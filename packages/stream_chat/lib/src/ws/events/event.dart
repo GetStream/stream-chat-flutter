@@ -97,7 +97,7 @@ class Event extends WsEvent {
   /// User object of the health check user
   final OwnUser? me;
 
-  /// User object of the current user
+  /// The user this event concerns, such as the sender of a new message.
   final User? user;
 
   /// The message sent with the event

@@ -297,7 +297,7 @@ GROUPS = [
               It unwraps `GeneralRepository.createGuest`'s `Result` with `getOrElse`, the one sanctioned unwrap
               inside the SDK: a `Result` on a connect call could be ignored and hide a failed sign-in.
             - **`createGuest` lives in `GeneralRepository`**, next to `enrichUrl`. Its mappers are in
-              `lib/src/repository/mapper/user_mapper.dart`, with the `User` mappers they use.
+              `lib/src/repository/mapper/users_mapper.dart`, with the `User` mappers they use.
             - **The envelope is the internal `CreateGuestUserResponse`:** a freezed envelope that only
               `createGuest` returns. It replaces v10's public `ConnectGuestUserResponse`, whose only public reach was
               `StreamChatApi.guest`, removed together with `GuestApi`.
@@ -320,7 +320,7 @@ GROUPS = [
               non-date value). v10's flat response shadowed them, so the same guest connected; confirmed live.
             - **Not a regression: a custom `ban_expires` that isn't a date** fails the connect in v10 and now alike,
               because the socket's `me` lets it through into `OwnUser.fromJson`.
-            - **`User` is not restructured here.** `user_mapper.dart` maps the generated types onto today's `User`,
+            - **`User` is not restructured here.** `users_mapper.dart` maps the generated types onto today's `User`,
               following [01-foundation](01-foundation.md).
             """),
         done=DONE.replace('- [ ]', '- [x]'),
@@ -586,50 +586,45 @@ GROUPS = [
     dict(
         num='09', slug='users', title='Users',
         hand=['user_api.dart'],
-        match=owns('/api/v2/users', unless=('/api/v2/users/block', '/api/v2/users/unblock')),
+        match=owns('/api/v2/users', unless=('/api/v2/users/block', '/api/v2/users/unblock'),
+                   unless_ops=('POST /api/v2/users', 'PATCH /api/v2/users')),
         goal='`User` is the most widely referenced public model in the SDK; this is where keep-vs-adopt costs the '
-             'most. [18](18-unread-counts.md) split the current user\'s unread counts out of it, and '
-             '[19](19-user-blocking.md) blocking users.',
+             'most. [18](18-unread-counts.md) split the current user\'s unread counts out of it, '
+             '[19](19-user-blocking.md) blocking users, and [20](20-user-updates.md) updating users.',
         decisions=[
             '`User` and `OwnUser` are public, persisted, and embedded in nearly every other response. This group '
-            'restructures them, last: the mappers in `user_mapper.dart` already map the generated types onto the '
+            'restructures them, last: the mappers in `users_mapper.dart` already map the generated types onto the '
             'current class for every group before it, and stay. See [01-foundation](01-foundation.md).',
             '`PrivacySettings` and the push-preference sub-shapes — decide per type.',
-            '**`User.name` and `image` become fields** (README rule 9): `UserResponse` types them, and the constructor '
-            'stops writing them into `extraData`; decide whether `name` keeps its fallback to `id`. `deleted_at`, '
-            '`deactivated_at` and `blocked_user_ids`, which `UserResponse` types and v1 kept in a plain user\'s '
-            '`extraData`, become fields or are dropped, never `extraData`. '
-            '`UserResponse.toModel()` then copies `custom` verbatim into the field, renamed `custom`, and '
-            '`UserRequestMapper` stops reading `extraData[\'name\']` and `[\'image\']`.',
-            '`UserFilterField.shadowBanned` and `.bypassModeration` read `extraData`, which the generated '
-            '`UserResponse` has no field to fill.',
-            '`updateUsers` reuses `User.toRequest()`. It is a full upsert, and v10\'s flattened body filed the '
-            'user\'s client state (`online`, `banned`, `created_at` and similar) into the stored custom data on '
-            'every call, as it did for guests in [04](04-roles-guest-and-app.md). Decide the same way here, for real '
-            'users rather than fresh guests, and record it in the CHANGELOG.',
-            'The generated `UserRequest` sends explicit `null` for an unset `language` or `invisible`, where v10 '
-            'left the key out. For a guest create that made no difference; for an upsert of an existing user, '
-            'confirm live that a `null` does not reset a stored value differently from an omitted key.',
+            '`UserFilterField.bypassModeration` reads `custom`, which no generated user has a field to fill.',
+            '**`User` and `OwnUser` move to freezed without changing the current user\'s merge rules.** freezed\'s '
+            '`copyWith` clears a field passed `null` where today\'s keeps it, and it can\'t generate one for '
+            '`OwnUser` while it takes `User`\'s fields through super-parameters. `OwnUser.merge` builds through the '
+            'constructor and states each field\'s rule (keep a nullable value the other user leaves out, except '
+            '`deactivatedAt`, `deletedAt` and `shadowBanned`, taken as they are, and `banExpires`, always kept); '
+            'keep those rules in a dedicated merge, and run `copywith_audit.py` on both models for every other '
+            'call site, such as the `user.updated` handler\'s preserve list.',
+            '`queryUsers` answers `FullUserResponse`, which [20](20-user-updates.md) already maps to `User`; the '
+            'caller\'s own entry could map to `OwnUser` once `Mute`, `ChannelMute` and `PrivacySettings` have '
+            'response mappers.',
         ],
         risks=[
             'Every other group depends on the `User` decision.',
             'User data arrives over the WebSocket on nearly every event.',
+            'A user mapped from `UserResponse` and the same user decoded from v1 JSON compare unequal: the v1 '
+            'decode keeps `invisible`, `shadowBanned` and `banExpires`, which `UserResponse` does not carry.',
             'Landing `UserResponse` -> `User` unblocks the two fields [08](08-moderation-and-blocklists.md) '
             'had to drop from `MuteUsersResponse`: the `mutes` the call created and the `ownUser` it left '
             'behind. Adding them is additive for anyone reading the response, so revisit them here rather '
             'than leaving them dropped for good.',
-            'Until then, a user mapped from `UserResponse` and the same user decoded from v1 JSON carry different '
-            '`extraData`: the v1 path keeps `blocked_user_ids`, `deleted_at` and `deactivated_at`, '
-            'the mapper drops them. Equality includes `extraData`, so a `Poll` from a '
-            'REST call (its `createdBy`, its votes\' `user`) and the same poll from an event compare unequal.',
         ],
         done=DONE + (
             '- [ ] Temporary adapters owned by this group (`DeviceV1JsonConverter`) are deleted and removed from\n'
             '      the table in `README.md`.\n'
-            '- [ ] `user_mapper.dart` maps onto the restructured `User`, and its `TODO(openapi-migration)` note is\n'
+            '- [ ] `users_mapper.dart` maps onto the restructured `User`, and its `TODO(openapi-migration)` note is\n'
             '      gone.\n'
             '- [ ] A user mapped from `UserResponse` and the same user decoded from v1 / WebSocket JSON compare equal.\n'
-            '- [ ] `user_mapper.dart` has no `_shadowedCustomKeys`: `User.custom` is the wire\'s `custom`, verbatim, and\n'
+            '- [x] `users_mapper.dart` has no `_shadowedCustomKeys`: `User.custom` is the wire\'s `custom`, verbatim, and\n'
             '      no typed field is written into it.\n'
         ),
     ),
@@ -731,7 +726,7 @@ GROUPS = [
             - **The generated channel and member types map onto today's classes.**
               `lib/src/repository/mapper/channels_mapper.dart` maps `ChannelResponse`, `ChannelConfigWithInfo`,
               `ChannelMemberResponse`, `Command` and `ChatPreferences` onto the json_serializable `ChannelModel`,
-              `ChannelConfig`, `Member`, `Command` and `ChatPreferences`, the way `user_mapper.dart` does for
+              `ChannelConfig`, `Member`, `Command` and `ChatPreferences`, the way `users_mapper.dart` does for
               `User`. [15](15-partial-updates.md) uses it first; groups 06, 07 and 14 will reuse it. This group
               restructures those classes and re-points the mapper.
             - **Every field `ChannelResponse` and `ChannelMemberResponse` declare is reachable on ours,** as a
@@ -743,7 +738,7 @@ GROUPS = [
               `Command`'s `createdAt` / `updatedAt`, which ours do not model.
             - **The mapper copies `custom` verbatim** (README rule 9). A mapped channel or member still differs from
               a v1 decode in two ways. `truncatedBy`, `createdBy` and each member's user go through
-              `user_mapper.dart`, which drops the user fields `User` does not model, for group 09 to settle. And
+              `users_mapper.dart`, which drops the user fields `User` does not model, for group 09 to settle. And
               a v1 member keeps the wire's `role` in `custom`, where the mapper leaves the typed `role` out.
             - **The mapper is tested through the client,** by [15](15-partial-updates.md)'s
               `updateChannelPartial` tests: the first call that returns a channel through the generated client.
@@ -1042,7 +1037,7 @@ GROUPS = [
         hand=[],
         match=only_ops('POST /api/v2/users/block', 'GET /api/v2/users/block', 'POST /api/v2/users/unblock'),
         goal='Move blocking and unblocking a user, and listing the blocked users, ahead of [09](09-users.md): they '
-             'embed `User` only through the existing `user_mapper.dart`, and nothing persists them.',
+             'embed `User` only through the existing `users_mapper.dart`, and nothing persists them.',
         decisions=[],
         taken=textwrap.dedent("""\
             - **Split out of [09](09-users.md), ahead of it, as one slice.** Blocking and unblocking are a pair,
@@ -1070,6 +1065,66 @@ GROUPS = [
         risks=[
             'A `try`/`catch` around `blockUser`, `unblockUser` or `getBlockedUsers` still compiles but no longer '
             'catches a failed call.',
+        ],
+        done=DONE.replace('- [ ]', '- [x]'),
+    ),
+    dict(
+        num='20', slug='user-updates', title='User Updates',
+        hand=[],
+        match=only_ops('POST /api/v2/users', 'PATCH /api/v2/users'),
+        goal='Move creating, updating and partially updating users ahead of [09](09-users.md): the response maps '
+             'onto the current `User`, and nothing persists it.',
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **Split out of [09](09-users.md), ahead of it.** `updateUser`, `updateUsers`, `partialUpdateUser` and
+              `partialUpdateUsers` read nothing into client state, as in v10; the `user.updated` event does.
+            - **The v2 routes are the v1 handlers.** `lib/core/api/users/routes.go` mounts `UpdateUsers` and
+              `UpdateUsersPartial` in the common routes, at the root and under `/api/v2/`; only the JSON encoding
+              differs. Neither is gated, in beta or deprecated.
+            - **The upsert sends `User.toRequest()`.** v10 sent the whole user flattened, and v1 stored every key
+              its request does not declare as custom data: the user's `online`, `banned` and timestamps, and an own
+              user's devices, mutes and unread counts. v2 drops unknown keys, so that stops, as it did for guests
+              in [04](04-roles-guest-and-app.md). An `OwnUser` decoded from the connection keeps `unread_count`,
+              `total_unread_count_by_team` and `latest_hidden_channels` in `custom`, so an upsert of it still
+              stores them as custom data, as v10 did. `role`, `teams` and `teams_role` are no longer sent: a
+              client-side token never stores them, and a different role was refused.
+            - **Moved off `UserApi`:** `updateUsers` and `partialUpdateUsers`, now `StreamChatClient` methods over
+              `UsersRepository`.
+            - **Explicit `null`s are not a regression.** The generated request sends `language: null` and
+              `invisible: null` where v10 left the keys out; the server reads a null or missing language as empty,
+              and a null or missing `invisible` as unchanged.
+            - **The partial updates take the API's names,** `updateUserPartial` and `updateUsersPartial`, with
+              `UpdateUserPartialRequest` (renamed from `PartialUpdateUserRequest`, freezed, without `toJson`), as
+              the channel and member partial updates already do. `updateUserPartial` keeps v10's arguments.
+            - **`UpdateUsersResponse` keeps its name** and maps each `FullUserResponse` to a `User`. No public
+              full-user type: a client-side caller can only update itself, the server blanks the private fields
+              for anyone else, and the caller's own are on `currentUser`. `membership_deletion_task_id` is always
+              empty and stays out.
+            - **`User` and `OwnUser` promote the fields v10 parked in `extraData`, and rename it `custom`**
+              (README rule 9), since these calls are the first to map a user. `User.name`, `image`,
+              `deactivatedAt`, `deletedAt` and `shadowBanned` are fields with persistence columns;
+              `blockedUserIds` moves up from `OwnUser`. `OwnUser` doesn't model `unread_count`,
+              `total_unread_count_by_team` or `latest_hidden_channels`, which no event keeps current. The mappers
+              leave the keys the SDK doesn't model out; a v1 user keeps them in `custom`, as a v1 member keeps
+              `role`.
+              Each generated user mapper fills the ones its response carries (`UserResponse` has no
+              `shadowBanned`).
+            - **`User.name` is nullable and has no fallback to `id`;** `User.nameOrId` has it, for a missing or
+              empty name, as v10's `name` did. Name and image are stored as given. The UI names a user by
+              `nameOrId` everywhere except avatar initials, which show the placeholder icon for an unnamed user,
+              and filters and sorts, which read the raw `name`; the avatar treats an empty image as none.
+            - **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
+              so it cannot overwrite the field. `OwnUser.fromUser` copies the user's fields and no longer reads an
+              own user's fields out of the custom data.
+            - **`OwnUser.merge` takes the other user's fields,** as before. A `user.updated` event's user is decoded
+              again as an `OwnUser`, so the privacy settings it carries for the current user replace theirs, as in
+              v10 — a temporary adapter (README) for the WebSocket v2 move to replace.
+            """),
+        risks=[
+            'A `try`/`catch` around `updateUser`, `updateUsers`, `updateUserPartial` or `updateUsersPartial` still '
+            'compiles but no longer catches a failed call.',
+            'A string interpolation of `User.name` still compiles now that it is nullable, and prints `null` for a '
+            'user with no name; `nameOrId` gives the old output.',
         ],
         done=DONE.replace('- [ ]', '- [x]'),
     ),

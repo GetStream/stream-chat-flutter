@@ -36,9 +36,9 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
     if (users.isEmpty) return '';
     final first = users.first;
     if (users.length == 1) {
-      return "${first.name} est en train d'écrire";
+      return "${first.nameOrId} est en train d'écrire";
     }
-    return "${first.name} et ${users.length - 1} sont entrain d'écrire";
+    return "${first.nameOrId} et ${users.length - 1} sont entrain d'écrire";
   }
 
   @override
@@ -66,7 +66,7 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   }) {
     final pinnedByCurrentUser = currentUser.id == pinnedBy.id;
     if (pinnedByCurrentUser) return 'Épinglé par vous';
-    return 'Épinglé par ${pinnedBy.name}';
+    return 'Épinglé par ${pinnedBy.nameOrId}';
   }
 
   @override

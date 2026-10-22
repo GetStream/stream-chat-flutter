@@ -15,7 +15,7 @@ import '../../core/models/response/mark_read_response.dart';
 import '../../core/models/response/show_channel_response.dart';
 import '../../core/models/response/update_channel_partial_response.dart';
 import '../../core/models/response/update_member_partial_response.dart';
-import 'user_mapper.dart';
+import 'users_mapper.dart';
 
 // TODO(openapi-migration): re-point these mappers in group 11.
 

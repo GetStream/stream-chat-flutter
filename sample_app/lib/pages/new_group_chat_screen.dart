@@ -164,7 +164,7 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      user.name.split(' ')[0],
+                                      user.nameOrId.split(' ')[0],
                                       style: const TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 12,

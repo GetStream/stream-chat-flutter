@@ -253,9 +253,9 @@ packages/stream_chat/lib/src/
 ```
 
 - **The role decides the folder.** An envelope goes in `response/` (`CreateUserGroupResponse`). A type the caller
-  passes in to shape a request goes in `request/`, whatever its name: `MessageDelivery`, and also
-  `PartialUpdateUserRequest`, `PaginationParams` and `ThreadOptions` when their groups migrate them. Every other
-  model stays in `models/` (`UserGroup`). Copy `lib/src/core/models/request/message_delivery.dart`.
+  passes in to shape a request goes in `request/`, whatever its name: `MessageDelivery`, `UpdateUserPartialRequest`,
+  and also `PaginationParams` and `ThreadOptions` when their groups migrate them. Every other model stays in
+  `models/` (`UserGroup`). Copy `lib/src/core/models/request/message_delivery.dart`.
 - **Models and envelopes** are `@freezed` classes with a const constructor and `@override final` fields. Copy
   `lib/src/core/models/user_group.dart` and `lib/src/core/models/response/create_user_group_response.dart`.
   Envelopes carry `required this.duration`, documented with an example value such as `4.21ms`, plus one field per
@@ -346,10 +346,9 @@ Three data-shape traps while mapping:
 - **The model's `custom` is the wire's `custom`, verbatim** (README rule 9). A migrated model names it `custom`
   — `extraData` on one whose group has not run — and the mapper copies the generated map into it and sends it
   back as `custom`; never filter either. A typed wire field our model lacks is added as a field, with
-  approval, or left out — never parked in `extraData` behind a getter, as `User.name` still is until group 09
-  promotes it. A v1 decoder splits flat JSON by a key list — `topLevelFields` while the model still has JSON, a
-  private list beside the converter once it does not — and a v1 writer leaves a custom entry named like a key out
-  so it cannot overwrite the key.
+  approval, or left out — never parked in `extraData` behind a getter. A v1 decoder splits flat JSON by a key
+  list — `topLevelFields` while the model still has JSON, a private list beside the converter once it does not —
+  and a v1 writer leaves a custom entry named like a key out so it cannot overwrite the key.
 - **Units on anything that takes a `Duration`.** The wire carries a bare integer and the field name rarely says
   in what. Read the Go payload type: `commonpayloads.DurationInMinutes` and `DurationMilliseconds` sit on sibling
   endpoints in the same feature — `ban.timeout` and `mute.timeout` are minutes, `muteChannel.expiration` is

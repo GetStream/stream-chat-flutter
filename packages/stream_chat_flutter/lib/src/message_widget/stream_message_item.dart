@@ -1444,9 +1444,9 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
     //
     // With no name there is nothing to attribute, so the body stands alone —
     // the message text, or "Message deleted" for a deleted message, which is
-    // already what the formatter returns for one. [User.name] falls back to
+    // already what the formatter returns for one. [User.nameOrId] falls back to
     // the user id, so this is close to unreachable.
-    final senderName = sender.name.trim();
+    final senderName = sender.nameOrId.trim();
     if (senderName.isEmpty) return body;
 
     return switch (isDeleted) {

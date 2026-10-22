@@ -170,7 +170,7 @@ class _UserReadTile extends StatelessWidget {
       ),
       child: StreamListTile(
         leading: StreamUserAvatar(user: read.user),
-        title: Text(read.user.name, maxLines: 1, overflow: .ellipsis),
+        title: Text(read.user.nameOrId, maxLines: 1, overflow: .ellipsis),
         trailing: Icon(
           context.streamIcons.checks,
           size: 18,

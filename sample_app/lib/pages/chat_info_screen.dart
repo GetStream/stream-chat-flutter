@@ -93,7 +93,7 @@ class _ContactInfoHeader extends StatelessWidget {
           children: [
             Flexible(
               child: Text(
-                user.name,
+                user.nameOrId,
                 style: textTheme.headingLg.copyWith(color: colorScheme.textPrimary),
                 overflow: TextOverflow.ellipsis,
               ),

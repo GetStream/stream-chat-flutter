@@ -40,9 +40,8 @@ void main() {
       expect(ownUser.totalUnreadCount, 0);
       expect(ownUser.unreadChannels, 0);
       expect(ownUser.image, 'https://placehold.jp/150x150.png');
-      expect(ownUser.extraData['image'], 'https://placehold.jp/150x150.png');
-      expect(ownUser.extraData['name'], 'Proud darkness');
-      expect(ownUser.extraData['username'], 'Rioland');
+      expect(ownUser.name, 'Proud darkness');
+      expect(ownUser.custom, {'username': 'Rioland'});
     });
 
     test('OwnUser.toJson writes each device under its id and push_provider keys', () {
@@ -96,15 +95,25 @@ void main() {
       final ownUser = OwnUser.fromUser(user);
 
       expect(ownUser.id, user.id);
-      expect(ownUser.id, user.id);
       expect(ownUser.role, user.role);
+      expect(ownUser.name, user.name);
+      expect(ownUser.image, user.image);
       expect(ownUser.createdAt, user.createdAt);
       expect(ownUser.updatedAt, user.updatedAt);
       expect(ownUser.lastActive, user.lastActive);
       expect(ownUser.online, user.online);
       expect(ownUser.banned, user.banned);
-      expect(ownUser.extraData, user.extraData);
-      expect(ownUser.image, user.image);
+      expect(ownUser.banExpires, user.banExpires);
+      expect(ownUser.teams, user.teams);
+      expect(ownUser.language, user.language);
+      expect(ownUser.invisible, user.invisible);
+      expect(ownUser.teamsRole, user.teamsRole);
+      expect(ownUser.avgResponseTime, user.avgResponseTime);
+      expect(ownUser.custom, user.custom);
+      expect(ownUser.deactivatedAt, user.deactivatedAt);
+      expect(ownUser.deletedAt, user.deletedAt);
+      expect(ownUser.shadowBanned, user.shadowBanned);
+      expect(ownUser.blockedUserIds, user.blockedUserIds);
     });
 
     test('copyWith', () {
@@ -122,7 +131,7 @@ void main() {
       expect(newUser.updatedAt, user.updatedAt);
       expect(newUser.lastActive, user.lastActive);
       expect(newUser.online, user.online);
-      expect(newUser.extraData, user.extraData);
+      expect(newUser.custom, user.custom);
       expect(newUser.banned, user.banned);
       expect(newUser.teams, user.teams);
       expect(newUser.language, user.language);
@@ -131,9 +140,10 @@ void main() {
       newUser = user.copyWith(
         id: 'test',
         role: 'test',
+        name: 'test',
         image: 'https://getstream.io/image-new',
-        extraData: {
-          'name': 'test',
+        custom: {
+          'color': 'red',
         },
         devices: devices,
         mutes: mutes,
@@ -147,20 +157,16 @@ void main() {
         banned: true,
         teams: ['team1', 'team2'],
         language: 'fr',
+        deactivatedAt: DateTime.utc(2022),
+        deletedAt: DateTime.utc(2023),
+        shadowBanned: true,
       );
 
       expect(newUser.id, 'test');
       expect(newUser.role, 'test');
       expect(newUser.name, 'test');
       expect(newUser.image, 'https://getstream.io/image-new');
-      expect(
-        newUser.extraData,
-        {
-          'name': 'test',
-          'image': 'https://getstream.io/image-new',
-        },
-        reason: 'Should get image from user.image',
-      );
+      expect(newUser.custom, {'color': 'red'});
       expect(newUser.devices, devices);
       expect(newUser.mutes, mutes);
       expect(newUser.totalUnreadCount, 10);
@@ -173,6 +179,9 @@ void main() {
       expect(newUser.banned, true);
       expect(newUser.teams, ['team1', 'team2']);
       expect(newUser.language, 'fr');
+      expect(newUser.deactivatedAt, DateTime.utc(2022));
+      expect(newUser.deletedAt, DateTime.utc(2023));
+      expect(newUser.shadowBanned, isTrue);
     });
 
     test('merge', () {
@@ -181,8 +190,9 @@ void main() {
         OwnUser(
           id: 'test',
           role: 'test',
-          extraData: const {
-            'name': 'test',
+          name: 'test',
+          custom: const {
+            'color': 'red',
           },
           image: 'https://getstream.io/image-new',
           devices: devices,
@@ -197,6 +207,9 @@ void main() {
           banned: true,
           teams: const ['team1', 'team2'],
           language: 'fr',
+          deactivatedAt: DateTime.utc(2022),
+          deletedAt: DateTime.utc(2023),
+          shadowBanned: true,
         ),
       );
 
@@ -204,14 +217,7 @@ void main() {
       expect(newUser.role, 'test');
       expect(newUser.name, 'test');
       expect(newUser.image, 'https://getstream.io/image-new');
-      expect(
-        newUser.extraData,
-        {
-          'name': 'test',
-          'image': 'https://getstream.io/image-new',
-        },
-        reason: 'Should get image from user.image',
-      );
+      expect(newUser.custom, {'color': 'red'});
       expect(newUser.devices, devices);
       expect(newUser.mutes, mutes);
       expect(newUser.totalUnreadCount, 10);
@@ -224,28 +230,67 @@ void main() {
       expect(newUser.banned, true);
       expect(newUser.teams, ['team1', 'team2']);
       expect(newUser.language, 'fr');
+      expect(newUser.deactivatedAt, DateTime.utc(2022));
+      expect(newUser.deletedAt, DateTime.utc(2023));
+      expect(newUser.shadowBanned, isTrue);
     });
 
-    test(
-      'fromUser should not override name with id if not available in extraData',
-      () {
-        final user = User(id: 'test-id');
-        expect(user.id, 'test-id');
-        expect(user.name, 'test-id');
+    test('OwnUser.fromUser keeps a user with no name nameless', () {
+      final ownUser = OwnUser.fromUser(User(id: 'test-id'));
 
-        final encodedUser = user.toJson();
-        expect(encodedUser['id'], 'test-id');
-        expect(encodedUser['name'], null);
+      expect(ownUser.name, isNull);
+      expect(ownUser.toJson().containsKey('name'), isFalse);
+    });
 
-        final ownUser = OwnUser.fromUser(user);
-        expect(user.id, 'test-id');
-        expect(user.name, 'test-id');
+    test('merge clears the values the other user leaves out', () {
+      final user = OwnUser(
+        id: 'test-user',
+        deactivatedAt: DateTime.utc(2020),
+        deletedAt: DateTime.utc(2021),
+        shadowBanned: true,
+      );
 
-        final encodedOwnUser = ownUser.toJson();
-        expect(encodedOwnUser['id'], 'test-id');
-        expect(encodedOwnUser['name'], null);
-      },
-    );
+      final merged = user.merge(OwnUser(id: 'test-user'));
+
+      expect(merged.deactivatedAt, isNull);
+      expect(merged.deletedAt, isNull);
+      expect(merged.shadowBanned, isNull);
+    });
+
+    test('merge keeps the values the other user leaves out', () {
+      final user = OwnUser(
+        id: 'test-user',
+        role: 'admin',
+        name: 'Jane',
+        image: 'https://example.com/jane.png',
+        createdAt: createdAt,
+        updatedAt: updatedAt,
+        lastActive: lastActive,
+        banExpires: DateTime.utc(2030),
+        language: 'fr',
+        invisible: true,
+        teamsRole: const {'team-a': 'admin'},
+        avgResponseTime: 12,
+        pushPreferences: const PushPreference(chatLevel: ChatLevel.mentions),
+        privacySettings: const PrivacySettings(typingIndicators: TypingIndicators(enabled: false)),
+      );
+
+      final merged = user.merge(OwnUser(id: 'test-user'));
+
+      expect(merged.role, 'admin');
+      expect(merged.name, 'Jane');
+      expect(merged.image, 'https://example.com/jane.png');
+      expect(merged.createdAt, createdAt);
+      expect(merged.updatedAt, updatedAt);
+      expect(merged.lastActive, lastActive);
+      expect(merged.banExpires, DateTime.utc(2030));
+      expect(merged.language, 'fr');
+      expect(merged.invisible, isTrue);
+      expect(merged.teamsRole, {'team-a': 'admin'});
+      expect(merged.avgResponseTime, 12);
+      expect(merged.pushPreferences, const PushPreference(chatLevel: ChatLevel.mentions));
+      expect(merged.privacySettings, const PrivacySettings(typingIndicators: TypingIndicators(enabled: false)));
+    });
 
     test('should parse json with privacy settings correctly', () {
       final json = {
@@ -302,131 +347,7 @@ void main() {
       expect(updatedUser.privacySettings?.readReceipts?.enabled, false);
     });
 
-    test('fromUser should extract privacy settings from extraData', () {
-      // Create user from JSON to properly deserialize privacy_settings
-      final userJson = {
-        'id': 'test-user',
-        'privacy_settings': {
-          'typing_indicators': {'enabled': false},
-          'read_receipts': {'enabled': true},
-        },
-      };
-
-      final user = User.fromJson(userJson);
-      final ownUser = OwnUser.fromUser(user);
-
-      expect(ownUser.privacySettings, isNotNull);
-      expect(ownUser.privacySettings?.typingIndicators?.enabled, false);
-      expect(ownUser.privacySettings?.readReceipts?.enabled, true);
-    });
-
-    test('fromUser should extract push preferences from extraData', () {
-      final userJson = {
-        'id': 'test-user',
-        'push_preferences': {
-          'call_level': 'all',
-          'chat_level': 'mentions',
-          'disabled_until': '2025-12-31T00:00:00.000Z',
-        },
-      };
-
-      final user = User.fromJson(userJson);
-      final ownUser = OwnUser.fromUser(user);
-
-      expect(ownUser.pushPreferences, isNotNull);
-      expect(ownUser.pushPreferences?.callLevel, CallLevel.all);
-      expect(ownUser.pushPreferences?.chatLevel, ChatLevel.mentions);
-      expect(ownUser.pushPreferences?.disabledUntil, isNotNull);
-    });
-
-    test('fromUser should extract devices from extraData', () {
-      final userJson = {
-        'id': 'test-user',
-        'devices': [
-          {
-            'id': 'device-1',
-            'push_provider': 'firebase',
-            'created_at': '2023-01-01T00:00:00.000Z',
-            'user_id': 'test-user',
-          },
-        ],
-      };
-
-      final user = User.fromJson(userJson);
-      final ownUser = OwnUser.fromUser(user);
-
-      expect(ownUser.devices, hasLength(1));
-      expect(ownUser.devices.first.id, 'device-1');
-      expect(ownUser.devices.first.pushProvider, 'firebase');
-    });
-
-    test('fromUser should extract mutes from extraData', () {
-      final userJson = {
-        'id': 'test-user',
-        'mutes': [
-          {
-            'user': {
-              'id': 'test-user',
-            },
-            'target': {
-              'id': 'muted-user',
-            },
-            'created_at': '2023-01-01T00:00:00.000Z',
-            'updated_at': '2023-01-01T00:00:00.000Z',
-          },
-        ],
-      };
-
-      final user = User.fromJson(userJson);
-      final ownUser = OwnUser.fromUser(user);
-
-      expect(ownUser.mutes, hasLength(1));
-      expect(ownUser.mutes.first.user.id, 'test-user');
-      expect(ownUser.mutes.first.target.id, 'muted-user');
-    });
-
-    test('fromUser should extract channel mutes from extraData', () {
-      final userJson = {
-        'id': 'test-user',
-        'channel_mutes': [
-          {
-            'user': {
-              'id': 'test-user',
-            },
-            'channel': {
-              'cid': 'messaging:test-channel',
-            },
-            'created_at': '2023-01-01T00:00:00.000Z',
-            'updated_at': '2023-01-01T00:00:00.000Z',
-          },
-        ],
-      };
-
-      final user = User.fromJson(userJson);
-      final ownUser = OwnUser.fromUser(user);
-
-      expect(ownUser.channelMutes, hasLength(1));
-      expect(ownUser.channelMutes.first.user.id, 'test-user');
-      expect(ownUser.channelMutes.first.channel.cid, 'messaging:test-channel');
-    });
-
-    test('fromUser should extract unread counts from extraData', () {
-      final userJson = {
-        'id': 'test-user',
-        'total_unread_count': 42,
-        'unread_channels': 5,
-        'unread_threads': 3,
-      };
-
-      final user = User.fromJson(userJson);
-      final ownUser = OwnUser.fromUser(user);
-
-      expect(ownUser.totalUnreadCount, 42);
-      expect(ownUser.unreadChannels, 5);
-      expect(ownUser.unreadThreads, 3);
-    });
-
-    test('fromUser should extract blocked user ids from extraData', () {
+    test('fromUser should copy the blocked user ids', () {
       final userJson = {
         'id': 'test-user',
         'blocked_user_ids': ['blocked-1', 'blocked-2', 'blocked-3'],
@@ -467,7 +388,7 @@ void main() {
         name: 'Test User',
         role: 'admin',
         image: 'https://example.com/avatar.png',
-        extraData: const {
+        custom: const {
           'company': 'Stream',
           'department': 'Engineering',
           'custom_field': 'custom_value',
@@ -499,9 +420,9 @@ void main() {
       expect(convertedOwnUser.name, originalOwnUser.name);
       expect(convertedOwnUser.role, originalOwnUser.role);
       expect(convertedOwnUser.image, originalOwnUser.image);
-      expect(convertedOwnUser.extraData['company'], 'Stream');
-      expect(convertedOwnUser.extraData['department'], 'Engineering');
-      expect(convertedOwnUser.extraData['custom_field'], 'custom_value');
+      expect(convertedOwnUser.custom['company'], 'Stream');
+      expect(convertedOwnUser.custom['department'], 'Engineering');
+      expect(convertedOwnUser.custom['custom_field'], 'custom_value');
       expect(convertedOwnUser.devices.length, 1);
       expect(convertedOwnUser.devices.first.id, 'device-1');
       expect(convertedOwnUser.devices.first.pushProvider, 'firebase');
@@ -518,15 +439,14 @@ void main() {
     });
 
     test(
-      'fromUser should work with JSON round-trip '
-      '(OwnUser -> JSON -> User -> OwnUser)',
+      'OwnUser.fromJson reads back what OwnUser.toJson wrote',
       () {
         final originalOwnUser = OwnUser(
           id: 'test-user',
           name: 'Test User',
           role: 'moderator',
           image: 'https://example.com/profile.jpg',
-          extraData: const {
+          custom: const {
             'title': 'Senior Developer',
             'location': 'Amsterdam',
             'is_verified': true,
@@ -556,14 +476,7 @@ void main() {
           ),
         );
 
-        // Step 1: OwnUser -> JSON
-        final json = originalOwnUser.toJson();
-
-        // Step 2: JSON -> User
-        final user = User.fromJson(json);
-
-        // Step 3: User -> OwnUser
-        final reconstructedOwnUser = OwnUser.fromUser(user);
+        final reconstructedOwnUser = OwnUser.fromJson(originalOwnUser.toJson());
 
         // Verify all fields are preserved through the round-trip
         expect(reconstructedOwnUser.id, originalOwnUser.id);
@@ -571,10 +484,10 @@ void main() {
         expect(reconstructedOwnUser.role, originalOwnUser.role);
         expect(reconstructedOwnUser.image, originalOwnUser.image);
 
-        // Verify extraData
-        expect(reconstructedOwnUser.extraData['title'], 'Senior Developer');
-        expect(reconstructedOwnUser.extraData['location'], 'Amsterdam');
-        expect(reconstructedOwnUser.extraData['is_verified'], true);
+        // Verify custom data
+        expect(reconstructedOwnUser.custom['title'], 'Senior Developer');
+        expect(reconstructedOwnUser.custom['location'], 'Amsterdam');
+        expect(reconstructedOwnUser.custom['is_verified'], true);
 
         // Verify OwnUser-specific fields
         expect(reconstructedOwnUser.devices.length, 2);

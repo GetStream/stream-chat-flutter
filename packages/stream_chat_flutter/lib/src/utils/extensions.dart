@@ -306,7 +306,7 @@ extension UserListX on List<User> {
 
     for (final user in this) {
       final normalizedId = normalize(user.id);
-      final normalizedUserName = normalize(user.name);
+      final normalizedUserName = normalize(user.nameOrId);
       final lDistance = normalizedUserName.levenshteinDistance(normalizedQuery);
       final containsId = normalizedId.contains(normalizedQuery);
       final containsName = normalizedUserName.contains(normalizedQuery);
@@ -318,7 +318,7 @@ extension UserListX on List<User> {
     final entries = matchingUsers.entries.toList(growable: false)
       ..sort((prev, curr) {
         bool containsQuery(User user) =>
-            normalize(user.id).contains(normalizedQuery) || normalize(user.name).contains(normalizedQuery);
+            normalize(user.id).contains(normalizedQuery) || normalize(user.nameOrId).contains(normalizedQuery);
 
         final containsInPrev = containsQuery(prev.key);
         final containsInCurr = containsQuery(curr.key);
@@ -397,10 +397,10 @@ extension MessageX on Message {
     // before enhanced mentions existed) so existing consumer code stays
     // compatible.
     for (final user in mentionedUsers.toSet()) {
-      final replacement = wrap(user.name, .user, user.id);
+      final replacement = wrap(user.nameOrId, .user, user.id);
       current = applyReplace(current, user.id, replacement);
-      if (user.name != user.id) {
-        current = applyReplace(current, user.name, replacement);
+      if (user.nameOrId != user.id) {
+        current = applyReplace(current, user.nameOrId, replacement);
       }
     }
 
@@ -483,7 +483,7 @@ extension MessageX on Message {
     if (messageTextToSend == null) return this;
 
     for (final user in mentionedUsers.toSet()) {
-      final userName = user.name;
+      final userName = user.nameOrId;
       messageTextToSend = messageTextToSend!.replaceAll(
         '@$userName',
         '@${user.id}',
@@ -696,12 +696,12 @@ extension ChannelModelX on ChannelModel {
     final otherMembers = members.where((it) => it.userId != currentUser?.id);
 
     // If there are no other members, we return the name of the current user.
-    if (otherMembers.isEmpty) return currentUser?.name;
+    if (otherMembers.isEmpty) return currentUser?.nameOrId;
 
     // Otherwise, we return the names of the first `maxMembers` members sorted
     // alphabetically, followed by the number of remaining members if there are
     // more than `maxMembers` members.
-    final memberNames = otherMembers.map((it) => it.user?.name).whereType<String>().take(maxMembers).sorted();
+    final memberNames = otherMembers.map((it) => it.user?.nameOrId).whereType<String>().take(maxMembers).sorted();
 
     return switch (otherMembers.length <= maxMembers) {
       true => memberNames.join(', '),

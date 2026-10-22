@@ -121,15 +121,31 @@
 - `UserBlock` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value.
 - `UserBlock.blockedUser`, `userId`, `blockedUserId` and `createdAt` are required and non-nullable, and `UserBlock.copyWith` takes every field as a non-nullable value.
 - `StreamChatApi.user`'s blocking methods are removed; use `blockUser`, `unblockUser` and `getBlockedUsers` on `StreamChatClient` instead.
+- `StreamChatClient.updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing.
+- `StreamChatClient.partialUpdateUser` and `partialUpdateUsers` are renamed `updateUserPartial` and `updateUsersPartial`, and return a `Result<UpdateUsersResponse>` instead of throwing.
+- `PartialUpdateUserRequest` is renamed `UpdateUserPartialRequest`.
+- `UpdateUserPartialRequest` no longer encodes to JSON or extends `Equatable`, so `props` is removed; it still compares by value and gains `copyWith`.
+- `UpdateUsersResponse` no longer decodes from JSON, is immutable, built through a const constructor, compares by value, gains `copyWith`, and its `duration` is a non-nullable `String`.
+- The users in an `UpdateUsersResponse` no longer carry their devices, mutes, channel mutes, privacy settings, unread counts, hidden channels or token revocation time in their custom data.
+- `updateUser` and `updateUsers` no longer send the user's `role`, `teams` and `teamsRole`.
+- `StreamChatApi.user.updateUsers` and `partialUpdateUsers` are removed; call `updateUsers` and `updateUsersPartial` on `StreamChatClient` instead.
 - `ChannelModel.extraData` and `Member.extraData` are renamed `custom`, and so are `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the `extraData` argument of the `Channel` constructor and of `StreamChatClient.channel`.
 - The channel and member values `custom` used to hold, such as `ChannelModel.hidden` and `Member.status`, are fields now: `custom` and `toJson` leave them out, and setting one through `custom` has no effect.
 - An entry of `ChannelModel.custom` or `Member.custom` named like one of the model's own fields stays in `custom` and leaves the field alone, and `toJson` leaves it out.
+- `User.extraData` is renamed `custom`, and so is the `extraData` argument of the `User` and `OwnUser` constructors and `copyWith`.
+- `User.name` is nullable and no longer answers the user's id when they have no name; read `User.nameOrId` for that.
+- `User.image` returns an empty image URL as `''` instead of `null`.
+- The user values `custom` used to hold, such as `User.name` and `User.deactivatedAt`, are fields now: `custom` leaves them out, and setting one through `custom` has no effect.
+- An entry of `User.custom` named like one of the user's own fields stays in `custom` and leaves the field alone, and `toJson` leaves it out.
+- `OwnUser.fromUser` no longer reads devices, mutes, unread counts, push preferences or privacy settings out of the user's custom data; they are left at their defaults.
 - `rawType` is removed from `MessageType`, `AttachmentType`, `PushLevel`, `ChatPreferenceLevel`, `ChatLevel`, `CallLevel` and `RoleType`, as are `ModerationAction.action` and `ChannelCapability.capability`; use the value itself instead.
 
 🐞 Fixed
 
-- `connectGuestUser` no longer copies the user's online status, ban, unread counts, devices and push preferences into the created guest's `extraData`.
+- `connectGuestUser` no longer copies the user's online status, ban, unread counts, devices and push preferences into the created guest's custom data.
 - `Channel.custom` no longer returns the data the channel was created with once the channel's custom data is empty.
+
+- `updateUser` and `updateUsers` no longer store the user's online status, ban, devices or unread counts as custom data, and no longer fail for an own user with many devices.
 
 - A message deleted while its attachments upload no longer comes back.
 
@@ -160,6 +176,7 @@
 - Added optional `reason` and `custom` arguments to `flagMessage` and `flagUser`, recorded with the flag.
 - Added an optional `timeout` to `StreamChatClient.moderation.muteUser` that expires the mute.
 - Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call and report the ids that matched no user.
+- Added `User.deactivatedAt`, `deletedAt`, `shadowBanned`, `blockedUserIds` and `nameOrId`; the constructors and `copyWith` accept the new fields.
 - Added `ChannelModel.muted`, `blocked`, `truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`; the constructors and `copyWith` accept the new fields.
 - Added a `prev` argument to `queryPolls` and `queryPollVotes`, and a `prev` cursor on their responses, for paging backwards.
 

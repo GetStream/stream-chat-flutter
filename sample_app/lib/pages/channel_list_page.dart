@@ -182,7 +182,7 @@ class LeftDrawer extends StatelessWidget {
                   StreamUserAvatar(size: .xxl, user: user, showOnlineIndicator: false),
                   SizedBox(height: spacing.sm),
                   Text(
-                    user.name,
+                    user.nameOrId,
                     style: textTheme.headingMd.copyWith(color: colorScheme.textPrimary),
                     overflow: TextOverflow.ellipsis,
                     textAlign: TextAlign.center,

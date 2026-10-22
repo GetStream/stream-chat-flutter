@@ -61,7 +61,7 @@
 - **The generated channel and member types map onto today's classes.**
   `lib/src/repository/mapper/channels_mapper.dart` maps `ChannelResponse`, `ChannelConfigWithInfo`,
   `ChannelMemberResponse`, `Command` and `ChatPreferences` onto the json_serializable `ChannelModel`,
-  `ChannelConfig`, `Member`, `Command` and `ChatPreferences`, the way `user_mapper.dart` does for
+  `ChannelConfig`, `Member`, `Command` and `ChatPreferences`, the way `users_mapper.dart` does for
   `User`. [15](15-partial-updates.md) uses it first; groups 06, 07 and 14 will reuse it. This group
   restructures those classes and re-points the mapper.
 - **Every field `ChannelResponse` and `ChannelMemberResponse` declare is reachable on ours,** as a
@@ -73,7 +73,7 @@
   `Command`'s `createdAt` / `updatedAt`, which ours do not model.
 - **The mapper copies `custom` verbatim** (README rule 9). A mapped channel or member still differs from
   a v1 decode in two ways. `truncatedBy`, `createdBy` and each member's user go through
-  `user_mapper.dart`, which drops the user fields `User` does not model, for group 09 to settle. And
+  `users_mapper.dart`, which drops the user fields `User` does not model, for group 09 to settle. And
   a v1 member keeps the wire's `role` in `custom`, where the mapper leaves the typed `role` out.
 - **The mapper is tested through the client,** by [15](15-partial-updates.md)'s
   `updateChannelPartial` tests: the first call that returns a channel through the generated client.

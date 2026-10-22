@@ -51,29 +51,6 @@ void main() {
     expect(guest.updatedAt, DateTime.utc(2026, 9, 2));
   });
 
-  test(
-    "StreamChatClient.connectGuestUser sends no custom data named like one of the user's own fields",
-    () async {
-      final defaultApi = _defaultApiAnswering(Result.success(_createGuestResponse()));
-      final client = _client(defaultApi);
-      final user = User.fromJson(const {
-        'id': 'requested-id',
-        'deleted_at': '2026-01-01T00:00:00Z',
-        'devices': <Object?>[],
-        'color': 'blue',
-      });
-
-      await client.connectGuestUser(user, connectWebSocket: false);
-
-      final request =
-          verify(
-                () => defaultApi.createGuest(createGuestRequest: captureAny(named: 'createGuestRequest')),
-              ).captured.single
-              as api.CreateGuestRequest;
-      expect(request.user.custom, {'color': 'blue'});
-    },
-  );
-
   test('StreamChatClient.connectGuestUser sends neither a name nor an image for a user without them', () async {
     final defaultApi = _defaultApiAnswering(Result.success(_createGuestResponse()));
     final client = _client(defaultApi);
@@ -90,31 +67,6 @@ void main() {
       ),
     );
   });
-
-  test(
-    "StreamChatClient.connectGuestUser keeps custom fields named like the user's own fields out of the created guest",
-    () async {
-      final response = _createGuestResponse(
-        custom: const {
-          'favorite_color': 'green',
-          'online': 'custom-online',
-          'blocked_user_ids': 'custom-blocked-user-ids',
-          'privacy_settings': 'custom-privacy-settings',
-          'deleted_at': 'custom-deleted-at',
-          'deactivated_at': 'custom-deactivated-at',
-        },
-      );
-      final client = _client(_defaultApiAnswering(Result.success(response)));
-
-      final guest = await client.connectGuestUser(_fullyPopulatedUser(), connectWebSocket: false);
-
-      expect(guest.extraData, {
-        'favorite_color': 'green',
-        'name': 'Created Name',
-        'image': 'https://example.com/created.png',
-      });
-    },
-  );
 
   test('StreamChatClient.connectGuestUser connects the socket as the created guest', () async {
     final defaultApi = _defaultApiAnswering(Result.success(_createGuestResponse()));
@@ -212,7 +164,7 @@ OwnUser _fullyPopulatedUser() => OwnUser(
   invisible: true,
   teamsRole: const {'team-x': 'admin'},
   avgResponseTime: 7,
-  extraData: const {'favorite_color': 'blue'},
+  custom: const {'favorite_color': 'blue'},
   devices: const [Device(id: 'device-1', pushProvider: PushProvider.firebase)],
   mutes: [
     Mute(
@@ -281,8 +233,11 @@ User _createdGuest() => User(
   teams: const ['team-a'],
   teamsRole: const {'team-a': 'member'},
   avgResponseTime: 42,
-  extraData: const {'favorite_color': 'green'},
+  custom: const {'favorite_color': 'green'},
   createdAt: DateTime.utc(2026, 9, 1),
   updatedAt: DateTime.utc(2026, 9, 2),
   lastActive: DateTime.utc(2026, 9, 3),
+  deactivatedAt: DateTime.utc(2026, 9, 4),
+  deletedAt: DateTime.utc(2026, 9, 5),
+  blockedUserIds: const ['blocked-user'],
 );

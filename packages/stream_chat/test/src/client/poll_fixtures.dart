@@ -40,7 +40,10 @@ final voter = User(
   language: 'en',
   teamsRole: const {'jedi': 'admin'},
   avgResponseTime: 12,
-  extraData: const {'favorite_color': 'blue'},
+  deactivatedAt: DateTime.utc(2024, 1, 4),
+  deletedAt: DateTime.utc(2024, 1, 5),
+  custom: const {'favorite_color': 'blue'},
+  blockedUserIds: const ['blocked-user'],
 );
 
 final generatedVote = api.PollVoteResponseData(

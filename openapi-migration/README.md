@@ -20,7 +20,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 7 | 7 | ☐ |
 | [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
-| [09](09-users.md) | Users | 5 | 5 | ☐ |
+| [09](09-users.md) | Users | 3 | 3 | ☐ |
 | [10](10-messages.md) | Messages & Search | 14 | 12 | ☐ |
 | [11](11-channels-and-members.md) | Channels, Members & Sync | 13 | 15 | ☐ |
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☑ |
@@ -31,9 +31,10 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [17](17-read-receipts.md) | Read Receipts — split out of 11 | 0 | 4 | ☑ |
 | [18](18-unread-counts.md) | Unread Counts — split out of 09 | 0 | 1 | ☑ |
 | [19](19-user-blocking.md) | User Blocking — split out of 09 | 0 | 3 | ☑ |
+| [20](20-user-updates.md) | User Updates — split out of 09 | 0 | 2 | ☑ |
 | [21](21-custom-data.md) | Custom Data Check — no model still says `extraData` | — | — | ☐ |
 
-**Coverage:** 53 hand-written methods across 9 files, and all 129 generated operations, each claimed by exactly
+**Coverage:** 51 hand-written methods across 9 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
 
 
@@ -161,8 +162,8 @@ includes a named response that carries only `duration` today, such as `HideChann
    directions.** A response mapper copies the generated `custom` map into it and a request mapper sends it back as
    `custom`; neither filters it. A model whose group has not run still says `extraData`. A field the
    generated response types is never parked in `extraData` behind a getter: it becomes a field on the model, as
-   the owning group's break, or stays out. `User.name` is parked today, and group 09 promotes it; group 15
-   promoted `ChannelModel`'s and `Member`'s. `topLevelFields` and `Serializer` serve only the v1 decoders, which
+   the owning group's break, or stays out. Group 15 promoted `ChannelModel`'s and `Member`'s, and group 20
+   `User`'s and `OwnUser`'s. `topLevelFields` and `Serializer` serve only the v1 decoders, which
    still split flat JSON by a key list, and go with the WebSocket v2 move; a model that loses its JSON drops
    `topLevelFields` and its converter owns the list. A v1 writer leaves a custom entry named like a key out so it
    cannot overwrite the key.
@@ -176,8 +177,15 @@ includes a named response that carries only `duration` today, such as `HideChann
 | `DataSerializable` | `UserGroup`, `UserGroupMember`, `PollOption` (`fromData`, `toData`) | [10](10-messages.md) |
 | `PollV1JsonConverter` | `Message.poll`, `DraftMessage.poll`, `Event.poll` | WebSocket v2 (no group) |
 | `PollVoteV1JsonConverter` | `Event.pollVote` | WebSocket v2 (no group) |
-| `user_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
+| The `user.updated` handler's JSON round trip | `OwnUser.privacySettings`, read out of `Event.user.custom` | WebSocket v2 (no group) |
+| `users_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
 | `channels_mapper.dart` (kept, re-pointed) | today's `ChannelModel`, `ChannelConfig` and `Member`, which still read and write JSON | [11](11-channels-and-members.md) |
+
+The `user.updated` round trip reads the privacy settings the current user's copy of the event carries, which `User` does
+not model and leaves in `custom`, so the handler can apply them as v10 did. When the WebSocket moves to v2, map the
+generated `UserUpdatedEvent.user` (`UserResponsePrivacyFields`) onto the current user once, and make the handler apply
+only what that type carries: it never fills `blocked_user_ids` and has no shadow ban or ban expiry, which the handler
+wipes or resets today, as v10 did.
 
 How v1 JSON decodes `User` once it becomes a plain model is decided in [01-foundation](01-foundation.md): until
 group 09 restructures it, v1 payloads keep decoding through `User.fromJson`.
@@ -208,9 +216,12 @@ surfaces before it reaches `Message` and `ChannelState`:
 - **18** is the current user's unread counts, split out of 09 because it embeds no `User` and nothing persists it.
 - **19** is blocking and unblocking users and listing the blocked ones, split out of 09 because it embeds `User`
   only through the existing mappers and nothing persists it.
+- **20** is creating, updating and partially updating users, split out of 09 because its response maps onto the
+  current `User`. As the first group to map a user, it promoted `User`'s and `OwnUser`'s parked fields and renamed
+  their custom data `custom` (rule 9).
 - **12** comes late because it needs its own hand-written multipart client and is the highest-traffic path in the
   SDK.
-- **09** is last. Every group before it maps users through `user_mapper.dart` onto today's `User`; 09 migrates the
+- **09** is last. Every group before it maps users through `users_mapper.dart` onto today's `User`; 09 migrates the
   user endpoints and restructures `User` and `OwnUser` themselves, when every parent that embeds them has moved.
 - **21** checks the custom data once every group has run: each model's custom data is named `custom` and is the
   wire's `custom`, with no mapper filtering it and no typed field parked in it. Each group does that for the

@@ -9439,14 +9439,76 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String> extraData = GeneratedColumn<String>(
-    'extra_data',
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _imageMeta = const VerificationMeta('image');
+  @override
+  late final GeneratedColumn<String> image = GeneratedColumn<String>(
+    'image',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deactivatedAtMeta = const VerificationMeta(
+    'deactivatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deactivatedAt = GeneratedColumn<DateTime>(
+    'deactivated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _shadowBannedMeta = const VerificationMeta(
+    'shadowBanned',
+  );
+  @override
+  late final GeneratedColumn<bool> shadowBanned = GeneratedColumn<bool>(
+    'shadow_banned',
+    aliasedName,
+    true,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("shadow_banned" IN (0, 1))',
+    ),
+  );
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>, String> blockedUserIds = GeneratedColumn<String>(
+    'blocked_user_ids',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
-  ).withConverter<Map<String, dynamic>>($UsersTable.$converterextraData);
+  ).withConverter<List<String>>($UsersTable.$converterblockedUserIds);
+  @override
+  late final GeneratedColumnWithTypeConverter<Map<String, dynamic>, String> custom = GeneratedColumn<String>(
+    'custom',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  ).withConverter<Map<String, dynamic>>($UsersTable.$convertercustom);
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -9459,7 +9521,13 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
     banned,
     teamsRole,
     avgResponseTime,
-    extraData,
+    name,
+    image,
+    deactivatedAt,
+    deletedAt,
+    shadowBanned,
+    blockedUserIds,
+    custom,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -9529,6 +9597,42 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
         ),
       );
     }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    }
+    if (data.containsKey('image')) {
+      context.handle(
+        _imageMeta,
+        image.isAcceptableOrUnknown(data['image']!, _imageMeta),
+      );
+    }
+    if (data.containsKey('deactivated_at')) {
+      context.handle(
+        _deactivatedAtMeta,
+        deactivatedAt.isAcceptableOrUnknown(
+          data['deactivated_at']!,
+          _deactivatedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('shadow_banned')) {
+      context.handle(
+        _shadowBannedMeta,
+        shadowBanned.isAcceptableOrUnknown(
+          data['shadow_banned']!,
+          _shadowBannedMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -9580,10 +9684,36 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
         DriftSqlType.int,
         data['${effectivePrefix}avg_response_time'],
       ),
-      extraData: $UsersTable.$converterextraData.fromSql(
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      ),
+      image: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}image'],
+      ),
+      deactivatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deactivated_at'],
+      ),
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      shadowBanned: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}shadow_banned'],
+      ),
+      blockedUserIds: $UsersTable.$converterblockedUserIds.fromSql(
         attachedDatabase.typeMapping.read(
           DriftSqlType.string,
-          data['${effectivePrefix}extra_data'],
+          data['${effectivePrefix}blocked_user_ids'],
+        )!,
+      ),
+      custom: $UsersTable.$convertercustom.fromSql(
+        attachedDatabase.typeMapping.read(
+          DriftSqlType.string,
+          data['${effectivePrefix}custom'],
         )!,
       ),
     );
@@ -9598,7 +9728,8 @@ class $UsersTable extends Users with TableInfo<$UsersTable, UserEntity> {
   static TypeConverter<Map<String, String>?, String?> $converterteamsRolen = NullAwareTypeConverter.wrap(
     $converterteamsRole,
   );
-  static TypeConverter<Map<String, dynamic>, String> $converterextraData = MapConverter();
+  static TypeConverter<List<String>, String> $converterblockedUserIds = ListConverter<String>();
+  static TypeConverter<Map<String, dynamic>, String> $convertercustom = MapConverter();
 }
 
 class UserEntity extends DataClass implements Insertable<UserEntity> {
@@ -9634,8 +9765,26 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
   /// The average response time for the user in seconds.
   final int? avgResponseTime;
 
-  /// Map of custom user extraData
-  final Map<String, dynamic> extraData;
+  /// The user's name.
+  final String? name;
+
+  /// The URL of the user's image.
+  final String? image;
+
+  /// The date at which the user was deactivated.
+  final DateTime? deactivatedAt;
+
+  /// The date at which the user was deleted.
+  final DateTime? deletedAt;
+
+  /// Whether the user is shadow banned.
+  final bool? shadowBanned;
+
+  /// The ids of the users this user blocked.
+  final List<String> blockedUserIds;
+
+  /// Custom data attached to the user.
+  final Map<String, dynamic> custom;
   const UserEntity({
     required this.id,
     this.role,
@@ -9647,7 +9796,13 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     required this.banned,
     this.teamsRole,
     this.avgResponseTime,
-    required this.extraData,
+    this.name,
+    this.image,
+    this.deactivatedAt,
+    this.deletedAt,
+    this.shadowBanned,
+    required this.blockedUserIds,
+    required this.custom,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -9678,9 +9833,29 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     if (!nullToAbsent || avgResponseTime != null) {
       map['avg_response_time'] = Variable<int>(avgResponseTime);
     }
+    if (!nullToAbsent || name != null) {
+      map['name'] = Variable<String>(name);
+    }
+    if (!nullToAbsent || image != null) {
+      map['image'] = Variable<String>(image);
+    }
+    if (!nullToAbsent || deactivatedAt != null) {
+      map['deactivated_at'] = Variable<DateTime>(deactivatedAt);
+    }
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    if (!nullToAbsent || shadowBanned != null) {
+      map['shadow_banned'] = Variable<bool>(shadowBanned);
+    }
     {
-      map['extra_data'] = Variable<String>(
-        $UsersTable.$converterextraData.toSql(extraData),
+      map['blocked_user_ids'] = Variable<String>(
+        $UsersTable.$converterblockedUserIds.toSql(blockedUserIds),
+      );
+    }
+    {
+      map['custom'] = Variable<String>(
+        $UsersTable.$convertercustom.toSql(custom),
       );
     }
     return map;
@@ -9702,7 +9877,13 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       banned: serializer.fromJson<bool>(json['banned']),
       teamsRole: serializer.fromJson<Map<String, String>?>(json['teamsRole']),
       avgResponseTime: serializer.fromJson<int?>(json['avgResponseTime']),
-      extraData: serializer.fromJson<Map<String, dynamic>>(json['extraData']),
+      name: serializer.fromJson<String?>(json['name']),
+      image: serializer.fromJson<String?>(json['image']),
+      deactivatedAt: serializer.fromJson<DateTime?>(json['deactivatedAt']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      shadowBanned: serializer.fromJson<bool?>(json['shadowBanned']),
+      blockedUserIds: serializer.fromJson<List<String>>(json['blockedUserIds']),
+      custom: serializer.fromJson<Map<String, dynamic>>(json['custom']),
     );
   }
   @override
@@ -9719,7 +9900,13 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       'banned': serializer.toJson<bool>(banned),
       'teamsRole': serializer.toJson<Map<String, String>?>(teamsRole),
       'avgResponseTime': serializer.toJson<int?>(avgResponseTime),
-      'extraData': serializer.toJson<Map<String, dynamic>>(extraData),
+      'name': serializer.toJson<String?>(name),
+      'image': serializer.toJson<String?>(image),
+      'deactivatedAt': serializer.toJson<DateTime?>(deactivatedAt),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'shadowBanned': serializer.toJson<bool?>(shadowBanned),
+      'blockedUserIds': serializer.toJson<List<String>>(blockedUserIds),
+      'custom': serializer.toJson<Map<String, dynamic>>(custom),
     };
   }
 
@@ -9734,7 +9921,13 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     bool? banned,
     Value<Map<String, String>?> teamsRole = const Value.absent(),
     Value<int?> avgResponseTime = const Value.absent(),
-    Map<String, dynamic>? extraData,
+    Value<String?> name = const Value.absent(),
+    Value<String?> image = const Value.absent(),
+    Value<DateTime?> deactivatedAt = const Value.absent(),
+    Value<DateTime?> deletedAt = const Value.absent(),
+    Value<bool?> shadowBanned = const Value.absent(),
+    List<String>? blockedUserIds,
+    Map<String, dynamic>? custom,
   }) => UserEntity(
     id: id ?? this.id,
     role: role.present ? role.value : this.role,
@@ -9746,7 +9939,13 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     banned: banned ?? this.banned,
     teamsRole: teamsRole.present ? teamsRole.value : this.teamsRole,
     avgResponseTime: avgResponseTime.present ? avgResponseTime.value : this.avgResponseTime,
-    extraData: extraData ?? this.extraData,
+    name: name.present ? name.value : this.name,
+    image: image.present ? image.value : this.image,
+    deactivatedAt: deactivatedAt.present ? deactivatedAt.value : this.deactivatedAt,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    shadowBanned: shadowBanned.present ? shadowBanned.value : this.shadowBanned,
+    blockedUserIds: blockedUserIds ?? this.blockedUserIds,
+    custom: custom ?? this.custom,
   );
   UserEntity copyWithCompanion(UsersCompanion data) {
     return UserEntity(
@@ -9760,7 +9959,13 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
       banned: data.banned.present ? data.banned.value : this.banned,
       teamsRole: data.teamsRole.present ? data.teamsRole.value : this.teamsRole,
       avgResponseTime: data.avgResponseTime.present ? data.avgResponseTime.value : this.avgResponseTime,
-      extraData: data.extraData.present ? data.extraData.value : this.extraData,
+      name: data.name.present ? data.name.value : this.name,
+      image: data.image.present ? data.image.value : this.image,
+      deactivatedAt: data.deactivatedAt.present ? data.deactivatedAt.value : this.deactivatedAt,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      shadowBanned: data.shadowBanned.present ? data.shadowBanned.value : this.shadowBanned,
+      blockedUserIds: data.blockedUserIds.present ? data.blockedUserIds.value : this.blockedUserIds,
+      custom: data.custom.present ? data.custom.value : this.custom,
     );
   }
 
@@ -9777,7 +9982,13 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           ..write('banned: $banned, ')
           ..write('teamsRole: $teamsRole, ')
           ..write('avgResponseTime: $avgResponseTime, ')
-          ..write('extraData: $extraData')
+          ..write('name: $name, ')
+          ..write('image: $image, ')
+          ..write('deactivatedAt: $deactivatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('shadowBanned: $shadowBanned, ')
+          ..write('blockedUserIds: $blockedUserIds, ')
+          ..write('custom: $custom')
           ..write(')'))
         .toString();
   }
@@ -9794,7 +10005,13 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
     banned,
     teamsRole,
     avgResponseTime,
-    extraData,
+    name,
+    image,
+    deactivatedAt,
+    deletedAt,
+    shadowBanned,
+    blockedUserIds,
+    custom,
   );
   @override
   bool operator ==(Object other) =>
@@ -9810,7 +10027,13 @@ class UserEntity extends DataClass implements Insertable<UserEntity> {
           other.banned == this.banned &&
           other.teamsRole == this.teamsRole &&
           other.avgResponseTime == this.avgResponseTime &&
-          other.extraData == this.extraData);
+          other.name == this.name &&
+          other.image == this.image &&
+          other.deactivatedAt == this.deactivatedAt &&
+          other.deletedAt == this.deletedAt &&
+          other.shadowBanned == this.shadowBanned &&
+          other.blockedUserIds == this.blockedUserIds &&
+          other.custom == this.custom);
 }
 
 class UsersCompanion extends UpdateCompanion<UserEntity> {
@@ -9824,7 +10047,13 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
   final Value<bool> banned;
   final Value<Map<String, String>?> teamsRole;
   final Value<int?> avgResponseTime;
-  final Value<Map<String, dynamic>> extraData;
+  final Value<String?> name;
+  final Value<String?> image;
+  final Value<DateTime?> deactivatedAt;
+  final Value<DateTime?> deletedAt;
+  final Value<bool?> shadowBanned;
+  final Value<List<String>> blockedUserIds;
+  final Value<Map<String, dynamic>> custom;
   final Value<int> rowid;
   const UsersCompanion({
     this.id = const Value.absent(),
@@ -9837,7 +10066,13 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     this.banned = const Value.absent(),
     this.teamsRole = const Value.absent(),
     this.avgResponseTime = const Value.absent(),
-    this.extraData = const Value.absent(),
+    this.name = const Value.absent(),
+    this.image = const Value.absent(),
+    this.deactivatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.shadowBanned = const Value.absent(),
+    this.blockedUserIds = const Value.absent(),
+    this.custom = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   UsersCompanion.insert({
@@ -9851,11 +10086,18 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     this.banned = const Value.absent(),
     this.teamsRole = const Value.absent(),
     this.avgResponseTime = const Value.absent(),
-    required Map<String, dynamic> extraData,
+    this.name = const Value.absent(),
+    this.image = const Value.absent(),
+    this.deactivatedAt = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.shadowBanned = const Value.absent(),
+    required List<String> blockedUserIds,
+    required Map<String, dynamic> custom,
     this.rowid = const Value.absent(),
   }) : id = Value(id),
-       extraData = Value(extraData);
-  static Insertable<UserEntity> custom({
+       blockedUserIds = Value(blockedUserIds),
+       custom = Value(custom);
+  static Insertable<UserEntity> createCustom({
     Expression<String>? id,
     Expression<String>? role,
     Expression<String>? language,
@@ -9866,7 +10108,13 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     Expression<bool>? banned,
     Expression<String>? teamsRole,
     Expression<int>? avgResponseTime,
-    Expression<String>? extraData,
+    Expression<String>? name,
+    Expression<String>? image,
+    Expression<DateTime>? deactivatedAt,
+    Expression<DateTime>? deletedAt,
+    Expression<bool>? shadowBanned,
+    Expression<String>? blockedUserIds,
+    Expression<String>? custom,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -9880,7 +10128,13 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       if (banned != null) 'banned': banned,
       if (teamsRole != null) 'teams_role': teamsRole,
       if (avgResponseTime != null) 'avg_response_time': avgResponseTime,
-      if (extraData != null) 'extra_data': extraData,
+      if (name != null) 'name': name,
+      if (image != null) 'image': image,
+      if (deactivatedAt != null) 'deactivated_at': deactivatedAt,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (shadowBanned != null) 'shadow_banned': shadowBanned,
+      if (blockedUserIds != null) 'blocked_user_ids': blockedUserIds,
+      if (custom != null) 'custom': custom,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -9896,7 +10150,13 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     Value<bool>? banned,
     Value<Map<String, String>?>? teamsRole,
     Value<int?>? avgResponseTime,
-    Value<Map<String, dynamic>>? extraData,
+    Value<String?>? name,
+    Value<String?>? image,
+    Value<DateTime?>? deactivatedAt,
+    Value<DateTime?>? deletedAt,
+    Value<bool?>? shadowBanned,
+    Value<List<String>>? blockedUserIds,
+    Value<Map<String, dynamic>>? custom,
     Value<int>? rowid,
   }) {
     return UsersCompanion(
@@ -9910,7 +10170,13 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
       banned: banned ?? this.banned,
       teamsRole: teamsRole ?? this.teamsRole,
       avgResponseTime: avgResponseTime ?? this.avgResponseTime,
-      extraData: extraData ?? this.extraData,
+      name: name ?? this.name,
+      image: image ?? this.image,
+      deactivatedAt: deactivatedAt ?? this.deactivatedAt,
+      deletedAt: deletedAt ?? this.deletedAt,
+      shadowBanned: shadowBanned ?? this.shadowBanned,
+      blockedUserIds: blockedUserIds ?? this.blockedUserIds,
+      custom: custom ?? this.custom,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -9950,9 +10216,29 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
     if (avgResponseTime.present) {
       map['avg_response_time'] = Variable<int>(avgResponseTime.value);
     }
-    if (extraData.present) {
-      map['extra_data'] = Variable<String>(
-        $UsersTable.$converterextraData.toSql(extraData.value),
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (image.present) {
+      map['image'] = Variable<String>(image.value);
+    }
+    if (deactivatedAt.present) {
+      map['deactivated_at'] = Variable<DateTime>(deactivatedAt.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (shadowBanned.present) {
+      map['shadow_banned'] = Variable<bool>(shadowBanned.value);
+    }
+    if (blockedUserIds.present) {
+      map['blocked_user_ids'] = Variable<String>(
+        $UsersTable.$converterblockedUserIds.toSql(blockedUserIds.value),
+      );
+    }
+    if (custom.present) {
+      map['custom'] = Variable<String>(
+        $UsersTable.$convertercustom.toSql(custom.value),
       );
     }
     if (rowid.present) {
@@ -9974,7 +10260,13 @@ class UsersCompanion extends UpdateCompanion<UserEntity> {
           ..write('banned: $banned, ')
           ..write('teamsRole: $teamsRole, ')
           ..write('avgResponseTime: $avgResponseTime, ')
-          ..write('extraData: $extraData, ')
+          ..write('name: $name, ')
+          ..write('image: $image, ')
+          ..write('deactivatedAt: $deactivatedAt, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('shadowBanned: $shadowBanned, ')
+          ..write('blockedUserIds: $blockedUserIds, ')
+          ..write('custom: $custom, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -18627,7 +18919,13 @@ typedef $$UsersTableCreateCompanionBuilder =
       Value<bool> banned,
       Value<Map<String, String>?> teamsRole,
       Value<int?> avgResponseTime,
-      required Map<String, dynamic> extraData,
+      Value<String?> name,
+      Value<String?> image,
+      Value<DateTime?> deactivatedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool?> shadowBanned,
+      required List<String> blockedUserIds,
+      required Map<String, dynamic> custom,
       Value<int> rowid,
     });
 typedef $$UsersTableUpdateCompanionBuilder =
@@ -18642,7 +18940,13 @@ typedef $$UsersTableUpdateCompanionBuilder =
       Value<bool> banned,
       Value<Map<String, String>?> teamsRole,
       Value<int?> avgResponseTime,
-      Value<Map<String, dynamic>> extraData,
+      Value<String?> name,
+      Value<String?> image,
+      Value<DateTime?> deactivatedAt,
+      Value<DateTime?> deletedAt,
+      Value<bool?> shadowBanned,
+      Value<List<String>> blockedUserIds,
+      Value<Map<String, dynamic>> custom,
       Value<int> rowid,
     });
 
@@ -18704,11 +19008,40 @@ class $$UsersTableFilterComposer extends Composer<_$DriftChatDatabase, $UsersTab
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnWithTypeConverterFilters<Map<String, dynamic>, Map<String, dynamic>, String> get extraData =>
-      $composableBuilder(
-        column: $table.extraData,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get image => $composableBuilder(
+    column: $table.image,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deactivatedAt => $composableBuilder(
+    column: $table.deactivatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get shadowBanned => $composableBuilder(
+    column: $table.shadowBanned,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<List<String>, List<String>, String> get blockedUserIds => $composableBuilder(
+    column: $table.blockedUserIds,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
+
+  ColumnWithTypeConverterFilters<Map<String, dynamic>, Map<String, dynamic>, String> get custom => $composableBuilder(
+    column: $table.custom,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
 }
 
 class $$UsersTableOrderingComposer extends Composer<_$DriftChatDatabase, $UsersTable> {
@@ -18769,8 +19102,38 @@ class $$UsersTableOrderingComposer extends Composer<_$DriftChatDatabase, $UsersT
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get extraData => $composableBuilder(
-    column: $table.extraData,
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get image => $composableBuilder(
+    column: $table.image,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deactivatedAt => $composableBuilder(
+    column: $table.deactivatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get shadowBanned => $composableBuilder(
+    column: $table.shadowBanned,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get blockedUserIds => $composableBuilder(
+    column: $table.blockedUserIds,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get custom => $composableBuilder(
+    column: $table.custom,
     builder: (column) => ColumnOrderings(column),
   );
 }
@@ -18810,8 +19173,29 @@ class $$UsersTableAnnotationComposer extends Composer<_$DriftChatDatabase, $User
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<Map<String, dynamic>, String> get extraData =>
-      $composableBuilder(column: $table.extraData, builder: (column) => column);
+  GeneratedColumn<String> get name => $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get image => $composableBuilder(column: $table.image, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deactivatedAt => $composableBuilder(
+    column: $table.deactivatedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get deletedAt => $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get shadowBanned => $composableBuilder(
+    column: $table.shadowBanned,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<List<String>, String> get blockedUserIds => $composableBuilder(
+    column: $table.blockedUserIds,
+    builder: (column) => column,
+  );
+
+  GeneratedColumnWithTypeConverter<Map<String, dynamic>, String> get custom =>
+      $composableBuilder(column: $table.custom, builder: (column) => column);
 }
 
 class $$UsersTableTableManager
@@ -18852,7 +19236,13 @@ class $$UsersTableTableManager
                 Value<bool> banned = const Value.absent(),
                 Value<Map<String, String>?> teamsRole = const Value.absent(),
                 Value<int?> avgResponseTime = const Value.absent(),
-                Value<Map<String, dynamic>> extraData = const Value.absent(),
+                Value<String?> name = const Value.absent(),
+                Value<String?> image = const Value.absent(),
+                Value<DateTime?> deactivatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool?> shadowBanned = const Value.absent(),
+                Value<List<String>> blockedUserIds = const Value.absent(),
+                Value<Map<String, dynamic>> custom = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => UsersCompanion(
                 id: id,
@@ -18865,7 +19255,13 @@ class $$UsersTableTableManager
                 banned: banned,
                 teamsRole: teamsRole,
                 avgResponseTime: avgResponseTime,
-                extraData: extraData,
+                name: name,
+                image: image,
+                deactivatedAt: deactivatedAt,
+                deletedAt: deletedAt,
+                shadowBanned: shadowBanned,
+                blockedUserIds: blockedUserIds,
+                custom: custom,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -18880,7 +19276,13 @@ class $$UsersTableTableManager
                 Value<bool> banned = const Value.absent(),
                 Value<Map<String, String>?> teamsRole = const Value.absent(),
                 Value<int?> avgResponseTime = const Value.absent(),
-                required Map<String, dynamic> extraData,
+                Value<String?> name = const Value.absent(),
+                Value<String?> image = const Value.absent(),
+                Value<DateTime?> deactivatedAt = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<bool?> shadowBanned = const Value.absent(),
+                required List<String> blockedUserIds,
+                required Map<String, dynamic> custom,
                 Value<int> rowid = const Value.absent(),
               }) => UsersCompanion.insert(
                 id: id,
@@ -18893,7 +19295,13 @@ class $$UsersTableTableManager
                 banned: banned,
                 teamsRole: teamsRole,
                 avgResponseTime: avgResponseTime,
-                extraData: extraData,
+                name: name,
+                image: image,
+                deactivatedAt: deactivatedAt,
+                deletedAt: deletedAt,
+                shadowBanned: shadowBanned,
+                blockedUserIds: blockedUserIds,
+                custom: custom,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0
