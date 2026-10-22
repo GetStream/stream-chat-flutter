@@ -1807,8 +1807,7 @@ class StreamChatClient {
     String? prev,
   }) => _pollsRepository.queryPollVotes(pollId, filter: filter, sort: sort, limit: limit, next: next, prev: prev);
 
-  /// Creates [user], or replaces the data of the existing user with the same
-  /// id.
+  /// Creates [user], or replaces the existing user with the same id.
   ///
   /// This cannot change the user's role, teams or team roles. To change only
   /// some fields, consider [updateUserPartial].
