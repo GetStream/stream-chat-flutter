@@ -23,6 +23,7 @@
 🔄 Changed
 
 - A deleted message in `StreamMessagePreviewText` now matches the rest of the preview unless `StreamMessagePreviewTextThemeData.deletedContentStyle` sets a style. The channel list, thread list and message search keep their own deleted style.
+- `StreamThreadListTileTheme.of` now merges a local `StreamThreadListTileTheme` over `StreamChatThemeData.threadListTileTheme`, so values the local theme leaves unset keep their app-wide setting instead of resetting to the default.
 
 ## 10.6.0
 

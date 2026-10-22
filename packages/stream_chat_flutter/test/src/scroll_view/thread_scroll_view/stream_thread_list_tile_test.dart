@@ -239,6 +239,27 @@ void main() {
     );
   });
 
+  testWidgets('keeps the app-wide root message style under a local theme', (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        StreamThreadListTileTheme(
+          data: const StreamThreadListTileThemeData(padding: EdgeInsets.all(4)),
+          child: StreamThreadListTile(thread: thread, currentUser: user2),
+        ),
+        chatTheme: StreamChatThemeData(
+          threadListTileTheme: const StreamThreadListTileThemeData(
+            threadReplyToMessageStyle: TextStyle(color: Colors.red),
+          ),
+        ),
+      ),
+    );
+
+    final preview = tester.widget<RichText>(
+      find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(RichText)).first,
+    );
+    expect(preview.text.style?.color, Colors.red);
+  });
+
   testWidgets('shows a deleted root message in the secondary text color', (tester) async {
     final deletedThread = thread.copyWith(parentMessage: _deletedMessage());
     await tester.pumpWidget(_wrapWithMaterialApp(StreamThreadListTile(thread: deletedThread, currentUser: user2)));
@@ -303,6 +324,7 @@ Color? _deletedMessageColor(WidgetTester tester) {
 Widget _wrapWithMaterialApp(
   Widget widget, {
   Brightness brightness = Brightness.light,
+  StreamChatThemeData? chatTheme,
 }) {
   final client = MockClient();
   final clientState = MockClientState();
@@ -317,7 +339,7 @@ Widget _wrapWithMaterialApp(
       client: client,
       configData: StreamChatConfigurationData(),
       connectivityStream: Stream.value([ConnectivityResult.wifi]),
-      themeData: StreamChatThemeData(),
+      themeData: chatTheme ?? StreamChatThemeData(),
       child: Builder(
         builder: (context) {
           return Scaffold(
