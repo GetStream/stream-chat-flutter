@@ -68,13 +68,32 @@ void main() {
     expect(_deletedIconColor(tester), colorScheme.textPrimary);
   });
 
+  testWidgets('StreamQuotedMessage keeps the reply color for a deleted quote under an app-wide deleted color', (
+    tester,
+  ) async {
+    await _pumpQuote(
+      tester,
+      quotedMessage: _deletedMessage(),
+      layout: const StreamMessageLayoutData(alignment: StreamMessageAlignment.end),
+      chatTheme: StreamChatThemeData(
+        messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+          deletedTextStyle: TextStyle(color: Colors.red),
+        ),
+      ),
+    );
+
+    final colorScheme = tester.element(find.byType(StreamQuotedMessage)).streamColorScheme;
+    expect(_deletedLabelColor(tester), colorScheme.brand.shade900);
+    expect(_deletedIconColor(tester), colorScheme.brand.shade900);
+  });
+
   testWidgets('StreamQuotedMessage shows a deleted quote in the themed preview style', (tester) async {
     await _pumpQuote(
       tester,
       quotedMessage: _deletedMessage(),
       layout: const StreamMessageLayoutData(alignment: StreamMessageAlignment.end),
       theme: const StreamQuotedMessageThemeData(
-        previewStyle: StreamMessagePreviewThemeData(deletedTextStyle: TextStyle(color: Colors.orange)),
+        previewStyle: StreamMessagePreviewTextThemeData(deletedTextStyle: TextStyle(color: Colors.orange)),
       ),
     );
 
@@ -128,6 +147,7 @@ Future<void> _pumpQuote(
   required Message quotedMessage,
   required StreamMessageLayoutData layout,
   StreamQuotedMessageThemeData theme = const StreamQuotedMessageThemeData(),
+  StreamChatThemeData? chatTheme,
 }) async {
   final currentUser = OwnUser(id: 'maya', name: 'Maya Ross');
   final client = MockClient();
@@ -142,6 +162,7 @@ Future<void> _pumpQuote(
       home: StreamChat(
         client: client,
         connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
+        themeData: chatTheme,
         child: Scaffold(
           body: StreamMessageLayout(
             data: layout,

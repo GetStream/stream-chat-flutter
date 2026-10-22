@@ -97,7 +97,7 @@ void main() {
         tester,
         message,
         themeData: StreamChatThemeData(
-          messagePreviewTheme: const StreamMessagePreviewThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
             deletedTextStyle: TextStyle(color: Colors.red, fontStyle: FontStyle.italic),
           ),
         ),
@@ -739,6 +739,35 @@ void main() {
       final span = _getPreviewSpan(tester);
       final youSpan = _findTextSpans(span).firstWhere((s) => s.text == 'You: ');
       expect(youSpan.style?.fontWeight, FontWeight.bold);
+    });
+
+    testWidgets('group channel prepends the sender name in the themed sender style', (tester) async {
+      final channel = ChannelModel(
+        id: 'test-channel',
+        type: 'messaging',
+        memberCount: 3,
+      );
+
+      final message = Message(
+        text: 'Hello everyone',
+        user: User(id: 'other-user-id', name: 'Jane Doe'),
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        channel: channel,
+        themeData: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            senderTextStyle: TextStyle(color: Colors.indigo, fontWeight: FontWeight.w500),
+          ),
+        ),
+      );
+
+      final span = _getPreviewSpan(tester);
+      final nameSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Jane: ');
+      expect(nameSpan.style?.color, Colors.indigo);
+      expect(nameSpan.style?.fontWeight, FontWeight.w500);
     });
 
     testWidgets('group channel prepends bold first name for other users', (tester) async {

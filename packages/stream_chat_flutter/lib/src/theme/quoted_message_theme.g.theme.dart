@@ -57,7 +57,7 @@ mixin _$StreamQuotedMessageThemeData {
           ? a.thumbnailSide
           : BorderSide.lerp(a.thumbnailSide!, b.thumbnailSide!, t),
       thumbnailSize: Size.lerp(a.thumbnailSize, b.thumbnailSize, t),
-      previewStyle: StreamMessagePreviewThemeData.lerp(
+      previewStyle: StreamMessagePreviewTextThemeData.lerp(
         a.previewStyle,
         b.previewStyle,
         t,
@@ -77,7 +77,7 @@ mixin _$StreamQuotedMessageThemeData {
     OutlinedBorder? thumbnailShape,
     BorderSide? thumbnailSide,
     Size? thumbnailSize,
-    StreamMessagePreviewThemeData? previewStyle,
+    StreamMessagePreviewTextThemeData? previewStyle,
   }) {
     final _this = (this as StreamQuotedMessageThemeData);
 

@@ -3,7 +3,7 @@
 ✅ Added
 
 - Added a next action to the poll creator's option fields, which moves to the next option or adds a new one from the last.
-- Added `StreamMessagePreviewTheme` and `StreamChatThemeData.messagePreviewTheme`, to style the deleted-message and "Draft:" labels in message previews.
+- Added `StreamMessagePreviewTextTheme` and `StreamChatThemeData.messagePreviewTextTheme`, to style the deleted-message label, the "Draft:" label and the sender name in message previews.
 - Added `StreamQuotedMessageThemeData.previewStyle`, to style the message preview inside a quoted reply.
 
 🔄 Changed

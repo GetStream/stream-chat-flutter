@@ -3,7 +3,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
 
 import '../localization/translations.dart';
-import '../theme/message_preview_theme.dart';
+import '../theme/message_preview_text_theme.dart';
 import 'extensions.dart';
 
 /// Formats a [Message] or [DraftMessage] into a preview [TextSpan] suitable
@@ -94,9 +94,11 @@ abstract interface class MessagePreviewFormatter {
   /// Formats [draftMessage] as a preview [TextSpan] with a highlighted
   /// "Draft:" prefix.
   ///
-  /// The prefix is styled with [StreamMessagePreviewThemeData.draftLabelStyle],
-  /// bold in the accent color by default. The draft body is formatted using the same rules as a regular message —
-  /// plain text, attachments, and polls all get a rich preview.
+  /// The prefix is styled with
+  /// [StreamMessagePreviewTextThemeData.draftLabelStyle], bold in the accent
+  /// color by default. The draft body is formatted using the same rules as a
+  /// regular message — plain text, attachments, and polls all get a rich
+  /// preview.
   ///
   /// [currentUser] is forwarded to body formatters that need viewer context
   /// (for example, [formatPollMessage] to resolve the current user's vote).
@@ -297,12 +299,12 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   /// Formats a deleted [message] as a preview [TextSpan].
   ///
   /// Shows a "no-sign" icon followed by the localized "Message deleted"
-  /// label, both styled with [StreamMessagePreviewThemeData.deletedTextStyle].
+  /// label, both styled with [StreamMessagePreviewTextThemeData.deletedTextStyle].
   /// Defaults to the theme's tertiary text color to signal the deleted state.
   @protected
   TextSpan formatDeletedMessage(BuildContext context, Message message) {
-    final theme = StreamMessagePreviewTheme.of(context);
-    final defaults = _StreamMessagePreviewDefaults(context);
+    final theme = StreamMessagePreviewTextTheme.of(context);
+    final defaults = _StreamMessagePreviewTextDefaults(context);
 
     return _labeledIcon(
       icon: context.streamIcons.noSign,
@@ -331,8 +333,9 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
 
   /// Formats a regular message sent by the current user.
   ///
-  /// Prepends a bold, localized "You: " prefix to [messageBody] and returns
-  /// the combined span. Override to customize or remove the prefix:
+  /// Prepends a localized "You: " prefix, styled with
+  /// [StreamMessagePreviewTextThemeData.senderTextStyle], to [messageBody] and
+  /// returns the combined span. Override to customize or remove the prefix:
   ///
   /// {@tool snippet}
   ///
@@ -350,7 +353,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   /// {@end-tool}
   @protected
   TextSpan formatCurrentUserMessage(BuildContext context, TextSpan messageBody) {
-    return TextSpan(children: [_boldSpan('${context.translations.youText}: '), messageBody]);
+    return TextSpan(children: [_senderSpan(context, '${context.translations.youText}: '), messageBody]);
   }
 
   /// Formats a regular message shown in a 1-on-1 channel.
@@ -380,8 +383,9 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
 
   /// Formats a regular message sent by another user in a group channel.
   ///
-  /// Prepends a bold "FirstName: " prefix (the first word of
-  /// [messageAuthor]'s name) to [messageBody] and returns the combined span.
+  /// Prepends a "FirstName: " prefix (the first word of [messageAuthor]'s
+  /// name), styled with [StreamMessagePreviewTextThemeData.senderTextStyle],
+  /// to [messageBody] and returns the combined span.
   /// Returns [messageBody] unchanged when [messageAuthor] is `null` or has
   /// no renderable name.
   ///
@@ -417,7 +421,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
     // Use only the first name to keep the prefix compact in narrow
     // single-line preview rows.
     final firstName = authorName.split(RegExp(r'\s+')).first;
-    return TextSpan(children: [_boldSpan('$firstName: '), messageBody]);
+    return TextSpan(children: [_senderSpan(context, '$firstName: '), messageBody]);
   }
 
   /// Formats a list of [attachments] as a preview [TextSpan].
@@ -509,8 +513,8 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
       showCaption: showCaption,
     );
 
-    final theme = StreamMessagePreviewTheme.of(context);
-    final defaults = _StreamMessagePreviewDefaults(context);
+    final theme = StreamMessagePreviewTextTheme.of(context);
+    final defaults = _StreamMessagePreviewTextDefaults(context);
 
     final prefix = _labeledIcon(
       label: getDraftPrefix(context),
@@ -733,10 +737,10 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   }
 }
 
-// Default values for [StreamMessagePreviewThemeData] backed by stream design
+// Default values for [StreamMessagePreviewTextThemeData] backed by stream design
 // tokens.
-class _StreamMessagePreviewDefaults extends StreamMessagePreviewThemeData {
-  _StreamMessagePreviewDefaults(this._context);
+class _StreamMessagePreviewTextDefaults extends StreamMessagePreviewTextThemeData {
+  _StreamMessagePreviewTextDefaults(this._context);
 
   final BuildContext _context;
 
@@ -747,6 +751,9 @@ class _StreamMessagePreviewDefaults extends StreamMessagePreviewThemeData {
 
   @override
   TextStyle get draftLabelStyle => TextStyle(color: _colorScheme.accentPrimary, fontWeight: FontWeight.bold);
+
+  @override
+  TextStyle get senderTextStyle => const TextStyle(fontWeight: FontWeight.bold);
 }
 
 // ---------------------------------------------------------------------------
@@ -801,12 +808,13 @@ WidgetSpan _iconSpan(
   );
 }
 
-// Builds a bold [TextSpan] wrapping [text]. Used for the "You:" / "FirstName:"
-// sender prefix.
-TextSpan _boldSpan(String text) => TextSpan(
-  text: text,
-  style: const TextStyle(fontWeight: FontWeight.bold),
-);
+// Builds the "You:" / "FirstName:" sender prefix [TextSpan] for [text].
+TextSpan _senderSpan(BuildContext context, String text) {
+  final theme = StreamMessagePreviewTextTheme.of(context);
+  final defaults = _StreamMessagePreviewTextDefaults(context);
+
+  return TextSpan(text: text, style: theme.senderTextStyle ?? defaults.senderTextStyle);
+}
 
 // ---------------------------------------------------------------------------
 // Attachment presentation

@@ -66,7 +66,7 @@ void main() {
         tester,
         DraftMessage(text: 'This is a draft message'),
         themeData: StreamChatThemeData(
-          messagePreviewTheme: const StreamMessagePreviewThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
             draftLabelStyle: TextStyle(color: Colors.purple),
           ),
         ),

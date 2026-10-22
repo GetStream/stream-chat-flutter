@@ -2,7 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:stream_core_flutter/chat.dart';
 import 'package:theme_extensions_builder_annotation/theme_extensions_builder_annotation.dart';
 
-import 'message_preview_theme.dart';
+import 'message_preview_text_theme.dart';
 import 'stream_chat_theme.dart';
 
 part 'quoted_message_theme.g.theme.dart';
@@ -117,7 +117,8 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
   /// The text style for the quoted message preview.
   ///
   /// If null, defaults to [StreamTextTheme.metadataDefault] tinted with the
-  /// alignment-aware text color.
+  /// alignment-aware text color. Parts styled by [previewStyle], such as the
+  /// deleted-message label, apply on top of this style.
   final TextStyle? subtitleTextStyle;
 
   /// Color of the leading indicator bar.
@@ -175,12 +176,13 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
   /// If null, defaults to `Size.square(40)`.
   final Size? thumbnailSize;
 
-  /// The theme overrides for the message preview shown as the subtitle.
+  /// Styles for parts of the preview that differ from [subtitleTextStyle].
   ///
-  /// If null, the deleted-message label keeps [subtitleTextStyle]'s color
-  /// instead of the muted color used in lists, unless
-  /// [StreamChatThemeData.messagePreviewTheme] sets one.
-  final StreamMessagePreviewThemeData? previewStyle;
+  /// Applies on top of [subtitleTextStyle] and of any enclosing message
+  /// preview theme. Only [StreamMessagePreviewTextThemeData.deletedTextStyle]
+  /// takes effect in a quote. Unless this sets a color, the deleted-message
+  /// label keeps [subtitleTextStyle]'s color.
+  final StreamMessagePreviewTextThemeData? previewStyle;
 
   /// Linearly interpolate between two [StreamQuotedMessageThemeData] objects.
   static StreamQuotedMessageThemeData? lerp(

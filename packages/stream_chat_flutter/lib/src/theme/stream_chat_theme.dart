@@ -109,7 +109,7 @@ class StreamChatTheme extends InheritedTheme {
 ///  * [StreamMessageListViewThemeData], which defines message list styles.
 ///  * [StreamChannelListItemThemeData], which defines channel list item styles.
 ///  * [StreamQuotedMessageThemeData], which defines quoted message styles.
-///  * [StreamMessagePreviewThemeData], which defines message preview styles.
+///  * [StreamMessagePreviewTextThemeData], which defines message preview styles.
 ///  * [StreamThreadListTileThemeData], which defines thread list tile styles.
 ///  * [StreamVoiceRecordingAttachmentThemeData], which defines voice recording attachment styles.
 ///  * [StreamPollCreatorThemeData], which defines poll creator styles.
@@ -146,7 +146,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
     StreamQuotedMessageThemeData? quotedMessageTheme,
     StreamChannelListItemThemeData? channelListItemTheme,
-    StreamMessagePreviewThemeData? messagePreviewTheme,
+    StreamMessagePreviewTextThemeData? messagePreviewTextTheme,
   }) {
     // App bars
     channelHeaderTheme ??= const StreamAppBarThemeData();
@@ -172,7 +172,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
     voiceRecordingAttachmentTheme ??= const StreamVoiceRecordingAttachmentThemeData();
     quotedMessageTheme ??= const StreamQuotedMessageThemeData();
     channelListItemTheme ??= const StreamChannelListItemThemeData();
-    messagePreviewTheme ??= const StreamMessagePreviewThemeData();
+    messagePreviewTextTheme ??= const StreamMessagePreviewTextThemeData();
 
     return StreamChatThemeData.raw(
       channelHeaderTheme: channelHeaderTheme,
@@ -190,7 +190,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
       voiceRecordingAttachmentTheme: voiceRecordingAttachmentTheme,
       quotedMessageTheme: quotedMessageTheme,
       channelListItemTheme: channelListItemTheme,
-      messagePreviewTheme: messagePreviewTheme,
+      messagePreviewTextTheme: messagePreviewTextTheme,
     );
   }
 
@@ -211,7 +211,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
     required this.voiceRecordingAttachmentTheme,
     required this.quotedMessageTheme,
     required this.channelListItemTheme,
-    this.messagePreviewTheme = const StreamMessagePreviewThemeData(),
+    this.messagePreviewTextTheme = const StreamMessagePreviewTextThemeData(),
   });
 
   /// The channel header app bar theme for this theme.
@@ -260,5 +260,5 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
   final StreamChannelListItemThemeData channelListItemTheme;
 
   /// The theme for message previews, such as a channel list item's subtitle.
-  final StreamMessagePreviewThemeData messagePreviewTheme;
+  final StreamMessagePreviewTextThemeData messagePreviewTextTheme;
 }

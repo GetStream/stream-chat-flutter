@@ -3,18 +3,18 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 // ignore_for_file: type=lint, unused_element
 
-part of 'message_preview_theme.dart';
+part of 'message_preview_text_theme.dart';
 
 // **************************************************************************
 // ThemeGenGenerator
 // **************************************************************************
 
-mixin _$StreamMessagePreviewThemeData {
+mixin _$StreamMessagePreviewTextThemeData {
   bool get canMerge => true;
 
-  static StreamMessagePreviewThemeData? lerp(
-    StreamMessagePreviewThemeData? a,
-    StreamMessagePreviewThemeData? b,
+  static StreamMessagePreviewTextThemeData? lerp(
+    StreamMessagePreviewTextThemeData? a,
+    StreamMessagePreviewTextThemeData? b,
     double t,
   ) {
     if (identical(a, b)) {
@@ -29,30 +29,35 @@ mixin _$StreamMessagePreviewThemeData {
       return t == 0.0 ? a : null;
     }
 
-    return StreamMessagePreviewThemeData(
+    return StreamMessagePreviewTextThemeData(
       deletedTextStyle: TextStyle.lerp(
         a.deletedTextStyle,
         b.deletedTextStyle,
         t,
       ),
       draftLabelStyle: TextStyle.lerp(a.draftLabelStyle, b.draftLabelStyle, t),
+      senderTextStyle: TextStyle.lerp(a.senderTextStyle, b.senderTextStyle, t),
     );
   }
 
-  StreamMessagePreviewThemeData copyWith({
+  StreamMessagePreviewTextThemeData copyWith({
     TextStyle? deletedTextStyle,
     TextStyle? draftLabelStyle,
+    TextStyle? senderTextStyle,
   }) {
-    final _this = (this as StreamMessagePreviewThemeData);
+    final _this = (this as StreamMessagePreviewTextThemeData);
 
-    return StreamMessagePreviewThemeData(
+    return StreamMessagePreviewTextThemeData(
       deletedTextStyle: deletedTextStyle ?? _this.deletedTextStyle,
       draftLabelStyle: draftLabelStyle ?? _this.draftLabelStyle,
+      senderTextStyle: senderTextStyle ?? _this.senderTextStyle,
     );
   }
 
-  StreamMessagePreviewThemeData merge(StreamMessagePreviewThemeData? other) {
-    final _this = (this as StreamMessagePreviewThemeData);
+  StreamMessagePreviewTextThemeData merge(
+    StreamMessagePreviewTextThemeData? other,
+  ) {
+    final _this = (this as StreamMessagePreviewTextThemeData);
 
     if (other == null || identical(_this, other)) {
       return _this;
@@ -69,6 +74,9 @@ mixin _$StreamMessagePreviewThemeData {
       draftLabelStyle:
           _this.draftLabelStyle?.merge(other.draftLabelStyle) ??
           other.draftLabelStyle,
+      senderTextStyle:
+          _this.senderTextStyle?.merge(other.senderTextStyle) ??
+          other.senderTextStyle,
     );
   }
 
@@ -82,21 +90,23 @@ mixin _$StreamMessagePreviewThemeData {
       return false;
     }
 
-    final _this = (this as StreamMessagePreviewThemeData);
-    final _other = (other as StreamMessagePreviewThemeData);
+    final _this = (this as StreamMessagePreviewTextThemeData);
+    final _other = (other as StreamMessagePreviewTextThemeData);
 
     return _other.deletedTextStyle == _this.deletedTextStyle &&
-        _other.draftLabelStyle == _this.draftLabelStyle;
+        _other.draftLabelStyle == _this.draftLabelStyle &&
+        _other.senderTextStyle == _this.senderTextStyle;
   }
 
   @override
   int get hashCode {
-    final _this = (this as StreamMessagePreviewThemeData);
+    final _this = (this as StreamMessagePreviewTextThemeData);
 
     return Object.hash(
       runtimeType,
       _this.deletedTextStyle,
       _this.draftLabelStyle,
+      _this.senderTextStyle,
     );
   }
 }
