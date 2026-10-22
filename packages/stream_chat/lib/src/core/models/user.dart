@@ -145,6 +145,8 @@ class User extends Equatable {
   final bool? shadowBanned;
 
   /// The ids of the users this user blocked.
+  ///
+  /// Empty for every user but the current one.
   final List<String> blockedUserIds;
 
   /// List of users to list of userIds.
