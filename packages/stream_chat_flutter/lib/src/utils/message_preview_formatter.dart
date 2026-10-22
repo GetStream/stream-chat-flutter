@@ -69,8 +69,9 @@ abstract interface class MessagePreviewFormatter {
   /// Formats [message] as a preview [TextSpan].
   ///
   /// The output adapts to the message kind (regular, deleted, system, poll,
-  /// location) and to the surrounding [channel] — for example, group channels
-  /// prepend a bold "You:" or "FirstName:" prefix.
+  /// location) and to the surrounding [channel] — for example, a "You:"
+  /// prefix on the current user's messages, or "FirstName:" in group
+  /// channels.
   ///
   /// [showCaption] controls how attachment and location previews label
   /// themselves: when `true` (the default) they display the message text; when
@@ -78,11 +79,8 @@ abstract interface class MessagePreviewFormatter {
   /// type-based label such as "Photo", "2 Videos", or "Location". Pure text
   /// messages always show their text.
   ///
-  /// The returned span carries structural style only (bold sender prefix,
-  /// tinted deleted-message text). Base text color and font should be
-  /// applied by the caller via [Text.rich]'s `style` parameter or an
-  /// ambient [DefaultTextStyle]; inline icons pick up their color from the
-  /// ambient [IconTheme].
+  /// The returned span styles only the parts that stand apart from the rest,
+  /// such as the sender prefix. The caller provides the base text style.
   TextSpan formatMessage(
     BuildContext context,
     Message message, {
@@ -94,11 +92,8 @@ abstract interface class MessagePreviewFormatter {
   /// Formats [draftMessage] as a preview [TextSpan] with a highlighted
   /// "Draft:" prefix.
   ///
-  /// The prefix is styled with
-  /// [StreamMessagePreviewTextThemeData.draftLabelStyle], bold in the accent
-  /// color by default. The draft body is formatted using the same rules as a
-  /// regular message — plain text, attachments, and polls all get a rich
-  /// preview.
+  /// The draft body is formatted using the same rules as a regular message —
+  /// plain text, attachments, and polls all get a rich preview.
   ///
   /// [currentUser] is forwarded to body formatters that need viewer context
   /// (for example, [formatPollMessage] to resolve the current user's vote).
@@ -108,9 +103,7 @@ abstract interface class MessagePreviewFormatter {
   /// when `false` they fall back to a type-based label such as "Photo" or
   /// "2 Videos". Pure text drafts always show their text.
   ///
-  /// Like [formatMessage], the returned span carries only the structural
-  /// overrides the preview needs; the caller is responsible for the base
-  /// text style.
+  /// Like [formatMessage], the caller provides the base text style.
   TextSpan formatDraftMessage(
     BuildContext context,
     DraftMessage draftMessage, {
@@ -298,10 +291,8 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
 
   /// Formats a deleted [message] as a preview [TextSpan].
   ///
-  /// Shows a "no-sign" icon followed by the localized "Message deleted"
-  /// label, both styled with
-  /// [StreamMessagePreviewTextThemeData.deletedTextStyle]. Defaults to the
-  /// theme's tertiary text color to signal the deleted state.
+  /// Shows a "no-sign" icon followed by the localized "Message deleted" text,
+  /// styled with [StreamMessagePreviewTextThemeData.deletedMessageStyle].
   @protected
   TextSpan formatDeletedMessage(BuildContext context, Message message) {
     final theme = StreamMessagePreviewTextTheme.of(context);
@@ -310,7 +301,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
     return _labeledIcon(
       icon: context.streamIcons.noSign,
       label: context.translations.messageDeletedLabel,
-      textStyle: theme.deletedTextStyle ?? defaults.deletedTextStyle,
+      textStyle: theme.deletedMessageStyle ?? defaults.deletedMessageStyle,
     );
   }
 
@@ -335,8 +326,9 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   /// Formats a regular message sent by the current user.
   ///
   /// Prepends a localized "You: " prefix, styled with
-  /// [StreamMessagePreviewTextThemeData.senderTextStyle], to [messageBody] and
-  /// returns the combined span. Override to customize or remove the prefix:
+  /// [StreamMessagePreviewTextThemeData.senderPrefixStyle], to [messageBody]
+  /// and returns the combined span. Override to customize or remove the
+  /// prefix:
   ///
   /// {@tool snippet}
   ///
@@ -385,10 +377,9 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   /// Formats a regular message sent by another user in a group channel.
   ///
   /// Prepends a "FirstName: " prefix (the first word of [messageAuthor]'s
-  /// name), styled with [StreamMessagePreviewTextThemeData.senderTextStyle],
-  /// to [messageBody] and returns the combined span.
-  /// Returns [messageBody] unchanged when [messageAuthor] is `null` or has
-  /// no renderable name.
+  /// name), styled with [StreamMessagePreviewTextThemeData.senderPrefixStyle],
+  /// to [messageBody] and returns the combined span. Falls back to
+  /// [formatDirectMessage] when [messageAuthor] is `null` or has no name.
   ///
   /// Override to customize the prefix text:
   ///
@@ -519,7 +510,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
 
     final prefix = _labeledIcon(
       label: getDraftPrefix(context),
-      textStyle: theme.draftLabelStyle ?? defaults.draftLabelStyle,
+      textStyle: theme.draftPrefixStyle ?? defaults.draftPrefixStyle,
     );
 
     return TextSpan(
@@ -533,7 +524,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
 
   /// The text shown as the prefix of a draft preview.
   ///
-  /// Defaults to the localized "Draft:" label.
+  /// Defaults to the localized "Draft:" prefix.
   ///
   /// {@tool snippet}
   ///
@@ -748,13 +739,13 @@ class _StreamMessagePreviewTextDefaults extends StreamMessagePreviewTextThemeDat
   late final StreamColorScheme _colorScheme = _context.streamColorScheme;
 
   @override
-  TextStyle get deletedTextStyle => TextStyle(color: _colorScheme.textTertiary);
+  TextStyle get deletedMessageStyle => TextStyle(color: _colorScheme.textTertiary);
 
   @override
-  TextStyle get draftLabelStyle => TextStyle(color: _colorScheme.accentPrimary, fontWeight: FontWeight.bold);
+  TextStyle get draftPrefixStyle => TextStyle(color: _colorScheme.accentPrimary, fontWeight: FontWeight.bold);
 
   @override
-  TextStyle get senderTextStyle => const TextStyle(fontWeight: FontWeight.bold);
+  TextStyle get senderPrefixStyle => const TextStyle(fontWeight: FontWeight.bold);
 }
 
 // ---------------------------------------------------------------------------
@@ -815,7 +806,7 @@ TextSpan _senderSpan(BuildContext context, String text) {
   final theme = StreamMessagePreviewTextTheme.of(context);
   final defaults = _StreamMessagePreviewTextDefaults(context);
 
-  return TextSpan(text: text, style: theme.senderTextStyle ?? defaults.senderTextStyle);
+  return TextSpan(text: text, style: theme.senderPrefixStyle ?? defaults.senderPrefixStyle);
 }
 
 // ---------------------------------------------------------------------------

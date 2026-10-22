@@ -30,27 +30,35 @@ mixin _$StreamMessagePreviewTextThemeData {
     }
 
     return StreamMessagePreviewTextThemeData(
-      deletedTextStyle: TextStyle.lerp(
-        a.deletedTextStyle,
-        b.deletedTextStyle,
+      draftPrefixStyle: TextStyle.lerp(
+        a.draftPrefixStyle,
+        b.draftPrefixStyle,
         t,
       ),
-      draftLabelStyle: TextStyle.lerp(a.draftLabelStyle, b.draftLabelStyle, t),
-      senderTextStyle: TextStyle.lerp(a.senderTextStyle, b.senderTextStyle, t),
+      senderPrefixStyle: TextStyle.lerp(
+        a.senderPrefixStyle,
+        b.senderPrefixStyle,
+        t,
+      ),
+      deletedMessageStyle: TextStyle.lerp(
+        a.deletedMessageStyle,
+        b.deletedMessageStyle,
+        t,
+      ),
     );
   }
 
   StreamMessagePreviewTextThemeData copyWith({
-    TextStyle? deletedTextStyle,
-    TextStyle? draftLabelStyle,
-    TextStyle? senderTextStyle,
+    TextStyle? draftPrefixStyle,
+    TextStyle? senderPrefixStyle,
+    TextStyle? deletedMessageStyle,
   }) {
     final _this = (this as StreamMessagePreviewTextThemeData);
 
     return StreamMessagePreviewTextThemeData(
-      deletedTextStyle: deletedTextStyle ?? _this.deletedTextStyle,
-      draftLabelStyle: draftLabelStyle ?? _this.draftLabelStyle,
-      senderTextStyle: senderTextStyle ?? _this.senderTextStyle,
+      draftPrefixStyle: draftPrefixStyle ?? _this.draftPrefixStyle,
+      senderPrefixStyle: senderPrefixStyle ?? _this.senderPrefixStyle,
+      deletedMessageStyle: deletedMessageStyle ?? _this.deletedMessageStyle,
     );
   }
 
@@ -68,15 +76,15 @@ mixin _$StreamMessagePreviewTextThemeData {
     }
 
     return copyWith(
-      deletedTextStyle:
-          _this.deletedTextStyle?.merge(other.deletedTextStyle) ??
-          other.deletedTextStyle,
-      draftLabelStyle:
-          _this.draftLabelStyle?.merge(other.draftLabelStyle) ??
-          other.draftLabelStyle,
-      senderTextStyle:
-          _this.senderTextStyle?.merge(other.senderTextStyle) ??
-          other.senderTextStyle,
+      draftPrefixStyle:
+          _this.draftPrefixStyle?.merge(other.draftPrefixStyle) ??
+          other.draftPrefixStyle,
+      senderPrefixStyle:
+          _this.senderPrefixStyle?.merge(other.senderPrefixStyle) ??
+          other.senderPrefixStyle,
+      deletedMessageStyle:
+          _this.deletedMessageStyle?.merge(other.deletedMessageStyle) ??
+          other.deletedMessageStyle,
     );
   }
 
@@ -93,9 +101,9 @@ mixin _$StreamMessagePreviewTextThemeData {
     final _this = (this as StreamMessagePreviewTextThemeData);
     final _other = (other as StreamMessagePreviewTextThemeData);
 
-    return _other.deletedTextStyle == _this.deletedTextStyle &&
-        _other.draftLabelStyle == _this.draftLabelStyle &&
-        _other.senderTextStyle == _this.senderTextStyle;
+    return _other.draftPrefixStyle == _this.draftPrefixStyle &&
+        _other.senderPrefixStyle == _this.senderPrefixStyle &&
+        _other.deletedMessageStyle == _this.deletedMessageStyle;
   }
 
   @override
@@ -104,9 +112,9 @@ mixin _$StreamMessagePreviewTextThemeData {
 
     return Object.hash(
       runtimeType,
-      _this.deletedTextStyle,
-      _this.draftLabelStyle,
-      _this.senderTextStyle,
+      _this.draftPrefixStyle,
+      _this.senderPrefixStyle,
+      _this.deletedMessageStyle,
     );
   }
 }

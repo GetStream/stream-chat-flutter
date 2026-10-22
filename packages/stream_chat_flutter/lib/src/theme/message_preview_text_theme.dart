@@ -5,8 +5,8 @@ import 'stream_chat_theme.dart';
 
 part 'message_preview_text_theme.g.theme.dart';
 
-/// An inherited theme that overrides the style of [StreamMessagePreviewText]
-/// and [StreamDraftMessagePreviewText] descendants.
+/// A theme that overrides the style of [StreamMessagePreviewText] and
+/// [StreamDraftMessagePreviewText] descendants.
 ///
 /// See also:
 ///
@@ -40,47 +40,46 @@ class StreamMessagePreviewTextTheme extends InheritedTheme {
 }
 
 /// {@template streamMessagePreviewTextThemeData}
-/// Theme data for the parts of a message preview that are styled apart from
-/// the surrounding text.
+/// Theme data for parts of a message preview styled apart from the rest.
 ///
-/// A message preview takes its base text style from where it is shown, such
-/// as a channel list item's subtitle or a quoted reply. These styles apply on
-/// top of that base.
+/// To style the whole preview, use the subtitle style where it is shown, such
+/// as [StreamChannelListItemThemeData.subtitleStyle] or
+/// [StreamQuotedMessageThemeData.subtitleTextStyle].
 ///
 /// See also:
 ///
 ///  * [StreamMessagePreviewTextTheme], which overrides the theme for a subtree.
 ///  * [StreamChatThemeData.messagePreviewTextTheme], which sets the theme
 ///    app-wide.
-///  * [StreamQuotedMessageThemeData.previewStyle], which styles the preview
-///    inside a quoted reply.
+///  * [StreamQuotedMessageThemeData.messagePreviewTextTheme], which styles
+///    the preview inside a quoted reply.
 /// {@endtemplate}
 @themeGen
 @immutable
 class StreamMessagePreviewTextThemeData with _$StreamMessagePreviewTextThemeData {
   /// {@macro streamMessagePreviewTextThemeData}
   const StreamMessagePreviewTextThemeData({
-    this.deletedTextStyle,
-    this.draftLabelStyle,
-    this.senderTextStyle,
+    this.draftPrefixStyle,
+    this.senderPrefixStyle,
+    this.deletedMessageStyle,
   });
 
-  /// The text style for the deleted-message label and its icon.
-  ///
-  /// If null, defaults to the tertiary text color.
-  final TextStyle? deletedTextStyle;
-
-  /// The text style for the "Draft:" label that starts a
+  /// The text style for the "Draft:" prefix that starts a
   /// [StreamDraftMessagePreviewText].
   ///
   /// If null, defaults to bold in the primary accent color.
-  final TextStyle? draftLabelStyle;
+  final TextStyle? draftPrefixStyle;
 
-  /// The text style for the sender name, such as "You:" or "Ann:", that
+  /// The text style for the sender prefix, such as "You:" or "Ann:", that
   /// starts a preview in a channel or thread list.
   ///
   /// If null, defaults to bold.
-  final TextStyle? senderTextStyle;
+  final TextStyle? senderPrefixStyle;
+
+  /// The text style for the "Message deleted" text and its icon.
+  ///
+  /// If null, defaults to the tertiary text color.
+  final TextStyle? deletedMessageStyle;
 
   /// Linearly interpolates between two [StreamMessagePreviewTextThemeData]
   /// objects.

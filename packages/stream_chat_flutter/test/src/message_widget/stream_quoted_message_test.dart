@@ -77,7 +77,7 @@ void main() {
       layout: const StreamMessageLayoutData(alignment: StreamMessageAlignment.end),
       chatTheme: StreamChatThemeData(
         messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
-          deletedTextStyle: TextStyle(color: Colors.red),
+          deletedMessageStyle: TextStyle(color: Colors.red),
         ),
       ),
     );
@@ -93,7 +93,9 @@ void main() {
       quotedMessage: _deletedMessage(),
       layout: const StreamMessageLayoutData(alignment: StreamMessageAlignment.end),
       theme: const StreamQuotedMessageThemeData(
-        previewStyle: StreamMessagePreviewTextThemeData(deletedTextStyle: TextStyle(color: Colors.orange)),
+        messagePreviewTextTheme: StreamMessagePreviewTextThemeData(
+          deletedMessageStyle: TextStyle(color: Colors.orange),
+        ),
       ),
     );
 

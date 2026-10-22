@@ -96,6 +96,7 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
   const StreamQuotedMessageThemeData({
     this.titleTextStyle,
     this.subtitleTextStyle,
+    this.messagePreviewTextTheme,
     this.indicatorColor,
     this.backgroundColor,
     this.shape,
@@ -105,7 +106,6 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
     this.thumbnailShape,
     this.thumbnailSide,
     this.thumbnailSize,
-    this.previewStyle,
   });
 
   /// The text style for the quoted user's name.
@@ -114,12 +114,18 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
   /// alignment-aware text color.
   final TextStyle? titleTextStyle;
 
-  /// The text style for the quoted message preview.
+  /// The text style for the whole quoted message preview.
   ///
-  /// If null, defaults to [StreamTextTheme.metadataDefault] tinted with the
-  /// alignment-aware text color. Parts styled by [previewStyle], such as the
-  /// deleted-message label, apply on top of this style.
+  /// To style only parts of it, use [messagePreviewTextTheme]. If null,
+  /// defaults to [StreamTextTheme.metadataDefault] in the alignment-aware text
+  /// color.
   final TextStyle? subtitleTextStyle;
+
+  /// The theme for styling parts of the quoted message preview differently
+  /// from the rest.
+  ///
+  /// If null, the whole preview uses [subtitleTextStyle].
+  final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 
   /// Color of the leading indicator bar.
   ///
@@ -175,14 +181,6 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
   ///
   /// If null, defaults to `Size.square(40)`.
   final Size? thumbnailSize;
-
-  /// Styles for parts of the preview that differ from [subtitleTextStyle].
-  ///
-  /// Applies on top of [subtitleTextStyle] and of any enclosing message
-  /// preview theme. Only [StreamMessagePreviewTextThemeData.deletedTextStyle]
-  /// takes effect in a quote. Unless this style sets a color, the
-  /// deleted-message label keeps [subtitleTextStyle]'s color.
-  final StreamMessagePreviewTextThemeData? previewStyle;
 
   /// Linearly interpolate between two [StreamQuotedMessageThemeData] objects.
   static StreamQuotedMessageThemeData? lerp(

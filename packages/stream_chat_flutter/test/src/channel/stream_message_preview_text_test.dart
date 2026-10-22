@@ -108,7 +108,7 @@ void main() {
         message,
         themeData: StreamChatThemeData(
           messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
-            deletedTextStyle: TextStyle(color: Colors.red, fontStyle: FontStyle.italic),
+            deletedMessageStyle: TextStyle(color: Colors.red, fontStyle: FontStyle.italic),
           ),
         ),
       );
@@ -769,7 +769,7 @@ void main() {
         channel: channel,
         themeData: StreamChatThemeData(
           messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
-            senderTextStyle: TextStyle(color: Colors.indigo, fontWeight: FontWeight.w500),
+            senderPrefixStyle: TextStyle(color: Colors.indigo, fontWeight: FontWeight.w500),
           ),
         ),
       );

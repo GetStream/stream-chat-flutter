@@ -56,7 +56,7 @@ void main() {
       await pumpDraftMessagePreview(tester, DraftMessage(text: 'This is a draft message'));
 
       final accentPrimary = tester.element(find.byType(StreamDraftMessagePreviewText)).streamColorScheme.accentPrimary;
-      final style = _draftLabelStyle(tester);
+      final style = _draftPrefixStyle(tester);
       expect(style?.color, accentPrimary);
       expect(style?.fontWeight, FontWeight.bold);
     });
@@ -67,12 +67,12 @@ void main() {
         DraftMessage(text: 'This is a draft message'),
         themeData: StreamChatThemeData(
           messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
-            draftLabelStyle: TextStyle(color: Colors.purple),
+            draftPrefixStyle: TextStyle(color: Colors.purple),
           ),
         ),
       );
 
-      expect(_draftLabelStyle(tester)?.color, Colors.purple);
+      expect(_draftPrefixStyle(tester)?.color, Colors.purple);
     });
 
     testWidgets('renders attachment icons in the text color', (tester) async {
@@ -166,7 +166,7 @@ void main() {
 
 // The style the "Draft:" label paints with, after every ancestor span's style
 // is applied.
-TextStyle? _draftLabelStyle(WidgetTester tester) {
+TextStyle? _draftPrefixStyle(WidgetTester tester) {
   final text = tester.widget<RichText>(
     find.descendant(of: find.byType(StreamDraftMessagePreviewText), matching: find.byType(RichText)),
   );

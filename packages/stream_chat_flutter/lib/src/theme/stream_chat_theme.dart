@@ -109,8 +109,7 @@ class StreamChatTheme extends InheritedTheme {
 ///  * [StreamMessageListViewThemeData], which defines message list styles.
 ///  * [StreamChannelListItemThemeData], which defines channel list item styles.
 ///  * [StreamQuotedMessageThemeData], which defines quoted message styles.
-///  * [StreamMessagePreviewTextThemeData], which defines message
-///    preview styles.
+///  * [StreamMessagePreviewTextThemeData], which defines message preview styles.
 ///  * [StreamThreadListTileThemeData], which defines thread list tile styles.
 ///  * [StreamVoiceRecordingAttachmentThemeData], which defines voice recording attachment styles.
 ///  * [StreamPollCreatorThemeData], which defines poll creator styles.
@@ -212,6 +211,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
     required this.voiceRecordingAttachmentTheme,
     required this.quotedMessageTheme,
     required this.channelListItemTheme,
+    // TODO(v11): Make required; the default keeps existing callers compiling.
     this.messagePreviewTextTheme = const StreamMessagePreviewTextThemeData(),
   });
 

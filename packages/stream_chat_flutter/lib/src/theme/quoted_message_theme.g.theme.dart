@@ -36,6 +36,11 @@ mixin _$StreamQuotedMessageThemeData {
         b.subtitleTextStyle,
         t,
       ),
+      messagePreviewTextTheme: StreamMessagePreviewTextThemeData.lerp(
+        a.messagePreviewTextTheme,
+        b.messagePreviewTextTheme,
+        t,
+      ),
       indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t),
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       shape: OutlinedBorder.lerp(a.shape, b.shape, t),
@@ -57,17 +62,13 @@ mixin _$StreamQuotedMessageThemeData {
           ? a.thumbnailSide
           : BorderSide.lerp(a.thumbnailSide!, b.thumbnailSide!, t),
       thumbnailSize: Size.lerp(a.thumbnailSize, b.thumbnailSize, t),
-      previewStyle: StreamMessagePreviewTextThemeData.lerp(
-        a.previewStyle,
-        b.previewStyle,
-        t,
-      ),
     );
   }
 
   StreamQuotedMessageThemeData copyWith({
     TextStyle? titleTextStyle,
     TextStyle? subtitleTextStyle,
+    StreamMessagePreviewTextThemeData? messagePreviewTextTheme,
     Color? indicatorColor,
     Color? backgroundColor,
     OutlinedBorder? shape,
@@ -77,13 +78,14 @@ mixin _$StreamQuotedMessageThemeData {
     OutlinedBorder? thumbnailShape,
     BorderSide? thumbnailSide,
     Size? thumbnailSize,
-    StreamMessagePreviewTextThemeData? previewStyle,
   }) {
     final _this = (this as StreamQuotedMessageThemeData);
 
     return StreamQuotedMessageThemeData(
       titleTextStyle: titleTextStyle ?? _this.titleTextStyle,
       subtitleTextStyle: subtitleTextStyle ?? _this.subtitleTextStyle,
+      messagePreviewTextTheme:
+          messagePreviewTextTheme ?? _this.messagePreviewTextTheme,
       indicatorColor: indicatorColor ?? _this.indicatorColor,
       backgroundColor: backgroundColor ?? _this.backgroundColor,
       shape: shape ?? _this.shape,
@@ -93,7 +95,6 @@ mixin _$StreamQuotedMessageThemeData {
       thumbnailShape: thumbnailShape ?? _this.thumbnailShape,
       thumbnailSide: thumbnailSide ?? _this.thumbnailSide,
       thumbnailSize: thumbnailSize ?? _this.thumbnailSize,
-      previewStyle: previewStyle ?? _this.previewStyle,
     );
   }
 
@@ -115,6 +116,9 @@ mixin _$StreamQuotedMessageThemeData {
       subtitleTextStyle:
           _this.subtitleTextStyle?.merge(other.subtitleTextStyle) ??
           other.subtitleTextStyle,
+      messagePreviewTextTheme:
+          _this.messagePreviewTextTheme?.merge(other.messagePreviewTextTheme) ??
+          other.messagePreviewTextTheme,
       indicatorColor: other.indicatorColor,
       backgroundColor: other.backgroundColor,
       shape: other.shape,
@@ -128,8 +132,6 @@ mixin _$StreamQuotedMessageThemeData {
           ? BorderSide.merge(_this.thumbnailSide!, other.thumbnailSide!)
           : other.thumbnailSide,
       thumbnailSize: other.thumbnailSize,
-      previewStyle:
-          _this.previewStyle?.merge(other.previewStyle) ?? other.previewStyle,
     );
   }
 
@@ -148,6 +150,7 @@ mixin _$StreamQuotedMessageThemeData {
 
     return _other.titleTextStyle == _this.titleTextStyle &&
         _other.subtitleTextStyle == _this.subtitleTextStyle &&
+        _other.messagePreviewTextTheme == _this.messagePreviewTextTheme &&
         _other.indicatorColor == _this.indicatorColor &&
         _other.backgroundColor == _this.backgroundColor &&
         _other.shape == _this.shape &&
@@ -156,8 +159,7 @@ mixin _$StreamQuotedMessageThemeData {
         _other.padding == _this.padding &&
         _other.thumbnailShape == _this.thumbnailShape &&
         _other.thumbnailSide == _this.thumbnailSide &&
-        _other.thumbnailSize == _this.thumbnailSize &&
-        _other.previewStyle == _this.previewStyle;
+        _other.thumbnailSize == _this.thumbnailSize;
   }
 
   @override
@@ -168,6 +170,7 @@ mixin _$StreamQuotedMessageThemeData {
       runtimeType,
       _this.titleTextStyle,
       _this.subtitleTextStyle,
+      _this.messagePreviewTextTheme,
       _this.indicatorColor,
       _this.backgroundColor,
       _this.shape,
@@ -177,7 +180,6 @@ mixin _$StreamQuotedMessageThemeData {
       _this.thumbnailShape,
       _this.thumbnailSide,
       _this.thumbnailSize,
-      _this.previewStyle,
     );
   }
 }
