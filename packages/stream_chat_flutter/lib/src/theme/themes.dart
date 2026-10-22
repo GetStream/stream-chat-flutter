@@ -1,5 +1,6 @@
 export 'message_composer_theme.dart';
 export 'message_list_view_theme.dart';
+export 'message_preview_theme.dart';
 export 'poll_card_style.dart';
 export 'poll_comments_sheet_theme.dart';
 export 'poll_creator_theme.dart';

@@ -3,6 +3,8 @@
 ✅ Added
 
 - Added a next action to the poll creator's option fields, which moves to the next option or adds a new one from the last.
+- Added `StreamMessagePreviewTheme` and `StreamChatThemeData.messagePreviewTheme`, to style the deleted-message and "Draft:" labels in message previews.
+- Added `StreamQuotedMessageThemeData.previewStyle`, to style the message preview inside a quoted reply.
 
 🔄 Changed
 
@@ -13,6 +15,8 @@
 - Fixed a voice recording sent as a reply without text showing inside a filled container instead of directly on the message bubble.
 - Fixed a mention rendering as another mentioned user's shorter mention followed by leftover text, such as `@Anna` next to `@Ann`.
 - Fixed the poll creator showing the reorder handle and remove button when there is only one option.
+- Fixed "Message deleted" in a quoted reply showing in a muted gray instead of the reply's text color.
+- Fixed icons in message previews showing in a different color from the text beside them.
 
 ## 10.6.0
 

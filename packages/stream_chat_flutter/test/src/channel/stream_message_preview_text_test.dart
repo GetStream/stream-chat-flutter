@@ -15,6 +15,7 @@ void main() {
     TextStyle? textStyle,
     ChannelModel? channel,
     StreamChatConfigurationData? configData,
+    StreamChatThemeData? themeData,
     bool showCaption = true,
   }) async {
     final client = MockClient();
@@ -30,7 +31,7 @@ void main() {
           body: StreamChat(
             client: client,
             configData: configData,
-            themeData: StreamChatThemeData(),
+            themeData: themeData ?? StreamChatThemeData(),
             child: Center(
               child: StreamMessagePreviewText(
                 message: message,
@@ -79,7 +80,34 @@ void main() {
       final span = _getPreviewSpan(tester);
       final styledSpans = _findTextSpans(span);
       final deletedSpan = styledSpans.firstWhere((s) => s.text == 'Message deleted');
-      expect(deletedSpan.style?.color, isNotNull);
+      final textTertiary = tester.element(find.byType(StreamMessagePreviewText)).streamColorScheme.textTertiary;
+      expect(deletedSpan.style?.color, textTertiary);
+      expect(tester.widget<Icon>(find.byType(Icon)).color, textTertiary);
+    });
+
+    testWidgets('renders deleted message in the themed deleted style', (tester) async {
+      final message = Message(
+        text: 'Original message',
+        type: MessageType.deleted,
+        user: User(id: 'other-user-id', name: 'Other User'),
+        deletedAt: DateTime.now(),
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        themeData: StreamChatThemeData(
+          messagePreviewTheme: const StreamMessagePreviewThemeData(
+            deletedTextStyle: TextStyle(color: Colors.red, fontStyle: FontStyle.italic),
+          ),
+        ),
+      );
+
+      final span = _getPreviewSpan(tester);
+      final deletedSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Message deleted');
+      expect(deletedSpan.style?.color, Colors.red);
+      expect(deletedSpan.style?.fontStyle, FontStyle.italic);
+      expect(_iconColor(tester), Colors.red);
     });
 
     testWidgets('renders system message with text', (tester) async {
@@ -194,6 +222,18 @@ void main() {
   });
 
   group('Single attachments', () {
+    testWidgets('attachment icon matches the text color', (tester) async {
+      final message = Message(
+        text: '',
+        user: User(id: 'other-user-id', name: 'Other User'),
+        attachments: [Attachment(type: AttachmentType.image)],
+      );
+
+      await pumpMessagePreview(tester, message, textStyle: const TextStyle(color: Colors.teal));
+
+      expect(_iconColor(tester), Colors.teal);
+    });
+
     testWidgets('image attachment shows camera icon and "Photo" label', (tester) async {
       final message = Message(
         text: '',
@@ -1789,6 +1829,12 @@ List<_PreviewIcon> _findIcons(WidgetTester tester) {
 
   visit(span);
   return result;
+}
+
+// The color the single inline icon in the preview paints with.
+Color? _iconColor(WidgetTester tester) {
+  final finder = find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(Icon));
+  return tester.widget<Icon>(finder).color ?? IconTheme.of(tester.element(finder)).color;
 }
 
 /// Minimal stand-in for the old `Icon` widget in tests.

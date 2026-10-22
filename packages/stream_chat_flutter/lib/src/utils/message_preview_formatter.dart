@@ -3,6 +3,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
 
 import '../localization/translations.dart';
+import '../theme/message_preview_theme.dart';
 import 'extensions.dart';
 
 /// Formats a [Message] or [DraftMessage] into a preview [TextSpan] suitable
@@ -93,8 +94,8 @@ abstract interface class MessagePreviewFormatter {
   /// Formats [draftMessage] as a preview [TextSpan] with a highlighted
   /// "Draft:" prefix.
   ///
-  /// The prefix is rendered in bold using the theme's accent color. The
-  /// draft body is formatted using the same rules as a regular message —
+  /// The prefix is styled with [StreamMessagePreviewThemeData.draftLabelStyle],
+  /// bold in the accent color by default. The draft body is formatted using the same rules as a regular message —
   /// plain text, attachments, and polls all get a rich preview.
   ///
   /// [currentUser] is forwarded to body formatters that need viewer context
@@ -296,14 +297,17 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   /// Formats a deleted [message] as a preview [TextSpan].
   ///
   /// Shows a "no-sign" icon followed by the localized "Message deleted"
-  /// label, both tinted with the theme's tertiary text color to signal the
-  /// deleted state. The tint overrides the ambient text/icon color.
+  /// label, both styled with [StreamMessagePreviewThemeData.deletedTextStyle].
+  /// Defaults to the theme's tertiary text color to signal the deleted state.
   @protected
   TextSpan formatDeletedMessage(BuildContext context, Message message) {
+    final theme = StreamMessagePreviewTheme.of(context);
+    final defaults = _StreamMessagePreviewDefaults(context);
+
     return _labeledIcon(
       icon: context.streamIcons.noSign,
       label: context.translations.messageDeletedLabel,
-      foregroundColor: context.streamColorScheme.textTertiary,
+      textStyle: theme.deletedTextStyle ?? defaults.deletedTextStyle,
     );
   }
 
@@ -505,10 +509,12 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
       showCaption: showCaption,
     );
 
+    final theme = StreamMessagePreviewTheme.of(context);
+    final defaults = _StreamMessagePreviewDefaults(context);
+
     final prefix = _labeledIcon(
       label: getDraftPrefix(context),
-      textStyle: const TextStyle(fontWeight: FontWeight.bold),
-      foregroundColor: context.streamColorScheme.accentPrimary,
+      textStyle: theme.draftLabelStyle ?? defaults.draftLabelStyle,
     );
 
     return TextSpan(
@@ -520,7 +526,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
     );
   }
 
-  /// The text shown as the bold prefix of a draft preview.
+  /// The text shown as the prefix of a draft preview.
   ///
   /// Defaults to the localized "Draft:" label.
   ///
@@ -727,41 +733,49 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   }
 }
 
+// Default values for [StreamMessagePreviewThemeData] backed by stream design
+// tokens.
+class _StreamMessagePreviewDefaults extends StreamMessagePreviewThemeData {
+  _StreamMessagePreviewDefaults(this._context);
+
+  final BuildContext _context;
+
+  late final StreamColorScheme _colorScheme = _context.streamColorScheme;
+
+  @override
+  TextStyle get deletedTextStyle => TextStyle(color: _colorScheme.textTertiary);
+
+  @override
+  TextStyle get draftLabelStyle => TextStyle(color: _colorScheme.accentPrimary, fontWeight: FontWeight.bold);
+}
+
 // ---------------------------------------------------------------------------
 // Span primitives
 //
-// The preview is composed from three small helpers:
+// The preview is composed from two small helpers:
 //
 //  * [_iconSpan]       — an inline icon as a [WidgetSpan].
 //  * [_labeledIcon]    — the common "icon + space + label" pattern.
-//  * [_applyMentions]  — a single post-pass that bolds "@Mention" fragments
-//                         anywhere in the assembled span tree.
 //
-// Most `format*` methods above reduce to a single call to [_labeledIcon], and
-// mention handling stays out of every individual formatter — it's applied
-// once at the root by [formatMessage].
+// Most `format*` methods above reduce to a single call to [_labeledIcon].
 // ---------------------------------------------------------------------------
 
 // Builds an "icon + space + label" [TextSpan]. The icon slot is dropped
 // when [icon] is null; the text slot (and separator) is dropped when
 // [label] is empty.
 //
-// [textStyle] sets typography; [foregroundColor] tints the label and
-// overrides [textStyle.color]. The inline icon always renders at the
-// resulting effective text color so text and icon stay in sync.
+// [textStyle] styles the label. The inline icon renders at its color, or the
+// surrounding icon color when it has none.
 TextSpan _labeledIcon({
   IconData? icon,
   required String label,
   TextStyle? textStyle,
-  Color? foregroundColor,
 }) {
-  final effectiveTextStyle = (textStyle ?? const TextStyle()).copyWith(color: foregroundColor);
-
   return TextSpan(
-    style: effectiveTextStyle,
+    style: textStyle,
     children: [
       if (icon != null) ...[
-        _iconSpan(icon, color: effectiveTextStyle.color),
+        _iconSpan(icon, color: textStyle?.color),
         if (label.isNotEmpty) const TextSpan(text: ' '),
       ],
       if (label.isNotEmpty) TextSpan(text: label),
@@ -785,46 +799,6 @@ WidgetSpan _iconSpan(
     alignment: PlaceholderAlignment.middle,
     child: Icon(icon, size: size, color: color),
   );
-}
-
-// Walks the assembled [span] tree once and bolds any text fragments that
-// match a [mentionedUsers] entry (as "@UserName").
-//
-// Kept as a single post-pass so individual `format*` methods don't need to
-// know about mentions. [WidgetSpan]s (e.g. inline icons) and styled
-// descendants pass through untouched; only plain text fragments are split
-// and re-wrapped.
-// ignore: unused_element
-TextSpan _applyMentions(TextSpan span, List<User> mentionedUsers) {
-  if (mentionedUsers.isEmpty) return span;
-
-  final regex = RegExp(mentionedUsers.map((it) => '@${RegExp.escape(it.name)}').join('|'));
-  bool isMention(String s) => mentionedUsers.any((it) => '@${it.name}' == s);
-
-  InlineSpan visit(InlineSpan node) {
-    if (node is! TextSpan) return node;
-
-    final mappedChildren = node.children?.map(visit).toList(growable: false);
-    final text = node.text;
-
-    if (text == null || text.isEmpty || !regex.hasMatch(text)) {
-      return TextSpan(text: text, style: node.style, children: mappedChildren);
-    }
-
-    // Only the bolded mention fragments need an explicit style override;
-    // non-mention fragments inherit from [node.style] (and ancestors).
-    const boldStyle = TextStyle(fontWeight: FontWeight.bold);
-    return TextSpan(
-      style: node.style,
-      children: [
-        for (final part in text.splitByRegExp(regex))
-          if (isMention(part)) TextSpan(text: part, style: boldStyle) else TextSpan(text: part),
-        if (mappedChildren != null) ...mappedChildren,
-      ],
-    );
-  }
-
-  return visit(span) as TextSpan;
 }
 
 // Builds a bold [TextSpan] wrapping [text]. Used for the "You:" / "FirstName:"
@@ -1052,32 +1026,4 @@ extension on String {
   // Returns the string, or `null` when it is empty. Lets call sites collapse
   // "missing or blank" into a single null-check.
   String? get nullIfEmpty => isEmpty ? null : this;
-
-  // Splits the string on every match of [regex], keeping the matched
-  // fragments in the result.
-  //
-  // Unlike [String.split], this preserves the delimiters as their own
-  // entries, so a mention-matching regex can split "Hi @Alice!" into
-  // `["Hi ", "@Alice", "!"]` — the caller can then style only the mention
-  // fragment.
-  List<String> splitByRegExp(RegExp regex) {
-    if (regex.pattern.isEmpty) return [this];
-
-    final result = <String>[];
-    var start = 0;
-
-    for (final match in regex.allMatches(this)) {
-      if (match.start > start) {
-        result.add(substring(start, match.start));
-      }
-      result.add(match.group(0)!);
-      start = match.end;
-    }
-
-    if (start < length) {
-      result.add(substring(start));
-    }
-
-    return result;
-  }
 }

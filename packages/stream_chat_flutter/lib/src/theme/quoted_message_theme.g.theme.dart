@@ -57,6 +57,11 @@ mixin _$StreamQuotedMessageThemeData {
           ? a.thumbnailSide
           : BorderSide.lerp(a.thumbnailSide!, b.thumbnailSide!, t),
       thumbnailSize: Size.lerp(a.thumbnailSize, b.thumbnailSize, t),
+      previewStyle: StreamMessagePreviewThemeData.lerp(
+        a.previewStyle,
+        b.previewStyle,
+        t,
+      ),
     );
   }
 
@@ -72,6 +77,7 @@ mixin _$StreamQuotedMessageThemeData {
     OutlinedBorder? thumbnailShape,
     BorderSide? thumbnailSide,
     Size? thumbnailSize,
+    StreamMessagePreviewThemeData? previewStyle,
   }) {
     final _this = (this as StreamQuotedMessageThemeData);
 
@@ -87,6 +93,7 @@ mixin _$StreamQuotedMessageThemeData {
       thumbnailShape: thumbnailShape ?? _this.thumbnailShape,
       thumbnailSide: thumbnailSide ?? _this.thumbnailSide,
       thumbnailSize: thumbnailSize ?? _this.thumbnailSize,
+      previewStyle: previewStyle ?? _this.previewStyle,
     );
   }
 
@@ -121,6 +128,8 @@ mixin _$StreamQuotedMessageThemeData {
           ? BorderSide.merge(_this.thumbnailSide!, other.thumbnailSide!)
           : other.thumbnailSide,
       thumbnailSize: other.thumbnailSize,
+      previewStyle:
+          _this.previewStyle?.merge(other.previewStyle) ?? other.previewStyle,
     );
   }
 
@@ -147,7 +156,8 @@ mixin _$StreamQuotedMessageThemeData {
         _other.padding == _this.padding &&
         _other.thumbnailShape == _this.thumbnailShape &&
         _other.thumbnailSide == _this.thumbnailSide &&
-        _other.thumbnailSize == _this.thumbnailSize;
+        _other.thumbnailSize == _this.thumbnailSize &&
+        _other.previewStyle == _this.previewStyle;
   }
 
   @override
@@ -167,6 +177,7 @@ mixin _$StreamQuotedMessageThemeData {
       _this.thumbnailShape,
       _this.thumbnailSide,
       _this.thumbnailSize,
+      _this.previewStyle,
     );
   }
 }

@@ -6,6 +6,7 @@ import '../attachment/thumbnail/media_attachment_thumbnail.dart';
 import '../channel/stream_message_preview_text.dart';
 import '../components/stream_chat_component_builders.dart';
 import '../stream_chat.dart';
+import '../theme/message_preview_theme.dart';
 import '../theme/quoted_message_theme.dart';
 import '../utils/extensions.dart';
 
@@ -226,7 +227,10 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
       style: effectiveSubtitleTextStyle,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      child: StreamMessagePreviewText(message: quotedMessage),
+      child: StreamMessagePreviewTheme(
+        data: defaults.previewStyle.merge(theme.previewStyle),
+        child: StreamMessagePreviewText(message: quotedMessage),
+      ),
     );
 
     Widget? effectiveThumbnail;
@@ -336,6 +340,13 @@ class _StreamQuotedMessageDefaults extends StreamQuotedMessageThemeData {
 
   @override
   TextStyle get subtitleTextStyle => _textTheme.metadataDefault.copyWith(color: _textColor);
+
+  // An unset color keeps the subtitle's, so a deleted quote reads like the
+  // rest of the reply.
+  @override
+  StreamMessagePreviewThemeData get previewStyle => const StreamMessagePreviewThemeData(
+    deletedTextStyle: TextStyle(),
+  );
 
   @override
   Color get indicatorColor => switch (_alignment) {

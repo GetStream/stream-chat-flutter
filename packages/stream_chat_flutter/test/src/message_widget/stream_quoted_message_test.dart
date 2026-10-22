@@ -17,11 +17,84 @@ void main() {
 
     expect(inset, 0);
   });
+
+  testWidgets('StreamQuotedMessage shows a deleted quote in the outgoing text color', (tester) async {
+    await _pumpQuote(
+      tester,
+      quotedMessage: _deletedMessage(),
+      layout: const StreamMessageLayoutData(alignment: StreamMessageAlignment.end),
+    );
+
+    final colorScheme = tester.element(find.byType(StreamQuotedMessage)).streamColorScheme;
+    expect(_deletedLabelColor(tester), colorScheme.brand.shade900);
+    expect(_deletedIconColor(tester), colorScheme.brand.shade900);
+  });
+
+  testWidgets('StreamQuotedMessage shows a deleted quote in the incoming text color', (tester) async {
+    await _pumpQuote(
+      tester,
+      quotedMessage: _deletedMessage(),
+      layout: const StreamMessageLayoutData(alignment: StreamMessageAlignment.start),
+    );
+
+    final colorScheme = tester.element(find.byType(StreamQuotedMessage)).streamColorScheme;
+    expect(_deletedLabelColor(tester), colorScheme.textPrimary);
+    expect(_deletedIconColor(tester), colorScheme.textPrimary);
+  });
+
+  testWidgets('StreamQuotedMessage shows a deleted quote in the themed preview style', (tester) async {
+    await _pumpQuote(
+      tester,
+      quotedMessage: _deletedMessage(),
+      layout: const StreamMessageLayoutData(alignment: StreamMessageAlignment.end),
+      theme: const StreamQuotedMessageThemeData(
+        previewStyle: StreamMessagePreviewThemeData(deletedTextStyle: TextStyle(color: Colors.orange)),
+      ),
+    );
+
+    expect(_deletedLabelColor(tester), Colors.orange);
+    expect(_deletedIconColor(tester), Colors.orange);
+  });
 }
+
+Message _deletedMessage() => Message(
+  id: 'quoted',
+  text: 'Can you send me a voice note?',
+  type: MessageType.deleted,
+  createdAt: DateTime(2026, 8, 26, 14),
+  deletedAt: DateTime(2026, 8, 26, 15),
+  user: User(id: 'jason', name: 'Jason Thompson'),
+  state: MessageState.softDeleted,
+);
 
 // Pumps a quote laid out for [contentKind] and returns how far its card sits
 // below the top of the quote.
 Future<double> _pumpTopInset(WidgetTester tester, {required StreamMessageContentKind contentKind}) async {
+  await _pumpQuote(
+    tester,
+    quotedMessage: Message(
+      id: 'quoted',
+      text: 'Can you send me a voice note?',
+      createdAt: DateTime(2026, 8, 26, 14),
+      user: User(id: 'jason', name: 'Jason Thompson'),
+      state: MessageState.sent,
+    ),
+    layout: StreamMessageLayoutData(contentKind: contentKind),
+  );
+
+  final quote = tester.getRect(find.byType(StreamQuotedMessage));
+  final card = tester.getRect(
+    find.descendant(of: find.byType(StreamQuotedMessage), matching: find.byType(Material)).first,
+  );
+  return card.top - quote.top;
+}
+
+Future<void> _pumpQuote(
+  WidgetTester tester, {
+  required Message quotedMessage,
+  required StreamMessageLayoutData layout,
+  StreamQuotedMessageThemeData theme = const StreamQuotedMessageThemeData(),
+}) async {
   final currentUser = OwnUser(id: 'maya', name: 'Maya Ross');
   final client = MockClient();
   final clientState = MockClientState();
@@ -30,14 +103,6 @@ Future<double> _pumpTopInset(WidgetTester tester, {required StreamMessageContent
   when(() => clientState.currentUser).thenReturn(currentUser);
   when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
 
-  final quotedMessage = Message(
-    id: 'quoted',
-    text: 'Can you send me a voice note?',
-    createdAt: DateTime(2026, 8, 26, 14),
-    user: User(id: 'jason', name: 'Jason Thompson'),
-    state: MessageState.sent,
-  );
-
   await tester.pumpWidget(
     MaterialApp(
       home: StreamChat(
@@ -45,10 +110,13 @@ Future<double> _pumpTopInset(WidgetTester tester, {required StreamMessageContent
         connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
         child: Scaffold(
           body: StreamMessageLayout(
-            data: StreamMessageLayoutData(contentKind: contentKind),
+            data: layout,
             child: Align(
               alignment: Alignment.topLeft,
-              child: StreamQuotedMessage(quotedMessage: quotedMessage),
+              child: StreamQuotedMessageTheme(
+                data: theme,
+                child: StreamQuotedMessage(quotedMessage: quotedMessage),
+              ),
             ),
           ),
         ),
@@ -56,10 +124,31 @@ Future<double> _pumpTopInset(WidgetTester tester, {required StreamMessageContent
     ),
   );
   await tester.pumpAndSettle();
+}
 
-  final quote = tester.getRect(find.byType(StreamQuotedMessage));
-  final card = tester.getRect(
-    find.descendant(of: find.byType(StreamQuotedMessage), matching: find.byType(Material)).first,
+// The color the "Message deleted" label paints with, after every ancestor
+// span's style is applied.
+Color? _deletedLabelColor(WidgetTester tester) {
+  final text = tester.widget<RichText>(
+    find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(RichText)).first,
   );
-  return card.top - quote.top;
+
+  Color? color;
+  void visit(InlineSpan span, TextStyle? inherited) {
+    if (span is! TextSpan) return;
+    final style = inherited?.merge(span.style) ?? span.style;
+    if (span.text == 'Message deleted') color = style?.color;
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      visit(child, style);
+    }
+  }
+
+  visit(text.text, null);
+  return color;
+}
+
+// The color the deleted-message icon paints with.
+Color? _deletedIconColor(WidgetTester tester) {
+  final finder = find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(Icon));
+  return tester.widget<Icon>(finder).color ?? IconTheme.of(tester.element(finder)).color;
 }
