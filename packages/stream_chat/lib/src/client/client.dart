@@ -1826,8 +1826,9 @@ class StreamChatClient {
     List<String>? unset,
   }) => updateUsersPartial([UpdateUserPartialRequest(id: id, set: set, unset: unset)]);
 
-  /// Partially updates several users at once, applying each of [updates] to the
-  /// user it names.
+  /// Partially updates several users at once.
+  ///
+  /// Each of [updates] applies to the user it names.
   Future<Result<UpdateUsersResponse>> updateUsersPartial(List<UpdateUserPartialRequest> updates) =>
       _usersRepository.updateUsersPartial(updates);
 
