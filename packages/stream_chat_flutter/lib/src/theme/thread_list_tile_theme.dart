@@ -98,7 +98,7 @@ class StreamThreadListTileThemeData with _$StreamThreadListTileThemeData {
   /// from the rest.
   ///
   /// Falls back to showing a deleted message in
-  /// [StreamColorScheme.textTertiary].
+  /// [StreamColorScheme.textSecondary].
   final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 
   /// The style of the latest reply author username in the

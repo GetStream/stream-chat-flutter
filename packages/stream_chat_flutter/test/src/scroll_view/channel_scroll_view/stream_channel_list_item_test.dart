@@ -665,7 +665,11 @@ void main() {
       deletedAt: DateTime.parse('2021-07-20T17:00:00.000Z'),
     );
 
-    Future<void> pumpTile(WidgetTester tester, {StreamChannelListItemThemeData? theme}) {
+    Future<void> pumpTile(
+      WidgetTester tester, {
+      StreamChannelListItemThemeData? theme,
+      StreamChatThemeData? chatTheme,
+    }) {
       final client = MockClient();
       final clientState = MockClientState();
       final currentUser = OwnUser(id: 'me');
@@ -679,6 +683,7 @@ void main() {
           home: StreamChat(
             client: client,
             connectivityStream: Stream.value(const [ConnectivityResult.wifi]),
+            themeData: chatTheme,
             child: Scaffold(
               body: StreamChannelListItemTheme(
                 data: theme ?? const StreamChannelListItemThemeData(),
@@ -699,6 +704,19 @@ void main() {
 
       final colorScheme = tester.element(find.byType(StreamChannelListTile)).streamColorScheme;
       expect(_deletedMessageColor(tester), colorScheme.textTertiary);
+    });
+
+    testWidgets('shows a deleted message in an app-wide deleted style', (tester) async {
+      await pumpTile(
+        tester,
+        chatTheme: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            deletedMessageStyle: TextStyle(color: Colors.red),
+          ),
+        ),
+      );
+
+      expect(_deletedMessageColor(tester), Colors.red);
     });
 
     testWidgets('shows a deleted message in the themed preview style', (tester) async {

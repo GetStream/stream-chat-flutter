@@ -239,12 +239,12 @@ void main() {
     );
   });
 
-  testWidgets('shows a deleted root message in the tertiary text color', (tester) async {
+  testWidgets('shows a deleted root message in the secondary text color', (tester) async {
     final deletedThread = thread.copyWith(parentMessage: _deletedMessage());
     await tester.pumpWidget(_wrapWithMaterialApp(StreamThreadListTile(thread: deletedThread, currentUser: user2)));
 
     final colorScheme = tester.element(find.byType(StreamThreadListTile)).streamColorScheme;
-    expect(_deletedMessageColor(tester), colorScheme.textTertiary);
+    expect(_deletedMessageColor(tester), colorScheme.textSecondary);
   });
 
   testWidgets('shows a deleted root message in the themed preview style', (tester) async {
