@@ -977,9 +977,10 @@ if (result case Failure(:final error)) report(error);
 settings, and nothing else.** v10 sent the whole user, so the user's online status, ban and timestamps, and an own
 user's devices, mutes and unread counts, were stored as custom data on every call, and an own user with many devices
 went over the custom data size limit and failed; that no longer happens. An own user decoded from the connection
-still keeps `unread_count`, `total_unread_count_by_team` and `latest_hidden_channels` in `custom`, so passing
-`currentUser` back stores them as custom data, as v10 did; remove them from `custom` first if you don't want them
-stored. `role`, `teams` and `teamsRole` are no longer sent, so these calls cannot change them.
+still keeps `unread_count`, `total_unread_count_by_team`, `latest_hidden_channels` and `last_engaged_at` in
+`custom`, and one whose tokens were revoked also keeps `revoke_tokens_issued_before`, so passing `currentUser` back
+stores them as custom data, as v10 did; remove them from `custom` first if you don't want them stored. `role`, `teams`
+and `teamsRole` are no longer sent, so these calls cannot change them.
 
 **The returned users no longer carry the fields only they can see in `extraData`.** v10 left every field `User`
 does not model in `extraData` as raw JSON; now their devices, mutes, channel mutes, privacy settings, unread counts, hidden
