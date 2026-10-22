@@ -83,8 +83,9 @@ class StreamMessagePreviewTextThemeData with _$StreamMessagePreviewTextThemeData
 
   /// The text style for the "Message deleted" text and its icon.
   ///
-  /// If null, matches the rest of the preview, except in the channel list,
-  /// thread list and message search, which use a muted color.
+  /// The icon takes [iconColor] instead when that is set. If null, matches the
+  /// rest of the preview, except in the channel list, thread list and message
+  /// search, which use a muted color.
   final TextStyle? deletedContentStyle;
 
   /// The size of the icons in the preview, such as the photo or poll icon.

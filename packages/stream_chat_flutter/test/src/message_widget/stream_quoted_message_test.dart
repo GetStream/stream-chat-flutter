@@ -123,27 +123,33 @@ void main() {
   });
 
   testWidgets('StreamQuotedMessage shows 12-pixel preview icons', (tester) async {
-    await _pumpQuote(
-      tester,
-      quotedMessage: _deletedMessage(),
-      layout: const StreamMessageLayoutData(alignment: StreamMessageAlignment.end),
-    );
+    await _pumpQuote(tester, quotedMessage: _deletedMessage());
 
     expect(_previewIcon(tester).size, 12);
   });
 
-  testWidgets('StreamQuotedMessage shows preview icons in the themed icon size and color', (tester) async {
+  testWidgets('StreamQuotedMessage shows preview icons in the themed icon size', (tester) async {
     await _pumpQuote(
       tester,
       quotedMessage: _deletedMessage(),
-      layout: const StreamMessageLayoutData(alignment: StreamMessageAlignment.end),
       theme: const StreamQuotedMessageThemeData(
-        messagePreviewTextTheme: StreamMessagePreviewTextThemeData(iconSize: 20, iconColor: Colors.green),
+        messagePreviewTextTheme: StreamMessagePreviewTextThemeData(iconSize: 20),
+      ),
+    );
+
+    expect(_previewIcon(tester).size, 20);
+  });
+
+  testWidgets('StreamQuotedMessage colors only the preview icons with the themed icon color', (tester) async {
+    await _pumpQuote(
+      tester,
+      quotedMessage: _deletedMessage(),
+      theme: const StreamQuotedMessageThemeData(
+        messagePreviewTextTheme: StreamMessagePreviewTextThemeData(iconColor: Colors.green),
       ),
     );
 
     final colorScheme = tester.element(find.byType(StreamQuotedMessage)).streamColorScheme;
-    expect(_previewIcon(tester).size, 20);
     expect(_deletedIconColor(tester), Colors.green);
     expect(_deletedLabelColor(tester), colorScheme.brand.shade900);
   });

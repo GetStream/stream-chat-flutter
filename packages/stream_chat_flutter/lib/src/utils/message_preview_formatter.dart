@@ -765,8 +765,8 @@ class _StreamMessagePreviewTextDefaults extends StreamMessagePreviewTextThemeDat
 // when [icon] is null; the text slot (and separator) is dropped when
 // [label] is empty.
 //
-// [textStyle] styles the label. The inline icon takes [textStyle]'s color
-// unless the theme sets an icon color.
+// [textStyle] styles the label. The inline icon takes the theme's icon color,
+// else [textStyle]'s color, else the surrounding icon color.
 TextSpan _labeledIcon(
   BuildContext context, {
   IconData? icon,

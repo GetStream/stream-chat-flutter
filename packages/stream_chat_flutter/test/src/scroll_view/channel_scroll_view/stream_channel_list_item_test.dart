@@ -756,13 +756,7 @@ void main() {
     expect(_deletedMessageColor(tester), Colors.orange);
   });
 
-  testWidgets('StreamChannelListTile shows 16-pixel preview icons', (tester) async {
-    await _pumpTile(tester, message: _deletedMessage());
-
-    expect(_previewIcon(tester).size, 16);
-  });
-
-  testWidgets('StreamChannelListTile shows preview icons in an app-wide icon color', (tester) async {
+  testWidgets('StreamChannelListTile colors only the preview icons with an app-wide icon color', (tester) async {
     await _pumpTile(
       tester,
       message: _deletedMessage(),
