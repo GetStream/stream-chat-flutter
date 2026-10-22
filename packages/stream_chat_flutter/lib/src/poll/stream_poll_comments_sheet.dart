@@ -118,10 +118,9 @@ class _StreamPollCommentsSheetState extends State<StreamPollCommentsSheet> {
   }
 
   void _initializeController() {
-    _controller = StreamPollVoteListController(
+    _controller = StreamPollVoteListController.forAnswers(
       pollId: widget.poll.id,
       channel: StreamChannel.of(context).channel,
-      filter: .equal(PollVoteFilterField.isAnswer, true),
     );
   }
 

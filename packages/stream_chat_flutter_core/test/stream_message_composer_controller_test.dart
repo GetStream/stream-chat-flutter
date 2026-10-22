@@ -1013,6 +1013,74 @@ void main() {
       },
     );
 
+    testWidgets('restores the mentioned users of a draft', (tester) async {
+      final stateKey = GlobalKey<_RestorableWidgetState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          restorationScopeId: 'app',
+          home: _RestorableWidget(key: stateKey),
+        ),
+      );
+
+      stateKey.currentState!.controller.value
+        ..text = 'Hi @Bob'
+        ..addMentionedUser(User(id: 'bob', name: 'Bob'));
+      await tester.pumpAndSettle();
+
+      await tester.restartAndRestore();
+
+      final mentionedUsers = stateKey.currentState!.controller.value.mentionedUsers;
+      expect(mentionedUsers.single.id, 'bob');
+      expect(mentionedUsers.single.name, 'Bob');
+    });
+
+    testWidgets('restores the mentioned users of a message being edited', (tester) async {
+      final stateKey = GlobalKey<_RestorableEditWidgetState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          restorationScopeId: 'app',
+          home: _RestorableEditWidget(key: stateKey),
+        ),
+      );
+
+      final messageBeingEdited = Message(
+        id: 'msg-1',
+        text: 'Hi @Alice',
+        mentionedUsers: [User(id: 'alice', name: 'Alice')],
+      );
+      stateKey.currentState!.controller.value
+        ..editMessage(messageBeingEdited)
+        ..addMentionedUser(User(id: 'carol', name: 'Carol'));
+      await tester.pumpAndSettle();
+
+      await tester.restartAndRestore();
+
+      final controller = stateKey.currentState!.controller.value;
+      expect(controller.messageBeingEdited!.mentionedUsers.map((it) => it.name), ['Alice']);
+      expect(controller.mentionedUsers.map((it) => it.name), ['Alice', 'Carol']);
+    });
+
+    testWidgets('restores the mentioned users of the draft from before an edit', (tester) async {
+      final stateKey = GlobalKey<_RestorableEditWidgetState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          restorationScopeId: 'app',
+          home: _RestorableEditWidget(key: stateKey),
+        ),
+      );
+
+      stateKey.currentState!.controller.value
+        ..text = 'Hi @Bob'
+        ..addMentionedUser(User(id: 'bob', name: 'Bob'))
+        ..editMessage(Message(id: 'msg-1', text: 'Original'));
+      await tester.pumpAndSettle();
+
+      await tester.restartAndRestore();
+
+      final controller = stateKey.currentState!.controller.value..cancelEditMessage();
+      expect(controller.mentionedUsers.map((it) => it.name), ['Bob']);
+    });
+
     group('fromPrimitives', () {
       // fromPrimitives is a pure factory: it does not access `this.value`, so
       // it can be called directly without going through the Flutter restoration

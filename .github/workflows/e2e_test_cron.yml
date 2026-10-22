@@ -100,9 +100,6 @@ jobs:
           - ios: "26.2"
             device: "iPhone 17 Pro"
             setup_runtime: false
-          - ios: "18.5"
-            device: "iPhone 16 Pro"
-            setup_runtime: false
           - ios: "17.5"
             device: "iPhone 15 Pro"
             setup_runtime: true

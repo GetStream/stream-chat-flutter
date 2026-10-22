@@ -1,3 +1,4 @@
+import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart';
 
 /// An alias of [StreamException], so code written against either name catches
@@ -61,4 +62,18 @@ extension StreamChatExceptionRetries on StreamChatException {
     // A bug does not heal on resend.
     StreamClientException() => false,
   };
+}
+
+/// Whether a failed send was a message the server already stored.
+@internal
+extension StreamChatExceptionDuplicateMessage on StreamChatException {
+  /// Whether the server rejected a send because it already stored a message
+  /// with the same id.
+  bool get isMessageAlreadyExistsError {
+    final exception = this;
+    if (exception is! StreamApiException) return false;
+    if (exception.code != StreamErrorCode.inputError) return false;
+    if (!exception.message.contains('a message with ID')) return false;
+    return exception.message.contains('already exists');
+  }
 }

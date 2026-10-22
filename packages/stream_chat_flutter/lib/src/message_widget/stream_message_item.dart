@@ -76,7 +76,7 @@ class StreamMessageItem extends StatelessWidget {
     EdgeInsetsGeometry? padding,
     double? spacing,
     Color? backgroundColor,
-    double maxWidth = 264,
+    double maxWidth = 272,
     bool swipeToReply = false,
     void Function(Message)? onMessageTap,
     void Function(Message)? onMessageLongPress,
@@ -230,7 +230,7 @@ class StreamMessageItemProps extends Equatable {
   ///
   /// The content uses at most this width while still respecting the parent
   /// [Flex] constraints. Use [double.infinity] to impose no cap from this
-  /// widget. Defaults to `264` when not specified.
+  /// widget. Defaults to `272`.
   final double maxWidth;
 
   /// Whether swiping the message triggers a quoted-reply action.
@@ -836,7 +836,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       initialReactionType: initialReaction?.type,
     );
 
-    if (action is! MessageAction) return;
+    if (action is! MessageAction || !context.mounted) return;
     return _onActionTap(context, channel, action).ignore();
   }
 
@@ -903,7 +903,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       ),
     );
 
-    if (action is! MessageAction) return;
+    if (action is! MessageAction || !context.mounted) return;
     return _onActionTap(context, channel, action).ignore();
   }
 
@@ -935,6 +935,8 @@ class DefaultStreamMessageItem extends StatelessWidget {
       currentUser: currentUser,
     );
 
+    // Read up front: the modal can outlive this message, and with it `context`.
+    final configuration = StreamChatConfiguration.of(context);
     final layout = StreamMessageLayout.of(context);
     final theme = core.StreamMessageItemTheme.of(context);
     final defaults = _StreamMessageItemDefaults(
@@ -965,7 +967,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       context: context,
       useRootNavigator: false,
       builder: (_) => StreamChatConfiguration(
-        data: StreamChatConfiguration.of(context),
+        data: configuration,
         child: StreamMessageLayout(
           // The message is re-rendered on top of the modal scrim, so its
           // metadata and annotations switch to their on-scrim colors.
@@ -984,7 +986,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       ),
     );
 
-    if (action is! MessageAction) return;
+    if (action is! MessageAction || !context.mounted) return;
     return _onActionTap(context, channel, action).ignore();
   }
 

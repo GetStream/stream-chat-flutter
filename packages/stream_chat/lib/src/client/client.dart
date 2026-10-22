@@ -63,7 +63,7 @@ import '../core/models/request/message_delivery.dart';
 import '../core/models/request/update_user_partial_request.dart';
 import '../core/models/response/add_user_group_members_response.dart';
 import '../core/models/response/app_settings_response.dart';
-import '../core/models/response/block_users_response.dart';
+import '../core/models/response/block_user_response.dart';
 import '../core/models/response/create_user_group_response.dart';
 import '../core/models/response/delete_channel_response.dart';
 import '../core/models/response/get_blocked_users_response.dart';
@@ -84,7 +84,7 @@ import '../core/models/response/remove_user_group_members_response.dart';
 import '../core/models/response/search_roles_response.dart';
 import '../core/models/response/search_user_groups_response.dart';
 import '../core/models/response/show_channel_response.dart';
-import '../core/models/response/unblock_users_response.dart';
+import '../core/models/response/unblock_user_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
 import '../core/models/response/update_user_group_response.dart';
@@ -92,6 +92,7 @@ import '../core/models/response/update_users_response.dart';
 import '../core/models/role_type.dart';
 import '../core/models/thread.dart';
 import '../core/models/user.dart';
+import '../core/models/user_block.dart';
 import '../core/util/event_controller.dart';
 import '../core/util/extension.dart';
 import '../core/util/immutable_collection_subjects.dart';
@@ -1624,8 +1625,9 @@ class StreamChatClient {
     messageId: messageId,
   );
 
-  /// Marks the message with [messageId] and every later one in a channel as
-  /// unread for the current user.
+  /// Marks a channel unread from [messageId] for the current user.
+  ///
+  /// The message with [messageId] and every later one are marked as unread.
   ///
   /// The message must be one of the channel's latest 100 messages; an older one
   /// returns a failure.
@@ -1639,8 +1641,10 @@ class StreamChatClient {
     messageId: messageId,
   );
 
-  /// Marks the messages of a channel created after [timestamp] as unread for
-  /// the current user.
+  /// Marks a channel unread after [timestamp] for the current user.
+  ///
+  /// The first message after [timestamp] must exist and be one of the
+  /// channel's latest 100 messages; otherwise this returns a failure.
   Future<Result<void>> markChannelUnreadByTimestamp(
     String channelId,
     String channelType,
@@ -1651,8 +1655,9 @@ class StreamChatClient {
     messageTimestamp: timestamp,
   );
 
-  /// Marks the thread started by the message with [threadId] as read for the
-  /// current user.
+  /// Marks the thread of [threadId] as read for the current user.
+  ///
+  /// The [threadId] is the id of the thread's parent message.
   Future<Result<MarkReadResponse>> markThreadRead(
     String channelId,
     String channelType,
@@ -1663,8 +1668,9 @@ class StreamChatClient {
     threadId: threadId,
   );
 
-  /// Marks the thread started by the message with [threadId] as unread for the
-  /// current user.
+  /// Marks the thread of [threadId] as unread for the current user.
+  ///
+  /// The [threadId] is the id of the thread's parent message.
   Future<Result<void>> markThreadUnread(
     String channelId,
     String channelType,
@@ -1838,22 +1844,34 @@ class StreamChatClient {
   ///
   /// On success, the blocked user's id is added to [OwnUser.blockedUserIds] on
   /// [ClientState.currentUser]. A failure leaves it unchanged.
-  Future<Result<BlockUsersResponse>> blockUser(String userId) async {
+  Future<Result<BlockUserResponse>> blockUser(String userId) async {
     final result = await _userBlockLock.synchronized(() => _usersRepository.blockUser(userId));
     return result
         .onSuccess((response) => _addBlockedUserId(response.blockedUserId))
         .onFailure((e, stk) => logger.e(() => 'Error blocking user', error: e, stackTrace: stk));
   }
 
+  void _addBlockedUserId(String userId) {
+    final blockedUserIds = [...?state.currentUser?.blockedUserIds];
+    if (blockedUserIds.contains(userId)) return;
+    state.blockedUserIds = [...blockedUserIds, userId];
+  }
+
   /// Unblocks [userId] for the current user.
   ///
   /// On success, [userId] is removed from [OwnUser.blockedUserIds] on
   /// [ClientState.currentUser]. A failure leaves it unchanged.
-  Future<Result<UnblockUsersResponse>> unblockUser(String userId) async {
+  Future<Result<UnblockUserResponse>> unblockUser(String userId) async {
     final result = await _userBlockLock.synchronized(() => _usersRepository.unblockUser(userId));
     return result
         .onSuccess((_) => _removeBlockedUserId(userId))
         .onFailure((e, stk) => logger.e(() => 'Error unblocking user', error: e, stackTrace: stk));
+  }
+
+  void _removeBlockedUserId(String userId) {
+    final blockedUserIds = [...?state.currentUser?.blockedUserIds];
+    if (!blockedUserIds.remove(userId)) return;
+    state.blockedUserIds = blockedUserIds;
   }
 
   /// Gets the users the current user has blocked.
@@ -1864,20 +1882,12 @@ class StreamChatClient {
   Future<Result<GetBlockedUsersResponse>> getBlockedUsers() async {
     final result = await _userBlockLock.synchronized(_usersRepository.getBlockedUsers);
     return result
-        .onSuccess((response) => state.blockedUserIds = [for (final block in response.blocks) block.blockedUserId])
+        .onSuccess((response) => _replaceBlockedUserIds(response.blocks))
         .onFailure((e, stk) => logger.e(() => 'Error getting blocked users', error: e, stackTrace: stk));
   }
 
-  void _addBlockedUserId(String userId) {
-    final blockedUserIds = [...?state.currentUser?.blockedUserIds];
-    if (blockedUserIds.contains(userId)) return;
-    state.blockedUserIds = [...blockedUserIds, userId];
-  }
-
-  void _removeBlockedUserId(String userId) {
-    final blockedUserIds = [...?state.currentUser?.blockedUserIds];
-    if (!blockedUserIds.remove(userId)) return;
-    state.blockedUserIds = blockedUserIds;
+  void _replaceBlockedUserIds(List<UserBlock> blocks) {
+    state.blockedUserIds = [for (final block in blocks) block.blockedUserId];
   }
 
   /// Gets how many unread messages and threads the current user has.
@@ -1918,7 +1928,8 @@ class StreamChatClient {
   /// await client.markChannelsDelivered([receipt]);
   /// ```
   ///
-  /// Takes up to 100 receipts per call; more return a failure.
+  /// Takes between 1 and 100 receipts per call; any other number returns a
+  /// failure.
   Future<Result<MarkDeliveredResponse>> markChannelsDelivered(
     Iterable<MessageDelivery> deliveries,
   ) => _channelsRepository.markChannelsDelivered(deliveries);
@@ -2872,15 +2883,18 @@ class ClientState {
     _currentUserController.safeAdd(user);
   }
 
-  /// Update all the [users] with the provided [userList]
+  /// Updates [users] with the users in [userList] that are new or changed.
+  ///
+  /// When a user is listed more than once, the last copy is kept.
   @internal
   void updateUsers(List<User?> userList) {
-    final newUsers = {
-      ...users,
+    final changedUsers = {
       for (final user in userList)
         if (user != null) user.id: user,
-    };
-    _usersController.safeAdd(newUsers);
+    }..removeWhere((id, user) => users[id] == user);
+
+    if (changedUsers.isEmpty) return;
+    _usersController.safeAdd({...users, ...changedUsers});
   }
 
   /// Update the passed [user] in state

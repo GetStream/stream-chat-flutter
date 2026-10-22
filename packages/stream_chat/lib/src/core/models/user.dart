@@ -212,6 +212,7 @@ class User extends Equatable {
     role,
     name,
     image,
+    createdAt,
     lastActive,
     online,
     custom,

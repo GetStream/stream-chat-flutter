@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:collection/collection.dart';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 // Needed for RenderProxyBox; it also re-exports the semantics library that
@@ -9,6 +10,7 @@ import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 
 import '../../stream_chat_flutter.dart';
+import '../misc/empty_widget.dart';
 import 'audio_recorder/audio_recorder_announcer.dart';
 import 'composer_attachment_announcer.dart';
 import 'error_alert_sheet.dart';
@@ -84,7 +86,8 @@ class StreamMessageComposer extends StatelessWidget {
     Iterable<StreamAutocompleteTrigger> customAutocompleteTriggers = const [],
     bool mentionAllAppUsers = false,
     bool? shouldKeepFocusAfterMessage,
-    MessageValidator validator = MessageComposerProps._defaultValidator,
+    @Deprecated('Use StreamMessageComposerController.validator instead.')
+    MessageValidator validator = StreamMessageComposerController.defaultValidator,
     String? restorationId,
     bool? enableSafeArea,
     bool enableMentionsOverlay = true,
@@ -197,7 +200,8 @@ class MessageComposerProps {
     this.customAutocompleteTriggers = const [],
     this.mentionAllAppUsers = false,
     this.shouldKeepFocusAfterMessage,
-    this.validator = _defaultValidator,
+    @Deprecated('Use StreamMessageComposerController.validator instead.')
+    this.validator = StreamMessageComposerController.defaultValidator,
     this.restorationId,
     this.enableSafeArea,
     this.enableMentionsOverlay = true,
@@ -216,7 +220,10 @@ class MessageComposerProps {
     this.autofocus = false,
     this.autoCorrect = true,
     this.surfaceStyle,
-  });
+  }) : assert(
+         messageComposerController == null || validator == StreamMessageComposerController.defaultValidator,
+         'validator has no effect with a messageComposerController; set it on that controller.',
+       );
 
   /// Function called after sending the message.
   final void Function(Message)? onMessageSent;
@@ -232,7 +239,10 @@ class MessageComposerProps {
   /// The focus node associated to the TextField.
   final FocusNode? focusNode;
 
-  /// If true the attachments button will not be displayed.
+  /// Whether the user is prevented from adding attachments.
+  ///
+  /// When true, the attachment button is hidden, and dropped files and
+  /// keyboard images are refused.
   ///
   /// Defaults to false.
   final bool disableAttachments;
@@ -242,7 +252,9 @@ class MessageComposerProps {
   /// Defaults to true.
   final bool canAlsoSendToChannelFromThread;
 
-  /// If true the voice recording button will be displayed.
+  /// Whether the voice recording button is shown.
+  ///
+  /// The button is only shown when the channel allows uploads.
   ///
   /// Defaults to false.
   final bool enableVoiceRecording;
@@ -312,10 +324,12 @@ class MessageComposerProps {
   /// Defaults to [StreamAttachmentValidator.defaultMaxAttachmentCount].
   final int attachmentLimit;
 
-  /// The list of allowed attachment types which can be picked using the
-  /// attachment button.
+  /// The attachment types the user can add.
   ///
-  /// By default, all the attachment types are allowed.
+  /// Applies to the attachment picker, dropped files and images inserted from
+  /// the keyboard. A type is only accepted when the channel allows it.
+  ///
+  /// Defaults to [AttachmentPickerType.values].
   final List<AttachmentPickerType> allowedAttachmentPickerTypes;
 
   /// List of triggers for showing autocomplete.
@@ -330,7 +344,15 @@ class MessageComposerProps {
   /// The default behaviour keeps focus until a command is enabled.
   final bool? shouldKeepFocusAfterMessage;
 
-  /// A callback function that validates the message.
+  /// The function that decides whether the message being composed can be
+  /// sent.
+  ///
+  /// It also decides whether drafts are saved. It has no effect when
+  /// [messageComposerController] is given; set [StreamMessageComposerController.validator] on
+  /// that controller instead.
+  ///
+  /// Defaults to [StreamMessageComposerController.defaultValidator].
+  @Deprecated('Use StreamMessageComposerController.validator instead.')
   final MessageValidator validator;
 
   /// Restoration ID to save and restore the state of the MessageInput.
@@ -454,7 +476,7 @@ class MessageComposerProps {
     Iterable<StreamAutocompleteTrigger>? customAutocompleteTriggers,
     bool? mentionAllAppUsers,
     bool? shouldKeepFocusAfterMessage,
-    MessageValidator? validator,
+    @Deprecated('Use StreamMessageComposerController.validator instead.') MessageValidator? validator,
     String? restorationId,
     bool? enableSafeArea,
     bool? enableMentionsOverlay,
@@ -542,14 +564,6 @@ class MessageComposerProps {
     return true;
   }
 
-  static bool _defaultValidator(Message message) {
-    final hasText = message.text?.trim().isNotEmpty == true;
-    final hasAttachments = message.attachments.isNotEmpty;
-    final hasPoll = message.pollId != null;
-
-    return hasText || hasAttachments || hasPoll;
-  }
-
   static String? _defaultPlaceholderBuilder(
     BuildContext context,
     MessageInputPlaceholder placeholder,
@@ -606,7 +620,11 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
   void _createLocalController([Message? message]) {
     assert(_controller == null, '');
-    _controller = StreamRestorableMessageComposerController(message: message);
+    _controller = StreamRestorableMessageComposerController(
+      message: message,
+      // A validator changed on rebuild takes effect.
+      validator: (message) => widget.props.validator(message),
+    );
   }
 
   void _registerController() {
@@ -843,35 +861,13 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
           if (enabled) return messageInput;
 
           // Otherwise, show the no permission message.
-          return _buildNoPermissionMessage(context);
+          return _insetContent(context, _buildNoPermissionMessage(context));
         },
       ),
       final messageInput => messageInput,
     };
 
-    final spacing = context.streamSpacing;
-    final platform = Theme.of(context).platform;
-    final hasBottomInset = MediaQuery.paddingOf(context).bottom > 0;
-
-    // Apple platforms rest on the bottom inset; elsewhere a margin clears it,
-    // and stands in when there is none.
-    final bottomSafeAreaMargin = switch (platform) {
-      .iOS || .macOS when hasBottomInset => spacing.none,
-      _ => spacing.md,
-    };
-
-    final content = Material(
-      type: .transparency,
-      child: switch (widget.props.enableSafeArea) {
-        false => Center(heightFactor: 1, child: messageInput),
-        _ => StreamSafeArea.driven(
-          top: false,
-          listenable: _pickerAnimation,
-          margin: .only(bottom: bottomSafeAreaMargin),
-          child: Center(heightFactor: 1, child: messageInput),
-        ),
-      },
-    );
+    final content = Material(type: .transparency, child: messageInput);
 
     final colorScheme = context.streamColorScheme;
     final effectiveSurfaceStyle = _resolveSurfaceStyle(context);
@@ -880,6 +876,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       .regular => DecoratedBox(
         decoration: BoxDecoration(
           color: colorScheme.backgroundElevation1,
+          border: Border(top: BorderSide(color: colorScheme.borderDefault)),
         ),
         child: content,
       ),
@@ -904,11 +901,41 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     );
   }
 
+  Widget _insetContent(BuildContext context, Widget child) {
+    final spacing = context.streamSpacing;
+    final platform = Theme.of(context).platform;
+    final padding = MediaQuery.paddingOf(context);
+    final hasBottomInset = padding.bottom > 0;
+
+    // Apple platforms rest on the bottom inset; elsewhere a margin clears it,
+    // and stands in when there is none.
+    final bottomSafeAreaMargin = switch (platform) {
+      .iOS || .macOS when hasBottomInset => spacing.none,
+      _ => spacing.md,
+    };
+
+    return switch (widget.props.enableSafeArea) {
+      false => Center(heightFactor: 1, child: child),
+      _ => StreamSafeArea.driven(
+        top: false,
+        listenable: _pickerAnimation,
+        // Only the bottom inset gives way to the picker; the side insets stay.
+        to: .only(left: padding.left, right: padding.right),
+        margin: .only(bottom: bottomSafeAreaMargin),
+        child: Center(heightFactor: 1, child: child),
+      ),
+    };
+  }
+
   Widget _buildAutocompleteMessageInput(BuildContext context) {
     return StreamAutocomplete(
       focusNode: _effectiveFocusNode,
       messageComposerController: _effectiveController,
-      fieldViewBuilder: _buildMessageInput,
+      // Inset inside the autocomplete so its suggestions span the full width.
+      fieldViewBuilder: (context, controller, focusNode) {
+        final messageInput = _buildMessageInput(context, controller, focusNode);
+        return _insetContent(context, messageInput);
+      },
       autocompleteTriggers: [
         ...widget.props.customAutocompleteTriggers,
         StreamAutocompleteTrigger(
@@ -990,10 +1017,34 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     );
   }
 
+  // Without the upload-file capability the composer offers no way to add an
+  // upload. A channel that isn't created yet allows uploads.
   Widget _buildMessageInput(
     BuildContext context,
     StreamMessageComposerController controller,
     FocusNode focusNode,
+  ) {
+    final channel = StreamChannel.of(context).channel;
+    if (channel.state == null) {
+      const capabilities = [ChannelCapability.uploadFile];
+      return _buildMessageInputContent(context, controller, focusNode, capabilities);
+    }
+
+    return BetterStreamBuilder<List<ChannelCapability>>(
+      initialData: channel.ownCapabilities,
+      stream: channel.ownCapabilitiesStream,
+      comparator: const ListEquality<ChannelCapability>().equals,
+      builder: (context, capabilities) {
+        return _buildMessageInputContent(context, controller, focusNode, capabilities);
+      },
+    );
+  }
+
+  Widget _buildMessageInputContent(
+    BuildContext context,
+    StreamMessageComposerController controller,
+    FocusNode focusNode,
+    List<ChannelCapability> capabilities,
   ) {
     final currentUserId = StreamChat.of(context).currentUser?.id;
     final isFloating = _resolveSurfaceStyle(context).isFloating;
@@ -1001,9 +1052,16 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     return StreamMessageValueListenableBuilder(
       valueListenable: controller,
       builder: (context, value, _) {
+        final canUploadFile = capabilities.contains(ChannelCapability.uploadFile);
+        final canRecordVoice = widget.props.enableVoiceRecording && canUploadFile;
+        final allowedTypes = _getAllowedAttachmentPickerTypes(capabilities);
+        final canOpenPicker = allowedTypes.isNotEmpty;
+        final canDropFiles = allowedTypes.contains(AttachmentPickerType.files);
+
         // Extracted so the floating gradient can wrap just the pill, keeping
         // gradient height stable when the picker (a sibling) opens.
         final pill = DropTarget(
+          enable: canDropFiles,
           onDragDone: (details) async {
             final attachments = <Attachment>[];
             for (final file in details.files) {
@@ -1019,13 +1077,13 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             child: StreamChatMessageInput(
               controller: controller,
               currentUserId: currentUserId,
-              onAttachmentButtonPressed: widget.props.disableAttachments ? null : _onAttachmentButtonPressed,
+              onAttachmentButtonPressed: canOpenPicker ? _onAttachmentButtonPressed : null,
               isPickerOpen: _isPickerVisible,
               placeholder: _buildPlaceholder(context),
               focusNode: focusNode,
               onSendPressed: sendMessage,
               canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
-              audioRecorderController: widget.props.enableVoiceRecording ? _audioRecorderController : null,
+              audioRecorderController: canRecordVoice ? _audioRecorderController : null,
               sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,
               feedback: widget.props.voiceRecordingFeedback,
               onQuotedMessageCleared: () {
@@ -1038,7 +1096,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               autofocus: widget.props.autofocus,
               autocorrect: widget.props.autoCorrect,
               isFloating: isFloating,
-              contentInsertionConfiguration: _buildContentInsertionConfiguration(),
+              contentInsertionConfiguration: ContentInsertionConfiguration(
+                onContentInserted: (content) => _onContentInserted(content, allowedTypes),
+              ),
             ),
           ),
         );
@@ -1066,7 +1126,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                 sizeFactor: _pickerAnimation,
                 // ignore: deprecated_member_use, alternative is only available since Flutter 3.44
                 axisAlignment: -1,
-                child: _buildInlineAttachmentPicker(context),
+                child: _buildInlineAttachmentPicker(context, allowedTypes),
               ),
             ],
           ),
@@ -1075,16 +1135,26 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     );
   }
 
-  Widget _buildInlineAttachmentPicker(BuildContext context) {
-    if (!_isPickerVisible) return const SizedBox.shrink();
+  Widget _buildInlineAttachmentPicker(
+    BuildContext context,
+    List<AttachmentPickerType> allowedTypes,
+  ) {
+    if (!_isPickerVisible) return const Empty();
 
-    final allowedTypes = _getAllowedAttachmentPickerTypes();
+    // Nothing is left to offer, for example after uploads are revoked while
+    // the picker is open.
+    if (allowedTypes.isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _hidePicker();
+      });
+      return const Empty();
+    }
 
-    final isWebOrDesktop = switch (CurrentPlatform.type) {
+    final useSystemPicker = switch (CurrentPlatform.type) {
+      _ when widget.props.useSystemAttachmentPicker => true,
       PlatformType.android || PlatformType.ios => false,
       _ => true,
     };
-    final useSystemPicker = widget.props.useSystemAttachmentPicker || isWebOrDesktop;
 
     if (useSystemPicker) {
       return systemAttachmentPickerBuilder(
@@ -1177,23 +1247,41 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     return channel.sendPoll(poll).ignore();
   }
 
-  // Returns the list of allowed attachment picker types based on the
-  // current channel configuration and context.
-  List<AttachmentPickerType> _getAllowedAttachmentPickerTypes() {
-    final allowedTypes = widget.props.allowedAttachmentPickerTypes.where((type) {
-      if (type != AttachmentPickerType.poll) return true;
+  // Returns the list of allowed attachment picker types based on the user's
+  // capabilities, the current channel configuration and context.
+  List<AttachmentPickerType> _getAllowedAttachmentPickerTypes(
+    List<ChannelCapability> capabilities,
+  ) {
+    if (widget.props.disableAttachments) return const [];
 
-      // We don't allow editing polls.
-      if (_isEditing) return false;
-      // We don't allow creating polls in threads.
-      if (_effectiveController.message.parentId != null) return false;
+    final channel = StreamChannel.of(context).channel;
+    final channelConfig = channel.state != null ? channel.config : null;
+    final canUploadFile = capabilities.contains(ChannelCapability.uploadFile);
 
-      // Otherwise, check if the user has the permission to send polls.
-      final channel = StreamChannel.of(context).channel;
-      return channel.config?.polls == true && channel.canSendPoll;
-    });
+    final pickerTypes = widget.props.allowedAttachmentPickerTypes;
+    final allowedTypes = pickerTypes.where(
+      (type) => switch (type) {
+        ImagesPickerType() || VideosPickerType() || AudiosPickerType() || FilesPickerType() => canUploadFile,
+        PollPickerType() => _canCreatePoll(capabilities, channelConfig),
+        CommandPickerType() => channelConfig?.commands.isNotEmpty ?? false,
+        CustomAttachmentPickerType() => true,
+      },
+    );
 
     return allowedTypes.toList(growable: false);
+  }
+
+  bool _canCreatePoll(
+    List<ChannelCapability> capabilities,
+    ChannelConfig? channelConfig,
+  ) {
+    // We don't allow editing polls.
+    if (_isEditing) return false;
+    // We don't allow creating polls in threads.
+    if (_effectiveController.message.parentId != null) return false;
+
+    // Otherwise, check if the user has the permission to send polls.
+    return channelConfig?.polls == true && capabilities.contains(ChannelCapability.sendPoll);
   }
 
   /// Toggles the inline attachment picker visibility.
@@ -1461,22 +1549,17 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     if (validationErrors.firstOrNull case final error?) _handleAttachmentError(error);
   }
 
-  // Lets keyboards such as Gboard insert images and GIFs. Accepted only where
-  // the picker would accept an image, and validated the same way. Off while a
-  // command is active, as commands carry no attachments.
-  ContentInsertionConfiguration? _buildContentInsertionConfiguration() {
-    if (widget.props.disableAttachments) return null;
-    if (_commandEnabled) return null;
-    if (!StreamChannel.of(context).channel.canUploadFile) return null;
-    if (!_getAllowedAttachmentPickerTypes().contains(AttachmentPickerType.images)) return null;
+  // Adds an image or GIF inserted from a keyboard such as Gboard. Accepted only
+  // where the picker would accept an image, and validated the same way.
+  void _onContentInserted(
+    KeyboardInsertedContent content,
+    List<AttachmentPickerType> allowedTypes,
+  ) {
+    // Commands carry no attachments.
+    if (_commandEnabled) return;
+    if (!allowedTypes.contains(AttachmentPickerType.images)) return;
 
-    return ContentInsertionConfiguration(onContentInserted: _onContentInserted);
-  }
-
-  void _onContentInserted(KeyboardInsertedContent content) {
-    // The platform reads the content before handing it over, and a failed read
-    // can arrive as no data or as empty data; either way there is nothing to
-    // attach.
+    // A failed read arrives as no data or empty data.
     final bytes = content.data;
     if (bytes == null || bytes.isEmpty) return;
 
@@ -1532,7 +1615,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   /// Sends the current message
   Future<void> sendMessage() async {
     if (_effectiveController.isSlowModeActive) return;
-    if (!widget.props.validator(_effectiveController.message)) return;
+    if (!_effectiveController.canSend) return;
 
     _hidePicker();
 
@@ -1648,7 +1731,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     if (channel == null) return;
 
     final message = _effectiveController.message;
-    final isMessageValid = widget.props.validator.call(message);
+    final isMessageValid = _effectiveController.validator.call(message);
 
     // If the message is valid, we need to create or update it as a draft
     // message for the channel or thread.
@@ -1667,7 +1750,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final draftMessage = message.toDraftMessage();
 
     // If the draft message is not valid, we don't need to update it.
-    final isDraftValid = widget.props.validator.call(draftMessage.toMessage());
+    final isDraftValid = _effectiveController.validator.call(draftMessage.toMessage());
     if (!isDraftValid) return;
 
     // If the draft message didn't change, we don't need to update it.

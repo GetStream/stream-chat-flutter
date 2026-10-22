@@ -17,15 +17,53 @@
 - Polls are now shown translated into the current user's language, following `StreamMessageTranslationConfiguration` like the message text.
 - Added `PollTranslationX`, `PollOptionTranslationX` and `PollVoteTranslationX`, to read the translations of a poll, its options and its answers.
 - Added `MessageTranslationLanguage`, the language `StreamMessageContent` shows a message translated into, for custom attachments to show translations too.
+- Added `automaticallyImplyLeading` to `StreamChannelPage` and `StreamThreadPage`, which hides the header's back button when `false`.
+- Added a `selected` parameter to `StreamThreadListTile`, which highlights the tile, and `StreamThreadListTile.copyWith`.
+- Added `StreamMediaGallery.gridDelegate` to change how the gallery lays out its tiles.
+- `StreamMessageListView` now shows who is typing at the newest end of the list with `StreamMessageListTypingIndicator`, replacing the indicator above `StreamChannelPage`'s composer. Replace it with `StreamMessageListViewBuilders.typingIndicator`, or hide it with `StreamMessageListViewConfiguration.showTypingIndicator`.
+- Added `StreamTypingUsersBuilder`, to build a widget from the users typing in a channel or thread.
+
+⚠️ Deprecated
+
+- Deprecated `MessageComposerProps.validator` and the `validator` parameter of `StreamMessageComposer`; pass a `StreamMessageComposerController(validator: …)` as `messageComposerController` instead. Passing a custom one together with a `messageComposerController` fails an assert.
+- Deprecated `StreamMediaGallery.crossAxisCount` in favour of `gridDelegate`.
 
 🔄 Changed
 
+- Allowed `equatable` 3.x alongside 2.x.
+- Allowed `record` 7.x alongside 6.x.
+- Raised `desktop_drop` to 0.8.4, which builds with AGP 9's built-in Kotlin. Android apps still on AGP 8 need Kotlin Gradle Plugin 2.0 or later.
+- Raised `photo_manager` to 3.11.0, which builds with AGP 9's built-in Kotlin.
+- `StreamMessageComposer`'s send button now follows the message validator, so a custom validator can enable or disable it, including when editing or with a command.
 - `StreamMessageListView` now rebuilds only the message rows that changed; a custom row builder should read changing outside state through an inherited widget.
+- `StreamMessageComposer`'s top border now spans the full width, including under the side safe-area insets, and also shows above the no-permission message; the composer is 1px shorter as a result.
+- `StreamMessageComposer` now hides the picker's upload options and voice recording, and refuses dropped files, when the user lacks the `upload-file` capability. The attachment button is hidden when nothing else is left to offer.
+- `StreamMessageComposer` now refuses dropped files when `disableAttachments` is set or `allowedAttachmentPickerTypes` leaves out `AttachmentPickerType.files`.
+- `StreamTypingIndicator` now uses the design system's typing dots; the `lottie` dependency is removed.
+- Suggestions from `customAutocompleteTriggers` now span the composer's full width. `StreamAutocompleteOptions` keeps its options clear of the side safe-area insets; other options views should wrap their content in `StreamSafeArea(top: false, bottom: false)`.
+- `StreamMediaGallery` and `StreamPhotoGallery`, including `defaultStreamPhotoGalleryDelegate`, now show more tiles per row in wider grids instead of always 3. Pass a `SliverGridDelegateWithFixedCrossAxisCount` as `gridDelegate` to keep a fixed count.
+- `defaultStreamPhotoGalleryDelegate` is now declared as a `SliverGridDelegate`.
+- `StreamMessageItem`'s `maxWidth` now defaults to `272`, the same as `StreamMessageItemProps`.
+- The floating date divider in `StreamMessageListView` now passes the start of the day it labels, instead of the time of the message at the top, to `StreamMessageListViewBuilders.floatingDateDivider`, and to `dateDivider` when it is used as the fallback.
 
 🐞 Fixed
 
 - Fixed `StreamMessageListView` dropping frames on each new message in busy channels.
+- Fixed `StreamMessageListView`'s floating date divider rebuilding after each new message when its date hasn't changed.
 - Fixed `StreamMessageComposer` polling the audio recorder ten times a second while no recording is in progress, including when voice recording is disabled.
+- Fixed `StreamMessageComposer` and its attachment picker running under the left and right safe-area insets while the picker is open.
+- Fixed the default empty, loading and error states of `StreamChannelListView`, `StreamThreadListView` and the other paged list views running under the safe-area insets.
+- Fixed `StreamMessageListView`'s scroll-to-bottom button, floating date divider, unread indicator and empty, loading and error states ignoring the safe-area insets when `enableSafeArea` is on.
+- Fixed `StreamMessageComposer`'s send button looking enabled on an empty message when voice recording is off, and showing the microphone instead of send for a staged poll.
+- Fixed the attachment picker showing an empty commands tab in channels without commands.
+- Fixed dialogs and bottom sheets opened below `StreamChat` keeping the old colors when the app switched between light and dark mode.
+- Fixed `StreamPollOptionVotesSheet` listing votes for other options and answers.
+- Fixed `StreamPollCommentsSheet` listing votes for poll options as comments.
+- Fixed the attachment picker overflowing short screens, such as a phone in landscape.
+- Fixed `StreamMessageListView`'s default loading, empty and error states overflowing when the list has little room, such as in landscape with the attachment picker open.
+- Fixed the composer's autocomplete suggestions stopping short of the screen edge under a side safe-area inset.
+- Fixed `StreamThreadListTile` overflowing when narrow; its timestamp now truncates instead.
+- Fixed `StreamMessageItem`'s actions modal throwing when the message leaves the screen while the modal is open.
 
 ## 10.5.0
 
