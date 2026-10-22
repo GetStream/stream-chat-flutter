@@ -205,13 +205,9 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
     final effectiveTitleTextStyle = theme.titleTextStyle ?? defaults.titleTextStyle;
     final effectiveSubtitleTextStyle = theme.subtitleTextStyle ?? defaults.subtitleTextStyle;
 
-    // A deleted quote keeps the subtitle's color, so it reads like the rest of
-    // the reply rather than like a muted list preview.
-    final effectiveMessagePreviewTextTheme = StreamMessagePreviewTextTheme.of(context)
-        .merge(
-          StreamMessagePreviewTextThemeData(deletedMessageStyle: TextStyle(color: effectiveSubtitleTextStyle.color)),
-        )
-        .merge(theme.messagePreviewTextTheme);
+    final effectiveMessagePreviewTextTheme = StreamMessagePreviewTextTheme.of(
+      context,
+    ).merge(theme.messagePreviewTextTheme);
     final effectiveIndicatorColor = theme.indicatorColor ?? defaults.indicatorColor;
     final effectiveBackgroundColor = theme.backgroundColor ?? defaults.backgroundColor;
 

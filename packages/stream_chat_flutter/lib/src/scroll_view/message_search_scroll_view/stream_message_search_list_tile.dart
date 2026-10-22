@@ -122,10 +122,15 @@ class StreamMessageSearchListTile extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: StreamMessagePreviewText(
-                message: message,
-                textStyle: context.streamTextTheme.metadataDefault.copyWith(
-                  color: context.streamColorScheme.textSecondary,
+              child: StreamMessagePreviewTextTheme(
+                data: StreamMessagePreviewTextThemeData(
+                  deletedMessageStyle: TextStyle(color: context.streamColorScheme.textTertiary),
+                ).merge(StreamMessagePreviewTextTheme.of(context)),
+                child: StreamMessagePreviewText(
+                  message: message,
+                  textStyle: context.streamTextTheme.metadataDefault.copyWith(
+                    color: context.streamColorScheme.textSecondary,
+                  ),
                 ),
               ),
             ),

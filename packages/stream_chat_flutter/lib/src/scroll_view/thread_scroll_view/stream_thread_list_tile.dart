@@ -111,6 +111,9 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
     final effectivePadding = theme.padding ?? defaults.padding;
     final effectiveChannelNameStyle = theme.threadChannelNameStyle ?? defaults.threadChannelNameStyle;
     final effectiveReplyToMessageStyle = theme.threadReplyToMessageStyle ?? defaults.threadReplyToMessageStyle;
+    final effectiveMessagePreviewTextTheme = defaults.messagePreviewTextTheme
+        .merge(StreamMessagePreviewTextTheme.of(context))
+        .merge(theme.messagePreviewTextTheme);
     final effectiveLatestReplyMessageStyle =
         theme.threadLatestReplyMessageStyle ?? defaults.threadLatestReplyMessageStyle;
     final effectiveReplyCountStyle = theme.threadReplyCountStyle ?? defaults.threadReplyCountStyle;
@@ -181,12 +184,15 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: spacing.xxs),
-                    ThreadRootMessagePreview(
-                      parentMessage: parentMessage,
-                      channel: channel,
-                      language: language,
-                      style: effectiveReplyToMessageStyle,
-                      emptyStyle: effectiveLatestReplyMessageStyle,
+                    StreamMessagePreviewTextTheme(
+                      data: effectiveMessagePreviewTextTheme,
+                      child: ThreadRootMessagePreview(
+                        parentMessage: parentMessage,
+                        channel: channel,
+                        language: language,
+                        style: effectiveReplyToMessageStyle,
+                        emptyStyle: effectiveLatestReplyMessageStyle,
+                      ),
                     ),
                     SizedBox(height: spacing.xs),
                     ThreadFooter(
@@ -418,6 +424,11 @@ class _StreamThreadListTileThemeDefaults extends StreamThreadListTileThemeData {
 
   @override
   TextStyle get threadReplyToMessageStyle => _textTheme.bodyDefault;
+
+  @override
+  StreamMessagePreviewTextThemeData get messagePreviewTextTheme => StreamMessagePreviewTextThemeData(
+    deletedMessageStyle: TextStyle(color: _colorScheme.textTertiary),
+  );
 
   @override
   TextStyle get threadLatestReplyMessageStyle => _textTheme.bodyDefault;

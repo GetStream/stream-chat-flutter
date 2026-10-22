@@ -296,12 +296,11 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   @protected
   TextSpan formatDeletedMessage(BuildContext context, Message message) {
     final theme = StreamMessagePreviewTextTheme.of(context);
-    final defaults = _StreamMessagePreviewTextDefaults(context);
 
     return _labeledIcon(
       icon: context.streamIcons.noSign,
       label: context.translations.messageDeletedLabel,
-      textStyle: theme.deletedMessageStyle ?? defaults.deletedMessageStyle,
+      textStyle: theme.deletedMessageStyle,
     );
   }
 
@@ -737,9 +736,6 @@ class _StreamMessagePreviewTextDefaults extends StreamMessagePreviewTextThemeDat
   final BuildContext _context;
 
   late final StreamColorScheme _colorScheme = _context.streamColorScheme;
-
-  @override
-  TextStyle get deletedMessageStyle => TextStyle(color: _colorScheme.textTertiary);
 
   @override
   TextStyle get draftPrefixStyle => TextStyle(color: _colorScheme.accentPrimary, fontWeight: FontWeight.bold);

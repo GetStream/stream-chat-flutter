@@ -68,9 +68,7 @@ void main() {
     expect(_deletedIconColor(tester), colorScheme.textPrimary);
   });
 
-  testWidgets('StreamQuotedMessage keeps the reply color for a deleted quote under an app-wide deleted color', (
-    tester,
-  ) async {
+  testWidgets('StreamQuotedMessage shows a deleted quote in an app-wide deleted style', (tester) async {
     await _pumpQuote(
       tester,
       quotedMessage: _deletedMessage(),
@@ -82,9 +80,8 @@ void main() {
       ),
     );
 
-    final colorScheme = tester.element(find.byType(StreamQuotedMessage)).streamColorScheme;
-    expect(_deletedLabelColor(tester), colorScheme.brand.shade900);
-    expect(_deletedIconColor(tester), colorScheme.brand.shade900);
+    expect(_deletedLabelColor(tester), Colors.red);
+    expect(_deletedIconColor(tester), Colors.red);
   });
 
   testWidgets('StreamQuotedMessage shows a deleted quote in the themed preview style', (tester) async {

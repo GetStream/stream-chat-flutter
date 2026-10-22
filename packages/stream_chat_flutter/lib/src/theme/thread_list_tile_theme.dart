@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:theme_extensions_builder_annotation/theme_extensions_builder_annotation.dart';
 
 import '../utils/date_formatter.dart';
+import 'message_preview_text_theme.dart';
 import 'stream_chat_theme.dart';
 
 part 'thread_list_tile_theme.g.theme.dart';
@@ -64,6 +65,7 @@ class StreamThreadListTileThemeData with _$StreamThreadListTileThemeData {
     this.backgroundColor,
     this.threadChannelNameStyle,
     this.threadReplyToMessageStyle,
+    this.messagePreviewTextTheme,
     this.threadLatestReplyUsernameStyle,
     this.threadLatestReplyMessageStyle,
     this.threadLatestReplyTimestampStyle,
@@ -85,11 +87,19 @@ class StreamThreadListTileThemeData with _$StreamThreadListTileThemeData {
   /// [StreamColorScheme.textTertiary].
   final TextStyle? threadChannelNameStyle;
 
-  /// The style of the root message preview in the [StreamThreadListTile]
-  /// widget.
+  /// The style of the whole root message preview in the
+  /// [StreamThreadListTile] widget.
   ///
-  /// Falls back to [StreamTextTheme.bodyDefault].
+  /// To style only parts of it, use [messagePreviewTextTheme]. Falls back to
+  /// [StreamTextTheme.bodyDefault].
   final TextStyle? threadReplyToMessageStyle;
+
+  /// The theme for styling parts of the root message preview differently
+  /// from the rest.
+  ///
+  /// Falls back to showing a deleted message in
+  /// [StreamColorScheme.textTertiary].
+  final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 
   /// The style of the latest reply author username in the
   /// [StreamThreadListTile] widget.

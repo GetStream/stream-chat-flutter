@@ -656,6 +656,85 @@ void main() {
       handle.dispose();
     });
   });
+
+  group('StreamChannelListTile message preview', () {
+    final deletedMessage = Message(
+      id: 'deleted',
+      text: 'Original message',
+      type: MessageType.deleted,
+      deletedAt: DateTime.parse('2021-07-20T17:00:00.000Z'),
+    );
+
+    Future<void> pumpTile(WidgetTester tester, {StreamChannelListItemThemeData? theme}) {
+      final client = MockClient();
+      final clientState = MockClientState();
+      final currentUser = OwnUser(id: 'me');
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(currentUser);
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
+
+      return tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            connectivityStream: Stream.value(const [ConnectivityResult.wifi]),
+            child: Scaffold(
+              body: StreamChannelListItemTheme(
+                data: theme ?? const StreamChannelListItemThemeData(),
+                child: StreamChannelListTile(
+                  avatar: const _SilentAvatar(),
+                  title: const Text('General'),
+                  subtitle: StreamMessagePreviewText(message: deletedMessage),
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    testWidgets('shows a deleted message in the tertiary text color', (tester) async {
+      await pumpTile(tester);
+
+      final colorScheme = tester.element(find.byType(StreamChannelListTile)).streamColorScheme;
+      expect(_deletedMessageColor(tester), colorScheme.textTertiary);
+    });
+
+    testWidgets('shows a deleted message in the themed preview style', (tester) async {
+      await pumpTile(
+        tester,
+        theme: const StreamChannelListItemThemeData(
+          messagePreviewTextTheme: StreamMessagePreviewTextThemeData(
+            deletedMessageStyle: TextStyle(color: Colors.orange),
+          ),
+        ),
+      );
+
+      expect(_deletedMessageColor(tester), Colors.orange);
+    });
+  });
+}
+
+// The color the "Message deleted" text paints with, after every ancestor
+// span's style is applied.
+Color? _deletedMessageColor(WidgetTester tester) {
+  final text = tester.widget<RichText>(
+    find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(RichText)).first,
+  );
+
+  Color? color;
+  void visit(InlineSpan span, TextStyle? inherited) {
+    if (span is! TextSpan) return;
+    final style = inherited?.merge(span.style) ?? span.style;
+    if (span.text == 'Message deleted') color = style?.color;
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      visit(child, style);
+    }
+  }
+
+  visit(text.text, null);
+  return color;
 }
 
 // Simulates a DM avatar — silent (wraps its sentinel text in

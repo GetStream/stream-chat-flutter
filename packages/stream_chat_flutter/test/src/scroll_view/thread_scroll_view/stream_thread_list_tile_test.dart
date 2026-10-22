@@ -238,12 +238,66 @@ void main() {
       },
     );
   });
+
+  testWidgets('shows a deleted root message in the tertiary text color', (tester) async {
+    final deletedThread = thread.copyWith(parentMessage: _deletedMessage());
+    await tester.pumpWidget(_wrapWithMaterialApp(StreamThreadListTile(thread: deletedThread, currentUser: user2)));
+
+    final colorScheme = tester.element(find.byType(StreamThreadListTile)).streamColorScheme;
+    expect(_deletedMessageColor(tester), colorScheme.textTertiary);
+  });
+
+  testWidgets('shows a deleted root message in the themed preview style', (tester) async {
+    final deletedThread = thread.copyWith(parentMessage: _deletedMessage());
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        StreamThreadListTileTheme(
+          data: const StreamThreadListTileThemeData(
+            messagePreviewTextTheme: StreamMessagePreviewTextThemeData(
+              deletedMessageStyle: TextStyle(color: Colors.orange),
+            ),
+          ),
+          child: StreamThreadListTile(thread: deletedThread, currentUser: user2),
+        ),
+      ),
+    );
+
+    expect(_deletedMessageColor(tester), Colors.orange);
+  });
 }
 
 // The background color the tile paints behind its content.
 Color? _tileBackground(WidgetTester tester) {
   final ink = find.descendant(of: find.byType(StreamThreadListTile), matching: find.byType(Ink));
   return (tester.widget<Ink>(ink).decoration! as ShapeDecoration).color;
+}
+
+Message _deletedMessage() => Message(
+  id: 'parent-message-id',
+  text: "Hey everyone, who's up for a group ride this Saturday morning?",
+  type: MessageType.deleted,
+  deletedAt: DateTime.parse('2021-07-20T17:00:00.000Z'),
+);
+
+// The color the "Message deleted" text paints with, after every ancestor
+// span's style is applied.
+Color? _deletedMessageColor(WidgetTester tester) {
+  final text = tester.widget<RichText>(
+    find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(RichText)).first,
+  );
+
+  Color? color;
+  void visit(InlineSpan span, TextStyle? inherited) {
+    if (span is! TextSpan) return;
+    final style = inherited?.merge(span.style) ?? span.style;
+    if (span.text == 'Message deleted') color = style?.color;
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      visit(child, style);
+    }
+  }
+
+  visit(text.text, null);
+  return color;
 }
 
 Widget _wrapWithMaterialApp(

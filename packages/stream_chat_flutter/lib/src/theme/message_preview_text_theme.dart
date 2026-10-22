@@ -78,7 +78,7 @@ class StreamMessagePreviewTextThemeData with _$StreamMessagePreviewTextThemeData
 
   /// The text style for the "Message deleted" text and its icon.
   ///
-  /// If null, defaults to the tertiary text color.
+  /// If null, matches the rest of the preview.
   final TextStyle? deletedMessageStyle;
 
   /// Linearly interpolates between two [StreamMessagePreviewTextThemeData]

@@ -256,6 +256,9 @@ class StreamChannelListTile extends StatelessWidget {
 
     final effectiveTitleStyle = channelListItemTheme.titleStyle ?? defaults.titleStyle;
     final effectiveSubtitleStyle = channelListItemTheme.subtitleStyle ?? defaults.subtitleStyle;
+    final effectiveMessagePreviewTextTheme = defaults.messagePreviewTextTheme
+        .merge(StreamMessagePreviewTextTheme.of(context))
+        .merge(channelListItemTheme.messagePreviewTextTheme);
     final effectiveTimestampStyle = channelListItemTheme.timestampStyle ?? defaults.timestampStyle;
     final effectiveAttributePosition = channelListItemTheme.attributePosition ?? defaults.attributePosition;
 
@@ -311,6 +314,7 @@ class StreamChannelListTile extends StatelessWidget {
                         subtitle: subtitle,
                         subtitleTrailing: subtitleTrailing,
                         subtitleStyle: effectiveSubtitleStyle,
+                        messagePreviewTextTheme: effectiveMessagePreviewTextTheme,
                       ),
                   ],
                 ),
@@ -396,11 +400,13 @@ class _SubtitleRow extends StatelessWidget {
     required this.subtitle,
     this.subtitleTrailing,
     required this.subtitleStyle,
+    required this.messagePreviewTextTheme,
   });
 
   final Widget? subtitle;
   final Widget? subtitleTrailing;
   final TextStyle subtitleStyle;
+  final StreamMessagePreviewTextThemeData messagePreviewTextTheme;
 
   @override
   Widget build(BuildContext context) {
@@ -416,7 +422,10 @@ class _SubtitleRow extends StatelessWidget {
             style: subtitleStyle,
             maxLines: 1,
             overflow: .ellipsis,
-            child: subtitle ?? const Empty(),
+            child: StreamMessagePreviewTextTheme(
+              data: messagePreviewTextTheme,
+              child: subtitle ?? const Empty(),
+            ),
           ),
         ),
         if (subtitleTrailing case final trailing?)
@@ -445,6 +454,11 @@ class _StreamChannelListItemThemeDefaults extends StreamChannelListItemThemeData
 
   @override
   TextStyle get subtitleStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textSecondary);
+
+  @override
+  StreamMessagePreviewTextThemeData get messagePreviewTextTheme => StreamMessagePreviewTextThemeData(
+    deletedMessageStyle: TextStyle(color: _colorScheme.textTertiary),
+  );
 
   @override
   TextStyle get timestampStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);

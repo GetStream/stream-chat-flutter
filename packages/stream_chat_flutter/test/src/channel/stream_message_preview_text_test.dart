@@ -78,7 +78,7 @@ void main() {
       expect(_extractText(tester), 'Message deleted');
     });
 
-    testWidgets('renders deleted message in the tertiary text color', (tester) async {
+    testWidgets('renders deleted message in the surrounding text color', (tester) async {
       final message = Message(
         text: 'Original message',
         type: MessageType.deleted,
@@ -86,13 +86,12 @@ void main() {
         deletedAt: DateTime.now(),
       );
 
-      await pumpMessagePreview(tester, message);
+      await pumpMessagePreview(tester, message, textStyle: const TextStyle(color: Colors.teal));
 
       final span = _getPreviewSpan(tester);
       final deletedSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Message deleted');
-      final textTertiary = tester.element(find.byType(StreamMessagePreviewText)).streamColorScheme.textTertiary;
-      expect(deletedSpan.style?.color, textTertiary);
-      expect(_iconColor(tester), textTertiary);
+      expect(deletedSpan.style?.color, isNull);
+      expect(_iconColor(tester), Colors.teal);
     });
 
     testWidgets('renders deleted message in the themed deleted style', (tester) async {
