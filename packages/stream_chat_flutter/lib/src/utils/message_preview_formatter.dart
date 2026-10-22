@@ -299,8 +299,9 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   /// Formats a deleted [message] as a preview [TextSpan].
   ///
   /// Shows a "no-sign" icon followed by the localized "Message deleted"
-  /// label, both styled with [StreamMessagePreviewTextThemeData.deletedTextStyle].
-  /// Defaults to the theme's tertiary text color to signal the deleted state.
+  /// label, both styled with
+  /// [StreamMessagePreviewTextThemeData.deletedTextStyle]. Defaults to the
+  /// theme's tertiary text color to signal the deleted state.
   @protected
   TextSpan formatDeletedMessage(BuildContext context, Message message) {
     final theme = StreamMessagePreviewTextTheme.of(context);
@@ -737,8 +738,8 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   }
 }
 
-// Default values for [StreamMessagePreviewTextThemeData] backed by stream design
-// tokens.
+// Default values for [StreamMessagePreviewTextThemeData] backed by stream
+// design tokens.
 class _StreamMessagePreviewTextDefaults extends StreamMessagePreviewTextThemeData {
   _StreamMessagePreviewTextDefaults(this._context);
 
@@ -759,10 +760,11 @@ class _StreamMessagePreviewTextDefaults extends StreamMessagePreviewTextThemeDat
 // ---------------------------------------------------------------------------
 // Span primitives
 //
-// The preview is composed from two small helpers:
+// The preview is composed from three small helpers:
 //
 //  * [_iconSpan]       — an inline icon as a [WidgetSpan].
 //  * [_labeledIcon]    — the common "icon + space + label" pattern.
+//  * [_senderSpan]     — the "You:" / "FirstName:" sender prefix.
 //
 // Most `format*` methods above reduce to a single call to [_labeledIcon].
 // ---------------------------------------------------------------------------
@@ -771,8 +773,8 @@ class _StreamMessagePreviewTextDefaults extends StreamMessagePreviewTextThemeDat
 // when [icon] is null; the text slot (and separator) is dropped when
 // [label] is empty.
 //
-// [textStyle] styles the label. The inline icon renders at its color, or the
-// surrounding icon color when it has none.
+// [textStyle] styles the label. The inline icon takes [textStyle]'s color, or
+// the surrounding icon color when that is null.
 TextSpan _labeledIcon({
   IconData? icon,
   required String label,

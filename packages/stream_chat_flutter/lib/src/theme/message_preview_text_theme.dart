@@ -5,8 +5,8 @@ import 'stream_chat_theme.dart';
 
 part 'message_preview_text_theme.g.theme.dart';
 
-/// Overrides the default style of [StreamMessagePreviewText] and
-/// [StreamDraftMessagePreviewText] descendants.
+/// An inherited theme that overrides the style of [StreamMessagePreviewText]
+/// and [StreamDraftMessagePreviewText] descendants.
 ///
 /// See also:
 ///
@@ -45,8 +45,7 @@ class StreamMessagePreviewTextTheme extends InheritedTheme {
 ///
 /// A message preview takes its base text style from where it is shown, such
 /// as a channel list item's subtitle or a quoted reply. These styles apply on
-/// top of that base. When a property is null the preview falls back to
-/// defaults derived from the ambient [StreamColorScheme].
+/// top of that base.
 ///
 /// See also:
 ///
@@ -67,14 +66,20 @@ class StreamMessagePreviewTextThemeData with _$StreamMessagePreviewTextThemeData
   });
 
   /// The text style for the deleted-message label and its icon.
+  ///
+  /// If null, defaults to the tertiary text color.
   final TextStyle? deletedTextStyle;
 
   /// The text style for the "Draft:" label that starts a
   /// [StreamDraftMessagePreviewText].
+  ///
+  /// If null, defaults to bold in the primary accent color.
   final TextStyle? draftLabelStyle;
 
   /// The text style for the sender name, such as "You:" or "Ann:", that
-  /// starts a preview in a channel list.
+  /// starts a preview in a channel or thread list.
+  ///
+  /// If null, defaults to bold.
   final TextStyle? senderTextStyle;
 
   /// Linearly interpolates between two [StreamMessagePreviewTextThemeData]

@@ -76,13 +76,23 @@ void main() {
       expect(icons.first.size, 16);
 
       expect(_extractText(tester), 'Message deleted');
+    });
+
+    testWidgets('renders deleted message in the tertiary text color', (tester) async {
+      final message = Message(
+        text: 'Original message',
+        type: MessageType.deleted,
+        user: User(id: 'other-user-id', name: 'Other User'),
+        deletedAt: DateTime.now(),
+      );
+
+      await pumpMessagePreview(tester, message);
 
       final span = _getPreviewSpan(tester);
-      final styledSpans = _findTextSpans(span);
-      final deletedSpan = styledSpans.firstWhere((s) => s.text == 'Message deleted');
+      final deletedSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Message deleted');
       final textTertiary = tester.element(find.byType(StreamMessagePreviewText)).streamColorScheme.textTertiary;
       expect(deletedSpan.style?.color, textTertiary);
-      expect(tester.widget<Icon>(find.byType(Icon)).color, textTertiary);
+      expect(_iconColor(tester), textTertiary);
     });
 
     testWidgets('renders deleted message in the themed deleted style', (tester) async {

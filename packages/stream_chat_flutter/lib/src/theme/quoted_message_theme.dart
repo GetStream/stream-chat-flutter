@@ -180,8 +180,8 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
   ///
   /// Applies on top of [subtitleTextStyle] and of any enclosing message
   /// preview theme. Only [StreamMessagePreviewTextThemeData.deletedTextStyle]
-  /// takes effect in a quote. Unless this sets a color, the deleted-message
-  /// label keeps [subtitleTextStyle]'s color.
+  /// takes effect in a quote. Unless this style sets a color, the
+  /// deleted-message label keeps [subtitleTextStyle]'s color.
   final StreamMessagePreviewTextThemeData? previewStyle;
 
   /// Linearly interpolate between two [StreamQuotedMessageThemeData] objects.
