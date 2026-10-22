@@ -65,6 +65,8 @@ class StreamMessagePreviewTextThemeData with _$StreamMessagePreviewTextThemeData
     this.draftPrefixStyle,
     this.senderPrefixStyle,
     this.deletedContentStyle,
+    this.iconSize,
+    this.iconColor,
   });
 
   /// The text style for the "Draft:" prefix that starts a
@@ -84,6 +86,16 @@ class StreamMessagePreviewTextThemeData with _$StreamMessagePreviewTextThemeData
   /// If null, matches the rest of the preview, except in the channel list,
   /// thread list and message search, which use a muted color.
   final TextStyle? deletedContentStyle;
+
+  /// The size of the icons in the preview, such as the photo or poll icon.
+  ///
+  /// Defaults to 16, or 12 in a quoted reply.
+  final double? iconSize;
+
+  /// The color of the icons in the preview.
+  ///
+  /// If null, each icon matches the text beside it.
+  final Color? iconColor;
 
   /// Linearly interpolates between two [StreamMessagePreviewTextThemeData]
   /// objects.

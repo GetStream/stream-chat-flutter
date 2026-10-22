@@ -747,6 +747,26 @@ void main() {
 
     expect(_deletedMessageColor(tester), Colors.orange);
   });
+
+  testWidgets('StreamChannelListTile shows 16-pixel preview icons', (tester) async {
+    await _pumpTile(tester, message: _deletedMessage());
+
+    expect(_previewIcon(tester).size, 16);
+  });
+
+  testWidgets('StreamChannelListTile shows preview icons in an app-wide icon color', (tester) async {
+    await _pumpTile(
+      tester,
+      message: _deletedMessage(),
+      chatTheme: StreamChatThemeData(
+        messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(iconColor: Colors.green),
+      ),
+    );
+
+    final colorScheme = tester.element(find.byType(StreamChannelListTile)).streamColorScheme;
+    expect(_previewIcon(tester).color, Colors.green);
+    expect(_deletedMessageColor(tester), colorScheme.textTertiary);
+  });
 }
 
 // Pumps a channel list tile whose subtitle previews [message].
@@ -797,6 +817,11 @@ Message _deletedMessage() => Message(
   user: User(id: 'jason', name: 'Jason Thompson'),
   deletedAt: DateTime.parse('2021-07-20T17:00:00.000Z'),
 );
+
+// The icon inside the message preview.
+Icon _previewIcon(WidgetTester tester) {
+  return tester.widget<Icon>(find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(Icon)));
+}
 
 // The color the "Message deleted" text paints with.
 Color? _deletedMessageColor(WidgetTester tester) => _deletedMessageStyle(tester)?.color;

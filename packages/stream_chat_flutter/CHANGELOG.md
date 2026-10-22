@@ -3,7 +3,7 @@
 ✅ Added
 
 - Added a next action to the poll creator's option fields, which moves to the next option or adds a new one from the last.
-- Added `StreamMessagePreviewTextTheme` and `StreamChatThemeData.messagePreviewTextTheme`, to style the "Draft:" and sender prefixes and the deleted message in message previews.
+- Added `StreamMessagePreviewTextTheme` and `StreamChatThemeData.messagePreviewTextTheme`, to style the "Draft:" and sender prefixes, the deleted message and the icons in message previews.
 - Added `messagePreviewTextTheme` to `StreamQuotedMessageThemeData`, `StreamChannelListItemThemeData` and `StreamThreadListTileThemeData`, to style parts of the message preview on each.
 
 🔄 Changed
@@ -24,6 +24,7 @@
 - Fixed a deleted message in a thread list preview showing in the tertiary text color instead of the secondary one.
 - Fixed the "You:" and sender name prefix in channel and thread list previews showing bold in the text color instead of semibold in the muted one.
 - Fixed the "Draft:" prefix in channel list previews showing bold instead of semibold.
+- Fixed icons in a quoted reply preview showing at 16 pixels instead of 12.
 
 ## 10.6.0
 

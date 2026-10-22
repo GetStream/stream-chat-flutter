@@ -45,6 +45,8 @@ mixin _$StreamMessagePreviewTextThemeData {
         b.deletedContentStyle,
         t,
       ),
+      iconSize: lerpDouble$(a.iconSize, b.iconSize, t),
+      iconColor: Color.lerp(a.iconColor, b.iconColor, t),
     );
   }
 
@@ -52,6 +54,8 @@ mixin _$StreamMessagePreviewTextThemeData {
     TextStyle? draftPrefixStyle,
     TextStyle? senderPrefixStyle,
     TextStyle? deletedContentStyle,
+    double? iconSize,
+    Color? iconColor,
   }) {
     final _this = (this as StreamMessagePreviewTextThemeData);
 
@@ -59,6 +63,8 @@ mixin _$StreamMessagePreviewTextThemeData {
       draftPrefixStyle: draftPrefixStyle ?? _this.draftPrefixStyle,
       senderPrefixStyle: senderPrefixStyle ?? _this.senderPrefixStyle,
       deletedContentStyle: deletedContentStyle ?? _this.deletedContentStyle,
+      iconSize: iconSize ?? _this.iconSize,
+      iconColor: iconColor ?? _this.iconColor,
     );
   }
 
@@ -85,6 +91,8 @@ mixin _$StreamMessagePreviewTextThemeData {
       deletedContentStyle:
           _this.deletedContentStyle?.merge(other.deletedContentStyle) ??
           other.deletedContentStyle,
+      iconSize: other.iconSize,
+      iconColor: other.iconColor,
     );
   }
 
@@ -103,7 +111,9 @@ mixin _$StreamMessagePreviewTextThemeData {
 
     return _other.draftPrefixStyle == _this.draftPrefixStyle &&
         _other.senderPrefixStyle == _this.senderPrefixStyle &&
-        _other.deletedContentStyle == _this.deletedContentStyle;
+        _other.deletedContentStyle == _this.deletedContentStyle &&
+        _other.iconSize == _this.iconSize &&
+        _other.iconColor == _this.iconColor;
   }
 
   @override
@@ -115,6 +125,8 @@ mixin _$StreamMessagePreviewTextThemeData {
       _this.draftPrefixStyle,
       _this.senderPrefixStyle,
       _this.deletedContentStyle,
+      _this.iconSize,
+      _this.iconColor,
     );
   }
 }
