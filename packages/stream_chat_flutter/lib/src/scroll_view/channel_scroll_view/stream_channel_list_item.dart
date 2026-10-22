@@ -258,20 +258,12 @@ class StreamChannelListTile extends StatelessWidget {
     final effectiveSubtitleStyle = channelListItemTheme.subtitleStyle ?? defaults.subtitleStyle;
     final previewTextTheme = channelListItemTheme.messagePreviewTextTheme;
     final outerPreviewTextTheme = StreamMessagePreviewTextTheme.of(context);
-    final defaultPreviewTextTheme = defaults.messagePreviewTextTheme;
-    final effectiveMessagePreviewTextTheme = StreamMessagePreviewTextThemeData(
-      draftPrefixStyle:
-          previewTextTheme?.draftPrefixStyle ??
-          outerPreviewTextTheme.draftPrefixStyle ??
-          defaultPreviewTextTheme.draftPrefixStyle,
-      senderPrefixStyle:
-          previewTextTheme?.senderPrefixStyle ??
-          outerPreviewTextTheme.senderPrefixStyle ??
-          defaultPreviewTextTheme.senderPrefixStyle,
-      deletedContentStyle:
-          previewTextTheme?.deletedContentStyle ??
-          outerPreviewTextTheme.deletedContentStyle ??
-          defaultPreviewTextTheme.deletedContentStyle,
+    final effectiveMessagePreviewTextTheme = defaults.messagePreviewTextTheme.merge(
+      StreamMessagePreviewTextThemeData(
+        draftPrefixStyle: previewTextTheme?.draftPrefixStyle ?? outerPreviewTextTheme.draftPrefixStyle,
+        senderPrefixStyle: previewTextTheme?.senderPrefixStyle ?? outerPreviewTextTheme.senderPrefixStyle,
+        deletedContentStyle: previewTextTheme?.deletedContentStyle ?? outerPreviewTextTheme.deletedContentStyle,
+      ),
     );
     final effectiveTimestampStyle = channelListItemTheme.timestampStyle ?? defaults.timestampStyle;
     final effectiveAttributePosition = channelListItemTheme.attributePosition ?? defaults.attributePosition;

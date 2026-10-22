@@ -507,7 +507,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
 
     final prefix = _labeledIcon(
       label: getDraftPrefix(context),
-      textStyle: theme.draftPrefixStyle ?? defaults.draftPrefixStyle,
+      textStyle: defaults.draftPrefixStyle.merge(theme.draftPrefixStyle),
     );
 
     return TextSpan(
@@ -801,7 +801,7 @@ TextSpan _senderSpan(BuildContext context, String text) {
   final theme = StreamMessagePreviewTextTheme.of(context);
   final defaults = _StreamMessagePreviewTextDefaults(context);
 
-  return TextSpan(text: text, style: theme.senderPrefixStyle ?? defaults.senderPrefixStyle);
+  return TextSpan(text: text, style: defaults.senderPrefixStyle.merge(theme.senderPrefixStyle));
 }
 
 // ---------------------------------------------------------------------------

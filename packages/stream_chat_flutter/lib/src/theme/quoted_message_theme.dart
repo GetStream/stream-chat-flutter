@@ -125,7 +125,8 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
   /// from the rest.
   ///
   /// Takes precedence over an enclosing [StreamMessagePreviewTextTheme] and
-  /// the app-wide one. If null, the whole preview uses [subtitleTextStyle].
+  /// the app-wide one. A quoted reply shows no sender or draft prefix. If
+  /// null, the whole preview uses [subtitleTextStyle].
   final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 
   /// Color of the leading indicator bar.

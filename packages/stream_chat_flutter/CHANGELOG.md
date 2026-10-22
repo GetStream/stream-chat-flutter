@@ -16,7 +16,7 @@
 - Fixed a mention rendering as another mentioned user's shorter mention followed by leftover text, such as `@Anna` next to `@Ann`.
 - Fixed the poll creator showing the reorder handle and remove button when there is only one option.
 - Fixed "Message deleted" in a quoted reply showing in a muted gray instead of the reply's text color.
-- Fixed icons in message previews showing in a different color from the text beside them.
+- Fixed icons in message previews showing in a different color from the text beside them. They no longer follow a surrounding `IconTheme`.
 - Fixed a quoted reply to your own message showing your name instead of "You".
 - Fixed a deleted message in a thread list preview showing in the tertiary text color instead of the secondary one.
 

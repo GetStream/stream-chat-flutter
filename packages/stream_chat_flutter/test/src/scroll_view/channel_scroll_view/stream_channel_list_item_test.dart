@@ -719,6 +719,21 @@ void main() {
       expect(_deletedMessageColor(tester), Colors.red);
     });
 
+    testWidgets('keeps the tertiary color under an app-wide italic deleted style', (tester) async {
+      await pumpTile(
+        tester,
+        chatTheme: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      );
+
+      final colorScheme = tester.element(find.byType(StreamChannelListTile)).streamColorScheme;
+      expect(_deletedMessageColor(tester), colorScheme.textTertiary);
+      expect(_deletedMessageFontStyle(tester), FontStyle.italic);
+    });
+
     testWidgets('shows a deleted message in the themed preview style', (tester) async {
       await pumpTile(
         tester,
@@ -734,25 +749,31 @@ void main() {
   });
 }
 
-// The color the "Message deleted" text paints with, after every ancestor
+// The color the "Message deleted" text paints with.
+Color? _deletedMessageColor(WidgetTester tester) => _deletedMessageStyle(tester)?.color;
+
+// The font style the "Message deleted" text paints with.
+FontStyle? _deletedMessageFontStyle(WidgetTester tester) => _deletedMessageStyle(tester)?.fontStyle;
+
+// The style the "Message deleted" text paints with, after every ancestor
 // span's style is applied.
-Color? _deletedMessageColor(WidgetTester tester) {
+TextStyle? _deletedMessageStyle(WidgetTester tester) {
   final text = tester.widget<RichText>(
     find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(RichText)).first,
   );
 
-  Color? color;
+  TextStyle? result;
   void visit(InlineSpan span, TextStyle? inherited) {
     if (span is! TextSpan) return;
     final style = inherited?.merge(span.style) ?? span.style;
-    if (span.text == 'Message deleted') color = style?.color;
+    if (span.text == 'Message deleted') result = style;
     for (final child in span.children ?? const <InlineSpan>[]) {
       visit(child, style);
     }
   }
 
   visit(text.text, null);
-  return color;
+  return result;
 }
 
 // Simulates a DM avatar — silent (wraps its sentinel text in

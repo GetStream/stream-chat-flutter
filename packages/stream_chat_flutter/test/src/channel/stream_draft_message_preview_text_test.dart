@@ -61,7 +61,7 @@ void main() {
       expect(style?.fontWeight, FontWeight.bold);
     });
 
-    testWidgets('renders the draft prefix in the themed style instead of its default', (tester) async {
+    testWidgets('renders the draft prefix in the themed style on top of its default', (tester) async {
       await pumpDraftMessagePreview(
         tester,
         DraftMessage(text: 'This is a draft message'),
@@ -73,7 +73,7 @@ void main() {
       );
 
       expect(_draftPrefixStyle(tester)?.color, Colors.purple);
-      expect(_draftPrefixStyle(tester)?.fontWeight, isNot(FontWeight.bold));
+      expect(_draftPrefixStyle(tester)?.fontWeight, FontWeight.bold);
     });
 
     testWidgets('renders attachment icons in the text color', (tester) async {

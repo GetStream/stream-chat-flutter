@@ -779,7 +779,7 @@ void main() {
       expect(nameSpan.style?.fontWeight, FontWeight.w500);
     });
 
-    testWidgets('group channel replaces the default sender style with the themed one', (tester) async {
+    testWidgets('group channel keeps the bold sender name under a color-only sender style', (tester) async {
       final channel = ChannelModel(
         id: 'test-channel',
         type: 'messaging',
@@ -805,7 +805,7 @@ void main() {
       final span = _getPreviewSpan(tester);
       final nameSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Jane: ');
       expect(nameSpan.style?.color, Colors.indigo);
-      expect(nameSpan.style?.fontWeight, isNull);
+      expect(nameSpan.style?.fontWeight, FontWeight.bold);
     });
 
     testWidgets('group channel prepends bold first name for other users', (tester) async {

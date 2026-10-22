@@ -99,7 +99,8 @@ class StreamThreadListTileThemeData with _$StreamThreadListTileThemeData {
   ///
   /// Takes precedence over an enclosing [StreamMessagePreviewTextTheme] and
   /// the app-wide one. Falls back to showing a deleted message in
-  /// [StreamColorScheme.textSecondary].
+  /// [StreamColorScheme.textSecondary], which a set deleted style keeps unless
+  /// it sets its own color. A thread list shows no draft prefix.
   final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 
   /// The style of the latest reply author username in the
