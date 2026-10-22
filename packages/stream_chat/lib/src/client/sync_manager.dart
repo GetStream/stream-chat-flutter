@@ -199,24 +199,19 @@ class SyncManager {
     }
 
     for (final page in cids.slices(_channelPageSize)) {
-      try {
-        final result = await client.queryChannelsOnline(
-          filter: ChannelFilter.in_(ChannelFilterField.cid, page),
-          paginationParams: PaginationParams(limit: page.length),
-          // Fail fast if the connection dropped again: the reconnect handler is
-          // waiting to announce recovery, and a sync would hold its lock.
-          waitForConnect: false,
-        );
+      final result = await client.queryChannelsOnline(
+        filter: ChannelFilter.in_(ChannelFilterField.cid, page),
+        paginationParams: PaginationParams(limit: page.length),
+        // Fail fast if the connection dropped again: the reconnect handler is
+        // waiting to announce recovery, and a sync would hold its lock.
+        waitForConnect: false,
+      );
 
-        switch (result) {
-          case Success(:final data):
-            refreshed.addAll(data.map((it) => it.cid).nonNulls);
-          case Failure(:final error, :final stackTrace):
-            onPageFailed(page.length, error, stackTrace ?? StackTrace.current);
-        }
-      } catch (error, stk) {
-        // Querying without an active connection throws.
-        onPageFailed(page.length, error, stk);
+      switch (result) {
+        case Success(:final data):
+          refreshed.addAll(data.map((it) => it.cid).nonNulls);
+        case Failure(:final error, :final stackTrace):
+          onPageFailed(page.length, error, stackTrace ?? StackTrace.current);
       }
     }
 

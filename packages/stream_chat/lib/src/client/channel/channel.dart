@@ -5,7 +5,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
-import 'package:stream_core/stream_core.dart' show runSafely;
+import 'package:stream_core/stream_core.dart' show runSafely, runSafelySync;
 import 'package:synchronized/synchronized.dart';
 
 import '../../../stream_chat.dart';
@@ -20,11 +20,10 @@ const incomingTypingStartEventTimeout = 7;
 /// #### Channel name
 ///
 /// {@template name}
-/// If an optional [name] argument is provided in the constructor then it
-/// will be set on [custom] with a key of 'name'.
+/// The name is stored in [custom] under the `name` key.
 ///
 /// ```dart
-/// final channel = Channel(client, type, id, name: 'Channel name');
+/// final channel = Channel(client, type, id, data: CreateChannelData(custom: {'name': 'Channel name'}));
 /// print(channel.name == channel.custom['name']); // true
 /// ```
 ///
@@ -44,11 +43,10 @@ const incomingTypingStartEventTimeout = 7;
 /// #### Channel image
 ///
 /// {@template image}
-/// If an optional [image] argument is provided in the constructor then it
-/// will be set on [custom] with a key of 'image'.
+/// The image is stored in [custom] under the `image` key.
 ///
 /// ```dart
-/// final channel = Channel(client, type, id, image: 'https://getstream.io/image.png');
+/// final channel = Channel(client, type, id, data: CreateChannelData(custom: {'image': 'https://getstream.io/image.png'}));
 /// print(channel.image == channel.custom['image']); // true
 /// ```
 ///
@@ -67,22 +65,16 @@ const incomingTypingStartEventTimeout = 7;
 class Channel {
   /// Creates a channel of [type] with the id [id].
   ///
-  /// The channel starts with [custom] as its custom data. A [name] or [image]
-  /// is stored in it under the `name` or `image` key, replacing any entry
-  /// [custom] has for that key.
+  /// A channel that does not exist yet is created with [data] when it is
+  /// first queried. Without an [id], the channel is the one the members in
+  /// [data] identify.
   Channel(
     this._client,
     this._type,
     this._id, {
-    String? name,
-    String? image,
-    Map<String, Object?>? custom,
+    CreateChannelData? data,
   }) : _cid = _id != null ? '$_type:$_id' : null,
-       _custom = {
-         ...?custom,
-         if (name != null) 'name': name,
-         if (image != null) 'image': image,
-       } {
+       _data = data ?? const CreateChannelData() {
     _logger.d(() => 'New Channel instance created, not yet initialized');
   }
 
@@ -95,7 +87,7 @@ class Channel {
       _id = channelState.channel!.id,
       _type = channelState.channel!.type,
       _cid = channelState.channel!.cid,
-      _custom = channelState.channel!.custom {
+      _data = CreateChannelData(custom: channelState.channel!.custom) {
     _initState(channelState); // Initialize the state immediately.
   }
 
@@ -109,7 +101,9 @@ class Channel {
 
   String? _id;
   String? _cid;
-  final Map<String, Object?> _custom;
+
+  // The data this channel is created with, until it is initialized.
+  CreateChannelData _data;
 
   /// Shortcut to set channel name.
   ///
@@ -121,7 +115,7 @@ class Channel {
         'to update the channel name',
       );
     }
-    _custom.addAll({'name': name});
+    _data = _data.copyWith(custom: {..._data.custom, 'name': name});
   }
 
   /// Shortcut to set channel image.
@@ -134,7 +128,7 @@ class Channel {
         'to update the channel image',
       );
     }
-    _custom.addAll({'image': image});
+    _data = _data.copyWith(custom: {..._data.custom, 'image': image});
   }
 
   set custom(Map<String, Object?> custom) {
@@ -144,7 +138,7 @@ class Channel {
         'to update channel data',
       );
     }
-    _custom.addAll(custom);
+    _data = _data.copyWith(custom: {..._data.custom, ...custom});
   }
 
   /// Whether this channel is identified by its member set rather than an
@@ -531,7 +525,7 @@ class Channel {
   ///
   /// Before the channel is initialized, this is the custom data it was created
   /// with, updated by any assignment to [name], [image] or [custom].
-  Map<String, Object?> get custom => state?.channelState.channel?.custom ?? _custom;
+  Map<String, Object?> get custom => state?.channelState.channel?.custom ?? _data.custom;
 
   /// List of user permissions on this channel
   List<ChannelCapability> get ownCapabilities => state?.channelState.channel?.ownCapabilities ?? [];
@@ -546,7 +540,7 @@ class Channel {
   Stream<Map<String, Object?>> get customStream {
     _checkInitialized();
     return state!.channelStateStream.map(
-      (cs) => cs.channel?.custom ?? _custom,
+      (cs) => cs.channel?.custom ?? _data.custom,
     );
   }
 
@@ -1755,20 +1749,15 @@ class Channel {
   /// The same as [updatePartial] with `set: {'image': image}`.
   Future<Result<UpdateChannelPartialResponse>> updateImage(String image) => updatePartial(set: {'image': image});
 
-  /// Replaces this channel's data with [channelData].
+  /// Replaces all of this channel's data with [channelData].
   ///
-  /// Every field [channelData] leaves out is cleared. An [updateMessage] is
-  /// sent to the channel as a system message.
+  /// An [updateMessage] is sent to the channel as a system message.
   ///
-  /// The `members`, `invites`, `team`, `frozen`, `disabled`,
-  /// `auto_translation_enabled`, `auto_translation_language` and
-  /// `config_overrides` entries set those fields; every other entry, `name`
-  /// and `image` included, is custom data. An entry whose value has another
-  /// type than its field returns a failure.
+  /// See also:
   ///
-  /// To change only some fields, consider [updatePartial].
+  ///  * [updatePartial], which changes only some fields.
   Future<Result<UpdateChannelResponse>> update(
-    Map<String, Object?> channelData, {
+    UpdateChannelData channelData, {
     Message? updateMessage,
   }) async {
     _checkInitialized();
@@ -1856,7 +1845,7 @@ class Channel {
     return _client.rejectChannelInvite(id!, type, message: message);
   }
 
-  /// Adds the users with the ids [memberIds] to this channel.
+  /// Adds [members] to this channel.
   ///
   /// A [message] is sent to the channel as a system message.
   ///
@@ -1864,7 +1853,7 @@ class Channel {
   /// or any earlier message when [hideHistory] is true. A [hideHistoryBefore]
   /// takes precedence over [hideHistory].
   Future<Result<UpdateChannelResponse>> addMembers(
-    List<String> memberIds, {
+    List<ChannelMemberData> members, {
     Message? message,
     bool hideHistory = false,
     DateTime? hideHistoryBefore,
@@ -1873,22 +1862,22 @@ class Channel {
     return _client.addChannelMembers(
       id!,
       type,
-      memberIds,
+      members,
       message: message,
       hideHistory: hideHistory,
       hideHistoryBefore: hideHistoryBefore,
     );
   }
 
-  /// Invites the users with the ids [memberIds] to this channel.
+  /// Invites [members] into this channel.
   ///
   /// A [message] is sent to the channel as a system message.
   Future<Result<UpdateChannelResponse>> inviteMembers(
-    List<String> memberIds, {
+    List<ChannelMemberData> members, {
     Message? message,
   }) async {
     _checkInitialized();
-    return _client.inviteChannelMembers(id!, type, memberIds, message: message);
+    return _client.inviteChannelMembers(id!, type, members, message: message);
   }
 
   /// Removes the users with the ids [memberIds] from this channel.
@@ -2106,8 +2095,6 @@ class Channel {
 
   /// Loads this channel's state and starts watching it, creating the channel
   /// first if it does not exist.
-  ///
-  /// The same as [query] with `watch: true`.
   Future<Result<ChannelStateResponse>> watch({
     bool presence = false,
     PaginationParams? messagesPagination,
@@ -2234,20 +2221,10 @@ class Channel {
   Future<Result<ChannelStateResponse>> create() => query(state: false);
 
   /// Loads this channel's state, creating the channel first if it does not
-  /// exist, and applies it to [Channel.state].
+  /// exist.
   ///
-  /// The state holds the messages, members and watchers when [state] is true,
-  /// paged by [messagesPagination], [membersPagination] and
-  /// [watchersPagination]. With [watch], this connection receives the
-  /// channel's events; with [presence], its members' presence changes.
-  ///
-  /// If [preferOffline] is true and the offline storage holds messages for the
-  /// page, that state is used instead of fetching it. When fetching fails
-  /// without [watch], the state stored offline is returned instead, if there
-  /// is one. Either answer reports a `0ms` duration.
-  ///
-  /// A failure that is not answered from the offline storage also completes
-  /// [initialized] with its error while the channel has no state.
+  /// If [preferOffline] is true, the state is read from the offline storage
+  /// when it holds the requested messages.
   Future<Result<ChannelStateResponse>> query({
     bool state = true,
     bool watch = false,
@@ -2265,15 +2242,19 @@ class Channel {
       _initializedCompleter = Completer<bool>();
     }
 
+    // If we prefer offline, we first try to get the channel state from the
+    // offline storage.
     final offlineState = preferOffline && !watch ? await _offlineChannelState(messagesPagination) : null;
-    final result = switch (offlineState) {
+    final fetched = switch (offlineState) {
+      // If the cached state contains messages, we can use it.
       final channelState? when channelState.messages?.isNotEmpty == true => Result.success(
         ChannelStateResponse(duration: '0ms', channelState: channelState),
       ),
+      // Otherwise, we try to get it from the API.
       _ => await _client.queryChannel(
         type,
         channelId: id,
-        channelData: _custom,
+        channelData: _data,
         state: state,
         watch: watch,
         presence: presence,
@@ -2283,17 +2264,28 @@ class Channel {
       ),
     };
 
-    switch (result) {
-      case Success(:final data):
+    // An error while applying the state is handled like a failed fetch.
+    final result = fetched.flatMap(
+      (data) => runSafelySync(() {
         _applyChannelState(data.channelState, messagesPagination: messagesPagination);
+        return data;
+      }),
+    );
+
+    switch (result) {
+      case Success():
         return result;
       case Failure(:final error, :final stackTrace):
+        // If we failed to get the channel state from the API and we were not
+        // supposed to watch the channel, we will try to get the channel state
+        // from the offline storage.
         if (!watch && _client.persistenceEnabled) {
           if (await _offlineChannelState(messagesPagination) case final channelState?) {
             return Result.success(ChannelStateResponse(duration: '0ms', channelState: channelState));
           }
         }
 
+        // Otherwise, we will just return the failure.
         _initializedCompleter.safeCompleteError(error, stackTrace);
         return result;
     }
@@ -2348,11 +2340,8 @@ class Channel {
     }
   }
 
-  /// Fetches one page of this channel's members that match [filter], ordered
-  /// by [sort].
-  ///
-  /// The page holds up to [PaginationParams.limit] members after skipping
-  /// [PaginationParams.offset], bounded by its `createdAt` dates.
+  /// Fetches the members of this channel that match [filter], ordered by
+  /// [sort].
   Future<Result<QueryMembersResponse>> queryMembers({
     MemberFilter? filter,
     List<MemberSort>? sort,

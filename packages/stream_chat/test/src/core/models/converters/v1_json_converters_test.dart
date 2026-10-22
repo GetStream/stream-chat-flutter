@@ -209,6 +209,20 @@ void main() {
     });
   });
 
+  test('Event.fromJson reads a zero last_message_at as no date', () {
+    final channel = Event.fromJson(const {
+      'type': 'channel.truncated',
+      'channel': {
+        'id': 'general',
+        'type': 'messaging',
+        'cid': 'messaging:general',
+        'last_message_at': '0001-01-01T00:00:00Z',
+      },
+    }).channel!;
+
+    expect(channel.lastMessageAt, isNull);
+  });
+
   test('Event.fromJson reads every channel field from its v1 keys', () {
     final channel = Event.fromJson(const {
       'type': 'channel.updated',

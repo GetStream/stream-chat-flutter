@@ -2248,7 +2248,7 @@ void main() {
         final channel = client.channel(
           channelType,
           id: channelId,
-          custom: channelData,
+          data: const CreateChannelData(custom: channelData),
         );
 
         expect(channel, isNotNull);
@@ -2267,7 +2267,7 @@ void main() {
         final channel = client.channel(
           channelType,
           id: channelId,
-          custom: channelData,
+          data: const CreateChannelData(custom: channelData),
         );
 
         final channelState = ChannelState(
@@ -3003,6 +3003,9 @@ void main() {
             message: 'Too many events',
           ),
         );
+        when(
+          () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
+        ).thenAnswer((_) async => Result.success(generatedQueryChannelsResponse(const [])));
 
         await client.sync();
 

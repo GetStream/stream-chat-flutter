@@ -19,10 +19,13 @@ void main() {
       final res = await client.queryChannel(
         'messaging',
         channelId: 'general',
-        channelData: const {
-          'name': 'General',
-          'members': ['mo', 'jo'],
-        },
+        channelData: const CreateChannelData(
+          members: [
+            ChannelMemberData(userId: 'mo'),
+            ChannelMemberData(userId: 'jo'),
+          ],
+          custom: {'name': 'General'},
+        ),
         watch: true,
         presence: true,
         messagesPagination: PaginationParams(
@@ -88,9 +91,12 @@ void main() {
 
     await client.queryChannel(
       'messaging',
-      channelData: const {
-        'members': ['mo', 'jo'],
-      },
+      channelData: const CreateChannelData(
+        members: [
+          ChannelMemberData(userId: 'mo'),
+          ChannelMemberData(userId: 'jo'),
+        ],
+      ),
     );
 
     verify(
@@ -113,61 +119,47 @@ void main() {
     verifyNoMoreInteractions(defaultApi);
   });
 
-  test(
-    'StreamChatClient.queryChannel sends the invites, team, flags and settings of a new channel as fields',
-    () async {
-      final defaultApi = _defaultApi();
-      final client = _client(defaultApi);
-
-      await client.queryChannel(
-        'messaging',
-        channelId: 'general',
-        channelData: const {
-          'invites': ['mo'],
-          'team': 'blue',
-          'frozen': true,
-          'disabled': false,
-          'auto_translation_enabled': true,
-          'auto_translation_language': 'fr',
-          'filter_tags': ['support'],
-          'config_overrides': {'replies': false},
-        },
-      );
-
-      final request =
-          verify(
-                () => defaultApi.getOrCreateChannel(
-                  type: 'messaging',
-                  id: 'general',
-                  channelGetOrCreateRequest: captureAny(named: 'channelGetOrCreateRequest'),
-                ),
-              ).captured.single
-              as api.ChannelGetOrCreateRequest;
-      expect(
-        request.data,
-        const api.ChannelInput(
-          invites: [api.ChannelMemberRequest(userId: 'mo')],
-          team: 'blue',
-          frozen: true,
-          disabled: false,
-          autoTranslationEnabled: true,
-          autoTranslationLanguage: 'fr',
-          filterTags: ['support'],
-          configOverrides: api.ChannelConfigOverrides(replies: false),
-          custom: {},
-        ),
-      );
-    },
-  );
-
-  test('StreamChatClient.queryChannel returns a failure without a request for a value of the wrong type', () async {
+  test('StreamChatClient.queryChannel sends every field of the data of a new channel', () async {
     final defaultApi = _defaultApi();
     final client = _client(defaultApi);
 
-    final res = await client.queryChannel('messaging', channelId: 'general', channelData: const {'team': 7});
+    await client.queryChannel(
+      'messaging',
+      channelId: 'general',
+      channelData: const CreateChannelData(
+        members: [
+          ChannelMemberData(userId: 'jo', channelRole: 'channel_moderator', custom: {'nickname': 'Jo'}),
+        ],
+        invites: [ChannelMemberData(userId: 'mo')],
+        team: 'blue',
+        frozen: true,
+        disabled: false,
+        custom: {'name': 'General'},
+      ),
+    );
 
-    expect(res.exceptionOrNull(), isA<StreamClientException>());
-    verifyZeroInteractions(defaultApi);
+    final request =
+        verify(
+              () => defaultApi.getOrCreateChannel(
+                type: 'messaging',
+                id: 'general',
+                channelGetOrCreateRequest: captureAny(named: 'channelGetOrCreateRequest'),
+              ),
+            ).captured.single
+            as api.ChannelGetOrCreateRequest;
+    expect(
+      request.data,
+      const api.ChannelInput(
+        members: [
+          api.ChannelMemberRequest(userId: 'jo', channelRole: 'channel_moderator', custom: {'nickname': 'Jo'}),
+        ],
+        invites: [api.ChannelMemberRequest(userId: 'mo')],
+        team: 'blue',
+        frozen: true,
+        disabled: false,
+        custom: {'name': 'General'},
+      ),
+    );
   });
 
   test('StreamChatClient.queryChannel returns the channel state with every field it models', () async {
@@ -272,7 +264,11 @@ void main() {
     final defaultApi = _defaultApi();
     final client = _client(defaultApi);
 
-    final res = await client.createChannel('messaging', channelId: 'general', channelData: const {'name': 'General'});
+    final res = await client.createChannel(
+      'messaging',
+      channelId: 'general',
+      channelData: const CreateChannelData(custom: {'name': 'General'}),
+    );
 
     expect(res.getOrNull()!.channelState.channel!.cid, 'messaging:general');
     verify(

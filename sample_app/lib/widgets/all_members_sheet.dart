@@ -430,9 +430,12 @@ Future<void> _openDirectChannel(BuildContext context, User user) async {
   } else {
     channel = chat.client.channel(
       'messaging',
-      custom: {
-        'members': [currentUser.id, user.id],
-      },
+      data: CreateChannelData(
+        members: [
+          ChannelMemberData(userId: currentUser.id),
+          ChannelMemberData(userId: user.id),
+        ],
+      ),
     );
     await channel.watch();
   }

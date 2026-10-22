@@ -12,7 +12,10 @@ import '../../core/models/predefined_filter.dart';
 import '../../core/models/push_level.dart';
 import '../../core/models/push_preference.dart';
 import '../../core/models/read.dart';
+import '../../core/models/request/channel_member_data.dart';
+import '../../core/models/request/create_channel_data.dart';
 import '../../core/models/request/message_delivery.dart';
+import '../../core/models/request/update_channel_data.dart';
 import '../../core/models/response/channel_state_response.dart';
 import '../../core/models/response/delete_channel_response.dart';
 import '../../core/models/response/event_response.dart';
@@ -65,6 +68,10 @@ extension ChannelResponseMapper on api.ChannelResponse {
 }
 
 // Whether [time] is the Unix epoch, which stands for no date.
+//
+// v2 encodes the last message date of a channel without messages as `0`, the
+// epoch, where v1 leaves it out or sends Go's zero date (year 1). Both read as
+// null, so the REST and WebSocket paths give the same channel.
 bool _isEpoch(DateTime time) => time.microsecondsSinceEpoch == 0;
 
 /// Maps a generated [api.ChannelConfigWithInfo] to a [ChannelConfig].
@@ -242,104 +249,36 @@ extension EventResponseMapper on api.EventResponse {
   EventResponse toModel() => EventResponse(duration: duration);
 }
 
-/// Converts the channel [data] a caller gives as one map into the
-/// [api.ChannelInput] that creates a channel.
-///
-/// `members` and `invites`, each a list of user ids or of member maps with a
-/// `user_id`, `team`, `frozen`, `disabled`, `auto_translation_enabled`,
-/// `auto_translation_language`, `config_overrides` and `filter_tags` become
-/// the request's fields; every other entry, `name` and `image` included, is
-/// sent as custom data. A value of another type than the field's throws.
-api.ChannelInput channelInputFromData(Map<String, Object?> data) {
-  final custom = {...data};
-  final fields = _extractChannelDataFields(custom);
-  final filterTags = custom.remove('filter_tags') as List<Object?>?;
-
-  return api.ChannelInput(
-    members: fields.members,
-    invites: fields.invites,
-    team: fields.team,
-    frozen: fields.frozen,
-    disabled: fields.disabled,
-    autoTranslationEnabled: fields.autoTranslationEnabled,
-    autoTranslationLanguage: fields.autoTranslationLanguage,
-    configOverrides: fields.configOverrides?.let(api.ChannelConfigOverrides.fromJson),
-    filterTags: filterTags?.cast<String>().toList(),
+/// Maps a [CreateChannelData] to the generated [api.ChannelInput].
+extension CreateChannelDataMapper on CreateChannelData {
+  /// Converts this data into the request that creates a channel with it.
+  api.ChannelInput toRequest() => api.ChannelInput(
+    members: members?.map((member) => member.toRequest()).toList(),
+    invites: invites?.map((member) => member.toRequest()).toList(),
+    team: team,
+    frozen: frozen,
+    disabled: disabled,
     custom: custom,
   );
 }
 
-/// Converts the channel [data] a caller gives as one map into the
-/// [api.ChannelInputRequest] that replaces a channel's data.
-///
-/// The entries map as in [channelInputFromData], except `filter_tags`, which
-/// stays custom data.
-api.ChannelInputRequest channelInputRequestFromData(Map<String, Object?> data) {
-  final custom = {...data};
-  final fields = _extractChannelDataFields(custom);
-
-  return api.ChannelInputRequest(
-    members: fields.members,
-    invites: fields.invites,
-    team: fields.team,
-    frozen: fields.frozen,
-    disabled: fields.disabled,
-    autoTranslationEnabled: fields.autoTranslationEnabled,
-    autoTranslationLanguage: fields.autoTranslationLanguage,
-    configOverrides: fields.configOverrides?.let(api.ConfigOverridesRequest.fromJson),
+/// Maps a [UpdateChannelData] to the generated [api.ChannelInputRequest].
+extension UpdateChannelDataMapper on UpdateChannelData {
+  /// Converts this data into the request that replaces a channel's data.
+  api.ChannelInputRequest toRequest() => api.ChannelInputRequest(
+    members: members?.map((member) => member.toRequest()).toList(),
+    invites: invites?.map((member) => member.toRequest()).toList(),
+    team: team,
+    frozen: frozen,
+    disabled: disabled,
     custom: custom,
   );
 }
 
-// The entries of channel data that both the create and the update request
-// carry as fields.
-typedef _ChannelDataFields = ({
-  List<api.ChannelMemberRequest>? members,
-  List<api.ChannelMemberRequest>? invites,
-  String? team,
-  bool? frozen,
-  bool? disabled,
-  bool? autoTranslationEnabled,
-  String? autoTranslationLanguage,
-  Map<String, Object?>? configOverrides,
-});
-
-// Removes the field entries from [data], leaving its custom data.
-_ChannelDataFields _extractChannelDataFields(Map<String, Object?> data) => (
-  members: _memberRequests(data.remove('members')),
-  invites: _memberRequests(data.remove('invites')),
-  team: data.remove('team') as String?,
-  frozen: data.remove('frozen') as bool?,
-  disabled: data.remove('disabled') as bool?,
-  autoTranslationEnabled: data.remove('auto_translation_enabled') as bool?,
-  autoTranslationLanguage: data.remove('auto_translation_language') as String?,
-  configOverrides: data.remove('config_overrides') as Map<String, Object?>?,
-);
-
-// The member requests for a list of user ids or member maps. A map's
-// `user_id` and `channel_role` become fields and its other entries the
-// member's custom data.
-List<api.ChannelMemberRequest>? _memberRequests(Object? members) {
-  if (members == null) return null;
-
-  return [
-    for (final member in members as List<Object?>)
-      switch (member) {
-        final String userId => api.ChannelMemberRequest(userId: userId),
-        final Map<String, Object?> member => _memberRequestFromMap(member),
-        _ => throw ArgumentError.value(member, 'members', 'Expected a user id or a member map'),
-      },
-  ];
-}
-
-api.ChannelMemberRequest _memberRequestFromMap(Map<String, Object?> member) {
-  final custom = {...member};
-  final userId =
-      custom.remove('user_id') as String? ??
-      (throw ArgumentError.value(member, 'members', 'Expected a member map with a user_id'));
-  final channelRole = custom.remove('channel_role') as String?;
-
-  return api.ChannelMemberRequest(
+/// Maps a [ChannelMemberData] to the generated [api.ChannelMemberRequest].
+extension ChannelMemberDataMapper on ChannelMemberData {
+  /// Converts this request into the generated one.
+  api.ChannelMemberRequest toRequest() => api.ChannelMemberRequest(
     userId: userId,
     channelRole: channelRole,
     custom: custom.isEmpty ? null : custom,

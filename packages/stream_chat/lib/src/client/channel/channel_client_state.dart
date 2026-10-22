@@ -566,20 +566,14 @@ class ChannelClientState {
       key: (read) => read.user.id,
     );
 
-    _channelState = _channelState.copyWith(
-      messages: newMessages,
-      channel: _channelState.channel?.merge(updatedState.channel),
-      watchers: newWatchers,
-      watcherCount: updatedState.watcherCount ?? _channelState.watcherCount,
-      members: updatedState.members ?? _channelState.members,
-      membership: updatedState.membership ?? _channelState.membership,
-      read: newReads,
-      draft: updatedState.draft,
-      pinnedMessages: updatedState.pinnedMessages ?? _channelState.pinnedMessages,
-      pendingMessages: updatedState.pendingMessages ?? _channelState.pendingMessages,
-      pushPreferences: updatedState.pushPreferences ?? _channelState.pushPreferences,
-      activeLiveLocations: updatedState.activeLiveLocations ?? _channelState.activeLiveLocations,
-    );
+    _channelState = _channelState
+        .merge(updatedState)
+        .copyWith(
+          messages: newMessages,
+          channel: _channelState.channel?.merge(updatedState.channel),
+          watchers: newWatchers,
+          read: newReads,
+        );
   }
 
   /// Applies a [remoteState] from a `query`/`watch` response or offline

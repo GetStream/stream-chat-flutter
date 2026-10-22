@@ -5,6 +5,33 @@ import '../../utils.dart';
 
 void main() {
   group('src/models/channel_state', () {
+    test('merge keeps the fields the other state leaves out', () {
+      final members = [Member(userId: 'alice')];
+      final state = ChannelState(
+        members: members,
+        watcherCount: 3,
+        pinnedMessages: [Message(id: 'pinned')],
+      );
+
+      final merged = state.merge(const ChannelState(watcherCount: 5));
+
+      expect(merged.members, members);
+      expect(merged.watcherCount, 5);
+      expect(merged.pinnedMessages?.map((it) => it.id), ['pinned']);
+    });
+
+    test('merge takes the draft of the other state, even when it has none', () {
+      final draft = Draft(
+        channelCid: 'messaging:123',
+        createdAt: DateTime.utc(2026),
+        message: DraftMessage(text: 'hi'),
+      );
+
+      final merged = ChannelState(draft: draft).merge(const ChannelState());
+
+      expect(merged.draft, isNull);
+    });
+
     test('should handle draft field correctly', () {
       final now = DateTime.now();
       final draftMessage = DraftMessage(text: 'Draft message');

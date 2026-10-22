@@ -81,7 +81,12 @@ void main() {
       expect(channel.custom['image'], imageUrl);
 
       const newImage = 'https://getstream.io/new-image';
-      final newChannelInstance = Channel(client, channelType, channelId, image: newImage);
+      final newChannelInstance = Channel(
+        client,
+        channelType,
+        channelId,
+        data: const CreateChannelData(custom: {'image': newImage}),
+      );
 
       expect(newChannelInstance.image, newImage);
       expect(newChannelInstance.custom['image'], newImage);
@@ -97,7 +102,12 @@ void main() {
       expect(channel.custom['name'], name);
 
       const newName = 'New channel name';
-      final newChannelInstance = Channel(client, channelType, channelId, name: newName);
+      final newChannelInstance = Channel(
+        client,
+        channelType,
+        channelId,
+        data: const CreateChannelData(custom: {'name': newName}),
+      );
 
       expect(newChannelInstance.name, newName);
       expect(newChannelInstance.custom['name'], newName);
@@ -135,6 +145,81 @@ void main() {
       // completed with an error).
       expect(() => channel.name = 'New name', returnsNormally);
       expect(channel.name, 'New name');
+    });
+
+    test('Channel.watch creates the channel with its data and the name set before watching', () async {
+      when(
+        () => client.queryChannel(
+          channelType,
+          channelId: any(named: 'channelId'),
+          channelData: any(named: 'channelData'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          messagesPagination: any(named: 'messagesPagination'),
+          membersPagination: any(named: 'membersPagination'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400)));
+      final newChannel = Channel(
+        client,
+        channelType,
+        channelId,
+        data: const CreateChannelData(
+          members: [ChannelMemberData(userId: 'mo')],
+          custom: {'topic': 'travel'},
+        ),
+      )..name = 'Travel';
+      addTearDown(newChannel.dispose);
+      final initializedFailure = expectLater(newChannel.initialized, throwsA(isA<StreamApiException>()));
+
+      await newChannel.watch();
+
+      verify(
+        () => client.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: const CreateChannelData(
+            members: [ChannelMemberData(userId: 'mo')],
+            custom: {'topic': 'travel', 'name': 'Travel'},
+          ),
+          state: any(named: 'state'),
+          watch: true,
+          presence: any(named: 'presence'),
+          messagesPagination: any(named: 'messagesPagination'),
+          membersPagination: any(named: 'membersPagination'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      ).called(1);
+      await initializedFailure;
+    });
+
+    test('Channel.watch returns a failure and fails initialization when the fetched state cannot be applied', () async {
+      // A channel without an id adopts the one of the fetched channel, which
+      // this state lacks.
+      when(
+        () => client.queryChannel(
+          channelType,
+          channelId: any(named: 'channelId'),
+          channelData: any(named: 'channelData'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          messagesPagination: any(named: 'messagesPagination'),
+          membersPagination: any(named: 'membersPagination'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      ).thenAnswer(
+        (_) async => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
+      );
+      final distinctChannel = Channel(client, channelType, null);
+      addTearDown(distinctChannel.dispose);
+      final initializedFailure = expectLater(distinctChannel.initialized, throwsA(isA<TypeError>()));
+
+      final res = await distinctChannel.watch();
+
+      expect(res.exceptionOrNull(), isA<TypeError>());
+      await initializedFailure;
     });
   });
 
@@ -3881,10 +3966,9 @@ void main() {
     });
 
     test('`.update`', () async {
-      const channelData = {
-        'name': 'Stream Team',
-        'profile_image': 'test-profile-image',
-      };
+      const channelData = UpdateChannelData(
+        custom: {'name': 'Stream Team', 'profile_image': 'test-profile-image'},
+      );
       final updateMessage = Message(
         id: 'test-message-id',
         text: 'updated channel',
@@ -3892,7 +3976,7 @@ void main() {
 
       final channelModel = ChannelModel(
         cid: channelCid,
-        custom: channelData,
+        custom: channelData.custom,
       );
 
       when(() => client.updateChannel(channelId, channelType, channelData, message: any(named: 'message'))).thenAnswer(
@@ -3908,7 +3992,7 @@ void main() {
 
       expect(res, isNotNull);
       expect(res.getOrNull()!.channel!.cid, channelModel.cid);
-      expect(res.getOrNull()!.channel!.custom, channelData);
+      expect(res.getOrNull()!.channel!.custom, channelData.custom);
       expect(res.getOrNull()!.message?.id, updateMessage.id);
 
       verify(() => client.updateChannel(channelId, channelType, channelData, message: any(named: 'message'))).called(1);
@@ -4079,20 +4163,20 @@ void main() {
         3,
         (index) => Member(userId: 'test-member-id-$index'),
       );
-      final memberIds = members.map((it) => it.userId).whereType<String>().toList(growable: false);
+      final memberData = [for (final member in members) ChannelMemberData(userId: member.userId!)];
       final message = Message(id: 'test-message-id', text: 'Members Added');
 
       final channelModel = ChannelModel(cid: channelCid);
 
       when(
-        () => client.addChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
+        () => client.addChannelMembers(channelId, channelType, memberData, message: any(named: 'message')),
       ).thenAnswer(
         (_) async => Result.success(
           UpdateChannelResponse(duration: '0.01ms', channel: channelModel, members: members, message: message),
         ),
       );
 
-      final res = await channel.addMembers(memberIds, message: message);
+      final res = await channel.addMembers(memberData, message: message);
 
       expect(res, isNotNull);
       expect(res.getOrNull()!.channel!.cid, channelModel.cid);
@@ -4100,7 +4184,7 @@ void main() {
       expect(res.getOrNull()!.message?.id, message.id);
 
       verify(
-        () => client.addChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
+        () => client.addChannelMembers(channelId, channelType, memberData, message: any(named: 'message')),
       ).called(1);
     });
 
@@ -4109,7 +4193,7 @@ void main() {
         3,
         (index) => Member(userId: 'test-member-id-$index'),
       );
-      final memberIds = members.map((it) => it.userId).whereType<String>().toList(growable: false);
+      final memberData = [for (final member in members) ChannelMemberData(userId: member.userId!)];
       final message = Message(id: 'test-message-id', text: 'Members Added');
       final hideHistoryBefore = DateTime.parse('2024-01-01T00:00:00Z');
 
@@ -4119,7 +4203,7 @@ void main() {
         () => client.addChannelMembers(
           channelId,
           channelType,
-          memberIds,
+          memberData,
           message: message,
           hideHistoryBefore: hideHistoryBefore,
         ),
@@ -4130,7 +4214,7 @@ void main() {
       );
 
       final res = await channel.addMembers(
-        memberIds,
+        memberData,
         message: message,
         hideHistoryBefore: hideHistoryBefore,
       );
@@ -4144,7 +4228,7 @@ void main() {
         () => client.addChannelMembers(
           channelId,
           channelType,
-          memberIds,
+          memberData,
           message: message,
           hideHistoryBefore: hideHistoryBefore,
         ),
@@ -4156,20 +4240,20 @@ void main() {
         3,
         (index) => Member(userId: 'test-member-id-$index'),
       );
-      final memberIds = members.map((it) => it.userId).whereType<String>().toList(growable: false);
+      final memberData = [for (final member in members) ChannelMemberData(userId: member.userId!)];
       final message = Message(id: 'test-message-id', text: 'Members Invited');
 
       final channelModel = ChannelModel(cid: channelCid);
 
       when(
-        () => client.inviteChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
+        () => client.inviteChannelMembers(channelId, channelType, memberData, message: any(named: 'message')),
       ).thenAnswer(
         (_) async => Result.success(
           UpdateChannelResponse(duration: '0.01ms', channel: channelModel, members: members, message: message),
         ),
       );
 
-      final res = await channel.inviteMembers(memberIds, message: message);
+      final res = await channel.inviteMembers(memberData, message: message);
 
       expect(res, isNotNull);
       expect(res.getOrNull()!.channel!.cid, channelModel.cid);
@@ -4177,7 +4261,7 @@ void main() {
       expect(res.getOrNull()!.message?.id, message.id);
 
       verify(
-        () => client.inviteChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
+        () => client.inviteChannelMembers(channelId, channelType, memberData, message: any(named: 'message')),
       ).called(1);
     });
 

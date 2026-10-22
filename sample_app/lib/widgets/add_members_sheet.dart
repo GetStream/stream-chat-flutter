@@ -114,7 +114,9 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
     final messenger = ScaffoldMessenger.of(context);
 
     setState(() => _saving = true);
-    final result = await _channel.addMembers(_selectedIds.toList());
+    final result = await _channel.addMembers([
+      for (final id in _selectedIds) ChannelMemberData(userId: id),
+    ]);
     if (!mounted) return;
 
     switch (result) {

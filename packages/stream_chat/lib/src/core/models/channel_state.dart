@@ -81,6 +81,30 @@ class ChannelState with _$ChannelState {
   /// The list of active live locations in the channel.
   @override
   final List<Location>? activeLiveLocations;
+
+  /// Returns this state updated with [other], a newer state of the same
+  /// channel.
+  ///
+  /// A field [other] leaves out keeps its value here, except [draft], which
+  /// takes the value of [other]. The [channel] is combined with
+  /// [ChannelModel.merge].
+  ChannelState merge(ChannelState? other) {
+    if (other == null) return this;
+    return ChannelState(
+      channel: channel?.merge(other.channel) ?? other.channel,
+      messages: other.messages ?? messages,
+      members: other.members ?? members,
+      pinnedMessages: other.pinnedMessages ?? pinnedMessages,
+      watcherCount: other.watcherCount ?? watcherCount,
+      watchers: other.watchers ?? watchers,
+      read: other.read ?? read,
+      membership: other.membership ?? membership,
+      draft: other.draft,
+      pendingMessages: other.pendingMessages ?? pendingMessages,
+      pushPreferences: other.pushPreferences ?? pushPreferences,
+      activeLiveLocations: other.activeLiveLocations ?? activeLiveLocations,
+    );
+  }
 }
 
 /// A filter for a channel query.

@@ -28,20 +28,15 @@ class DebugRemoveUser extends StatelessWidget {
         ),
         onSubmitted: (value) async {
           final userId = value.trim();
-          try {
-            debugPrint('[removeUser] userId: $userId');
-            final result = await client.removeChannelMembers(
-              channel.id!,
-              channel.type,
-              [userId],
-            );
-            debugPrint('[removeUser] result: $result');
-            if (result.exceptionOrNull() case final error?) {
-              showErrorDialog(context, error, 'Remove User');
-            }
-          } catch (e) {
-            debugPrint('[removeUser] failed: $e');
-            showErrorDialog(context, e, 'Remove User');
+          debugPrint('[removeUser] userId: $userId');
+          final result = await client.removeChannelMembers(
+            channel.id!,
+            channel.type,
+            [userId],
+          );
+          debugPrint('[removeUser] result: $result');
+          if (result.exceptionOrNull() case final error?) {
+            showErrorDialog(context, error, 'Remove User');
           }
         },
       ),

@@ -107,7 +107,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
 | [**Message Custom Data**](#message-custom-data) | `extraData` is `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`; a message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields |
 | [**Sending Events**](#sending-events) | `sendEvent` takes `type`, `parentId` and `custom` instead of an `Event` and returns a `Result<EventResponse>`; the typing calls, `stopAIResponse` and `KeyStrokeHandler` return a `Result<void>` instead of throwing |
-| [**Channels and Members**](#channels-and-members) | Querying, creating, watching, updating and truncating a channel, its invites and its members, and querying its members, return a `Result` instead of throwing; the invite and member calls answer an `UpdateChannelResponse`, and the channel queries a `ChannelStateResponse`; `ChannelState`, `ChannelModel`, `Member` and `PredefinedFilter` no longer decode JSON and compare by value, and the first three's `copyWith` clears a field passed as `null` |
+| [**Channels and Members**](#channels-and-members) | Querying, creating, watching, updating and truncating a channel, its invites and its members, and querying its members, return a `Result` instead of throwing; the invite and member calls answer an `UpdateChannelResponse`, and the channel queries a `ChannelStateResponse`; the data a channel is created or updated with and the members added to it are typed (`CreateChannelData`, `UpdateChannelData`, `ChannelMemberData`); `ChannelState`, `ChannelModel`, `Member` and `PredefinedFilter` no longer decode JSON and compare by value, and the first three's `copyWith` clears a field passed as `null` |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -344,7 +344,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `UpdateUsersResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `StreamChatApi.user.updateUsers` / `partialUpdateUsers` | `StreamChatClient.updateUsers` / `updateUsersPartial` | `removed` | The endpoints moved to the generated client |
 | `ChannelModel.extraData` / `Member.extraData` | `ChannelModel.custom` / `Member.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
-| `Channel.extraData` / `Channel.extraDataStream` / `Channel(…, extraData:)` / `StreamChatClient.channel(…, extraData:)` | `Channel.custom` / `Channel.customStream` / `custom:` | `renamed` | Follows `ChannelModel.custom`; the setter is renamed too |
+| `Channel.extraData` / `Channel.extraDataStream` / `Channel(…, extraData:)` / `StreamChatClient.channel(…, extraData:)` | `Channel.custom` / `Channel.customStream` / `data: CreateChannelData(custom: …)` | `renamed` | Follows `ChannelModel.custom`; the setter is renamed too |
 | `channel.extraData['disabled']` / `['hidden']` / `['muted']` / `['blocked']` / `['truncated_at']` / `['truncated_by']` / `['auto_translation_enabled']` / `['auto_translation_language']` | `ChannelModel.disabled` / `hidden` / `muted` / `blocked` / `truncatedAt` / `truncatedBy` / `autoTranslationEnabled` / `autoTranslationLanguage` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
 | `member.extraData['notifications_muted']` / `['status']` / `['ban_from_future_channels']` / `['future_channel_ban_expires']` / `['deleted_at']` | `Member.notificationsMuted` / `status` / `banFromFutureChannels` / `futureChannelBanExpires` / `deletedAt` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
 | `ChannelModel.custom` / `Member.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; it cannot overwrite the field |
@@ -473,6 +473,13 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChannel.queryMembers` → `Future<List<Member>>` | `Future<Result<List<Member>>>` | `retyped` | `stream_chat_flutter_core`. Returns a `Result` instead of throwing |
 | `StreamChannelListController.getChannel` → `Future<Channel>`, `leaveChannel` → `Future<void>` | `Future<Result<Channel>>` / `Future<Result<UpdateChannelResponse>>` | `retyped` | `stream_chat_flutter_core`. Returns a `Result` instead of throwing |
 | `StreamChatApi.channel.queryChannel` / `queryChannels` / `updateChannel` / `acceptChannelInvite` / `rejectChannelInvite` / `inviteChannelMembers` / `addMembers` / `removeMembers` / `truncateChannel`, `StreamChatApi.general.queryMembers` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
+| `Channel(…, custom: …, name: …, image: …)` / `StreamChatClient.channel(…, custom: …)` | `data: CreateChannelData(…)` | `retyped` | `members`, `invites`, `team`, `frozen` and `disabled` are fields; `name`, `image` and everything else go in its `custom` |
+| `queryChannel` / `watchChannel` / `createChannel(channelData: Map)` | `channelData: CreateChannelData` | `retyped` | Same fields as the constructor's `data` |
+| `StreamChatClient.updateChannel(…, Map data)` / `Channel.update(Map channelData)` | `UpdateChannelData` | `retyped` | Same fields as `CreateChannelData` |
+| `'members'` / `'invites'` entries of the channel data: a user id or `{'user_id': …, 'channel_role': …}` | `ChannelMemberData(userId: …, channelRole: …, custom: …)` | `retyped` | |
+| `'filter_tags'` / `'config_overrides'` / `'auto_translation_*'` entries of the channel data | — | `removed` | Not settable through the channel data any more |
+| `addChannelMembers` / `inviteChannelMembers` / `Channel.addMembers` / `Channel.inviteMembers(List<String>)` | `List<ChannelMemberData>` | `retyped` | Wrap each id: `ChannelMemberData(userId: id)`; a role and custom data can be set too |
+| _(new)_ | `ChannelState.merge` | `added` | Folds a newer state of the channel in, keeping the fields it leaves out |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -1189,7 +1196,7 @@ try {
 }
 
 // v11
-final result = await channel.addMembers([userId]);
+final result = await channel.addMembers([ChannelMemberData(userId: userId)]);
 if (result case Failure(:final error)) report(error);
 ```
 
@@ -1241,19 +1248,40 @@ state.copyWith(members: newMembers ?? state.members);
 **`Member.copyWith` no longer takes `role`,** which it ignored; set `channelRole`. A member's `role`, and a
 channel's `hide_messages_before` and `mute_expires_at`, are no longer kept in `custom`.
 
-**The `members`, `invites`, `team`, `frozen`, `disabled`, `config_overrides` and auto-translation entries of the
-data a channel is created or updated with, and `filter_tags` on creation, must have their field's type.** They set
-those fields as before; a value of another type, such as a `members` entry that is neither a user id nor a member
-map, returns a failure instead of being sent.
+**The data a channel is created or updated with is typed.** `Channel` and `StreamChatClient.channel` take a
+`CreateChannelData` as `data` instead of `custom`, `name` and `image`; `queryChannel`, `watchChannel` and
+`createChannel` take one as `channelData`; and `updateChannel` and `Channel.update` take an `UpdateChannelData`
+instead of a map. Both hold the `members`, `invites`, `team`, `frozen` and `disabled` fields, with everything else
+in `custom`. A channel's name and image are custom data under `name` and `image`, and the `name`, `image` and
+`custom` setters still work before the channel is initialized.
 
-**A member given as a map sends its other entries as the member's custom data.** In
-`{'user_id': 'b', 'channel_role': 'channel_moderator', 'color': 'red'}`, `channel_role` sets the role and `color`
-is custom data; v10 rejected a member map when creating a channel.
+```dart
+// v10
+final channel = client.channel('messaging', id: 'team', custom: {
+  'name': 'Team',
+  'members': [me, {'user_id': other, 'channel_role': 'channel_moderator'}],
+});
+await channel.update({'name': 'Team', 'frozen': true});
+
+// v11
+final channel = client.channel('messaging', id: 'team', data: CreateChannelData(
+  members: [ChannelMemberData(userId: me), ChannelMemberData(userId: other, channelRole: 'channel_moderator')],
+  custom: {'name': 'Team'},
+));
+await channel.update(const UpdateChannelData(frozen: true, custom: {'name': 'Team'}));
+```
+
+**The data can no longer set a channel's filter tags, config overrides or auto-translation settings.** An entry
+with one of those names in `custom` is custom data.
+
+**`addChannelMembers` and `inviteChannelMembers`, and `Channel.addMembers` and `inviteMembers`, take
+`ChannelMemberData`s instead of user ids,** so a member's channel role and custom data can be set as it is added or
+invited. `removeMembers` still takes ids.
 
 **A member v11 adds carries an entry named `custom` in its custom data.** That covers members added when creating a
-channel and by `addMembers` and `inviteMembers`. Given as a user id, or as a map with no other entries, the member
-reads back with `custom: {'custom': null}`. Given other entries, a channel query reads them as the member's custom
-data, but its events and other SDKs see them nested under `custom`. A member that already belongs to the channel
+channel and by `addMembers` and `inviteMembers`. Without custom data, the member reads back with
+`custom: {'custom': null}`. With custom data, a channel query reads it as the member's custom data, but its events
+and other SDKs see it nested under `custom`. A member that already belongs to the channel
 keeps its custom data.
 
 **In `stream_chat_flutter_core`, the calls built on these return a `Result` too.** `StreamChannel.queryBeforeMessage`
@@ -1268,13 +1296,15 @@ and `queryAfterMessage` answer a `Result<ChannelState>`; `loadChannelAtMessage`,
 
 > **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. The invite and
 > member calls share one API response, so they answer one type. The public models stop being wire shapes, so the
-> API payload can change without changing the type a caller holds.
+> API payload can change without changing the type a caller holds, and the data a channel is created or updated
+> with is checked by the compiler rather than discovered by the server.
 
 ### Channel and Member Custom Data
 
 **`extraData` is renamed `custom` on `ChannelModel`, `Member` and `Channel`.** That covers the fields, the
-constructor and `copyWith` arguments, `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the
-`extraData` argument of `StreamChatClient.channel`.
+constructor and `copyWith` arguments, `Channel.extraData` and `Channel.extraDataStream` (now `customStream`). The
+`extraData` argument of `Channel` and `StreamChatClient.channel` becomes the `custom` of their `CreateChannelData` —
+see [Channels and Members](#channels-and-members).
 
 ```dart
 // v10
@@ -1282,7 +1312,7 @@ final channel = client.channel('messaging', id: 'general', extraData: {'topic': 
 final topic = channel.extraData['topic'];
 
 // v11
-final channel = client.channel('messaging', id: 'general', custom: {'topic': 'support'});
+final channel = client.channel('messaging', id: 'general', data: const CreateChannelData(custom: {'topic': 'support'}));
 final topic = channel.custom['topic'];
 ```
 

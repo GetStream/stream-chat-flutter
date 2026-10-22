@@ -109,12 +109,12 @@ class _NewChatScreenState extends State<NewChatScreen> {
         } else {
           channel = chatState.client.channel(
             'messaging',
-            custom: {
-              'members': [
-                ..._selectedUsers.map((e) => e.id),
-                chatState.currentUser!.id,
+            data: CreateChannelData(
+              members: [
+                ..._selectedUsers.map((e) => ChannelMemberData(userId: e.id)),
+                ChannelMemberData(userId: chatState.currentUser!.id),
               ],
-            },
+            ),
           );
         }
 

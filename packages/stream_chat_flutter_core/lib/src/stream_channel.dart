@@ -772,11 +772,7 @@ class StreamChannelState extends State<StreamChannel> {
     return null;
   }
 
-  /// Fetches one page of the channel's members that match [filter], ordered
-  /// by [sort].
-  ///
-  /// The page holds up to [PaginationParams.limit] members after skipping
-  /// [PaginationParams.offset], bounded by its `createdAt` dates.
+  /// Fetches the channel's members that match [filter], ordered by [sort].
   Future<Result<List<Member>>> queryMembers({
     MemberFilter? filter,
     List<MemberSort>? sort,

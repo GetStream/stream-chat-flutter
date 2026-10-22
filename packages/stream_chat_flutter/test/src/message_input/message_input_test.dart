@@ -584,9 +584,11 @@ void main() {
     });
 
     testWidgets(
-      'DefaultStreamMessageComposer does not send the message when reloading an out-of-date channel fails',
+      'DefaultStreamMessageComposer reports a failed reload of an out-of-date channel to onError instead of sending',
       (tester) async {
-        final key = await _pumpComposer(tester, client, channel);
+        const error = StreamClientException(message: 'offline');
+        final errors = <Object>[];
+        final key = await _pumpComposer(tester, client, channel, onError: (error, _) => errors.add(error));
         // The group shares the channel, so forget the sends of earlier tests.
         clearInteractions(channel);
         when(() => channelState.isUpToDate).thenReturn(false);
@@ -596,11 +598,12 @@ void main() {
             preferOffline: any(named: 'preferOffline'),
             messagesPagination: any(named: 'messagesPagination'),
           ),
-        ).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'offline')));
+        ).thenAnswer((_) async => const Result.failure(error));
 
         await key.currentState!.sendMessage();
         await tester.pump(const Duration(seconds: 1));
 
+        expect(errors, [error]);
         verifyNever(() => channel.sendMessage(any()));
       },
     );

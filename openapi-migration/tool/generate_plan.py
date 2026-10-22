@@ -1042,8 +1042,9 @@ GROUPS = [
             - **Moved off `ChannelApi` and `GeneralApi`:** `queryChannel`, `queryChannels`, `updateChannel`,
               `acceptChannelInvite`, `rejectChannelInvite`, `inviteChannelMembers`, `addMembers`, `removeMembers`,
               `truncateChannel` and `queryMembers`, each a `StreamChatClient` method over `ChannelsRepository`.
-              `queryChannel` calls `getOrCreateChannel` when given an id and `getOrCreateDistinctChannel`
-              otherwise. `sync` stays hand-written and moves with the WebSocket's move to v2.
+              The repository does the routing: `getOrCreateChannel` calls the generated `getOrCreateChannel` when
+              given an id and `getOrCreateDistinctChannel` otherwise, and the update, member and invite calls each
+              build their own `UpdateChannelRequest`. `sync` stays hand-written and moves with the WebSocket's move to v2.
             - **A single-channel query answers `ChannelStateResponse`,** a freezed envelope holding the
               `ChannelState`, from `queryChannel`, `watchChannel` and `Channel.query`, `watch` and `create`; the
               unused v10 class of that name goes. An answer read from the offline storage carries a `'0ms'`
@@ -1060,11 +1061,15 @@ GROUPS = [
               `limit` and `offset` for `queryChannels`; the message cursors for a channel query's messages, and
               `limit` and `offset` for its members and watchers; `limit`, `offset` and the four `created_at`
               cursors for `queryMembers`.
-            - **The request mapper splits creation and update data.** From the map `Channel`,
-              `StreamChatClient.channel` and `Channel.update` take, `members`, `invites`, `team`, `frozen`,
-              `disabled`, `config_overrides`, the auto-translation settings and, on creation, `filter_tags` become
-              the request's typed fields; everything else, `name` and `image` included, is sent as `custom`. A
-              member may be given as an id or as a map.
+            - **The channel data is typed:** `CreateChannelData` (the `Channel` constructor and
+              `StreamChatClient.channel` take it as `data`, the channel queries as `channelData`) and
+              `UpdateChannelData` (`updateChannel`, `Channel.update`) replace the untyped map, named per operation so
+              a create-only field never has to sit unused on the update type; `ChannelMemberData` replaces member
+              ids in the members, invites, `addMembers` and `inviteMembers`. They hold `members`, `invites`, `team`,
+              `frozen`, `disabled` and `custom`. `filter_tags` is left out as not meant for integrators, and
+              `config_overrides` and the auto-translation settings because a client cannot set them (401/403 live).
+            - **`ChannelState.merge`** folds a newer state in, keeping the fields it leaves out, for
+              `ChannelClientState.updateChannelState`; the one-off merges elsewhere stay explicit.
             - **`ChannelState`, `ChannelModel`, `Member`, `ChannelConfig` and `PredefinedFilter` become plain
               freezed models,** with freezed's `copyWith`: each call site that relied on `null` keeping a value
               merges explicitly. `ChannelModel` and `Member` keep a v1 decoder for the WebSocket, keyed by the

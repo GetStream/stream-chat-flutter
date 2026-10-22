@@ -15,7 +15,12 @@ void main() {
       final defaultApi = _defaultApi();
       final client = _client(defaultApi);
 
-      final res = await client.inviteChannelMembers('general', 'messaging', ['mo', 'jo'], message: systemMessage);
+      final res = await client.inviteChannelMembers(
+        'general',
+        'messaging',
+        const [ChannelMemberData(userId: 'mo', channelRole: 'channel_moderator'), ChannelMemberData(userId: 'jo')],
+        message: systemMessage,
+      );
 
       expectUpdateChannelResponse(res.getOrNull());
       verify(
@@ -24,7 +29,7 @@ void main() {
           id: 'general',
           updateChannelRequest: const api.UpdateChannelRequest(
             invites: [
-              api.ChannelMemberRequest(userId: 'mo'),
+              api.ChannelMemberRequest(userId: 'mo', channelRole: 'channel_moderator'),
               api.ChannelMemberRequest(userId: 'jo'),
             ],
             message: systemMessageRequest,
@@ -47,7 +52,7 @@ void main() {
     ).thenAnswer((_) async => const Result.failure(error));
     final client = _client(defaultApi);
 
-    final res = await client.inviteChannelMembers('general', 'messaging', ['mo']);
+    final res = await client.inviteChannelMembers('general', 'messaging', const [ChannelMemberData(userId: 'mo')]);
 
     expect(res.exceptionOrNull(), error);
   });

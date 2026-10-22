@@ -64,13 +64,13 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                     final channel = client.channel(
                       'messaging',
                       id: const Uuid().v4(),
-                      custom: {
-                        'members': [
-                          client.state.currentUser!.id,
-                          ...widget.groupChatState.users.map((e) => e.id),
+                      data: CreateChannelData(
+                        members: [
+                          ChannelMemberData(userId: client.state.currentUser!.id),
+                          ...widget.groupChatState.users.map((e) => ChannelMemberData(userId: e.id)),
                         ],
-                        'name': groupName,
-                      },
+                        custom: {'name': groupName},
+                      ),
                     );
                     if (await channel.watch() case Failure()) {
                       _showErrorAlert();

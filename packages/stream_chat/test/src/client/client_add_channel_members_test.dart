@@ -10,12 +10,20 @@ void main() {
   setUpAll(() => registerFallbackValue(const api.UpdateChannelRequest()));
 
   test(
-    'StreamChatClient.addChannelMembers sends the added users and the message and returns the updated channel',
+    'StreamChatClient.addChannelMembers sends the added members and the message and returns the updated channel',
     () async {
       final defaultApi = _defaultApi();
       final client = _client(defaultApi);
 
-      final res = await client.addChannelMembers('general', 'messaging', ['mo', 'jo'], message: systemMessage);
+      final res = await client.addChannelMembers(
+        'general',
+        'messaging',
+        const [
+          ChannelMemberData(userId: 'mo', channelRole: 'channel_moderator', custom: {'nickname': 'Mo'}),
+          ChannelMemberData(userId: 'jo'),
+        ],
+        message: systemMessage,
+      );
 
       expectUpdateChannelResponse(res.getOrNull());
       verify(
@@ -24,7 +32,7 @@ void main() {
           id: 'general',
           updateChannelRequest: const api.UpdateChannelRequest(
             addMembers: [
-              api.ChannelMemberRequest(userId: 'mo'),
+              api.ChannelMemberRequest(userId: 'mo', channelRole: 'channel_moderator', custom: {'nickname': 'Mo'}),
               api.ChannelMemberRequest(userId: 'jo'),
             ],
             message: systemMessageRequest,
@@ -40,7 +48,7 @@ void main() {
     final defaultApi = _defaultApi();
     final client = _client(defaultApi);
 
-    await client.addChannelMembers('general', 'messaging', ['mo'], hideHistory: true);
+    await client.addChannelMembers('general', 'messaging', const [ChannelMemberData(userId: 'mo')], hideHistory: true);
 
     verify(
       () => defaultApi.updateChannel(
@@ -64,7 +72,7 @@ void main() {
       await client.addChannelMembers(
         'general',
         'messaging',
-        ['mo'],
+        const [ChannelMemberData(userId: 'mo')],
         hideHistory: true,
         hideHistoryBefore: DateTime.utc(2026, 3),
       );
@@ -95,7 +103,7 @@ void main() {
     ).thenAnswer((_) async => const Result.failure(error));
     final client = _client(defaultApi);
 
-    final res = await client.addChannelMembers('general', 'messaging', ['mo']);
+    final res = await client.addChannelMembers('general', 'messaging', const [ChannelMemberData(userId: 'mo')]);
 
     expect(res.exceptionOrNull(), error);
   });

@@ -145,7 +145,7 @@ ChannelModel _channelModelFromV1Json(Map<String, dynamic> json) {
       _ => null,
     },
     frozen: data['frozen'] as bool? ?? false,
-    lastMessageAt: _dateTimeOrNull(data['last_message_at']),
+    lastMessageAt: _lastMessageAtOrNull(data['last_message_at']),
     createdAt: _dateTimeOrNull(data['created_at']),
     updatedAt: _dateTimeOrNull(data['updated_at']),
     deletedAt: _dateTimeOrNull(data['deleted_at']),
@@ -160,7 +160,7 @@ ChannelModel _channelModelFromV1Json(Map<String, dynamic> json) {
     blocked: data['blocked'] as bool?,
     truncatedAt: _dateTimeOrNull(data['truncated_at']),
     messageCount: (data['message_count'] as num?)?.toInt(),
-    filterTags: (data['filter_tags'] as List<dynamic>?)?.cast<String>(),
+    filterTags: (data['filter_tags'] as List<dynamic>?)?.map((it) => it as String).toList(),
     truncatedBy: switch (data['truncated_by']) {
       final Map<String, dynamic> user => User.fromJson(user),
       _ => null,
@@ -280,7 +280,7 @@ Member _memberFromV1Json(Map<String, dynamic> json) {
     shadowBanned: data['shadow_banned'] as bool? ?? false,
     pinnedAt: _dateTimeOrNull(data['pinned_at']),
     archivedAt: _dateTimeOrNull(data['archived_at']),
-    deletedMessages: (data['deleted_messages'] as List<dynamic>?)?.cast<String>() ?? const [],
+    deletedMessages: (data['deleted_messages'] as List<dynamic>?)?.map((it) => it as String).toList() ?? const [],
     custom: data['extra_data'] as Map<String, dynamic>? ?? const {},
     notificationsMuted: data['notifications_muted'] as bool?,
     status: data['status'] as String?,
@@ -552,6 +552,16 @@ ReactionGroup _reactionGroupFromV1Json(Map<String, dynamic> json) => ReactionGro
 const _dateTime = StreamDateTimeConverter();
 
 DateTime? _dateTimeOrNull(Object? json) => json == null ? null : _dateTime.fromJson(json);
+
+// A channel's last message date, or null for Go's zero date (year 1), which
+// v1 sends for a channel without messages.
+//
+// v2 sends the Unix epoch instead, which the channels mapper reads as null
+// too, so the REST and WebSocket paths give the same channel.
+DateTime? _lastMessageAtOrNull(Object? json) => switch (_dateTimeOrNull(json)) {
+  final date? when date.year > 1 => date,
+  _ => null,
+};
 
 // Reads the keys directly rather than through the generated group type, whose members require `app_pk`: a payload
 // without it should not fail the whole message.

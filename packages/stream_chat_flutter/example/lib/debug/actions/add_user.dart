@@ -28,20 +28,15 @@ class DebugAddUser extends StatelessWidget {
         ),
         onSubmitted: (value) async {
           final userId = value.trim();
-          try {
-            debugPrint('[addUser] userId: $userId');
-            final result = await client.addChannelMembers(
-              channel.id!,
-              channel.type,
-              [userId],
-            );
-            debugPrint('[addUser] result: $result');
-            if (result.exceptionOrNull() case final error?) {
-              showErrorDialog(context, error, 'Add User');
-            }
-          } catch (e) {
-            debugPrint('[addUser] failed: $e');
-            showErrorDialog(context, e, 'Add User');
+          debugPrint('[addUser] userId: $userId');
+          final result = await client.addChannelMembers(
+            channel.id!,
+            channel.type,
+            [ChannelMemberData(userId: userId)],
+          );
+          debugPrint('[addUser] result: $result');
+          if (result.exceptionOrNull() case final error?) {
+            showErrorDialog(context, error, 'Add User');
           }
         },
       ),

@@ -63,8 +63,11 @@ import '../core/models/poll_vote.dart';
 import '../core/models/push_preference.dart';
 import '../core/models/push_provider.dart';
 import '../core/models/reaction.dart';
+import '../core/models/request/channel_member_data.dart';
+import '../core/models/request/create_channel_data.dart';
 import '../core/models/request/message_delivery.dart';
 import '../core/models/request/thread_options.dart';
+import '../core/models/request/update_channel_data.dart';
 import '../core/models/request/update_user_partial_request.dart';
 import '../core/models/response/add_user_group_members_response.dart';
 import '../core/models/response/app_settings_response.dart';
@@ -927,9 +930,7 @@ class StreamChatClient {
     }
   }
 
-  /// Fetches the channels matching a query from the API.
-  ///
-  /// Takes the same arguments as [queryChannels], whose online step this is.
+  /// Fetches the channels matching [filter] from the API.
   ///
   /// Throws a [StateError] when [waitForConnect] is true and no connection
   /// opens.
@@ -1344,29 +1345,19 @@ class StreamChatClient {
     cancelToken: cancelToken,
   );
 
-  /// Replaces a channel's data with [data].
+  /// Replaces all of a channel's data with [data].
   ///
-  /// Every field [data] leaves out is cleared. A [message] is sent to the
-  /// channel as a system message.
+  /// A [message] is sent to the channel as a system message.
   ///
-  /// The `members`, `invites`, `team`, `frozen`, `disabled`,
-  /// `auto_translation_enabled`, `auto_translation_language` and
-  /// `config_overrides` entries set those fields; every other entry, `name`
-  /// and `image` included, is custom data. An entry whose value has another
-  /// type than its field returns a failure.
+  /// See also:
   ///
-  /// Use [updateChannelPartial] for a partial update.
+  ///  * [updateChannelPartial], which changes only some fields.
   Future<Result<UpdateChannelResponse>> updateChannel(
     String channelId,
     String channelType,
-    Map<String, Object?> data, {
+    UpdateChannelData data, {
     Message? message,
-  }) => _channelsRepository.updateChannel(
-    channelId,
-    channelType,
-    data: data,
-    message: message,
-  );
+  }) => _channelsRepository.updateChannel(channelId, channelType, data, message: message);
 
   /// Partially updates a channel.
   ///
@@ -1493,25 +1484,27 @@ class StreamChatClient {
     return res;
   }
 
-  /// Returns a channel client with the given type, id and custom data.
+  /// Returns a channel client of [type] with the id [id].
+  ///
+  /// A channel that does not exist yet is created with [data] when it is
+  /// first queried. Without an [id], the channel is the one the members in
+  /// [data] identify.
   Channel channel(
     String type, {
     String? id,
-    Map<String, Object?>? custom,
+    CreateChannelData? data,
   }) {
     if (id != null && state.channels.containsKey('$type:$id')) {
       return state.channels['$type:$id']!;
     }
-    return Channel(this, type, id, custom: custom);
+    return Channel(this, type, id, data: data);
   }
 
   /// Creates a channel without fetching its messages, members or watchers.
-  ///
-  /// The same as [queryChannel] with `state: false`.
   Future<Result<ChannelStateResponse>> createChannel(
     String channelType, {
     String? channelId,
-    Map<String, Object?>? channelData,
+    CreateChannelData? channelData,
   }) => queryChannel(
     channelType,
     channelId: channelId,
@@ -1521,12 +1514,10 @@ class StreamChatClient {
 
   /// Fetches the state of a channel and starts watching it, creating the
   /// channel first if it does not exist.
-  ///
-  /// The same as [queryChannel] with `watch: true`.
   Future<Result<ChannelStateResponse>> watchChannel(
     String channelType, {
     String? channelId,
-    Map<String, Object?>? channelData,
+    CreateChannelData? channelData,
   }) => queryChannel(
     channelType,
     channelId: channelId,
@@ -1534,33 +1525,22 @@ class StreamChatClient {
     channelData: channelData,
   );
 
-  /// Fetches the state of a channel of type [channelType], creating the
-  /// channel first if it does not exist.
+  /// Fetches the state of a channel, creating the channel first if it does
+  /// not exist.
   ///
-  /// The channel is the one with the id [channelId] or, without one, the one
-  /// identified by the `members` entry of [channelData]. A channel being
-  /// created takes [channelData] as its data: its `members`, `invites`,
-  /// `team`, `frozen`, `disabled`, `auto_translation_enabled`,
-  /// `auto_translation_language`, `config_overrides` and `filter_tags` set
-  /// those fields, and every other entry, `name` and `image` included, is
-  /// custom data. An entry whose value has another type than its field
-  /// returns a failure.
-  ///
-  /// The state holds the messages, members and watchers when [state] is true,
-  /// paged by [messagesPagination], [membersPagination] and
-  /// [watchersPagination]. With [watch], this connection receives the
-  /// channel's events; with [presence], its members' presence changes.
+  /// Without a [channelId], the channel is the one the members in
+  /// [channelData] identify.
   Future<Result<ChannelStateResponse>> queryChannel(
     String channelType, {
     bool state = true,
     bool watch = false,
     bool presence = false,
     String? channelId,
-    Map<String, Object?>? channelData,
+    CreateChannelData? channelData,
     PaginationParams? messagesPagination,
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
-  }) => _channelsRepository.queryChannel(
+  }) => _channelsRepository.getOrCreateChannel(
     channelType,
     channelId: channelId,
     channelData: channelData,
@@ -1572,14 +1552,10 @@ class StreamChatClient {
     watchersPagination: watchersPagination,
   );
 
-  /// Fetches one page of the members of a channel of type [channelType] that
-  /// match [filter], ordered by [sort].
+  /// Fetches the members of a channel that match [filter], ordered by [sort].
   ///
-  /// The channel is the one with the id [channelId] or, for a channel not
-  /// created yet, the one whose members are [members].
-  ///
-  /// The page holds up to [PaginationParams.limit] members after skipping
-  /// [PaginationParams.offset], bounded by its `createdAt` dates.
+  /// Without a [channelId], the channel is the one whose members are
+  /// [members].
   Future<Result<QueryMembersResponse>> queryMembers(
     String channelType, {
     MemberFilter? filter,
@@ -1659,12 +1635,7 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     Message? message,
-  }) => _channelsRepository.updateChannel(
-    channelId,
-    channelType,
-    acceptInvite: true,
-    message: message,
-  );
+  }) => _channelsRepository.acceptInvite(channelId, channelType, message: message);
 
   /// Rejects the current user's invite to a channel.
   ///
@@ -1673,14 +1644,9 @@ class StreamChatClient {
     String channelId,
     String channelType, {
     Message? message,
-  }) => _channelsRepository.updateChannel(
-    channelId,
-    channelType,
-    rejectInvite: true,
-    message: message,
-  );
+  }) => _channelsRepository.rejectInvite(channelId, channelType, message: message);
 
-  /// Adds the users with the ids [memberIds] to a channel.
+  /// Adds [members] to a channel.
   ///
   /// A [message] is sent to the channel as a system message.
   ///
@@ -1690,16 +1656,16 @@ class StreamChatClient {
   Future<Result<UpdateChannelResponse>> addChannelMembers(
     String channelId,
     String channelType,
-    List<String> memberIds, {
+    List<ChannelMemberData> members, {
     Message? message,
     bool hideHistory = false,
     DateTime? hideHistoryBefore,
-  }) => _channelsRepository.updateChannel(
+  }) => _channelsRepository.addMembers(
     channelId,
     channelType,
-    addMembers: memberIds,
+    members,
     message: message,
-    hideHistory: hideHistoryBefore == null ? hideHistory : null,
+    hideHistory: hideHistory,
     hideHistoryBefore: hideHistoryBefore,
   );
 
@@ -1711,27 +1677,17 @@ class StreamChatClient {
     String channelType,
     List<String> memberIds, {
     Message? message,
-  }) => _channelsRepository.updateChannel(
-    channelId,
-    channelType,
-    removeMembers: memberIds,
-    message: message,
-  );
+  }) => _channelsRepository.removeMembers(channelId, channelType, memberIds, message: message);
 
-  /// Invites the users with the ids [memberIds] to a channel.
+  /// Invites [members] into a channel.
   ///
   /// A [message] is sent to the channel as a system message.
   Future<Result<UpdateChannelResponse>> inviteChannelMembers(
     String channelId,
     String channelType,
-    List<String> memberIds, {
+    List<ChannelMemberData> members, {
     Message? message,
-  }) => _channelsRepository.updateChannel(
-    channelId,
-    channelType,
-    invites: memberIds,
-    message: message,
-  );
+  }) => _channelsRepository.inviteMembers(channelId, channelType, members, message: message);
 
   /// Stop watching the channel
   Future<EmptyResponse> stopChannelWatching(

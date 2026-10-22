@@ -35,7 +35,7 @@ class UpdateChannelResponse with _$UpdateChannelResponse {
   @override
   final ChannelModel? channel;
 
-  /// The channel's members after the update.
+  /// A page of the channel's members after the update.
   @override
   final List<Member> members;
 
