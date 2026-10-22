@@ -18,6 +18,32 @@ void main() {
     expect(inset, 0);
   });
 
+  testWidgets('StreamQuotedMessage titles a quote of your own message "You"', (tester) async {
+    await _pumpQuote(
+      tester,
+      quotedMessage: _textMessage(
+        author: User(id: 'maya', name: 'Maya Ross'),
+      ),
+      layout: const StreamMessageLayoutData(alignment: StreamMessageAlignment.end),
+    );
+
+    expect(find.text('You'), findsOneWidget);
+    expect(find.text('Maya Ross'), findsNothing);
+  });
+
+  testWidgets("StreamQuotedMessage titles a quote of someone else's message with their name", (tester) async {
+    await _pumpQuote(
+      tester,
+      quotedMessage: _textMessage(
+        author: User(id: 'jason', name: 'Jason Thompson'),
+      ),
+      layout: const StreamMessageLayoutData(alignment: StreamMessageAlignment.end),
+    );
+
+    expect(find.text('Jason Thompson'), findsOneWidget);
+    expect(find.text('You'), findsNothing);
+  });
+
   testWidgets('StreamQuotedMessage shows a deleted quote in the outgoing text color', (tester) async {
     await _pumpQuote(
       tester,
@@ -56,6 +82,14 @@ void main() {
     expect(_deletedIconColor(tester), Colors.orange);
   });
 }
+
+Message _textMessage({required User author}) => Message(
+  id: 'quoted',
+  text: 'Can you send me a voice note?',
+  createdAt: DateTime(2026, 8, 26, 14),
+  user: author,
+  state: MessageState.sent,
+);
 
 Message _deletedMessage() => Message(
   id: 'quoted',

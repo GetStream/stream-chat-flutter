@@ -182,6 +182,17 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
     return a11y.incomingReplyToMessageLabel(replierName: replierName, authorName: authorName);
   }
 
+  // The quoted author's name, or "You" when the current user wrote it.
+  String _title(BuildContext context) {
+    final quotedAuthor = props.quotedMessage.user;
+    if (quotedAuthor == null) return '';
+
+    final currentUser = StreamChat.maybeOf(context)?.currentUser;
+    if (quotedAuthor.id == currentUser?.id) return context.translations.youText;
+
+    return quotedAuthor.name;
+  }
+
   @override
   Widget build(BuildContext context) {
     final quotedMessage = props.quotedMessage;
@@ -213,12 +224,12 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
       style: effectiveTitleTextStyle,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      // The visible title is just the quoted author's name, which leaves a
-      // screen reader to guess at the relationship. Announcing who replied to
-      // whom instead turns the preview into a sentence; it merges with the
-      // body preview below into one phrase.
+      // The visible title only names who wrote the quoted message, which
+      // leaves a screen reader to guess at the relationship. Announcing who
+      // replied to whom instead turns the preview into a sentence; it merges
+      // with the body preview below into one phrase.
       child: Text(
-        quotedMessage.user?.name ?? '',
+        _title(context),
         semanticsLabel: _semanticsLabel(context),
       ),
     );

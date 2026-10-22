@@ -17,6 +17,7 @@
 - Fixed the poll creator showing the reorder handle and remove button when there is only one option.
 - Fixed "Message deleted" in a quoted reply showing in a muted gray instead of the reply's text color.
 - Fixed icons in message previews showing in a different color from the text beside them.
+- Fixed a quoted reply to your own message showing your name instead of "You".
 
 ## 10.6.0
 
