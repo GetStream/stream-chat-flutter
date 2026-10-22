@@ -25,8 +25,6 @@ class StreamMessagePreviewTextTheme extends InheritedTheme {
 
   /// The [StreamMessagePreviewTextThemeData] for the given context.
   ///
-  /// The [StreamMessagePreviewTextThemeData] for the given context.
-  ///
   /// Values from the nearest [StreamMessagePreviewTextTheme] ancestor take
   /// precedence over [StreamChatThemeData.messagePreviewTextTheme].
   static StreamMessagePreviewTextThemeData of(BuildContext context) {
@@ -44,7 +42,8 @@ class StreamMessagePreviewTextTheme extends InheritedTheme {
 /// {@template streamMessagePreviewTextThemeData}
 /// Theme data for parts of a message preview styled apart from the rest.
 ///
-/// To style the whole preview, use the subtitle style where it is shown, such
+/// A set style keeps the default for anything it leaves out. To style the
+/// whole preview, use the subtitle style where it is shown, such
 /// as [StreamChannelListItemThemeData.subtitleStyle] or
 /// [StreamQuotedMessageThemeData.subtitleTextStyle].
 ///
@@ -69,20 +68,18 @@ class StreamMessagePreviewTextThemeData with _$StreamMessagePreviewTextThemeData
   /// The text style for the "Draft:" prefix that starts a
   /// [StreamDraftMessagePreviewText].
   ///
-  /// Defaults to bold in the primary accent color. A set style keeps the
-  /// default for anything it leaves out.
+  /// Defaults to bold in the primary accent color.
   final TextStyle? draftPrefixStyle;
 
   /// The text style for the sender prefix, such as "You:" or "Ann:", that
   /// starts a preview in a channel or thread list.
   ///
-  /// Defaults to bold. A set style keeps the default for anything it leaves
-  /// out.
+  /// Defaults to bold.
   final TextStyle? senderPrefixStyle;
 
   /// The text style for the "Message deleted" text and its icon.
   ///
-  /// If null, matches the rest of the preview.
+  /// If null, the default depends on where the preview is shown.
   final TextStyle? deletedContentStyle;
 
   /// Linearly interpolates between two [StreamMessagePreviewTextThemeData]

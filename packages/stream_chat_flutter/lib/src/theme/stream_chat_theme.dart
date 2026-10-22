@@ -260,6 +260,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
   /// The channel list item theme for this theme.
   final StreamChannelListItemThemeData channelListItemTheme;
 
-  /// The theme for message previews, such as a channel list item's subtitle.
+  /// The app-wide styles for parts of a message preview, such as the sender
+  /// prefix.
   final StreamMessagePreviewTextThemeData messagePreviewTextTheme;
 }

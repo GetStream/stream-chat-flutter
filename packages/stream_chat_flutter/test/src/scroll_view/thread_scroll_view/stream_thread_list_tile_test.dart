@@ -268,6 +268,67 @@ void main() {
     expect(_deletedMessageColor(tester), colorScheme.textSecondary);
   });
 
+  testWidgets('shows a deleted root message in an app-wide deleted style', (tester) async {
+    final deletedThread = thread.copyWith(parentMessage: _deletedMessage());
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        StreamThreadListTile(thread: deletedThread, currentUser: user2),
+        chatTheme: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(color: Colors.red),
+          ),
+        ),
+      ),
+    );
+
+    expect(_deletedMessageColor(tester), Colors.red);
+  });
+
+  testWidgets('keeps the secondary color under an app-wide italic deleted style', (tester) async {
+    final deletedThread = thread.copyWith(parentMessage: _deletedMessage());
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        StreamThreadListTile(thread: deletedThread, currentUser: user2),
+        chatTheme: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      ),
+    );
+
+    final colorScheme = tester.element(find.byType(StreamThreadListTile)).streamColorScheme;
+    expect(_deletedMessageColor(tester), colorScheme.textSecondary);
+  });
+
+  testWidgets('prefers the themed preview style over enclosing and app-wide ones', (tester) async {
+    final deletedThread = thread.copyWith(parentMessage: _deletedMessage());
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        StreamMessagePreviewTextTheme(
+          data: const StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(color: Colors.blue),
+          ),
+          child: StreamThreadListTileTheme(
+            data: const StreamThreadListTileThemeData(
+              messagePreviewTextTheme: StreamMessagePreviewTextThemeData(
+                deletedContentStyle: TextStyle(color: Colors.orange),
+              ),
+            ),
+            child: StreamThreadListTile(thread: deletedThread, currentUser: user2),
+          ),
+        ),
+        chatTheme: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(color: Colors.red),
+          ),
+        ),
+      ),
+    );
+
+    expect(_deletedMessageColor(tester), Colors.orange);
+  });
+
   testWidgets('shows a deleted root message in the themed preview style', (tester) async {
     final deletedThread = thread.copyWith(parentMessage: _deletedMessage());
     await tester.pumpWidget(

@@ -727,8 +727,8 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
 }
 
 // Default values for [StreamMessagePreviewTextThemeData] backed by stream
-// design tokens. A deleted message has no default here: each screen sets its
-// own.
+// design tokens. A deleted message has no default here, so it matches the rest
+// of the preview unless the surrounding theme sets one.
 class _StreamMessagePreviewTextDefaults extends StreamMessagePreviewTextThemeData {
   _StreamMessagePreviewTextDefaults(this._context);
 

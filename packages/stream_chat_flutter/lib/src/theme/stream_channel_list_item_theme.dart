@@ -129,9 +129,8 @@ class StreamChannelListItemThemeData with _$StreamChannelListItemThemeData {
   /// from the rest.
   ///
   /// Takes precedence over an enclosing [StreamMessagePreviewTextTheme] and
-  /// the app-wide one. Falls back to showing a deleted message in
-  /// [StreamColorScheme.textTertiary], which a set deleted style keeps unless
-  /// it sets its own color.
+  /// the app-wide one. A deleted message defaults to
+  /// [StreamColorScheme.textTertiary].
   final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 
   /// The text style for the timestamp.

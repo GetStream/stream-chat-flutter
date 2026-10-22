@@ -110,23 +110,23 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
 
   /// The text style for the quoted user's name.
   ///
-  /// If null, defaults to [StreamTextTheme.metadataEmphasis] tinted with the
-  /// alignment-aware text color.
+  /// If null, defaults to [StreamTextTheme.metadataEmphasis] in
+  /// [StreamColorScheme.textPrimary] for an incoming reply and `brand.shade900`
+  /// for an outgoing one.
   final TextStyle? titleTextStyle;
 
   /// The text style for the whole quoted message preview.
   ///
   /// To style only parts of it, use [messagePreviewTextTheme]. If null,
-  /// defaults to [StreamTextTheme.metadataDefault] in the alignment-aware text
-  /// color.
+  /// defaults to [StreamTextTheme.metadataDefault] in the same color as
+  /// [titleTextStyle].
   final TextStyle? subtitleTextStyle;
 
   /// The theme for styling parts of the quoted message preview differently
   /// from the rest.
   ///
   /// Takes precedence over an enclosing [StreamMessagePreviewTextTheme] and
-  /// the app-wide one. A quoted reply shows no sender or draft prefix. If
-  /// null, the whole preview uses [subtitleTextStyle].
+  /// the app-wide one. A quoted reply shows no sender or draft prefix.
   final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 
   /// Color of the leading indicator bar.

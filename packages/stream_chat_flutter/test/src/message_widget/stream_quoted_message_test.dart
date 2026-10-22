@@ -21,10 +21,10 @@ void main() {
   testWidgets('StreamQuotedMessage titles a quote of your own message "You"', (tester) async {
     await _pumpQuote(
       tester,
+      currentUser: OwnUser(id: 'maya', name: 'Maya Ross'),
       quotedMessage: _textMessage(
         author: User(id: 'maya', name: 'Maya Ross'),
       ),
-      layout: const StreamMessageLayoutData(alignment: StreamMessageAlignment.end),
     );
 
     expect(find.text('You'), findsOneWidget);
@@ -34,10 +34,10 @@ void main() {
   testWidgets("StreamQuotedMessage titles a quote of someone else's message with their name", (tester) async {
     await _pumpQuote(
       tester,
+      currentUser: OwnUser(id: 'maya', name: 'Maya Ross'),
       quotedMessage: _textMessage(
         author: User(id: 'jason', name: 'Jason Thompson'),
       ),
-      layout: const StreamMessageLayoutData(alignment: StreamMessageAlignment.end),
     );
 
     expect(find.text('Jason Thompson'), findsOneWidget);
@@ -99,6 +99,28 @@ void main() {
     expect(_deletedLabelColor(tester), Colors.orange);
     expect(_deletedIconColor(tester), Colors.orange);
   });
+
+  testWidgets('StreamQuotedMessage prefers the themed preview style over enclosing and app-wide ones', (tester) async {
+    await _pumpQuote(
+      tester,
+      quotedMessage: _deletedMessage(),
+      chatTheme: StreamChatThemeData(
+        messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+          deletedContentStyle: TextStyle(color: Colors.red),
+        ),
+      ),
+      previewTextTheme: const StreamMessagePreviewTextThemeData(
+        deletedContentStyle: TextStyle(color: Colors.blue),
+      ),
+      theme: const StreamQuotedMessageThemeData(
+        messagePreviewTextTheme: StreamMessagePreviewTextThemeData(
+          deletedContentStyle: TextStyle(color: Colors.orange),
+        ),
+      ),
+    );
+
+    expect(_deletedLabelColor(tester), Colors.orange);
+  });
 }
 
 Message _textMessage({required User author}) => Message(
@@ -144,17 +166,19 @@ Future<double> _pumpTopInset(WidgetTester tester, {required StreamMessageContent
 Future<void> _pumpQuote(
   WidgetTester tester, {
   required Message quotedMessage,
-  required StreamMessageLayoutData layout,
+  StreamMessageLayoutData layout = const StreamMessageLayoutData(alignment: StreamMessageAlignment.end),
+  OwnUser? currentUser,
   StreamQuotedMessageThemeData theme = const StreamQuotedMessageThemeData(),
+  StreamMessagePreviewTextThemeData previewTextTheme = const StreamMessagePreviewTextThemeData(),
   StreamChatThemeData? chatTheme,
 }) async {
-  final currentUser = OwnUser(id: 'maya', name: 'Maya Ross');
+  final user = currentUser ?? OwnUser(id: 'maya', name: 'Maya Ross');
   final client = MockClient();
   final clientState = MockClientState();
 
   when(() => client.state).thenReturn(clientState);
-  when(() => clientState.currentUser).thenReturn(currentUser);
-  when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
+  when(() => clientState.currentUser).thenReturn(user);
+  when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(user));
 
   await tester.pumpWidget(
     MaterialApp(
@@ -167,9 +191,12 @@ Future<void> _pumpQuote(
             data: layout,
             child: Align(
               alignment: Alignment.topLeft,
-              child: StreamQuotedMessageTheme(
-                data: theme,
-                child: StreamQuotedMessage(quotedMessage: quotedMessage),
+              child: StreamMessagePreviewTextTheme(
+                data: previewTextTheme,
+                child: StreamQuotedMessageTheme(
+                  data: theme,
+                  child: StreamQuotedMessage(quotedMessage: quotedMessage),
+                ),
               ),
             ),
           ),

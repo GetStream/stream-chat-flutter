@@ -16,14 +16,15 @@
 - Fixed a mention rendering as another mentioned user's shorter mention followed by leftover text, such as `@Anna` next to `@Ann`.
 - Fixed the poll creator showing the reorder handle and remove button when there is only one option.
 - Fixed "Message deleted" in a quoted reply showing in a muted gray instead of the reply's text color.
-- Fixed icons in message previews showing in a different color from the text beside them. They no longer follow a surrounding `IconTheme`.
+- Fixed icons in message previews showing in a different color from the text beside them.
 - Fixed a quoted reply to your own message showing your name instead of "You".
 - Fixed a deleted message in a thread list preview showing in the tertiary text color instead of the secondary one.
 
 🔄 Changed
 
 - A deleted message in `StreamMessagePreviewText` now matches the rest of the preview unless `StreamMessagePreviewTextThemeData.deletedContentStyle` sets a style. The channel list, thread list and message search keep their own deleted style.
-- `StreamThreadListTileTheme.of` now merges a local `StreamThreadListTileTheme` over `StreamChatThemeData.threadListTileTheme`, so values the local theme leaves unset keep their app-wide setting instead of resetting to the default.
+- Icons in `StreamMessagePreviewText` and `StreamDraftMessagePreviewText` no longer follow a surrounding `IconTheme`.
+- Values a local `StreamThreadListTileTheme` leaves unset now keep their `StreamChatThemeData.threadListTileTheme` setting instead of resetting to the default.
 
 ## 10.6.0
 

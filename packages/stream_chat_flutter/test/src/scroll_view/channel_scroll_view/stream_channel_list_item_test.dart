@@ -658,16 +658,11 @@ void main() {
   });
 
   group('StreamChannelListTile message preview', () {
-    final deletedMessage = Message(
-      id: 'deleted',
-      text: 'Original message',
-      type: MessageType.deleted,
-      deletedAt: DateTime.parse('2021-07-20T17:00:00.000Z'),
-    );
-
     Future<void> pumpTile(
       WidgetTester tester, {
+      required Message message,
       StreamChannelListItemThemeData? theme,
+      StreamMessagePreviewTextThemeData? previewTextTheme,
       StreamChatThemeData? chatTheme,
     }) {
       final client = MockClient();
@@ -685,12 +680,15 @@ void main() {
             connectivityStream: Stream.value(const [ConnectivityResult.wifi]),
             themeData: chatTheme,
             child: Scaffold(
-              body: StreamChannelListItemTheme(
-                data: theme ?? const StreamChannelListItemThemeData(),
-                child: StreamChannelListTile(
-                  avatar: const _SilentAvatar(),
-                  title: const Text('General'),
-                  subtitle: StreamMessagePreviewText(message: deletedMessage),
+              body: StreamMessagePreviewTextTheme(
+                data: previewTextTheme ?? const StreamMessagePreviewTextThemeData(),
+                child: StreamChannelListItemTheme(
+                  data: theme ?? const StreamChannelListItemThemeData(),
+                  child: StreamChannelListTile(
+                    avatar: const _SilentAvatar(),
+                    title: const Text('General'),
+                    subtitle: StreamMessagePreviewText(message: message),
+                  ),
                 ),
               ),
             ),
@@ -700,7 +698,7 @@ void main() {
     }
 
     testWidgets('shows a deleted message in the tertiary text color', (tester) async {
-      await pumpTile(tester);
+      await pumpTile(tester, message: _deletedMessage());
 
       final colorScheme = tester.element(find.byType(StreamChannelListTile)).streamColorScheme;
       expect(_deletedMessageColor(tester), colorScheme.textTertiary);
@@ -709,6 +707,7 @@ void main() {
     testWidgets('shows a deleted message in an app-wide deleted style', (tester) async {
       await pumpTile(
         tester,
+        message: _deletedMessage(),
         chatTheme: StreamChatThemeData(
           messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
             deletedContentStyle: TextStyle(color: Colors.red),
@@ -722,6 +721,7 @@ void main() {
     testWidgets('keeps the tertiary color under an app-wide italic deleted style', (tester) async {
       await pumpTile(
         tester,
+        message: _deletedMessage(),
         chatTheme: StreamChatThemeData(
           messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
             deletedContentStyle: TextStyle(fontStyle: FontStyle.italic),
@@ -737,6 +737,29 @@ void main() {
     testWidgets('shows a deleted message in the themed preview style', (tester) async {
       await pumpTile(
         tester,
+        message: _deletedMessage(),
+        theme: const StreamChannelListItemThemeData(
+          messagePreviewTextTheme: StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(color: Colors.orange),
+          ),
+        ),
+      );
+
+      expect(_deletedMessageColor(tester), Colors.orange);
+    });
+
+    testWidgets('prefers the themed preview style over enclosing and app-wide ones', (tester) async {
+      await pumpTile(
+        tester,
+        message: _deletedMessage(),
+        chatTheme: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(color: Colors.red),
+          ),
+        ),
+        previewTextTheme: const StreamMessagePreviewTextThemeData(
+          deletedContentStyle: TextStyle(color: Colors.blue),
+        ),
         theme: const StreamChannelListItemThemeData(
           messagePreviewTextTheme: StreamMessagePreviewTextThemeData(
             deletedContentStyle: TextStyle(color: Colors.orange),
@@ -748,6 +771,13 @@ void main() {
     });
   });
 }
+
+Message _deletedMessage() => Message(
+  id: 'deleted',
+  text: 'Original message',
+  type: MessageType.deleted,
+  deletedAt: DateTime.parse('2021-07-20T17:00:00.000Z'),
+);
 
 // The color the "Message deleted" text paints with.
 Color? _deletedMessageColor(WidgetTester tester) => _deletedMessageStyle(tester)?.color;

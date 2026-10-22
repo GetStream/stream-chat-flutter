@@ -16,6 +16,7 @@ void main() {
     ChannelModel? channel,
     StreamChatConfigurationData? configData,
     StreamChatThemeData? themeData,
+    StreamMessagePreviewTextThemeData? previewTextTheme,
     bool showCaption = true,
   }) async {
     final client = MockClient();
@@ -33,12 +34,15 @@ void main() {
             configData: configData,
             themeData: themeData ?? StreamChatThemeData(),
             child: Center(
-              child: StreamMessagePreviewText(
-                message: message,
-                language: language,
-                textStyle: textStyle,
-                channel: channel,
-                showCaption: showCaption,
+              child: StreamMessagePreviewTextTheme(
+                data: previewTextTheme ?? const StreamMessagePreviewTextThemeData(),
+                child: StreamMessagePreviewText(
+                  message: message,
+                  language: language,
+                  textStyle: textStyle,
+                  channel: channel,
+                  showCaption: showCaption,
+                ),
               ),
             ),
           ),
@@ -117,6 +121,33 @@ void main() {
       expect(deletedSpan.style?.color, Colors.red);
       expect(deletedSpan.style?.fontStyle, FontStyle.italic);
       expect(_iconColor(tester), Colors.red);
+    });
+
+    testWidgets('renders deleted message in a local deleted style over the app-wide one', (tester) async {
+      final message = Message(
+        text: 'Original message',
+        type: MessageType.deleted,
+        user: User(id: 'other-user-id', name: 'Other User'),
+        deletedAt: DateTime.now(),
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        themeData: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(color: Colors.red, fontStyle: FontStyle.italic),
+          ),
+        ),
+        previewTextTheme: const StreamMessagePreviewTextThemeData(
+          deletedContentStyle: TextStyle(color: Colors.blue),
+        ),
+      );
+
+      final span = _getPreviewSpan(tester);
+      final deletedSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Message deleted');
+      expect(deletedSpan.style?.color, Colors.blue);
+      expect(deletedSpan.style?.fontStyle, FontStyle.italic);
     });
 
     testWidgets('renders system message with text', (tester) async {
