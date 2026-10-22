@@ -128,7 +128,8 @@ class StreamChannelListItemThemeData with _$StreamChannelListItemThemeData {
   /// The theme for styling parts of the message preview subtitle differently
   /// from the rest.
   ///
-  /// Falls back to showing a deleted message in
+  /// Takes precedence over an enclosing [StreamMessagePreviewTextTheme] and
+  /// the app-wide one. Falls back to showing a deleted message in
   /// [StreamColorScheme.textTertiary].
   final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 

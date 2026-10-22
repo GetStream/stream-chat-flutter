@@ -25,11 +25,11 @@ class StreamMessagePreviewTextTheme extends InheritedTheme {
 
   /// The [StreamMessagePreviewTextThemeData] for the given context.
   ///
-  /// Values from the nearest [StreamMessagePreviewTextTheme] ancestor take
-  /// precedence over [StreamChatThemeData.messagePreviewTextTheme].
+  /// The nearest [StreamMessagePreviewTextTheme] ancestor's data, or
+  /// [StreamChatThemeData.messagePreviewTextTheme] when there is none.
   static StreamMessagePreviewTextThemeData of(BuildContext context) {
     final localTheme = context.dependOnInheritedWidgetOfExactType<StreamMessagePreviewTextTheme>();
-    return StreamChatTheme.of(context).messagePreviewTextTheme.merge(localTheme?.data);
+    return localTheme?.data ?? StreamChatTheme.of(context).messagePreviewTextTheme;
   }
 
   @override

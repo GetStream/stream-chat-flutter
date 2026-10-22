@@ -235,7 +235,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   }
 
   // Dispatches to the `format*` method that matches the kind of [message].
-  // Returns the bare body span, without the author prefix or mention pass.
+  // Returns the bare body span, without the author prefix.
   TextSpan _formatContent(
     BuildContext context,
     Message message, {
@@ -295,12 +295,10 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   /// styled with [StreamMessagePreviewTextThemeData.deletedMessageStyle].
   @protected
   TextSpan formatDeletedMessage(BuildContext context, Message message) {
-    final theme = StreamMessagePreviewTextTheme.of(context);
-
     return _labeledIcon(
       icon: context.streamIcons.noSign,
       label: context.translations.messageDeletedLabel,
-      textStyle: theme.deletedMessageStyle,
+      textStyle: StreamMessagePreviewTextTheme.of(context).deletedMessageStyle,
     );
   }
 
@@ -729,7 +727,8 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
 }
 
 // Default values for [StreamMessagePreviewTextThemeData] backed by stream
-// design tokens.
+// design tokens. A deleted message has no default here: each screen sets its
+// own.
 class _StreamMessagePreviewTextDefaults extends StreamMessagePreviewTextThemeData {
   _StreamMessagePreviewTextDefaults(this._context);
 

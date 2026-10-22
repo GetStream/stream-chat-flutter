@@ -97,7 +97,8 @@ class StreamThreadListTileThemeData with _$StreamThreadListTileThemeData {
   /// The theme for styling parts of the root message preview differently
   /// from the rest.
   ///
-  /// Falls back to showing a deleted message in
+  /// Takes precedence over an enclosing [StreamMessagePreviewTextTheme] and
+  /// the app-wide one. Falls back to showing a deleted message in
   /// [StreamColorScheme.textSecondary].
   final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 

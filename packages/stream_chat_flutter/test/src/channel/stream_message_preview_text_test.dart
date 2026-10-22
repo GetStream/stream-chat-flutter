@@ -779,6 +779,35 @@ void main() {
       expect(nameSpan.style?.fontWeight, FontWeight.w500);
     });
 
+    testWidgets('group channel replaces the default sender style with the themed one', (tester) async {
+      final channel = ChannelModel(
+        id: 'test-channel',
+        type: 'messaging',
+        memberCount: 3,
+      );
+
+      final message = Message(
+        text: 'Hello everyone',
+        user: User(id: 'other-user-id', name: 'Jane Doe'),
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        channel: channel,
+        themeData: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            senderPrefixStyle: TextStyle(color: Colors.indigo),
+          ),
+        ),
+      );
+
+      final span = _getPreviewSpan(tester);
+      final nameSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Jane: ');
+      expect(nameSpan.style?.color, Colors.indigo);
+      expect(nameSpan.style?.fontWeight, isNull);
+    });
+
     testWidgets('group channel prepends bold first name for other users', (tester) async {
       final channel = ChannelModel(
         id: 'test-channel',

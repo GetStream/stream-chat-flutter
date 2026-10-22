@@ -124,7 +124,8 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
   /// The theme for styling parts of the quoted message preview differently
   /// from the rest.
   ///
-  /// If null, the whole preview uses [subtitleTextStyle].
+  /// Takes precedence over an enclosing [StreamMessagePreviewTextTheme] and
+  /// the app-wide one. If null, the whole preview uses [subtitleTextStyle].
   final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 
   /// Color of the leading indicator bar.
