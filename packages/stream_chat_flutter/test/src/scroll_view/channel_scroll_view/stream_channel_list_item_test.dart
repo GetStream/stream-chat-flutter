@@ -38,8 +38,9 @@ void main() {
 
     Future<void> pumpWithMessages(
       WidgetTester tester,
-      List<Message> messages,
-    ) async {
+      List<Message> messages, {
+      TextStyle? textStyle,
+    }) async {
       when(() => channelState.messages).thenReturn(messages);
       when(() => channelState.messagesStream).thenAnswer((_) => Stream.value(messages));
 
@@ -48,7 +49,7 @@ void main() {
           home: StreamChat(
             client: client,
             child: Scaffold(
-              body: ChannelLastMessageText(channel: channel),
+              body: ChannelLastMessageText(channel: channel, textStyle: textStyle),
             ),
           ),
         ),
@@ -66,6 +67,19 @@ void main() {
       await pumpWithMessages(tester, [message]);
 
       expect(find.text('hello world'), findsOneWidget);
+    });
+
+    testWidgets('shows "No messages yet" in the tertiary text color', (tester) async {
+      await pumpWithMessages(tester, []);
+
+      final colorScheme = tester.element(find.text('No messages yet')).streamColorScheme;
+      expect(tester.widget<Text>(find.text('No messages yet')).style?.color, colorScheme.textTertiary);
+    });
+
+    testWidgets('shows "No messages yet" in the color of a given text style', (tester) async {
+      await pumpWithMessages(tester, [], textStyle: const TextStyle(color: Colors.teal));
+
+      expect(tester.widget<Text>(find.text('No messages yet')).style?.color, Colors.teal);
     });
 
     testWidgets('hides shadowed message from another user', (tester) async {

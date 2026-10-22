@@ -810,7 +810,7 @@ class _ChannelLastMessageTextState extends State<ChannelLastMessageText> with _L
           return Text(
             maxLines: 1,
             context.translations.emptyMessagesText,
-            style: widget.textStyle,
+            style: TextStyle(color: context.streamColorScheme.textTertiary).merge(widget.textStyle),
             overflow: TextOverflow.ellipsis,
           );
         }
