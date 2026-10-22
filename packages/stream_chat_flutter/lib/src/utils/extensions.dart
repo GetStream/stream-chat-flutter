@@ -354,7 +354,6 @@ extension MessageX on Message {
   Message replaceMentions({bool linkify = true}) {
     final initial = text;
     if (initial == null || initial.isEmpty) return this;
-    var current = initial;
 
     String wrap(String displayName, StreamMentionType type, String id) {
       if (!linkify) return '@$displayName';
@@ -362,35 +361,30 @@ extension MessageX on Message {
       return '[@$displayName]($scheme:$id)';
     }
 
-    // Negative lookbehind on `[` ensures an already-wrapped `[@name](...)`
-    // isn't re-matched by a later iteration when another mention source
-    // happens to share the same `@name` literal.
-    String applyReplace(String input, String literal, String replacement) {
-      return input.replaceAll(
-        RegExp('(?<!\\[)@${RegExp.escape(literal)}'),
-        replacement,
-      );
+    // Every `@literal` to wrap, mapped to its replacement. When two sources
+    // share a literal, the first one registered wins.
+    final replacements = <String, String>{};
+    void register(String literal, String replacement) {
+      replacements.putIfAbsent(literal, () => replacement);
     }
 
     if (mentionedChannel ?? false) {
       const channel = StreamMentionType.channel;
-      current = applyReplace(current, channel, wrap(channel, .channel, channel));
+      register(channel, wrap(channel, .channel, channel));
     }
     if (mentionedHere ?? false) {
       const here = StreamMentionType.here;
-      current = applyReplace(current, here, wrap(here, .here, here));
+      register(here, wrap(here, .here, here));
     }
 
     for (final group in mentionedGroups ?? const <UserGroup>[]) {
       final replacement = wrap(group.name, .group, group.id);
-      current = applyReplace(current, group.id, replacement);
-      if (group.name != group.id) {
-        current = applyReplace(current, group.name, replacement);
-      }
+      register(group.id, replacement);
+      register(group.name, replacement);
     }
 
     for (final role in mentionedRoles ?? const <String>[]) {
-      current = applyReplace(current, role, wrap(role, .role, role));
+      register(role, wrap(role, .role, role));
     }
 
     // User-mention emission uses the bare `mention:` scheme (unchanged from
@@ -398,13 +392,21 @@ extension MessageX on Message {
     // compatible.
     for (final user in mentionedUsers.toSet()) {
       final replacement = wrap(user.name, .user, user.id);
-      current = applyReplace(current, user.id, replacement);
-      if (user.name != user.id) {
-        current = applyReplace(current, user.name, replacement);
-      }
+      register(user.id, replacement);
+      register(user.name, replacement);
     }
 
-    return copyWith(text: current);
+    if (replacements.isEmpty) return copyWith(text: initial);
+
+    // Replace every mention in a single pass, trying the longest literal
+    // first, so `@Ann` can't claim the start of `@Anna` when both are
+    // mentioned. The negative lookbehind on `[` leaves an already-wrapped
+    // `[@name](...)` in the text untouched.
+    final literals = replacements.keys.toList()..sort((a, b) => b.length.compareTo(a.length));
+    final pattern = RegExp('(?<!\\[)@(${literals.map(RegExp.escape).join('|')})');
+    final replaced = initial.replaceAllMapped(pattern, (match) => replacements[match[1]]!);
+
+    return copyWith(text: replaced);
   }
 
   /// Returns an approximation of message size

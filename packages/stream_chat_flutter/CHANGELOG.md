@@ -3,6 +3,7 @@
 🐞 Fixed
 
 - Fixed a voice recording sent as a reply without text showing inside a filled container instead of directly on the message bubble.
+- Fixed a mention of a user whose name or id starts with another mentioned user's, such as `@Anna` next to `@Ann`, rendering as the shorter mention followed by leftover text.
 
 ## 10.6.0
 

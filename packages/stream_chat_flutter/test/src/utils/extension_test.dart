@@ -413,6 +413,37 @@ void main() {
         );
       });
 
+      test('should not let a mentioned name claim the start of a longer one', () {
+        final ann = User(id: 'ann', name: 'Ann');
+        final anna = User(id: 'anna', name: 'Anna');
+
+        final message = Message(
+          text: 'Hi @Ann and @Anna!',
+          mentionedUsers: [ann, anna],
+        );
+
+        final modifiedMessage = message.replaceMentions();
+
+        expect(
+          modifiedMessage.text,
+          equals('Hi [@Ann](mention:ann) and [@Anna](mention:anna)!'),
+        );
+      });
+
+      test('should not let a mentioned id claim the start of a longer one', () {
+        final first = User(id: 'user1', name: 'First');
+        final twelfth = User(id: 'user12', name: 'Twelfth');
+
+        final message = Message(
+          text: 'Hi @user12 and @user1!',
+          mentionedUsers: [first, twelfth],
+        );
+
+        final modifiedMessage = message.replaceMentions(linkify: false);
+
+        expect(modifiedMessage.text, equals('Hi @Twelfth and @First!'));
+      });
+
       test('should handle userIds with special characters', () {
         final user = User(id: 'user.id+123', name: 'TestUser');
 
