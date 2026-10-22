@@ -401,6 +401,14 @@ void main() {
       );
     }
 
+    testWidgets('shows "No messages yet" in the tertiary text color', (tester) async {
+      await pumpSubtitle(tester, channelA);
+      await tester.pumpAndSettle();
+
+      final colorScheme = tester.element(find.text(emptyText)).streamColorScheme;
+      expect(tester.widget<Text>(find.text(emptyText)).style?.color, colorScheme.textTertiary);
+    });
+
     testWidgets(
       'preserves the last-known message when state is not up-to-date and emits empty',
       (tester) async {
