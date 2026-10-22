@@ -117,7 +117,7 @@ void main() {
           membersPagination: any(named: 'membersPagination'),
           watchersPagination: any(named: 'watchersPagination'),
         ),
-      ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+      ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400)));
 
       // A failed watch() also completes `initialized` with the error. Attach
       // the expectation up-front so that error has a listener the moment it
@@ -127,10 +127,7 @@ void main() {
         throwsA(isA<StreamApiException>()),
       );
 
-      await expectLater(
-        channel.watch(),
-        throwsA(isA<StreamApiException>()),
-      );
+      expect((await channel.watch()).exceptionOrNull(), isA<StreamApiException>());
       await initializedFailure;
 
       // Init never *succeeded*, so the raw setters must still work. Previously
@@ -172,6 +169,11 @@ void main() {
       final channelState = _generateChannelState(channelId, channelType);
       when(() => client.chatPersistenceClient.getChannelStateByCid(channelCid)).thenAnswer((_) async => channelState);
       when(() => client.chatPersistenceClient.updateMessages(channelCid, any())).thenAnswer((_) => Future.value());
+
+      // mock channel delivery reporter
+      when(
+        () => client.channelDeliveryReporter.submitForDelivery(any()),
+      ).thenAnswer((_) async {});
     });
 
     // Setting up a initialized channel
@@ -239,6 +241,112 @@ void main() {
 
       expect(res.getOrNull(), response);
       verify(() => client.getReplies(parentId, limit: 30)).called(1);
+    });
+
+    void stubQueryChannel(Result<ChannelStateResponse> result) {
+      when(
+        () => client.queryChannel(
+          channelType,
+          channelId: any(named: 'channelId'),
+          channelData: any(named: 'channelData'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          messagesPagination: any(named: 'messagesPagination'),
+          membersPagination: any(named: 'membersPagination'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      ).thenAnswer((_) async => result);
+    }
+
+    test('Channel.query answers from the offline storage when preferOffline is true and it holds messages', () async {
+      final storedState = ChannelState(
+        channel: ChannelModel(cid: channelCid),
+        messages: [Message(id: 'stored-message-id')],
+      );
+      when(() => client.chatPersistenceClient.getChannelStateByCid(channelCid)).thenAnswer((_) async => storedState);
+
+      final res = await channel.query(preferOffline: true);
+
+      expect(res.getOrNull(), ChannelStateResponse(duration: '0ms', channelState: storedState));
+      expect(channel.state!.messages.map((it) => it.id), contains('stored-message-id'));
+      verifyNever(
+        () => client.queryChannel(
+          any(),
+          channelId: any(named: 'channelId'),
+          channelData: any(named: 'channelData'),
+          state: any(named: 'state'),
+          watch: any(named: 'watch'),
+          presence: any(named: 'presence'),
+          messagesPagination: any(named: 'messagesPagination'),
+          membersPagination: any(named: 'membersPagination'),
+          watchersPagination: any(named: 'watchersPagination'),
+        ),
+      );
+    });
+
+    test('Channel.query fetches the state when preferOffline is true but the storage cannot be read', () async {
+      when(
+        () => client.chatPersistenceClient.getChannelStateByCid(channelCid),
+      ).thenThrow(StateError('database closed'));
+      final fetchedState = ChannelState(channel: ChannelModel(cid: channelCid));
+      stubQueryChannel(Result.success(ChannelStateResponse(duration: '0.01ms', channelState: fetchedState)));
+
+      final res = await channel.query(preferOffline: true);
+
+      expect(res.getOrNull(), ChannelStateResponse(duration: '0.01ms', channelState: fetchedState));
+    });
+
+    test('Channel.query fetches the state when preferOffline is true but the stored state has no messages', () async {
+      final storedState = ChannelState(
+        channel: ChannelModel(cid: channelCid),
+        messages: const [],
+      );
+      when(() => client.chatPersistenceClient.getChannelStateByCid(channelCid)).thenAnswer((_) async => storedState);
+      final fetchedState = ChannelState(channel: ChannelModel(cid: channelCid));
+      stubQueryChannel(Result.success(ChannelStateResponse(duration: '0.01ms', channelState: fetchedState)));
+
+      final res = await channel.query(preferOffline: true);
+
+      expect(res.getOrNull(), ChannelStateResponse(duration: '0.01ms', channelState: fetchedState));
+    });
+
+    test('Channel.query answers from the offline storage when fetching the state fails', () async {
+      final storedState = ChannelState(channel: ChannelModel(cid: channelCid));
+      when(() => client.chatPersistenceClient.getChannelStateByCid(channelCid)).thenAnswer((_) async => storedState);
+      stubQueryChannel(const Result.failure(StreamClientException(message: 'boom')));
+
+      final res = await channel.query();
+
+      expect(res.getOrNull(), ChannelStateResponse(duration: '0ms', channelState: storedState));
+    });
+
+    test('Channel.query returns the failure and fails initialization when fetching the state and reading the offline '
+        'storage both fail', () async {
+      const error = StreamClientException(message: 'boom');
+      when(
+        () => client.chatPersistenceClient.getChannelStateByCid(channelCid),
+      ).thenThrow(StateError('database closed'));
+      stubQueryChannel(const Result.failure(error));
+      final uninitializedChannel = Channel(client, channelType, channelId);
+      addTearDown(uninitializedChannel.dispose);
+      // Attach the expectation up-front so the error `initialized` completes
+      // with has a listener and isn't reported as an unhandled async error.
+      final initializedFailure = expectLater(uninitializedChannel.initialized, throwsA(error));
+
+      final res = await uninitializedChannel.query();
+
+      expect(res.exceptionOrNull(), error);
+      await initializedFailure;
+    });
+
+    test('Channel.watch returns the failure without answering from the offline storage', () async {
+      const error = StreamClientException(message: 'boom');
+      stubQueryChannel(const Result.failure(error));
+
+      final res = await channel.watch();
+
+      expect(res.exceptionOrNull(), error);
     });
   });
 
@@ -3788,9 +3896,9 @@ void main() {
       );
 
       when(() => client.updateChannel(channelId, channelType, channelData, message: any(named: 'message'))).thenAnswer(
-        (_) async => UpdateChannelResponse()
-          ..channel = channelModel
-          ..message = updateMessage,
+        (_) async => Result.success(
+          UpdateChannelResponse(duration: '0.01ms', channel: channelModel, members: const [], message: updateMessage),
+        ),
       );
 
       final res = await channel.update(
@@ -3799,9 +3907,9 @@ void main() {
       );
 
       expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(res.channel.custom, channelData);
-      expect(res.message?.id, updateMessage.id);
+      expect(res.getOrNull()!.channel!.cid, channelModel.cid);
+      expect(res.getOrNull()!.channel!.custom, channelData);
+      expect(res.getOrNull()!.message?.id, updateMessage.id);
 
       verify(() => client.updateChannel(channelId, channelType, channelData, message: any(named: 'message'))).called(1);
     });
@@ -3915,7 +4023,9 @@ void main() {
     });
 
     test('`.truncate`', () async {
-      when(() => client.truncateChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.truncateChannel(channelId, channelType),
+      ).thenAnswer((_) async => const Result.success(TruncateChannelResponse(duration: '0.01ms')));
 
       final res = await channel.truncate();
 
@@ -3930,16 +4040,16 @@ void main() {
       final channelModel = ChannelModel(cid: channelCid);
 
       when(() => client.acceptChannelInvite(channelId, channelType, message: any(named: 'message'))).thenAnswer(
-        (_) async => AcceptInviteResponse()
-          ..channel = channelModel
-          ..message = message,
+        (_) async => Result.success(
+          UpdateChannelResponse(duration: '0.01ms', channel: channelModel, members: const [], message: message),
+        ),
       );
 
       final res = await channel.acceptInvite(message);
 
       expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(res.message?.id, message.id);
+      expect(res.getOrNull()!.channel!.cid, channelModel.cid);
+      expect(res.getOrNull()!.message?.id, message.id);
 
       verify(() => client.acceptChannelInvite(channelId, channelType, message: any(named: 'message'))).called(1);
     });
@@ -3950,16 +4060,16 @@ void main() {
       final channelModel = ChannelModel(cid: channelCid);
 
       when(() => client.rejectChannelInvite(channelId, channelType, message: any(named: 'message'))).thenAnswer(
-        (_) async => RejectInviteResponse()
-          ..channel = channelModel
-          ..message = message,
+        (_) async => Result.success(
+          UpdateChannelResponse(duration: '0.01ms', channel: channelModel, members: const [], message: message),
+        ),
       );
 
       final res = await channel.rejectInvite(message);
 
       expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(res.message?.id, message.id);
+      expect(res.getOrNull()!.channel!.cid, channelModel.cid);
+      expect(res.getOrNull()!.message?.id, message.id);
 
       verify(() => client.rejectChannelInvite(channelId, channelType, message: any(named: 'message'))).called(1);
     });
@@ -3977,18 +4087,17 @@ void main() {
       when(
         () => client.addChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
       ).thenAnswer(
-        (_) async => AddMembersResponse()
-          ..channel = channelModel
-          ..members = members
-          ..message = message,
+        (_) async => Result.success(
+          UpdateChannelResponse(duration: '0.01ms', channel: channelModel, members: members, message: message),
+        ),
       );
 
       final res = await channel.addMembers(memberIds, message: message);
 
       expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(res.members.length, members.length);
-      expect(res.message?.id, message.id);
+      expect(res.getOrNull()!.channel!.cid, channelModel.cid);
+      expect(res.getOrNull()!.members.length, members.length);
+      expect(res.getOrNull()!.message?.id, message.id);
 
       verify(
         () => client.addChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
@@ -4015,10 +4124,9 @@ void main() {
           hideHistoryBefore: hideHistoryBefore,
         ),
       ).thenAnswer(
-        (_) async => AddMembersResponse()
-          ..channel = channelModel
-          ..members = members
-          ..message = message,
+        (_) async => Result.success(
+          UpdateChannelResponse(duration: '0.01ms', channel: channelModel, members: members, message: message),
+        ),
       );
 
       final res = await channel.addMembers(
@@ -4028,9 +4136,9 @@ void main() {
       );
 
       expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(res.members.length, members.length);
-      expect(res.message?.id, message.id);
+      expect(res.getOrNull()!.channel!.cid, channelModel.cid);
+      expect(res.getOrNull()!.members.length, members.length);
+      expect(res.getOrNull()!.message?.id, message.id);
 
       verify(
         () => client.addChannelMembers(
@@ -4056,18 +4164,17 @@ void main() {
       when(
         () => client.inviteChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
       ).thenAnswer(
-        (_) async => InviteMembersResponse()
-          ..channel = channelModel
-          ..members = members
-          ..message = message,
+        (_) async => Result.success(
+          UpdateChannelResponse(duration: '0.01ms', channel: channelModel, members: members, message: message),
+        ),
       );
 
       final res = await channel.inviteMembers(memberIds, message: message);
 
       expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(res.members.length, members.length);
-      expect(res.message?.id, message.id);
+      expect(res.getOrNull()!.channel!.cid, channelModel.cid);
+      expect(res.getOrNull()!.members.length, members.length);
+      expect(res.getOrNull()!.message?.id, message.id);
 
       verify(
         () => client.inviteChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
@@ -4087,18 +4194,17 @@ void main() {
       when(
         () => client.removeChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
       ).thenAnswer(
-        (_) async => RemoveMembersResponse()
-          ..channel = channelModel
-          ..members = members
-          ..message = message,
+        (_) async => Result.success(
+          UpdateChannelResponse(duration: '0.01ms', channel: channelModel, members: members, message: message),
+        ),
       );
 
       final res = await channel.removeMembers(memberIds, message: message);
 
       expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(res.members.length, members.length);
-      expect(res.message?.id, message.id);
+      expect(res.getOrNull()!.channel!.cid, channelModel.cid);
+      expect(res.getOrNull()!.members.length, members.length);
+      expect(res.getOrNull()!.message?.id, message.id);
 
       verify(
         () => client.removeChannelMembers(channelId, channelType, memberIds, message: any(named: 'message')),
@@ -4164,14 +4270,15 @@ void main() {
             watchersPagination: any(named: 'watchersPagination'),
           ),
         ).thenAnswer(
-          (_) async => _generateChannelState(channelId, channelType),
+          (_) async => Result.success(
+            ChannelStateResponse(duration: '0.01ms', channelState: _generateChannelState(channelId, channelType)),
+          ),
         );
 
         final res = await channel.watch();
 
         expect(res, isNotNull);
-        expect(res.channel, isNotNull);
-        expect(res.channel?.cid, channelCid);
+        expect(res.getOrNull()!.channelState.channel?.cid, channelCid);
 
         verify(
           () => client.queryChannel(
@@ -4204,9 +4311,11 @@ void main() {
           ),
         ).thenAnswer((_) async {
           if (++attempts == 1) {
-            throw apiException(code: StreamErrorCode.inputError, statusCode: 400);
+            return Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400));
           }
-          return _generateChannelState(channelId, channelType);
+          return Result.success(
+            ChannelStateResponse(duration: '0.01ms', channelState: _generateChannelState(channelId, channelType)),
+          );
         });
 
         // First init fails: `initialized` errors and `state` stays null.
@@ -4215,10 +4324,7 @@ void main() {
           freshChannel.initialized,
           throwsA(isA<StreamApiException>()),
         );
-        await expectLater(
-          freshChannel.watch(),
-          throwsA(isA<StreamApiException>()),
-        );
+        expect((await freshChannel.watch()).exceptionOrNull(), isA<StreamApiException>());
         await firstInit;
         expect(freshChannel.state, isNull);
 
@@ -4229,7 +4335,7 @@ void main() {
         await expectLater(freshChannel.initialized, completion(isTrue));
       });
 
-      test('should rethrow if `.query` throws', () async {
+      test('Channel.watch returns the failure of the query without throwing', () async {
         when(
           () => client.queryChannel(
             channelType,
@@ -4240,12 +4346,9 @@ void main() {
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
           ),
-        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+        ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400)));
 
-        await expectLater(
-          channel.watch(),
-          throwsA(isA<StreamApiException>()),
-        );
+        expect((await channel.watch()).exceptionOrNull(), isA<StreamApiException>());
 
         verify(
           () => client.queryChannel(
@@ -4456,7 +4559,7 @@ void main() {
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
           ),
-        ).thenAnswer((_) async => channelState);
+        ).thenAnswer((_) async => Result.success(ChannelStateResponse(duration: '0.01ms', channelState: channelState)));
 
         final res = await channel.query();
 
@@ -4474,7 +4577,7 @@ void main() {
         ).called(1);
       });
 
-      test('should rethrow if `client.queryChannel` throws', () async {
+      test('Channel.query returns the failure of the query without throwing', () async {
         when(
           () => client.queryChannel(
             channelType,
@@ -4484,12 +4587,9 @@ void main() {
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
           ),
-        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+        ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400)));
 
-        await expectLater(
-          channel.query(),
-          throwsA(isA<StreamApiException>()),
-        );
+        expect((await channel.query()).exceptionOrNull(), isA<StreamApiException>());
 
         verify(
           () => client.queryChannel(
@@ -4541,7 +4641,7 @@ void main() {
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
           ),
-        ).thenAnswer((_) async => newState);
+        ).thenAnswer((_) async => Result.success(ChannelStateResponse(duration: '0.01ms', channelState: newState)));
 
         const pagination = PaginationParams(idAround: 'target-message-id');
 
@@ -4602,7 +4702,7 @@ void main() {
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
           ),
-        ).thenAnswer((_) async => newState);
+        ).thenAnswer((_) async => Result.success(ChannelStateResponse(duration: '0.01ms', channelState: newState)));
 
         final pagination = PaginationParams(createdAtAround: targetDate);
 
@@ -4638,7 +4738,9 @@ void main() {
               membersPagination: any(named: 'membersPagination'),
               watchersPagination: any(named: 'watchersPagination'),
             ),
-          ).thenAnswer((_) async => channelState);
+          ).thenAnswer(
+            (_) async => Result.success(ChannelStateResponse(duration: '0.01ms', channelState: channelState)),
+          );
 
           // Query without pagination params (fetching latest messages)
           await channel.query();
@@ -4664,7 +4766,9 @@ void main() {
               membersPagination: any(named: 'membersPagination'),
               watchersPagination: any(named: 'watchersPagination'),
             ),
-          ).thenAnswer((_) async => channelState);
+          ).thenAnswer(
+            (_) async => Result.success(ChannelStateResponse(duration: '0.01ms', channelState: channelState)),
+          );
 
           // Query with pagination params (fetching older messages)
           await channel.query(
@@ -4699,12 +4803,11 @@ void main() {
           sort: any(named: 'sort'),
           pagination: any(named: 'pagination'),
         ),
-      ).thenAnswer((_) async => QueryMembersResponse()..members = members);
+      ).thenAnswer((_) async => Result.success(QueryMembersResponse(duration: '0.01ms', members: members)));
 
       final res = await channel.queryMembers(filter: filter);
 
-      expect(res, isNotNull);
-      expect(res.members.length, members.length);
+      expect(res.getOrNull()!.members.length, members.length);
 
       verify(
         () => client.queryMembers(

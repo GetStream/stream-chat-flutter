@@ -81,7 +81,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
       if (_messageInputFocusNode.hasFocus && _selectedUsers.isNotEmpty) {
         final chatState = StreamChat.of(context);
 
-        final res = await chatState.client.queryChannelsOnline(
+        final result = await chatState.client.queryChannelsOnline(
           state: false,
           watch: false,
           filter: ChannelFilter.raw(
@@ -99,6 +99,9 @@ class _NewChatScreenState extends State<NewChatScreen> {
           ),
         );
 
+        // A failed lookup falls back to the channel its members identify,
+        // which is the same distinct channel.
+        final res = result.getOrDefault(const []);
         final channelExisted = res.length == 1;
         if (channelExisted) {
           channel = res.first;

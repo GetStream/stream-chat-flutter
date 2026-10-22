@@ -36,6 +36,9 @@ class DebugRemoveUser extends StatelessWidget {
               [userId],
             );
             debugPrint('[removeUser] result: $result');
+            if (result.exceptionOrNull() case final error?) {
+              showErrorDialog(context, error, 'Remove User');
+            }
           } catch (e) {
             debugPrint('[removeUser] failed: $e');
             showErrorDialog(context, e, 'Remove User');

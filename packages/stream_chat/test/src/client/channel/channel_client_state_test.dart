@@ -2288,7 +2288,12 @@ void main() {
               pagination: any(named: 'pagination'),
             ),
           ).thenAnswer(
-            (_) async => QueryMembersResponse()..members = [Member(userId: 'bad-user', channelRole: 'channel_banned')],
+            (_) async => Result.success(
+              QueryMembersResponse(
+                duration: '0.01ms',
+                members: [Member(userId: 'bad-user', channelRole: 'channel_banned')],
+              ),
+            ),
           );
         });
 
@@ -2451,6 +2456,26 @@ void main() {
             channel.state!.channelState.watchers?.map((it) => it.id),
             contains('watcher-2'),
           );
+        },
+      );
+
+      test(
+        '${EventType.userWatchingStop} without watcherCount preserves the existing count',
+        () async {
+          channel.state!.updateChannelState(
+            channel.state!.channelState.copyWith(watcherCount: 5),
+          );
+
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.userWatchingStop,
+              user: User(id: 'watcher-3'),
+            ),
+          );
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.watcherCount, 5);
         },
       );
 
@@ -5748,6 +5773,72 @@ void main() {
       return Channel.fromState(client, seeded);
     }
 
+    test('ChannelClientState.members keeps the user a member carries when the client holds none for it', () {
+      final member = Member(
+        user: User(id: 'mo', name: 'Mo'),
+      );
+      final channel = Channel.fromState(
+        client,
+        _generateChannelState(channelId, channelType).copyWith(members: [member]),
+      );
+      addTearDown(channel.dispose);
+
+      expect(channel.state!.members.single.user, member.user);
+    });
+
+    test(
+      'ChannelClientState.membersStream keeps the user a member carries when the client holds none for it',
+      () async {
+        final member = Member(
+          user: User(id: 'mo', name: 'Mo'),
+        );
+        final usersClient = MockStreamChatClient();
+        when(() => usersClient.retryPolicy).thenReturn(client.retryPolicy);
+        when(() => usersClient.state).thenReturn(_ClientStateWithoutUsers());
+        final channel = Channel.fromState(
+          usersClient,
+          _generateChannelState(channelId, channelType).copyWith(members: [member]),
+        );
+        addTearDown(channel.dispose);
+
+        final members = await channel.state!.membersStream.first;
+
+        expect(members.single.user, member.user);
+      },
+    );
+
+    test('updateChannelState keeps the fields a partial state leaves out', () {
+      final member = Member(userId: 'mo');
+      final pinned = Message(id: 'pinned');
+      final pending = Message(id: 'pending');
+      const pushPreferences = ChannelPushPreference(chatLevel: ChatLevel.mentions);
+      final location = Location(latitude: 1, longitude: 2, channelCid: '$channelType:$channelId');
+      final channel = Channel.fromState(
+        client,
+        _generateChannelState(channelId, channelType).copyWith(
+          watcherCount: 3,
+          members: [member],
+          membership: member,
+          pinnedMessages: [pinned],
+          pendingMessages: [pending],
+          pushPreferences: pushPreferences,
+          activeLiveLocations: [location],
+        ),
+      );
+      addTearDown(channel.dispose);
+
+      channel.state!.updateChannelState(ChannelState(channel: channel.state!.channelState.channel));
+
+      final state = channel.state!.channelState;
+      expect(state.watcherCount, 3);
+      expect(state.members, [member]);
+      expect(state.membership, member);
+      expect(state.pinnedMessages, [pinned]);
+      expect(state.pendingMessages, [pending]);
+      expect(state.pushPreferences, pushPreferences);
+      expect(state.activeLiveLocations, [location]);
+    });
+
     test(
       'preserves messages reference when updatedState.messages is null',
       () {
@@ -6416,3 +6507,9 @@ ChannelState _generateChannelState(
 }
 
 // endregion
+
+// A client state that holds no users, so a member keeps the user it carries.
+class _ClientStateWithoutUsers extends FakeClientState {
+  @override
+  Stream<Map<String, User>> get usersStream => Stream.value(const {});
+}

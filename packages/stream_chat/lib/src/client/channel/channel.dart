@@ -1755,14 +1755,19 @@ class Channel {
   /// The same as [updatePartial] with `set: {'image': image}`.
   Future<Result<UpdateChannelPartialResponse>> updateImage(String image) => updatePartial(set: {'image': image});
 
-  /// Update the channel custom data. This replaces all of the channel data
-  /// with the given [channelData].
+  /// Replaces this channel's data with [channelData].
   ///
-  /// If you instead want to do a partial update, use [updatePartial].
+  /// Every field [channelData] leaves out is cleared. An [updateMessage] is
+  /// sent to the channel as a system message.
   ///
-  /// See, https://getstream.io/chat/docs/other-rest/channel_update/?language=dart
-  /// for more information.
-  Future<UpdateChannelResponse> update(
+  /// The `members`, `invites`, `team`, `frozen`, `disabled`,
+  /// `auto_translation_enabled`, `auto_translation_language` and
+  /// `config_overrides` entries set those fields; every other entry, `name`
+  /// and `image` included, is custom data. An entry whose value has another
+  /// type than its field returns a failure.
+  ///
+  /// To change only some fields, consider [updatePartial].
+  Future<Result<UpdateChannelResponse>> update(
     Map<String, Object?> channelData, {
     Message? updateMessage,
   }) async {
@@ -1815,11 +1820,12 @@ class Channel {
     return _client.deleteChannel(id!, type);
   }
 
-  /// Removes all messages from the channel up to [truncatedAt] or now if
-  /// [truncatedAt] is not provided.
-  /// If [skipPush] is true, no push notification will be sent.
-  /// [Message] is the system message that will be sent to the channel.
-  Future<EmptyResponse> truncate({
+  /// Removes this channel's messages.
+  ///
+  /// The messages up to [truncatedAt] are removed, or all of them when it is
+  /// null. A [message] is sent to the channel as a system message, and
+  /// [skipPush] sends it without a push notification.
+  Future<Result<TruncateChannelResponse>> truncate({
     Message? message,
     bool? skipPush,
     DateTime? truncatedAt,
@@ -1834,20 +1840,30 @@ class Channel {
     );
   }
 
-  /// Accept invitation to the channel.
-  Future<AcceptInviteResponse> acceptInvite([Message? message]) async {
+  /// Accepts the current user's invite to this channel.
+  ///
+  /// A [message] is sent to the channel as a system message.
+  Future<Result<UpdateChannelResponse>> acceptInvite([Message? message]) async {
     _checkInitialized();
     return _client.acceptChannelInvite(id!, type, message: message);
   }
 
-  /// Reject invitation to the channel.
-  Future<RejectInviteResponse> rejectInvite([Message? message]) async {
+  /// Rejects the current user's invite to this channel.
+  ///
+  /// A [message] is sent to the channel as a system message.
+  Future<Result<UpdateChannelResponse>> rejectInvite([Message? message]) async {
     _checkInitialized();
     return _client.rejectChannelInvite(id!, type, message: message);
   }
 
-  /// Add members to the channel.
-  Future<AddMembersResponse> addMembers(
+  /// Adds the users with the ids [memberIds] to this channel.
+  ///
+  /// A [message] is sent to the channel as a system message.
+  ///
+  /// The new members do not see the messages sent before [hideHistoryBefore],
+  /// or any earlier message when [hideHistory] is true. A [hideHistoryBefore]
+  /// takes precedence over [hideHistory].
+  Future<Result<UpdateChannelResponse>> addMembers(
     List<String> memberIds, {
     Message? message,
     bool hideHistory = false,
@@ -1864,8 +1880,10 @@ class Channel {
     );
   }
 
-  /// Invite members to the channel.
-  Future<InviteMembersResponse> inviteMembers(
+  /// Invites the users with the ids [memberIds] to this channel.
+  ///
+  /// A [message] is sent to the channel as a system message.
+  Future<Result<UpdateChannelResponse>> inviteMembers(
     List<String> memberIds, {
     Message? message,
   }) async {
@@ -1873,8 +1891,10 @@ class Channel {
     return _client.inviteChannelMembers(id!, type, memberIds, message: message);
   }
 
-  /// Remove members from the channel.
-  Future<RemoveMembersResponse> removeMembers(
+  /// Removes the users with the ids [memberIds] from this channel.
+  ///
+  /// A [message] is sent to the channel as a system message.
+  Future<Result<UpdateChannelResponse>> removeMembers(
     List<String> memberIds, {
     Message? message,
   }) async {
@@ -2084,8 +2104,11 @@ class Channel {
     _logger.v(() => 'State initialized');
   }
 
-  /// Loads the initial channel state and watches for changes.
-  Future<ChannelState> watch({
+  /// Loads this channel's state and starts watching it, creating the channel
+  /// first if it does not exist.
+  ///
+  /// The same as [query] with `watch: true`.
+  Future<Result<ChannelStateResponse>> watch({
     bool presence = false,
     PaginationParams? messagesPagination,
     PaginationParams? membersPagination,
@@ -2207,14 +2230,25 @@ class Channel {
     return result.onSuccess((response) => state?.updateMessage(response.message));
   }
 
-  /// Creates a new channel.
-  Future<ChannelState> create() => query(state: false);
+  /// Creates this channel without loading its messages, members or watchers.
+  Future<Result<ChannelStateResponse>> create() => query(state: false);
 
-  /// Query the API, get messages, members or other channel fields.
+  /// Loads this channel's state, creating the channel first if it does not
+  /// exist, and applies it to [Channel.state].
   ///
-  /// Set [preferOffline] to true to avoid the API call if the data is already
-  /// in the offline storage.
-  Future<ChannelState> query({
+  /// The state holds the messages, members and watchers when [state] is true,
+  /// paged by [messagesPagination], [membersPagination] and
+  /// [watchersPagination]. With [watch], this connection receives the
+  /// channel's events; with [presence], its members' presence changes.
+  ///
+  /// If [preferOffline] is true and the offline storage holds messages for the
+  /// page, that state is used instead of fetching it. When fetching fails
+  /// without [watch], the state stored offline is returned instead, if there
+  /// is one. Either answer reports a `0ms` duration.
+  ///
+  /// A failure that is not answered from the offline storage also completes
+  /// [initialized] with its error while the channel has no state.
+  Future<Result<ChannelStateResponse>> query({
     bool state = true,
     bool watch = false,
     bool presence = false,
@@ -2231,28 +2265,12 @@ class Channel {
       _initializedCompleter = Completer<bool>();
     }
 
-    ChannelState? channelState;
-
-    try {
-      // If we prefer offline, we first try to get the channel state from the
-      // offline storage.
-      if (preferOffline && !watch && cid != null) {
-        final persistenceClient = _client.chatPersistenceClient;
-        if (persistenceClient != null) {
-          final cachedState = await persistenceClient.getChannelStateByCid(
-            cid!,
-            messagePagination: messagesPagination,
-          );
-
-          // If the cached state contains messages, we can use it.
-          if (cachedState.messages?.isNotEmpty == true) {
-            channelState = cachedState;
-          }
-        }
-      }
-
-      // If we still don't have the channelState, we try to get it from the API.
-      channelState ??= await _client.queryChannel(
+    final offlineState = preferOffline && !watch ? await _offlineChannelState(messagesPagination) : null;
+    final result = switch (offlineState) {
+      final channelState? when channelState.messages?.isNotEmpty == true => Result.success(
+        ChannelStateResponse(duration: '0ms', channelState: channelState),
+      ),
+      _ => await _client.queryChannel(
         type,
         channelId: id,
         channelData: _custom,
@@ -2262,61 +2280,80 @@ class Channel {
         messagesPagination: messagesPagination,
         membersPagination: membersPagination,
         watchersPagination: watchersPagination,
-      );
+      ),
+    };
 
-      if (_id == null) {
-        _id = channelState.channel!.id;
-        _cid = channelState.channel!.cid;
-      }
-
-      // Initialize the channel state if it's not initialized yet.
-      if (this.state == null) {
-        _initState(channelState);
-      } else {
-        // Otherwise, we update the existing state with the new channel state.
-        //
-        // But, before updating the state, we check if we are querying around a
-        // message, If we are, we have to truncate the state to avoid potential
-        // gaps in the message sequence.
-        final isQueryingAround = switch (messagesPagination) {
-          PaginationParams(idAround: _?) => true,
-          PaginationParams(createdAtAround: _?) => true,
-          _ => false,
-        };
-
-        if (isQueryingAround) this.state?.truncate();
-        this.state?.updateChannelStateFromServer(channelState);
-      }
-
-      // Submit for delivery reporting only when fetching the latest messages.
-      // This happens when no pagination params are provided (initial query).
-      if (messagesPagination == null) {
-        _client.channelDeliveryReporter.submitForDelivery([this]);
-      }
-
-      return channelState;
-    } catch (e, stk) {
-      // If we failed to get the channel state from the API and we were not
-      // supposed to watch the channel, we will try to get the channel state
-      // from the offline storage.
-      if (watch == false) {
-        if (_client.persistenceEnabled) {
-          return _client.chatPersistenceClient!.getChannelStateByCid(
-            cid!,
-            messagePagination: messagesPagination,
-          );
+    switch (result) {
+      case Success(:final data):
+        _applyChannelState(data.channelState, messagesPagination: messagesPagination);
+        return result;
+      case Failure(:final error, :final stackTrace):
+        if (!watch && _client.persistenceEnabled) {
+          if (await _offlineChannelState(messagesPagination) case final channelState?) {
+            return Result.success(ChannelStateResponse(duration: '0ms', channelState: channelState));
+          }
         }
-      }
 
-      // Otherwise, we will just rethrow the error.
-      _initializedCompleter.safeCompleteError(e, stk);
-
-      rethrow;
+        _initializedCompleter.safeCompleteError(error, stackTrace);
+        return result;
     }
   }
 
-  /// Query channel members.
-  Future<QueryMembersResponse> queryMembers({
+  // The channel state the offline storage holds for the page described by
+  // [messagesPagination], or null when there is no storage, the channel has
+  // no cid yet or the storage cannot be read.
+  Future<ChannelState?> _offlineChannelState(PaginationParams? messagesPagination) async {
+    final persistenceClient = _client.chatPersistenceClient;
+    final cid = this.cid;
+    if (persistenceClient == null || cid == null) return null;
+
+    final result = await runSafely(
+      () => persistenceClient.getChannelStateByCid(cid, messagePagination: messagesPagination),
+    );
+    return result.getOrNull();
+  }
+
+  // Applies a fetched [channelState]: adopts the id of a channel created
+  // through its members, initializes the state or updates it, and reports
+  // delivery when the latest messages were loaded.
+  void _applyChannelState(ChannelState channelState, {PaginationParams? messagesPagination}) {
+    if (_id == null) {
+      _id = channelState.channel!.id;
+      _cid = channelState.channel!.cid;
+    }
+
+    // Initialize the channel state if it's not initialized yet.
+    if (state == null) {
+      _initState(channelState);
+    } else {
+      // Otherwise, we update the existing state with the new channel state.
+      //
+      // But, before updating the state, we check if we are querying around a
+      // message, If we are, we have to truncate the state to avoid potential
+      // gaps in the message sequence.
+      final isQueryingAround = switch (messagesPagination) {
+        PaginationParams(idAround: _?) => true,
+        PaginationParams(createdAtAround: _?) => true,
+        _ => false,
+      };
+
+      if (isQueryingAround) state?.truncate();
+      state?.updateChannelStateFromServer(channelState);
+    }
+
+    // Submit for delivery reporting only when fetching the latest messages.
+    // This happens when no pagination params are provided (initial query).
+    if (messagesPagination == null) {
+      _client.channelDeliveryReporter.submitForDelivery([this]);
+    }
+  }
+
+  /// Fetches one page of this channel's members that match [filter], ordered
+  /// by [sort].
+  ///
+  /// The page holds up to [PaginationParams.limit] members after skipping
+  /// [PaginationParams.offset], bounded by its `createdAt` dates.
+  Future<Result<QueryMembersResponse>> queryMembers({
     MemberFilter? filter,
     List<MemberSort>? sort,
     PaginationParams? pagination,

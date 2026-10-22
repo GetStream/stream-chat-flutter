@@ -341,7 +341,9 @@ void main() {
           preferOffline: any(named: 'preferOffline'),
           messagesPagination: any(named: 'messagesPagination'),
         ),
-      ).thenAnswer((_) async => const ChannelState());
+      ).thenAnswer(
+        (_) async => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
+      );
 
       await pumpMessageList(
         tester,

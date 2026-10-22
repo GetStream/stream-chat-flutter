@@ -137,10 +137,10 @@ void main() {
       queriedPages.add(page);
 
       final outcome = onQueryPage?.call(page);
-      if (outcome is Exception) throw outcome;
+      if (outcome is Exception) return Result.failure(outcome);
 
       final answered = outcome is List<String> ? outcome : page;
-      return [for (final cid in answered) _FakeChannel(cid)];
+      return Result.success([for (final cid in answered) _FakeChannel(cid)]);
     });
 
     return (

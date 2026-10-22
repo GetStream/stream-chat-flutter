@@ -3,7 +3,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
-import '../fakes.dart';
 import '../utils.dart';
 import '../ws/fake_chat_server.dart';
 
@@ -21,15 +20,14 @@ void main() {
   setUp(() {
     adapter = MockHttpClientAdapter();
     when(() => adapter.fetch(any(), any(), any())).thenAnswer(
-      (_) async => ResponseBody.fromString('{"channels":[]}', 200, headers: _jsonHeaders),
+      (_) async => ResponseBody.fromString('{"channels":[],"duration":"0.01ms"}', 200, headers: _jsonHeaders),
     );
 
     ws = FakeChatServer();
-    // Faked: the generated client shares this adapter, and its connect-time
-    // request would land among the ones captured below.
+    // The generated client shares this adapter, so the channel query below is
+    // the last request it captures.
     client = StreamChatClient(
       'test-api-key',
-      defaultApi: FakeDefaultApi(),
       wsProvider: ws.connect,
       httpClientAdapter: adapter,
     );

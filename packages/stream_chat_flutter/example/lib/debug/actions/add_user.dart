@@ -36,6 +36,9 @@ class DebugAddUser extends StatelessWidget {
               [userId],
             );
             debugPrint('[addUser] result: $result');
+            if (result.exceptionOrNull() case final error?) {
+              showErrorDialog(context, error, 'Add User');
+            }
           } catch (e) {
             debugPrint('[addUser] failed: $e');
             showErrorDialog(context, e, 'Add User');

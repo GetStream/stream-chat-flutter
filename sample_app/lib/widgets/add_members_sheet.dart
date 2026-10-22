@@ -114,15 +114,17 @@ class _AddMembersSheetState extends State<AddMembersSheet> {
     final messenger = ScaffoldMessenger.of(context);
 
     setState(() => _saving = true);
-    try {
-      await _channel.addMembers(_selectedIds.toList());
-      if (!mounted) return;
-      navigator.pop(true);
-    } catch (e) {
-      messenger.showSnackBar(
-        SnackBar(content: Text('Failed to add members: $e')),
-      );
-      if (mounted) setState(() => _saving = false);
+    final result = await _channel.addMembers(_selectedIds.toList());
+    if (!mounted) return;
+
+    switch (result) {
+      case Success():
+        navigator.pop(true);
+      case Failure(:final error):
+        messenger.showSnackBar(
+          SnackBar(content: Text('Failed to add members: $error')),
+        );
+        setState(() => _saving = false);
     }
   }
 

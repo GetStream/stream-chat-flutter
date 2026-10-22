@@ -181,16 +181,18 @@ includes a named response that carries only `duration` today, such as `HideChann
 | `moderationFromV1Json` | `Message.moderation` | [10](10-messages.md) |
 | `reactionGroupsFromV1Json` | `Message.reactionGroups` | [10](10-messages.md) |
 | `ActionV1JsonConverter` | `Attachment.actions` | [10](10-messages.md) |
-| `LocationV1JsonConverter` | `Message.sharedLocation`, `ChannelState.activeLiveLocations`, `GetActiveLiveLocationsResponse.activeLiveLocations`, `updateLiveLocation`'s response | [10](10-messages.md) |
+| `LocationV1JsonConverter` | `Message.sharedLocation`, `GetActiveLiveLocationsResponse.activeLiveLocations`, `updateLiveLocation`'s response | [10](10-messages.md) |
 | `messageReminderFromV1Json` | `Message.reminder`, `Event.reminder` | WebSocket v2 (no group) |
 | `reactionFromV1Json` / `reactionsFromV1Json` | `Message.latestReactions` / `ownReactions`, `Event.reaction` | WebSocket v2 (no group) |
-| `DataSerializable` | `UserGroup`, `UserGroupMember`, `ReactionGroup`, `PollOption` (`fromData`, `toData`) | [10](10-messages.md) |
+| `DataSerializable` | `UserGroup`, `UserGroupMember`, `ReactionGroup`, `PollOption`, `ChannelConfig` (`fromData`, `toData`) | [10](10-messages.md) |
+| `ChannelModelV1JsonConverter` | `Event.channel`, `ChannelMute.channel`, `BannedUser.channel`, `Draft.channel`, and the channel of a v1 `Location`, `MessageReminder` and `Thread` | WebSocket v2 (no group) |
+| `channelConfigFromV1Json` | `ChannelModel.config` | WebSocket v2 (no group) |
+| `memberFromV1Json` / `membersFromV1Json` | `Event.member` / `ChannelModel.members` | WebSocket v2 (no group) |
 | `pollFromV1Json` | `Message.poll`, `DraftMessage.poll`, `Event.poll` | WebSocket v2 (no group) |
 | `pollVoteFromV1Json` | `Event.pollVote` | WebSocket v2 (no group) |
 | `threadFromV1Json` | `Event.thread` | WebSocket v2 (no group) |
 | `Event.fromJson`'s `user.updated` re-decode | `Event.user`, decoded as a `User` and again as an `OwnUser` | WebSocket v2 (no group) |
 | `users_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
-| `channels_mapper.dart` (kept, re-pointed) | today's `ChannelModel`, `ChannelConfig` and `Member`, which still read and write JSON | [11](11-channels-and-members.md) |
 | `messages_mapper.dart`, `attachments_mapper.dart`, `reactions_mapper.dart`, `locations_mapper.dart`, `drafts_mapper.dart` (kept, re-pointed) | today's `Message`, `Attachment`, `Reaction`, `Location`, `Draft` and `DraftMessage`, which still read and write JSON | [10](10-messages.md) |
 
 The `user.updated` re-decode keeps the privacy settings the current user's copy of the event carries, which `User`

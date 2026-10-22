@@ -3,6 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_core/stream_core.dart' show Filter, FilterField, Sort, SortField;
 
 import 'channel_model.dart';
+import 'converters/v1_json_converters.dart';
 import 'user.dart';
 
 part 'banned_user.g.dart';
@@ -31,6 +32,7 @@ class BannedUser extends Equatable {
   final User? bannedBy;
 
   /// Channel where the [user] was banned.
+  @ChannelModelV1JsonConverter()
   final ChannelModel? channel;
 
   /// Timestamp when the [user] was banned.

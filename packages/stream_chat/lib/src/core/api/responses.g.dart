@@ -25,19 +25,6 @@ SyncResponse _$SyncResponseFromJson(Map<String, dynamic> json) => SyncResponse()
   ..duration = json['duration'] as String?
   ..events = (json['events'] as List<dynamic>?)?.map((e) => Event.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-QueryChannelsResponse _$QueryChannelsResponseFromJson(Map<String, dynamic> json) => QueryChannelsResponse()
-  ..duration = json['duration'] as String?
-  ..channels =
-      (json['channels'] as List<dynamic>?)?.map((e) => ChannelState.fromJson(e as Map<String, dynamic>)).toList() ?? []
-  ..predefinedFilter = json['predefined_filter'] == null
-      ? null
-      : PredefinedFilter.fromJson(json['predefined_filter'] as Map<String, dynamic>);
-
-QueryMembersResponse _$QueryMembersResponseFromJson(Map<String, dynamic> json) => QueryMembersResponse()
-  ..duration = json['duration'] as String?
-  ..members =
-      (json['members'] as List<dynamic>?)?.map((e) => Member.fromJson(e as Map<String, dynamic>)).toList() ?? [];
-
 QueryUsersResponse _$QueryUsersResponseFromJson(Map<String, dynamic> json) => QueryUsersResponse()
   ..duration = json['duration'] as String?
   ..users = (json['users'] as List<dynamic>?)?.map((e) => User.fromJson(e as Map<String, dynamic>)).toList() ?? [];
@@ -46,53 +33,8 @@ QueryBannedUsersResponse _$QueryBannedUsersResponseFromJson(Map<String, dynamic>
   ..duration = json['duration'] as String?
   ..bans = (json['bans'] as List<dynamic>?)?.map((e) => BannedUser.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-UpdateChannelResponse _$UpdateChannelResponseFromJson(Map<String, dynamic> json) => UpdateChannelResponse()
-  ..duration = json['duration'] as String?
-  ..channel = ChannelModel.fromJson(json['channel'] as Map<String, dynamic>)
-  ..members = (json['members'] as List<dynamic>?)?.map((e) => Member.fromJson(e as Map<String, dynamic>)).toList()
-  ..message = json['message'] == null ? null : Message.fromJson(json['message'] as Map<String, dynamic>);
-
-InviteMembersResponse _$InviteMembersResponseFromJson(Map<String, dynamic> json) => InviteMembersResponse()
-  ..duration = json['duration'] as String?
-  ..channel = ChannelModel.fromJson(json['channel'] as Map<String, dynamic>)
-  ..members = (json['members'] as List<dynamic>?)?.map((e) => Member.fromJson(e as Map<String, dynamic>)).toList() ?? []
-  ..message = json['message'] == null ? null : Message.fromJson(json['message'] as Map<String, dynamic>);
-
-RemoveMembersResponse _$RemoveMembersResponseFromJson(Map<String, dynamic> json) => RemoveMembersResponse()
-  ..duration = json['duration'] as String?
-  ..channel = ChannelModel.fromJson(json['channel'] as Map<String, dynamic>)
-  ..members = (json['members'] as List<dynamic>?)?.map((e) => Member.fromJson(e as Map<String, dynamic>)).toList() ?? []
-  ..message = json['message'] == null ? null : Message.fromJson(json['message'] as Map<String, dynamic>);
-
-AddMembersResponse _$AddMembersResponseFromJson(Map<String, dynamic> json) => AddMembersResponse()
-  ..duration = json['duration'] as String?
-  ..channel = ChannelModel.fromJson(json['channel'] as Map<String, dynamic>)
-  ..members = (json['members'] as List<dynamic>?)?.map((e) => Member.fromJson(e as Map<String, dynamic>)).toList() ?? []
-  ..message = json['message'] == null ? null : Message.fromJson(json['message'] as Map<String, dynamic>);
-
-AcceptInviteResponse _$AcceptInviteResponseFromJson(Map<String, dynamic> json) => AcceptInviteResponse()
-  ..duration = json['duration'] as String?
-  ..channel = ChannelModel.fromJson(json['channel'] as Map<String, dynamic>)
-  ..members = (json['members'] as List<dynamic>?)?.map((e) => Member.fromJson(e as Map<String, dynamic>)).toList() ?? []
-  ..message = json['message'] == null ? null : Message.fromJson(json['message'] as Map<String, dynamic>);
-
-RejectInviteResponse _$RejectInviteResponseFromJson(Map<String, dynamic> json) => RejectInviteResponse()
-  ..duration = json['duration'] as String?
-  ..channel = ChannelModel.fromJson(json['channel'] as Map<String, dynamic>)
-  ..members = (json['members'] as List<dynamic>?)?.map((e) => Member.fromJson(e as Map<String, dynamic>)).toList() ?? []
-  ..message = json['message'] == null ? null : Message.fromJson(json['message'] as Map<String, dynamic>);
-
 EmptyResponse _$EmptyResponseFromJson(Map<String, dynamic> json) =>
     EmptyResponse()..duration = json['duration'] as String?;
-
-ChannelStateResponse _$ChannelStateResponseFromJson(Map<String, dynamic> json) => ChannelStateResponse()
-  ..duration = json['duration'] as String?
-  ..channel = ChannelModel.fromJson(json['channel'] as Map<String, dynamic>)
-  ..messages =
-      (json['messages'] as List<dynamic>?)?.map((e) => Message.fromJson(e as Map<String, dynamic>)).toList() ?? []
-  ..members = (json['members'] as List<dynamic>?)?.map((e) => Member.fromJson(e as Map<String, dynamic>)).toList() ?? []
-  ..watcherCount = (json['watcher_count'] as num?)?.toInt() ?? 0
-  ..read = (json['read'] as List<dynamic>?)?.map((e) => Read.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
 UpsertPushPreferencesResponse _$UpsertPushPreferencesResponseFromJson(Map<String, dynamic> json) =>
     UpsertPushPreferencesResponse()

@@ -583,6 +583,28 @@ void main() {
       expect(messages, isEmpty);
     });
 
+    testWidgets(
+      'DefaultStreamMessageComposer does not send the message when reloading an out-of-date channel fails',
+      (tester) async {
+        final key = await _pumpComposer(tester, client, channel);
+        // The group shares the channel, so forget the sends of earlier tests.
+        clearInteractions(channel);
+        when(() => channelState.isUpToDate).thenReturn(false);
+        when(channelState.truncate).thenReturn(null);
+        when(
+          () => channel.query(
+            preferOffline: any(named: 'preferOffline'),
+            messagesPagination: any(named: 'messagesPagination'),
+          ),
+        ).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'offline')));
+
+        await key.currentState!.sendMessage();
+        await tester.pump(const Duration(seconds: 1));
+
+        verifyNever(() => channel.sendMessage(any()));
+      },
+    );
+
     testWidgets('DefaultStreamMessageComposer reports a send the channel throws on to onError', (tester) async {
       final error = StateError('not initialized');
       when(() => channel.sendMessage(any())).thenThrow(error);

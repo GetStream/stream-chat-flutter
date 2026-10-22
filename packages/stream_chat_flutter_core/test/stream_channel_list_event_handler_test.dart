@@ -167,7 +167,7 @@ void main() {
       when(() => controller.currentItems).thenReturn([existing]);
       when(
         () => controller.getChannel(id: 'new', type: 'messaging'),
-      ).thenAnswer((_) async => added);
+      ).thenAnswer((_) async => Result.success(added));
 
       handler.onChannelVisible(
         Event(
@@ -189,7 +189,7 @@ void main() {
       when(() => controller.currentItems).thenReturn([existing, stale]);
       when(
         () => controller.getChannel(id: 'new', type: 'messaging'),
-      ).thenAnswer((_) async => fetched);
+      ).thenAnswer((_) async => Result.success(fetched));
 
       handler.onChannelVisible(
         Event(
@@ -202,6 +202,26 @@ void main() {
       await pumpEventQueue();
 
       expect(capturedChannels(), equals([fetched, existing]));
+    });
+
+    test('leaves the list unchanged when the channel cannot be fetched', () async {
+      final existing = mockChannel('messaging:existing');
+      when(() => controller.currentItems).thenReturn([existing]);
+      when(
+        () => controller.getChannel(id: 'new', type: 'messaging'),
+      ).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'boom')));
+
+      handler.onChannelVisible(
+        Event(
+          type: EventType.channelVisible,
+          channelId: 'new',
+          channelType: 'messaging',
+        ),
+        controller,
+      );
+      await pumpEventQueue();
+
+      verifyNever(() => controller.channels = any());
     });
 
     test('is a no-op when the channel identifiers are missing', () async {
@@ -285,7 +305,7 @@ void main() {
       when(() => controller.currentItems).thenReturn([existing]);
       when(
         () => controller.getChannel(id: 'new', type: 'messaging'),
-      ).thenAnswer((_) async => added);
+      ).thenAnswer((_) async => Result.success(added));
 
       handler.onNotificationAddedToChannel(
         Event(
@@ -308,7 +328,7 @@ void main() {
       when(() => controller.currentItems).thenReturn([existing]);
       when(
         () => controller.getChannel(id: 'new', type: 'messaging'),
-      ).thenAnswer((_) async => added);
+      ).thenAnswer((_) async => Result.success(added));
 
       handler.onNotificationMessageNew(
         Event(

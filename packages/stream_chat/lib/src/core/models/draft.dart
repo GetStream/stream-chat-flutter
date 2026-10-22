@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stream_core/stream_core.dart' show Filter, FilterField, Sort, SortField;
 
 import 'channel_model.dart';
+import 'converters/v1_json_converters.dart';
 import 'draft_message.dart';
 import 'message.dart';
 
@@ -37,6 +38,7 @@ class Draft extends Equatable {
   final DraftMessage message;
 
   /// The channel this draft belongs to.
+  @ChannelModelV1JsonConverter()
   final ChannelModel? channel;
 
   /// The ID of the parent message, if the message is a thread reply.

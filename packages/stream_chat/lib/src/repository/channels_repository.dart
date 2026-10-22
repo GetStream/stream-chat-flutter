@@ -1,17 +1,29 @@
-import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
+import 'package:stream_core/stream_core.dart' show PatternMatching, Result, Standard, runApiSafely;
 
 import '../../open_api/api.dart' as api;
+import '../core/api/requests.dart';
+import '../core/models/channel_state.dart';
+import '../core/models/member.dart';
+import '../core/models/message.dart';
 import '../core/models/request/message_delivery.dart';
+import '../core/models/response/channel_state_response.dart';
 import '../core/models/response/delete_channel_response.dart';
 import '../core/models/response/event_response.dart';
 import '../core/models/response/hide_channel_response.dart';
 import '../core/models/response/mark_delivered_response.dart';
 import '../core/models/response/mark_read_response.dart';
+import '../core/models/response/query_channels_response.dart';
+import '../core/models/response/query_members_response.dart';
 import '../core/models/response/show_channel_response.dart';
+import '../core/models/response/truncate_channel_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
+import '../core/models/response/update_channel_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
 import 'mapper/channels_mapper.dart';
+import 'mapper/filter_mapper.dart';
+import 'mapper/messages_mapper.dart';
 import 'mapper/result_mapper.dart';
+import 'mapper/sort_mapper.dart';
 
 /// Repository dedicated to channel operations.
 class ChannelsRepository {
@@ -19,6 +31,201 @@ class ChannelsRepository {
   const ChannelsRepository(this._api);
 
   final api.DefaultApi _api;
+
+  /// Updates a channel.
+  ///
+  /// Replaces its data with [data] when given, adds the users in [addMembers],
+  /// invites those in [invites] and removes those in [removeMembers], and
+  /// accepts or rejects the current user's invite when [acceptInvite] or
+  /// [rejectInvite] is true. A [message] is sent to the channel as a system
+  /// message.
+  ///
+  /// Added members do not see the messages sent before [hideHistoryBefore], or
+  /// any earlier message when [hideHistory] is true.
+  ///
+  /// A [data] entry whose value has another type than the field it names, such
+  /// as a `frozen` that is not a `bool`, returns a failure without a request.
+  Future<Result<UpdateChannelResponse>> updateChannel(
+    String channelId,
+    String channelType, {
+    Map<String, Object?>? data,
+    Message? message,
+    bool? acceptInvite,
+    bool? rejectInvite,
+    List<String>? invites,
+    List<String>? addMembers,
+    List<String>? removeMembers,
+    bool? hideHistory,
+    DateTime? hideHistoryBefore,
+  }) async {
+    final request = await runApiSafely(
+      () => api.UpdateChannelRequest(
+        data: data?.let(channelInputRequestFromData),
+        message: message?.toRequest(),
+        acceptInvite: acceptInvite,
+        rejectInvite: rejectInvite,
+        invites: invites?.map((userId) => api.ChannelMemberRequest(userId: userId)).toList(),
+        addMembers: addMembers?.map((userId) => api.ChannelMemberRequest(userId: userId)).toList(),
+        removeMembers: removeMembers,
+        hideHistory: hideHistory,
+        hideHistoryBefore: hideHistoryBefore,
+      ),
+    );
+
+    return request.flatMapAsync((request) async {
+      final result = await _api.updateChannel(type: channelType, id: channelId, updateChannelRequest: request);
+      return result.map((response) => response.toModel());
+    });
+  }
+
+  /// Removes the messages of a channel.
+  ///
+  /// The messages up to [truncatedAt] are removed, or all of them when it is
+  /// null. A [message] is sent to the channel as a system message, and
+  /// [skipPush] sends it without a push notification.
+  Future<Result<TruncateChannelResponse>> truncateChannel(
+    String channelId,
+    String channelType, {
+    Message? message,
+    bool? skipPush,
+    DateTime? truncatedAt,
+  }) async {
+    final result = await _api.truncateChannel(
+      type: channelType,
+      id: channelId,
+      truncateChannelRequest: api.TruncateChannelRequest(
+        message: message?.toRequest(),
+        skipPush: skipPush,
+        truncatedAt: truncatedAt,
+      ),
+    );
+
+    return result.map((response) => response.toModel());
+  }
+
+  /// Fetches the state of a channel of type [channelType], creating the
+  /// channel first if it does not exist.
+  ///
+  /// The channel is the one with the id [channelId] or, without one, the one
+  /// identified by the members in [channelData]. A channel being created takes
+  /// [channelData] as its data.
+  ///
+  /// The state holds the messages, members and watchers when [state] is true,
+  /// paged by [messagesPagination], [membersPagination] and
+  /// [watchersPagination]. With [watch], the current connection receives the
+  /// channel's events; with [presence], its members' presence changes.
+  ///
+  /// A [channelData] entry whose value has another type than the field it
+  /// names returns a failure without a request.
+  Future<Result<ChannelStateResponse>> queryChannel(
+    String channelType, {
+    String? channelId,
+    Map<String, Object?>? channelData,
+    bool state = true,
+    bool watch = false,
+    bool presence = false,
+    PaginationParams? messagesPagination,
+    PaginationParams? membersPagination,
+    PaginationParams? watchersPagination,
+  }) async {
+    final request = await runApiSafely(
+      () => api.ChannelGetOrCreateRequest(
+        data: channelData?.let(channelInputFromData),
+        state: state,
+        watch: watch,
+        presence: presence,
+        messages: messagesPagination?.toMessagePaginationParams(),
+        members: membersPagination?.toPaginationParams(),
+        watchers: watchersPagination?.toPaginationParams(),
+      ),
+    );
+
+    return request.flatMapAsync((request) async {
+      final result = switch (channelId) {
+        final id? => await _api.getOrCreateChannel(type: channelType, id: id, channelGetOrCreateRequest: request),
+        null => await _api.getOrCreateDistinctChannel(type: channelType, channelGetOrCreateRequest: request),
+      };
+      return result.map((response) => response.toModel());
+    });
+  }
+
+  /// Fetches one page of the channels that match [filter], ordered by [sort].
+  ///
+  /// A [predefinedFilter] names a filter and sort set up on the app instead,
+  /// filled in with [filterValues] and [sortValues].
+  ///
+  /// The page holds up to [PaginationParams.limit] channels after skipping
+  /// [PaginationParams.offset]; each carries up to [memberLimit] members and
+  /// [messageLimit] messages. The channels' state is loaded when [state] is
+  /// true. With [watch], the current connection receives their events; with
+  /// [presence], their members' presence changes.
+  Future<Result<QueryChannelsResponse>> queryChannels({
+    ChannelFilter? filter,
+    List<ChannelSort>? sort,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    int? memberLimit,
+    int? messageLimit,
+    bool state = true,
+    bool watch = true,
+    bool presence = false,
+    PaginationParams paginationParams = const PaginationParams(),
+  }) async {
+    final result = await _api.queryChannels(
+      queryChannelsRequest: api.QueryChannelsRequest(
+        filterConditions: filter?.toRequest(),
+        sort: sort?.map((sort) => sort.toRequest()).toList(),
+        predefinedFilter: predefinedFilter,
+        filterValues: filterValues,
+        sortValues: sortValues,
+        memberLimit: memberLimit,
+        messageLimit: messageLimit,
+        state: state,
+        watch: watch,
+        presence: presence,
+        limit: paginationParams.limit,
+        offset: paginationParams.offset,
+      ),
+    );
+
+    return result.map((response) => response.toModel());
+  }
+
+  /// Fetches one page of the members of a channel of type [channelType] that
+  /// match [filter], ordered by [sort].
+  ///
+  /// The channel is the one with the id [channelId] or, for a channel not
+  /// created yet, the one whose members are [members].
+  ///
+  /// The page holds up to [PaginationParams.limit] members after skipping
+  /// [PaginationParams.offset], bounded by its `createdAt` dates.
+  Future<Result<QueryMembersResponse>> queryMembers(
+    String channelType, {
+    MemberFilter? filter,
+    String? channelId,
+    List<Member>? members,
+    List<MemberSort>? sort,
+    PaginationParams? pagination,
+  }) async {
+    final result = await _api.queryMembers(
+      payload: api.QueryMembersPayload(
+        type: channelType,
+        id: channelId,
+        members: channelId == null ? members?.map((member) => member.toRequest()).toList() : null,
+        filterConditions: filter?.toRequest() ?? const {},
+        sort: sort?.map((sort) => sort.toRequest()).toList(),
+        limit: pagination?.limit,
+        offset: pagination?.offset,
+        createdAtAfter: pagination?.createdAtAfter,
+        createdAtAfterOrEqual: pagination?.createdAtAfterOrEqual,
+        createdAtBefore: pagination?.createdAtBefore,
+        createdAtBeforeOrEqual: pagination?.createdAtBeforeOrEqual,
+      ),
+    );
+
+    return result.map((response) => response.toModel());
+  }
 
   /// Partially updates a channel.
   ///

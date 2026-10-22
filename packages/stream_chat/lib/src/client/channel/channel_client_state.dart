@@ -68,7 +68,7 @@ class ChannelClientState {
     final existingWatchers = channelState.watchers ?? const <User>[];
     _channelState = channelState.copyWith(
       watchers: existingWatchers.where((user) => user.id != watcher.id).toList(),
-      watcherCount: watcherCount,
+      watcherCount: watcherCount ?? channelState.watcherCount,
     );
   }
 
@@ -301,15 +301,16 @@ class ChannelClientState {
   }
 
   /// Channel members list.
-  List<Member> get members =>
-      (_channelState.members ?? <Member>[]).map((e) => e.copyWith(user: _client.state.users[e.user!.id])).toList();
+  List<Member> get members => (_channelState.members ?? <Member>[])
+      .map((e) => e.copyWith(user: _client.state.users[e.user!.id] ?? e.user))
+      .toList();
 
   /// Channel members list as a stream.
   Stream<List<Member>> get membersStream =>
       CombineLatestStream.combine2<List<Member?>?, Map<String?, User?>, List<Member>>(
         channelStateStream.map((cs) => cs.members),
         _client.state.usersStream,
-        (members, users) => [...?members?.map((e) => e!.copyWith(user: users[e.user!.id]))],
+        (members, users) => [...?members?.map((e) => e!.copyWith(user: users[e.user!.id] ?? e.user))],
       ).distinct(const ListEquality().equals);
 
   /// Channel watcher count.
@@ -569,15 +570,15 @@ class ChannelClientState {
       messages: newMessages,
       channel: _channelState.channel?.merge(updatedState.channel),
       watchers: newWatchers,
-      watcherCount: updatedState.watcherCount,
-      members: updatedState.members,
-      membership: updatedState.membership,
+      watcherCount: updatedState.watcherCount ?? _channelState.watcherCount,
+      members: updatedState.members ?? _channelState.members,
+      membership: updatedState.membership ?? _channelState.membership,
       read: newReads,
       draft: updatedState.draft,
-      pinnedMessages: updatedState.pinnedMessages,
-      pendingMessages: updatedState.pendingMessages,
-      pushPreferences: updatedState.pushPreferences,
-      activeLiveLocations: updatedState.activeLiveLocations,
+      pinnedMessages: updatedState.pinnedMessages ?? _channelState.pinnedMessages,
+      pendingMessages: updatedState.pendingMessages ?? _channelState.pendingMessages,
+      pushPreferences: updatedState.pushPreferences ?? _channelState.pushPreferences,
+      activeLiveLocations: updatedState.activeLiveLocations ?? _channelState.activeLiveLocations,
     );
   }
 

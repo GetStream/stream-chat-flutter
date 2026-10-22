@@ -1,4 +1,4 @@
-import 'package:stream_chat/stream_chat.dart' show Event, Member;
+import 'package:stream_chat/stream_chat.dart' show Event, Member, PatternMatching;
 import 'stream_channel_list_controller.dart';
 
 /// Contains handlers that are called from [StreamChannelListController] for
@@ -88,10 +88,12 @@ mixin class StreamChannelListEventHandler {
 
     final currentChannels = [...controller.currentItems];
 
-    final channel = await controller.getChannel(
+    final result = await controller.getChannel(
       id: channelId,
       type: channelType,
     );
+    final channel = result.getOrNull();
+    if (channel == null) return;
 
     final updatedChannels = [
       channel,

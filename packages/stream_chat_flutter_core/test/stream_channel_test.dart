@@ -212,7 +212,7 @@ void main() {
       final nonInitializedMockChannel = NonInitializedMockChannel();
       when(() => nonInitializedMockChannel.cid).thenReturn('test:channel');
       when(nonInitializedMockChannel.watch).thenAnswer(
-        (_) async => const ChannelState(),
+        (_) async => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
       );
 
       // A simple widget that provides StreamChannel
@@ -249,7 +249,7 @@ void main() {
       final nonInitializedMockChannel = NonInitializedMockChannel();
       when(() => nonInitializedMockChannel.cid).thenReturn('test:channel');
       when(nonInitializedMockChannel.watch).thenAnswer(
-        (_) async => const ChannelState(),
+        (_) async => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
       );
 
       // A simple widget that provides StreamChannel
@@ -284,7 +284,9 @@ void main() {
       final nonInitializedMockChannel = NonInitializedMockChannel();
       when(() => nonInitializedMockChannel.cid).thenReturn('test:channel');
       when(nonInitializedMockChannel.watch).thenAnswer(
-        (_) => Future.microtask(ChannelState.new),
+        (_) => Future.microtask(
+          () => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
+        ),
       );
 
       // A widget with custom loading indicator
@@ -478,9 +480,9 @@ void main() {
       when(channel.watch).thenAnswer((_) async {
         attempts++;
         if (attempts == 1) {
-          throw const StreamClientException(message: 'boom');
+          return const Result.failure(StreamClientException(message: 'boom'));
         }
-        return const ChannelState();
+        return const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState()));
       });
 
       await tester.pumpWidget(
@@ -514,16 +516,14 @@ void main() {
     (tester) async {
       final channel = NonInitializedMockChannel();
       when(() => channel.cid).thenReturn('test:channel');
-      Completer<ChannelState>? secondWatch;
+      Completer<Result<ChannelStateResponse>>? secondWatch;
       var attempts = 0;
       when(channel.watch).thenAnswer((_) {
         attempts++;
         if (attempts == 1) {
-          return Future<ChannelState>.error(
-            const StreamClientException(message: 'boom'),
-          );
+          return Future.value(const Result.failure(StreamClientException(message: 'boom')));
         }
-        secondWatch = Completer<ChannelState>();
+        secondWatch = Completer<Result<ChannelStateResponse>>();
         return secondWatch!.future;
       });
 
@@ -550,7 +550,9 @@ void main() {
       expect(find.text('Oops, something went wrong'), findsNothing);
 
       // Completing the in-flight watch renders the child.
-      secondWatch!.complete(const ChannelState());
+      secondWatch!.complete(
+        const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
+      );
       await tester.pumpAndSettle();
       expect(find.text('Child Widget'), findsOneWidget);
     },
@@ -562,8 +564,8 @@ void main() {
       final channel = NonInitializedMockChannel();
       when(() => channel.cid).thenReturn('test:channel');
       // Always fails, so the retry fails again.
-      when(channel.watch).thenThrow(
-        const StreamClientException(message: 'boom'),
+      when(channel.watch).thenAnswer(
+        (_) async => const Result.failure(StreamClientException(message: 'boom')),
       );
 
       await tester.pumpWidget(
@@ -598,8 +600,8 @@ void main() {
     (tester) async {
       final channel = NonInitializedMockChannel();
       when(() => channel.cid).thenReturn('test:channel');
-      when(channel.watch).thenThrow(
-        const StreamClientException(message: 'boom'),
+      when(channel.watch).thenAnswer(
+        (_) async => const Result.failure(StreamClientException(message: 'boom')),
       );
 
       await tester.pumpWidget(
@@ -628,8 +630,8 @@ void main() {
     (tester) async {
       final channel = NonInitializedMockChannel();
       when(() => channel.cid).thenReturn('test:channel');
-      when(channel.watch).thenThrow(
-        const StreamClientException(message: 'boom'),
+      when(channel.watch).thenAnswer(
+        (_) async => const Result.failure(StreamClientException(message: 'boom')),
       );
 
       await tester.pumpWidget(
@@ -664,7 +666,9 @@ void main() {
           messagesPagination: any(named: 'messagesPagination'),
           preferOffline: any(named: 'preferOffline'),
         ),
-      ).thenAnswer((_) async => const ChannelState());
+      ).thenAnswer(
+        (_) async => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
+      );
 
       // Build a widget with initialMessageId
       final testWidget = MaterialApp(
@@ -713,7 +717,9 @@ void main() {
       // Second channel
       final mockChannel2 = NonInitializedMockChannel();
       when(() => mockChannel2.cid).thenReturn('test:channel2');
-      when(mockChannel2.watch).thenAnswer((_) async => const ChannelState());
+      when(mockChannel2.watch).thenAnswer(
+        (_) async => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
+      );
 
       // Update widget with second channel
       await tester.pumpWidget(
@@ -750,7 +756,9 @@ void main() {
           messagesPagination: any(named: 'messagesPagination'),
           preferOffline: any(named: 'preferOffline'),
         ),
-      ).thenAnswer((_) async => const ChannelState());
+      ).thenAnswer(
+        (_) async => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
+      );
 
       // First initial message ID
       const initialMessageId1 = 'test-message-id-1';
@@ -812,7 +820,9 @@ void main() {
           preferOffline: any(named: 'preferOffline'),
           messagesPagination: any(named: 'messagesPagination'),
         ),
-      ).thenAnswer((_) async => const ChannelState());
+      ).thenAnswer(
+        (_) async => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
+      );
     });
 
     tearDown(() => reset(mockChannel));
@@ -1051,7 +1061,9 @@ void main() {
           preferOffline: any(named: 'preferOffline'),
           messagesPagination: any(named: 'messagesPagination'),
         ),
-      ).thenAnswer((_) async => const ChannelState());
+      ).thenAnswer(
+        (_) async => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
+      );
     });
 
     tearDown(() => reset(mockChannel));
@@ -1267,6 +1279,44 @@ void main() {
         expect(captured.createdAtAround, isNull);
       },
     );
+
+    testWidgets(
+      'queries createdAtAround=lastRead when loading at lastReadMessageId fails',
+      (tester) async {
+        final lastRead = DateTime.utc(2026, 6, 26, 12);
+        final read = Read(
+          user: User(id: 'testUserId'),
+          lastRead: lastRead,
+          unreadMessages: 100,
+          lastReadMessageId: 'last-read-msg',
+        );
+        when(() => mockChannel.state.unreadCount).thenReturn(100);
+        when(() => mockChannel.state.currentUserRead).thenReturn(read);
+        when(
+          () => mockChannel.query(
+            preferOffline: any(named: 'preferOffline'),
+            messagesPagination: any(
+              named: 'messagesPagination',
+              that: isA<PaginationParams>().having((it) => it.idAround, 'idAround', 'last-read-msg'),
+            ),
+          ),
+        ).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'boom')));
+
+        await _pumpStreamChannel(tester, mockChannel);
+
+        final captured = verify(
+          () => mockChannel.query(
+            preferOffline: any(named: 'preferOffline'),
+            messagesPagination: captureAny(named: 'messagesPagination'),
+          ),
+        ).captured.cast<PaginationParams>();
+
+        expect(captured.map((it) => (it.idAround, it.createdAtAround)), [
+          ('last-read-msg', null),
+          (null, lastRead),
+        ]);
+      },
+    );
   });
 
   group('pruneOldest', () {
@@ -1327,7 +1377,12 @@ void main() {
             messagesPagination: any(named: 'messagesPagination'),
           ),
         ).thenAnswer(
-          (_) async => ChannelState(messages: _generateMessages(2)),
+          (_) async => Result.success(
+            ChannelStateResponse(
+              duration: '0ms',
+              channelState: ChannelState(messages: _generateMessages(2)),
+            ),
+          ),
         );
 
         final streamChannel = await _pumpStreamChannel(tester, mockChannel);
@@ -1369,7 +1424,12 @@ void main() {
             messagesPagination: any(named: 'messagesPagination'),
           ),
         ).thenAnswer(
-          (_) async => ChannelState(messages: _generateMessages(2)),
+          (_) async => Result.success(
+            ChannelStateResponse(
+              duration: '0ms',
+              channelState: ChannelState(messages: _generateMessages(2)),
+            ),
+          ),
         );
 
         final streamChannel = await _pumpStreamChannel(tester, mockChannel);
@@ -1432,7 +1492,12 @@ void main() {
         // primes disjoint old/new sets.
         final newMessages = _generateMessages(30, prefix: 'new');
         stateMessages = [...stateMessages, ...newMessages];
-        return ChannelState(messages: newMessages);
+        return Result.success(
+          ChannelStateResponse(
+            duration: '0ms',
+            channelState: ChannelState(messages: newMessages),
+          ),
+        );
       });
     });
 
@@ -1552,6 +1617,39 @@ void main() {
     });
   });
 
+  group('with one message loaded', () {
+    final message = Message(id: 'message-id');
+    const error = StreamClientException(message: 'boom');
+
+    testWidgets('StreamChannel.queryMessages reports a failed page of older messages', (tester) async {
+      final mockChannel = _channelWithMessages([message]);
+      _stubQueryPage(mockChannel, lessThan: 'message-id', result: const Result.failure(error));
+      final streamChannel = await _pumpStreamChannel(tester, mockChannel);
+
+      final errors = <Object>[];
+      final subscription = streamChannel.queryTopMessages.listen(null, onError: errors.add);
+      await streamChannel.queryMessages();
+      await tester.pump();
+      unawaited(subscription.cancel());
+
+      expect(errors, [error]);
+    });
+
+    testWidgets('StreamChannel.queryMessages reports a failed page of newer messages', (tester) async {
+      final mockChannel = _channelWithMessages([message]);
+      _stubQueryPage(mockChannel, greaterThan: 'message-id', result: const Result.failure(error));
+      final streamChannel = await _pumpStreamChannel(tester, mockChannel);
+
+      final errors = <Object>[];
+      final subscription = streamChannel.queryBottomMessages.listen(null, onError: errors.add);
+      await streamChannel.queryMessages(direction: QueryDirection.bottom);
+      await tester.pump();
+      unawaited(subscription.cancel());
+
+      expect(errors, [error]);
+    });
+  });
+
   group('with one reply loaded in a thread', () {
     final reply = Message(id: 'reply-id', parentId: 'parent-id');
     const error = StreamClientException(message: 'boom');
@@ -1634,6 +1732,34 @@ void main() {
 // lookup has to fetch.
 MockChannel _channelWithNothingLoaded() => _channelWithThreads({});
 
+// A channel whose state holds only [messages].
+MockChannel _channelWithMessages(List<Message> messages) {
+  final channel = _channelWithThreads({});
+  when(() => channel.state.messages).thenReturn(messages);
+  return channel;
+}
+
+// Answers the query for the page of messages before [lessThan] or after
+// [greaterThan] with [result].
+void _stubQueryPage(
+  MockChannel channel, {
+  String? lessThan,
+  String? greaterThan,
+  required Result<ChannelStateResponse> result,
+}) {
+  when(
+    () => channel.query(
+      preferOffline: any(named: 'preferOffline'),
+      messagesPagination: any(
+        named: 'messagesPagination',
+        that: isA<PaginationParams>()
+            .having((it) => it.lessThan, 'lessThan', lessThan)
+            .having((it) => it.greaterThan, 'greaterThan', greaterThan),
+      ),
+    ),
+  ).thenAnswer((_) async => result);
+}
+
 // A channel whose state holds only the thread replies in [threads].
 MockChannel _channelWithThreads(Map<String, List<Message>> threads) {
   final channel = MockChannel();
@@ -1644,7 +1770,7 @@ MockChannel _channelWithThreads(Map<String, List<Message>> threads) {
       preferOffline: any(named: 'preferOffline'),
       messagesPagination: any(named: 'messagesPagination'),
     ),
-  ).thenAnswer((_) async => const ChannelState());
+  ).thenAnswer((_) async => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())));
   when(() => channel.state.messages).thenReturn([]);
   when(() => channel.state.threads).thenReturn(threads);
   when(() => channel.state.pinnedMessages).thenReturn([]);

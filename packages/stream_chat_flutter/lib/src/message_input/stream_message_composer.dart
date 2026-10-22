@@ -1573,9 +1573,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     }
 
     // If the channel is not up to date, we should reload it before sending
-    // the message.
+    // the message, and not send it if the reload fails.
     if (!channel.state!.isUpToDate) {
-      await streamChannel.reloadChannel();
+      if (await streamChannel.reloadChannel() case Failure()) return;
 
       // We need to wait for the frame to be rendered with the updated channel
       // state before sending the message.

@@ -333,9 +333,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
               sort: resolvedSort,
             );
 
-      return QueryChannelsResponse()
-        ..channels = channels
-        ..predefinedFilter = spec;
+      return QueryChannelsResponse(duration: '0ms', channels: channels, predefinedFilter: spec);
     }
 
     final channelModels = await db!.channelQueryDao.getChannels(filter: filter);
@@ -345,7 +343,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       paginationParams,
       messageLimit: messageLimit,
     );
-    return QueryChannelsResponse()..channels = channels;
+    return QueryChannelsResponse(duration: '0ms', channels: channels);
   }
 
   // Wraps channel models in sort envelopes, attaches memberships when the

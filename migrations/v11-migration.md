@@ -44,6 +44,7 @@ onto Stream's OpenAPI-generated API client.
     - [Unread Counts](#unread-counts)
     - [User Blocking](#user-blocking)
     - [User Updates](#user-updates)
+    - [Channels and Members](#channels-and-members)
     - [Channel and Member Custom Data](#channel-and-member-custom-data)
     - [User Custom Data](#user-custom-data)
     - [Message Custom Data](#message-custom-data)
@@ -106,6 +107,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
 | [**Message Custom Data**](#message-custom-data) | `extraData` is `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`; a message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields |
 | [**Sending Events**](#sending-events) | `sendEvent` takes `type`, `parentId` and `custom` instead of an `Event` and returns a `Result<EventResponse>`; the typing calls, `stopAIResponse` and `KeyStrokeHandler` return a `Result<void>` instead of throwing |
+| [**Channels and Members**](#channels-and-members) | Querying, creating, watching, updating and truncating a channel, its invites and its members, and querying its members, return a `Result` instead of throwing; the invite and member calls answer an `UpdateChannelResponse`, and the channel queries a `ChannelStateResponse`; `ChannelState`, `ChannelModel`, `Member` and `PredefinedFilter` no longer decode JSON and compare by value, and the first three's `copyWith` clears a field passed as `null` |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -343,9 +345,9 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `StreamChatApi.user.updateUsers` / `partialUpdateUsers` | `StreamChatClient.updateUsers` / `updateUsersPartial` | `removed` | The endpoints moved to the generated client |
 | `ChannelModel.extraData` / `Member.extraData` | `ChannelModel.custom` / `Member.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
 | `Channel.extraData` / `Channel.extraDataStream` / `Channel(…, extraData:)` / `StreamChatClient.channel(…, extraData:)` | `Channel.custom` / `Channel.customStream` / `custom:` | `renamed` | Follows `ChannelModel.custom`; the setter is renamed too |
-| `channel.extraData['disabled']` / `['hidden']` / `['muted']` / `['blocked']` / `['truncated_at']` / `['truncated_by']` / `['auto_translation_enabled']` / `['auto_translation_language']` | `ChannelModel.disabled` / `hidden` / `muted` / `blocked` / `truncatedAt` / `truncatedBy` / `autoTranslationEnabled` / `autoTranslationLanguage` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them, and `toJson` no longer writes them |
-| `member.extraData['notifications_muted']` / `['status']` / `['ban_from_future_channels']` / `['future_channel_ban_expires']` / `['deleted_at']` | `Member.notificationsMuted` / `status` / `banFromFutureChannels` / `futureChannelBanExpires` / `deletedAt` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them, and `toJson` no longer writes them |
-| `ChannelModel.custom` / `Member.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
+| `channel.extraData['disabled']` / `['hidden']` / `['muted']` / `['blocked']` / `['truncated_at']` / `['truncated_by']` / `['auto_translation_enabled']` / `['auto_translation_language']` | `ChannelModel.disabled` / `hidden` / `muted` / `blocked` / `truncatedAt` / `truncatedBy` / `autoTranslationEnabled` / `autoTranslationLanguage` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
+| `member.extraData['notifications_muted']` / `['status']` / `['ban_from_future_channels']` / `['future_channel_ban_expires']` / `['deleted_at']` | `Member.notificationsMuted` / `status` / `banFromFutureChannels` / `futureChannelBanExpires` / `deletedAt` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
+| `ChannelModel.custom` / `Member.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; it cannot overwrite the field |
 | `User.extraData` / `OwnUser.extraData` | `User.custom` / `OwnUser.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
 | `User.name` (`String`, the id when the user has none) | `User.nameOrId` | `retyped` | `User.name` is a `String?` that is null when the user has none. Use `nameOrId` wherever a user is named by text, and `name` where a missing name matters, such as initials |
 | `User.image` (`null` for an empty image URL) | `User.image` | `retyped` | Returns `''` as given; check `image?.isNotEmpty` where an empty URL means no image |
@@ -440,8 +442,37 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Channel.startTyping` / `stopTyping` / `keyStroke` → `Future<void>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing. Same arguments. A success when typing events are disabled and nothing is sent |
 | `Channel.stopAIResponse` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing. Calling it before the channel is initialized still throws a `StateError` |
 | `KeyStrokeHandler.onStartTyping` / `onStopTyping` → `Future<void> Function([String?])` | `Future<Result<void>> Function([String?])` | `retyped` | Return a failure rather than throwing; calling the handler returns `Future<Result<void>>` with the failure of its typing start or stop |
-| `Event.toJson`, `ChannelState.toJson`, `Read.toJson`, `Draft.toJson`, `DraftMessage.toJson`, `ChannelPushPreference.toJson` | — | `removed` | These models only decode; `fromJson` stays |
+| `Event.toJson`, `Read.toJson`, `Draft.toJson`, `DraftMessage.toJson`, `ChannelPushPreference.toJson` | — | `removed` | These models only decode; `fromJson` stays |
 | `StreamChatApi.channel.sendEvent` | `StreamChatClient.sendEvent` | `removed` | The endpoint moved to the generated client |
+| `StreamChatClient.queryChannel` / `watchChannel` / `createChannel` → `Future<ChannelState>` | `Future<Result<ChannelStateResponse>>` | `retyped` | Returns a `Result` instead of throwing; read the state off `.channelState` |
+| `Channel.query` / `watch` / `create` → `Future<ChannelState>` | `Future<Result<ChannelStateResponse>>` | `retyped` | Returns a `Result` instead of throwing; read the state off `.channelState`. A state read from the offline storage answers with a `0ms` duration |
+| `ChannelStateResponse` (the channel, messages, members and the rest at the root) | `ChannelStateResponse(duration: …, channelState: …)` | `retyped` | Wraps the `ChannelState` the call answered |
+| `StreamChatClient.queryChannelsOnline` → `Future<List<Channel>>` | `Future<Result<List<Channel>>>` | `retyped` | Returns a `Result` instead of throwing. Calling it with no connected user still throws a `StateError` |
+| `StreamChatClient.updateChannel` / `Channel.update` → `Future<UpdateChannelResponse>` | `Future<Result<UpdateChannelResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `StreamChatClient.acceptChannelInvite` / `rejectChannelInvite` / `addChannelMembers` / `removeChannelMembers` / `inviteChannelMembers` → `Future<AcceptInviteResponse>` and the like | `Future<Result<UpdateChannelResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `Channel.acceptInvite` / `rejectInvite` / `addMembers` / `removeMembers` / `inviteMembers` → `Future<AcceptInviteResponse>` and the like | `Future<Result<UpdateChannelResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `AcceptInviteResponse`, `RejectInviteResponse`, `AddMembersResponse`, `RemoveMembersResponse`, `InviteMembersResponse` | `UpdateChannelResponse` | `removed` | The invite and member calls share one response |
+| `UpdateChannelResponse.channel` (`ChannelModel`) | `UpdateChannelResponse.channel` (`ChannelModel?`) | `retyped` | Nullable, as the API declares it |
+| `UpdateChannelResponse.members` (`List<Member>?`) | `UpdateChannelResponse.members` (`List<Member>`) | `retyped` | Always present; drop any `?.` or `?? []` |
+| `StreamChatClient.truncateChannel` / `Channel.truncate` → `Future<EmptyResponse>` | `Future<Result<TruncateChannelResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `StreamChatClient.queryMembers` / `Channel.queryMembers` → `Future<QueryMembersResponse>` | `Future<Result<QueryMembersResponse>>` | `retyped` | Returns a `Result` instead of throwing |
+| `QueryChannelsResponse.duration` / `QueryMembersResponse.duration` / `UpdateChannelResponse.duration` / `ChannelStateResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `QueryChannelsResponse.fromJson`, `QueryMembersResponse.fromJson`, `UpdateChannelResponse.fromJson`, `ChannelStateResponse.fromJson` | — | `removed` | The responses are plain classes; construct them directly |
+| `QueryChannelsResponse()..channels = …` and the other setters of the channel and member responses | `QueryChannelsResponse(duration: …, channels: …)` and the like | `retyped` | Plain classes with a const constructor and final fields. A `ChatPersistenceClient` answering `queryChannelStates` builds one with `duration: '0ms'` |
+| `QueryChannelsResponse` / `QueryMembersResponse` / `UpdateChannelResponse` / `ChannelStateResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two responses with the same fields are now equal |
+| `ChannelState.fromJson` / `.toJson`, `ChannelModel.fromJson` / `.toJson`, `Member.fromJson` / `.toJson`, `PredefinedFilter.fromJson` | — | `removed` | The models are plain classes; construct them directly. The events and models that embed them still decode from the same keys |
+| `ChannelConfig.fromJson` / `.toJson` | `ChannelConfig.fromData` / `.toData` | `removed` | `fromData` / `toData` are the offline database's format, not API JSON |
+| `ChannelModel.topLevelFields` | — | `removed` | It listed the JSON keys of a model that no longer has JSON |
+| `ChannelState.copyWith` / `ChannelModel.copyWith` / `Member.copyWith` keeping a field passed as `null` | clearing it | `retyped` | `null` clears a nullable field and gives `createdAt`, `updatedAt`, `ChannelModel.config` and `Member.userId` their default again. Leave an argument out to keep its value, or pass `x ?? model.x` |
+| `ChannelState` / `ChannelModel` / `ChannelConfig` / `PredefinedFilter` identity `==`, `Member` `Equatable` `==` and `props` | value `==` | `retyped` | `Member.props` is removed |
+| `ChannelModel(ownCapabilities: List<String>?)` / `copyWith(ownCapabilities:)` | `List<ChannelCapability>?` | `retyped` | Pass `ChannelCapability.sendMessage` and the like, or `ChannelCapability('…')` |
+| `Member.copyWith(role:)` | — | `removed` | It was ignored; set `channelRole` |
+| `member.extraData['role']`, `channel.extraData['hide_messages_before']` / `['mute_expires_at']` | — | `removed` | No longer kept in `custom` |
+| `StreamChannel.queryBeforeMessage` / `queryAfterMessage` → `Future<ChannelState>` | `Future<Result<ChannelState>>` | `retyped` | `stream_chat_flutter_core`. Returns a `Result` instead of throwing |
+| `StreamChannel.loadChannelAtMessage` / `loadChannelAtTimestamp` / `reloadChannel` / `queryMembersAndWatchers` → `Future<void>` | `Future<Result<void>>` | `retyped` | `stream_chat_flutter_core`. Returns a `Result` instead of throwing |
+| `StreamChannel.queryMembers` → `Future<List<Member>>` | `Future<Result<List<Member>>>` | `retyped` | `stream_chat_flutter_core`. Returns a `Result` instead of throwing |
+| `StreamChannelListController.getChannel` → `Future<Channel>`, `leaveChannel` → `Future<void>` | `Future<Result<Channel>>` / `Future<Result<UpdateChannelResponse>>` | `retyped` | `stream_chat_flutter_core`. Returns a `Result` instead of throwing |
+| `StreamChatApi.channel.queryChannel` / `queryChannels` / `updateChannel` / `acceptChannelInvite` / `rejectChannelInvite` / `inviteChannelMembers` / `addMembers` / `removeMembers` / `truncateChannel`, `StreamChatApi.general.queryMembers` | the `StreamChatClient` methods | `removed` | The endpoints moved to the generated client |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -496,7 +527,7 @@ final result = await client.someMigratedCall();
 
 // One that has not migrated still throws — the type is what changed.
 try {
-  await channel.addMembers([userId]);
+  await client.queryUsers();
 } on StreamChatException catch (error) {
   print(error.message);
 }
@@ -839,8 +870,8 @@ result.fold(
 `updateName`, `updateImage`, `enableSlowMode` and `disableSlowMode`. On the member side it covers
 `StreamChatClient.updateMemberPartial` (v10's `partialMemberUpdate`), `pinChannel`, `unpinChannel`,
 `archiveChannel` and `unarchiveChannel`, and `Channel.pin`, `unpin`, `archive` and `unarchive`. The full update,
-`updateChannel` and `Channel.update`, still throws. A `try`/`catch` around a partial update still compiles, but
-no longer catches a failed call: read the returned `Result` instead.
+`updateChannel` and `Channel.update`, is covered in [Channels and Members](#channels-and-members). A `try`/`catch`
+around a partial update still compiles, but no longer catches a failed call: read the returned `Result` instead.
 
 ```dart
 // v10
@@ -1008,8 +1039,9 @@ typing events are disabled, the typing calls send nothing and return a success.
 `Future<Result<void>> Function([String?])`, and calling the handler returns a `Result<void>` carrying the failure
 of its typing start or stop.
 
-**`Event`, `ChannelState`, `Read`, `Draft`, `DraftMessage` and `ChannelPushPreference` no longer encode to
-JSON.** They still decode with `fromJson`. Serialize the fields you need yourself if you stored them.
+**`Event`, `Read`, `Draft`, `DraftMessage` and `ChannelPushPreference` no longer encode to JSON.** They still
+decode with `fromJson`. Serialize the fields you need yourself if you stored them. `ChannelState` no longer
+encodes or decodes at all — see [Channels and Members](#channels-and-members).
 
 **`StreamChatApi.channel.sendEvent` is removed.** Call `StreamChatClient.sendEvent`.
 
@@ -1137,6 +1169,107 @@ no longer encodes to JSON or extends `Equatable`; it still compares by value and
 > updates take the API's names, as the channel and member partial updates already do. The request carries only
 > what the user can change and their custom data as it is.
 
+### Channels and Members
+
+**Querying, creating, watching, updating and truncating a channel return a `Result` instead of throwing.** That
+covers `StreamChatClient.queryChannel`, `watchChannel`, `createChannel`, `queryChannelsOnline`, `updateChannel`,
+`truncateChannel`, `queryMembers`, `acceptChannelInvite`, `rejectChannelInvite`, `addChannelMembers`,
+`removeChannelMembers` and `inviteChannelMembers`, and `Channel.query`, `watch`, `create`, `update`, `truncate`,
+`queryMembers`, `acceptInvite`, `rejectInvite`, `addMembers`, `removeMembers` and `inviteMembers`. A `try`/`catch`
+around one still compiles, but no longer catches a failed call: read the returned `Result` instead.
+`queryChannelsOnline` still throws a `StateError` when no user is connected, `queryChannels` still reports a failure
+as an error on its stream, and `stopWatching` still throws.
+
+```dart
+// v10
+try {
+  await channel.addMembers([userId]);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await channel.addMembers([userId]);
+if (result case Failure(:final error)) report(error);
+```
+
+**`queryChannel`, `watchChannel` and `createChannel`, and `Channel.query`, `watch` and `create`, answer a
+`ChannelStateResponse`** where v10 answered the `ChannelState`. Read the state off `channelState`. When
+`Channel.query` reads the state from the offline storage, the response has a `0ms` duration.
+
+```dart
+// v10
+final state = await channel.watch();
+
+// v11
+final state = (await channel.watch()).getOrThrow().channelState;
+```
+
+**The invite and member calls answer an `UpdateChannelResponse`**, where v10 answered an `AcceptInviteResponse`,
+`RejectInviteResponse`, `AddMembersResponse`, `RemoveMembersResponse` or `InviteMembersResponse`; those are removed.
+Its `channel` is nullable and its `members` is always a list. `truncateChannel` and `Channel.truncate` answer a
+`TruncateChannelResponse` where v10 answered an `EmptyResponse`.
+
+**The responses no longer decode JSON.** `QueryChannelsResponse`, `QueryMembersResponse`, `UpdateChannelResponse` and
+`ChannelStateResponse` are plain classes that compare by value; build them with their constructors. `duration` is a
+non-nullable `String`. A `ChatPersistenceClient` answering `queryChannelStates` writes
+`QueryChannelsResponse(duration: '0ms', channels: states)` where v10 wrote `QueryChannelsResponse()..channels = states`.
+
+**`ChannelState`, `ChannelModel`, `Member` and `PredefinedFilter` no longer decode from or encode to JSON.** The
+events and models that embed a channel or a member still decode from the same keys. `ChannelModel.topLevelFields`,
+which listed its JSON keys, is gone with the JSON. `ChannelConfig` loses `fromJson` and `toJson` and gains
+`fromData` and `toData`, which read and write the format the offline database stores; they are not a way to decode
+API responses.
+
+**`ChannelState`, `ChannelModel`, `Member`, `ChannelConfig` and `PredefinedFilter` compare by value, and the first
+three's `copyWith` clears a field passed as `null`.** v10 kept the current value; now a nullable field is set to
+`null`, and `createdAt`, `updatedAt`, `ChannelModel.config` and `Member.userId` get their default again. Leave an
+argument out to keep its value. `Member` is no longer an `Equatable`, so `props` is gone. `ChannelModel.merge` is
+unchanged.
+
+```dart
+// v10: keeps the members when newMembers is null
+state.copyWith(members: newMembers);
+
+// v11
+state.copyWith(members: newMembers ?? state.members);
+```
+
+**`ChannelModel`'s `ownCapabilities` argument takes `ChannelCapability`s**, where v10 took strings:
+`ChannelModel(ownCapabilities: [ChannelCapability.sendMessage])`.
+
+**`Member.copyWith` no longer takes `role`,** which it ignored; set `channelRole`. A member's `role`, and a
+channel's `hide_messages_before` and `mute_expires_at`, are no longer kept in `custom`.
+
+**The `members`, `invites`, `team`, `frozen`, `disabled`, `config_overrides` and auto-translation entries of the
+data a channel is created or updated with, and `filter_tags` on creation, must have their field's type.** They set
+those fields as before; a value of another type, such as a `members` entry that is neither a user id nor a member
+map, returns a failure instead of being sent.
+
+**A member given as a map sends its other entries as the member's custom data.** In
+`{'user_id': 'b', 'channel_role': 'channel_moderator', 'color': 'red'}`, `channel_role` sets the role and `color`
+is custom data; v10 rejected a member map when creating a channel.
+
+**A member v11 adds carries an entry named `custom` in its custom data.** That covers members added when creating a
+channel and by `addMembers` and `inviteMembers`. Given as a user id, or as a map with no other entries, the member
+reads back with `custom: {'custom': null}`. Given other entries, a channel query reads them as the member's custom
+data, but its events and other SDKs see them nested under `custom`. A member that already belongs to the channel
+keeps its custom data.
+
+**In `stream_chat_flutter_core`, the calls built on these return a `Result` too.** `StreamChannel.queryBeforeMessage`
+and `queryAfterMessage` answer a `Result<ChannelState>`; `loadChannelAtMessage`, `loadChannelAtTimestamp`,
+`reloadChannel` and `queryMembersAndWatchers` a `Result<void>`; and `queryMembers` a `Result<List<Member>>`.
+`StreamChannelListController.getChannel` answers a `Result<Channel>` and `leaveChannel` a
+`Result<UpdateChannelResponse>`.
+
+**`StreamChatApi.channel.queryChannel`, `queryChannels`, `updateChannel`, `acceptChannelInvite`,
+`rejectChannelInvite`, `inviteChannelMembers`, `addMembers`, `removeMembers` and `truncateChannel`, and
+`StreamChatApi.general.queryMembers`, are removed.** Call them on `StreamChatClient`.
+
+> **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. The invite and
+> member calls share one API response, so they answer one type. The public models stop being wire shapes, so the
+> API payload can change without changing the type a caller holds.
+
 ### Channel and Member Custom Data
 
 **`extraData` is renamed `custom` on `ChannelModel`, `Member` and `Channel`.** That covers the fields, the
@@ -1169,11 +1302,7 @@ final hidden = channel.hidden;
 final shown = model.copyWith(hidden: false);
 ```
 
-**`ChannelModel.toJson` and `Member.toJson` no longer write these fields**, where v10 wrote them at the root with the
-rest of the custom data. Read them from the model rather than from its JSON.
-
-**An entry of `custom` named like one of the model's own fields stays in `custom`** and leaves the field alone;
-`toJson` leaves it out, so it cannot overwrite the field.
+**An entry of `custom` named like one of the model's own fields stays in `custom`** and leaves the field alone.
 
 **Filter and sort on a flag through its declared field,** such as `ChannelFilterField.hidden`, rather than
 `.custom('hidden')`, which reads `custom` locally and finds nothing there.

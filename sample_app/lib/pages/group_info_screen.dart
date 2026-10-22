@@ -327,6 +327,7 @@ class _ActionsSection extends StatelessWidget {
 
   Future<void> _confirmLeave(BuildContext context) async {
     final navigator = Navigator.of(context);
+    final messenger = ScaffoldMessenger.of(context);
     final channel = StreamChannel.of(context).channel;
     final currentUserId = StreamChat.of(context).currentUser?.id;
     if (currentUserId == null) return;
@@ -339,7 +340,12 @@ class _ActionsSection extends StatelessWidget {
     );
     if (confirmed != true) return;
 
-    await channel.removeMembers([currentUserId]);
+    final result = await channel.removeMembers([currentUserId]);
+    if (result case Failure(:final error)) {
+      messenger.showSnackBar(SnackBar(content: Text('Failed to leave: $error')));
+      return;
+    }
+
     // Pop every screen until we land on the channel list — going back to
     // the channel page would crash since we're no longer a member.
     navigator.popUntil((route) => route.isFirst);

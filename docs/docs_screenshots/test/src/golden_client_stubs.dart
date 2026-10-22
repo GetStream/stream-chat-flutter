@@ -98,7 +98,7 @@ void stubQueryMembersForGoldens(MockChannel channel, List<Member> members) {
       sort: any(named: 'sort'),
       pagination: any(named: 'pagination'),
     ),
-  ).thenAnswer((_) async => QueryMembersResponse()..members = members);
+  ).thenAnswer((_) async => Result.success(QueryMembersResponse(duration: '0ms', members: members)));
 }
 
 /// Stubs search for [StreamMessageSearchListController] goldens using [StreamMessageSearchListController.fromValue].

@@ -253,6 +253,7 @@ Future<void> _pushChannelInfo(BuildContext context, Channel channel, User? user)
 // channel. Leave is only surfaced for group channels in the detail sheet,
 // so the copy is group-specific here.
 Future<void> _maybeLeaveChannel(BuildContext context, Channel channel) async {
+  final messenger = ScaffoldMessenger.of(context);
   final currentUserId = StreamChat.of(context).currentUser?.id;
   if (currentUserId == null) return;
 
@@ -264,7 +265,11 @@ Future<void> _maybeLeaveChannel(BuildContext context, Channel channel) async {
   );
 
   if (confirmed != true) return;
-  await channel.removeMembers([currentUserId]);
+
+  final result = await channel.removeMembers([currentUserId]);
+  if (result case Failure(:final error)) {
+    messenger.showSnackBar(SnackBar(content: Text('Failed to leave: $error')));
+  }
 }
 
 // Shows a confirmation dialog before deleting the channel. On success, pops

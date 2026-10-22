@@ -264,21 +264,22 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     }
   }
 
-  /// Returns/Creates a new Channel and starts watching it.
-  Future<Channel> getChannel({
+  /// Returns the channel of [type] with the id [id] and starts watching it,
+  /// creating the channel first if it does not exist.
+  Future<Result<Channel>> getChannel({
     required String id,
     required String type,
   }) async {
     final channel = client.channel(type, id: id);
-    await channel.watch();
-    return channel;
+    final result = await channel.watch();
+    return result.map((_) => channel);
   }
 
   /// Leaves the [channel] and updates the list.
-  Future<void> leaveChannel(Channel channel) async {
+  Future<Result<UpdateChannelResponse>> leaveChannel(Channel channel) {
     final user = client.state.currentUser;
     assert(user != null, 'You must be logged in to leave a channel.');
-    await channel.removeMembers([user!.id]);
+    return channel.removeMembers([user!.id]);
   }
 
   /// Deletes the [channel] and updates the list.

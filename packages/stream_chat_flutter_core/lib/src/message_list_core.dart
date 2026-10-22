@@ -289,13 +289,10 @@ class MessageListCoreState extends State<MessageListCore> {
     // disposing thread would clobber the channel page state.
     if (_isThreadConversation) return;
 
-    try {
-      return await _streamChannel?.reloadChannel();
-    } catch (_) {
-      // We just ignore the error here, as we can't do anything about it.
-      // The reload might fail for various reasons, such as user already
-      // left the channel, or the channel is deleted.
-    }
+    // A failed reload is ignored, as we can't do anything about it. The
+    // reload might fail for various reasons, such as user already left the
+    // channel, or the channel is deleted.
+    await _streamChannel?.reloadChannel();
   }
 
   @override

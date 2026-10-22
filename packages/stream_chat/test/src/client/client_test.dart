@@ -13,6 +13,7 @@ import '../matchers.dart';
 import '../mocks.dart';
 import '../utils.dart';
 import '../ws/fake_chat_server.dart';
+import 'query_channels_fixtures.dart';
 
 void main() {
   group('Fake web-socket connection functions', () {
@@ -342,6 +343,7 @@ void main() {
   group('Client with connected user with persistence', () {
     const apiKey = 'test-api-key';
     late final fakeChatApi = FakeChatApi();
+    late MockDefaultApi defaultApi;
     late final persistence = MockPersistenceClient();
 
     final user = User(id: 'test-user-id');
@@ -358,13 +360,15 @@ void main() {
     });
 
     setUp(() async {
+      defaultApi = MockDefaultApi();
+      when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse()));
       when(() => persistence.updateLastSyncAt(any())).thenAnswer((_) => Future.value());
       when(persistence.getLastSyncAt).thenAnswer((_) async => null);
       // The hello frame reaches the client through the socket now, so connecting stores the
       // connection info before any test has had a chance to stub it.
       when(() => persistence.updateConnectionInfo(any())).thenAnswer((_) => Future.value());
       final ws = FakeChatServer();
-      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect)
+      client = StreamChatClient(apiKey, defaultApi: defaultApi, chatApi: fakeChatApi, wsProvider: ws.connect)
         ..chatPersistenceClient = persistence;
       await client.connectUser(user, token);
       await delay(300);
@@ -475,7 +479,7 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer((_) async => QueryChannelsResponse()..channels = persistentChannelStates);
+          ).thenAnswer((_) async => QueryChannelsResponse(duration: '0ms', channels: persistentChannelStates));
 
           final channelStates = List.generate(
             3,
@@ -485,18 +489,9 @@ void main() {
           );
 
           when(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
           ).thenAnswer(
-            (_) async => QueryChannelsResponse()..channels = channelStates,
+            (_) async => Result.success(generatedQueryChannelsResponse(channelStates)),
           );
 
           when(() => persistence.getChannelThreads(any())).thenAnswer(
@@ -556,16 +551,7 @@ void main() {
           ).called(1);
 
           verify(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
           ).called(1);
 
           verify(() => persistence.getChannelThreads(any())).called(channelStates.length);
@@ -588,7 +574,7 @@ void main() {
       );
 
       test(
-        '''should never rethrow network call if persistence already emitted some channels''',
+        '''should not emit the network failure if persistence already emitted some channels''',
         () async {
           final persistentChannelStates = List.generate(
             3,
@@ -607,20 +593,11 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer((_) async => QueryChannelsResponse()..channels = persistentChannelStates);
+          ).thenAnswer((_) async => QueryChannelsResponse(duration: '0ms', channels: persistentChannelStates));
 
           when(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
-          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
+          ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400)));
 
           when(() => persistence.getChannelThreads(any())).thenAnswer(
             (_) async => <String, List<Message>>{
@@ -664,16 +641,7 @@ void main() {
           ).called(1);
 
           verify(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
           ).called(1);
 
           verify(() => persistence.getChannelThreads(any())).called(persistentChannelStates.length);
@@ -693,17 +661,14 @@ void main() {
           );
 
           when(
-            () => fakeChatApi.channel.queryChannels(
-              filter: filter,
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
+            () => defaultApi.queryChannels(
+              queryChannelsRequest: any(
+                named: 'queryChannelsRequest',
+                that: isChannelQuery(filter: filter),
+              ),
             ),
           ).thenAnswer(
-            (_) async => QueryChannelsResponse()..channels = channelStates,
+            (_) async => Result.success(generatedQueryChannelsResponse(channelStates)),
           );
 
           when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
@@ -764,25 +729,23 @@ void main() {
           final resolvedSort = [ChannelSort.desc(ChannelSortField.lastMessageAt)];
 
           when(
-            () => fakeChatApi.channel.queryChannels(
-              predefinedFilter: filterName,
-              filterValues: filterValues,
-              sortValues: sortValues,
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
+            () => defaultApi.queryChannels(
+              queryChannelsRequest: any(
+                named: 'queryChannelsRequest',
+                that: isChannelQuery(predefinedFilter: filterName, filterValues: filterValues, sortValues: sortValues),
+              ),
             ),
           ).thenAnswer(
-            (_) async => QueryChannelsResponse()
-              ..channels = channelStates
-              ..predefinedFilter = PredefinedFilter(
-                name: filterName,
-                filter: const ChannelFilter.raw({}),
-                sort: resolvedSort,
+            (_) async => Result.success(
+              generatedQueryChannelsResponse(
+                channelStates,
+                predefinedFilter: PredefinedFilter(
+                  name: filterName,
+                  filter: const ChannelFilter.raw({}),
+                  sort: resolvedSort,
+                ),
               ),
+            ),
           );
 
           when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
@@ -817,8 +780,8 @@ void main() {
               filter: null,
               sort: null,
               predefinedFilter: filterName,
-              resolvedFilter: const ChannelFilter.raw({}),
-              resolvedSort: resolvedSort,
+              resolvedFilter: any(named: 'resolvedFilter', that: isSameFilterAs(const ChannelFilter.raw({}))),
+              resolvedSort: any(named: 'resolvedSort', that: isSameSortAs(resolvedSort)),
               filterValues: filterValues,
               sortValues: sortValues,
               clearQueryCache: true,
@@ -829,17 +792,8 @@ void main() {
 
       test('queryChannelsOnline sends a message limit of 25 when none is given', () async {
         when(
-          () => fakeChatApi.channel.queryChannels(
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            memberLimit: any(named: 'memberLimit'),
-            messageLimit: any(named: 'messageLimit'),
-            paginationParams: any(named: 'paginationParams'),
-          ),
-        ).thenAnswer((_) async => QueryChannelsResponse()..channels = const []);
+          () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
+        ).thenAnswer((_) async => Result.success(generatedQueryChannelsResponse(const [])));
         when(
           () => persistence.saveChannelQueries(
             cids: any(named: 'cids'),
@@ -853,20 +807,13 @@ void main() {
             clearQueryCache: any(named: 'clearQueryCache'),
           ),
         ).thenAnswer((_) => Future.value());
-        clearInteractions(fakeChatApi.channel);
+        clearInteractions(defaultApi);
 
         await client.queryChannelsOnline();
 
         verify(
-          () => fakeChatApi.channel.queryChannels(
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            memberLimit: any(named: 'memberLimit'),
-            messageLimit: 25,
-            paginationParams: any(named: 'paginationParams'),
+          () => defaultApi.queryChannels(
+            queryChannelsRequest: any(named: 'queryChannelsRequest', that: isChannelQuery(messageLimit: 25)),
           ),
         ).called(1);
       });
@@ -893,7 +840,7 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer((_) async => QueryChannelsResponse()..channels = channelStates);
+          ).thenAnswer((_) async => QueryChannelsResponse(duration: '0ms', channels: channelStates));
 
           when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
           when(() => persistence.updateChannelState(any())).thenAnswer((_) async {});
@@ -942,21 +889,12 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer((_) async => QueryChannelsResponse()..channels = const []);
+          ).thenAnswer((_) async => const QueryChannelsResponse(duration: '0ms', channels: []));
 
           when(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
           ).thenAnswer(
-            (_) async => QueryChannelsResponse()..channels = channelStates,
+            (_) async => Result.success(generatedQueryChannelsResponse(channelStates)),
           );
 
           when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
@@ -1018,24 +956,19 @@ void main() {
               messageLimit: any(named: 'messageLimit'),
               paginationParams: any(named: 'paginationParams'),
             ),
-          ).thenAnswer((_) async => QueryChannelsResponse()..channels = const []);
+          ).thenAnswer((_) async => const QueryChannelsResponse(duration: '0ms', channels: []));
 
           when(
-            () => fakeChatApi.channel.queryChannels(
-              predefinedFilter: filterName,
-              filterValues: filterValues,
-              sortValues: sortValues,
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
+            () => defaultApi.queryChannels(
+              queryChannelsRequest: any(
+                named: 'queryChannelsRequest',
+                that: isChannelQuery(predefinedFilter: filterName, filterValues: filterValues, sortValues: sortValues),
+              ),
             ),
           ).thenAnswer(
-            (_) async => QueryChannelsResponse()
-              ..channels = channelStates
-              ..predefinedFilter = expectedPredefinedFilter,
+            (_) async => Result.success(
+              generatedQueryChannelsResponse(channelStates, predefinedFilter: expectedPredefinedFilter),
+            ),
           );
 
           when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => <String, List<Message>>{});
@@ -1071,7 +1004,7 @@ void main() {
           expect(results.single.channels, hasLength(channelStates.length));
           expect(results.single.predefinedFilter, isNotNull);
           expect(results.single.predefinedFilter!.name, equals(filterName));
-          expect(results.single.predefinedFilter!.sort, equals(resolvedSort));
+          expect(results.single.predefinedFilter!.sort, isSameSortAs(resolvedSort));
         },
       );
     });
@@ -1192,18 +1125,9 @@ void main() {
         );
 
         when(
-          () => fakeChatApi.channel.queryChannels(
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            memberLimit: any(named: 'memberLimit'),
-            messageLimit: any(named: 'messageLimit'),
-            paginationParams: any(named: 'paginationParams'),
-          ),
+          () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
         ).thenAnswer(
-          (_) async => QueryChannelsResponse()..channels = channelStates,
+          (_) async => Result.success(generatedQueryChannelsResponse(channelStates)),
         );
 
         expectLater(
@@ -1216,34 +1140,16 @@ void main() {
         await delay(300);
 
         verify(
-          () => fakeChatApi.channel.queryChannels(
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            memberLimit: any(named: 'memberLimit'),
-            messageLimit: any(named: 'messageLimit'),
-            paginationParams: any(named: 'paginationParams'),
-          ),
+          () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
         ).called(1);
       });
 
       test(
-        '''should rethrow if `.queryChannelsOnline` throws and persistence channels are empty''',
+        '''should emit the error if `.queryChannelsOnline` fails and persistence channels are empty''',
         () async {
           when(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
-          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
+          ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400)));
 
           expectLater(
             client.queryChannels(),
@@ -1255,47 +1161,22 @@ void main() {
           await delay(300);
 
           verify(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
           ).called(1);
         },
       );
 
       test('queryChannelsOnline omits the message limit when none is given', () async {
         when(
-          () => fakeChatApi.channel.queryChannels(
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            memberLimit: any(named: 'memberLimit'),
-            messageLimit: any(named: 'messageLimit'),
-            paginationParams: any(named: 'paginationParams'),
-          ),
-        ).thenAnswer((_) async => QueryChannelsResponse()..channels = const []);
-        clearInteractions(fakeChatApi.channel);
+          () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
+        ).thenAnswer((_) async => Result.success(generatedQueryChannelsResponse(const [])));
+        clearInteractions(defaultApi);
 
         await client.queryChannelsOnline();
 
         verify(
-          () => fakeChatApi.channel.queryChannels(
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            memberLimit: any(named: 'memberLimit'),
-            messageLimit: null,
-            paginationParams: any(named: 'paginationParams'),
+          () => defaultApi.queryChannels(
+            queryChannelsRequest: any(named: 'queryChannelsRequest', that: isChannelQuery(messageLimit: null)),
           ),
         ).called(1);
       });
@@ -1321,19 +1202,10 @@ void main() {
           // Slow down the API so all concurrent callers are guaranteed to be
           // in flight at the same time when the cache write happens.
           when(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
           ).thenAnswer((_) async {
             await delay(100);
-            return QueryChannelsResponse()..channels = channelStates;
+            return Result.success(generatedQueryChannelsResponse(channelStates));
           });
 
           // Fire 5 identical calls back-to-back in the same tick.
@@ -1349,16 +1221,7 @@ void main() {
 
           // But only ONE HTTP request should have been issued.
           verify(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
           ).called(1);
         },
       );
@@ -1377,34 +1240,16 @@ void main() {
           );
 
           when(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
           ).thenAnswer(
-            (_) async => QueryChannelsResponse()..channels = channelStates,
+            (_) async => Result.success(generatedQueryChannelsResponse(channelStates)),
           );
 
           await client.queryChannels().toList();
           await client.queryChannels().toList();
 
           verify(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
           ).called(2);
         },
       );
@@ -1415,19 +1260,10 @@ void main() {
           // The cache is keyed on a hash of the query parameters. Callers
           // with different filters/limits must each fire their own request.
           when(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
           ).thenAnswer((_) async {
             await delay(100);
-            return QueryChannelsResponse()..channels = [];
+            return Result.success(generatedQueryChannelsResponse([]));
           });
 
           await Future.wait([
@@ -1436,16 +1272,7 @@ void main() {
           ]);
 
           verify(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
           ).called(2);
         },
       );
@@ -1457,16 +1284,7 @@ void main() {
           // awaiting the shared future should see the same error rather than
           // each firing its own retry request.
           when(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
           ).thenAnswer((_) async {
             await delay(100);
             throw apiException(code: StreamErrorCode.inputError, statusCode: 400);
@@ -1491,16 +1309,7 @@ void main() {
 
           // But only ONE HTTP request was made — the rest piggybacked.
           verify(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
           ).called(1);
         },
       );
@@ -1576,29 +1385,6 @@ void main() {
         ),
       ).called(1);
       verifyNoMoreInteractions(fakeChatApi.moderation);
-    });
-
-    test('`.updateChannel`', () async {
-      const channelId = 'test-channel-id';
-      const channelType = 'test-channel-type';
-      const data = {'name': 'test-channel'};
-
-      when(() => fakeChatApi.channel.updateChannel(channelId, channelType, data)).thenAnswer(
-        (invocation) async => UpdateChannelResponse()
-          ..channel = ChannelModel(
-            id: channelId,
-            type: channelType,
-            custom: {...data},
-          ),
-      );
-
-      final res = await client.updateChannel(channelId, channelType, data);
-      expect(res, isNotNull);
-      expect(res.channel.cid, '$channelType:$channelId');
-      expect(res.channel.custom['name'], 'test-channel');
-
-      verify(() => fakeChatApi.channel.updateChannel(channelId, channelType, data)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
     });
 
     test('StreamChatClient.addDevice sends the device and returns a success', () async {
@@ -2489,18 +2275,32 @@ void main() {
         );
 
         when(
-          () => fakeChatApi.channel.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: channelData,
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
+          () => defaultApi.getOrCreateChannel(
+            type: channelType,
+            id: channelId,
+            channelGetOrCreateRequest: any(named: 'channelGetOrCreateRequest'),
           ),
-        ).thenAnswer((_) async => channelState);
+        ).thenAnswer(
+          (_) async => Result.success(
+            api.ChannelStateResponse(
+              duration: '0.01ms',
+              channel: api.ChannelResponse(
+                cid: channelCid,
+                id: channelId,
+                type: channelType,
+                createdAt: DateTime.utc(2026),
+                updatedAt: DateTime.utc(2026),
+                custom: channelData,
+                disabled: false,
+                frozen: false,
+              ),
+              members: const [],
+              messages: const [],
+              pinnedMessages: const [],
+              threads: const [],
+            ),
+          ),
+        );
 
         expectLater(
           client.state.channelsStream.skip(1),
@@ -2515,399 +2315,13 @@ void main() {
         expect(newChannel, channel);
 
         verify(
-          () => fakeChatApi.channel.queryChannel(
-            channelType,
-            channelId: channelId,
-            channelData: channelData,
-            state: any(named: 'state'),
-            watch: any(named: 'watch'),
-            presence: any(named: 'presence'),
-            messagesPagination: any(named: 'messagesPagination'),
-            membersPagination: any(named: 'membersPagination'),
-            watchersPagination: any(named: 'watchersPagination'),
+          () => defaultApi.getOrCreateChannel(
+            type: channelType,
+            id: channelId,
+            channelGetOrCreateRequest: any(named: 'channelGetOrCreateRequest'),
           ),
         ).called(1);
       });
-    });
-
-    test('`.createChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelData = {'name': 'test-channel-name'};
-      const channelCid = '$channelType:$channelId';
-
-      final channelState = ChannelState(
-        channel: ChannelModel(cid: channelCid, custom: channelData),
-      );
-
-      when(
-        () => fakeChatApi.channel.queryChannel(
-          channelType,
-          channelId: channelId,
-          channelData: channelData,
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          messagesPagination: any(named: 'messagesPagination'),
-          membersPagination: any(named: 'membersPagination'),
-          watchersPagination: any(named: 'watchersPagination'),
-        ),
-      ).thenAnswer((_) async => channelState);
-
-      final res = await client.createChannel(
-        channelType,
-        channelId: channelId,
-        channelData: channelData,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel, isNotNull);
-      final channel = res.channel!;
-      expect(channel.type, channelType);
-      expect(channel.id, channelId);
-      expect(channel.cid, '$channelType:$channelId');
-      expect(channel.custom, channelData);
-
-      verify(
-        () => fakeChatApi.channel.queryChannel(
-          channelType,
-          channelId: channelId,
-          channelData: channelData,
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          messagesPagination: any(named: 'messagesPagination'),
-          membersPagination: any(named: 'membersPagination'),
-          watchersPagination: any(named: 'watchersPagination'),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.watchChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelData = {'name': 'test-channel-name'};
-      const channelCid = '$channelType:$channelId';
-
-      final channelState = ChannelState(
-        channel: ChannelModel(cid: channelCid, custom: channelData),
-      );
-
-      when(
-        () => fakeChatApi.channel.queryChannel(
-          channelType,
-          channelId: channelId,
-          channelData: channelData,
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          messagesPagination: any(named: 'messagesPagination'),
-          membersPagination: any(named: 'membersPagination'),
-          watchersPagination: any(named: 'watchersPagination'),
-        ),
-      ).thenAnswer((_) async => channelState);
-
-      final res = await client.watchChannel(
-        channelType,
-        channelId: channelId,
-        channelData: channelData,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel, isNotNull);
-      final channel = res.channel!;
-      expect(channel.type, channelType);
-      expect(channel.id, channelId);
-      expect(channel.cid, '$channelType:$channelId');
-      expect(channel.custom, channelData);
-
-      verify(
-        () => fakeChatApi.channel.queryChannel(
-          channelType,
-          channelId: channelId,
-          channelData: channelData,
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          messagesPagination: any(named: 'messagesPagination'),
-          membersPagination: any(named: 'membersPagination'),
-          watchersPagination: any(named: 'watchersPagination'),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.queryChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelData = {'name': 'test-channel-name'};
-      const channelCid = '$channelType:$channelId';
-
-      final channelState = ChannelState(
-        channel: ChannelModel(cid: channelCid, custom: channelData),
-      );
-
-      when(
-        () => fakeChatApi.channel.queryChannel(
-          channelType,
-          channelId: channelId,
-          channelData: channelData,
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          messagesPagination: any(named: 'messagesPagination'),
-          membersPagination: any(named: 'membersPagination'),
-          watchersPagination: any(named: 'watchersPagination'),
-        ),
-      ).thenAnswer((_) async => channelState);
-
-      final res = await client.queryChannel(
-        channelType,
-        channelId: channelId,
-        channelData: channelData,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel, isNotNull);
-      final channel = res.channel!;
-      expect(channel.type, channelType);
-      expect(channel.id, channelId);
-      expect(channel.cid, '$channelType:$channelId');
-      expect(channel.custom, channelData);
-
-      verify(
-        () => fakeChatApi.channel.queryChannel(
-          channelType,
-          channelId: channelId,
-          channelData: channelData,
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          messagesPagination: any(named: 'messagesPagination'),
-          membersPagination: any(named: 'membersPagination'),
-          watchersPagination: any(named: 'watchersPagination'),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.queryMembers`', () async {
-      const channelType = 'test-channel-type';
-
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-user-id-$index'),
-      );
-
-      when(() => fakeChatApi.general.queryMembers(channelType)).thenAnswer(
-        (_) async => QueryMembersResponse()..members = members,
-      );
-
-      final res = await client.queryMembers(channelType);
-      expect(res, isNotNull);
-      expect(res.members.length, members.length);
-
-      verify(() => fakeChatApi.general.queryMembers(channelType)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.general);
-    });
-
-    test('`.truncateChannel`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-
-      when(() => fakeChatApi.channel.truncateChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
-
-      final res = await client.truncateChannel(channelId, channelType);
-
-      expect(res, isNotNull);
-
-      verify(
-        () => fakeChatApi.channel.truncateChannel(channelId, channelType),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.acceptChannelInvite`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      when(
-        () => fakeChatApi.channel.acceptChannelInvite(channelId, channelType),
-      ).thenAnswer((_) async => AcceptInviteResponse()..channel = ChannelModel(cid: channelCid));
-
-      final res = await client.acceptChannelInvite(channelId, channelType);
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelCid);
-
-      verify(() => fakeChatApi.channel.acceptChannelInvite(channelId, channelType)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.rejectChannelInvite`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      when(
-        () => fakeChatApi.channel.rejectChannelInvite(channelId, channelType),
-      ).thenAnswer((_) async => RejectInviteResponse()..channel = ChannelModel(cid: channelCid));
-
-      final res = await client.rejectChannelInvite(channelId, channelType);
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelCid);
-
-      verify(() => fakeChatApi.channel.rejectChannelInvite(channelId, channelType)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.addChannelMembers`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-user-id-$index'),
-      );
-
-      final memberIds = members.map((e) => e.userId!).toList(growable: false);
-
-      when(() => fakeChatApi.channel.addMembers(channelId, channelType, memberIds)).thenAnswer(
-        (_) async => AddMembersResponse()
-          ..channel = ChannelModel(cid: channelCid)
-          ..members = members,
-      );
-
-      final res = await client.addChannelMembers(
-        channelId,
-        channelType,
-        memberIds,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelCid);
-      expect(res.members.length, memberIds.length);
-
-      verify(
-        () => fakeChatApi.channel.addMembers(channelId, channelType, memberIds),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.addChannelMembers` with hideHistoryBefore', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-user-id-$index'),
-      );
-
-      final memberIds = members.map((e) => e.userId!).toList(growable: false);
-      final hideHistoryBefore = DateTime.parse('2024-01-01T00:00:00Z');
-
-      when(
-        () => fakeChatApi.channel.addMembers(
-          channelId,
-          channelType,
-          memberIds,
-          hideHistoryBefore: hideHistoryBefore,
-        ),
-      ).thenAnswer(
-        (_) async => AddMembersResponse()
-          ..channel = ChannelModel(cid: channelCid)
-          ..members = members,
-      );
-
-      final res = await client.addChannelMembers(
-        channelId,
-        channelType,
-        memberIds,
-        hideHistoryBefore: hideHistoryBefore,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelCid);
-      expect(res.members.length, memberIds.length);
-
-      verify(
-        () => fakeChatApi.channel.addMembers(
-          channelId,
-          channelType,
-          memberIds,
-          hideHistoryBefore: hideHistoryBefore,
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.removeChannelMembers`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-user-id-$index'),
-      );
-
-      final memberIds = members.map((e) => e.userId!).toList(growable: false);
-
-      when(() => fakeChatApi.channel.removeMembers(channelId, channelType, memberIds)).thenAnswer(
-        (_) async => RemoveMembersResponse()
-          ..channel = ChannelModel(cid: channelCid)
-          ..members = members,
-      );
-
-      final res = await client.removeChannelMembers(
-        channelId,
-        channelType,
-        memberIds,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelCid);
-      expect(res.members.length, memberIds.length);
-
-      verify(
-        () => fakeChatApi.channel.removeMembers(channelId, channelType, memberIds),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
-    });
-
-    test('`.inviteChannelMembers`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      const channelCid = '$channelType:$channelId';
-
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-user-id-$index'),
-      );
-
-      final memberIds = members.map((e) => e.userId!).toList(growable: false);
-
-      when(() => fakeChatApi.channel.inviteChannelMembers(channelId, channelType, memberIds)).thenAnswer(
-        (_) async => InviteMembersResponse()
-          ..channel = ChannelModel(cid: channelCid)
-          ..members = members,
-      );
-
-      final res = await client.inviteChannelMembers(
-        channelId,
-        channelType,
-        memberIds,
-      );
-
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelCid);
-      expect(res.members.length, memberIds.length);
-
-      verify(() => fakeChatApi.channel.inviteChannelMembers(channelId, channelType, memberIds)).called(1);
-      verifyNoMoreInteractions(fakeChatApi.channel);
     });
 
     test('`.stopChannelWatching`', () async {
@@ -3408,6 +2822,7 @@ void main() {
   group('PersistenceConnectionTests', () {
     const apiKey = 'test-api-key';
     late final fakeChatApi = FakeChatApi();
+    late MockDefaultApi defaultApi;
 
     final user = User(id: 'test-user-id');
     final token = testUserToken(user.id).rawValue;
@@ -3415,8 +2830,10 @@ void main() {
     late StreamChatClient client;
 
     setUp(() async {
+      defaultApi = MockDefaultApi();
+      when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse()));
       final ws = FakeChatServer();
-      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: defaultApi, chatApi: fakeChatApi, wsProvider: ws.connect);
       expect(client.persistenceEnabled, isFalse);
     });
 
@@ -3659,24 +3076,15 @@ void main() {
           );
 
           when(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter'),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: any(named: 'paginationParams'),
-            ),
-          ).thenAnswer((_) async => QueryChannelsResponse()..channels = []);
+            () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
+          ).thenAnswer((_) async => Result.success(generatedQueryChannelsResponse([])));
 
           final replayed = <Event>[];
           final sub = client.on(EventType.messageNew).listen(replayed.add);
           addTearDown(sub.cancel);
 
           // The group shares one api mock, so only count this test's calls.
-          clearInteractions(fakeChatApi.channel);
+          clearInteractions(defaultApi);
 
           await client.sync();
           await pumpEventQueue();
@@ -3686,15 +3094,11 @@ void main() {
           expect(replayed, isEmpty);
           // The channels the payload covered are refreshed in its place.
           verify(
-            () => fakeChatApi.channel.queryChannels(
-              filter: any(named: 'filter', that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, cids))),
-              sort: any(named: 'sort'),
-              state: any(named: 'state'),
-              watch: any(named: 'watch'),
-              presence: any(named: 'presence'),
-              memberLimit: any(named: 'memberLimit'),
-              messageLimit: any(named: 'messageLimit'),
-              paginationParams: const PaginationParams(limit: 1),
+            () => defaultApi.queryChannels(
+              queryChannelsRequest: any(
+                named: 'queryChannelsRequest',
+                that: isChannelQuery(filter: ChannelFilter.in_(ChannelFilterField.cid, cids), limit: 1),
+              ),
             ),
           ).called(1);
           // lastSyncAt moves to the newest event in the skipped payload, so
@@ -3711,6 +3115,7 @@ void main() {
     final token = testUserToken(user.id).rawValue;
 
     late FakeChatApi fakeChatApi;
+    late MockDefaultApi defaultApi;
     late FakeChatServer ws;
     late StreamChatClient client;
 
@@ -3721,23 +3126,16 @@ void main() {
 
     setUp(() {
       fakeChatApi = FakeChatApi();
+      defaultApi = MockDefaultApi();
+      when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse()));
       ws = FakeChatServer();
 
       // Stub queryChannels for every test — it's the API the recovery path
       // calls when enabled, and a missing stub would surface as an unhandled
       // async error inside the connection-status listener.
       when(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: any(named: 'paginationParams'),
-        ),
-      ).thenAnswer((_) async => QueryChannelsResponse()..channels = []);
+        () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
+      ).thenAnswer((_) async => Result.success(generatedQueryChannelsResponse([])));
     });
 
     tearDown(() async {
@@ -3763,7 +3161,7 @@ void main() {
 
     test('should re-query active channels on reconnect when enabled (default)', () async {
       // Setup: connect with default flag, register two channels.
-      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: defaultApi, chatApi: fakeChatApi, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -3775,24 +3173,20 @@ void main() {
 
       // Drop interactions from the initial connect's (empty-channel) recovery
       // so we only count the reconnect call.
-      clearInteractions(fakeChatApi.channel);
+      clearInteractions(defaultApi);
 
       await simulateReconnect();
 
       // The re-query asks for exactly the channels it lists, a page at a time.
       verify(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(
-            named: 'filter',
-            that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, const ['messaging:c1', 'messaging:c2'])),
+        () => defaultApi.queryChannels(
+          queryChannelsRequest: any(
+            named: 'queryChannelsRequest',
+            that: isChannelQuery(
+              filter: ChannelFilter.in_(ChannelFilterField.cid, const ['messaging:c1', 'messaging:c2']),
+              limit: 2,
+            ),
           ),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: const PaginationParams(limit: 2),
         ),
       ).called(1);
     });
@@ -3800,7 +3194,7 @@ void main() {
     test('should skip the re-query on reconnect when disabled', () async {
       client = StreamChatClient(
         apiKey,
-        defaultApi: FakeDefaultApi(),
+        defaultApi: defaultApi,
         chatApi: fakeChatApi,
         wsProvider: ws.connect,
         recoverStateOnReconnect: false,
@@ -3810,28 +3204,19 @@ void main() {
 
       final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: 'messaging:c1')));
       client.state.addChannels({'messaging:c1': channel});
-      clearInteractions(fakeChatApi.channel);
+      clearInteractions(defaultApi);
 
       await simulateReconnect();
 
       verifyNever(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: any(named: 'paginationParams'),
-        ),
+        () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
       );
     });
 
     test('should still emit `connectionRecovered` when disabled', () async {
       client = StreamChatClient(
         apiKey,
-        defaultApi: FakeDefaultApi(),
+        defaultApi: defaultApi,
         chatApi: fakeChatApi,
         wsProvider: ws.connect,
         recoverStateOnReconnect: false,
@@ -3858,19 +3243,10 @@ void main() {
     // and must not stop `connectionRecovered` from firing.
     test('should not surface an error when the re-query fails', () async {
       when(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: any(named: 'paginationParams'),
-        ),
-      ).thenThrow(StateError('queryChannels needs an active connection. Call `connectUser` first.'));
+        () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
+      ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400)));
 
-      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: defaultApi, chatApi: fakeChatApi, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -3889,26 +3265,17 @@ void main() {
     });
 
     test('should skip the re-query when no active channels are tracked', () async {
-      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: defaultApi, chatApi: fakeChatApi, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
       // No channels added — the cids.isNotEmpty guard should short-circuit.
-      clearInteractions(fakeChatApi.channel);
+      clearInteractions(defaultApi);
 
       await simulateReconnect();
 
       verifyNever(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: any(named: 'paginationParams'),
-        ),
+        () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
       );
     });
 
@@ -3917,7 +3284,7 @@ void main() {
     test('should re-query active channels when the sync skipped event replay', () async {
       client = StreamChatClient(
         apiKey,
-        defaultApi: FakeDefaultApi(),
+        defaultApi: defaultApi,
         chatApi: fakeChatApi,
         wsProvider: ws.connect,
         recoverStateOnReconnect: false,
@@ -3949,20 +3316,16 @@ void main() {
         (_) async => SyncResponse()..events = events,
       );
 
-      clearInteractions(fakeChatApi.channel);
+      clearInteractions(defaultApi);
 
       await simulateReconnect();
 
       verify(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(named: 'filter', that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, const [cid]))),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: const PaginationParams(limit: 1),
+        () => defaultApi.queryChannels(
+          queryChannelsRequest: any(
+            named: 'queryChannelsRequest',
+            that: isChannelQuery(filter: ChannelFilter.in_(ChannelFilterField.cid, const [cid]), limit: 1),
+          ),
         ),
       ).called(1);
 
@@ -3974,7 +3337,7 @@ void main() {
     // A failed sync applied nothing and moved nothing, so the configured
     // recovery still runs and the window stays outstanding for the next sync.
     test('should re-query active channels when the sync fails, keeping lastSyncAt', () async {
-      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: defaultApi, chatApi: fakeChatApi, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -3996,20 +3359,16 @@ void main() {
         ),
       );
 
-      clearInteractions(fakeChatApi.channel);
+      clearInteractions(defaultApi);
 
       await simulateReconnect();
 
       verify(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(named: 'filter', that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, const [cid]))),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: const PaginationParams(limit: 1),
+        () => defaultApi.queryChannels(
+          queryChannelsRequest: any(
+            named: 'queryChannelsRequest',
+            that: isChannelQuery(filter: ChannelFilter.in_(ChannelFilterField.cid, const [cid]), limit: 1),
+          ),
         ),
       ).called(1);
 
@@ -4020,21 +3379,12 @@ void main() {
     // so a failed refresh keeps the checkpoint and the range is asked for again.
     test('should keep lastSyncAt when the refresh after a skipped replay fails', () async {
       when(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: any(named: 'paginationParams'),
-        ),
-      ).thenThrow(StateError('queryChannels needs an active connection. Call `connectUser` first.'));
+        () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
+      ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400)));
 
       client = StreamChatClient(
         apiKey,
-        defaultApi: FakeDefaultApi(),
+        defaultApi: defaultApi,
         chatApi: fakeChatApi,
         wsProvider: ws.connect,
         recoverStateOnReconnect: false,
@@ -4074,7 +3424,7 @@ void main() {
     test('should re-query in batches when more channels are active than fit in one page', () async {
       client = StreamChatClient(
         apiKey,
-        defaultApi: FakeDefaultApi(),
+        defaultApi: defaultApi,
         chatApi: fakeChatApi,
         wsProvider: ws.connect,
         recoverStateOnReconnect: false,
@@ -4108,39 +3458,25 @@ void main() {
         (_) async => SyncResponse()..events = events,
       );
 
-      clearInteractions(fakeChatApi.channel);
+      clearInteractions(defaultApi);
 
       await simulateReconnect();
 
       verify(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(
-            named: 'filter',
-            that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, cids.take(30).toList())),
+        () => defaultApi.queryChannels(
+          queryChannelsRequest: any(
+            named: 'queryChannelsRequest',
+            that: isChannelQuery(filter: ChannelFilter.in_(ChannelFilterField.cid, cids.take(30).toList()), limit: 30),
           ),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: const PaginationParams(limit: 30),
         ),
       ).called(1);
 
       verify(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(
-            named: 'filter',
-            that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, cids.skip(30).toList())),
+        () => defaultApi.queryChannels(
+          queryChannelsRequest: any(
+            named: 'queryChannelsRequest',
+            that: isChannelQuery(filter: ChannelFilter.in_(ChannelFilterField.cid, cids.skip(30).toList()), limit: 1),
           ),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: const PaginationParams(limit: 1),
         ),
       ).called(1);
     });
@@ -4150,7 +3486,7 @@ void main() {
     // it fires. Emitting it before the catch-up finishes would have them act
     // on state the sync has not written yet.
     test('should finish recovering before `connectionRecovered` fires', () async {
-      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: defaultApi, chatApi: fakeChatApi, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -4169,19 +3505,10 @@ void main() {
         return SyncResponse()..events = [];
       });
       when(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: any(named: 'paginationParams'),
-        ),
+        () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
       ).thenAnswer((_) async {
         calls.add('queryChannels');
-        return QueryChannelsResponse()..channels = [];
+        return Result.success(generatedQueryChannelsResponse([]));
       });
 
       final sub = client.on(EventType.connectionRecovered).listen((_) => calls.add('connectionRecovered'));
@@ -4198,7 +3525,7 @@ void main() {
     test('should attempt every page when one of them fails', () async {
       client = StreamChatClient(
         apiKey,
-        defaultApi: FakeDefaultApi(),
+        defaultApi: defaultApi,
         chatApi: fakeChatApi,
         wsProvider: ws.connect,
         recoverStateOnReconnect: false,
@@ -4235,39 +3562,25 @@ void main() {
 
       // The first page fails, the second one succeeds.
       when(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(
-            named: 'filter',
-            that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, cids.take(30).toList())),
+        () => defaultApi.queryChannels(
+          queryChannelsRequest: any(
+            named: 'queryChannelsRequest',
+            that: isChannelQuery(filter: ChannelFilter.in_(ChannelFilterField.cid, cids.take(30).toList())),
           ),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: any(named: 'paginationParams'),
         ),
-      ).thenThrow(StateError('Failed to query channels'));
+      ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400)));
 
-      clearInteractions(fakeChatApi.channel);
+      clearInteractions(defaultApi);
 
       await simulateReconnect();
 
       // Both pages are asked for, even though the first one failed.
       verify(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(
-            named: 'filter',
-            that: isSameFilterAs(ChannelFilter.in_(ChannelFilterField.cid, cids.skip(30).toList())),
+        () => defaultApi.queryChannels(
+          queryChannelsRequest: any(
+            named: 'queryChannelsRequest',
+            that: isChannelQuery(filter: ChannelFilter.in_(ChannelFilterField.cid, cids.skip(30).toList()), limit: 1),
           ),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: const PaginationParams(limit: 1),
         ),
       ).called(1);
 
@@ -4276,44 +3589,26 @@ void main() {
     });
 
     test('should respect runtime toggling via the setter', () async {
-      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: defaultApi, chatApi: fakeChatApi, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
       final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: 'messaging:c1')));
       client.state.addChannels({'messaging:c1': channel});
-      clearInteractions(fakeChatApi.channel);
+      clearInteractions(defaultApi);
 
       // Disable mid-flight → no re-query on reconnect.
       client.recoverStateOnReconnect = false;
       await simulateReconnect();
       verifyNever(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: any(named: 'paginationParams'),
-        ),
+        () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
       );
 
       // Re-enable → re-query on the next reconnect.
       client.recoverStateOnReconnect = true;
       await simulateReconnect();
       verify(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: any(named: 'paginationParams'),
-        ),
+        () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
       ).called(1);
     });
   });
@@ -4324,6 +3619,7 @@ void main() {
     final token = testUserToken(user.id).rawValue;
 
     late FakeChatApi fakeChatApi;
+    late MockDefaultApi defaultApi;
     late FakeChatServer ws;
     late StreamChatClient client;
     var disposed = false;
@@ -4335,6 +3631,8 @@ void main() {
 
     setUp(() {
       fakeChatApi = FakeChatApi();
+      defaultApi = MockDefaultApi();
+      when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse()));
       ws = FakeChatServer();
       disposed = false;
     });
@@ -4350,21 +3648,12 @@ void main() {
     test('disposing mid-recovery does not surface a late recovery event', () async {
       // Keep the recovery's channel query pending so the client is still
       // mid-recovery at the moment it is disposed.
-      final pendingQuery = Completer<QueryChannelsResponse>();
+      final pendingQuery = Completer<Result<api.QueryChannelsResponse>>();
       when(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: any(named: 'paginationParams'),
-        ),
+        () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
       ).thenAnswer((_) => pendingQuery.future);
 
-      client = StreamChatClient(apiKey, defaultApi: FakeDefaultApi(), chatApi: fakeChatApi, wsProvider: ws.connect);
+      client = StreamChatClient(apiKey, defaultApi: defaultApi, chatApi: fakeChatApi, wsProvider: ws.connect);
       await client.connectUser(user, token);
       await delay(300);
 
@@ -4388,7 +3677,7 @@ void main() {
 
       // Let the now-orphaned recovery finish. Its trailing work must be
       // discarded silently instead of thrown as an unhandled async error.
-      pendingQuery.complete(QueryChannelsResponse()..channels = []);
+      pendingQuery.complete(Result.success(generatedQueryChannelsResponse([])));
       await delay(300);
 
       expect(client.connectionStatus, ConnectionStatus.disconnected);
@@ -5091,28 +4380,14 @@ void main() {
     // Whether the channels can be watched is read when the request is sent, not when the query is
     // made, so one that waited for a connection still watches what it loads.
     test('should watch the channels it loads when the connection lands mid-query', () async {
-      final fakeChatApi = FakeChatApi();
-      final ws = FakeChatServer(user: OwnUser.fromUser(user));
-      final client = StreamChatClient(
-        apiKey,
-        defaultApi: FakeDefaultApi(),
-        chatApi: fakeChatApi,
-        wsProvider: ws.connect,
-      );
-      addTearDown(client.dispose);
-
+      final defaultApi = MockDefaultApi();
+      when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse()));
       when(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: any(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: any(named: 'paginationParams'),
-        ),
-      ).thenAnswer((_) async => QueryChannelsResponse()..channels = []);
+        () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
+      ).thenAnswer((_) async => Result.success(generatedQueryChannelsResponse([])));
+      final ws = FakeChatServer(user: OwnUser.fromUser(user));
+      final client = StreamChatClient(apiKey, defaultApi: defaultApi, wsProvider: ws.connect);
+      addTearDown(client.dispose);
 
       // Not awaited: the query below has to arrive while the attempt is still in flight.
       final connecting = client.connectUser(user, token);
@@ -5121,20 +4396,13 @@ void main() {
       await connecting;
       await queried;
 
-      final watched = verify(
-        () => fakeChatApi.channel.queryChannels(
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          state: any(named: 'state'),
-          watch: captureAny(named: 'watch'),
-          presence: any(named: 'presence'),
-          memberLimit: any(named: 'memberLimit'),
-          messageLimit: any(named: 'messageLimit'),
-          paginationParams: any(named: 'paginationParams'),
-        ),
-      ).captured;
+      final request =
+          verify(
+                () => defaultApi.queryChannels(queryChannelsRequest: captureAny(named: 'queryChannelsRequest')),
+              ).captured.single
+              as api.QueryChannelsRequest;
 
-      expect(watched.single, isTrue);
+      expect(request.watch, isTrue);
     });
 
     // The wait ends when the attempt settles either way: one that fails has to raise rather than

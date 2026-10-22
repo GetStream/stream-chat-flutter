@@ -5,10 +5,10 @@ import '../db/drift_chat_database.dart';
 extension ChannelEntityX on ChannelEntity {
   /// Maps a [ChannelEntity] into [ChannelModel]
   ChannelModel toChannelModel({User? createdBy, User? truncatedBy}) {
-    final config = ChannelConfig.fromJson(this.config);
+    final config = ChannelConfig.fromData(this.config);
     return ChannelModel(
       id: id,
-      ownCapabilities: ownCapabilities,
+      ownCapabilities: ownCapabilities?.map(ChannelCapability.new).toList(),
       config: config,
       type: type,
       frozen: frozen,
@@ -59,7 +59,7 @@ extension ChannelModelX on ChannelModel {
     type: type,
     cid: cid,
     ownCapabilities: ownCapabilities,
-    config: config.toJson(),
+    config: config.toData(),
     frozen: frozen,
     lastMessageAt: lastMessageAt,
     createdAt: createdAt,
