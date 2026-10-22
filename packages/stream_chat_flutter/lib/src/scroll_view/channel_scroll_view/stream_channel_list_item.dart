@@ -268,10 +268,10 @@ class StreamChannelListTile extends StatelessWidget {
           previewTextTheme?.senderPrefixStyle ??
           outerPreviewTextTheme.senderPrefixStyle ??
           defaultPreviewTextTheme.senderPrefixStyle,
-      deletedMessageStyle:
-          previewTextTheme?.deletedMessageStyle ??
-          outerPreviewTextTheme.deletedMessageStyle ??
-          defaultPreviewTextTheme.deletedMessageStyle,
+      deletedContentStyle:
+          previewTextTheme?.deletedContentStyle ??
+          outerPreviewTextTheme.deletedContentStyle ??
+          defaultPreviewTextTheme.deletedContentStyle,
     );
     final effectiveTimestampStyle = channelListItemTheme.timestampStyle ?? defaults.timestampStyle;
     final effectiveAttributePosition = channelListItemTheme.attributePosition ?? defaults.attributePosition;
@@ -471,7 +471,7 @@ class _StreamChannelListItemThemeDefaults extends StreamChannelListItemThemeData
 
   @override
   StreamMessagePreviewTextThemeData get messagePreviewTextTheme => StreamMessagePreviewTextThemeData(
-    deletedMessageStyle: TextStyle(color: _colorScheme.textTertiary),
+    deletedContentStyle: TextStyle(color: _colorScheme.textTertiary),
   );
 
   @override

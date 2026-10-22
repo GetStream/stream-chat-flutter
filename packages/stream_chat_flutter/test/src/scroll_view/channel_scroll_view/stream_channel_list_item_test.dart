@@ -711,7 +711,7 @@ void main() {
         tester,
         chatTheme: StreamChatThemeData(
           messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
-            deletedMessageStyle: TextStyle(color: Colors.red),
+            deletedContentStyle: TextStyle(color: Colors.red),
           ),
         ),
       );
@@ -724,7 +724,7 @@ void main() {
         tester,
         theme: const StreamChannelListItemThemeData(
           messagePreviewTextTheme: StreamMessagePreviewTextThemeData(
-            deletedMessageStyle: TextStyle(color: Colors.orange),
+            deletedContentStyle: TextStyle(color: Colors.orange),
           ),
         ),
       );

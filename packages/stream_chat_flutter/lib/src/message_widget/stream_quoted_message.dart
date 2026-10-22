@@ -209,7 +209,7 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
     final effectiveMessagePreviewTextTheme = StreamMessagePreviewTextThemeData(
       draftPrefixStyle: previewTextTheme?.draftPrefixStyle ?? outerPreviewTextTheme.draftPrefixStyle,
       senderPrefixStyle: previewTextTheme?.senderPrefixStyle ?? outerPreviewTextTheme.senderPrefixStyle,
-      deletedMessageStyle: previewTextTheme?.deletedMessageStyle ?? outerPreviewTextTheme.deletedMessageStyle,
+      deletedContentStyle: previewTextTheme?.deletedContentStyle ?? outerPreviewTextTheme.deletedContentStyle,
     );
     final effectiveIndicatorColor = theme.indicatorColor ?? defaults.indicatorColor;
     final effectiveBackgroundColor = theme.backgroundColor ?? defaults.backgroundColor;

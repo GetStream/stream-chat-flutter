@@ -123,10 +123,10 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
           previewTextTheme?.senderPrefixStyle ??
           outerPreviewTextTheme.senderPrefixStyle ??
           defaultPreviewTextTheme.senderPrefixStyle,
-      deletedMessageStyle:
-          previewTextTheme?.deletedMessageStyle ??
-          outerPreviewTextTheme.deletedMessageStyle ??
-          defaultPreviewTextTheme.deletedMessageStyle,
+      deletedContentStyle:
+          previewTextTheme?.deletedContentStyle ??
+          outerPreviewTextTheme.deletedContentStyle ??
+          defaultPreviewTextTheme.deletedContentStyle,
     );
     final effectiveLatestReplyMessageStyle =
         theme.threadLatestReplyMessageStyle ?? defaults.threadLatestReplyMessageStyle;
@@ -441,7 +441,7 @@ class _StreamThreadListTileThemeDefaults extends StreamThreadListTileThemeData {
 
   @override
   StreamMessagePreviewTextThemeData get messagePreviewTextTheme => StreamMessagePreviewTextThemeData(
-    deletedMessageStyle: TextStyle(color: _colorScheme.textSecondary),
+    deletedContentStyle: TextStyle(color: _colorScheme.textSecondary),
   );
 
   @override

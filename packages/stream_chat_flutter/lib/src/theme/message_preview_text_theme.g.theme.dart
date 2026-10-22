@@ -40,9 +40,9 @@ mixin _$StreamMessagePreviewTextThemeData {
         b.senderPrefixStyle,
         t,
       ),
-      deletedMessageStyle: TextStyle.lerp(
-        a.deletedMessageStyle,
-        b.deletedMessageStyle,
+      deletedContentStyle: TextStyle.lerp(
+        a.deletedContentStyle,
+        b.deletedContentStyle,
         t,
       ),
     );
@@ -51,14 +51,14 @@ mixin _$StreamMessagePreviewTextThemeData {
   StreamMessagePreviewTextThemeData copyWith({
     TextStyle? draftPrefixStyle,
     TextStyle? senderPrefixStyle,
-    TextStyle? deletedMessageStyle,
+    TextStyle? deletedContentStyle,
   }) {
     final _this = (this as StreamMessagePreviewTextThemeData);
 
     return StreamMessagePreviewTextThemeData(
       draftPrefixStyle: draftPrefixStyle ?? _this.draftPrefixStyle,
       senderPrefixStyle: senderPrefixStyle ?? _this.senderPrefixStyle,
-      deletedMessageStyle: deletedMessageStyle ?? _this.deletedMessageStyle,
+      deletedContentStyle: deletedContentStyle ?? _this.deletedContentStyle,
     );
   }
 
@@ -82,9 +82,9 @@ mixin _$StreamMessagePreviewTextThemeData {
       senderPrefixStyle:
           _this.senderPrefixStyle?.merge(other.senderPrefixStyle) ??
           other.senderPrefixStyle,
-      deletedMessageStyle:
-          _this.deletedMessageStyle?.merge(other.deletedMessageStyle) ??
-          other.deletedMessageStyle,
+      deletedContentStyle:
+          _this.deletedContentStyle?.merge(other.deletedContentStyle) ??
+          other.deletedContentStyle,
     );
   }
 
@@ -103,7 +103,7 @@ mixin _$StreamMessagePreviewTextThemeData {
 
     return _other.draftPrefixStyle == _this.draftPrefixStyle &&
         _other.senderPrefixStyle == _this.senderPrefixStyle &&
-        _other.deletedMessageStyle == _this.deletedMessageStyle;
+        _other.deletedContentStyle == _this.deletedContentStyle;
   }
 
   @override
@@ -114,7 +114,7 @@ mixin _$StreamMessagePreviewTextThemeData {
       runtimeType,
       _this.draftPrefixStyle,
       _this.senderPrefixStyle,
-      _this.deletedMessageStyle,
+      _this.deletedContentStyle,
     );
   }
 }

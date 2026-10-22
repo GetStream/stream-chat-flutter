@@ -22,7 +22,7 @@
 
 🔄 Changed
 
-- A deleted message in `StreamMessagePreviewText` now matches the rest of the preview unless `StreamMessagePreviewTextThemeData.deletedMessageStyle` sets a style. The channel list, thread list and message search keep their own deleted style.
+- A deleted message in `StreamMessagePreviewText` now matches the rest of the preview unless `StreamMessagePreviewTextThemeData.deletedContentStyle` sets a style. The channel list, thread list and message search keep their own deleted style.
 
 ## 10.6.0
 

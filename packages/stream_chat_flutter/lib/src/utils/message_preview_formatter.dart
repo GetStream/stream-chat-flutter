@@ -292,13 +292,13 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   /// Formats a deleted [message] as a preview [TextSpan].
   ///
   /// Shows a "no-sign" icon followed by the localized "Message deleted" text,
-  /// styled with [StreamMessagePreviewTextThemeData.deletedMessageStyle].
+  /// styled with [StreamMessagePreviewTextThemeData.deletedContentStyle].
   @protected
   TextSpan formatDeletedMessage(BuildContext context, Message message) {
     return _labeledIcon(
       icon: context.streamIcons.noSign,
       label: context.translations.messageDeletedLabel,
-      textStyle: StreamMessagePreviewTextTheme.of(context).deletedMessageStyle,
+      textStyle: StreamMessagePreviewTextTheme.of(context).deletedContentStyle,
     );
   }
 

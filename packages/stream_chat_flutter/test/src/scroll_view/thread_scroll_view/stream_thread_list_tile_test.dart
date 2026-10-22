@@ -254,7 +254,7 @@ void main() {
         StreamThreadListTileTheme(
           data: const StreamThreadListTileThemeData(
             messagePreviewTextTheme: StreamMessagePreviewTextThemeData(
-              deletedMessageStyle: TextStyle(color: Colors.orange),
+              deletedContentStyle: TextStyle(color: Colors.orange),
             ),
           ),
           child: StreamThreadListTile(thread: deletedThread, currentUser: user2),

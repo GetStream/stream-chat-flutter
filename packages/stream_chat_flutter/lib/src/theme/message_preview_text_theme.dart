@@ -61,7 +61,7 @@ class StreamMessagePreviewTextThemeData with _$StreamMessagePreviewTextThemeData
   const StreamMessagePreviewTextThemeData({
     this.draftPrefixStyle,
     this.senderPrefixStyle,
-    this.deletedMessageStyle,
+    this.deletedContentStyle,
   });
 
   /// The text style for the "Draft:" prefix that starts a
@@ -79,7 +79,7 @@ class StreamMessagePreviewTextThemeData with _$StreamMessagePreviewTextThemeData
   /// The text style for the "Message deleted" text and its icon.
   ///
   /// If null, matches the rest of the preview.
-  final TextStyle? deletedMessageStyle;
+  final TextStyle? deletedContentStyle;
 
   /// Linearly interpolates between two [StreamMessagePreviewTextThemeData]
   /// objects.
