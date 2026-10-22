@@ -178,7 +178,7 @@ After modifying any package, update its `CHANGELOG.md`.
 
 ## Figma Designs
 
-UI designs for this SDK are in the [SDK Design System](https://www.figma.com/design/BJppI3JYlPy3XeEu5MZY1E/SDK-Design-System) Figma project. Use the Figma MCP server to look up designs when implementing or updating UI components.
+UI designs for this SDK are in two Figma projects: the [Chat SDK Design System](https://www.figma.com/design/Us73erK1xFNcB5EH3hyq6Y/Chat-SDK-Design-System) for chat-specific components, and the [SDK Design System](https://www.figma.com/design/BJppI3JYlPy3XeEu5MZY1E/SDK-Design-System) for the core components in `stream_core_flutter`. Use the Figma MCP server to look up designs when implementing or updating UI components.
 
 ## Sibling SDK Alignment
 
