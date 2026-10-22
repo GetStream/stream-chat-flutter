@@ -62,20 +62,12 @@ class Event extends WsEvent {
   }) : createdAt = createdAt?.toUtc() ?? DateTime.now().toUtc();
 
   /// Create a new instance from a json
-  factory Event.fromJson(Map<String, dynamic> json) {
-    final event = _$EventFromJson(
-      Serializer.moveToExtraDataFromRoot(
-        json,
-        topLevelFields,
-      ),
-    );
-
-    // TODO(openapi-migration): remove once WebSocket events decode v2 payloads.
-    return switch ((event.type, json['user'])) {
-      (EventType.userUpdated, final Map<String, dynamic> user) => event.copyWith(user: OwnUser.fromJson(user)),
-      _ => event,
-    };
-  }
+  factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(
+    Serializer.moveToExtraDataFromRoot(
+      json,
+      topLevelFields,
+    ),
+  );
 
   /// The type of the event
   /// [EventType] contains some predefined constant types
@@ -106,9 +98,6 @@ class Event extends WsEvent {
   final OwnUser? me;
 
   /// The user this event concerns, such as the sender of a new message.
-  ///
-  /// An [OwnUser] on a [EventType.userUpdated] event, so it keeps the user's
-  /// privacy settings.
   final User? user;
 
   /// The message sent with the event

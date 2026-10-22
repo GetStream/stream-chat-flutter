@@ -2702,7 +2702,10 @@ class ClientState {
         if (user == null) return;
 
         if (user.id == currentUser?.id) {
-          final updatedUser = OwnUser.fromUser(user);
+          // TODO(openapi-migration): map the v2 event's user once WebSocket
+          // events decode v2 payloads. Until then, the privacy settings the
+          // current user's copy carries sit in the user's custom data.
+          final updatedUser = OwnUser.fromJson(user.toJson());
           currentUser = user = updatedUser.copyWith(
             // PRESERVE these fields (we don't get them in user.updated events)
             devices: currentUser?.devices,
