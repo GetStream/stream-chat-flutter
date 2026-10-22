@@ -675,6 +675,20 @@ void main() {
       expect(updated.members, [member]);
     });
 
+    test('onChannelUpdated keeps the members when the channel carries none', () {
+      final member = Member(user: otherUser);
+      stubChannelState(
+        ChannelState(
+          channel: ChannelModel(cid: 'messaging:test'),
+          members: [member],
+        ),
+      );
+
+      mutations.onChannelUpdated(ChannelModel(cid: 'messaging:test', frozen: true));
+
+      expect(capturedChannelState().members, [member]);
+    });
+
     test('onChannelCounts updates the member and message counts', () {
       stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
 

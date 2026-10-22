@@ -5,42 +5,31 @@ import '../../utils.dart';
 
 void main() {
   group('src/models/channel_state', () {
-    test('should parse json correctly', () {
-      final channelState = ChannelState.fromJson(jsonFixture('channel_state.json'));
-      expect(channelState.channel?.cid, 'team:dev');
-      expect(channelState.channel?.id, 'dev');
-      expect(channelState.channel?.team, 'test');
-      expect(channelState.channel?.type, 'team');
-      expect(channelState.channel?.config, isA<ChannelConfig>());
-      expect(channelState.channel?.config, isNotNull);
-      expect(channelState.channel?.config.commands, hasLength(1));
-      expect(channelState.channel?.config.commands[0], isA<Command>());
-      expect(channelState.channel?.lastMessageAt, DateTime.parse('2020-01-30T13:43:41.062362Z'));
-      expect(channelState.channel?.createdAt, DateTime.parse('2019-04-03T18:43:33.213373Z'));
-      expect(channelState.channel?.updatedAt, DateTime.parse('2019-04-03T18:43:33.213374Z'));
-      expect(channelState.channel?.createdBy, isA<User>());
-      expect(channelState.channel?.frozen, true);
-      expect(channelState.channel?.custom['example'], 1);
-      expect(channelState.channel?.custom['name'], '#dev');
-      expect(
-        channelState.channel?.custom['image'],
-        'https://cdn.chrisshort.net/testing-certificate-chains-in-go/GOPHER_MIC_DROP.png',
+    test('merge keeps the fields the other state leaves out', () {
+      final members = [Member(userId: 'alice')];
+      final state = ChannelState(
+        members: members,
+        watcherCount: 3,
+        pinnedMessages: [Message(id: 'pinned')],
       );
-      expect(channelState.messages, isNotNull);
-      expect(channelState.messages, isNotEmpty);
-      expect(channelState.messages, hasLength(25));
-      expect(channelState.messages![0], isA<Message>());
-      expect(channelState.messages![0], isNotNull);
-      expect(
-        channelState.messages![0].createdAt,
-        DateTime.parse('2020-01-29T03:23:02.843948Z'),
+
+      final merged = state.merge(const ChannelState(watcherCount: 5));
+
+      expect(merged.members, members);
+      expect(merged.watcherCount, 5);
+      expect(merged.pinnedMessages?.map((it) => it.id), ['pinned']);
+    });
+
+    test('merge takes the draft of the other state, even when it has none', () {
+      final draft = Draft(
+        channelCid: 'messaging:123',
+        createdAt: DateTime.utc(2026),
+        message: DraftMessage(text: 'hi'),
       );
-      expect(channelState.messages![0].user, isA<User>());
-      expect(
-        channelState.messages![0].restrictedVisibility,
-        isA<List<String>>(),
-      );
-      expect(channelState.watcherCount, 5);
+
+      final merged = ChannelState(draft: draft).merge(const ChannelState());
+
+      expect(merged.draft, isNull);
     });
 
     test('should handle draft field correctly', () {

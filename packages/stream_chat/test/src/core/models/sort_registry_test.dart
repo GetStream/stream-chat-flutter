@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 import 'package:equatable/equatable.dart';
 import 'package:stream_chat/src/core/models/banned_user.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
+import 'package:stream_chat/src/core/models/converters/v1_json_converters.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
@@ -153,16 +154,16 @@ void main() {
     test('`fromRemote` falls back to a field the API added and the SDK has not', () {
       // A channel key with no typed property deserializes into custom,
       // which is where the custom fallback looks — so the sort still works.
-      ChannelState channelWith(Object? value) => ChannelState.fromJson({
-        'channel': {
+      ChannelState channelWith(Object? value) => ChannelState(
+        channel: const ChannelModelV1JsonConverter().fromJson({
           'cid': 'messaging:a',
           'id': 'a',
           'type': 'messaging',
           'created_at': '2026-01-01T00:00:00.000Z',
           'updated_at': '2026-01-01T00:00:00.000Z',
           'some_new_api_field': value,
-        },
-      });
+        }),
+      );
 
       final sort = [ChannelSort.desc(ChannelSortField.fromRemote('some_new_api_field'))];
 
@@ -175,16 +176,16 @@ void main() {
       // the model: a typed property's value never reaches extraData, so the
       // fallback finds nothing and orders the two as equal. The query still
       // carries the right field name.
-      ChannelState channelWith(int memberCount) => ChannelState.fromJson({
-        'channel': {
+      ChannelState channelWith(int memberCount) => ChannelState(
+        channel: const ChannelModelV1JsonConverter().fromJson({
           'cid': 'messaging:a',
           'id': 'a',
           'type': 'messaging',
           'created_at': '2026-01-01T00:00:00.000Z',
           'updated_at': '2026-01-01T00:00:00.000Z',
           'member_count': memberCount,
-        },
-      });
+        }),
+      );
 
       final asCustom = [ChannelSort.desc(ChannelSortField.custom('member_count'))];
       expect(asCustom.compare(channelWith(50), channelWith(100)), 0);

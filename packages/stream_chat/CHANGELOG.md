@@ -191,6 +191,27 @@
 - `KeyStrokeHandler`'s `onStartTyping` and `onStopTyping` callbacks return a `Result<void>`, and calling the handler returns one instead of throwing.
 - `toJson` is removed from `Event`, `ChannelState`, `Read`, `Draft`, `DraftMessage` and `ChannelPushPreference`.
 - `StreamChatApi.channel.sendEvent` is removed.
+- `queryChannel`, `watchChannel` and `createChannel` on `StreamChatClient`, and `Channel.query`, `watch` and `create`, return a `Result<ChannelStateResponse>` instead of a `ChannelState`, and no longer throw.
+- `ChannelStateResponse` holds the `ChannelState` and the call's `duration`, and reports `0ms` for a state read from the offline storage.
+- `queryChannelsOnline` returns a `Result<List<Channel>>` instead of throwing.
+- `updateChannel`, `acceptChannelInvite`, `rejectChannelInvite`, `addChannelMembers`, `removeChannelMembers` and `inviteChannelMembers`, and their `Channel` counterparts, return a `Result<UpdateChannelResponse>` instead of throwing.
+- `AcceptInviteResponse`, `RejectInviteResponse`, `InviteMembersResponse`, `AddMembersResponse` and `RemoveMembersResponse` are removed; those calls answer an `UpdateChannelResponse`.
+- `UpdateChannelResponse.channel` is nullable and `UpdateChannelResponse.members` is non-nullable.
+- `truncateChannel` and `Channel.truncate` return a `Result<TruncateChannelResponse>` instead of an `EmptyResponse`.
+- `queryMembers` and `Channel.queryMembers` return a `Result<QueryMembersResponse>` instead of throwing.
+- `QueryChannelsResponse`, `QueryMembersResponse`, `UpdateChannelResponse` and `ChannelStateResponse` are immutable, compare by value, and their `duration` is non-nullable.
+- The `Channel` constructor and `StreamChatClient.channel` take the data a new channel is created with as `data`, a `CreateChannelData`, instead of `custom`, `name` and `image`.
+- `queryChannel`, `watchChannel` and `createChannel` take `channelData` as a `CreateChannelData`, and `updateChannel` and `Channel.update` take an `UpdateChannelData`, instead of a map.
+- `addChannelMembers`, `inviteChannelMembers`, `Channel.addMembers` and `Channel.inviteMembers` take `ChannelMemberData`s instead of user ids.
+- The data a channel is created or updated with can no longer set its filter tags, config overrides or auto-translation settings.
+- `ChannelState`, `ChannelModel`, `Member` and `PredefinedFilter` no longer decode from or encode to JSON, and `ChannelModel.topLevelFields` is removed.
+- `ChannelConfig` no longer decodes from or encodes to JSON; it gains `fromData` and `toData`, which read and write only the format `stream_chat_persistence` stores it in.
+- `ChannelState`, `ChannelModel`, `ChannelConfig` and `PredefinedFilter` compare by value; `Member` no longer extends `Equatable`, so `props` is removed.
+- `copyWith` on `ChannelState`, `ChannelModel` and `Member` clears a nullable field passed as `null` and gives `createdAt`, `updatedAt`, `ChannelModel.config` and `Member.userId` their default again, where it kept the field.
+- `ChannelModel`'s `ownCapabilities` argument is a `List<ChannelCapability>`.
+- `Member.copyWith` no longer takes `role`, which it ignored.
+- A member's `role`, and a channel's `hide_messages_before` and `mute_expires_at`, are no longer kept in their custom data.
+- `StreamChatApi.channel.queryChannel`, `queryChannels`, `updateChannel`, `acceptChannelInvite`, `rejectChannelInvite`, `inviteChannelMembers`, `addMembers`, `removeMembers` and `truncateChannel`, and `StreamChatApi.general.queryMembers`, are removed.
 
 🐞 Fixed
 
@@ -208,16 +229,23 @@
 - The OpenAPI-generated client's methods that take a `payload` or `sort` argument no longer fail with `invalid json data`.
 
 - Disposing a `Channel` while the user is typing now sends the typing stop event.
+- `Channel.query` with `preferOffline` fetches the channel when the offline storage cannot be read, instead of throwing.
+- A `member.banned` or `member.unbanned` event whose member cannot be fetched no longer raises an unhandled error.
+- `truncateChannel` and `Channel.truncate` with a `truncatedAt` now reach the server, where they failed before sending.
+- `queryMembers` with a `createdAt` bound in local time, or with a filter on a date, no longer fails.
 - A typing start that fails after a later key stroke no longer keeps that key stroke's typing stop from being sent.
 
 🔄 Changed
 
+- A channel in an event reports a null `lastMessageAt` where it had no last message, instead of a date in year 1.
 - Failed messages now retry on server errors. The retry policy is now explicit: retry a request that never reached the server, a 5xx, a 429 and a 408; never another 4xx, a cancelled request, broken credentials, or anything the server marked unrecoverable. Previously only failures without a parseable error body retried, so a 500 or a 429 did not.
 - `SystemEnvironment` is a different type with the same constructor and fields, so existing usage keeps working.
 - Most SDK logging moved off `info`. It now carries only client and connection lifecycle — client created and disposed, user set and disconnected, connection opening, established and closing — and per-operation, per-event and per-timer records are `debug` or `verbose`. Raising the priority to `info` to debug a problem no longer buries it under a health check every 20 seconds and a line per WebSocket frame.
 
 ✅ Added
 
+- Added `CreateChannelData`, `UpdateChannelData` and `ChannelMemberData`; a member's channel role and custom data can be set when creating a channel, adding a member or inviting one.
+- Added `ChannelState.merge`.
 - Log records from the HTTP and token layers now reach the configured handler.
 - Added `MessageSearchSortField.relevance`, which sorts a message search by match quality.
 - Added `MessageReminderSortField.messageId`, the field the API breaks reminder ties on.

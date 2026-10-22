@@ -64,7 +64,7 @@ class _BenchmarkLauncherState extends State<_BenchmarkLauncher> {
     final channel = client.channel(
       _benchmarkChannelType,
       id: _benchmarkChannelId,
-      custom: const {'name': 'Perf benchmark'},
+      data: const CreateChannelData(custom: {'name': 'Perf benchmark'}),
     );
     await channel.watch(
       messagesPagination: const PaginationParams(limit: 25),

@@ -1,22 +1,21 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../util/extension.dart';
-import '../util/serializer.dart';
 import 'channel_config.dart';
 import 'member.dart';
 import 'user.dart';
 
-part 'channel_model.g.dart';
+part 'channel_model.freezed.dart';
 
 /// The class that contains the information about a channel
-@JsonSerializable()
-class ChannelModel {
+@freezed
+class ChannelModel with _$ChannelModel {
   /// Creates a channel model.
   ChannelModel({
     String? id,
     String? type,
     String? cid,
-    List<String>? ownCapabilities,
+    this.ownCapabilities,
     ChannelConfig? config,
     this.createdBy,
     this.frozen = false,
@@ -49,46 +48,42 @@ class ChannelModel {
        config = config ?? ChannelConfig(),
        createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now(),
-       ownCapabilities = ownCapabilities?.map(ChannelCapability.new).toList(),
        custom = {...custom};
 
-  /// Create a new instance from a json
-  factory ChannelModel.fromJson(Map<String, dynamic> json) => _$ChannelModelFromJson(
-    Serializer.moveToExtraDataFromRoot(json, topLevelFields),
-  );
-
   /// The id of this channel
+  @override
   final String id;
 
   /// The type of this channel
+  @override
   final String type;
 
   /// The cid of this channel
-  @JsonKey(includeToJson: false)
+  @override
   final String cid;
 
   /// List of various capabilities that a user can have in a channel.
-  @JsonKey(includeToJson: false)
+  @override
   final List<ChannelCapability>? ownCapabilities;
 
   /// The channel configuration data
-  @JsonKey(includeToJson: false)
+  @override
   final ChannelConfig config;
 
   /// The user that created this channel
-  @JsonKey(includeToJson: false)
+  @override
   final User? createdBy;
 
   /// True if this channel is frozen
-  @JsonKey(includeIfNull: false)
+  @override
   final bool frozen;
 
   /// The date of the last message
-  @JsonKey(includeToJson: false)
+  @override
   final DateTime? lastMessageAt;
 
   /// The date of channel creation
-  @JsonKey(includeToJson: false)
+  @override
   final DateTime createdAt;
 
   /// The date at which the channel was last updated.
@@ -97,7 +92,6 @@ class ChannelModel {
   /// Truncating a channel leaves [lastMessageAt] set to a value older than
   /// [createdAt] rather than clearing it, so taking the later of the two keeps
   /// the channel in place under a `last_updated` sort.
-  @JsonKey(includeToJson: false, includeFromJson: false)
   DateTime get lastUpdatedAt {
     if (lastMessageAt case final lastMessageAt? when lastMessageAt.isAfter(createdAt)) {
       return lastMessageAt;
@@ -106,68 +100,68 @@ class ChannelModel {
   }
 
   /// The date of the last channel update
-  @JsonKey(includeToJson: false)
+  @override
   final DateTime updatedAt;
 
   /// The date of channel deletion
-  @JsonKey(includeToJson: false)
+  @override
   final DateTime? deletedAt;
 
   /// The count of this channel members
-  @JsonKey(includeToJson: false)
+  @override
   final int memberCount;
 
   /// The list of this channel members
-  @JsonKey(includeToJson: false)
+  @override
   final List<Member>? members;
 
   /// The number of seconds in a cooldown
-  @JsonKey(includeIfNull: false)
+  @override
   final int cooldown;
 
   /// Whether this channel is disabled.
   ///
   /// Loading a disabled channel fails, and channel queries leave it out for
   /// users who lack the permission to see it.
-  @JsonKey(includeToJson: false)
+  @override
   final bool? disabled;
 
   /// Whether this channel is hidden for the current user.
-  @JsonKey(includeToJson: false)
+  @override
   final bool? hidden;
 
   /// Whether this channel is muted for the current user.
-  @JsonKey(includeToJson: false)
+  @override
   final bool? muted;
 
   /// Whether this channel is blocked by the current user.
-  @JsonKey(includeToJson: false)
+  @override
   final bool? blocked;
 
   /// The date this channel was last truncated.
-  @JsonKey(includeToJson: false)
+  @override
   final DateTime? truncatedAt;
 
   /// The user that last truncated this channel.
-  @JsonKey(includeToJson: false)
+  @override
   final User? truncatedBy;
 
   /// Whether messages in this channel are translated automatically.
-  @JsonKey(includeToJson: false)
+  @override
   final bool? autoTranslationEnabled;
 
   /// The language this channel's messages are translated into automatically.
   ///
   /// It can name several languages, separated by commas.
-  @JsonKey(includeToJson: false)
+  @override
   final String? autoTranslationLanguage;
 
   /// This channel's custom data.
-  @JsonKey(name: 'extra_data')
+  @override
   final Map<String, Object?> custom;
 
   /// The team the channel belongs to
-  @JsonKey(includeToJson: false)
+  @override
   final String? team;
 
   /// Shortcut for channel name
@@ -182,115 +176,14 @@ class ChannelModel {
   ///
   /// Note: This field is only populated if the `count_messages` option is
   /// enabled for your app.
-  @JsonKey(includeToJson: false)
+  @override
   final int? messageCount;
 
   /// List of filter tags applied to the channel.
   ///
   /// This is generally used for querying filtered channels based on tags.
-  @JsonKey(includeToJson: false)
+  @override
   final List<String>? filterTags;
-
-  /// The JSON keys [ChannelModel.fromJson] reads into named fields.
-  ///
-  /// Every other key is kept in [custom].
-  static const topLevelFields = [
-    'id',
-    'type',
-    'cid',
-    'own_capabilities',
-    'config',
-    'created_by',
-    'frozen',
-    'last_message_at',
-    'created_at',
-    'updated_at',
-    'deleted_at',
-    'member_count',
-    'members',
-    'team',
-    'cooldown',
-    'message_count',
-    'filter_tags',
-    'disabled',
-    'hidden',
-    'muted',
-    'blocked',
-    'truncated_at',
-    'truncated_by',
-    'auto_translation_enabled',
-    'auto_translation_language',
-  ];
-
-  /// Serializes this channel to JSON.
-  ///
-  /// Leaves out [disabled], [hidden], [muted], [blocked], [truncatedAt],
-  /// [truncatedBy] and the auto-translation settings, which only
-  /// [ChannelModel.fromJson] reads.
-  ///
-  /// Writes the entries of [custom] at the root, leaving out any named like one
-  /// of [topLevelFields].
-  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-    _$ChannelModelToJson(this),
-    topLevelFields: topLevelFields,
-  );
-
-  /// Creates a copy of [ChannelModel] with specified attributes overridden.
-  ChannelModel copyWith({
-    String? id,
-    String? type,
-    String? cid,
-    List<String>? ownCapabilities,
-    ChannelConfig? config,
-    User? createdBy,
-    bool? frozen,
-    DateTime? lastMessageAt,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? deletedAt,
-    int? memberCount,
-    List<Member>? members,
-    Map<String, Object?>? custom,
-    String? team,
-    int? cooldown,
-    bool? disabled,
-    bool? hidden,
-    bool? muted,
-    bool? blocked,
-    DateTime? truncatedAt,
-    int? messageCount,
-    List<String>? filterTags,
-    User? truncatedBy,
-    bool? autoTranslationEnabled,
-    String? autoTranslationLanguage,
-  }) => ChannelModel(
-    id: id ?? this.id,
-    type: type ?? this.type,
-    cid: cid ?? this.cid,
-    ownCapabilities: ownCapabilities ?? this.ownCapabilities,
-    config: config ?? this.config,
-    createdBy: createdBy ?? this.createdBy,
-    frozen: frozen ?? this.frozen,
-    lastMessageAt: lastMessageAt ?? this.lastMessageAt,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-    deletedAt: deletedAt ?? this.deletedAt,
-    memberCount: memberCount ?? this.memberCount,
-    members: members ?? this.members,
-    custom: custom ?? this.custom,
-    team: team ?? this.team,
-    cooldown: cooldown ?? this.cooldown,
-    disabled: disabled ?? this.disabled,
-    hidden: hidden ?? this.hidden,
-    muted: muted ?? this.muted,
-    blocked: blocked ?? this.blocked,
-    truncatedAt: truncatedAt ?? this.truncatedAt,
-    messageCount: messageCount ?? this.messageCount,
-    filterTags: filterTags ?? this.filterTags,
-    truncatedBy: truncatedBy ?? this.truncatedBy,
-    autoTranslationEnabled: autoTranslationEnabled ?? this.autoTranslationEnabled,
-    autoTranslationLanguage: autoTranslationLanguage ?? this.autoTranslationLanguage,
-  );
 
   /// A copy of this channel updated with the fields [other] carries.
   ///

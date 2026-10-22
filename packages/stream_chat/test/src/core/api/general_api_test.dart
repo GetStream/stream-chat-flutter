@@ -1,9 +1,6 @@
-import 'dart:convert';
-
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
-import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../../mocks.dart';
@@ -57,116 +54,5 @@ void main() {
 
     verify(() => client.post(path, data: any(named: 'data'))).called(1);
     verifyNoMoreInteractions(client);
-  });
-
-  group('queryMembers', () {
-    test('with `channelId`', () async {
-      const channelType = 'test-channel-type';
-      const channelId = 'test-channel-id';
-      final filter = MemberFilter.in_(MemberFilterField.userId, const ['u1', 'u2']);
-      const pagination = PaginationParams();
-      final sort = [MemberSort.desc(MemberSortField.custom('test-field'))];
-
-      const path = '/members';
-
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-user-id=$index'),
-      );
-
-      final payload = jsonEncode({
-        'type': channelType,
-        'filter_conditions': filter,
-        'id': channelId,
-        'sort': sort,
-        ...pagination.toJson(),
-      });
-
-      when(
-        () => client.get(
-          path,
-          queryParameters: {
-            'payload': payload,
-          },
-        ),
-      ).thenAnswer(
-        (_) async => successResponse(
-          path,
-          data: {
-            'members': [...members.map((it) => it.toJson())],
-          },
-        ),
-      );
-
-      final res = await generalApi.queryMembers(
-        channelType,
-        channelId: channelId,
-        filter: filter,
-        pagination: pagination,
-        sort: sort,
-      );
-
-      expect(res, isNotNull);
-      expect(res.members.length, members.length);
-
-      verify(
-        () => client.get(path, queryParameters: any(named: 'queryParameters')),
-      ).called(1);
-      verifyNoMoreInteractions(client);
-    });
-
-    test('with `members`', () async {
-      const channelType = 'test-channel-type';
-      final filter = MemberFilter.in_(MemberFilterField.userId, const ['u1', 'u2']);
-      const pagination = PaginationParams();
-      final sort = [MemberSort.desc(MemberSortField.custom('test-field'))];
-
-      const path = '/members';
-
-      final members = List.generate(
-        3,
-        (index) => Member(userId: 'test-user-id=$index'),
-      );
-
-      final payload = jsonEncode({
-        'type': channelType,
-        'filter_conditions': filter,
-        'members': members,
-        'sort': sort,
-        ...pagination.toJson(),
-      });
-
-      when(
-        () => client.get(
-          path,
-          queryParameters: {
-            'payload': payload,
-          },
-        ),
-      ).thenAnswer(
-        (_) async => successResponse(
-          path,
-          data: {
-            'members': [...members.map((it) => it.toJson())],
-          },
-        ),
-      );
-
-      final res = await generalApi.queryMembers(
-        channelType,
-        filter: filter,
-        pagination: pagination,
-        sort: sort,
-        members: members,
-      );
-
-      expect(res, isNotNull);
-      expect(res.members.length, members.length);
-
-      verify(
-        () => client.get(path, queryParameters: any(named: 'queryParameters')),
-      ).called(1);
-      verifyNoMoreInteractions(client);
-    });
   });
 }

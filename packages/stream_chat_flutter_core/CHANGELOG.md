@@ -12,9 +12,13 @@
 - `StreamPollController.addOption` and `updateOption` take the option's custom data as `custom` instead of `extraData`.
 - `StreamChannel.getMessage` returns a `Result<Message>` and `StreamChannel.getReplies` a `Result<void>` instead of throwing.
 - `StreamMessageSearchListController` holds `SearchMessageResult`s instead of `GetMessageResponse`s.
+- `StreamChannel.queryBeforeMessage` and `queryAfterMessage` return a `Result<ChannelState>`, and `loadChannelAtMessage`, `loadChannelAtTimestamp`, `reloadChannel` and `queryMembersAndWatchers` a `Result<void>`, instead of throwing.
+- `StreamChannel.queryMembers` returns a `Result<List<Member>>` instead of throwing.
+- `StreamChannelListController.getChannel` returns a `Result<Channel>` and `leaveChannel` a `Result<UpdateChannelResponse>` instead of throwing.
 
 🐞 Fixed
 
+- A `channel.visible` event whose channel cannot be watched no longer raises an unhandled error; the channel list stays as it was.
 - A list controller sorted each loaded page with an unstable sort, so rows it called equal — members sharing a `created_at`, say — were reordered on every page append. They keep the order they arrived in now.
 
 ## Upcoming

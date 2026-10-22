@@ -3,86 +3,7 @@
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
-import '../../utils.dart';
-
 void main() {
-  group('src/models/channel', () {
-    test('should parse json correctly', () {
-      final channel = ChannelModel.fromJson(jsonFixture('channel.json'));
-      expect(channel.id, equals('test'));
-      expect(channel.type, equals('livestream'));
-      expect(channel.cid, equals('livestream:test'));
-      expect(channel.custom['cats'], equals(true));
-      expect(channel.custom['fruit'], equals(['bananas', 'apples']));
-      expect(channel.cooldown, equals(0));
-      expect(channel.disabled, isFalse);
-      expect(channel.hidden, isTrue);
-      expect(channel.muted, isTrue);
-      expect(channel.blocked, isFalse);
-      expect(channel.truncatedAt, DateTime.parse('2020-01-29T03:22:47.636130Z'));
-      expect(channel.truncatedBy?.id, 'truncator');
-      expect(channel.truncatedBy?.name, 'Truncator');
-      expect(channel.autoTranslationEnabled, isTrue);
-      expect(channel.autoTranslationLanguage, 'fr');
-    });
-
-    test('should serialize to json correctly', () {
-      final channel = ChannelModel(
-        type: 'type',
-        id: 'id',
-        cid: 'a:a',
-        custom: {'name': 'cool'},
-      );
-
-      expect(
-        channel.toJson(),
-        {
-          'id': 'id',
-          'type': 'type',
-          'frozen': false,
-          'cooldown': 0,
-          'name': 'cool',
-        },
-      );
-    });
-
-    test('should serialize to json correctly when frozen is provided', () {
-      final channel = ChannelModel(
-        type: 'type',
-        id: 'id',
-        cid: 'a:a',
-        custom: {'name': 'cool'},
-      );
-
-      expect(
-        channel.toJson(),
-        {
-          'id': 'id',
-          'type': 'type',
-          'frozen': false,
-          'cooldown': 0,
-          'name': 'cool',
-        },
-      );
-    });
-  });
-
-  test('ChannelModel.toJson leaves out custom data named like a field', () {
-    final channel = ChannelModel(
-      cid: 'test:cid',
-      hidden: true,
-      custom: const {'hidden': 'custom', 'id': 'custom', 'color': 'red'},
-    );
-
-    expect(channel.toJson(), {
-      'id': 'cid',
-      'type': 'test',
-      'frozen': false,
-      'cooldown': 0,
-      'color': 'red',
-    });
-  });
-
   test('ChannelModel.copyWith keeps the flags it is not given', () {
     final channel = ChannelModel(
       cid: 'test:cid',
@@ -212,16 +133,6 @@ void main() {
     );
 
     expect(channel.name, isNull);
-  });
-
-  test('should parse filterTags from json correctly', () {
-    final channel = ChannelModel.fromJson({
-      'id': 'test',
-      'type': 'livestream',
-      'filter_tags': ['tag1', 'tag2', 'tag3'],
-    });
-
-    expect(channel.filterTags, equals(['tag1', 'tag2', 'tag3']));
   });
 
   test('.lastUpdatedAt should return lastMessageAt if newer than createdAt', () {

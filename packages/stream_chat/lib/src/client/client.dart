@@ -10,6 +10,7 @@ import 'package:stream_core/stream_core.dart'
         AuthInterceptor,
         ConnectionIdInterceptor,
         CurrentPlatform,
+        Failure,
         HeadersInterceptor,
         InFlightCache,
         LocationCoordinate,
@@ -23,6 +24,7 @@ import 'package:stream_core/stream_core.dart'
         StreamException,
         StreamLogConfig,
         StreamLogger,
+        Success,
         SystemEnvironment,
         SystemEnvironmentManager,
         TokenManager,
@@ -30,7 +32,8 @@ import 'package:stream_core/stream_core.dart'
         UploadedFile,
         UserToken,
         WebSocketProvider,
-        WsEvent;
+        WsEvent,
+        runSafely;
 import 'package:synchronized/synchronized.dart';
 
 import '../../open_api/api.dart' show DefaultApi;
@@ -60,12 +63,16 @@ import '../core/models/poll_vote.dart';
 import '../core/models/push_preference.dart';
 import '../core/models/push_provider.dart';
 import '../core/models/reaction.dart';
+import '../core/models/request/channel_member_data.dart';
+import '../core/models/request/create_channel_data.dart';
 import '../core/models/request/message_delivery.dart';
 import '../core/models/request/thread_options.dart';
+import '../core/models/request/update_channel_data.dart';
 import '../core/models/request/update_user_partial_request.dart';
 import '../core/models/response/add_user_group_members_response.dart';
 import '../core/models/response/app_settings_response.dart';
 import '../core/models/response/block_users_response.dart';
+import '../core/models/response/channel_state_response.dart';
 import '../core/models/response/create_draft_response.dart';
 import '../core/models/response/create_reminder_response.dart';
 import '../core/models/response/create_user_group_response.dart';
@@ -92,7 +99,9 @@ import '../core/models/response/og_attachment_response.dart';
 import '../core/models/response/poll_option_response.dart';
 import '../core/models/response/poll_response.dart';
 import '../core/models/response/poll_vote_response.dart';
+import '../core/models/response/query_channels_response.dart';
 import '../core/models/response/query_drafts_response.dart';
+import '../core/models/response/query_members_response.dart';
 import '../core/models/response/query_poll_votes_response.dart';
 import '../core/models/response/query_polls_response.dart';
 import '../core/models/response/query_reactions_response.dart';
@@ -107,8 +116,10 @@ import '../core/models/response/send_message_response.dart';
 import '../core/models/response/send_reaction_response.dart';
 import '../core/models/response/show_channel_response.dart';
 import '../core/models/response/translate_message_response.dart';
+import '../core/models/response/truncate_channel_response.dart';
 import '../core/models/response/unblock_users_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
+import '../core/models/response/update_channel_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
 import '../core/models/response/update_message_partial_response.dart';
 import '../core/models/response/update_message_response.dart';
@@ -792,7 +803,7 @@ class StreamChatClient {
     return _syncManager.sync(cids: cids, lastSyncAt: lastSyncAt);
   }
 
-  final _queryChannelsCache = InFlightCache<String, QueryChannelsResult>();
+  final _queryChannelsCache = InFlightCache<String, Result<QueryChannelsResult>>();
 
   /// Requests channels with a given query.
   ///
@@ -884,11 +895,11 @@ class StreamChatClient {
       // Continue to online query even if offline fails
     }
 
-    try {
-      // Coalesce concurrent identical online queries — concurrent callers
-      // share both success and failure outcomes. See [InFlightCache] for
-      // the lifecycle details.
-      final result = await _queryChannelsCache.run(
+    // Coalesce concurrent identical online queries — concurrent callers
+    // share both success and failure outcomes. See [InFlightCache] for
+    // the lifecycle details.
+    final cached = await runSafely(
+      () => _queryChannelsCache.run(
         hash,
         () => _queryChannelsOnlineImpl(
           filter: filter,
@@ -904,17 +915,26 @@ class StreamChatClient {
           paginationParams: paginationParams,
           waitForConnect: waitForConnect,
         ).timeout(const Duration(seconds: 30)),
-      );
-      yield result;
-    } catch (e, stk) {
-      logger.e(() => 'Error querying channels online', error: e, stackTrace: stk);
-      // Only rethrow if we have no channels to show the user
-      if (offlineResult == null || offlineResult.channels.isEmpty) rethrow;
+      ),
+    );
+
+    switch (cached.flatten<QueryChannelsResult>()) {
+      case Success(:final data):
+        yield data;
+      case Failure(:final error, :final stackTrace):
+        logger.e(() => 'Error querying channels online', error: error, stackTrace: stackTrace);
+        // Only report the error if we have no channels to show the user.
+        if (offlineResult == null || offlineResult.channels.isEmpty) {
+          Error.throwWithStackTrace(error, stackTrace ?? StackTrace.current);
+        }
     }
   }
 
-  /// Requests channels with a given query from the API.
-  Future<List<Channel>> queryChannelsOnline({
+  /// Fetches the channels matching [filter] from the API.
+  ///
+  /// Throws a [StateError] when [waitForConnect] is true and no connection
+  /// opens.
+  Future<Result<List<Channel>>> queryChannelsOnline({
     ChannelFilter? filter,
     List<ChannelSort>? sort,
     String? predefinedFilter,
@@ -942,7 +962,7 @@ class StreamChatClient {
       waitForConnect: waitForConnect,
       paginationParams: paginationParams,
     );
-    return result.channels;
+    return result.map((it) => it.channels);
   }
 
   // Requires a connection for [operation], waiting first for one that is still being opened.
@@ -956,7 +976,7 @@ class StreamChatClient {
     throw StateError('$operation needs an active connection. Call `connectUser` first.');
   }
 
-  Future<QueryChannelsResult> _queryChannelsOnlineImpl({
+  Future<Result<QueryChannelsResult>> _queryChannelsOnlineImpl({
     ChannelFilter? filter,
     List<ChannelSort>? sort,
     String? predefinedFilter,
@@ -974,7 +994,7 @@ class StreamChatClient {
 
     if (waitForConnect) await _requireConnection('queryChannels');
 
-    final res = await _chatApi.channel.queryChannels(
+    final result = await _channelsRepository.queryChannels(
       filter: filter,
       sort: sort,
       predefinedFilter: predefinedFilter,
@@ -994,6 +1014,30 @@ class StreamChatClient {
       },
     );
 
+    return result.mapAsync(
+      (data) => _applyQueriedChannels(
+        data,
+        filter: filter,
+        sort: sort,
+        predefinedFilter: predefinedFilter,
+        filterValues: filterValues,
+        sortValues: sortValues,
+        paginationParams: paginationParams,
+      ),
+    );
+  }
+
+  // Registers the channels of a query response with the client state, the
+  // delivery reporter and the offline storage, and returns them.
+  Future<QueryChannelsResult> _applyQueriedChannels(
+    QueryChannelsResponse res, {
+    required PaginationParams paginationParams,
+    ChannelFilter? filter,
+    List<ChannelSort>? sort,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+  }) async {
     if (res.channels.isEmpty && paginationParams.offset == 0) {
       logger.w(
         () => '''
@@ -1012,7 +1056,7 @@ class StreamChatClient {
 
     final users = channels.expand((it) => it.members ?? <Member>[]).map((it) => it.user).toList(growable: false);
 
-    this.state.updateUsers(users);
+    state.updateUsers(users);
 
     logger.d(() => 'Got ${res.channels.length} channels from api');
 
@@ -1043,7 +1087,7 @@ class StreamChatClient {
       clearQueryCache: clearQueryCache,
     );
 
-    this.state.addChannels(updateData.key);
+    state.addChannels(updateData.key);
     return QueryChannelsResult(
       channels: updateData.value,
       predefinedFilter: res.predefinedFilter,
@@ -1091,7 +1135,7 @@ class StreamChatClient {
           messageLimit: messageLimit ?? ChatPersistenceClient.defaultMessageLimit,
           paginationParams: paginationParams,
         ) ??
-        (QueryChannelsResponse()..channels = const []);
+        const QueryChannelsResponse(duration: '0ms', channels: []);
 
     if (res.channels.isEmpty) {
       logger.d(() => 'No channels found in offline storage for the given query');
@@ -1301,20 +1345,19 @@ class StreamChatClient {
     cancelToken: cancelToken,
   );
 
-  /// Replaces the [channelId] of type [ChannelType] data with [data].
+  /// Replaces all of a channel's data with [data].
   ///
-  /// Use [updateChannelPartial] for a partial update.
-  Future<UpdateChannelResponse> updateChannel(
+  /// A [message] is sent to the channel as a system message.
+  ///
+  /// See also:
+  ///
+  ///  * [updateChannelPartial], which changes only some fields.
+  Future<Result<UpdateChannelResponse>> updateChannel(
     String channelId,
     String channelType,
-    Map<String, Object?> data, {
+    UpdateChannelData data, {
     Message? message,
-  }) => _chatApi.channel.updateChannel(
-    channelId,
-    channelType,
-    data,
-    message: message,
-  );
+  }) => _channelsRepository.updateChannel(channelId, channelType, data, message: message);
 
   /// Partially updates a channel.
   ///
@@ -1441,23 +1484,27 @@ class StreamChatClient {
     return res;
   }
 
-  /// Returns a channel client with the given type, id and custom data.
+  /// Returns a channel client of [type] with the id [id].
+  ///
+  /// A channel that does not exist yet is created with [data] when it is
+  /// first queried. Without an [id], the channel is the one the members in
+  /// [data] identify.
   Channel channel(
     String type, {
     String? id,
-    Map<String, Object?>? custom,
+    CreateChannelData? data,
   }) {
     if (id != null && state.channels.containsKey('$type:$id')) {
       return state.channels['$type:$id']!;
     }
-    return Channel(this, type, id, custom: custom);
+    return Channel(this, type, id, data: data);
   }
 
-  /// Creates a new channel
-  Future<ChannelState> createChannel(
+  /// Creates a channel without fetching its messages, members or watchers.
+  Future<Result<ChannelStateResponse>> createChannel(
     String channelType, {
     String? channelId,
-    Map<String, Object?>? channelData,
+    CreateChannelData? channelData,
   }) => queryChannel(
     channelType,
     channelId: channelId,
@@ -1465,12 +1512,12 @@ class StreamChatClient {
     channelData: channelData,
   );
 
-  /// watches the provided channel
-  /// Creates first if not yet created
-  Future<ChannelState> watchChannel(
+  /// Fetches the state of a channel and starts watching it, creating the
+  /// channel first if it does not exist.
+  Future<Result<ChannelStateResponse>> watchChannel(
     String channelType, {
     String? channelId,
-    Map<String, Object?>? channelData,
+    CreateChannelData? channelData,
   }) => queryChannel(
     channelType,
     channelId: channelId,
@@ -1478,19 +1525,22 @@ class StreamChatClient {
     channelData: channelData,
   );
 
-  /// Query the API, get messages, members or other channel fields
-  /// Creates the channel first if not yet created
-  Future<ChannelState> queryChannel(
+  /// Fetches the state of a channel, creating the channel first if it does
+  /// not exist.
+  ///
+  /// Without a [channelId], the channel is the one the members in
+  /// [channelData] identify.
+  Future<Result<ChannelStateResponse>> queryChannel(
     String channelType, {
     bool state = true,
     bool watch = false,
     bool presence = false,
     String? channelId,
-    Map<String, Object?>? channelData,
+    CreateChannelData? channelData,
     PaginationParams? messagesPagination,
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
-  }) => _chatApi.channel.queryChannel(
+  }) => _channelsRepository.getOrCreateChannel(
     channelType,
     channelId: channelId,
     channelData: channelData,
@@ -1502,15 +1552,18 @@ class StreamChatClient {
     watchersPagination: watchersPagination,
   );
 
-  /// Query channel members
-  Future<QueryMembersResponse> queryMembers(
+  /// Fetches the members of a channel that match [filter], ordered by [sort].
+  ///
+  /// Without a [channelId], the channel is the one whose members are
+  /// [members].
+  Future<Result<QueryMembersResponse>> queryMembers(
     String channelType, {
     MemberFilter? filter,
     String? channelId,
     List<Member>? members,
     List<MemberSort>? sort,
     PaginationParams? pagination,
-  }) => _chatApi.general.queryMembers(
+  }) => _channelsRepository.queryMembers(
     channelType,
     channelId: channelId,
     filter: filter,
@@ -1556,17 +1609,18 @@ class StreamChatClient {
     channelType,
   );
 
-  /// Removes all messages from the channel up to [truncatedAt] or now if
-  /// [truncatedAt] is not provided.
-  /// If [skipPush] is true, no push notification will be sent.
-  /// [Message] is the system message that will be sent to the channel.
-  Future<EmptyResponse> truncateChannel(
+  /// Removes the messages of a channel.
+  ///
+  /// The messages up to [truncatedAt] are removed, or all of them when it is
+  /// null. A [message] is sent to the channel as a system message, and
+  /// [skipPush] sends it without a push notification.
+  Future<Result<TruncateChannelResponse>> truncateChannel(
     String channelId,
     String channelType, {
     Message? message,
     bool? skipPush,
     DateTime? truncatedAt,
-  }) => _chatApi.channel.truncateChannel(
+  }) => _channelsRepository.truncateChannel(
     channelId,
     channelType,
     message: message,
@@ -1574,70 +1628,66 @@ class StreamChatClient {
     truncatedAt: truncatedAt,
   );
 
-  /// Accept invitation to the channel
-  Future<AcceptInviteResponse> acceptChannelInvite(
+  /// Accepts the current user's invite to a channel.
+  ///
+  /// A [message] is sent to the channel as a system message.
+  Future<Result<UpdateChannelResponse>> acceptChannelInvite(
     String channelId,
     String channelType, {
     Message? message,
-  }) => _chatApi.channel.acceptChannelInvite(
-    channelId,
-    channelType,
-    message: message,
-  );
+  }) => _channelsRepository.acceptInvite(channelId, channelType, message: message);
 
-  /// Reject invitation to the channel
-  Future<RejectInviteResponse> rejectChannelInvite(
+  /// Rejects the current user's invite to a channel.
+  ///
+  /// A [message] is sent to the channel as a system message.
+  Future<Result<UpdateChannelResponse>> rejectChannelInvite(
     String channelId,
     String channelType, {
     Message? message,
-  }) => _chatApi.channel.rejectChannelInvite(
-    channelId,
-    channelType,
-    message: message,
-  );
+  }) => _channelsRepository.rejectInvite(channelId, channelType, message: message);
 
-  /// Add members to the channel
-  Future<AddMembersResponse> addChannelMembers(
+  /// Adds [members] to a channel.
+  ///
+  /// A [message] is sent to the channel as a system message.
+  ///
+  /// The new members do not see the messages sent before [hideHistoryBefore],
+  /// or any earlier message when [hideHistory] is true. A [hideHistoryBefore]
+  /// takes precedence over [hideHistory].
+  Future<Result<UpdateChannelResponse>> addChannelMembers(
     String channelId,
     String channelType,
-    List<String> memberIds, {
+    List<ChannelMemberData> members, {
     Message? message,
     bool hideHistory = false,
     DateTime? hideHistoryBefore,
-  }) => _chatApi.channel.addMembers(
+  }) => _channelsRepository.addMembers(
     channelId,
     channelType,
-    memberIds,
+    members,
     message: message,
     hideHistory: hideHistory,
     hideHistoryBefore: hideHistoryBefore,
   );
 
-  /// Remove members from the channel
-  Future<RemoveMembersResponse> removeChannelMembers(
+  /// Removes the users with the ids [memberIds] from a channel.
+  ///
+  /// A [message] is sent to the channel as a system message.
+  Future<Result<UpdateChannelResponse>> removeChannelMembers(
     String channelId,
     String channelType,
     List<String> memberIds, {
     Message? message,
-  }) => _chatApi.channel.removeMembers(
-    channelId,
-    channelType,
-    memberIds,
-    message: message,
-  );
+  }) => _channelsRepository.removeMembers(channelId, channelType, memberIds, message: message);
 
-  /// Invite members to the channel
-  Future<InviteMembersResponse> inviteChannelMembers(
+  /// Invites [members] into a channel.
+  ///
+  /// A [message] is sent to the channel as a system message.
+  Future<Result<UpdateChannelResponse>> inviteChannelMembers(
     String channelId,
     String channelType,
-    List<String> memberIds, {
+    List<ChannelMemberData> members, {
     Message? message,
-  }) => _chatApi.channel.inviteChannelMembers(
-    channelId,
-    channelType,
-    memberIds,
-    message: message,
-  );
+  }) => _channelsRepository.inviteMembers(channelId, channelType, members, message: message);
 
   /// Stop watching the channel
   Future<EmptyResponse> stopChannelWatching(

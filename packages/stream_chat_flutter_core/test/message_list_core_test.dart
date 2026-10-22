@@ -173,6 +173,14 @@ void main() {
       when(() => mockChannel.state.messages).thenReturn(messages);
       when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value(messages));
       when(() => mockChannel.state.messages).thenReturn(messages);
+      when(
+        () => mockChannel.query(
+          messagesPagination: any(named: 'messagesPagination'),
+          preferOffline: any(named: 'preferOffline'),
+        ),
+      ).thenAnswer(
+        (_) async => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
+      );
 
       await tester.pumpWidget(
         StreamChannel(
@@ -308,7 +316,9 @@ void main() {
           preferOffline: any(named: 'preferOffline'),
           watchersPagination: any(named: 'watchersPagination'),
         ),
-      ).thenAnswer((_) async => const ChannelState());
+      ).thenAnswer(
+        (_) async => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
+      );
 
       const messages = <Message>[];
       when(() => mockChannel.state.messagesStream).thenAnswer((_) => Stream.value(messages));
@@ -466,7 +476,9 @@ void main() {
           preferOffline: any(named: 'preferOffline'),
           watchersPagination: any(named: 'watchersPagination'),
         ),
-      ).thenAnswer((_) async => const ChannelState());
+      ).thenAnswer(
+        (_) async => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
+      );
 
       await tester.pumpWidget(
         Directionality(

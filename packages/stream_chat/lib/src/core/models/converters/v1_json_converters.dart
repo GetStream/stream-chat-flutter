@@ -4,16 +4,21 @@ import 'package:stream_core/stream_core.dart' show StreamDateTimeConverter;
 
 import '../../util/serializer.dart';
 import '../action.dart';
+import '../channel_config.dart';
 import '../channel_model.dart';
+import '../chat_preferences.dart';
+import '../command.dart';
 import '../device.dart';
 import '../draft.dart';
 import '../location.dart';
+import '../member.dart';
 import '../message.dart';
 import '../message_reminder.dart';
 import '../moderation.dart';
 import '../poll.dart';
 import '../poll_option.dart';
 import '../poll_vote.dart';
+import '../push_level.dart';
 import '../push_provider.dart';
 import '../reaction.dart';
 import '../reaction_group.dart';
@@ -70,7 +75,7 @@ class LocationV1JsonConverter implements JsonConverter<Location, Map<String, dyn
   Location fromJson(Map<String, dynamic> json) => Location(
     channelCid: json['channel_cid'] as String?,
     channel: switch (json['channel']) {
-      final Map<String, dynamic> channel => ChannelModel.fromJson(channel),
+      final Map<String, dynamic> channel => _channelModelFromV1Json(channel),
       _ => null,
     },
     messageId: json['message_id'] as String?,
@@ -95,6 +100,221 @@ class LocationV1JsonConverter implements JsonConverter<Location, Map<String, dyn
     if (location.endAt case final endAt?) 'end_at': endAt.toIso8601String(),
   };
 }
+
+/// Converts a [ChannelModel] to and from its v1 keys.
+///
+/// [fromJson] reads the custom data from the root of the v1 map, beside the
+/// known keys; the fields the API's channel declares but the model leaves out,
+/// such as `hide_messages_before`, are not custom data. [toJson] writes the
+/// id, type, frozen flag, cooldown and custom data, each custom entry at the
+/// root unless it is named like a known key.
+// TODO(openapi-migration): remove when WebSocket payloads decode as v2
+@internal
+class ChannelModelV1JsonConverter implements JsonConverter<ChannelModel, Map<String, dynamic>> {
+  /// Creates a new [ChannelModelV1JsonConverter].
+  const ChannelModelV1JsonConverter();
+
+  @override
+  ChannelModel fromJson(Map<String, dynamic> json) => _channelModelFromV1Json(json);
+
+  @override
+  Map<String, dynamic> toJson(ChannelModel channel) => Serializer.moveFromExtraDataToRoot(
+    {
+      'id': channel.id,
+      'type': channel.type,
+      'frozen': channel.frozen,
+      'cooldown': channel.cooldown,
+      'extra_data': channel.custom,
+    },
+    topLevelFields: _channelV1Keys,
+  );
+}
+
+ChannelModel _channelModelFromV1Json(Map<String, dynamic> json) {
+  final data = Serializer.moveToExtraDataFromRoot(json, _channelV1Keys);
+  return ChannelModel(
+    id: data['id'] as String?,
+    type: data['type'] as String?,
+    cid: data['cid'] as String?,
+    ownCapabilities: (data['own_capabilities'] as List<dynamic>?)
+        ?.map((it) => ChannelCapability(it as String))
+        .toList(),
+    config: channelConfigFromV1Json(data['config'] as Map<String, dynamic>?),
+    createdBy: switch (data['created_by']) {
+      final Map<String, dynamic> user => User.fromJson(user),
+      _ => null,
+    },
+    frozen: data['frozen'] as bool? ?? false,
+    lastMessageAt: _lastMessageAtOrNull(data['last_message_at']),
+    createdAt: _dateTimeOrNull(data['created_at']),
+    updatedAt: _dateTimeOrNull(data['updated_at']),
+    deletedAt: _dateTimeOrNull(data['deleted_at']),
+    memberCount: (data['member_count'] as num?)?.toInt() ?? 0,
+    members: membersFromV1Json(data['members'] as List<dynamic>?),
+    custom: data['extra_data'] as Map<String, dynamic>? ?? const {},
+    team: data['team'] as String?,
+    cooldown: (data['cooldown'] as num?)?.toInt() ?? 0,
+    disabled: data['disabled'] as bool?,
+    hidden: data['hidden'] as bool?,
+    muted: data['muted'] as bool?,
+    blocked: data['blocked'] as bool?,
+    truncatedAt: _dateTimeOrNull(data['truncated_at']),
+    messageCount: (data['message_count'] as num?)?.toInt(),
+    filterTags: (data['filter_tags'] as List<dynamic>?)?.map((it) => it as String).toList(),
+    truncatedBy: switch (data['truncated_by']) {
+      final Map<String, dynamic> user => User.fromJson(user),
+      _ => null,
+    },
+    autoTranslationEnabled: data['auto_translation_enabled'] as bool?,
+    autoTranslationLanguage: data['auto_translation_language'] as String?,
+  );
+}
+
+// The keys a channel's v1 map carries beside its custom data: the fields the
+// API's channel declares.
+const _channelV1Keys = [
+  'auto_translation_enabled',
+  'auto_translation_language',
+  'blocked',
+  'cid',
+  'config',
+  'cooldown',
+  'created_at',
+  'created_by',
+  'deleted_at',
+  'disabled',
+  'filter_tags',
+  'frozen',
+  'hidden',
+  'hide_messages_before',
+  'id',
+  'last_message_at',
+  'member_count',
+  'members',
+  'message_count',
+  'mute_expires_at',
+  'muted',
+  'own_capabilities',
+  'team',
+  'truncated_at',
+  'truncated_by',
+  'type',
+  'updated_at',
+];
+
+/// Reads a [ChannelConfig] from its v1 keys, or the default configuration
+/// when there is none.
+// TODO(openapi-migration): remove when WebSocket payloads decode as v2
+@internal
+ChannelConfig channelConfigFromV1Json(Map<String, dynamic>? json) =>
+    json == null ? ChannelConfig() : _channelConfigFromV1Json(json);
+
+ChannelConfig _channelConfigFromV1Json(Map<String, dynamic> json) => ChannelConfig(
+  automod: json['automod'] as String? ?? 'flag',
+  commands: [
+    for (final command in json['commands'] as List<dynamic>? ?? const [])
+      Command.fromJson(command as Map<String, dynamic>),
+  ],
+  connectEvents: json['connect_events'] as bool? ?? false,
+  createdAt: _dateTimeOrNull(json['created_at']),
+  updatedAt: _dateTimeOrNull(json['updated_at']),
+  maxMessageLength: (json['max_message_length'] as num?)?.toInt() ?? 0,
+  messageRetention: json['message_retention'] as String? ?? '',
+  mutes: json['mutes'] as bool? ?? false,
+  reactions: json['reactions'] as bool? ?? false,
+  readEvents: json['read_events'] as bool? ?? false,
+  replies: json['replies'] as bool? ?? false,
+  search: json['search'] as bool? ?? false,
+  polls: json['polls'] as bool? ?? false,
+  pushLevel: switch (json['push_level']) {
+    final String pushLevel => PushLevel(pushLevel),
+    _ => null,
+  },
+  pushNotifications: json['push_notifications'] as bool? ?? true,
+  chatPreferences: switch (json['chat_preferences']) {
+    final Map<String, dynamic> chatPreferences => ChatPreferences.fromJson(chatPreferences),
+    _ => null,
+  },
+  typingEvents: json['typing_events'] as bool? ?? false,
+  uploads: json['uploads'] as bool? ?? false,
+  urlEnrichment: json['url_enrichment'] as bool? ?? false,
+  skipLastMsgUpdateForSystemMsgs: json['skip_last_msg_update_for_system_msgs'] as bool? ?? false,
+  userMessageReminders: json['user_message_reminders'] as bool? ?? false,
+  markMessagesPending: json['mark_messages_pending'] as bool? ?? false,
+  deliveryEvents: json['delivery_events'] as bool? ?? false,
+  sharedLocations: json['shared_locations'] as bool? ?? false,
+);
+
+/// Reads a [Member] from its v1 keys, or null when there is none.
+///
+/// Custom data sits at the root of the v1 map, beside the known keys. `role`
+/// is not custom data and is left out.
+// TODO(openapi-migration): remove when WebSocket payloads decode as v2
+@internal
+Member? memberFromV1Json(Map<String, dynamic>? json) => json == null ? null : _memberFromV1Json(json);
+
+/// Reads a list of [Member]s from their v1 keys, as [memberFromV1Json] reads
+/// each one.
+// TODO(openapi-migration): remove when WebSocket payloads decode as v2
+@internal
+List<Member>? membersFromV1Json(List<dynamic>? json) =>
+    json?.map((member) => _memberFromV1Json(member as Map<String, dynamic>)).toList();
+
+Member _memberFromV1Json(Map<String, dynamic> json) {
+  final data = Serializer.moveToExtraDataFromRoot(json, _memberV1Keys);
+  return Member(
+    user: switch (data['user']) {
+      final Map<String, dynamic> user => User.fromJson(user),
+      _ => null,
+    },
+    inviteAcceptedAt: _dateTimeOrNull(data['invite_accepted_at']),
+    inviteRejectedAt: _dateTimeOrNull(data['invite_rejected_at']),
+    invited: data['invited'] as bool? ?? false,
+    channelRole: data['channel_role'] as String?,
+    userId: data['user_id'] as String?,
+    isModerator: data['is_moderator'] as bool? ?? false,
+    createdAt: _dateTimeOrNull(data['created_at']),
+    updatedAt: _dateTimeOrNull(data['updated_at']),
+    banned: data['banned'] as bool? ?? false,
+    banExpires: _dateTimeOrNull(data['ban_expires']),
+    shadowBanned: data['shadow_banned'] as bool? ?? false,
+    pinnedAt: _dateTimeOrNull(data['pinned_at']),
+    archivedAt: _dateTimeOrNull(data['archived_at']),
+    deletedMessages: (data['deleted_messages'] as List<dynamic>?)?.map((it) => it as String).toList() ?? const [],
+    custom: data['extra_data'] as Map<String, dynamic>? ?? const {},
+    notificationsMuted: data['notifications_muted'] as bool?,
+    status: data['status'] as String?,
+    banFromFutureChannels: data['ban_from_future_channels'] as bool?,
+    futureChannelBanExpires: _dateTimeOrNull(data['future_channel_ban_expires']),
+    deletedAt: _dateTimeOrNull(data['deleted_at']),
+  );
+}
+
+// The keys a member's v1 map carries beside its custom data: the fields the
+// API's member declares.
+const _memberV1Keys = [
+  'archived_at',
+  'ban_expires',
+  'ban_from_future_channels',
+  'banned',
+  'channel_role',
+  'created_at',
+  'deleted_at',
+  'deleted_messages',
+  'future_channel_ban_expires',
+  'invite_accepted_at',
+  'invite_rejected_at',
+  'invited',
+  'is_moderator',
+  'notifications_muted',
+  'pinned_at',
+  'role',
+  'shadow_banned',
+  'status',
+  'updated_at',
+  'user',
+  'user_id',
+];
 
 /// Reads a [Reaction] from its v1 keys.
 ///
@@ -154,7 +374,7 @@ MessageReminder? messageReminderFromV1Json(Map<String, dynamic>? json) {
   return MessageReminder(
     channelCid: json['channel_cid'] as String,
     channel: switch (json['channel']) {
-      final Map<String, dynamic> channel => ChannelModel.fromJson(channel),
+      final Map<String, dynamic> channel => _channelModelFromV1Json(channel),
       _ => null,
     },
     messageId: json['message_id'] as String,
@@ -181,7 +401,7 @@ Thread? threadFromV1Json(Map<String, dynamic>? json) {
   return Thread(
     activeParticipantCount: (json['active_participant_count'] as num?)?.toInt(),
     channel: switch (json['channel']) {
-      final Map<String, dynamic> channel => ChannelModel.fromJson(channel),
+      final Map<String, dynamic> channel => _channelModelFromV1Json(channel),
       _ => null,
     },
     channelCid: json['channel_cid'] as String,
@@ -332,6 +552,16 @@ ReactionGroup _reactionGroupFromV1Json(Map<String, dynamic> json) => ReactionGro
 const _dateTime = StreamDateTimeConverter();
 
 DateTime? _dateTimeOrNull(Object? json) => json == null ? null : _dateTime.fromJson(json);
+
+// A channel's last message date, or null for Go's zero date (year 1), which
+// v1 sends for a channel without messages.
+//
+// v2 sends the Unix epoch instead, which the channels mapper reads as null
+// too, so the REST and WebSocket paths give the same channel.
+DateTime? _lastMessageAtOrNull(Object? json) => switch (_dateTimeOrNull(json)) {
+  final date? when date.year > 1 => date,
+  _ => null,
+};
 
 // Reads the keys directly rather than through the generated group type, whose members require `app_pk`: a payload
 // without it should not fail the whole message.

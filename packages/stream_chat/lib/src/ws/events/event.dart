@@ -123,9 +123,11 @@ class Event extends WsEvent {
   final PollVote? pollVote;
 
   /// The channel sent with the event
+  @ChannelModelV1JsonConverter()
   final ChannelModel? channel;
 
   /// The member sent with the event
+  @JsonKey(fromJson: memberFromV1Json)
   final Member? member;
 
   /// The reaction sent with the event

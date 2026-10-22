@@ -21,8 +21,11 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
   unreadChannels: (json['unread_channels'] as num?)?.toInt(),
   reaction: reactionFromV1Json(json['reaction'] as Map<String, dynamic>?),
   online: json['online'] as bool?,
-  channel: json['channel'] == null ? null : ChannelModel.fromJson(json['channel'] as Map<String, dynamic>),
-  member: json['member'] == null ? null : Member.fromJson(json['member'] as Map<String, dynamic>),
+  channel: _$JsonConverterFromJson<Map<String, dynamic>, ChannelModel>(
+    json['channel'],
+    const ChannelModelV1JsonConverter().fromJson,
+  ),
+  member: memberFromV1Json(json['member'] as Map<String, dynamic>?),
   channelId: json['channel_id'] as String?,
   channelType: json['channel_type'] as String?,
   channelLastMessageAt: json['channel_last_message_at'] == null
@@ -60,6 +63,9 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
   extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
   isLocal: json['is_local'] as bool? ?? false,
 );
+
+Value? _$JsonConverterFromJson<Json, Value>(Object? json, Value? Function(Json json) fromJson) =>
+    json == null ? null : fromJson(json as Json);
 
 const _$AITypingStateEnumMap = {
   AITypingState.idle: 'AI_STATE_IDLE',

@@ -1,17 +1,32 @@
 import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
 
 import '../../open_api/api.dart' as api;
+import '../core/api/requests.dart';
+import '../core/models/channel_state.dart';
+import '../core/models/member.dart';
+import '../core/models/message.dart';
+import '../core/models/request/channel_member_data.dart';
+import '../core/models/request/create_channel_data.dart';
 import '../core/models/request/message_delivery.dart';
+import '../core/models/request/update_channel_data.dart';
+import '../core/models/response/channel_state_response.dart';
 import '../core/models/response/delete_channel_response.dart';
 import '../core/models/response/event_response.dart';
 import '../core/models/response/hide_channel_response.dart';
 import '../core/models/response/mark_delivered_response.dart';
 import '../core/models/response/mark_read_response.dart';
+import '../core/models/response/query_channels_response.dart';
+import '../core/models/response/query_members_response.dart';
 import '../core/models/response/show_channel_response.dart';
+import '../core/models/response/truncate_channel_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
+import '../core/models/response/update_channel_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
 import 'mapper/channels_mapper.dart';
+import 'mapper/filter_mapper.dart';
+import 'mapper/messages_mapper.dart';
 import 'mapper/result_mapper.dart';
+import 'mapper/sort_mapper.dart';
 
 /// Repository dedicated to channel operations.
 class ChannelsRepository {
@@ -19,6 +34,217 @@ class ChannelsRepository {
   const ChannelsRepository(this._api);
 
   final api.DefaultApi _api;
+
+  /// Replaces all of a channel's [data].
+  Future<Result<UpdateChannelResponse>> updateChannel(
+    String channelId,
+    String channelType,
+    UpdateChannelData data, {
+    Message? message,
+  }) => _updateChannel(
+    channelId,
+    channelType,
+    api.UpdateChannelRequest(data: data.toRequest(), message: message?.toRequest()),
+  );
+
+  /// Adds [members] to a channel.
+  ///
+  /// A [hideHistoryBefore] takes precedence over [hideHistory].
+  Future<Result<UpdateChannelResponse>> addMembers(
+    String channelId,
+    String channelType,
+    List<ChannelMemberData> members, {
+    Message? message,
+    bool hideHistory = false,
+    DateTime? hideHistoryBefore,
+  }) => _updateChannel(
+    channelId,
+    channelType,
+    api.UpdateChannelRequest(
+      addMembers: members.map((member) => member.toRequest()).toList(),
+      message: message?.toRequest(),
+      hideHistory: hideHistoryBefore == null ? hideHistory : null,
+      hideHistoryBefore: hideHistoryBefore,
+    ),
+  );
+
+  /// Removes the users with the ids [memberIds] from a channel.
+  Future<Result<UpdateChannelResponse>> removeMembers(
+    String channelId,
+    String channelType,
+    List<String> memberIds, {
+    Message? message,
+  }) => _updateChannel(
+    channelId,
+    channelType,
+    api.UpdateChannelRequest(removeMembers: memberIds, message: message?.toRequest()),
+  );
+
+  /// Invites [members] into a channel.
+  Future<Result<UpdateChannelResponse>> inviteMembers(
+    String channelId,
+    String channelType,
+    List<ChannelMemberData> members, {
+    Message? message,
+  }) => _updateChannel(
+    channelId,
+    channelType,
+    api.UpdateChannelRequest(
+      invites: members.map((member) => member.toRequest()).toList(),
+      message: message?.toRequest(),
+    ),
+  );
+
+  /// Accepts the current user's invite to a channel.
+  Future<Result<UpdateChannelResponse>> acceptInvite(
+    String channelId,
+    String channelType, {
+    Message? message,
+  }) => _updateChannel(
+    channelId,
+    channelType,
+    api.UpdateChannelRequest(acceptInvite: true, message: message?.toRequest()),
+  );
+
+  /// Rejects the current user's invite to a channel.
+  Future<Result<UpdateChannelResponse>> rejectInvite(
+    String channelId,
+    String channelType, {
+    Message? message,
+  }) => _updateChannel(
+    channelId,
+    channelType,
+    api.UpdateChannelRequest(rejectInvite: true, message: message?.toRequest()),
+  );
+
+  Future<Result<UpdateChannelResponse>> _updateChannel(
+    String channelId,
+    String channelType,
+    api.UpdateChannelRequest request,
+  ) async {
+    final result = await _api.updateChannel(type: channelType, id: channelId, updateChannelRequest: request);
+    return result.map((response) => response.toModel());
+  }
+
+  /// Removes the messages of a channel up to [truncatedAt], or all of them.
+  Future<Result<TruncateChannelResponse>> truncateChannel(
+    String channelId,
+    String channelType, {
+    Message? message,
+    bool? skipPush,
+    DateTime? truncatedAt,
+  }) async {
+    final result = await _api.truncateChannel(
+      type: channelType,
+      id: channelId,
+      truncateChannelRequest: api.TruncateChannelRequest(
+        message: message?.toRequest(),
+        skipPush: skipPush,
+        truncatedAt: truncatedAt,
+      ),
+    );
+
+    return result.map((response) => response.toModel());
+  }
+
+  /// Fetches the state of a channel, creating the channel first if it does
+  /// not exist.
+  ///
+  /// Without a [channelId], the channel is the one the members in
+  /// [channelData] identify.
+  Future<Result<ChannelStateResponse>> getOrCreateChannel(
+    String channelType, {
+    String? channelId,
+    CreateChannelData? channelData,
+    bool state = true,
+    bool watch = false,
+    bool presence = false,
+    PaginationParams? messagesPagination,
+    PaginationParams? membersPagination,
+    PaginationParams? watchersPagination,
+  }) async {
+    final request = api.ChannelGetOrCreateRequest(
+      data: channelData?.toRequest(),
+      state: state,
+      watch: watch,
+      presence: presence,
+      messages: messagesPagination?.toMessagePaginationParams(),
+      members: membersPagination?.toPaginationParams(),
+      watchers: watchersPagination?.toPaginationParams(),
+    );
+
+    final result = switch (channelId) {
+      final id? => await _api.getOrCreateChannel(type: channelType, id: id, channelGetOrCreateRequest: request),
+      null => await _api.getOrCreateDistinctChannel(type: channelType, channelGetOrCreateRequest: request),
+    };
+    return result.map((response) => response.toModel());
+  }
+
+  /// Fetches the channels that match [filter], ordered by [sort], or those of
+  /// the [predefinedFilter].
+  Future<Result<QueryChannelsResponse>> queryChannels({
+    ChannelFilter? filter,
+    List<ChannelSort>? sort,
+    String? predefinedFilter,
+    Map<String, Object?>? filterValues,
+    Map<String, Object?>? sortValues,
+    int? memberLimit,
+    int? messageLimit,
+    bool state = true,
+    bool watch = true,
+    bool presence = false,
+    PaginationParams paginationParams = const PaginationParams(),
+  }) async {
+    final result = await _api.queryChannels(
+      queryChannelsRequest: api.QueryChannelsRequest(
+        filterConditions: filter?.toRequest(),
+        sort: sort?.map((sort) => sort.toRequest()).toList(),
+        predefinedFilter: predefinedFilter,
+        filterValues: filterValues,
+        sortValues: sortValues,
+        memberLimit: memberLimit,
+        messageLimit: messageLimit,
+        state: state,
+        watch: watch,
+        presence: presence,
+        limit: paginationParams.limit,
+        offset: paginationParams.offset,
+      ),
+    );
+
+    return result.map((response) => response.toModel());
+  }
+
+  /// Fetches the members of a channel that match [filter], ordered by [sort].
+  ///
+  /// Without a [channelId], the channel is the one whose members are
+  /// [members].
+  Future<Result<QueryMembersResponse>> queryMembers(
+    String channelType, {
+    MemberFilter? filter,
+    String? channelId,
+    List<Member>? members,
+    List<MemberSort>? sort,
+    PaginationParams? pagination,
+  }) async {
+    final result = await _api.queryMembers(
+      payload: api.QueryMembersPayload(
+        type: channelType,
+        id: channelId,
+        members: channelId == null ? members?.map((member) => member.toRequest()).toList() : null,
+        filterConditions: filter?.toRequest() ?? const {},
+        sort: sort?.map((sort) => sort.toRequest()).toList(),
+        limit: pagination?.limit,
+        offset: pagination?.offset,
+        createdAtAfter: pagination?.createdAtAfter,
+        createdAtAfterOrEqual: pagination?.createdAtAfterOrEqual,
+        createdAtBefore: pagination?.createdAtBefore,
+        createdAtBeforeOrEqual: pagination?.createdAtBeforeOrEqual,
+      ),
+    );
+
+    return result.map((response) => response.toModel());
+  }
 
   /// Partially updates a channel.
   ///

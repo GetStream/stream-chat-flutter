@@ -542,7 +542,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       // then re-scan against the fresh list — `messages` is reassigned in
       // `_buildListView` on each emission, so an index captured before the
       // await would be stale.
-      await streamChannel!.loadChannelAtMessage(messageId);
+      if (await streamChannel!.loadChannelAtMessage(messageId) case Failure()) return false;
       if (!mounted) return false;
       await WidgetsBinding.instance.endOfFrame;
       if (!mounted) return false;

@@ -102,6 +102,15 @@ void main() {
         preferOffline: any(named: 'preferOffline'),
       ),
     ).thenAnswer((_) async => const Result.success(GetRepliesResponse(duration: '0ms', messages: [])));
+    // Channel page loader called when the list paginates.
+    when(
+      () => channel.query(
+        messagesPagination: any(named: 'messagesPagination'),
+        preferOffline: any(named: 'preferOffline'),
+      ),
+    ).thenAnswer(
+      (_) async => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
+    );
   });
 
   // Default: opened with nothing pre-existing unread, so the
@@ -449,7 +458,14 @@ void main() {
             watchersPagination: any(named: 'watchersPagination'),
             preferOffline: any(named: 'preferOffline'),
           ),
-        ).thenAnswer((_) async => ChannelState(messages: [parent, reply]));
+        ).thenAnswer(
+          (_) async => Result.success(
+            ChannelStateResponse(
+              duration: '0ms',
+              channelState: ChannelState(messages: [parent, reply]),
+            ),
+          ),
+        );
 
         await pumpMessageList(
           tester,
@@ -643,7 +659,14 @@ void main() {
             preferOffline: any(named: 'preferOffline'),
             messagesPagination: any(named: 'messagesPagination'),
           ),
-        ).thenAnswer((_) async => const ChannelState(messages: []));
+        ).thenAnswer(
+          (_) async => const Result.success(
+            ChannelStateResponse(
+              duration: '0ms',
+              channelState: ChannelState(messages: []),
+            ),
+          ),
+        );
 
         await pumpMessageList(
           tester,

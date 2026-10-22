@@ -401,7 +401,7 @@ class ChannelStateMutations {
     _state.updateChannelState(
       _state.channelState.copyWith(
         channel: _state.channelState.channel?.merge(channel),
-        members: channel.members,
+        members: channel.members ?? _state.channelState.members,
       ),
     );
   }
@@ -410,11 +410,12 @@ class ChannelStateMutations {
   ///
   /// A null count leaves the currently stored value unchanged.
   void onChannelCounts({int? memberCount, int? messageCount}) {
+    final channel = _state.channelState.channel;
     _state.updateChannelState(
       _state.channelState.copyWith(
-        channel: _state.channelState.channel?.copyWith(
-          memberCount: memberCount,
-          messageCount: messageCount,
+        channel: channel?.copyWith(
+          memberCount: memberCount ?? channel.memberCount,
+          messageCount: messageCount ?? channel.messageCount,
         ),
       ),
     );
@@ -508,7 +509,7 @@ class ChannelStateMutations {
           watcher,
           ...?existingWatchers?.where((user) => user.id != watcher.id),
         ],
-        watcherCount: watcherCount,
+        watcherCount: watcherCount ?? _state.channelState.watcherCount,
       ),
     );
   }

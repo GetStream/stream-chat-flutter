@@ -143,28 +143,24 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
       this.limit * defaultInitialPagedLimitMultiplier,
       _kDefaultBackendPaginationLimit,
     );
-    try {
-      final memberResponse = await channel.queryMembers(
-        filter: _activeFilter,
-        sort: _activeSort,
-        pagination: PaginationParams(limit: limit),
-      );
+    final result = await channel.queryMembers(
+      filter: _activeFilter,
+      sort: _activeSort,
+      pagination: PaginationParams(limit: limit),
+    );
 
-      if (isStale(generation)) return;
-      final members = memberResponse.members;
-      final nextKey = members.length < limit ? null : members.length;
-      value = PagedValue(
-        items: members.where((it) => it.user != null).toList(),
-        nextPageKey: nextKey,
-      );
-    } on StreamChatException catch (error) {
-      if (isStale(generation)) return;
-      value = PagedValue.error(error);
-    } catch (error) {
-      if (isStale(generation)) return;
-      final chatError = StreamClientException(message: 'Failed to load members', cause: error);
-      value = PagedValue.error(chatError);
-    }
+    if (isStale(generation)) return;
+    result.fold(
+      onSuccess: (response) {
+        final members = response.members;
+        final nextKey = members.length < limit ? null : members.length;
+        value = PagedValue(
+          items: members.where((it) => it.user != null).toList(),
+          nextPageKey: nextKey,
+        );
+      },
+      onFailure: (error, _) => value = PagedValue.error(_chatException(error, 'Failed to load members')),
+    );
   }
 
   @override
@@ -172,32 +168,29 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
     final generation = loadGeneration;
     final previousValue = value.asSuccess;
 
-    try {
-      final memberResponse = await channel.queryMembers(
-        filter: _activeFilter,
-        sort: _activeSort,
-        pagination: PaginationParams(limit: limit, offset: nextPageKey),
-      );
+    final result = await channel.queryMembers(
+      filter: _activeFilter,
+      sort: _activeSort,
+      pagination: PaginationParams(limit: limit, offset: nextPageKey),
+    );
 
-      // Drop the page if a newer search or clearResults() superseded it, so a
-      // stale page cannot repopulate the results.
-      if (isStale(generation)) return;
-      final members = memberResponse.members;
-      final previousItems = previousValue.items;
-      final newItems = previousItems + members;
-      final nextKey = members.length < limit ? null : newItems.length;
-      value = PagedValue(
-        items: newItems.where((it) => it.user != null).toList(),
-        nextPageKey: nextKey,
-      );
-    } on StreamChatException catch (error) {
-      if (isStale(generation)) return;
-      value = previousValue.copyWith(error: error);
-    } catch (error) {
-      if (isStale(generation)) return;
-      final chatError = StreamClientException(message: 'Failed to load more members', cause: error);
-      value = previousValue.copyWith(error: chatError);
-    }
+    // Drop the page if a newer search or clearResults() superseded it, so a
+    // stale page cannot repopulate the results.
+    if (isStale(generation)) return;
+    result.fold(
+      onSuccess: (response) {
+        final members = response.members;
+        final newItems = previousValue.items + members;
+        final nextKey = members.length < limit ? null : newItems.length;
+        value = PagedValue(
+          items: newItems.where((it) => it.user != null).toList(),
+          nextPageKey: nextKey,
+        );
+      },
+      onFailure: (error, _) {
+        value = previousValue.copyWith(error: _chatException(error, 'Failed to load more members'));
+      },
+    );
   }
 
   @override
@@ -217,4 +210,9 @@ class StreamMemberListController extends PagedValueNotifier<int, Member> with Se
       nextPageKey: members.length,
     );
   }
+
+  StreamChatException _chatException(Object error, String message) => switch (error) {
+    final StreamChatException error => error,
+    _ => StreamClientException(message: message, cause: error),
+  };
 }

@@ -2,15 +2,9 @@ import 'package:json_annotation/json_annotation.dart';
 import '../../client/client.dart';
 import '../../ws/events/event.dart';
 import '../models/banned_user.dart';
-import '../models/channel_model.dart';
-import '../models/channel_state.dart';
 import '../models/converters/v1_json_converters.dart';
 import '../models/location.dart';
-import '../models/member.dart';
-import '../models/message.dart';
-import '../models/predefined_filter.dart';
 import '../models/push_preference.dart';
-import '../models/read.dart';
 import '../models/user.dart';
 
 part 'responses.g.dart';
@@ -60,34 +54,6 @@ class SyncResponse extends _BaseResponse {
   static SyncResponse fromJson(Map<String, dynamic> json) => _$SyncResponseFromJson(json);
 }
 
-/// Model response for [StreamChatClient.queryChannels] api call
-@JsonSerializable(createToJson: false)
-class QueryChannelsResponse extends _BaseResponse {
-  /// List of channels state returned by the query
-  @JsonKey(defaultValue: [])
-  late List<ChannelState> channels;
-
-  /// The predefined filter the query named, as resolved for it.
-  ///
-  /// Null when the query named no predefined filter.
-  @JsonKey(name: 'predefined_filter')
-  PredefinedFilter? predefinedFilter;
-
-  /// Create a new instance from a json
-  static QueryChannelsResponse fromJson(Map<String, dynamic> json) => _$QueryChannelsResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.queryChannels] api call
-@JsonSerializable(createToJson: false)
-class QueryMembersResponse extends _BaseResponse {
-  /// List of channels state returned by the query
-  @JsonKey(defaultValue: [])
-  late List<Member> members;
-
-  /// Create a new instance from a json
-  static QueryMembersResponse fromJson(Map<String, dynamic> json) => _$QueryMembersResponseFromJson(json);
-}
-
 /// Model response for [StreamChatClient.queryUsers] api call
 @JsonSerializable(createToJson: false)
 class QueryUsersResponse extends _BaseResponse {
@@ -110,138 +76,11 @@ class QueryBannedUsersResponse extends _BaseResponse {
   static QueryBannedUsersResponse fromJson(Map<String, dynamic> json) => _$QueryBannedUsersResponseFromJson(json);
 }
 
-/// Model response for [Channel.update] api call
-@JsonSerializable(createToJson: false)
-class UpdateChannelResponse extends _BaseResponse {
-  /// Updated channel
-  late ChannelModel channel;
-
-  /// Channel members
-  List<Member>? members;
-
-  /// Message returned by the api call
-  Message? message;
-
-  /// Create a new instance from a json
-  static UpdateChannelResponse fromJson(Map<String, dynamic> json) => _$UpdateChannelResponseFromJson(json);
-}
-
-/// Model response for [Channel.inviteMembers] api call
-@JsonSerializable(createToJson: false)
-class InviteMembersResponse extends _BaseResponse {
-  /// Updated channel
-  late ChannelModel channel;
-
-  /// Channel members
-  @JsonKey(defaultValue: [])
-  late List<Member> members;
-
-  /// Message returned by the api call
-  Message? message;
-
-  /// Create a new instance from a json
-  static InviteMembersResponse fromJson(Map<String, dynamic> json) => _$InviteMembersResponseFromJson(json);
-}
-
-/// Model response for [Channel.removeMembers] api call
-@JsonSerializable(createToJson: false)
-class RemoveMembersResponse extends _BaseResponse {
-  /// Updated channel
-  late ChannelModel channel;
-
-  /// Channel members
-  @JsonKey(defaultValue: [])
-  late List<Member> members;
-
-  /// Message returned by the api call
-  Message? message;
-
-  /// Create a new instance from a json
-  static RemoveMembersResponse fromJson(Map<String, dynamic> json) => _$RemoveMembersResponseFromJson(json);
-}
-
-/// Model response for [Channel.addMembers] api call
-@JsonSerializable(createToJson: false)
-class AddMembersResponse extends _BaseResponse {
-  /// Updated channel
-  late ChannelModel channel;
-
-  /// Channel members
-  @JsonKey(defaultValue: [])
-  late List<Member> members;
-
-  /// Message returned by the api call
-  Message? message;
-
-  /// Create a new instance from a json
-  static AddMembersResponse fromJson(Map<String, dynamic> json) => _$AddMembersResponseFromJson(json);
-}
-
-/// Model response for [Channel.acceptInvite] api call
-@JsonSerializable(createToJson: false)
-class AcceptInviteResponse extends _BaseResponse {
-  /// Updated channel
-  late ChannelModel channel;
-
-  /// Channel members
-  @JsonKey(defaultValue: [])
-  late List<Member> members;
-
-  /// Message returned by the api call
-  Message? message;
-
-  /// Create a new instance from a json
-  static AcceptInviteResponse fromJson(Map<String, dynamic> json) => _$AcceptInviteResponseFromJson(json);
-}
-
-/// Model response for [Channel.rejectInvite] api call
-@JsonSerializable(createToJson: false)
-class RejectInviteResponse extends _BaseResponse {
-  /// Updated channel
-  late ChannelModel channel;
-
-  /// Channel members
-  @JsonKey(defaultValue: [])
-  late List<Member> members;
-
-  /// Message returned by the api call
-  Message? message;
-
-  /// Create a new instance from a json
-  static RejectInviteResponse fromJson(Map<String, dynamic> json) => _$RejectInviteResponseFromJson(json);
-}
-
 /// Model response for empty responses
 @JsonSerializable(createToJson: false)
 class EmptyResponse extends _BaseResponse {
   /// Create a new instance from a json
   static EmptyResponse fromJson(Map<String, dynamic> json) => _$EmptyResponseFromJson(json);
-}
-
-/// Model response for [Channel.query] api call
-@JsonSerializable(createToJson: false)
-class ChannelStateResponse extends _BaseResponse {
-  /// Updated channel
-  late ChannelModel channel;
-
-  /// List of messages returned by the api call
-  @JsonKey(defaultValue: [])
-  late List<Message> messages;
-
-  /// Channel members
-  @JsonKey(defaultValue: [])
-  late List<Member> members;
-
-  /// Number of users watching the channel
-  @JsonKey(defaultValue: 0)
-  late int watcherCount;
-
-  /// List of read states
-  @JsonKey(defaultValue: [])
-  late List<Read> read;
-
-  /// Create a new instance from a json
-  static ChannelStateResponse fromJson(Map<String, dynamic> json) => _$ChannelStateResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.setPushPreferences] api call

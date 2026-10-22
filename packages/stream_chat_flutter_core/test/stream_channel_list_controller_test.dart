@@ -447,6 +447,54 @@ void main() {
     expect(controller.value.isSuccess, isTrue);
   });
 
+  test('getChannel watches the channel and returns it', () async {
+    final channel = MockChannel();
+    when(() => client.channel('messaging', id: 'general')).thenReturn(channel);
+    when(channel.watch).thenAnswer(
+      (_) async => const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())),
+    );
+
+    final controller = StreamChannelListController(client: client);
+    final res = await controller.getChannel(id: 'general', type: 'messaging');
+
+    expect(res.getOrNull(), same(channel));
+    verify(channel.watch).called(1);
+  });
+
+  test('getChannel returns the failure from Channel.watch', () async {
+    const error = StreamClientException(message: 'boom');
+    final channel = MockChannel();
+    when(() => client.channel('messaging', id: 'general')).thenReturn(channel);
+    when(channel.watch).thenAnswer((_) async => const Result.failure(error));
+
+    final controller = StreamChannelListController(client: client);
+    final res = await controller.getChannel(id: 'general', type: 'messaging');
+
+    expect(res.exceptionOrNull(), error);
+  });
+
+  test('leaveChannel removes the current user from the channel', () async {
+    const response = UpdateChannelResponse(duration: '0ms', members: []);
+    final channel = MockChannel();
+    when(() => channel.removeMembers(['testUserId'])).thenAnswer((_) async => const Result.success(response));
+
+    final controller = StreamChannelListController(client: client);
+    final res = await controller.leaveChannel(channel);
+
+    expect(res.getOrNull(), response);
+  });
+
+  test('leaveChannel returns the failure from Channel.removeMembers', () async {
+    const error = StreamClientException(message: 'boom');
+    final channel = MockChannel();
+    when(() => channel.removeMembers(['testUserId'])).thenAnswer((_) async => const Result.failure(error));
+
+    final controller = StreamChannelListController(client: client);
+    final res = await controller.leaveChannel(channel);
+
+    expect(res.exceptionOrNull(), error);
+  });
+
   test('deleteChannel returns the failure from Channel.delete', () async {
     const error = StreamClientException(message: 'boom');
     final channel = MockChannel();

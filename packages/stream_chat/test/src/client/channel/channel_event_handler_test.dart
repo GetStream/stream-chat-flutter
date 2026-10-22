@@ -27,13 +27,6 @@ class FakeLocation extends Fake implements Location {}
 
 class FakeChannelPushPreference extends Fake implements ChannelPushPreference {}
 
-class FakeQueryMembersResponse extends Fake implements QueryMembersResponse {
-  FakeQueryMembersResponse(this.members);
-
-  @override
-  final List<Member> members;
-}
-
 void main() {
   late MockChannel channel;
   late MockStreamChatClient client;
@@ -676,7 +669,7 @@ void main() {
     test('user.banned refreshes the member before delegating', () async {
       when(
         () => channel.queryMembers(filter: any(named: 'filter')),
-      ).thenAnswer((_) async => FakeQueryMembersResponse([member]));
+      ).thenAnswer((_) async => Result.success(QueryMembersResponse(duration: '0.01ms', members: [member])));
 
       final event = Event(
         type: EventType.userBanned,
@@ -699,6 +692,28 @@ void main() {
       verify(() => mutations.onMemberBanned(member)).called(1);
     });
 
+    test('user.banned leaves the member as it is when the member query fails', () async {
+      when(
+        () => channel.queryMembers(filter: any(named: 'filter')),
+      ).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'boom')));
+
+      handler.handleEvent(Event(type: EventType.userBanned, cid: 'messaging:test', user: otherUser));
+      await Future<void>.value();
+
+      verifyNever(() => mutations.onMemberBanned(any()));
+    });
+
+    test('user.banned leaves the member as it is when the member query finds none', () async {
+      when(
+        () => channel.queryMembers(filter: any(named: 'filter')),
+      ).thenAnswer((_) async => const Result.success(QueryMembersResponse(duration: '0.01ms', members: [])));
+
+      handler.handleEvent(Event(type: EventType.userBanned, cid: 'messaging:test', user: otherUser));
+      await Future<void>.value();
+
+      verifyNever(() => mutations.onMemberBanned(any()));
+    });
+
     test('user.banned ignores app-level bans without a cid', () async {
       handler.handleEvent(Event(type: EventType.userBanned, user: otherUser));
       await Future<void>.value();
@@ -710,7 +725,7 @@ void main() {
     test('user.unbanned refreshes the member before delegating', () async {
       when(
         () => channel.queryMembers(filter: any(named: 'filter')),
-      ).thenAnswer((_) async => FakeQueryMembersResponse([member]));
+      ).thenAnswer((_) async => Result.success(QueryMembersResponse(duration: '0.01ms', members: [member])));
 
       final event = Event(
         type: EventType.userUnbanned,

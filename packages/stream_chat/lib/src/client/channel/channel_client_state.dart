@@ -68,7 +68,7 @@ class ChannelClientState {
     final existingWatchers = channelState.watchers ?? const <User>[];
     _channelState = channelState.copyWith(
       watchers: existingWatchers.where((user) => user.id != watcher.id).toList(),
-      watcherCount: watcherCount,
+      watcherCount: watcherCount ?? channelState.watcherCount,
     );
   }
 
@@ -301,15 +301,16 @@ class ChannelClientState {
   }
 
   /// Channel members list.
-  List<Member> get members =>
-      (_channelState.members ?? <Member>[]).map((e) => e.copyWith(user: _client.state.users[e.user!.id])).toList();
+  List<Member> get members => (_channelState.members ?? <Member>[])
+      .map((e) => e.copyWith(user: _client.state.users[e.user!.id] ?? e.user))
+      .toList();
 
   /// Channel members list as a stream.
   Stream<List<Member>> get membersStream =>
       CombineLatestStream.combine2<List<Member?>?, Map<String?, User?>, List<Member>>(
         channelStateStream.map((cs) => cs.members),
         _client.state.usersStream,
-        (members, users) => [...?members?.map((e) => e!.copyWith(user: users[e.user!.id]))],
+        (members, users) => [...?members?.map((e) => e!.copyWith(user: users[e.user!.id] ?? e.user))],
       ).distinct(const ListEquality().equals);
 
   /// Channel watcher count.
@@ -565,20 +566,14 @@ class ChannelClientState {
       key: (read) => read.user.id,
     );
 
-    _channelState = _channelState.copyWith(
-      messages: newMessages,
-      channel: _channelState.channel?.merge(updatedState.channel),
-      watchers: newWatchers,
-      watcherCount: updatedState.watcherCount,
-      members: updatedState.members,
-      membership: updatedState.membership,
-      read: newReads,
-      draft: updatedState.draft,
-      pinnedMessages: updatedState.pinnedMessages,
-      pendingMessages: updatedState.pendingMessages,
-      pushPreferences: updatedState.pushPreferences,
-      activeLiveLocations: updatedState.activeLiveLocations,
-    );
+    _channelState = _channelState
+        .merge(updatedState)
+        .copyWith(
+          messages: newMessages,
+          channel: _channelState.channel?.merge(updatedState.channel),
+          watchers: newWatchers,
+          read: newReads,
+        );
   }
 
   /// Applies a [remoteState] from a `query`/`watch` response or offline

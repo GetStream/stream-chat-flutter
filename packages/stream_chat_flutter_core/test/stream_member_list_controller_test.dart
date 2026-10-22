@@ -4,6 +4,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart' hide Success;
+import 'package:stream_chat_flutter_core/src/paged_value_notifier.dart';
 import 'package:stream_chat_flutter_core/src/stream_member_list_controller.dart';
 
 import 'mocks.dart';
@@ -15,8 +16,8 @@ void main() {
     reset(channel);
   });
 
-  QueryMembersResponse membersResponse(List<Member> members) {
-    return QueryMembersResponse()..members = members;
+  Result<QueryMembersResponse> membersResponse(List<Member> members) {
+    return Result.success(QueryMembersResponse(duration: '0.01ms', members: members));
   }
 
   test('an empty sort queries without a sort term', () async {
@@ -41,6 +42,84 @@ void main() {
     await controller.doInitialLoad();
 
     expect(sorts.single, isEmpty);
+  });
+
+  void stubQueryMembers(Result<QueryMembersResponse> result) {
+    when(
+      () => channel.queryMembers(
+        filter: any(named: 'filter'),
+        sort: any(named: 'sort'),
+        pagination: any(named: 'pagination'),
+      ),
+    ).thenAnswer((_) async => result);
+  }
+
+  test('doInitialLoad reports the failure of the query as it is', () async {
+    const exception = StreamNetworkException(message: 'Network error');
+    stubQueryMembers(const Result.failure(exception));
+    final controller = StreamMemberListController(channel: channel);
+    addTearDown(controller.dispose);
+
+    await controller.doInitialLoad();
+
+    expect(controller.value, isA<Error<int, Member>>().having((it) => it.error, 'error', same(exception)));
+  });
+
+  test('doInitialLoad reports any other failure as a client error', () async {
+    final cause = Exception('boom');
+    stubQueryMembers(Result.failure(cause));
+    final controller = StreamMemberListController(channel: channel);
+    addTearDown(controller.dispose);
+
+    await controller.doInitialLoad();
+
+    expect(
+      controller.value,
+      isA<Error<int, Member>>().having(
+        (it) => it.error,
+        'error',
+        isA<StreamClientException>()
+            .having((it) => it.message, 'message', 'Failed to load members')
+            .having((it) => it.cause, 'cause', same(cause)),
+      ),
+    );
+  });
+
+  test('loadMore keeps the loaded members and reports the failure of the query as it is', () async {
+    const exception = StreamNetworkException(message: 'Network error');
+    stubQueryMembers(const Result.failure(exception));
+    final loadedMembers = [Member(user: User(id: 'user-1'))];
+    final controller = StreamMemberListController.fromValue(
+      PagedValue(items: loadedMembers, nextPageKey: 1),
+      channel: channel,
+    );
+    addTearDown(controller.dispose);
+
+    await controller.loadMore(1);
+
+    expect(controller.value.asSuccess.items, loadedMembers);
+    expect(controller.value.asSuccess.error, same(exception));
+  });
+
+  test('loadMore keeps the loaded members and reports any other failure as a client error', () async {
+    final cause = Exception('boom');
+    stubQueryMembers(Result.failure(cause));
+    final loadedMembers = [Member(user: User(id: 'user-1'))];
+    final controller = StreamMemberListController.fromValue(
+      PagedValue(items: loadedMembers, nextPageKey: 1),
+      channel: channel,
+    );
+    addTearDown(controller.dispose);
+
+    await controller.loadMore(1);
+
+    expect(controller.value.asSuccess.items, loadedMembers);
+    expect(
+      controller.value.asSuccess.error,
+      isA<StreamClientException>()
+          .having((it) => it.message, 'message', 'Failed to load more members')
+          .having((it) => it.cause, 'cause', same(cause)),
+    );
   });
 
   group('search', () {
@@ -104,9 +183,9 @@ void main() {
 
   group('superseded results', () {
     test('a slower earlier load does not overwrite a newer load', () async {
-      final responses = <Completer<QueryMembersResponse>>[
-        Completer<QueryMembersResponse>(),
-        Completer<QueryMembersResponse>(),
+      final responses = <Completer<Result<QueryMembersResponse>>>[
+        Completer<Result<QueryMembersResponse>>(),
+        Completer<Result<QueryMembersResponse>>(),
       ];
       var call = 0;
       when(

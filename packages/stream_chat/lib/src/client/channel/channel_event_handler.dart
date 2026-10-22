@@ -422,10 +422,8 @@ class ChannelEventHandler {
     // Filters channel ban from app ban.
     if (event.cid == null) return;
 
-    final user = event.user!;
-    final member = await _channel
-        .queryMembers(filter: .equal(MemberFilterField.userId, user.id))
-        .then((it) => it.members.first);
+    final member = await _queryMember(event.user!.id);
+    if (member == null) return;
 
     _mutations.onMemberBanned(member);
   }
@@ -434,12 +432,17 @@ class ChannelEventHandler {
     // Filters channel ban from app ban.
     if (event.cid == null) return;
 
-    final user = event.user!;
-    final member = await _channel
-        .queryMembers(filter: .equal(MemberFilterField.userId, user.id))
-        .then((it) => it.members.first);
+    final member = await _queryMember(event.user!.id);
+    if (member == null) return;
 
     _mutations.onMemberUnbanned(member);
+  }
+
+  // The member with the user id [userId], or null when the query fails or
+  // finds none.
+  Future<Member?> _queryMember(String userId) async {
+    final result = await _channel.queryMembers(filter: .equal(MemberFilterField.userId, userId));
+    return result.getOrNull()?.members.firstOrNull;
   }
 
   Future<void> _onUserMessagesDeleted(Event event) async {

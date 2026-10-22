@@ -1,8 +1,8 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stream_core/stream_core.dart'
     show Filter, FilterField, NullOrdering, Sort, SortDirection, SortField, Standard, normalizeStringForSort;
+
 import 'channel_model.dart';
-import 'converters/v1_json_converters.dart';
 import 'draft.dart';
 import 'location.dart';
 import 'member.dart';
@@ -11,18 +11,12 @@ import 'push_preference.dart';
 import 'read.dart';
 import 'user.dart';
 
-part 'channel_state.g.dart';
-
-class _NullConst {
-  const _NullConst();
-}
-
-const _nullConst = _NullConst();
+part 'channel_state.freezed.dart';
 
 /// The class that contains the information about a channel
-@JsonSerializable(createToJson: false)
-class ChannelState {
-  /// Constructor used for json serialization
+@freezed
+class ChannelState with _$ChannelState {
+  /// Creates a channel state.
   const ChannelState({
     this.channel,
     this.messages,
@@ -39,92 +33,78 @@ class ChannelState {
   });
 
   /// The channel to which this state belongs
+  @override
   final ChannelModel? channel;
 
   /// A paginated list of channel messages
+  @override
   final List<Message>? messages;
 
   /// A paginated list of channel members
+  @override
   final List<Member>? members;
 
   /// A paginated list of pinned messages
+  @override
   final List<Message>? pinnedMessages;
 
   /// The count of users watching the channel
+  @override
   final int? watcherCount;
 
   /// A paginated list of users watching the channel
+  @override
   final List<User>? watchers;
 
   /// The list of channel reads
+  @override
   final List<Read>? read;
 
   /// Relationship of the current user to this channel.
+  @override
   final Member? membership;
 
   /// The draft message for this channel if it exists.
+  @override
   final Draft? draft;
-
-  static Object? _pendingMessagesReadValue(
-    Map<Object?, Object?> json,
-    String key,
-  ) {
-    final pendingMessageResponse = json[key];
-    if (pendingMessageResponse is! List<Object?>) return null;
-
-    final value = pendingMessageResponse.map((it) {
-      if (it is! Map<String, Object?>) return null;
-      return it['message'];
-    }).nonNulls;
-
-    if (value.isEmpty) return null;
-    return value.toList(growable: false);
-  }
 
   /// List of messages pending for moderation on this channel.
   ///
   /// These messages are only visible to the author until they are approved.
-  @JsonKey(readValue: _pendingMessagesReadValue)
+  @override
   final List<Message>? pendingMessages;
 
   /// The push preferences for this channel if it exists.
+  @override
   final ChannelPushPreference? pushPreferences;
 
   /// The list of active live locations in the channel.
-  @LocationV1JsonConverter()
+  @override
   final List<Location>? activeLiveLocations;
 
-  /// Create a new instance from a json
-  static ChannelState fromJson(Map<String, dynamic> json) => _$ChannelStateFromJson(json);
-
-  /// Creates a copy of [ChannelState] with specified attributes overridden.
-  ChannelState copyWith({
-    ChannelModel? channel,
-    List<Message>? messages,
-    List<Member>? members,
-    List<Message>? pinnedMessages,
-    int? watcherCount,
-    List<User>? watchers,
-    List<Read>? read,
-    Member? membership,
-    Object? draft = _nullConst,
-    List<Message>? pendingMessages,
-    ChannelPushPreference? pushPreferences,
-    List<Location>? activeLiveLocations,
-  }) => ChannelState(
-    channel: channel ?? this.channel,
-    messages: messages ?? this.messages,
-    members: members ?? this.members,
-    pinnedMessages: pinnedMessages ?? this.pinnedMessages,
-    watcherCount: watcherCount ?? this.watcherCount,
-    watchers: watchers ?? this.watchers,
-    read: read ?? this.read,
-    membership: membership ?? this.membership,
-    draft: draft == _nullConst ? this.draft : draft as Draft?,
-    pendingMessages: pendingMessages ?? this.pendingMessages,
-    pushPreferences: pushPreferences ?? this.pushPreferences,
-    activeLiveLocations: activeLiveLocations ?? this.activeLiveLocations,
-  );
+  /// Returns this state updated with [other], a newer state of the same
+  /// channel.
+  ///
+  /// A field [other] leaves out keeps its value here, except [draft], which
+  /// takes the value of [other]. The [channel] is combined with
+  /// [ChannelModel.merge].
+  ChannelState merge(ChannelState? other) {
+    if (other == null) return this;
+    return ChannelState(
+      channel: channel?.merge(other.channel) ?? other.channel,
+      messages: other.messages ?? messages,
+      members: other.members ?? members,
+      pinnedMessages: other.pinnedMessages ?? pinnedMessages,
+      watcherCount: other.watcherCount ?? watcherCount,
+      watchers: other.watchers ?? watchers,
+      read: other.read ?? read,
+      membership: other.membership ?? membership,
+      draft: other.draft,
+      pendingMessages: other.pendingMessages ?? pendingMessages,
+      pushPreferences: other.pushPreferences ?? pushPreferences,
+      activeLiveLocations: other.activeLiveLocations ?? activeLiveLocations,
+    );
+  }
 }
 
 /// A filter for a channel query.
