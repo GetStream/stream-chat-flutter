@@ -121,6 +121,12 @@
 - `UserBlock` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value.
 - `UserBlock.blockedUser`, `userId`, `blockedUserId` and `createdAt` are required and non-nullable, and `UserBlock.copyWith` takes every field as a non-nullable value.
 - `StreamChatApi.user`'s blocking methods are removed; use `blockUser`, `unblockUser` and `getBlockedUsers` on `StreamChatClient` instead.
+- `Moderation`, `ReactionGroup`, `Action`, `Reaction`, `Location` and `MessageReminder` no longer decode from or encode to JSON.
+- `Moderation`, `ReactionGroup`, `Reaction`, `Location` and `MessageReminder` no longer extend `Equatable`, so `props` is removed; they still compare by value.
+- `Action` compares by value instead of by identity.
+- `Moderation` and `Action` gain `copyWith`.
+- `ReactionGroup` gains `fromData` and `toData`, for the offline cache only.
+- `copyWith` on `Location`, `MessageReminder`, `Reaction` and `ReactionGroup` clears a nullable field passed as `null`, and resets a date passed as `null` to now.
 - `StreamChatClient.updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing.
 - `StreamChatClient.partialUpdateUser` and `partialUpdateUsers` are renamed `updateUserPartial` and `updateUsersPartial`, and return a `Result<UpdateUsersResponse>` instead of throwing.
 - `PartialUpdateUserRequest` is renamed `UpdateUserPartialRequest`.
@@ -129,6 +135,11 @@
 - The users in an `UpdateUsersResponse` no longer carry their devices, mutes, channel mutes, privacy settings, unread counts, hidden channels or token revocation time in their custom data.
 - `updateUser` and `updateUsers` no longer send the user's `role`, `teams` and `teamsRole`.
 - `StreamChatApi.user.updateUsers` and `partialUpdateUsers` are removed; call `updateUsers` and `updateUsersPartial` on `StreamChatClient` instead.
+- The reminder calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing.
+- `deleteReminder` returns a `DeleteReminderResponse` instead of an `EmptyResponse`.
+- `queryReminders` takes `limit`, `next` and `prev` instead of `PaginationParams`.
+- `CreateReminderResponse`, `UpdateReminderResponse` and `QueryRemindersResponse` are immutable, compare by value, and their `duration` is non-nullable.
+- `MessageReminderResponse` and `StreamChatApi.reminders` are removed.
 - `ChannelModel.extraData` and `Member.extraData` are renamed `custom`, and so are `Channel.extraData`, `Channel.extraDataStream` (now `customStream`), and the `extraData` argument of the `Channel` constructor and of `StreamChatClient.channel`.
 - The channel and member values `custom` used to hold, such as `ChannelModel.hidden` and `Member.status`, are fields now: `custom` and `toJson` leave them out, and setting one through `custom` has no effect.
 - An entry of `ChannelModel.custom` or `Member.custom` named like one of the model's own fields stays in `custom` and leaves the field alone, and `toJson` leaves it out.
@@ -139,6 +150,11 @@
 - An entry of `User.custom` named like one of the user's own fields stays in `custom` and leaves the field alone, and `toJson` leaves it out.
 - `OwnUser.fromUser` no longer reads devices, mutes, unread counts, push preferences or privacy settings out of the user's custom data; they are left at their defaults.
 - `rawType` is removed from `MessageType`, `AttachmentType`, `PushLevel`, `ChatPreferenceLevel`, `ChatLevel`, `CallLevel` and `RoleType`, as are `ModerationAction.action` and `ChannelCapability.capability`; use the value itself instead.
+- `extraData` is renamed `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`, and on `Channel.sendStaticLocation` and `startLiveLocationSharing`.
+- A custom entry named like one of the model's own fields is no longer sent.
+- A message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields instead of custom data.
+- `Message.toJson` no longer writes the message's channel id, HTML, markup or deleted reply count.
+- `Reaction.topLevelFields` is removed.
 
 🐞 Fixed
 
@@ -175,6 +191,8 @@
 - Added `StreamChatClient.moderation.muteUsers` and `unmuteUsers`, which mute and unmute several users in one call and report the ids that matched no user.
 - Added `User.deactivatedAt`, `deletedAt`, `shadowBanned`, `blockedUserIds` and `nameOrId`; the constructors and `copyWith` accept the new fields.
 - Added `ChannelModel.muted`, `blocked`, `truncatedBy`, `autoTranslationEnabled` and `autoTranslationLanguage`, and `Member.notificationsMuted`, `status`, `banFromFutureChannels`, `futureChannelBanExpires` and `deletedAt`; the constructors and `copyWith` accept the new fields.
+- Added `Message.cid`, `html`, `mml` and `deletedReplyCount`, and `Attachment.giphy`.
+- Added a `prev` cursor to `QueryRemindersResponse`.
 - Added a `prev` argument to `queryPolls` and `queryPollVotes`, and a `prev` cursor on their responses, for paging backwards.
 
 🔒 Security

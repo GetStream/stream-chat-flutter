@@ -1,14 +1,11 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'moderation.g.dart';
+part 'moderation.freezed.dart';
 
-/// {@template moderation}
-/// Model holding data for a message moderated by Moderation V1-V2.
-/// {@endtemplate}
-@JsonSerializable()
-class Moderation extends Equatable {
-  /// {@macro moderation}
+/// The outcome of running a message through the moderation system.
+@freezed
+class Moderation with _$Moderation {
+  /// Creates a new [Moderation].
   const Moderation({
     required this.action,
     required this.originalText,
@@ -19,47 +16,33 @@ class Moderation extends Equatable {
     this.platformCircumvented = false,
   });
 
-  /// Create a new instance from a json
-  factory Moderation.fromJson(Map<String, dynamic> json) => _$ModerationFromJson(json);
-
   /// The action taken by the moderation system.
-  @JsonKey(
-    toJson: ModerationAction.toJson,
-    fromJson: ModerationAction.fromJson,
-  )
+  @override
   final ModerationAction action;
 
   /// The original text of the message.
+  @override
   final String originalText;
 
   /// The list of harmful text detected in the message.
+  @override
   final List<String>? textHarms;
 
   /// The list of harmful images detected in the message.
+  @override
   final List<String>? imageHarms;
 
   /// The blocklist matched by the message.
+  @override
   final String? blocklistMatched;
 
   /// The semantic filter matched by the message.
+  @override
   final String? semanticFilterMatched;
 
-  /// true/false if the message triggered the platform circumvention model.
-  final bool platformCircumvented;
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => _$ModerationToJson(this);
-
+  /// Whether the message triggered the platform circumvention model.
   @override
-  List<Object?> get props => [
-    action,
-    originalText,
-    textHarms,
-    imageHarms,
-    blocklistMatched,
-    semanticFilterMatched,
-    platformCircumvented,
-  ];
+  final bool platformCircumvented;
 }
 
 /// The moderation action performed over the message.

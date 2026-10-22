@@ -1,16 +1,17 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stream_core/stream_core.dart' show Filter, FilterField, Sort, SortField;
 
-import '../util/serializer.dart';
 import 'user.dart';
 
-part 'reaction.g.dart';
+part 'reaction.freezed.dart';
 
-/// The class that defines a reaction
-@JsonSerializable()
-class Reaction extends Equatable {
-  /// Constructor used for json serialization
+/// A reaction a user added to a message.
+@freezed
+class Reaction with _$Reaction {
+  /// Creates a new [Reaction].
+  ///
+  /// [userId] defaults to the id of [user], and [createdAt] and [updatedAt]
+  /// default to now.
   Reaction({
     this.messageId,
     required this.type,
@@ -20,118 +21,63 @@ class Reaction extends Equatable {
     this.emojiCode,
     DateTime? createdAt,
     DateTime? updatedAt,
-    this.extraData = const {},
+    this.custom = const {},
   }) : userId = userId ?? user?.id,
        createdAt = createdAt ?? DateTime.timestamp(),
        updatedAt = updatedAt ?? DateTime.timestamp();
 
-  /// Create a new instance from a json
-  factory Reaction.fromJson(Map<String, dynamic> json) => _$ReactionFromJson(
-    Serializer.moveToExtraDataFromRoot(
-      json,
-      topLevelFields,
-    ),
-  );
-
-  /// The messageId to which the reaction belongs
-  @JsonKey(includeToJson: false)
+  /// The id of the message the reaction is on.
+  @override
   final String? messageId;
 
-  /// The type of the reaction
+  /// The kind of reaction, such as `like` or `love`.
+  @override
   final String type;
 
-  /// The score of the reaction (ie. number of reactions sent)
+  /// How many times the user sent this reaction.
+  @override
   final int score;
 
-  /// The emoji code of the reaction (used for notifications)
-  @JsonKey(includeIfNull: false)
+  /// The emoji that stands for the reaction, such as `❤️`.
+  @override
   final String? emojiCode;
 
-  /// The user that sent the reaction
-  @JsonKey(includeToJson: false)
+  /// The user who sent the reaction.
+  @override
   final User? user;
 
-  /// The userId that sent the reaction
-  @JsonKey(includeToJson: false)
+  /// The id of the user who sent the reaction.
+  @override
   final String? userId;
 
-  /// The date of the reaction
-  @JsonKey(includeToJson: false)
+  /// The date at which the reaction was sent.
+  @override
   final DateTime createdAt;
 
-  /// The date of the reaction update
-  @JsonKey(includeToJson: false)
+  /// The date at which the reaction was last updated.
+  @override
   final DateTime updatedAt;
 
-  /// Reaction custom extraData
-  final Map<String, Object?> extraData;
+  /// This reaction's custom data.
+  @override
+  final Map<String, Object?> custom;
 
-  /// Map of custom user extraData
-  static const topLevelFields = [
-    'message_id',
-    'type',
-    'user',
-    'user_id',
-    'score',
-    'emoji_code',
-    'created_at',
-    'updated_at',
-  ];
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-    _$ReactionToJson(this),
-  );
-
-  /// Creates a copy of [Reaction] with specified attributes overridden.
-  Reaction copyWith({
-    String? messageId,
-    String? type,
-    User? user,
-    String? userId,
-    int? score,
-    String? emojiCode,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    Map<String, Object?>? extraData,
-  }) => Reaction(
-    messageId: messageId ?? this.messageId,
-    type: type ?? this.type,
-    user: user ?? this.user,
-    userId: userId ?? this.userId,
-    score: score ?? this.score,
-    emojiCode: emojiCode ?? this.emojiCode,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-    extraData: extraData ?? this.extraData,
-  );
-
-  /// Returns a new [Reaction] that is a combination of this reaction and the
-  /// given [other] reaction.
+  /// A copy of this reaction updated with the fields [other] carries.
+  ///
+  /// A nullable field [other] leaves null keeps its value here.
+  ///
+  /// Every other field, [custom] included, takes the value of [other].
   Reaction merge(Reaction other) => copyWith(
-    messageId: other.messageId,
+    messageId: other.messageId ?? messageId,
     type: other.type,
-    user: other.user,
-    userId: other.userId,
+    user: other.user ?? user,
+    userId: other.userId ?? userId,
     score: other.score,
-    emojiCode: other.emojiCode,
+    emojiCode: other.emojiCode ?? emojiCode,
     createdAt: other.createdAt,
     updatedAt: other.updatedAt,
-    extraData: other.extraData,
+    custom: other.custom,
   );
-
-  @override
-  List<Object?> get props => [
-    messageId,
-    type,
-    user,
-    userId,
-    score,
-    emojiCode,
-    createdAt,
-    updatedAt,
-    extraData,
-  ];
 }
 
 /// A filter for a reaction query.

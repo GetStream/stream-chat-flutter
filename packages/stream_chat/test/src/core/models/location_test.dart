@@ -75,66 +75,18 @@ void main() {
       expect(fullLocation.updatedAt, equals(updatedAt));
     });
 
-    test('should correctly serialize to JSON', () {
-      final json = location.toJson();
-
-      expect(json['latitude'], equals(latitude));
-      expect(json['longitude'], equals(longitude));
-      expect(json['created_by_device_id'], equals(createdByDeviceId));
-      expect(json['end_at'], isNull);
-      expect(json.containsKey('channel_cid'), isFalse);
-      expect(json.containsKey('channel'), isFalse);
-      expect(json.containsKey('message_id'), isFalse);
-      expect(json.containsKey('message'), isFalse);
-      expect(json.containsKey('user_id'), isFalse);
-      expect(json.containsKey('created_at'), isFalse);
-      expect(json.containsKey('updated_at'), isFalse);
-    });
-
-    test('should serialize live location with endAt correctly', () {
-      final endAt = DateTime.parse('2024-12-31T23:59:59.999Z');
+    test('should store endAt in UTC regardless of input timezone', () {
+      final localEndAt = DateTime(2024, 10, 16, 17, 12, 30, 338, 726);
       final liveLocation = Location(
         latitude: latitude,
         longitude: longitude,
         createdByDeviceId: createdByDeviceId,
-        endAt: endAt,
+        endAt: localEndAt,
       );
 
-      final json = liveLocation.toJson();
-
-      expect(json['latitude'], equals(latitude));
-      expect(json['longitude'], equals(longitude));
-      expect(json['created_by_device_id'], equals(createdByDeviceId));
-      expect(json['end_at'], equals('2024-12-31T23:59:59.999Z'));
+      expect(liveLocation.endAt?.isUtc, isTrue);
+      expect(liveLocation.endAt, equals(localEndAt.toUtc()));
     });
-
-    test(
-      'should convert endAt to UTC in toJson regardless of input timezone',
-      () {
-        // Create a non-UTC DateTime (local time)
-        final localEndAt = DateTime(2024, 10, 16, 17, 12, 30, 338, 726);
-        final liveLocation = Location(
-          latitude: latitude,
-          longitude: longitude,
-          createdByDeviceId: createdByDeviceId,
-          endAt: localEndAt,
-        );
-
-        final json = liveLocation.toJson();
-        final serializedEndAt = json['end_at'] as String?;
-
-        // Verify the serialized date is in UTC format (ends with 'Z')
-        expect(serializedEndAt, isNotNull);
-        expect(serializedEndAt, endsWith('Z'));
-
-        // Verify the stored endAt is in UTC
-        expect(liveLocation.endAt?.isUtc, isTrue);
-
-        // Verify the date is the same instant, just in UTC
-        final expectedUtc = localEndAt.toUtc();
-        expect(liveLocation.endAt, equals(expectedUtc));
-      },
-    );
 
     test('should return correct coordinates', () {
       final coordinates = location.coordinates;

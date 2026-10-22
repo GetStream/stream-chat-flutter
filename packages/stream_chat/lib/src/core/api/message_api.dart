@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../http/stream_http_client.dart';
+import '../models/converters/v1_json_converters.dart';
 import '../models/draft.dart';
 import '../models/draft_message.dart';
 import '../models/message.dart';
@@ -222,7 +223,7 @@ class MessageApi {
     final response = await _client.post(
       '/messages/$messageId/reaction',
       data: json.encode({
-        'reaction': reaction.toJson(),
+        'reaction': const ReactionV1JsonConverter().toJson(reaction),
         'skip_push': skipPush,
         'enforce_unique': enforceUnique,
       }),

@@ -414,13 +414,41 @@ GROUPS = [
     ),
     dict(
         num='06', slug='reminders', title='Message Reminders',
-        hand=['reminders_api.dart'],
+        hand=[],
         match=owns('/api/v2/chat/messages/{message_id}/reminders', '/api/v2/chat/reminders'),
         goal='Small and self-contained, and it exercises the `PATCH` shape our hand-written layer expresses '
              'differently.',
-        decisions=[
-            '`MessageReminder` is public and persisted; decide keep-vs-adopt with persistence in the same PR.',
-        ],
+        decisions=[],
+        taken=textwrap.dedent("""\
+            - **`MessageReminder` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`;
+              equality is unchanged. Its constructor stays non-const (dates default to now). It takes freezed's
+              `copyWith` (audited: only `merge` needed `?? channel`, `?? message` and `?? user` to keep what an
+              event leaves out) and keeps v10's `merge`. `expiresAt` stays out; adding it
+              is additive. It is not persisted after all: `Message.reminder` is never written to JSON and
+              `stream_chat_persistence` has no reminder column, so no codec is needed.
+            - **v1 JSON keeps decoding through `MessageReminderV1JsonConverter`** on `Message.reminder` and
+              `Event.reminder`. `Event` writes the field too, so the converter runs both ways and writes the keys
+              v10 did (ids and dates, without the channel, message or user).
+            - **The four methods return a `Result`,** on `StreamChatClient` and `Channel`. `deleteReminder`
+              answers the named `DeleteReminderResponse`, so it returns a new `DeleteReminderResponse` envelope
+              rather than `Result<void>`. `CreateReminderResponse`, `UpdateReminderResponse` and
+              `QueryRemindersResponse` keep their names; `reminder` is non-null, as the spec requires it. Their
+              shared base class `MessageReminderResponse` is removed (approved).
+            - **`queryReminders` takes `limit`, `next` and `prev`** instead of `PaginationParams` (approved). The
+              backend reads only those (default limit 10, at most 100, both cursors together rejected), so
+              the other `PaginationParams` fields were never honoured. `limit` defaults to 10, and the response
+              gains `prev`.
+            - **A null `remindAt` on `updateReminder` clears the due date,** as in v10: the backend treats an
+              absent and an explicit null `remind_at` alike, and the update is not a partial patch.
+            - **The v1 and v2 routes reach the same controllers** (`lib/chat/routes.go` mounts `coreRoutes` under
+              both), with no feature flag or beta gate; create still checks the channel's
+              `user_message_reminders` setting.
+            - **The reminder's message maps through the message mapper** of [10](10-messages.md), its first
+              consumer. Create and update answer without the channel; a query includes it.
+            - **Verified live** against the demo app: create, bookmark, update (set and clear), query with
+              `next`/`prev`, both cursors rejected, delete and a second delete (404).
+            """),
+        done=DONE.replace('- [ ]', '- [x]'),
         risks=['Reminder events also arrive over the WebSocket.'],
     ),
     dict(
@@ -437,7 +465,7 @@ GROUPS = [
         ],
         risks=[
             '`DraftMessage.poll` is never decoded from JSON: `poll` is not in `DraftMessage.topLevelFields`, so the key '
-            'would land in `extraData`, and the draft payload carries `poll_id` only. Its `PollV1JsonConverter` exists so '
+            'would land in `custom`, and the draft payload carries `poll_id` only. Its `PollV1JsonConverter` exists so '
             'the generated code compiles. Decide here whether the field stays constructor-only or goes.',
             'The four draft methods live in `message_api.dart`, not `threads_api.dart` — this group reaches into '
             'that file, and group 10 must leave those four alone.',
@@ -638,24 +666,94 @@ GROUPS = [
         decisions=[
             '`Message` is public, persisted, WebSocket-delivered and the most customised type in the SDK. Keep '
             'ours; treat the generated `MessageResponse` as a mapping source only.',
-            '`Attachment`: the generated model defines fields our `extraData` currently absorbs. Decide the '
-            'promotion rules before writing the mapper.',
-            'Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`): decide '
+            'Replace the temporary `@DataSerializable` storage codec (`UserGroup`, `UserGroupMember`, `ReactionGroup`): decide '
             'between dedicated tables and codecs owned by `stream_chat_persistence` before `Message` and '
             '`Attachment` become plain models, then delete the typedef and every `fromData`/`toData` it generates.',
-            '`Action` is still the v10 json_serializable class, embedded in `Attachment.actions`, which '
-            '`Attachment.toJson` writes when sending and `toData` writes to persistence. It becomes a plain model '
-            'with `Attachment`; group 04 left it alone.',
             'Expose `MarkReadResponse.event`. [17](17-read-receipts.md) dropped it because its thread carries a '
             '`MessageResponse`; the mapper marks it with a TODO.',
         ],
         risks=[
             '`message_api.dart` also holds the four draft methods, which belong to group 07 — leave them alone '
             'here.',
-            'Attachment `custom`/`extraData` promotion is the known hard part of the whole migration.',
             'Message send has offline and retry paths through `stream_chat_persistence` that must keep working.',
             '`MessageDeleteScope` has to be reconciled with `DeleteType`, which [08](08-moderation-and-blocklists.md) added. It is named for the scope of a delete — `deleteForMe` vs `deleteForAll` — but carries a `hard` bool, which is the same axis `DeleteType` models, in the same words, minus `pruning`. `deleteMessage(hard: true)` therefore cannot express a pruning delete at all, and `softDeleteForAll` / `hardDeleteForAll` read as two spellings of `DeleteType.soft` / `DeleteType.hard`. Decide whether the scope keeps a `DeleteType` field or the two stay separate arguments; either way the public type changes, so it belongs in this group rather than a later fix.',
         ],
+        taken=textwrap.dedent("""\
+            The models `Message` embeds become plain ahead of the endpoints, one PR each, leaves first. None routes
+            an endpoint, so the definition of done below stays open.
+
+            - **`Moderation` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`; equality
+              is unchanged. `Message.moderation` decodes through `moderationFromV1Json`, a temporary decode-only
+              function in `v1_json_converters.dart`: `Message.toJson` never writes the field. It keeps the
+              `moderation_details` fallback and the legacy `MESSAGE_RESPONSE_ACTION_*` names, and reads a missing
+              `platform_circumvented` as `false`. `stream_chat_persistence` does not store moderation, so no codec
+              is needed. `ModerationAction` keeps its `fromJson`/`toJson` statics, as `MessageType` does, until
+              `Message` stops decoding v1 JSON. `ModerationV2Response` maps beside the message, in
+              `messages_mapper.dart`.
+            - **`ReactionGroup` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`;
+              equality is unchanged. Its constructor stays non-const, defaulting both dates to now, and it takes
+              freezed's `copyWith` (audited: no site passes a `null` date). `Message.reactionGroups` decodes through
+              `reactionGroupsFromV1Json`,
+              decode-only; `reactionGroupsFromCounts` builds the groups from `reaction_counts` and
+              `reaction_scores` when `reaction_groups` is missing. Dates go through `StreamDateTimeConverter`.
+              `messages.reaction_groups` and `pinned_messages.reaction_groups` store the groups through the
+              temporary `@DataSerializable` codec, whose output is byte-identical to v10's `toJson`, so no
+              `schemaVersion` bump.
+            - **`Action` is a plain `@freezed` model,** ahead of `Attachment` rather than with it. It loses
+              `fromJson` and `toJson`, gains `copyWith` and `const`, and compares by value where v10 compared by
+              identity, so attachments holding equal actions now compare equal. `Attachment.actions` reads and
+              writes through `ActionV1JsonConverter`: `Attachment.toJson` sends the actions and `toData` stores
+              them, and the converter writes the same keys v10 did, `value` included when null, so requests and
+              the stored `attachments` columns are unchanged. `Action` needs no codec of its own.
+            - **`Reaction` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`; equality
+              is unchanged. Its constructor stays non-const (`userId` from `user`, dates default to now) and it
+              takes freezed's `copyWith` (audited: `merge` keeps a `null` message id, user, user id and emoji code
+              with `??`, and `sendReaction` keeps the reaction's user when there is no current user).
+              `Reaction.topLevelFields` is removed; the converter owns the key list. `ReactionV1JsonConverter` reads
+              and writes a reaction everywhere v1 JSON carries one: the message's latest and own reactions,
+              `Event.reaction`, the two hand-written reaction responses, and the `sendReaction` body, which keeps
+              v10's request shape (type, score, emoji code, custom data at the root). `stream_chat_persistence`
+              stores reactions as table rows, so no codec is needed.
+            - **`Location` is a plain `@freezed` model.** It loses `fromJson`, `toJson` and `Equatable`; equality
+              is unchanged. Its constructor stays non-const (`endAt` normalised to UTC, dates default to now) and
+              it takes freezed's `copyWith` (audited: no site changes). Its `channel` and `message`
+              stay json_serializable `ChannelModel` and `Message`, which `LocationV1JsonConverter` decodes through
+              their own `fromJson`; the API nests them only in active live locations, one level deep, so the
+              message-location cycle ends there. The converter reads and writes `Message.sharedLocation` (the write
+              keeps v10's request shape: coordinates, device and end date), `ChannelState.activeLiveLocations`,
+              `GetActiveLiveLocationsResponse` and `updateLiveLocation`'s response. `stream_chat_persistence` stores
+              locations as table rows, so no codec is needed.
+            - **`messages_mapper.dart` maps `MessageResponse` onto today's json_serializable `Message`** through
+              its constructor, with the generated attachment, reaction,
+              reaction group, moderation, shared location, reminder, draft and draft payload types, each mapped in
+              its own file (`attachments_mapper.dart`, `reactions_mapper.dart`, `locations_mapper.dart`,
+              `drafts_mapper.dart`, `reminders_mapper.dart`), the moderation beside the message itself. Its first
+              consumer is [06](06-reminders.md). `Message.fromJson` and the mapper share the type and state
+              derivation and the reaction groups built from counts and scores when a payload has none
+              (`lib/src/core/util/message_decoding.dart`, internal).
+            - **`Message`, `Attachment`, `Reaction` and `DraftMessage` rename `extraData` to `custom`** (README
+              rule 9), since these mappers are the first to map them. The response mappers copy the generated
+              `custom` as is; the v1 decoders keep splitting flat JSON by `topLevelFields` (the reaction converter
+              owns its key list, as `Reaction` has no JSON), and the v1 writers leave out a custom entry named like
+              a key. Persistence renames the `extra_data` columns `custom`.
+            - **The values v10 parked in `extraData` that the spec types are fields:** `Message.cid`, `html`, `mml`
+              and `deletedReplyCount`, with persistence columns (`cid` reads the message's channel), and
+              `Attachment.giphy`, stored through the attachment's `toData`. `Message.toJson` writes none of the
+              message's; `Attachment.toJson` writes `giphy`, so an edited Giphy message keeps its renditions.
+            - **What the SDK has no feature for stays out:** `image_labels` and `mentioned_channel_members` on a
+              message, and `html` and `mml` on a draft message, which iOS and Android drop too. The mappers leave
+              them out; the v1 decoders split flat JSON by `topLevelFields` alone, so they keep them in `custom`,
+              as v10 did.
+            - **A reaction's emoji code arrives in `custom`,** which keeps it, and also maps to `Reaction.emojiCode`.
+            - **Moderation actions go through `ModerationAction.fromJson`,** so legacy names read as current ones.
+            - **Attachments map at parity with `Attachment.fromJson`:** each gets a new local `id`, and the id the
+              attachment was sent with stays in `custom`; `giphy` and `fields` are written in their v1 JSON shape,
+              which `GiphyInfo` and the UI read. Making `Attachment` plain, and typing the renditions and
+              `fields`, is left to this group.
+            - **A reminder or location nests its message one level deep,** so the recursion ends there.
+            - **`MessageWithChannelResponse` gets its mapper with its first consumer** (getMessage, search), not
+              ahead of it.
+            """),
     ),
     dict(
         num='11', slug='channels-and-members', title='Channels, Members & Sync',

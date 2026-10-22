@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:stream_core/stream_core.dart' show LocationCoordinate;
 
 import '../http/stream_http_client.dart';
+import '../models/converters/v1_json_converters.dart';
 import '../models/location.dart';
 import '../models/user.dart';
 import 'requests.dart';
@@ -65,6 +66,6 @@ class UserApi {
       }),
     );
 
-    return Location.fromJson(response.data);
+    return const LocationV1JsonConverter().fromJson(response.data);
   }
 }

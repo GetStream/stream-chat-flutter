@@ -22,18 +22,31 @@ void main() {
       expect(reactionGroup.lastReactionAt, lastReactionAtDate);
     });
 
-    test('fromJson creates correct object', () {
-      final json = {
+    test('toData writes snake_case keys and ISO-8601 dates', () {
+      final reactionGroup = ReactionGroup(
+        count: count,
+        sumScores: sumScores,
+        firstReactionAt: firstReactionAtDate,
+        lastReactionAt: lastReactionAtDate,
+      );
+
+      expect(reactionGroup.toData(), {
         'count': count,
         'sum_scores': sumScores,
-        'first_reaction_at': firstReactionAtDate.toIso8601String(),
-        'last_reaction_at': lastReactionAtDate.toIso8601String(),
-      };
-      final reactionGroup = ReactionGroup.fromJson(json);
-      expect(reactionGroup.count, count);
-      expect(reactionGroup.sumScores, sumScores);
-      expect(reactionGroup.firstReactionAt, firstReactionAtDate);
-      expect(reactionGroup.lastReactionAt, lastReactionAtDate);
+        'first_reaction_at': '2023-10-26T10:00:00.000Z',
+        'last_reaction_at': '2023-10-26T12:00:00.000Z',
+      });
+    });
+
+    test('fromData reads back the group written by toData', () {
+      final reactionGroup = ReactionGroup(
+        count: count,
+        sumScores: sumScores,
+        firstReactionAt: firstReactionAtDate,
+        lastReactionAt: lastReactionAtDate,
+      );
+
+      expect(ReactionGroup.fromData(reactionGroup.toData()), reactionGroup);
     });
 
     test('copyWith creates a new object with updated values', () {
@@ -80,21 +93,6 @@ void main() {
       expect(copiedGroup.sumScores, sumScores);
       expect(copiedGroup.firstReactionAt, firstReactionAtDate);
       expect(copiedGroup.lastReactionAt, lastReactionAtDate);
-    });
-
-    test('props returns correct list of properties', () {
-      final reactionGroup = ReactionGroup(
-        count: count,
-        sumScores: sumScores,
-        firstReactionAt: firstReactionAtDate,
-        lastReactionAt: lastReactionAtDate,
-      );
-      expect(reactionGroup.props, [
-        count,
-        sumScores,
-        firstReactionAtDate,
-        lastReactionAtDate,
-      ]);
     });
 
     test('equality works correctly', () {

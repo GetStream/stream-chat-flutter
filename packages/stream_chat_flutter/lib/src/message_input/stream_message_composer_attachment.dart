@@ -88,7 +88,7 @@ class DefaultMessageComposerAttachment extends StatelessWidget {
   }
 
   Widget _buildFileAttachment(BuildContext context) {
-    final fileSizeBytes = attachment.file?.size ?? attachment.extraData['file_size'];
+    final fileSizeBytes = attachment.file?.size ?? attachment.custom['file_size'];
     final mimeType = attachment.file?.mediaType?.mimeType;
 
     return StreamMessageComposerFileAttachment(
@@ -223,7 +223,7 @@ class StreamMediaAttachmentBuilder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final durationSecs = attachment.extraData['duration'] as num?;
+    final durationSecs = attachment.custom['duration'] as num?;
     final videoDuration = durationSecs != null ? Duration(seconds: durationSecs.round()) : null;
 
     final a11y = context.translations.accessibility;

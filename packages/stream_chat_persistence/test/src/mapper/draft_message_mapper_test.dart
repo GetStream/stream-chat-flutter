@@ -47,7 +47,7 @@ void main() {
         command: 'testCommand',
         pollId: poll.id,
         createdAt: createdAt,
-        extraData: {'extra_test_field': 'extraTestData'},
+        custom: {'extra_test_field': 'extraTestData'},
       );
 
       final draft = entity.toDraft(
@@ -64,7 +64,7 @@ void main() {
       expect(draft.message.showInChannel, entity.showInChannel);
       expect(draft.message.silent, entity.silent);
       expect(draft.message.command, entity.command);
-      expect(draft.message.extraData, entity.extraData);
+      expect(draft.message.custom, entity.custom);
       expect(draft.message.parentId, entity.parentId);
       expect(draft.message.quotedMessageId, entity.quotedMessageId);
       expect(draft.message.pollId, entity.pollId);
@@ -124,7 +124,7 @@ void main() {
         command: 'testCommand',
         poll: poll,
         pollId: poll.id,
-        extraData: const {'extra_test_field': 'extraTestData'},
+        custom: const {'extra_test_field': 'extraTestData'},
       );
 
       final draft = Draft(
@@ -146,7 +146,7 @@ void main() {
       expect(entity.showInChannel, draft.message.showInChannel);
       expect(entity.silent, draft.message.silent);
       expect(entity.command, draft.message.command);
-      expect(entity.extraData, draft.message.extraData);
+      expect(entity.custom, draft.message.custom);
       expect(entity.parentId, draft.message.parentId);
       expect(entity.quotedMessageId, draft.message.quotedMessageId);
       expect(entity.pollId, draft.message.pollId);

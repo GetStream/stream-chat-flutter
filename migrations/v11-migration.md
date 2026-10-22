@@ -31,7 +31,9 @@ onto Stream's OpenAPI-generated API client.
     - [App Settings](#app-settings)
     - [Guest Users](#guest-users)
     - [Polls](#polls)
+    - [Message Reminders](#message-reminders)
     - [File Upload](#file-upload)
+    - [Messages](#messages)
     - [User Groups](#user-groups)
     - [Link Previews](#link-previews)
     - [Partial Updates](#partial-updates)
@@ -42,6 +44,7 @@ onto Stream's OpenAPI-generated API client.
     - [User Updates](#user-updates)
     - [Channel and Member Custom Data](#channel-and-member-custom-data)
     - [User Custom Data](#user-custom-data)
+    - [Message Custom Data](#message-custom-data)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -87,15 +90,18 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**App Settings**](#app-settings) | `getAppSettings` returns a `Result<AppSettingsResponse>` instead of throwing; `GetAppSettingsResponse` is renamed `AppSettingsResponse` |
 | [**Guest Users**](#guest-users) | `connectGuestUser` is unchanged; `StreamChatApi.guest` and `ConnectGuestUserResponse` are removed |
 | [**Polls**](#polls) | Poll calls return a `Result`; eight responses become `PollResponse`, `PollOptionResponse` and `PollVoteResponse`; queries take `limit`/`next`/`prev`; `VotingVisibility` is an extension type; `extraData` is `custom` |
+| [**Message Reminders**](#message-reminders) | Reminder calls return a `Result`; `deleteReminder` answers a new `DeleteReminderResponse`; `queryReminders` takes `limit`/`next`/`prev`; `MessageReminder` no longer decodes JSON |
 | [**File Upload**](#file-upload) | Uploads return a `Result<UploadedFile>` and deletes a `Result<void>` instead of throwing; `AttachmentFileUploaderProvider` receives a `Dio` |
 | [**Partial Updates**](#partial-updates) | Channel and member partial updates — `updatePartial`, `updateName`, `updateImage`, slow mode, pin and archive — return a `Result` instead of throwing; their responses take the API's names, `UpdateChannelPartialResponse` and `UpdateMemberPartialResponse`, and `partialMemberUpdate` becomes `updateMemberPartial` |
 | [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing |
 | [**Read Receipts**](#read-receipts) | Marking read, unread and delivered return a `Result` instead of throwing; `ChannelDeliveryReporter`'s callback returns a `Result` |
 | [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models lose their JSON codecs and compare by value |
 | [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUsersResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUsersResponse`, and `UserBlock`'s fields are all non-nullable |
+| [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action`, `Reaction` and `Location` no longer decode from or encode to JSON; `Action` compares by value |
 | [**User Updates**](#user-updates) | `updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing; `partialUpdateUser(s)` becomes `updateUserPartial` / `updateUsersPartial` and `PartialUpdateUserRequest` becomes `UpdateUserPartialRequest`; `updateUser` no longer sends `role`, `teams` or `teamsRole`, and the returned users no longer carry their private fields in `extraData` |
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`; the channel and member flags it carried are fields |
 | [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
+| [**Message Custom Data**](#message-custom-data) | `extraData` is `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`; a message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -308,6 +314,16 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `UserBlock.blockedUser` (`User?`), `.userId` / `.blockedUserId` (`String?`), `.createdAt` (`DateTime?`) | `User`, `String`, `DateTime` — required in the constructor | `retyped` | The server always sends them; drop any `!`, `?.` or `?? …` |
 | `UserBlock.copyWith(user: User?, …)`, keeping a field when passed `null` | `copyWith(user: User, …)` | `retyped` | Every argument is non-nullable, so a call that passed a nullable value no longer compiles; pass the value or leave the argument out |
 | `StreamChatApi.user.blockUser` / `unblockUser` / `queryBlockedUsers` | `StreamChatClient.blockUser` / `unblockUser` / `getBlockedUsers` | `removed` | The endpoints moved to the generated client |
+| `Moderation.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Message.fromJson` still reads a message's moderation |
+| `Moderation extends Equatable`, `Moderation.props` | `Moderation` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `Moderation` is no longer an `Equatable` |
+| `ReactionGroup.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Message.fromJson` still reads a message's reaction groups. `fromData` / `toData` are the offline database's format, not API JSON |
+| `ReactionGroup extends Equatable`, `ReactionGroup.props` | `ReactionGroup` (value `==`) | `removed` | Equality is unchanged; `props` is gone and `ReactionGroup` is no longer an `Equatable` |
+| `Action.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. `Attachment.fromJson` and `toJson` still read and write an attachment's actions |
+| `Action` identity `==` | value `==`, plus `copyWith` | `retyped` | Two actions with the same fields are now equal, and so are attachments that differ only in holding separate copies of them |
+| `Reaction.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. Messages, events and `sendReaction` still read and write reactions |
+| `Reaction extends Equatable`, `Reaction.props` | `Reaction` (value `==`) | `removed` | Equality and `merge` are unchanged; `props` is gone and `Reaction` is no longer an `Equatable` |
+| `Location.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. Messages, channel states and the live location calls still read and write locations |
+| `Location extends Equatable`, `Location.props` | `Location` (value `==`) | `removed` | Equality is unchanged; `props` is gone and `Location` is no longer an `Equatable` |
 | `StreamChatClient.updateUser` / `updateUsers` → `Future<UpdateUsersResponse>` | `Future<Result<UpdateUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing |
 | `StreamChatClient.partialUpdateUser` | `StreamChatClient.updateUserPartial` | `renamed` | Same arguments |
 | `StreamChatClient.partialUpdateUser` → `Future<UpdateUsersResponse>` | `updateUserPartial` → `Future<Result<UpdateUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing |
@@ -334,6 +350,24 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `OwnUser.fromUser(user)` reading devices, mutes, unread counts, push preferences and privacy settings out of `user.extraData` | — | `removed` | A `User` no longer carries them; they are left at their defaults |
 | `User.custom` entry named like one of the user's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
 | `MessageType.rawType` / `AttachmentType.rawType` / `PushLevel.rawType` / `ChatPreferenceLevel.rawType` / `ChatLevel.rawType` / `CallLevel.rawType` / `RoleType.rawType`, `ModerationAction.action`, `ChannelCapability.capability` | the value itself | `removed` | Each is a `String`, so use it directly: `message.type.rawType` becomes `message.type` |
+| `StreamChatClient.createReminder` / `.updateReminder` / `.queryReminders` → `Future<CreateReminderResponse>` and the like | `Future<Result<CreateReminderResponse>>` and the like | `retyped` | Return a `Result` instead of throwing; the same holds for `Channel.createReminder` and `.updateReminder` |
+| `StreamChatClient.deleteReminder` / `Channel.deleteReminder` → `Future<EmptyResponse>` | `Future<Result<DeleteReminderResponse>>` | `retyped` | A new response carrying `duration` |
+| `queryReminders(pagination: PaginationParams(limit: l, next: n))` | `queryReminders(limit: l, next: n)` | `retyped` | `limit` is still 10 when omitted. Pass a response's `prev` as `prev` to page backwards. The other `PaginationParams` fields never had an effect on this query |
+| `CreateReminderResponse()..reminder = …`, `UpdateReminderResponse()..reminder = …`, `QueryRemindersResponse()..reminders = …` and their other setters | `CreateReminderResponse(duration: …, reminder: …)` and the like | `retyped` | The responses are plain classes with a const constructor and final fields |
+| `CreateReminderResponse.fromJson`, `UpdateReminderResponse.fromJson`, `QueryRemindersResponse.fromJson` | — | `removed` | Construct the responses directly |
+| reminder responses' `duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| reminder responses' identity `==` | value `==`, plus `copyWith` | `retyped` | Two responses with the same fields are now equal |
+| `MessageReminderResponse` | — | `removed` | The shared base class of the create and update responses |
+| `MessageReminder.fromJson` / `toJson` | — | `removed` | A plain class; construct it directly. Messages and events still read reminders |
+| `MessageReminder extends Equatable`, `MessageReminder.props` | `MessageReminder` (value `==`) | `removed` | Equality and `merge` are unchanged; `props` is gone and `MessageReminder` is no longer an `Equatable` |
+| `Location.copyWith` / `MessageReminder.copyWith` / `Reaction.copyWith` / `ReactionGroup.copyWith` keeping a field passed as `null` | freezed's `copyWith` | `retyped` | `null` clears a nullable field and resets `createdAt`, `updatedAt`, `firstReactionAt` and `lastReactionAt` to now; `MessageReminder.remindAt` already cleared |
+| `StreamChatApi.reminders` (`RemindersApi`) | `StreamChatClient` reminder methods | `removed` | The endpoints moved to the generated client |
+| `Message.extraData` / `Attachment.extraData` / `Reaction.extraData` / `DraftMessage.extraData` | `Message.custom` / `Attachment.custom` / `Reaction.custom` / `DraftMessage.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
+| `Channel.sendStaticLocation(extraData: …)` / `startLiveLocationSharing(extraData: …)` | `sendStaticLocation(custom: …)` / `startLiveLocationSharing(custom: …)` | `renamed` | The message's custom data |
+| `message.extraData['cid']` / `['html']` / `['mml']` / `['deleted_reply_count']` | `Message.cid` / `html` / `mml` / `deletedReplyCount` | `retyped` | Fields now, not custom data; `toJson` does not write them, so a message can no longer be sent with markup |
+| `attachment.extraData['giphy']` | `Attachment.giphy` | `retyped` | A field now, not custom data |
+| `Message.custom` / `Attachment.custom` / `Reaction.custom` / `DraftMessage.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; left out when the model is sent, so it cannot overwrite the field |
+| `Reaction.topLevelFields` | — | `removed` | It listed the JSON keys of a model that no longer has JSON |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -1094,6 +1128,40 @@ no longer carries them.
 > **Why:** the API calls it `custom`, and every migrated model takes that name. A name that answered the id could
 > not tell an unnamed user from a named one, so initials and sorts read the id as a name.
 
+### Message Custom Data
+
+**`extraData` is renamed `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`**, along with the
+constructor and `copyWith` arguments and the `extraData` argument of `Channel.sendStaticLocation` and
+`startLiveLocationSharing`.
+
+```dart
+// v10
+final priority = message.extraData['priority'];
+final duration = attachment.extraData['duration'];
+
+// v11
+final priority = message.custom['priority'];
+final duration = attachment.custom['duration'];
+```
+
+**A message's channel id, HTML, markup and deleted reply count are fields**, `Message.cid`, `html`, `mml` and
+`deletedReplyCount`, and so are an attachment's Giphy renditions, `Attachment.giphy`. `custom` no longer holds
+their keys, and an entry with one of those names in `custom` no longer sets the field. `Message.toJson` does not
+write any of them, so a message can no longer be sent with markup.
+
+```dart
+// v10
+final html = message.extraData['html'] as String?;
+
+// v11
+final html = message.html;
+```
+
+**An entry of `custom` named like one of the model's own fields stays in `custom`** and leaves the field alone; it
+is left out when the model is sent, so it cannot overwrite the field. A reaction on a reminder's message keeps its emoji code in its `custom` as well as in `Reaction.emojiCode`.
+
+> **Why:** the API calls it `custom`, and every migrated model takes that name.
+
 ### Moderation
 
 **Muting, banning and flagging return a `Result` instead of throwing**, on both `StreamChatClient`
@@ -1329,6 +1397,54 @@ poll.copyWith(name: 'Dinner?');
 
 **`StreamChatApi.polls` is removed.** Call the poll methods on `StreamChatClient` or `Channel` instead.
 
+### Message Reminders
+
+**Every reminder call returns a `Result` instead of throwing,** on `StreamChatClient` and on `Channel`. Calling a
+`Channel` method on a channel that is not initialized still throws a `StateError`, as in v10.
+
+```dart
+// v10
+try {
+  final response = await client.createReminder(messageId, remindAt: remindAt);
+  showReminder(response.reminder);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.createReminder(messageId, remindAt: remindAt);
+result.fold(
+  onSuccess: (response) => showReminder(response.reminder),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**`deleteReminder` answers a `DeleteReminderResponse`** where v10 answered an `EmptyResponse`. It carries only
+`duration` today.
+
+**`queryReminders` takes `limit`, `next` and `prev`** instead of a `PaginationParams`. `limit` is still 10 when
+omitted. The offset and id-based fields of `PaginationParams` never had an effect on this query. The response now
+carries a `prev` cursor next to `next`; pass it as `prev` to fetch the page before.
+
+```dart
+// v10
+await client.queryReminders(pagination: PaginationParams(limit: 10, next: cursor));
+
+// v11
+await client.queryReminders(limit: 10, next: cursor);
+```
+
+**`MessageReminder` and the reminder responses no longer decode JSON.** Build them with their constructors —
+`CreateReminderResponse(duration: '0ms', reminder: reminder)` where v10 wrote
+`CreateReminderResponse()..reminder = reminder`. `Message.reminder` and the reminder events still decode from the
+same keys. `MessageReminder` is no longer an `Equatable`: equality and `merge` are unchanged, and `props` is
+gone. Its `copyWith` is freezed's: `null` clears a nullable field and resets a date to now.
+
+**`StreamChatApi.reminders` is removed.** Call the reminder methods on `StreamChatClient` or `Channel` instead.
+
+> **Why:** a failure is a value the caller handles where it happens, and the public models stop being wire shapes,
+> so the API payload can change without changing the type a caller holds.
+
 ### File Upload
 
 **Uploads and deletes return a `Result` instead of throwing.** `sendImage`, `sendFile`, `uploadImage` and
@@ -1368,6 +1484,34 @@ StreamChatClient(apiKey, attachmentFileUploaderProvider: (httpClient) => MyUploa
 // v11
 StreamChatClient(apiKey, attachmentFileUploaderProvider: (dio) => MyUploader(dio));
 ```
+
+### Messages
+
+**`Moderation` and `ReactionGroup` are plain classes.** Neither decodes from or encodes to JSON any more, and
+neither is an `Equatable`: equality is unchanged and `props` is gone. `Moderation` gains `copyWith`. A message
+still carries them in `Message.moderation` and `Message.reactionGroups`, read from the API as before.
+`ReactionGroup.fromData` and `toData` read and write the offline database's format; they are not a codec for API
+JSON.
+
+**`Action` is a plain class too, and compares by value.** It no longer decodes from or encodes to JSON, and it gains
+`copyWith`. Two actions with the same fields are now equal, where v10 compared them by identity; an `Attachment`
+holding them follows suit.
+
+**`Reaction` and `Location` are plain classes.** Neither decodes from or encodes to JSON any more, and neither is an
+`Equatable`; equality is unchanged, as is `Reaction.merge`. Messages, events, channel states, `sendReaction` and
+the live location calls still carry them as before. `copyWith` on `Reaction`, `Location` and `ReactionGroup` is
+freezed's: `null` clears a nullable field and resets a date to now.
+
+```dart
+// v10
+final moderation = Moderation.fromJson(json);
+
+// v11
+const moderation = Moderation(action: ModerationAction.flag, originalText: 'original text');
+```
+
+> **Why:** the public models stop being wire shapes, so the API payload can change without changing the type a
+> caller holds.
 
 ---
 

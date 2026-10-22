@@ -105,57 +105,52 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
       this.limit * defaultInitialPagedLimitMultiplier,
       _kDefaultBackendPaginationLimit,
     );
-    try {
-      final response = await client.queryReminders(
-        sort: _activeSort,
-        filter: _activeFilter,
-        pagination: PaginationParams(limit: limit),
-      );
+    final result = await client.queryReminders(sort: _activeSort, filter: _activeFilter, limit: limit);
 
-      final results = response.reminders;
-      final nextKey = response.next;
-      value = PagedValue(
-        items: results,
-        nextPageKey: nextKey,
-      );
-      // Start listening to events
-      if (disposed) return;
-      _subscribeToReminderListEvents();
-    } on StreamChatException catch (error) {
-      value = PagedValue.error(error);
-    } catch (error) {
-      final chatError = StreamClientException(message: 'Failed to load message reminders', cause: error);
-      value = PagedValue.error(chatError);
-    }
+    result.fold(
+      onSuccess: (response) {
+        value = PagedValue(
+          items: response.reminders,
+          nextPageKey: response.next,
+        );
+
+        // Start listening to events
+        if (disposed) return;
+        _subscribeToReminderListEvents();
+      },
+      onFailure: (error, _) => value = PagedValue.error(_chatException(error, 'Failed to load message reminders')),
+    );
   }
 
   @override
   Future<void> loadMore(String nextPageKey) async {
     final previousValue = value.asSuccess;
 
-    try {
-      final response = await client.queryReminders(
-        sort: _activeSort,
-        filter: _activeFilter,
-        pagination: PaginationParams(limit: limit, next: nextPageKey),
-      );
+    final result = await client.queryReminders(
+      sort: _activeSort,
+      filter: _activeFilter,
+      limit: limit,
+      next: nextPageKey,
+    );
 
-      final results = response.reminders;
-      final previousItems = previousValue.items;
-      final newItems = previousItems + results;
-      final next = response.next;
-      final nextKey = next != null && next.isNotEmpty ? next : null;
-      value = PagedValue(
-        items: newItems,
-        nextPageKey: nextKey,
-      );
-    } on StreamChatException catch (error) {
-      value = previousValue.copyWith(error: error);
-    } catch (error) {
-      final chatError = StreamClientException(message: 'Failed to load more message reminders', cause: error);
-      value = previousValue.copyWith(error: chatError);
-    }
+    result.fold(
+      onSuccess: (response) {
+        final next = response.next;
+        value = PagedValue(
+          items: previousValue.items + response.reminders,
+          nextPageKey: next != null && next.isNotEmpty ? next : null,
+        );
+      },
+      onFailure: (error, _) {
+        value = previousValue.copyWith(error: _chatException(error, 'Failed to load more message reminders'));
+      },
+    );
   }
+
+  StreamChatException _chatException(Object error, String message) => switch (error) {
+    final StreamChatException error => error,
+    _ => StreamClientException(message: message, cause: error),
+  };
 
   /// Event listener, which can be set in order to listen
   /// [client] web-socket events.

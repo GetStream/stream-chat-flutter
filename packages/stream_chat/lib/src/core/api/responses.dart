@@ -4,11 +4,11 @@ import '../../ws/events/event.dart';
 import '../models/banned_user.dart';
 import '../models/channel_model.dart';
 import '../models/channel_state.dart';
+import '../models/converters/v1_json_converters.dart';
 import '../models/draft.dart';
 import '../models/location.dart';
 import '../models/member.dart';
 import '../models/message.dart';
-import '../models/message_reminder.dart';
 import '../models/predefined_filter.dart';
 import '../models/push_preference.dart';
 import '../models/reaction.dart';
@@ -125,6 +125,7 @@ class QueryBannedUsersResponse extends _BaseResponse {
 class QueryReactionsResponse extends _BaseResponse {
   /// List of reactions returned by the query
   @JsonKey(defaultValue: [])
+  @ReactionV1JsonConverter()
   late List<Reaction> reactions;
 
   /// The cursor for the next page of results.
@@ -151,6 +152,7 @@ class QueryRepliesResponse extends _BaseResponse {
 @JsonSerializable(createToJson: false)
 class SendReactionResponse extends MessageResponse {
   /// The reaction created by the api call
+  @ReactionV1JsonConverter()
   late Reaction reaction;
 
   /// Create a new instance from a json
@@ -186,7 +188,7 @@ class GetMessageResponse extends MessageResponse {
   /// Create a new instance from a json
   static GetMessageResponse fromJson(Map<String, dynamic> json) {
     final res = _$GetMessageResponseFromJson(json);
-    final jsonChannel = res.message.extraData.remove('channel');
+    final jsonChannel = res.message.custom.remove('channel');
     if (jsonChannel != null) {
       res.channel = ChannelModel.fromJson(jsonChannel as Map<String, dynamic>);
     }
@@ -434,40 +436,6 @@ class QueryDraftsResponse extends _BaseResponse {
   static QueryDraftsResponse fromJson(Map<String, dynamic> json) => _$QueryDraftsResponseFromJson(json);
 }
 
-/// Base Model response for draft based api calls.
-class MessageReminderResponse extends _BaseResponse {
-  /// Draft returned by the api call
-  late MessageReminder reminder;
-}
-
-/// Model response for [StreamChatClient.createReminder] api call
-@JsonSerializable(createToJson: false)
-class CreateReminderResponse extends MessageReminderResponse {
-  /// Create a new instance from a json
-  static CreateReminderResponse fromJson(Map<String, dynamic> json) => _$CreateReminderResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.updateReminder] api call
-@JsonSerializable(createToJson: false)
-class UpdateReminderResponse extends MessageReminderResponse {
-  /// Create a new instance from a json
-  static UpdateReminderResponse fromJson(Map<String, dynamic> json) => _$UpdateReminderResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.queryReminders] api call
-@JsonSerializable(createToJson: false)
-class QueryRemindersResponse extends _BaseResponse {
-  /// List of reminders returned by the query
-  @JsonKey(defaultValue: [])
-  late List<MessageReminder> reminders;
-
-  /// The next page token
-  late String? next;
-
-  /// Create a new instance from a json
-  static QueryRemindersResponse fromJson(Map<String, dynamic> json) => _$QueryRemindersResponseFromJson(json);
-}
-
 /// Model response for [StreamChatClient.setPushPreferences] api call
 @JsonSerializable(createToJson: false)
 class UpsertPushPreferencesResponse extends _BaseResponse {
@@ -499,6 +467,7 @@ Map<String, PushPreference> _userPreferencesFromJson(Map<String, dynamic>? json)
 @JsonSerializable(createToJson: false)
 class GetActiveLiveLocationsResponse extends _BaseResponse {
   /// List of active live locations returned by the api call
+  @LocationV1JsonConverter()
   late List<Location> activeLiveLocations;
 
   /// Create a new instance from a json

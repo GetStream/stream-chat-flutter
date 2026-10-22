@@ -17,7 +17,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [03](03-user-groups.md) | User Groups | 0 | 8 | ☑ |
 | [04](04-roles-guest-and-app.md) | Roles, Guest & App Settings | 0 | 5 | ☑ |
 | [05](05-polls.md) | Polls | 0 | 13 | ☑ |
-| [06](06-reminders.md) | Message Reminders | 4 | 4 | ☐ |
+| [06](06-reminders.md) | Message Reminders | 0 | 4 | ☑ |
 | [07](07-threads-and-drafts.md) | Threads & Drafts | 7 | 7 | ☐ |
 | [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
 | [09](09-users.md) | Users | 3 | 3 | ☐ |
@@ -34,7 +34,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [20](20-user-updates.md) | User Updates — split out of 09 | 0 | 2 | ☑ |
 | [21](21-custom-data.md) | Custom Data Check — no model still says `extraData` | — | — | ☐ |
 
-**Coverage:** 51 hand-written methods across 9 files, and all 129 generated operations, each claimed by exactly
+**Coverage:** 47 hand-written methods across 8 files, and all 129 generated operations, each claimed by exactly
 one group. Verified mechanically — see [Keeping this plan honest](#keeping-this-plan-honest).
 
 
@@ -162,11 +162,11 @@ includes a named response that carries only `duration` today, such as `HideChann
    directions.** A response mapper copies the generated `custom` map into it and a request mapper sends it back as
    `custom`; neither filters it. A model whose group has not run still says `extraData`. A field the
    generated response types is never parked in `extraData` behind a getter: it becomes a field on the model, as
-   the owning group's break, or stays out. Group 15 promoted `ChannelModel`'s and `Member`'s, and group 20
-   `User`'s and `OwnUser`'s. `topLevelFields` and `Serializer` serve only the v1 decoders, which
-   still split flat JSON by a key list, and go with the WebSocket v2 move; a model that loses its JSON drops
-   `topLevelFields` and its converter owns the list. A v1 writer leaves a custom entry named like a key out so it
-   cannot overwrite the key.
+   the owning group's break, or stays out. Group 15 promoted `ChannelModel`'s and `Member`'s, group 20
+   `User`'s and `OwnUser`'s, and group 06 `Message`'s, `Attachment`'s, `Reaction`'s and `DraftMessage`'s.
+   `topLevelFields` and `Serializer` serve only the v1 decoders, which still split flat JSON by a key list, and go
+   with the WebSocket v2 move; a model that loses its JSON drops `topLevelFields` and its converter owns the list. A
+   v1 writer leaves a custom entry named like a key out so it cannot overwrite the key.
 
 ### Temporary adapters
 
@@ -174,12 +174,19 @@ includes a named response that carries only `duration` today, such as `HideChann
 | --- | --- | --- |
 | `DeviceV1JsonConverter` | `OwnUser.devices` | [09](09-users.md) |
 | `userGroupsFromV1Json` | `Message.mentionedGroups` | [10](10-messages.md) |
-| `DataSerializable` | `UserGroup`, `UserGroupMember`, `PollOption` (`fromData`, `toData`) | [10](10-messages.md) |
+| `moderationFromV1Json` | `Message.moderation` | [10](10-messages.md) |
+| `reactionGroupsFromV1Json` | `Message.reactionGroups` | [10](10-messages.md) |
+| `ActionV1JsonConverter` | `Attachment.actions` | [10](10-messages.md) |
+| `LocationV1JsonConverter` | `Message.sharedLocation`, `ChannelState.activeLiveLocations`, `GetActiveLiveLocationsResponse.activeLiveLocations`, `updateLiveLocation`'s response | [10](10-messages.md) |
+| `MessageReminderV1JsonConverter` | `Message.reminder`, `Event.reminder` | WebSocket v2 (no group) |
+| `ReactionV1JsonConverter` | `Message.latestReactions` / `ownReactions`, `Event.reaction`, `QueryReactionsResponse.reactions`, `SendReactionResponse.reaction`, the `sendReaction` body | WebSocket v2 (no group) |
+| `DataSerializable` | `UserGroup`, `UserGroupMember`, `ReactionGroup`, `PollOption` (`fromData`, `toData`) | [10](10-messages.md) |
 | `PollV1JsonConverter` | `Message.poll`, `DraftMessage.poll`, `Event.poll` | WebSocket v2 (no group) |
 | `PollVoteV1JsonConverter` | `Event.pollVote` | WebSocket v2 (no group) |
 | `Event.fromJson`'s `user.updated` re-decode | `Event.user`, decoded as a `User` and again as an `OwnUser` | WebSocket v2 (no group) |
 | `users_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
 | `channels_mapper.dart` (kept, re-pointed) | today's `ChannelModel`, `ChannelConfig` and `Member`, which still read and write JSON | [11](11-channels-and-members.md) |
+| `messages_mapper.dart`, `attachments_mapper.dart`, `reactions_mapper.dart`, `locations_mapper.dart`, `drafts_mapper.dart` (kept, re-pointed) | today's `Message`, `Attachment`, `Reaction`, `Location`, `Draft` and `DraftMessage`, which still read and write JSON | [10](10-messages.md) |
 
 The `user.updated` re-decode keeps the privacy settings the current user's copy of the event carries, which `User`
 does not model, so the handler can apply them as v10 did. When the WebSocket moves to v2, map the generated

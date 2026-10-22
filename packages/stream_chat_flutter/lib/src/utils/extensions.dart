@@ -140,20 +140,20 @@ extension XFileX on XFile {
   Future<Attachment> toAttachment({required String type}) async {
     final file = await toAttachmentFile;
 
-    final extraDataMap = <String, Object>{};
+    final customMap = <String, Object>{};
 
     final mimeType = this.mimeType ?? file.mediaType?.mimeType;
 
     if (mimeType != null) {
-      extraDataMap['mime_type'] = mimeType;
+      customMap['mime_type'] = mimeType;
     }
 
-    extraDataMap['file_size'] = file.size!;
+    customMap['file_size'] = file.size!;
 
     final attachment = Attachment(
       file: file,
       type: type,
-      extraData: extraDataMap,
+      custom: customMap,
     );
 
     return attachment;
@@ -718,7 +718,7 @@ extension VoiceRecordingAttachmentExtension on Attachment {
   /// Returns the duration of the voice recording attachment if available else
   /// returns [Duration.zero].
   Duration get duration {
-    final duration = extraData['duration'] as num?;
+    final duration = custom['duration'] as num?;
     if (duration == null) return Duration.zero;
 
     return Duration(milliseconds: (duration * 1000).round());
@@ -727,7 +727,7 @@ extension VoiceRecordingAttachmentExtension on Attachment {
   /// Returns the waveform data of the voice recording attachment if available
   /// else returns an empty list.
   List<double> get waveform {
-    final waveform = extraData['waveform_data'] as List<dynamic>?;
+    final waveform = custom['waveform_data'] as List<dynamic>?;
     if (waveform == null) return [];
 
     return [...waveform.map((e) => double.tryParse(e.toString())).nonNulls];

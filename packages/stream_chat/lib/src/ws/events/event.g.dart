@@ -22,7 +22,10 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
   ),
   totalUnreadCount: (json['total_unread_count'] as num?)?.toInt(),
   unreadChannels: (json['unread_channels'] as num?)?.toInt(),
-  reaction: json['reaction'] == null ? null : Reaction.fromJson(json['reaction'] as Map<String, dynamic>),
+  reaction: _$JsonConverterFromJson<Map<String, dynamic>, Reaction>(
+    json['reaction'],
+    const ReactionV1JsonConverter().fromJson,
+  ),
   online: json['online'] as bool?,
   channel: json['channel'] == null ? null : ChannelModel.fromJson(json['channel'] as Map<String, dynamic>),
   member: json['member'] == null ? null : Member.fromJson(json['member'] as Map<String, dynamic>),
@@ -48,7 +51,10 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
   unreadMessages: (json['unread_messages'] as num?)?.toInt(),
   lastReadMessageId: json['last_read_message_id'] as String?,
   draft: json['draft'] == null ? null : Draft.fromJson(json['draft'] as Map<String, dynamic>),
-  reminder: json['reminder'] == null ? null : MessageReminder.fromJson(json['reminder'] as Map<String, dynamic>),
+  reminder: _$JsonConverterFromJson<Map<String, dynamic>, MessageReminder>(
+    json['reminder'],
+    const MessageReminderV1JsonConverter().fromJson,
+  ),
   pushPreference: json['push_preference'] == null
       ? null
       : PushPreference.fromJson(json['push_preference'] as Map<String, dynamic>),
@@ -83,7 +89,10 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
   ),
   'channel': ?instance.channel?.toJson(),
   'member': ?instance.member?.toJson(),
-  'reaction': ?instance.reaction?.toJson(),
+  'reaction': ?_$JsonConverterToJson<Map<String, dynamic>, Reaction>(
+    instance.reaction,
+    const ReactionV1JsonConverter().toJson,
+  ),
   'total_unread_count': ?instance.totalUnreadCount,
   'unread_channels': ?instance.unreadChannels,
   'online': ?instance.online,
@@ -101,7 +110,10 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
   'unread_messages': ?instance.unreadMessages,
   'last_read_message_id': ?instance.lastReadMessageId,
   'draft': ?instance.draft?.toJson(),
-  'reminder': ?instance.reminder?.toJson(),
+  'reminder': ?_$JsonConverterToJson<Map<String, dynamic>, MessageReminder>(
+    instance.reminder,
+    const MessageReminderV1JsonConverter().toJson,
+  ),
   'push_preference': ?instance.pushPreference?.toJson(),
   'channel_push_preference': ?instance.channelPushPreference?.toJson(),
   'channel_member_count': ?instance.channelMemberCount,

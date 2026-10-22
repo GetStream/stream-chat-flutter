@@ -2,6 +2,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_core/stream_core.dart'
     show Filter, FilterField, NullOrdering, Sort, SortDirection, SortField, Standard, normalizeStringForSort;
 import 'channel_model.dart';
+import 'converters/v1_json_converters.dart';
 import 'draft.dart';
 import 'location.dart';
 import 'member.dart';
@@ -90,6 +91,7 @@ class ChannelState {
   final ChannelPushPreference? pushPreferences;
 
   /// The list of active live locations in the channel.
+  @LocationV1JsonConverter()
   final List<Location>? activeLiveLocations;
 
   /// Create a new instance from a json

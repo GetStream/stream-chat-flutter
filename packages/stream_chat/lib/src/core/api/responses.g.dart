@@ -65,7 +65,14 @@ QueryReactionsResponse _$QueryReactionsResponseFromJson(
 ) => QueryReactionsResponse()
   ..duration = json['duration'] as String?
   ..reactions =
-      (json['reactions'] as List<dynamic>?)?.map((e) => Reaction.fromJson(e as Map<String, dynamic>)).toList() ?? []
+      (json['reactions'] as List<dynamic>?)
+          ?.map(
+            (e) => const ReactionV1JsonConverter().fromJson(
+              e as Map<String, dynamic>,
+            ),
+          )
+          .toList() ??
+      []
   ..next = json['next'] as String?;
 
 QueryRepliesResponse _$QueryRepliesResponseFromJson(
@@ -80,7 +87,9 @@ SendReactionResponse _$SendReactionResponseFromJson(
 ) => SendReactionResponse()
   ..duration = json['duration'] as String?
   ..message = Message.fromJson(json['message'] as Map<String, dynamic>)
-  ..reaction = Reaction.fromJson(json['reaction'] as Map<String, dynamic>);
+  ..reaction = const ReactionV1JsonConverter().fromJson(
+    json['reaction'] as Map<String, dynamic>,
+  );
 
 UpdateMessageResponse _$UpdateMessageResponseFromJson(
   Map<String, dynamic> json,
@@ -210,31 +219,6 @@ QueryDraftsResponse _$QueryDraftsResponseFromJson(Map<String, dynamic> json) => 
   ..drafts = (json['drafts'] as List<dynamic>?)?.map((e) => Draft.fromJson(e as Map<String, dynamic>)).toList() ?? []
   ..next = json['next'] as String?;
 
-CreateReminderResponse _$CreateReminderResponseFromJson(
-  Map<String, dynamic> json,
-) => CreateReminderResponse()
-  ..duration = json['duration'] as String?
-  ..reminder = MessageReminder.fromJson(
-    json['reminder'] as Map<String, dynamic>,
-  );
-
-UpdateReminderResponse _$UpdateReminderResponseFromJson(
-  Map<String, dynamic> json,
-) => UpdateReminderResponse()
-  ..duration = json['duration'] as String?
-  ..reminder = MessageReminder.fromJson(
-    json['reminder'] as Map<String, dynamic>,
-  );
-
-QueryRemindersResponse _$QueryRemindersResponseFromJson(
-  Map<String, dynamic> json,
-) => QueryRemindersResponse()
-  ..duration = json['duration'] as String?
-  ..reminders =
-      (json['reminders'] as List<dynamic>?)?.map((e) => MessageReminder.fromJson(e as Map<String, dynamic>)).toList() ??
-      []
-  ..next = json['next'] as String?;
-
 UpsertPushPreferencesResponse _$UpsertPushPreferencesResponseFromJson(
   Map<String, dynamic> json,
 ) => UpsertPushPreferencesResponse()
@@ -261,5 +245,7 @@ GetActiveLiveLocationsResponse _$GetActiveLiveLocationsResponseFromJson(
 ) => GetActiveLiveLocationsResponse()
   ..duration = json['duration'] as String?
   ..activeLiveLocations = (json['active_live_locations'] as List<dynamic>)
-      .map((e) => Location.fromJson(e as Map<String, dynamic>))
+      .map(
+        (e) => const LocationV1JsonConverter().fromJson(e as Map<String, dynamic>),
+      )
       .toList();

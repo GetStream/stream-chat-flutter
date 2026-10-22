@@ -1,12 +1,18 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../db/data_serializable.dart';
+
+part 'reaction_group.freezed.dart';
 part 'reaction_group.g.dart';
 
-/// A model class representing a reaction group.
-@JsonSerializable()
-class ReactionGroup extends Equatable {
-  /// Create a new instance of [ReactionGroup].
+/// The reactions of one type on a message, counted and scored together.
+@freezed
+// TODO(openapi-migration): remove in group 10
+@DataSerializable()
+class ReactionGroup with _$ReactionGroup {
+  /// Creates a new [ReactionGroup].
+  ///
+  /// [firstReactionAt] and [lastReactionAt] default to now.
   ReactionGroup({
     this.count = 0,
     this.sumScores = 0,
@@ -15,46 +21,32 @@ class ReactionGroup extends Equatable {
   }) : firstReactionAt = firstReactionAt ?? DateTime.timestamp(),
        lastReactionAt = lastReactionAt ?? DateTime.timestamp();
 
-  /// Create a new instance from a json
-  factory ReactionGroup.fromJson(Map<String, dynamic> json) => _$ReactionGroupFromJson(json);
+  /// Creates a [ReactionGroup] from the offline-database format written by
+  /// [toData].
+  ///
+  /// It is not a codec for API payloads.
+  factory ReactionGroup.fromData(Map<String, dynamic> json) => _$ReactionGroupFromJson(json);
 
   /// The number of users that reacted with this reaction.
+  @override
   final int count;
 
   /// The sum of scores of all reactions in this group.
+  @override
   final int sumScores;
 
   /// The date of the first reaction in this group.
+  @override
   final DateTime firstReactionAt;
 
   /// The date of the last reaction in this group.
+  @override
   final DateTime lastReactionAt;
 
-  /// Serialize to json
-  Map<String, dynamic> toJson() => _$ReactionGroupToJson(this);
-
-  /// Creates a copy of [Reaction] with specified attributes overridden.
-  ReactionGroup copyWith({
-    int? count,
-    int? sumScores,
-    DateTime? firstReactionAt,
-    DateTime? lastReactionAt,
-  }) {
-    return ReactionGroup(
-      count: count ?? this.count,
-      sumScores: sumScores ?? this.sumScores,
-      firstReactionAt: firstReactionAt ?? this.firstReactionAt,
-      lastReactionAt: lastReactionAt ?? this.lastReactionAt,
-    );
-  }
-
-  @override
-  List<Object?> get props => [
-    count,
-    sumScores,
-    firstReactionAt,
-    lastReactionAt,
-  ];
+  /// Serializes this group to the format `stream_chat_persistence` stores.
+  ///
+  /// It is not a codec for API payloads.
+  Map<String, dynamic> toData() => _$ReactionGroupToJson(this);
 }
 
 /// A group of comparators for sorting [ReactionGroup]s.

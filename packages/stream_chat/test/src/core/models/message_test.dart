@@ -54,6 +54,11 @@ void main() {
       expect(message.i18n, null);
       expect(message.restrictedVisibility, isA<List<String>>());
       expect(message.channelRole, 'channel_member');
+      expect(message.cid, 'messaging:general');
+      expect(message.html, '<p>Hi</p>');
+      expect(message.mml, '<mml>Hi</mml>');
+      expect(message.deletedReplyCount, 2);
+      expect(message.custom, {'status': 'SENT'});
     });
 
     test('should serialize to json correctly', () {
@@ -82,7 +87,7 @@ void main() {
         showInChannel: true,
         parentId: 'parentId',
         restrictedVisibility: const ['user-id-3'],
-        extraData: const {'hey': 'test'},
+        custom: const {'hey': 'test'},
       );
 
       expect(
@@ -377,11 +382,11 @@ void main() {
         );
       });
 
-      test('a custom field orders by the message extra data', () {
+      test('a custom field orders by the message custom data', () {
         expectOrders(
           MessageSearchSortField.custom('priority'),
-          createTestMessage(id: 'a', extraData: const {'priority': 1}),
-          createTestMessage(id: 'b', extraData: const {'priority': 10}),
+          createTestMessage(id: 'a', custom: const {'priority': 1}),
+          createTestMessage(id: 'b', custom: const {'priority': 10}),
         );
       });
 
@@ -458,24 +463,134 @@ void main() {
       );
 
       test(
-        'synthesizes groups from legacy reaction_counts/reaction_scores '
-        'even when the score total is zero or negative',
+        'Message.fromJson synthesizes groups from legacy reaction_counts/reaction_scores '
+        'for the types with a positive count, whatever their score',
         () {
           final message = Message.fromJson(const {
-            'reaction_counts': {'like': 2, 'dislike': 3},
-            'reaction_scores': {'like': 0, 'dislike': -3},
+            'reaction_counts': {'like': 2, 'dislike': 3, 'wow': 0},
+            'reaction_scores': {'like': 0, 'dislike': -3, 'wow': 0},
           });
 
-          // Both groups must be retained because their count is positive, even
-          // though the summed scores are zero and negative respectively.
-          expect(message.reactionGroups, isNotNull);
+          // 'like' and 'dislike' are retained because their count is positive,
+          // even though the summed scores are zero and negative respectively;
+          // 'wow' has no reaction left.
+          expect(message.reactionGroups!.keys, unorderedEquals(['like', 'dislike']));
           expect(message.reactionGroups!['like']!.count, 2);
           expect(message.reactionGroups!['like']!.sumScores, 0);
           expect(message.reactionGroups!['dislike']!.count, 3);
           expect(message.reactionGroups!['dislike']!.sumScores, -3);
         },
       );
+
+      test('Message.fromJson prefers reaction_groups over legacy reaction_counts/reaction_scores', () {
+        final message = Message.fromJson(const {
+          'reaction_groups': {
+            'like': {
+              'count': 1,
+              'sum_scores': 2,
+              'first_reaction_at': '2026-01-05T00:00:00.000Z',
+              'last_reaction_at': '2026-01-06T00:00:00.000Z',
+            },
+          },
+          // The groups' dates tell them apart from groups built from these.
+          'reaction_counts': {'like': 1},
+          'reaction_scores': {'like': 2},
+        });
+
+        expect(message.reactionGroups, {
+          'like': ReactionGroup(
+            count: 1,
+            sumScores: 2,
+            firstReactionAt: DateTime.utc(2026, 1, 5),
+            lastReactionAt: DateTime.utc(2026, 1, 6),
+          ),
+        });
+      });
     });
+  });
+
+  test('Message.toJson leaves out custom data named like a field', () {
+    final message = Message(text: 'Hi', custom: const {'text': 'custom', 'priority': 'high'});
+
+    final json = message.toJson();
+
+    expect(json['text'], 'Hi');
+    expect(json['priority'], 'high');
+  });
+
+  test('Message.toJson leaves out the fields only fromJson reads', () {
+    final message = Message(cid: 'messaging:general', html: '<p>Hi</p>', mml: '<mml>Hi</mml>', deletedReplyCount: 2);
+
+    expect(
+      message.toJson().keys,
+      isNot(anyOf(contains('cid'), contains('html'), contains('mml'), contains('deleted_reply_count'))),
+    );
+  });
+
+  test('Message.copyWith keeps the channel id, HTML, markup and deleted reply count', () {
+    final message = Message(cid: 'messaging:general', html: '<p>Hi</p>', mml: '<mml>Hi</mml>', deletedReplyCount: 2);
+
+    expect(
+      message.copyWith(text: 'Hi'),
+      Message(
+        id: message.id,
+        text: 'Hi',
+        cid: 'messaging:general',
+        html: '<p>Hi</p>',
+        mml: '<mml>Hi</mml>',
+        deletedReplyCount: 2,
+      ),
+    );
+  });
+
+  test(
+    'Message.fromJson reads a message deleted only for the current user as deleted, even when it is soft-deleted',
+    () {
+      final message = Message.fromJson(const {
+        'id': 'message-id',
+        'type': 'regular',
+        'deleted_for_me': true,
+        'deleted_at': '2026-01-03T00:00:00.000Z',
+        'created_at': '2026-01-01T00:00:00.000Z',
+        'updated_at': '2026-01-02T00:00:00.000Z',
+      });
+
+      expect((message.type, message.state), (MessageType.deleted, MessageState.deletedForMe));
+    },
+  );
+
+  test('Message.fromJson reads a deleted message as soft-deleted', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'type': 'deleted',
+      'deleted_at': '2026-01-03T00:00:00.000Z',
+      'created_at': '2026-01-01T00:00:00.000Z',
+      'updated_at': '2026-01-02T00:00:00.000Z',
+    });
+
+    expect((message.type, message.state), (MessageType.deleted, MessageState.softDeleted));
+  });
+
+  test('Message.fromJson reads a message updated after it was created as updated', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'type': 'regular',
+      'created_at': '2026-01-01T00:00:00.000Z',
+      'updated_at': '2026-01-02T00:00:00.000Z',
+    });
+
+    expect((message.type, message.state), (MessageType.regular, MessageState.updated));
+  });
+
+  test('Message.fromJson reads a message never updated as sent', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'type': 'regular',
+      'created_at': '2026-01-01T00:00:00.000Z',
+      'updated_at': '2026-01-01T00:00:00.000Z',
+    });
+
+    expect((message.type, message.state), (MessageType.regular, MessageState.sent));
   });
 
   group('MessageVisibility Extension Tests', () {
@@ -1026,7 +1141,7 @@ Message createTestMessage({
   DateTime? createdAt,
   DateTime? updatedAt,
   User? user,
-  Map<String, Object?>? extraData,
+  Map<String, Object?>? custom,
   List<String>? restrictedVisibility,
   Poll? poll,
   String? pollId,
@@ -1044,7 +1159,7 @@ Message createTestMessage({
     localCreatedAt: createdAt,
     localUpdatedAt: updatedAt,
     user: user,
-    extraData: extraData ?? {},
+    custom: custom ?? {},
     restrictedVisibility: restrictedVisibility,
     poll: poll,
     pollId: pollId,
