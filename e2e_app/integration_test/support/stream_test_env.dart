@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:e2e_app/app.dart';
 import 'package:e2e_app/auth/auth_controller.dart';
+import 'package:e2e_app/widgets/e2e_message_actions.dart' show lastCopiedMessageId;
 import 'package:flutter/widgets.dart' show AppLifecycleState, SizedBox;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -252,6 +253,7 @@ class StreamTestEnv {
       // pointer routes that break every later test sharing the process.
       await _tester.pumpWidget(const SizedBox.shrink());
       await authController.debugReset();
+      lastCopiedMessageId = null;
     } finally {
       // Null when tearDown runs before setUp installed the fake.
       if (_realUrlLauncher case final real?) UrlLauncherPlatform.instance = real;

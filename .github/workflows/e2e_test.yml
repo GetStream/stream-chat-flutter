@@ -132,9 +132,12 @@ jobs:
 
       - name: Attach videos to failed tests
         if: failure()
+        # Videos only help debugging: a slow apt mirror (19 min once) must not hold the job.
+        timeout-minutes: 5
+        continue-on-error: true
         working-directory: e2e_app
         run: |
-          sudo apt-get update && sudo apt-get install -y ffmpeg
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
           bundle exec fastlane attach_videos
 
       - name: Upload Allure results

@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+/// The id the last "Copy Message ID" copied.
+///
+/// "Open Message by ID" reads it from here rather than from the system clipboard,
+/// which Android may refuse to read back (an app without input focus gets nothing).
+/// The id still goes on the clipboard for manual use.
+String? lastCopiedMessageId;
+
 /// Adds the message actions the native test apps offer and the SDK does not:
 ///
 ///  * "Hard Delete Message", for the user's own messages — the SDK only
@@ -29,7 +36,10 @@ Widget e2eMessageItemBuilder(BuildContext context, StreamMessageItemProps props)
             StreamContextMenuAction(
               label: const Text('Copy Message ID'),
               leading: Icon(context.streamIcons.copy),
-              onTap: () => Clipboard.setData(ClipboardData(text: message.id)).ignore(),
+              onTap: () {
+                lastCopiedMessageId = message.id;
+                Clipboard.setData(ClipboardData(text: message.id)).ignore();
+              },
             ),
           ],
         );

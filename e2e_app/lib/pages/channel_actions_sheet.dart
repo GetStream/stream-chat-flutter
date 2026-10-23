@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../navigation.dart';
+import '../widgets/e2e_message_actions.dart';
 
 /// The sheet a long press (or the swipe's "more" action) opens on a channel.
 Future<void> showChannelActionsSheet(BuildContext context, Channel channel) {
@@ -59,11 +60,11 @@ class _ChannelActions extends StatelessWidget {
           title: Text(channel.isOneToOne ? 'Delete Chat' : 'Delete Group'),
           onTap: () => run(() => _delete(hostContext, channel)),
         ),
-        // Debug: opens the message whose id "Copy Message ID" put on the clipboard.
+        // Debug: opens the message whose id "Copy Message ID" copied.
         ListTile(
           title: const Text('Open Message by ID'),
           onTap: () => run(() async {
-            final messageId = (await Clipboard.getData(Clipboard.kTextPlain))?.text;
+            final messageId = lastCopiedMessageId ?? (await Clipboard.getData(Clipboard.kTextPlain))?.text;
             if (messageId == null || messageId.isEmpty || !hostContext.mounted) return;
             return openMessage(hostContext, channel, messageId);
           }),
