@@ -653,6 +653,7 @@ void main() {
     tester.testTextInput.enterText('Option 2 edited');
     await tester.pump();
 
+    expect(find.text('Option 1'), findsOneWidget);
     expect(find.text('Option 2 edited'), findsOneWidget);
   });
 
