@@ -217,6 +217,7 @@ void main() {
   // MARK: Extended reactions
 
   streamTestWithEnv(
+    allureId: '12810',
     description: 'user adds a reaction using the extended reactions picker',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -235,6 +236,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12811',
     description: 'user removes a reaction using the extended reactions picker',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -258,6 +260,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12812',
     description: 'reaction authors sheet is shown when the user taps on a reaction',
     body: (env) async {
       const message = 'test message';
@@ -300,6 +303,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12813',
     description: 'participant adds a reaction to a thread reply',
     body: (env) async {
       const message = 'message';

@@ -13,6 +13,7 @@ void main() {
   const groupChannelName = '1';
 
   streamTestWithEnv(
+    allureId: '12784',
     description: 'user flags a message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -37,6 +38,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12785',
     description: 'user mutes the message author',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -55,6 +57,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12786',
     description: 'user unmutes the message author',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -76,6 +79,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12787',
     description: 'muted author stays muted when the user reopens the channel',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -97,6 +101,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12788',
     description: 'user blocks the message author',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -115,6 +120,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12789',
     description: 'user unblocks the message author',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -138,6 +144,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12790',
     description: 'blocked author stays blocked when the user reopens the channel',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -161,6 +168,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12791',
     description: 'user blocks the participant in a direct message channel',
     skip: 'https://linear.app/stream/issue/FLU-1085',
     body: (env) async {
@@ -179,6 +187,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12792',
     description: 'direct message channel disappears when the user blocks the participant',
     skip: 'https://linear.app/stream/issue/FLU-1085',
     body: (env) async {

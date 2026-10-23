@@ -8,6 +8,7 @@ import 'support/stream_test_case.dart';
 
 void main() {
   streamTestWithEnv(
+    allureId: '12689',
     description: 'channel list is shown when the user logs out and logs back in',
     body: (env) async {
       step('GIVEN the user logs in');
@@ -29,6 +30,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12690',
     description: 'channel list is shown when the user logs out while it is loading and logs back in',
     body: (env) async {
       step('GIVEN the user logs in');
@@ -51,6 +53,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12691',
     description: 'user logs in as another user after logging out',
     body: (env) async {
       const firstUserMessage = 'message from the first user';

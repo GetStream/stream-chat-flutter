@@ -12,6 +12,7 @@ void main() {
   const options = [firstOption, secondOption];
 
   streamTestWithEnv(
+    allureId: '12799',
     description: 'poll message is shown when the user creates a poll',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -26,6 +27,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12800',
     description: 'option is checked when the user votes in a poll',
     body: (env) async {
       step('GIVEN the user creates a poll');
@@ -40,6 +42,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12801',
     description: 'option is unchecked when the user removes the poll vote',
     body: (env) async {
       step('GIVEN the user creates a poll and votes');
@@ -59,6 +62,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12802',
     description: 'participant vote is shown in the poll results',
     body: (env) async {
       step('GIVEN the user creates a poll');
@@ -78,6 +82,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12803',
     description: 'poll is closed when the user ends it',
     body: (env) async {
       step('GIVEN the user creates a poll');
@@ -92,6 +97,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12804',
     description: 'user votes for several options when the poll allows multiple votes',
     body: (env) async {
       step('GIVEN the user creates a poll that allows multiple votes');

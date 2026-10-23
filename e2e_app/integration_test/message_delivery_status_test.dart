@@ -17,6 +17,7 @@ void main() {
   // MARK: Message list
 
   streamTestWithEnv(
+    allureId: '12716',
     description: 'single checkmark is shown when a message is sent',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -31,6 +32,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12717',
     description: 'delivery status shows clocks when a message is pending',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -50,6 +52,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12718',
     description: 'error indicator is shown when a message fails to be sent',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -66,6 +69,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12719',
     description: 'double checkmark is shown when the participant reads a message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -83,6 +87,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12720',
     description: 'delivered checkmark turns read when the participant reads the message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -106,6 +111,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12721',
     description: 'delivery status is shown for the last message in a group',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -125,6 +131,7 @@ void main() {
   streamTestWithEnv(
     // The native suites disagree: Android and UIKit hide the status of a deleted
     // message, SwiftUI keeps it (`test_deliveryStatusShown_whenMessageIsDeleted`).
+    allureId: '12722',
     description: 'delivery status is shown when a message is deleted',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -142,6 +149,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12723',
     description: 'delivery status is shown for the previous message when an error message is shown',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -159,6 +167,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12724',
     description: 'delivery status is shown for the previous message when a new message fails to be sent',
     skip: 'https://linear.app/stream/issue/FLU-1090',
     body: (env) async {
@@ -182,6 +191,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12725',
     description: 'message that failed to be sent cannot be previewed in a thread',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -205,6 +215,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12726',
     description: 'double checkmark is still shown when a new participant is added',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -226,6 +237,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12727',
     description: 'read status is dropped when the participant is removed',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -249,6 +261,7 @@ void main() {
   // MARK: Threads
 
   streamTestWithEnv(
+    allureId: '12728',
     description: 'single checkmark is shown when a message is sent and previewed in a thread',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -272,6 +285,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12729',
     description: 'single checkmark is shown when a thread reply is sent',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -290,6 +304,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12730',
     description: 'error indicator is shown when a thread reply fails to be sent',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -307,6 +322,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12731',
     description: 'double checkmark is shown when the participant reads a thread reply',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -328,6 +344,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12732',
     description: 'double checkmark is shown when the participant reads a thread reply also sent to the channel',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -355,6 +372,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12733',
     description: 'delivery status is shown for the last thread reply in a group',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -378,6 +396,7 @@ void main() {
   streamTestWithEnv(
     // SwiftUI's `test_deliveryStatusShown_whenThreadReplyIsDeleted`; see the
     // deleted message case above.
+    allureId: '12734',
     description: 'delivery status is shown when a thread reply is deleted',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -397,6 +416,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12735',
     description: 'thread reply has no double checkmark when a new participant is added',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -418,6 +438,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12736',
     description: 'read status of a thread reply is dropped when the participant is removed',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -443,6 +464,7 @@ void main() {
   // MARK: Channel preview
 
   streamTestWithEnv(
+    allureId: '12737',
     description: 'channel preview shows clocks when the last message is pending',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -465,6 +487,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12738',
     description: 'channel preview shows a single checkmark when the last message is sent',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -482,6 +505,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12739',
     description: 'channel preview shows an error indicator when the message fails to be sent',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -501,6 +525,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12740',
     description: 'channel preview shows a double checkmark when the participant reads the message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -521,6 +546,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12741',
     description: 'channel preview shows no delivery status when the participant sends the message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -541,6 +567,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12742',
     description: 'channel preview shows no delivery status when the user sends a thread reply',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -564,6 +591,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12743',
     description: 'channel preview shows a single checkmark when a thread reply is pending',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -590,6 +618,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12744',
     description: 'channel preview shows no delivery status when the participant reads a thread reply',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -614,6 +643,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12745',
     description: 'channel preview shows no delivery status when the participant sends a thread reply',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -638,6 +668,7 @@ void main() {
   // MARK: Read events disabled
 
   streamTestWithEnv(
+    allureId: '12746',
     description: 'delivery status is hidden when a message is sent and read events are disabled',
     skip: 'https://linear.app/stream/issue/FLU-1091',
     body: (env) async {
@@ -654,6 +685,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12747',
     description: 'delivery status shows clocks when a message is pending and read events are disabled',
     body: (env) async {
       step('GIVEN read events are disabled and the user opens a channel');
@@ -674,6 +706,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12748',
     description: 'error indicator is shown when a message fails to be sent and read events are disabled',
     body: (env) async {
       step('GIVEN read events are disabled and the user opens a channel');
@@ -691,6 +724,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12749',
     description: 'delivery status is hidden when the participant reads a message and read events are disabled',
     skip: 'https://linear.app/stream/issue/FLU-1091',
     body: (env) async {
@@ -710,6 +744,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12750',
     description: 'delivery status is hidden when a new participant is added and read events are disabled',
     skip: 'https://linear.app/stream/issue/FLU-1091',
     body: (env) async {
@@ -732,6 +767,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12751',
     description: 'delivery status is hidden when the participant is removed and read events are disabled',
     skip: 'https://linear.app/stream/issue/FLU-1091',
     body: (env) async {
@@ -754,6 +790,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12752',
     description: 'delivery status is hidden for grouped messages when read events are disabled',
     skip: 'https://linear.app/stream/issue/FLU-1091',
     body: (env) async {
@@ -775,6 +812,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12753',
     description: 'delivery status is hidden when a message is deleted and read events are disabled',
     skip: 'https://linear.app/stream/issue/FLU-1091',
     body: (env) async {
@@ -797,6 +835,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12754',
     description: 'channel preview shows no delivery status when read events are disabled',
     skip: 'https://linear.app/stream/issue/FLU-1091',
     body: (env) async {

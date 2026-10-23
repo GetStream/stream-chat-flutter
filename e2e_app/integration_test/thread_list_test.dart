@@ -8,6 +8,7 @@ void main() {
   const replyText = 'Reply';
 
   streamTestWithEnv(
+    allureId: '12827',
     description: 'thread list is empty when the channel has no threads',
     body: (env) async {
       step('GIVEN the user logs in');
@@ -22,6 +23,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12828',
     description: 'thread is shown on the thread list',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -43,6 +45,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12829',
     description: 'user opens a thread from the thread list',
     body: (env) async {
       step('GIVEN the user opens a channel');

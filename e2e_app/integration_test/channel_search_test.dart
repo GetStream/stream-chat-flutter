@@ -8,6 +8,7 @@ void main() {
   const searchQuery = 'Blue';
 
   streamTestWithEnv(
+    allureId: '12688',
     description: 'user searches for a channel',
     body: (env) async {
       step('GIVEN channels exist, one with a searchable name');

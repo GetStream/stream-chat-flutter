@@ -787,6 +787,7 @@ void main() {
   // MARK: Jumping
 
   streamTestWithEnv(
+    allureId: '12805',
     description: 'channel preview does not change when the user leaves the channel after jumping to a mid page',
     body: (env) async {
       const messageCount = 60;
@@ -821,6 +822,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12806',
     description: 'quoted message is present after re-entering the channel and loading new messages',
     body: (env) async {
       const messageCount = 60;
@@ -855,6 +857,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12807',
     description: 'user jumps from the channel to a quoted message in a thread',
     skip: 'https://linear.app/stream/issue/FLU-1095',
     body: (env) async {
@@ -892,6 +895,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12808',
     description: 'user jumps from the channel to a regular message in a thread',
     body: (env) async {
       const threadReply = 'also in channel';
@@ -923,6 +927,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12809',
     description: 'user jumps to a message in a thread opened by its id from the channel list',
     body: (env) async {
       const threadReply = 'jump target';

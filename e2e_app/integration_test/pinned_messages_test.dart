@@ -9,6 +9,7 @@ void main() {
   const sampleText = 'Test';
 
   streamTestWithEnv(
+    allureId: '12793',
     description: 'user pins a message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -27,6 +28,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12794',
     description: 'user unpins a message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -48,6 +50,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12795',
     description: 'participant pins a message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -65,6 +68,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12796',
     description: 'participant unpins a message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -86,6 +90,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12797',
     description: 'pinned message is shown on the pinned messages screen',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -107,6 +112,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12798',
     description: 'unpinned message is not shown on the pinned messages screen',
     body: (env) async {
       step('GIVEN the user opens a channel');

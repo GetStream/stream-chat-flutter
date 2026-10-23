@@ -348,6 +348,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12685',
     description: 'channel preview is updated when the participant edits the preview message',
     body: (env) async {
       const message = 'message';
@@ -373,6 +374,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12686',
     description: 'typing indicator is shown in the channel preview when the participant types',
     body: (env) async {
       step('GIVEN the user opens the channel list');
@@ -393,6 +395,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12687',
     description: 'channel list is reordered after the oldest channel gets a message while offline',
     body: (env) async {
       const message = 'message';

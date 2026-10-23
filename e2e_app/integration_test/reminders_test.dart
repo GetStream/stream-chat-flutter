@@ -8,6 +8,7 @@ void main() {
   const oneHourInSeconds = 3600;
 
   streamTestWithEnv(
+    allureId: '12814',
     description: 'reminders screen is empty when the user has no reminders',
     body: (env) async {
       step('GIVEN the user logs in');
@@ -22,6 +23,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12815',
     description: 'reminder saved for later is shown on the reminders screen',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -43,6 +45,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12816',
     description: 'scheduled reminder is shown on the reminders screen',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -64,6 +67,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12817',
     description: 'reminder saved for later is shown on the message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -85,6 +89,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12818',
     description: 'scheduled reminder is shown on the message',
     body: (env) async {
       step('GIVEN the user opens a channel');

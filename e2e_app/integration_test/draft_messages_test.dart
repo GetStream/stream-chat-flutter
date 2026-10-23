@@ -9,6 +9,7 @@ void main() {
   const draftMessage = 'alright';
 
   streamTestWithEnv(
+    allureId: '12692',
     description: 'user updates a channel draft message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -50,6 +51,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12693',
     description: 'user updates a thread draft message',
     body: (env) async {
       step('GIVEN the user opens a thread');
@@ -82,6 +84,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12694',
     description: 'user updates a draft message while offline',
     skip: 'https://linear.app/stream/issue/FLU-1086',
     body: (env) async {

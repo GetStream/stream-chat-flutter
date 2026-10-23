@@ -7,6 +7,7 @@ void main() {
   const sampleText = 'Test';
 
   streamTestWithEnv(
+    allureId: '12715',
     description: 'user copies a message',
     body: (env) async {
       step('GIVEN the user opens a channel');

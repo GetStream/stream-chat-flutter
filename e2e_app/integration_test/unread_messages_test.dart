@@ -9,6 +9,7 @@ void main() {
   const sampleText = 'Test';
 
   streamTestWithEnv(
+    allureId: '12835',
     description: 'unread separator is shown when the participant sends messages while the user is away',
     skip: 'https://linear.app/stream/issue/FLU-1098',
     body: (env) async {
@@ -38,6 +39,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12836',
     description: 'user scrolls to the first unread message',
     skip: 'https://linear.app/stream/issue/FLU-1098',
     body: (env) async {
@@ -73,6 +75,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12837',
     description: 'user marks a message as unread',
     body: (env) async {
       const unreadCount = 2;
@@ -99,6 +102,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12838',
     description: 'jump to unread button shows the unread count when the user marks a message as unread',
     body: (env) async {
       const unreadCount = 25;
@@ -125,6 +129,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12839',
     description: 'user dismisses the unread indicator',
     body: (env) async {
       const unreadCount = 25;
@@ -153,6 +158,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12840',
     description: 'channel unread count is reset when the user reads the channel',
     body: (env) async {
       const unreadCount = 2;

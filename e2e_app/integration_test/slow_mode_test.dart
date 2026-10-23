@@ -12,6 +12,7 @@ void main() {
   const editedMessage = 'edited message';
 
   streamTestWithEnv(
+    allureId: '12821',
     description: 'cooldown is shown when a new message is sent',
     body: (env) async {
       step('GIVEN slow mode is enabled on the channel');
@@ -29,6 +30,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12822',
     description: 'composer is disabled while slow mode is active',
     body: (env) async {
       step('GIVEN slow mode is enabled on the channel');
@@ -46,6 +48,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12823',
     description: 'cooldown is shown when the user replies to a message',
     body: (env) async {
       step('GIVEN slow mode is enabled on the channel');
@@ -70,6 +73,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12824',
     description: 'message cannot be replied to while the cooldown is shown',
     body: (env) async {
       step('GIVEN slow mode is enabled on the channel');
@@ -90,6 +94,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12825',
     description: 'cooldown carries over into a thread',
     body: (env) async {
       step('GIVEN slow mode is enabled on the channel');
@@ -110,6 +115,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12826',
     description: 'cooldown is not shown when a message is edited',
     body: (env) async {
       step('GIVEN slow mode is enabled on a channel with a message');

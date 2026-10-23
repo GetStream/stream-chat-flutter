@@ -6,6 +6,7 @@ import 'support/stream_test_case.dart';
 
 void main() {
   streamTestWithEnv(
+    allureId: '12677',
     description: 'channel actions sheet is shown when the user long-presses the channel',
     body: (env) async {
       step('GIVEN the user logs in');
@@ -20,6 +21,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12678',
     description: 'channel actions sheet is shown when the user swipes the channel',
     body: (env) async {
       step('GIVEN the user logs in');
@@ -34,6 +36,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12679',
     description: 'user opens the channel info from the channel actions sheet',
     body: (env) async {
       step('GIVEN the user logs in');
@@ -51,6 +54,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12680',
     description: 'user leaves a group channel',
     body: (env) async {
       step('GIVEN the user logs in');
@@ -68,6 +72,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12681',
     description: 'user deletes a group channel',
     body: (env) async {
       step('GIVEN the user logs in');
@@ -85,6 +90,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12682',
     description: 'user mutes a channel from the swipe action',
     body: (env) async {
       step('GIVEN the user logs in');
@@ -99,6 +105,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12683',
     description: 'user unmutes a channel from the swipe action',
     body: (env) async {
       step('GIVEN the user logs in');
@@ -116,6 +123,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12684',
     description: 'app does not crash when the user goes back after being removed from the open channel',
     skip: 'https://linear.app/stream/issue/FLU-1085',
     body: (env) async {

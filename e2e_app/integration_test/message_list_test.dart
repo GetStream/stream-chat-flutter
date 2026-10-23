@@ -335,6 +335,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12755',
     description: 'thread reply also sent to the channel by the user appears in both places',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -411,6 +412,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12756',
     description: 'thread reply is removed everywhere when the participant removes it from the channel',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -433,6 +435,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12757',
     description: 'thread reply is removed everywhere when the user removes it from the channel',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -455,6 +458,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12758',
     description: 'thread reply is removed everywhere when the user removes it from the thread',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -477,6 +481,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12759',
     description: 'participant removes a thread reply',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -500,6 +505,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12760',
     description: 'user removes a thread reply',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -522,6 +528,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12761',
     description: 'thread is not locked after the user deletes the parent message',
     skip: 'https://linear.app/stream/issue/FLU-1092',
     body: (env) async {
@@ -542,6 +549,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12762',
     description: 'thread is not locked after the participant deletes the parent message',
     skip: 'https://linear.app/stream/issue/FLU-1092',
     body: (env) async {
@@ -567,6 +575,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12763',
     description: 'user hard-deletes a message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -584,6 +593,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12764',
     description: 'user hard-deletes a message in a channel with history',
     body: (env) async {
       const message = 'test message';
@@ -627,6 +637,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12765',
     description: 'user fills the composer by mentioning the participant through the mentions overlay',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -643,6 +654,7 @@ void main() {
   // MARK: Commands
 
   streamTestWithEnv(
+    allureId: '12766',
     description: 'selecting a command hides the attachments button',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -660,6 +672,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12767',
     description: 'command suggestions disappear when the user taps on the message list',
     skip: 'https://linear.app/stream/issue/FLU-1093',
     body: (env) async {
@@ -720,6 +733,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12768',
     description: 'message list scrolls down when scrolled up and the user sends a message',
     body: (env) async {
       step('GIVEN the user opens a channel with history');
@@ -738,6 +752,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12769',
     description: 'message list scrolls down when the user taps the scroll to bottom button',
     body: (env) async {
       const newMessage = 'New message';
@@ -761,6 +776,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12770',
     description: 'skipped messages are reloaded when the user scrolls to the bottom',
     body: (env) async {
       step('GIVEN the user opens a channel with history');
@@ -782,6 +798,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12771',
     description: 'scroll to bottom button shows the unread count',
     body: (env) async {
       const newMessage = 'New message';
@@ -830,6 +847,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12772',
     description: 'user paginates a thread',
     body: (env) async {
       const repliesCount = 60;
@@ -897,6 +915,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12773',
     description: 'user sees a link preview for their own YouTube link',
     body: (env) async {
       const link = 'https://youtube.com/watch?v=xOX7MsrbaPY';
@@ -913,6 +932,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12774',
     description: 'user sees a link preview for their own Unsplash link',
     skip: 'https://linear.app/stream/issue/FLU-1088',
     body: (env) async {
@@ -930,6 +950,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12775',
     description: 'user sees a link preview for an Unsplash link',
     skip: 'https://linear.app/stream/issue/FLU-1088',
     body: (env) async {
@@ -947,6 +968,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12776',
     description: 'message with a link without a scheme opens the browser',
     skip: 'https://linear.app/stream/issue/FLU-1094',
     body: (env) async {
@@ -1011,6 +1033,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12777',
     description: 'message ends its group when followed by an error message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -1031,6 +1054,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12778',
     description: 'message renders its timestamp again when the last message of its group is hard-deleted',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -1050,6 +1074,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12779',
     description: 'message renders its timestamp again when the last message of its group is soft-deleted',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -1071,6 +1096,7 @@ void main() {
   // MARK: Thread reply editing
 
   streamTestWithEnv(
+    allureId: '12780',
     description: 'user edits a thread reply',
     body: (env) async {
       const threadReply = 'thread reply';
@@ -1095,6 +1121,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12781',
     description: 'participant edits a thread reply',
     body: (env) async {
       const threadReply = 'thread reply';
@@ -1121,6 +1148,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12782',
     description: 'thread reply also sent to the channel is edited everywhere when the participant edits it',
     body: (env) async {
       const threadReply = 'thread reply';
@@ -1148,6 +1176,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12783',
     description: 'thread reply is removed everywhere when the participant removes it from the thread',
     body: (env) async {
       const threadReply = 'thread reply';

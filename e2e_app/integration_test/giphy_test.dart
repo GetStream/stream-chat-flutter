@@ -7,6 +7,7 @@ import 'support/stream_test_case.dart';
 
 void main() {
   streamTestWithEnv(
+    allureId: '12695',
     description: 'user observes a Giphy when the user adds it',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -21,6 +22,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12696',
     description: 'user observes a Giphy when the participant adds it',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -35,6 +37,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12697',
     description: 'user observes a Giphy when the user adds it in a thread',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -50,6 +53,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12698',
     description: 'user observes a Giphy when the participant adds it in a thread',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -65,6 +69,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12699',
     description: 'user observes a Giphy after adding it through the composer commands',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -79,6 +84,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12700',
     description: 'message is not sent when the user sends an invalid command',
     body: (env) async {
       const invalidCommand = 'invalid command';
@@ -101,6 +107,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12701',
     description: 'channel list is not modified when an ephemeral message is shown',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -118,6 +125,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12702',
     description: 'delivery status is hidden when an ephemeral message is shown',
     skip: 'https://linear.app/stream/issue/FLU-1087',
     body: (env) async {
@@ -133,6 +141,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12703',
     description: 'delivery status is hidden when an ephemeral message is shown in a thread',
     skip: 'https://linear.app/stream/issue/FLU-1087',
     body: (env) async {
@@ -149,6 +158,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12704',
     description: 'message is not sent when the user cancels the ephemeral message',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -163,6 +173,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12705',
     description: 'user observes a Giphy after shuffling it',
     body: (env) async {
       step('GIVEN the user opens a channel');

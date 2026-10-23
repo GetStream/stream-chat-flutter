@@ -8,6 +8,7 @@ void main() {
   const sampleText = 'Test';
 
   streamTestWithEnv(
+    allureId: '12819',
     description: 'user searches for a message',
     body: (env) async {
       step('GIVEN the user opens the channel list');
@@ -26,6 +27,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12820',
     description: 'user opens a message from the search results',
     body: (env) async {
       step('GIVEN the user opens the channel list');

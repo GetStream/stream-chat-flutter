@@ -15,6 +15,7 @@ void main() {
   const enrichedAfterDismissal = 'https://linear.app/stream/issue/FLU-1089';
 
   streamTestWithEnv(
+    allureId: '12706',
     description: 'user sends a Unsplash link with a preview',
     skip: noPreviewForImageOg,
     body: (env) async {
@@ -39,6 +40,7 @@ void main() {
 
   // Passes only because the Unsplash preview never renders at all (FLU-1088).
   streamTestWithEnv(
+    allureId: '12707',
     description: 'user sends a Unsplash link without a preview',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -64,6 +66,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12708',
     description: 'participant sends a Unsplash link',
     skip: noPreviewForImageOg,
     body: (env) async {
@@ -81,6 +84,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12709',
     description: 'user sends a YouTube link with a preview',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -103,6 +107,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12710',
     description: 'user sends a YouTube link without a preview',
     skip: enrichedAfterDismissal,
     body: (env) async {
@@ -129,6 +134,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12711',
     description: 'participant sends a YouTube link',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -145,6 +151,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12712',
     description: 'user sends a Giphy link with a preview',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -167,6 +174,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12713',
     description: 'user sends a Giphy link without a preview',
     skip: enrichedAfterDismissal,
     body: (env) async {
@@ -193,6 +201,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12714',
     description: 'participant sends a Giphy link',
     body: (env) async {
       step('GIVEN the user opens a channel');

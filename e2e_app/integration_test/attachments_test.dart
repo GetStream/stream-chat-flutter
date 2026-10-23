@@ -8,6 +8,7 @@ void main() {
   // MARK: User uploads
 
   streamTestWithEnv(
+    allureId: '12653',
     description: 'user uploads an image',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -28,6 +29,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12654',
     description: 'user uploads multiple images',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -48,6 +50,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12655',
     description: 'user deletes an image',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -65,6 +68,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12656',
     description: 'user uploads a file',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -85,6 +89,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12657',
     description: 'user uploads multiple files',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -105,6 +110,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12658',
     description: 'user deletes a file',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -122,6 +128,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12659',
     description: 'user uploads a video',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -136,6 +143,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12660',
     description: 'image upload recovers when the user comes back online',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -160,6 +168,7 @@ void main() {
   // MARK: Participant uploads
 
   streamTestWithEnv(
+    allureId: '12661',
     description: 'participant uploads an image',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -174,6 +183,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12662',
     description: 'participant uploads multiple images',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -188,6 +198,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12663',
     description: 'participant uploads a video',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -202,6 +213,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12664',
     description: 'participant uploads a file',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -216,6 +228,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12665',
     description: 'user swipes between images in the gallery',
     body: (env) async {
       step('GIVEN the user opens a channel');

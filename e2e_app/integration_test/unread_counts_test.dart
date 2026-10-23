@@ -10,6 +10,7 @@ void main() {
   const participantMessage = 'Participant message';
 
   streamTestWithEnv(
+    allureId: '12830',
     description: 'new message in a muted channel does not increment the unread count',
     body: (env) async {
       step('GIVEN the user is in the channel list');
@@ -28,6 +29,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12831',
     description: 'new message from a muted user does not increment the unread count',
     body: (env) async {
       step('GIVEN the user opens a channel');
@@ -53,6 +55,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12832',
     description: 'new system message increments the unread count',
     skip: 'https://linear.app/stream/issue/FLU-1096',
     body: (env) async {
@@ -76,6 +79,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12833',
     description: 'new thread reply also sent to the channel increments the unread count',
     body: (env) async {
       step('GIVEN the user opens a channel and sends a message');
@@ -98,6 +102,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12834',
     description: 'hard delete of an unseen message decrements the unread count',
     skip: 'https://linear.app/stream/issue/FLU-1097',
     body: (env) async {

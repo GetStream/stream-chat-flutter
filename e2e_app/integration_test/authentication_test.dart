@@ -11,6 +11,7 @@ void main() {
   }
 
   streamTestWithEnv(
+    allureId: '12666',
     description: 'token invalidates before the user logs in',
     skip: 'https://linear.app/stream/issue/FLU-1084',
     jwt: true,
@@ -27,6 +28,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12667',
     description: 'token invalidates after the user logs in',
     skip: 'https://linear.app/stream/issue/FLU-1084',
     jwt: true,
@@ -44,6 +46,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12668',
     description: 'token date invalidates before the user logs in',
     skip: 'https://linear.app/stream/issue/FLU-1083',
     jwt: true,
@@ -60,6 +63,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12669',
     description: 'token date invalidates after the user logs in',
     skip: 'https://linear.app/stream/issue/FLU-1083',
     jwt: true,
@@ -77,6 +81,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12670',
     description: 'token signature invalidates before the user logs in',
     skip: 'https://linear.app/stream/issue/FLU-1083',
     jwt: true,
@@ -93,6 +98,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12671',
     description: 'token signature invalidates after the user logs in',
     skip: 'https://linear.app/stream/issue/FLU-1083',
     jwt: true,
@@ -110,6 +116,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12672',
     description: 'token expires before the user logs in',
     jwt: true,
     body: (env) async {
@@ -125,6 +132,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12673',
     description: 'token expires after the user logs in',
     jwt: true,
     body: (env) async {
@@ -141,6 +149,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12674',
     description: 'token expires while the user is in the background',
     jwt: true,
     body: (env) async {
@@ -164,6 +173,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12675',
     description: 'token expires while the user is offline',
     jwt: true,
     body: (env) async {
@@ -186,6 +196,7 @@ void main() {
   );
 
   streamTestWithEnv(
+    allureId: '12676',
     description: 'token generation fails',
     jwt: true,
     body: (env) async {
