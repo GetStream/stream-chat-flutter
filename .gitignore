@@ -2,10 +2,11 @@
 *.class
 *.log
 *.pyc
-/e2e_app/stream-chat-test-mock-server/
+# e2e: the cloned mock server, Allure results and CLI, and the generated batch entrypoint
+stream-chat-test-mock-server/
+allure-results/
+allurectl
 /e2e_app/integration_test/e2e_batch.g.dart
-/e2e_app/allure-results/
-/sample_app/allurectl
 *.swp
 .DS_Store
 .atom/
