@@ -456,6 +456,7 @@ class _StreamChannelListItemThemeDefaults extends StreamChannelListItemThemeData
 
   @override
   StreamMessagePreviewTextThemeData get messagePreviewTextTheme => StreamMessagePreviewTextThemeData(
+    senderPrefixStyle: TextStyle(color: _colorScheme.textTertiary),
     deletedContentStyle: TextStyle(color: _colorScheme.textTertiary),
   );
 
@@ -687,7 +688,7 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
         if (latestLastMessage == null) {
           return Text(
             context.translations.emptyMessagesText,
-            style: widget.textStyle?.copyWith(color: context.streamColorScheme.textTertiary),
+            style: (widget.textStyle ?? const TextStyle()).copyWith(color: context.streamColorScheme.textTertiary),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
           );

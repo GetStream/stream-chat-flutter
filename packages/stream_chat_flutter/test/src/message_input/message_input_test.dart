@@ -389,6 +389,80 @@ void main() {
     );
   });
 
+  group('MessageComposer header preview', () {
+    final client = MockClient();
+    final clientState = MockClientState();
+    final channel = MockChannel();
+    final channelState = MockChannelState();
+
+    setUp(() {
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(OwnUser(id: 'user-id')));
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(channel.getRemainingCooldown).thenReturn(0);
+      when(() => channelState.isUpToDate).thenReturn(true);
+    });
+
+    Future<void> pumpComposer(WidgetTester tester, StreamMessageComposerController controller) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: StreamChannel(
+              channel: channel,
+              child: Scaffold(
+                bottomNavigationBar: StreamMessageComposer(messageComposerController: controller),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    Icon previewIcon(WidgetTester tester) {
+      return tester.widget<Icon>(
+        find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(Icon)),
+      );
+    }
+
+    testWidgets('shows the quoted message icons at 12 pixels', (tester) async {
+      final quotedMessage = Message(
+        text: 'Can you send me a voice note?',
+        type: MessageType.deleted,
+        user: User(id: 'jason', name: 'Jason Thompson'),
+        deletedAt: DateTime(2026, 8, 26, 15),
+      );
+
+      await pumpComposer(tester, StreamMessageComposerController(message: Message(quotedMessage: quotedMessage)));
+
+      expect(previewIcon(tester).size, 12);
+    });
+
+    testWidgets('shows the edited message icons at 12 pixels', (tester) async {
+      final controller = StreamMessageComposerController()
+        ..editMessage(
+          Message(
+            id: 'poll-message',
+            user: User(id: 'user-id'),
+            poll: Poll(
+              name: 'Lunch on Friday?',
+              options: const [
+                PollOption(id: 'option-1', text: 'Yes'),
+                PollOption(id: 'option-2', text: 'No'),
+              ],
+            ),
+          ),
+        );
+
+      await pumpComposer(tester, controller);
+
+      expect(previewIcon(tester).size, 12);
+    });
+  });
+
   group('Edit message routing', () {
     final client = MockClient();
     final clientState = MockClientState();

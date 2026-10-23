@@ -121,6 +121,38 @@ void main() {
 
     expect(_deletedLabelColor(tester), Colors.orange);
   });
+
+  testWidgets('StreamQuotedMessage shows 12-pixel preview icons', (tester) async {
+    await _pumpQuote(tester, quotedMessage: _deletedMessage());
+
+    expect(_previewIcon(tester).size, 12);
+  });
+
+  testWidgets('StreamQuotedMessage shows preview icons in the themed icon size', (tester) async {
+    await _pumpQuote(
+      tester,
+      quotedMessage: _deletedMessage(),
+      theme: const StreamQuotedMessageThemeData(
+        messagePreviewTextTheme: StreamMessagePreviewTextThemeData(iconSize: 20),
+      ),
+    );
+
+    expect(_previewIcon(tester).size, 20);
+  });
+
+  testWidgets('StreamQuotedMessage colors only the preview icons with the themed icon color', (tester) async {
+    await _pumpQuote(
+      tester,
+      quotedMessage: _deletedMessage(),
+      theme: const StreamQuotedMessageThemeData(
+        messagePreviewTextTheme: StreamMessagePreviewTextThemeData(iconColor: Colors.green),
+      ),
+    );
+
+    final colorScheme = tester.element(find.byType(StreamQuotedMessage)).streamColorScheme;
+    expect(_deletedIconColor(tester), Colors.green);
+    expect(_deletedLabelColor(tester), colorScheme.brand.shade900);
+  });
 }
 
 Message _textMessage({required User author}) => Message(
@@ -228,4 +260,9 @@ Color? _deletedLabelColor(WidgetTester tester) {
 Color? _deletedIconColor(WidgetTester tester) {
   final finder = find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(Icon));
   return tester.widget<Icon>(finder).color ?? IconTheme.of(tester.element(finder)).color;
+}
+
+// The icon inside the quoted message preview.
+Icon _previewIcon(WidgetTester tester) {
+  return tester.widget<Icon>(find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(Icon)));
 }

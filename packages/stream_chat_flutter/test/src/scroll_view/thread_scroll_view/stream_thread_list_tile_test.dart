@@ -329,6 +329,23 @@ void main() {
     expect(_deletedMessageColor(tester), Colors.orange);
   });
 
+  testWidgets('shows the sender prefix semibold in the secondary text color', (tester) async {
+    final groupThread = thread.copyWith(
+      channel: ChannelModel(cid: 'channel-type:channel-id', memberCount: 3),
+      parentMessage: Message(
+        id: 'parent-message-id',
+        text: 'Who is in?',
+        user: User(id: 'ann', name: 'Ann Lee'),
+      ),
+    );
+    await tester.pumpWidget(_wrapWithMaterialApp(StreamThreadListTile(thread: groupThread, currentUser: user2)));
+
+    final element = tester.element(find.byType(StreamThreadListTile));
+    final style = _paintedStyle(tester, 'Ann: ');
+    expect(style?.color, element.streamColorScheme.textSecondary);
+    expect(style?.fontWeight, element.streamTypography.fontWeight.semibold);
+  });
+
   testWidgets('shows a deleted root message in the themed preview style', (tester) async {
     final deletedThread = thread.copyWith(parentMessage: _deletedMessage());
     await tester.pumpWidget(
@@ -346,6 +363,13 @@ void main() {
 
     expect(_deletedMessageColor(tester), Colors.orange);
   });
+
+  testWidgets('shows the root message in the primary text color', (tester) async {
+    await tester.pumpWidget(_wrapWithMaterialApp(StreamThreadListTile(thread: thread, currentUser: user2)));
+
+    final colorScheme = tester.element(find.byType(StreamThreadListTile)).streamColorScheme;
+    expect(_paintedStyle(tester, thread.parentMessage!.text!)?.color, colorScheme.textPrimary);
+  });
 }
 
 // The background color the tile paints behind its content.
@@ -362,25 +386,28 @@ Message _deletedMessage() => Message(
   deletedAt: DateTime.parse('2021-07-20T17:00:00.000Z'),
 );
 
-// The color the "Message deleted" text paints with, after every ancestor
+// The color the "Message deleted" text paints with.
+Color? _deletedMessageColor(WidgetTester tester) => _paintedStyle(tester, 'Message deleted')?.color;
+
+// The style the preview span with [text] paints with, after every ancestor
 // span's style is applied.
-Color? _deletedMessageColor(WidgetTester tester) {
-  final text = tester.widget<RichText>(
+TextStyle? _paintedStyle(WidgetTester tester, String text) {
+  final richText = tester.widget<RichText>(
     find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(RichText)).first,
   );
 
-  Color? color;
+  TextStyle? result;
   void visit(InlineSpan span, TextStyle? inherited) {
     if (span is! TextSpan) return;
     final style = inherited?.merge(span.style) ?? span.style;
-    if (span.text == 'Message deleted') color = style?.color;
+    if (span.text == text) result = style;
     for (final child in span.children ?? const <InlineSpan>[]) {
       visit(child, style);
     }
   }
 
-  visit(text.text, null);
-  return color;
+  visit(richText.text, null);
+  return result;
 }
 
 Widget _wrapWithMaterialApp(

@@ -286,7 +286,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
     }
 
     if (messageText == null) return null;
-    return _labeledIcon(label: messageText);
+    return _labeledIcon(context, label: messageText);
   }
 
   /// Formats a deleted [message] as a preview [TextSpan].
@@ -296,6 +296,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   @protected
   TextSpan formatDeletedMessage(BuildContext context, Message message) {
     return _labeledIcon(
+      context,
       icon: context.streamIcons.noSign,
       label: context.translations.messageDeletedLabel,
       textStyle: StreamMessagePreviewTextTheme.of(context).deletedContentStyle,
@@ -445,13 +446,13 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   }) {
     if (attachments.isEmpty) {
       if (messageText == null) return null;
-      return _labeledIcon(label: messageText);
+      return _labeledIcon(context, label: messageText);
     }
 
     final caption = showCaption ? messageText : null;
     final preview = _resolveAttachmentPreview(context, attachments, caption);
 
-    return _labeledIcon(icon: preview.icon, label: preview.label);
+    return _labeledIcon(context, icon: preview.icon, label: preview.label);
   }
 
   /// Formats a [poll] message as a preview [TextSpan].
@@ -464,7 +465,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   /// "You voted X" hint).
   @protected
   TextSpan formatPollMessage(BuildContext context, Poll poll, User? currentUser) {
-    return _labeledIcon(icon: context.streamIcons.poll, label: poll.name.trim());
+    return _labeledIcon(context, icon: context.streamIcons.poll, label: poll.name.trim());
   }
 
   /// Formats a shared [location] message as a preview [TextSpan].
@@ -483,7 +484,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
     final caption = showCaption ? message.text?.trim().nullIfEmpty : null;
     final label = caption ?? context.translations.locationLabel(isLive: location.isLive);
 
-    return _labeledIcon(icon: context.streamIcons.location, label: label);
+    return _labeledIcon(context, icon: context.streamIcons.location, label: label);
   }
 
   @override
@@ -506,6 +507,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
     final defaults = _StreamMessagePreviewTextDefaults(context);
 
     final prefix = _labeledIcon(
+      context,
       label: getDraftPrefix(context),
       textStyle: defaults.draftPrefixStyle.merge(theme.draftPrefixStyle),
     );
@@ -735,12 +737,16 @@ class _StreamMessagePreviewTextDefaults extends StreamMessagePreviewTextThemeDat
   final BuildContext _context;
 
   late final StreamColorScheme _colorScheme = _context.streamColorScheme;
+  late final StreamFontWeight _fontWeight = _context.streamTypography.fontWeight;
 
   @override
-  TextStyle get draftPrefixStyle => TextStyle(color: _colorScheme.accentPrimary, fontWeight: FontWeight.bold);
+  TextStyle get draftPrefixStyle => TextStyle(color: _colorScheme.accentPrimary, fontWeight: _fontWeight.semibold);
 
   @override
-  TextStyle get senderPrefixStyle => const TextStyle(fontWeight: FontWeight.bold);
+  TextStyle get senderPrefixStyle => TextStyle(fontWeight: _fontWeight.semibold);
+
+  @override
+  double get iconSize => 16;
 }
 
 // ---------------------------------------------------------------------------
@@ -759,9 +765,10 @@ class _StreamMessagePreviewTextDefaults extends StreamMessagePreviewTextThemeDat
 // when [icon] is null; the text slot (and separator) is dropped when
 // [label] is empty.
 //
-// [textStyle] styles the label. The inline icon takes [textStyle]'s color, or
-// the surrounding icon color when that is null.
-TextSpan _labeledIcon({
+// [textStyle] styles the label. The inline icon takes the theme's icon color,
+// else [textStyle]'s color, else the surrounding icon color.
+TextSpan _labeledIcon(
+  BuildContext context, {
   IconData? icon,
   required String label,
   TextStyle? textStyle,
@@ -770,7 +777,7 @@ TextSpan _labeledIcon({
     style: textStyle,
     children: [
       if (icon != null) ...[
-        _iconSpan(icon, color: textStyle?.color),
+        _iconSpan(context, icon, textColor: textStyle?.color),
         if (label.isNotEmpty) const TextSpan(text: ' '),
       ],
       if (label.isNotEmpty) TextSpan(text: label),
@@ -785,14 +792,16 @@ TextSpan _labeledIcon({
 // vertical midline rather than a text baseline — this keeps icons visually
 // aligned regardless of the icon font's intrinsic baseline, which rarely
 // matches the body font.
-WidgetSpan _iconSpan(
-  IconData icon, {
-  double size = 16,
-  Color? color,
-}) {
+WidgetSpan _iconSpan(BuildContext context, IconData icon, {Color? textColor}) {
+  final theme = StreamMessagePreviewTextTheme.of(context);
+  final defaults = _StreamMessagePreviewTextDefaults(context);
+
+  final effectiveIconSize = theme.iconSize ?? defaults.iconSize;
+  final effectiveIconColor = theme.iconColor ?? textColor;
+
   return WidgetSpan(
     alignment: PlaceholderAlignment.middle,
-    child: Icon(icon, size: size, color: color),
+    child: Icon(icon, size: effectiveIconSize, color: effectiveIconColor),
   );
 }
 

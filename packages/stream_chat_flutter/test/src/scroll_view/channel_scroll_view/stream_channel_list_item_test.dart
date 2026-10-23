@@ -401,6 +401,14 @@ void main() {
       );
     }
 
+    testWidgets('shows "No messages yet" in the tertiary text color', (tester) async {
+      await pumpSubtitle(tester, channelA);
+      await tester.pumpAndSettle();
+
+      final colorScheme = tester.element(find.text(emptyText)).streamColorScheme;
+      expect(tester.widget<Text>(find.text(emptyText)).style?.color, colorScheme.textTertiary);
+    });
+
     testWidgets(
       'preserves the last-known message when state is not up-to-date and emits empty',
       (tester) async {
@@ -678,6 +686,22 @@ void main() {
     expect(_deletedMessageColor(tester), Colors.red);
   });
 
+  testWidgets('StreamChannelListTile shows the sender prefix semibold in the tertiary text color', (tester) async {
+    await _pumpTile(
+      tester,
+      message: Message(
+        text: 'Hello everyone',
+        user: User(id: 'ann', name: 'Ann Lee'),
+      ),
+      channel: ChannelModel(id: 'general', type: 'messaging', memberCount: 3),
+    );
+
+    final element = tester.element(find.byType(StreamChannelListTile));
+    final style = _paintedStyle(tester, 'Ann: ');
+    expect(style?.color, element.streamColorScheme.textTertiary);
+    expect(style?.fontWeight, element.streamTypography.fontWeight.semibold);
+  });
+
   testWidgets('StreamChannelListTile keeps the tertiary color under an app-wide italic deleted style', (tester) async {
     await _pumpTile(
       tester,
@@ -731,6 +755,20 @@ void main() {
 
     expect(_deletedMessageColor(tester), Colors.orange);
   });
+
+  testWidgets('StreamChannelListTile colors only the preview icons with an app-wide icon color', (tester) async {
+    await _pumpTile(
+      tester,
+      message: _deletedMessage(),
+      chatTheme: StreamChatThemeData(
+        messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(iconColor: Colors.green),
+      ),
+    );
+
+    final colorScheme = tester.element(find.byType(StreamChannelListTile)).streamColorScheme;
+    expect(_previewIcon(tester).color, Colors.green);
+    expect(_deletedMessageColor(tester), colorScheme.textTertiary);
+  });
 }
 
 // Pumps a channel list tile whose subtitle previews [message].
@@ -740,6 +778,7 @@ Future<void> _pumpTile(
   StreamChannelListItemThemeData? theme,
   StreamMessagePreviewTextThemeData? previewTextTheme,
   StreamChatThemeData? chatTheme,
+  ChannelModel? channel,
 }) {
   final client = MockClient();
   final clientState = MockClientState();
@@ -763,7 +802,7 @@ Future<void> _pumpTile(
               child: StreamChannelListTile(
                 avatar: const _SilentAvatar(),
                 title: const Text('General'),
-                subtitle: StreamMessagePreviewText(message: message),
+                subtitle: StreamMessagePreviewText(message: message, channel: channel),
               ),
             ),
           ),
@@ -781,16 +820,24 @@ Message _deletedMessage() => Message(
   deletedAt: DateTime.parse('2021-07-20T17:00:00.000Z'),
 );
 
+// The icon inside the message preview.
+Icon _previewIcon(WidgetTester tester) {
+  return tester.widget<Icon>(find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(Icon)));
+}
+
 // The color the "Message deleted" text paints with.
 Color? _deletedMessageColor(WidgetTester tester) => _deletedMessageStyle(tester)?.color;
 
 // The font style the "Message deleted" text paints with.
 FontStyle? _deletedMessageFontStyle(WidgetTester tester) => _deletedMessageStyle(tester)?.fontStyle;
 
-// The style the "Message deleted" text paints with, after every ancestor
+// The style the "Message deleted" text paints with.
+TextStyle? _deletedMessageStyle(WidgetTester tester) => _paintedStyle(tester, 'Message deleted');
+
+// The style the preview span with [text] paints with, after every ancestor
 // span's style is applied.
-TextStyle? _deletedMessageStyle(WidgetTester tester) {
-  final text = tester.widget<RichText>(
+TextStyle? _paintedStyle(WidgetTester tester, String text) {
+  final richText = tester.widget<RichText>(
     find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(RichText)).first,
   );
 
@@ -798,13 +845,13 @@ TextStyle? _deletedMessageStyle(WidgetTester tester) {
   void visit(InlineSpan span, TextStyle? inherited) {
     if (span is! TextSpan) return;
     final style = inherited?.merge(span.style) ?? span.style;
-    if (span.text == 'Message deleted') result = style;
+    if (span.text == text) result = style;
     for (final child in span.children ?? const <InlineSpan>[]) {
       visit(child, style);
     }
   }
 
-  visit(text.text, null);
+  visit(richText.text, null);
   return result;
 }
 

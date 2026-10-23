@@ -3,7 +3,7 @@
 ✅ Added
 
 - Added a next action to the poll creator's option fields, which moves to the next option or adds a new one from the last.
-- Added `StreamMessagePreviewTextTheme` and `StreamChatThemeData.messagePreviewTextTheme`, to style the "Draft:" and sender prefixes and the deleted message in message previews.
+- Added `StreamMessagePreviewTextTheme` and `StreamChatThemeData.messagePreviewTextTheme`, to style the "Draft:" and sender prefixes, the deleted message and the icons in message previews.
 - Added `messagePreviewTextTheme` to `StreamQuotedMessageThemeData`, `StreamChannelListItemThemeData` and `StreamThreadListTileThemeData`, to style parts of the message preview on each.
 
 🔄 Changed
@@ -22,6 +22,11 @@
 - Fixed icons in message previews showing in a different color from the text beside them.
 - Fixed a quoted reply to your own message showing your name instead of "You".
 - Fixed a deleted message in a thread list preview showing in the tertiary text color instead of the secondary one.
+- Fixed the "You:" and sender name prefix in message previews showing bold instead of semibold, and in the text color instead of a muted one in the channel and thread lists.
+- Fixed the "Draft:" prefix in channel list previews showing bold instead of semibold.
+- Fixed icons in a quoted reply and in the composer's reply and edit previews showing at 16 pixels instead of 12.
+- Fixed "No messages yet" in the channel list showing in the secondary text color instead of the tertiary one.
+- Fixed the root message in a thread list preview showing in the app's default text color instead of the primary one.
 
 ## 10.6.0
 

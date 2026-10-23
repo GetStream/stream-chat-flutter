@@ -65,25 +65,39 @@ class StreamMessagePreviewTextThemeData with _$StreamMessagePreviewTextThemeData
     this.draftPrefixStyle,
     this.senderPrefixStyle,
     this.deletedContentStyle,
+    this.iconSize,
+    this.iconColor,
   });
 
   /// The text style for the "Draft:" prefix that starts a
   /// [StreamDraftMessagePreviewText].
   ///
-  /// Defaults to bold in the primary accent color.
+  /// Defaults to semibold in the primary accent color.
   final TextStyle? draftPrefixStyle;
 
   /// The text style for the sender prefix, such as "You:" or "Ann:", that
   /// starts a preview in a channel or thread list.
   ///
-  /// Defaults to bold.
+  /// Defaults to semibold, in a muted color in the channel and thread lists.
   final TextStyle? senderPrefixStyle;
 
   /// The text style for the "Message deleted" text and its icon.
   ///
-  /// If null, matches the rest of the preview, except in the channel list,
-  /// thread list and message search, which use a muted color.
+  /// The icon takes [iconColor] instead when that is set. If null, matches the
+  /// rest of the preview, except in the channel list, thread list and message
+  /// search, which use a muted color.
   final TextStyle? deletedContentStyle;
+
+  /// The size of the icons in the preview, such as the photo or poll icon.
+  ///
+  /// Defaults to 16, or 12 in a quoted reply and in the composer's reply or
+  /// edit preview.
+  final double? iconSize;
+
+  /// The color of the icons in the preview.
+  ///
+  /// If null, each icon matches the text beside it.
+  final Color? iconColor;
 
   /// Linearly interpolates between two [StreamMessagePreviewTextThemeData]
   /// objects.

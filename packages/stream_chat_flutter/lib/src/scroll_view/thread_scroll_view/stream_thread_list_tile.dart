@@ -422,10 +422,11 @@ class _StreamThreadListTileThemeDefaults extends StreamThreadListTileThemeData {
   TextStyle get threadChannelNameStyle => _textTheme.captionEmphasis.copyWith(color: _colorScheme.textTertiary);
 
   @override
-  TextStyle get threadReplyToMessageStyle => _textTheme.bodyDefault;
+  TextStyle get threadReplyToMessageStyle => _textTheme.bodyDefault.copyWith(color: _colorScheme.textPrimary);
 
   @override
   StreamMessagePreviewTextThemeData get messagePreviewTextTheme => StreamMessagePreviewTextThemeData(
+    senderPrefixStyle: TextStyle(color: _colorScheme.textSecondary),
     deletedContentStyle: TextStyle(color: _colorScheme.textSecondary),
   );
 

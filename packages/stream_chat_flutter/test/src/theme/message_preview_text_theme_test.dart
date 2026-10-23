@@ -46,6 +46,15 @@ void main() {
       expect(full.merge(null), full);
     });
 
+    test('merge takes the icon size and color of other when set', () {
+      const base = StreamMessagePreviewTextThemeData(iconSize: 16, iconColor: Colors.grey);
+
+      final merged = base.merge(const StreamMessagePreviewTextThemeData(iconSize: 12));
+
+      expect(merged.iconSize, 12);
+      expect(merged.iconColor, Colors.grey);
+    });
+
     test('lerp at boundaries returns endpoints; at 0.5 interpolates', () {
       const a = StreamMessagePreviewTextThemeData(deletedContentStyle: TextStyle(color: Colors.black));
       const b = StreamMessagePreviewTextThemeData(deletedContentStyle: TextStyle(color: Colors.white));

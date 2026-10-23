@@ -52,13 +52,16 @@ void main() {
       expect(find.text('Draft: This is a draft message'), findsOneWidget);
     });
 
-    testWidgets('renders the draft label bold in the accent color', (tester) async {
+    testWidgets('renders the draft prefix semibold in the accent color', (tester) async {
       await pumpDraftMessagePreview(tester, DraftMessage(text: 'This is a draft message'));
 
       final accentPrimary = tester.element(find.byType(StreamDraftMessagePreviewText)).streamColorScheme.accentPrimary;
       final style = _draftPrefixStyle(tester);
       expect(style?.color, accentPrimary);
-      expect(style?.fontWeight, FontWeight.bold);
+      expect(
+        style?.fontWeight,
+        tester.element(find.byType(StreamDraftMessagePreviewText)).streamTypography.fontWeight.semibold,
+      );
     });
 
     testWidgets('renders the draft prefix in the themed style on top of its default', (tester) async {
@@ -73,7 +76,10 @@ void main() {
       );
 
       expect(_draftPrefixStyle(tester)?.color, Colors.purple);
-      expect(_draftPrefixStyle(tester)?.fontWeight, FontWeight.bold);
+      expect(
+        _draftPrefixStyle(tester)?.fontWeight,
+        tester.element(find.byType(StreamDraftMessagePreviewText)).streamTypography.fontWeight.semibold,
+      );
     });
 
     testWidgets('renders attachment icons in the text color', (tester) async {

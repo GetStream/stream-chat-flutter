@@ -90,14 +90,15 @@ class StreamThreadListTileThemeData with _$StreamThreadListTileThemeData {
   /// [StreamThreadListTile] widget.
   ///
   /// To style only parts of it, consider [messagePreviewTextTheme]. Falls
-  /// back to [StreamTextTheme.bodyDefault].
+  /// back to [StreamTextTheme.bodyDefault] with
+  /// [StreamColorScheme.textPrimary].
   final TextStyle? threadReplyToMessageStyle;
 
   /// The theme for styling parts of the root message preview differently
   /// from the rest.
   ///
   /// Takes precedence over an enclosing [StreamMessagePreviewTextTheme] and
-  /// the app-wide one. A deleted message defaults to
+  /// the app-wide one. The sender prefix and a deleted message default to
   /// [StreamColorScheme.textSecondary]. A thread list shows no draft prefix.
   final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 
