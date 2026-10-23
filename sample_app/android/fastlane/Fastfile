@@ -3,7 +3,6 @@ import '../../fastlane/Fastfile'
 default_platform(:android)
 
 before_all do
-  @impact = impact_analysis
   if is_ci
     setup_ci
     setup_git_config
