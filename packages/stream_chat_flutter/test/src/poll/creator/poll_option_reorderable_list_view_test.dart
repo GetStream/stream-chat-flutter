@@ -489,6 +489,233 @@ void main() {
     );
   });
 
+  testWidgets('hides the reorder and remove controls when there is a single option', (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        PollOptionReorderableListView(
+          initialOptions: [PollOptionItem()],
+        ),
+      ),
+    );
+
+    expect(find.byIcon(StreamIconData.reorder), findsNothing);
+    expect(find.byIcon(StreamIconData.minusCircle), findsNothing);
+  });
+
+  testWidgets('shows the reorder and remove controls on every option when there are several', (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        PollOptionReorderableListView(
+          initialOptions: [
+            PollOptionItem(text: 'Option 1'),
+            PollOptionItem(text: 'Option 2'),
+          ],
+        ),
+      ),
+    );
+
+    expect(find.byIcon(StreamIconData.reorder), findsNWidgets(2));
+    expect(find.byIcon(StreamIconData.minusCircle), findsNWidgets(2));
+  });
+
+  testWidgets('shows the reorder and remove controls once a second option is added', (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        PollOptionReorderableListView(
+          initialOptions: [PollOptionItem(text: 'Option 1')],
+        ),
+      ),
+    );
+
+    await tester.tap(find.addOptionButton());
+    await tester.pumpAndSettle();
+
+    expect(find.byIcon(StreamIconData.reorder), findsNWidgets(2));
+    expect(find.byIcon(StreamIconData.minusCircle), findsNWidgets(2));
+  });
+
+  testWidgets('hides the reorder and remove controls after removing down to a single option', (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        PollOptionReorderableListView(
+          initialOptions: [
+            PollOptionItem(text: 'Option 1'),
+            PollOptionItem(text: 'Option 2'),
+          ],
+        ),
+      ),
+    );
+
+    await _removeOption(tester, find.byIcon(StreamIconData.minusCircle).last);
+
+    expect(find.byIcon(StreamIconData.reorder), findsNothing);
+    expect(find.byIcon(StreamIconData.minusCircle), findsNothing);
+  });
+
+  testWidgets('keeps receiving typed text in the remaining option after removing down to one', (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        PollOptionReorderableListView(
+          initialOptions: [
+            PollOptionItem(text: 'Option 1'),
+            PollOptionItem(text: 'Option 2'),
+          ],
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(TextField).first);
+    await _removeOption(tester, find.byIcon(StreamIconData.minusCircle).last);
+    tester.testTextInput.enterText('Option 1 edited');
+    await tester.pump();
+
+    expect(find.text('Option 1 edited'), findsOneWidget);
+  });
+
+  testWidgets('keeps a single option focused when it is long-pressed', (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        PollOptionReorderableListView(
+          initialOptions: [PollOptionItem(text: 'Option 1')],
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(TextField));
+    final rowEdge = tester.getTopLeft(find.byType(StreamTextInput)) + const Offset(4, 4);
+    await tester.longPressAt(rowEdge);
+    await tester.pumpAndSettle();
+
+    final field = tester.widget<TextField>(find.byType(TextField));
+    expect(field.focusNode?.hasFocus, isTrue);
+  });
+
+  group('when the removed option is empty', () {
+    testWidgets('removes it without asking for confirmation', (tester) async {
+      var optionsChanged = <PollOptionItem>[];
+
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollOptionReorderableListView(
+            initialOptions: [
+              PollOptionItem(text: 'Option 1'),
+              PollOptionItem(),
+            ],
+            onOptionsChanged: (options) => optionsChanged = options,
+          ),
+        ),
+      );
+
+      await tester.tap(find.byIcon(StreamIconData.minusCircle).last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Delete Option'), findsNothing);
+      expect(optionsChanged.map((it) => it.text), ['Option 1']);
+    });
+
+    testWidgets('moves focus to the previous option when it was focused', (tester) async {
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          PollOptionReorderableListView(
+            initialOptions: [
+              PollOptionItem(text: 'Option 1'),
+              PollOptionItem(),
+            ],
+          ),
+        ),
+      );
+
+      await tester.showKeyboard(find.byType(TextField).last);
+      await tester.tap(find.byIcon(StreamIconData.minusCircle).last);
+      await tester.pumpAndSettle();
+      tester.testTextInput.enterText('Option 1 edited');
+      await tester.pump();
+
+      expect(find.text('Option 1 edited'), findsOneWidget);
+    });
+  });
+
+  testWidgets('keeps typing in the previous option after removing a focused option with text', (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        PollOptionReorderableListView(
+          initialOptions: [
+            PollOptionItem(text: 'Option 1'),
+            PollOptionItem(text: 'Option 2'),
+            PollOptionItem(text: 'Option 3'),
+          ],
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(TextField).last);
+    await _removeOption(tester, find.byIcon(StreamIconData.minusCircle).last);
+    tester.testTextInput.enterText('Option 2 edited');
+    await tester.pump();
+
+    expect(find.text('Option 1'), findsOneWidget);
+    expect(find.text('Option 2 edited'), findsOneWidget);
+  });
+
+  testWidgets('moves focus to the next option on the keyboard next action', (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        PollOptionReorderableListView(
+          initialOptions: [
+            PollOptionItem(text: 'Option 1'),
+            PollOptionItem(text: 'Option 2'),
+          ],
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(TextField).first);
+    await tester.testTextInput.receiveAction(TextInputAction.next);
+    await tester.pumpAndSettle();
+
+    final fields = tester.widgetList<TextField>(find.byType(TextField));
+    expect(fields.last.focusNode?.hasFocus, isTrue);
+  });
+
+  testWidgets('adds and focuses a new option on the keyboard next action from the last one', (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        PollOptionReorderableListView(
+          initialOptions: [PollOptionItem(text: 'Option 1')],
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(TextField));
+    await tester.testTextInput.receiveAction(TextInputAction.next);
+    await tester.pumpAndSettle();
+
+    final fields = tester.widgetList<TextField>(find.byType(TextField));
+    expect(fields, hasLength(2));
+    expect(fields.last.focusNode?.hasFocus, isTrue);
+  });
+
+  testWidgets('closes the keyboard on the next action when no option can be added', (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        PollOptionReorderableListView(
+          optionsRange: (min: null, max: 2),
+          initialOptions: [
+            PollOptionItem(text: 'Option 1'),
+            PollOptionItem(text: 'Option 2'),
+          ],
+        ),
+      ),
+    );
+
+    await tester.showKeyboard(find.byType(TextField).last);
+    await tester.testTextInput.receiveAction(TextInputAction.next);
+    await tester.pumpAndSettle();
+
+    final fields = tester.widgetList<TextField>(find.byType(TextField));
+    expect(fields.any((it) => it.focusNode?.hasFocus ?? false), isFalse);
+  });
+
   group('Semantics / reorder', () {
     const moveToStart = CustomSemanticsAction(label: 'Move to the start');
     const moveToEnd = CustomSemanticsAction(label: 'Move to the end');
@@ -573,6 +800,13 @@ void main() {
       },
     );
   });
+}
+
+Future<void> _removeOption(WidgetTester tester, Finder removeButton) async {
+  await tester.tap(removeButton);
+  await tester.pumpAndSettle();
+  await tester.tap(find.text('Delete'));
+  await tester.pumpAndSettle();
 }
 
 extension on CommonFinders {

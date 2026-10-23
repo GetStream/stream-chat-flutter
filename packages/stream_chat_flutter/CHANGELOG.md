@@ -1,8 +1,18 @@
 ## Upcoming
 
+✅ Added
+
+- Added a next action to the poll creator's option fields, which moves to the next option or adds a new one from the last.
+
+🔄 Changed
+
+- Removing an empty poll option no longer asks for confirmation.
+
 🐞 Fixed
 
 - Fixed a voice recording sent as a reply without text showing inside a filled container instead of directly on the message bubble.
+- Fixed a mention rendering as another mentioned user's shorter mention followed by leftover text, such as `@Anna` next to `@Ann`.
+- Fixed the poll creator showing the reorder handle and remove button when there is only one option.
 
 ## 10.6.0
 
