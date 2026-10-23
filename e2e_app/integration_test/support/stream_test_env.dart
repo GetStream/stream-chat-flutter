@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:e2e_app/app.dart';
 import 'package:e2e_app/auth/auth_controller.dart';
-import 'package:flutter/widgets.dart' show AppLifecycleState;
+import 'package:flutter/widgets.dart' show AppLifecycleState, SizedBox;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
@@ -245,6 +245,12 @@ class StreamTestEnv {
   Future<void> tearDown() async {
     await _connectionStatusSubscription?.cancel();
     try {
+      // Unmount the app while the client is still alive. A test that fails with
+      // a page open leaves its widgets mounted, and disposing the client first
+      // makes their deactivate() throw (the composer saves its draft on the way
+      // out). That aborts the unmount, and the half-disposed tree keeps global
+      // pointer routes that break every later test sharing the process.
+      await _tester.pumpWidget(const SizedBox.shrink());
       await authController.debugReset();
     } finally {
       // Null when tearDown runs before setUp installed the fake.

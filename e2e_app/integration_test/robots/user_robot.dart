@@ -71,8 +71,18 @@ class UserRobot {
     return this;
   }
 
-  /// Clears whatever is currently in the composer.
-  Future<UserRobot> clearComposer() => typeText('');
+  /// Clears whatever is currently in the composer, and fails right here when the
+  /// composer still holds text: a later assertion would only see a draft that
+  /// was never deleted, without telling whether the clear itself failed.
+  Future<UserRobot> clearComposer() async {
+    await typeText('');
+    final end = DateTime.now().add(const Duration(seconds: 10));
+    while (composerText.isNotEmpty && DateTime.now().isBefore(end)) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+    expect(composerText, isEmpty, reason: 'The composer still holds text after clearing it');
+    return this;
+  }
 
   /// The text currently in the composer.
   String get composerText =>
