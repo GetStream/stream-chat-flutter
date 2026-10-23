@@ -3,16 +3,25 @@
 ✅ Added
 
 - Added a next action to the poll creator's option fields, which moves to the next option or adds a new one from the last.
+- Added `StreamMessagePreviewTextTheme` and `StreamChatThemeData.messagePreviewTextTheme`, to style the "Draft:" and sender prefixes and the deleted message in message previews.
+- Added `messagePreviewTextTheme` to `StreamQuotedMessageThemeData`, `StreamChannelListItemThemeData` and `StreamThreadListTileThemeData`, to style parts of the message preview on each.
 
 🔄 Changed
 
 - Removing an empty poll option no longer asks for confirmation.
+- A deleted message in `StreamMessagePreviewText` now matches the rest of the preview unless `StreamMessagePreviewTextThemeData.deletedContentStyle` sets a style. The channel list, thread list and message search still apply their own deleted style.
+- Icons in `StreamMessagePreviewText` and `StreamDraftMessagePreviewText` no longer follow a surrounding `IconTheme`.
+- Values a local `StreamThreadListTileTheme` leaves unset now keep their `StreamChatThemeData.threadListTileTheme` setting instead of resetting to the default.
 
 🐞 Fixed
 
 - Fixed a voice recording sent as a reply without text showing inside a filled container instead of directly on the message bubble.
 - Fixed a mention rendering as another mentioned user's shorter mention followed by leftover text, such as `@Anna` next to `@Ann`.
 - Fixed the poll creator showing the reorder handle and remove button when there is only one option.
+- Fixed "Message deleted" in a quoted reply showing in a muted gray instead of the reply's text color.
+- Fixed icons in message previews showing in a different color from the text beside them.
+- Fixed a quoted reply to your own message showing your name instead of "You".
+- Fixed a deleted message in a thread list preview showing in the tertiary text color instead of the secondary one.
 
 ## 10.6.0
 

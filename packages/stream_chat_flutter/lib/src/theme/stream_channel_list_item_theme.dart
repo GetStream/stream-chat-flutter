@@ -107,6 +107,7 @@ class StreamChannelListItemThemeData with _$StreamChannelListItemThemeData {
   const StreamChannelListItemThemeData({
     this.titleStyle,
     this.subtitleStyle,
+    this.messagePreviewTextTheme,
     this.timestampStyle,
     this.backgroundColor,
     this.borderColor,
@@ -118,10 +119,20 @@ class StreamChannelListItemThemeData with _$StreamChannelListItemThemeData {
   /// Falls back to [StreamTextTheme.headingSm] with [StreamColorScheme.textPrimary].
   final TextStyle? titleStyle;
 
-  /// The text style for the message preview subtitle.
+  /// The text style for the whole message preview subtitle.
   ///
-  /// Falls back to [StreamTextTheme.captionDefault] with [StreamColorScheme.textSecondary].
+  /// To style only parts of it, consider [messagePreviewTextTheme]. Falls
+  /// back to [StreamTextTheme.captionDefault] with
+  /// [StreamColorScheme.textSecondary].
   final TextStyle? subtitleStyle;
+
+  /// The theme for styling parts of the message preview subtitle differently
+  /// from the rest.
+  ///
+  /// Takes precedence over an enclosing [StreamMessagePreviewTextTheme] and
+  /// the app-wide one. A deleted message defaults to
+  /// [StreamColorScheme.textTertiary].
+  final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 
   /// The text style for the timestamp.
   ///

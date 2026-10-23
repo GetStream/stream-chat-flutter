@@ -238,6 +238,114 @@ void main() {
       },
     );
   });
+
+  testWidgets('keeps the app-wide root message style under a local theme', (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        StreamThreadListTileTheme(
+          data: const StreamThreadListTileThemeData(padding: EdgeInsets.all(4)),
+          child: StreamThreadListTile(thread: thread, currentUser: user2),
+        ),
+        chatTheme: StreamChatThemeData(
+          threadListTileTheme: const StreamThreadListTileThemeData(
+            threadReplyToMessageStyle: TextStyle(color: Colors.red),
+          ),
+        ),
+      ),
+    );
+
+    final preview = tester.widget<RichText>(
+      find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(RichText)).first,
+    );
+    expect(preview.text.style?.color, Colors.red);
+  });
+
+  testWidgets('shows a deleted root message in the secondary text color', (tester) async {
+    final deletedThread = thread.copyWith(parentMessage: _deletedMessage());
+    await tester.pumpWidget(_wrapWithMaterialApp(StreamThreadListTile(thread: deletedThread, currentUser: user2)));
+
+    final colorScheme = tester.element(find.byType(StreamThreadListTile)).streamColorScheme;
+    expect(_deletedMessageColor(tester), colorScheme.textSecondary);
+  });
+
+  testWidgets('shows a deleted root message in an app-wide deleted style', (tester) async {
+    final deletedThread = thread.copyWith(parentMessage: _deletedMessage());
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        StreamThreadListTile(thread: deletedThread, currentUser: user2),
+        chatTheme: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(color: Colors.red),
+          ),
+        ),
+      ),
+    );
+
+    expect(_deletedMessageColor(tester), Colors.red);
+  });
+
+  testWidgets('keeps the secondary color under an app-wide italic deleted style', (tester) async {
+    final deletedThread = thread.copyWith(parentMessage: _deletedMessage());
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        StreamThreadListTile(thread: deletedThread, currentUser: user2),
+        chatTheme: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(fontStyle: FontStyle.italic),
+          ),
+        ),
+      ),
+    );
+
+    final colorScheme = tester.element(find.byType(StreamThreadListTile)).streamColorScheme;
+    expect(_deletedMessageColor(tester), colorScheme.textSecondary);
+  });
+
+  testWidgets('prefers the themed preview style over enclosing and app-wide ones', (tester) async {
+    final deletedThread = thread.copyWith(parentMessage: _deletedMessage());
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        StreamMessagePreviewTextTheme(
+          data: const StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(color: Colors.blue),
+          ),
+          child: StreamThreadListTileTheme(
+            data: const StreamThreadListTileThemeData(
+              messagePreviewTextTheme: StreamMessagePreviewTextThemeData(
+                deletedContentStyle: TextStyle(color: Colors.orange),
+              ),
+            ),
+            child: StreamThreadListTile(thread: deletedThread, currentUser: user2),
+          ),
+        ),
+        chatTheme: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(color: Colors.red),
+          ),
+        ),
+      ),
+    );
+
+    expect(_deletedMessageColor(tester), Colors.orange);
+  });
+
+  testWidgets('shows a deleted root message in the themed preview style', (tester) async {
+    final deletedThread = thread.copyWith(parentMessage: _deletedMessage());
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        StreamThreadListTileTheme(
+          data: const StreamThreadListTileThemeData(
+            messagePreviewTextTheme: StreamMessagePreviewTextThemeData(
+              deletedContentStyle: TextStyle(color: Colors.orange),
+            ),
+          ),
+          child: StreamThreadListTile(thread: deletedThread, currentUser: user2),
+        ),
+      ),
+    );
+
+    expect(_deletedMessageColor(tester), Colors.orange);
+  });
 }
 
 // The background color the tile paints behind its content.
@@ -246,9 +354,39 @@ Color? _tileBackground(WidgetTester tester) {
   return (tester.widget<Ink>(ink).decoration! as ShapeDecoration).color;
 }
 
+Message _deletedMessage() => Message(
+  id: 'parent-message-id',
+  text: "Hey everyone, who's up for a group ride this Saturday morning?",
+  type: MessageType.deleted,
+  user: User(id: 'uid1', name: 'User 1'),
+  deletedAt: DateTime.parse('2021-07-20T17:00:00.000Z'),
+);
+
+// The color the "Message deleted" text paints with, after every ancestor
+// span's style is applied.
+Color? _deletedMessageColor(WidgetTester tester) {
+  final text = tester.widget<RichText>(
+    find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(RichText)).first,
+  );
+
+  Color? color;
+  void visit(InlineSpan span, TextStyle? inherited) {
+    if (span is! TextSpan) return;
+    final style = inherited?.merge(span.style) ?? span.style;
+    if (span.text == 'Message deleted') color = style?.color;
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      visit(child, style);
+    }
+  }
+
+  visit(text.text, null);
+  return color;
+}
+
 Widget _wrapWithMaterialApp(
   Widget widget, {
   Brightness brightness = Brightness.light,
+  StreamChatThemeData? chatTheme,
 }) {
   final client = MockClient();
   final clientState = MockClientState();
@@ -263,7 +401,7 @@ Widget _wrapWithMaterialApp(
       client: client,
       configData: StreamChatConfigurationData(),
       connectivityStream: Stream.value([ConnectivityResult.wifi]),
-      themeData: StreamChatThemeData(),
+      themeData: chatTheme ?? StreamChatThemeData(),
       child: Builder(
         builder: (context) {
           return Scaffold(
