@@ -48,13 +48,12 @@ jobs:
       - uses: ./.github/actions/cache-gradle
 
       - uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: e2e_app
 
       - uses: ./.github/actions/setup-flutter
 
       - uses: ./.github/actions/enable-kvm
-
-      - name: Use Firebase stubs
-        run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
 
       - name: Bootstrap
         run: |
@@ -62,7 +61,7 @@ jobs:
           melos bootstrap
 
       - name: Launch Allure TestOps
-        working-directory: sample_app/android
+        working-directory: e2e_app
         run: bundle exec fastlane allure_launch cron:true
 
       - name: Run e2e (Android emulator)
@@ -72,35 +71,35 @@ jobs:
           arch: x86_64
           profile: pixel_6
           emulator-options: -no-snapshot-save -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
-          script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554 coverage:${{ matrix.coverage == true }} mock_server_branch:${{ env.mock_server_branch }}
+          script: cd e2e_app && bundle exec fastlane run_e2e_test device:emulator-5554 coverage:${{ matrix.coverage == true }} mock_server_branch:${{ env.mock_server_branch }}
 
       - name: Build the coverage map
         if: matrix.coverage && !cancelled()
-        working-directory: sample_app/android
+        working-directory: e2e_app
         run: bundle exec fastlane build_e2e_coverage_map
 
       - uses: actions/upload-artifact@v7
         if: matrix.coverage && !cancelled()
         with:
           name: e2e-coverage-map
-          path: sample_app/build/e2e_coverage_map.json
+          path: e2e_app/build/e2e_coverage_map.json
           retention-days: 14
 
       - name: Attach videos to failed tests
         if: failure()
-        working-directory: sample_app/android
+        working-directory: e2e_app
         run: |
           sudo apt-get update && sudo apt-get install -y ffmpeg
           bundle exec fastlane attach_videos
 
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
-        working-directory: sample_app/android
+        working-directory: e2e_app
         run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
 
       - name: Allure TestOps Launch Removal
         if: env.LAUNCH_ID != '' && cancelled()
-        working-directory: sample_app/android
+        working-directory: e2e_app
         run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
 
       - uses: actions/upload-artifact@v7
@@ -108,8 +107,8 @@ jobs:
         with:
           name: e2e-nightly-android-${{ matrix.api-level }}
           path: |
-            sample_app/stream-chat-test-mock-server/logs
-            sample_app/build/e2e-test.log
+            e2e_app/stream-chat-test-mock-server/logs
+            e2e_app/build/e2e-test.log
 
   ios:
     runs-on: macos-15
@@ -133,6 +132,8 @@ jobs:
           xcode-version: '26.2'
 
       - uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: e2e_app
 
       - uses: ./.github/actions/setup-flutter
 
@@ -142,9 +143,6 @@ jobs:
           version: ${{ matrix.ios }}
           device: ${{ matrix.device }}
 
-      - name: Use Firebase stubs
-        run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
-
       - name: Bootstrap
         run: |
           flutter precache --ios
@@ -152,21 +150,21 @@ jobs:
           melos bootstrap
 
       - name: Launch Allure TestOps
-        working-directory: sample_app/ios
+        working-directory: e2e_app
         run: bundle exec fastlane allure_launch cron:true
 
       - name: Run e2e (iOS simulator)
-        working-directory: sample_app/ios
+        working-directory: e2e_app
         run: bundle exec fastlane run_e2e_test platform:ios ios:${{ matrix.ios }} device:"${{ matrix.device }} (${{ matrix.ios }})" mock_server_branch:${{ env.mock_server_branch }}
 
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
-        working-directory: sample_app/ios
+        working-directory: e2e_app
         run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
 
       - name: Allure TestOps Launch Removal
         if: env.LAUNCH_ID != '' && cancelled()
-        working-directory: sample_app/ios
+        working-directory: e2e_app
         run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
 
       - uses: actions/upload-artifact@v7
@@ -174,8 +172,8 @@ jobs:
         with:
           name: e2e-nightly-ios-${{ matrix.ios }}
           path: |
-            sample_app/stream-chat-test-mock-server/logs
-            sample_app/build/e2e-test.log
+            e2e_app/stream-chat-test-mock-server/logs
+            e2e_app/build/e2e-test.log
 
   slack:
     name: Slack Report

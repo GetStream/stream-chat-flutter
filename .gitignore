@@ -2,8 +2,9 @@
 *.class
 *.log
 *.pyc
-/sample_app/stream-chat-test-mock-server/
-/sample_app/allure-results/
+/e2e_app/stream-chat-test-mock-server/
+/e2e_app/integration_test/e2e_batch.g.dart
+/e2e_app/allure-results/
 /sample_app/allurectl
 *.swp
 .DS_Store

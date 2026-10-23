@@ -41,16 +41,18 @@ jobs:
           fetch-depth: 2 # the pull request merge commit and its base
 
       - uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: e2e_app
 
       - name: Select e2e tests
         id: select
-        working-directory: sample_app/android
+        working-directory: e2e_app
         run: bundle exec fastlane select_e2e_tests
 
       - uses: actions/upload-artifact@v7
         with:
           name: e2e-selection
-          path: sample_app/build/e2e_selection.json
+          path: e2e_app/build/e2e_selection.json
 
   allure_launch_android:
     needs: select
@@ -65,7 +67,7 @@ jobs:
       - uses: ./.github/actions/allure-launch
         id: launch
         with:
-          working-directory: sample_app/android
+          working-directory: e2e_app
 
   allure_launch_ios:
     needs: select
@@ -80,7 +82,7 @@ jobs:
       - uses: ./.github/actions/allure-launch
         id: launch
         with:
-          working-directory: sample_app/ios
+          working-directory: e2e_app
 
   android:
     # Always on pull_request; opt-out via the checkbox on workflow_dispatch.
@@ -103,13 +105,12 @@ jobs:
       - uses: ./.github/actions/cache-gradle
 
       - uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: e2e_app
 
       - uses: ./.github/actions/setup-flutter
 
       - uses: ./.github/actions/enable-kvm
-
-      - name: Use Firebase stubs
-        run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
 
       - name: Bootstrap
         run: |
@@ -119,7 +120,7 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           name: e2e-selection
-          path: sample_app/build
+          path: e2e_app/build
 
       - name: Run e2e (Android emulator)
         uses: reactivecircus/android-emulator-runner@v2
@@ -127,23 +128,23 @@ jobs:
           api-level: ${{ env.ANDROID_API_LEVEL }}
           arch: x86_64
           profile: pixel_6
-          script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554 selection:build/e2e_selection.json batch:${{ matrix.batch }} batch_count:${{ strategy.job-total }}
+          script: cd e2e_app && bundle exec fastlane run_e2e_test device:emulator-5554 selection:build/e2e_selection.json batch:${{ matrix.batch }} batch_count:${{ strategy.job-total }}
 
       - name: Attach videos to failed tests
         if: failure()
-        working-directory: sample_app/android
+        working-directory: e2e_app
         run: |
           sudo apt-get update && sudo apt-get install -y ffmpeg
           bundle exec fastlane attach_videos
 
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
-        working-directory: sample_app/android
+        working-directory: e2e_app
         run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
 
       - name: Allure TestOps Launch Removal
         if: env.LAUNCH_ID != '' && cancelled()
-        working-directory: sample_app/android
+        working-directory: e2e_app
         run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
 
       - uses: actions/upload-artifact@v7
@@ -151,8 +152,8 @@ jobs:
         with:
           name: e2e-android-logs-${{ matrix.batch }}
           path: |
-            sample_app/stream-chat-test-mock-server/logs
-            sample_app/build/e2e-test.log
+            e2e_app/stream-chat-test-mock-server/logs
+            e2e_app/build/e2e-test.log
 
   ios:
     # Only on workflow_dispatch, when the checkbox is ticked.
@@ -179,9 +180,8 @@ jobs:
       - uses: ./.github/actions/setup-flutter
 
       - uses: ./.github/actions/setup-ruby
-
-      - name: Use Firebase stubs
-        run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
+        with:
+          working-directory: e2e_app
 
       - name: Bootstrap
         run: |
@@ -192,20 +192,20 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           name: e2e-selection
-          path: sample_app/build
+          path: e2e_app/build
 
       - name: Run e2e (iOS simulator)
-        working-directory: sample_app/ios
+        working-directory: e2e_app
         run: bundle exec fastlane run_e2e_test platform:ios ios:"${{ env.IOS_SIMULATOR_VERSION }}" device:"${{ env.IOS_SIMULATOR_DEVICE }}" selection:build/e2e_selection.json batch:${{ matrix.batch }} batch_count:${{ strategy.job-total }}
 
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
-        working-directory: sample_app/ios
+        working-directory: e2e_app
         run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
 
       - name: Allure TestOps Launch Removal
         if: env.LAUNCH_ID != '' && cancelled()
-        working-directory: sample_app/ios
+        working-directory: e2e_app
         run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
 
       - uses: actions/upload-artifact@v7
@@ -213,8 +213,8 @@ jobs:
         with:
           name: e2e-ios-logs-${{ matrix.batch }}
           path: |
-            sample_app/stream-chat-test-mock-server/logs
-            sample_app/build/e2e-test.log
+            e2e_app/stream-chat-test-mock-server/logs
+            e2e_app/build/e2e-test.log
 
   # The single required check for E2E: the batch count follows the selection, so
   # the per-batch job names come and go.
