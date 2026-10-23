@@ -121,8 +121,9 @@ class StreamChannelListItemThemeData with _$StreamChannelListItemThemeData {
 
   /// The text style for the whole message preview subtitle.
   ///
-  /// To style only parts of it, use [messagePreviewTextTheme]. Falls back to
-  /// [StreamTextTheme.captionDefault] with [StreamColorScheme.textSecondary].
+  /// To style only parts of it, consider [messagePreviewTextTheme]. Falls
+  /// back to [StreamTextTheme.captionDefault] with
+  /// [StreamColorScheme.textSecondary].
   final TextStyle? subtitleStyle;
 
   /// The theme for styling parts of the message preview subtitle differently

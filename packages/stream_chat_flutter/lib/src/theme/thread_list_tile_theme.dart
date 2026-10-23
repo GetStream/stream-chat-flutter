@@ -89,8 +89,8 @@ class StreamThreadListTileThemeData with _$StreamThreadListTileThemeData {
   /// The style of the whole root message preview in the
   /// [StreamThreadListTile] widget.
   ///
-  /// To style only parts of it, use [messagePreviewTextTheme]. Falls back to
-  /// [StreamTextTheme.bodyDefault].
+  /// To style only parts of it, consider [messagePreviewTextTheme]. Falls
+  /// back to [StreamTextTheme.bodyDefault].
   final TextStyle? threadReplyToMessageStyle;
 
   /// The theme for styling parts of the root message preview differently

@@ -358,6 +358,7 @@ Message _deletedMessage() => Message(
   id: 'parent-message-id',
   text: "Hey everyone, who's up for a group ride this Saturday morning?",
   type: MessageType.deleted,
+  user: User(id: 'uid1', name: 'User 1'),
   deletedAt: DateTime.parse('2021-07-20T17:00:00.000Z'),
 );
 

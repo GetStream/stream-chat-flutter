@@ -92,9 +92,19 @@ void main() {
 
       await pumpMessagePreview(tester, message, textStyle: const TextStyle(color: Colors.teal));
 
-      final span = _getPreviewSpan(tester);
-      final deletedSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Message deleted');
-      expect(deletedSpan.style?.color, isNull);
+      expect(_paintedStyle(tester, 'Message deleted')?.color, Colors.teal);
+    });
+
+    testWidgets('renders the deleted icon in the surrounding text color', (tester) async {
+      final message = Message(
+        text: 'Original message',
+        type: MessageType.deleted,
+        user: User(id: 'other-user-id', name: 'Other User'),
+        deletedAt: DateTime.now(),
+      );
+
+      await pumpMessagePreview(tester, message, textStyle: const TextStyle(color: Colors.teal));
+
       expect(_iconColor(tester), Colors.teal);
     });
 
@@ -120,6 +130,26 @@ void main() {
       final deletedSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Message deleted');
       expect(deletedSpan.style?.color, Colors.red);
       expect(deletedSpan.style?.fontStyle, FontStyle.italic);
+    });
+
+    testWidgets('renders the deleted icon in the themed deleted color', (tester) async {
+      final message = Message(
+        text: 'Original message',
+        type: MessageType.deleted,
+        user: User(id: 'other-user-id', name: 'Other User'),
+        deletedAt: DateTime.now(),
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        themeData: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(color: Colors.red),
+          ),
+        ),
+      );
+
       expect(_iconColor(tester), Colors.red);
     });
 
@@ -1930,6 +1960,15 @@ List<_PreviewIcon> _findIcons(WidgetTester tester) {
 }
 
 // The color the single inline icon in the preview paints with.
+// The style the preview span with [text] paints with, after the surrounding
+// text style and every ancestor span's style are applied.
+TextStyle? _paintedStyle(WidgetTester tester, String text) {
+  final richText = tester.widget<RichText>(
+    find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(RichText)).first,
+  );
+  return _findTextSpans(richText.text).firstWhere((s) => s.text == text).style;
+}
+
 Color? _iconColor(WidgetTester tester) {
   final finder = find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(Icon));
   return tester.widget<Icon>(finder).color ?? IconTheme.of(tester.element(finder)).color;

@@ -43,8 +43,8 @@ class StreamMessagePreviewTextTheme extends InheritedTheme {
 /// Theme data for parts of a message preview styled apart from the rest.
 ///
 /// A set style keeps the default for anything it leaves out. To style the
-/// whole preview, use the subtitle style where it is shown, such
-/// as [StreamChannelListItemThemeData.subtitleStyle] or
+/// whole preview, consider the subtitle style where it is shown, such as
+/// [StreamChannelListItemThemeData.subtitleStyle] or
 /// [StreamQuotedMessageThemeData.subtitleTextStyle].
 ///
 /// See also:
@@ -52,8 +52,10 @@ class StreamMessagePreviewTextTheme extends InheritedTheme {
 ///  * [StreamMessagePreviewTextTheme], which overrides the theme for a subtree.
 ///  * [StreamChatThemeData.messagePreviewTextTheme], which sets the theme
 ///    app-wide.
-///  * [StreamQuotedMessageThemeData.messagePreviewTextTheme], which styles
-///    the preview inside a quoted reply.
+///  * [StreamQuotedMessageThemeData.messagePreviewTextTheme],
+///    [StreamChannelListItemThemeData.messagePreviewTextTheme] and
+///    [StreamThreadListTileThemeData.messagePreviewTextTheme], which style the
+///    preview in each component.
 /// {@endtemplate}
 @themeGen
 @immutable
@@ -79,7 +81,8 @@ class StreamMessagePreviewTextThemeData with _$StreamMessagePreviewTextThemeData
 
   /// The text style for the "Message deleted" text and its icon.
   ///
-  /// If null, the default depends on where the preview is shown.
+  /// If null, matches the rest of the preview, except in the channel list,
+  /// thread list and message search, which use a muted color.
   final TextStyle? deletedContentStyle;
 
   /// Linearly interpolates between two [StreamMessagePreviewTextThemeData]

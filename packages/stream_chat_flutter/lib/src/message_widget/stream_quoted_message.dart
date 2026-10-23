@@ -182,17 +182,6 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
     return a11y.incomingReplyToMessageLabel(replierName: replierName, authorName: authorName);
   }
 
-  // The quoted author's name, or "You" when the current user wrote it.
-  String _title(BuildContext context) {
-    final quotedAuthor = props.quotedMessage.user;
-    if (quotedAuthor == null) return '';
-
-    final currentUser = StreamChat.maybeOf(context)?.currentUser;
-    if (quotedAuthor.id == currentUser?.id) return context.translations.youText;
-
-    return quotedAuthor.name;
-  }
-
   @override
   Widget build(BuildContext context) {
     final quotedMessage = props.quotedMessage;
@@ -302,6 +291,17 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  // The quoted author's name, or "You" when the current user wrote it.
+  String _title(BuildContext context) {
+    final quotedAuthor = props.quotedMessage.user;
+    if (quotedAuthor == null) return '';
+
+    final currentUser = StreamChat.maybeOf(context)?.currentUser;
+    if (quotedAuthor.id == currentUser?.id) return context.translations.youText;
+
+    return quotedAuthor.name;
   }
 
   Widget? _buildThumbnail(BuildContext context, Message message) {

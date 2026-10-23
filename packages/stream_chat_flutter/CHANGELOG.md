@@ -9,6 +9,9 @@
 🔄 Changed
 
 - Removing an empty poll option no longer asks for confirmation.
+- A deleted message in `StreamMessagePreviewText` now matches the rest of the preview unless `StreamMessagePreviewTextThemeData.deletedContentStyle` sets a style. The channel list, thread list and message search still apply their own deleted style.
+- Icons in `StreamMessagePreviewText` and `StreamDraftMessagePreviewText` no longer follow a surrounding `IconTheme`.
+- Values a local `StreamThreadListTileTheme` leaves unset now keep their `StreamChatThemeData.threadListTileTheme` setting instead of resetting to the default.
 
 🐞 Fixed
 
@@ -19,12 +22,6 @@
 - Fixed icons in message previews showing in a different color from the text beside them.
 - Fixed a quoted reply to your own message showing your name instead of "You".
 - Fixed a deleted message in a thread list preview showing in the tertiary text color instead of the secondary one.
-
-🔄 Changed
-
-- A deleted message in `StreamMessagePreviewText` now matches the rest of the preview unless `StreamMessagePreviewTextThemeData.deletedContentStyle` sets a style. The channel list, thread list and message search keep their own deleted style.
-- Icons in `StreamMessagePreviewText` and `StreamDraftMessagePreviewText` no longer follow a surrounding `IconTheme`.
-- Values a local `StreamThreadListTileTheme` leaves unset now keep their `StreamChatThemeData.threadListTileTheme` setting instead of resetting to the default.
 
 ## 10.6.0
 

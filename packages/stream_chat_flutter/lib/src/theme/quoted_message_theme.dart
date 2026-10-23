@@ -117,9 +117,10 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
 
   /// The text style for the whole quoted message preview.
   ///
-  /// To style only parts of it, use [messagePreviewTextTheme]. If null,
-  /// defaults to [StreamTextTheme.metadataDefault] in the same color as
-  /// [titleTextStyle].
+  /// To style only parts of it, consider [messagePreviewTextTheme]. If null,
+  /// defaults to [StreamTextTheme.metadataDefault] in
+  /// [StreamColorScheme.textPrimary] for an incoming reply and `brand.shade900`
+  /// for an outgoing one.
   final TextStyle? subtitleTextStyle;
 
   /// The theme for styling parts of the quoted message preview differently

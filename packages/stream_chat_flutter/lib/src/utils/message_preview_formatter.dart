@@ -324,8 +324,8 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
   ///
   /// Prepends a localized "You: " prefix, styled with
   /// [StreamMessagePreviewTextThemeData.senderPrefixStyle], to [messageBody]
-  /// and returns the combined span. Override to customize or remove the
-  /// prefix:
+  /// and returns the combined span. Consider overriding this to customize or
+  /// remove the prefix:
   ///
   /// {@tool snippet}
   ///

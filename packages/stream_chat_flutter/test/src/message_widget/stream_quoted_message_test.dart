@@ -146,12 +146,8 @@ Message _deletedMessage() => Message(
 Future<double> _pumpTopInset(WidgetTester tester, {required StreamMessageContentKind contentKind}) async {
   await _pumpQuote(
     tester,
-    quotedMessage: Message(
-      id: 'quoted',
-      text: 'Can you send me a voice note?',
-      createdAt: DateTime(2026, 8, 26, 14),
-      user: User(id: 'jason', name: 'Jason Thompson'),
-      state: MessageState.sent,
+    quotedMessage: _textMessage(
+      author: User(id: 'jason', name: 'Jason Thompson'),
     ),
     layout: StreamMessageLayoutData(contentKind: contentKind),
   );
