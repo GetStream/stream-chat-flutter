@@ -42,6 +42,11 @@ mixin _$StreamThreadListTileThemeData {
         b.threadReplyToMessageStyle,
         t,
       ),
+      messagePreviewTextTheme: StreamMessagePreviewTextThemeData.lerp(
+        a.messagePreviewTextTheme,
+        b.messagePreviewTextTheme,
+        t,
+      ),
       threadLatestReplyUsernameStyle: TextStyle.lerp(
         a.threadLatestReplyUsernameStyle,
         b.threadLatestReplyUsernameStyle,
@@ -83,6 +88,7 @@ mixin _$StreamThreadListTileThemeData {
     Color? backgroundColor,
     TextStyle? threadChannelNameStyle,
     TextStyle? threadReplyToMessageStyle,
+    StreamMessagePreviewTextThemeData? messagePreviewTextTheme,
     TextStyle? threadLatestReplyUsernameStyle,
     TextStyle? threadLatestReplyMessageStyle,
     TextStyle? threadLatestReplyTimestampStyle,
@@ -101,6 +107,8 @@ mixin _$StreamThreadListTileThemeData {
           threadChannelNameStyle ?? _this.threadChannelNameStyle,
       threadReplyToMessageStyle:
           threadReplyToMessageStyle ?? _this.threadReplyToMessageStyle,
+      messagePreviewTextTheme:
+          messagePreviewTextTheme ?? _this.messagePreviewTextTheme,
       threadLatestReplyUsernameStyle:
           threadLatestReplyUsernameStyle ??
           _this.threadLatestReplyUsernameStyle,
@@ -144,6 +152,9 @@ mixin _$StreamThreadListTileThemeData {
             other.threadReplyToMessageStyle,
           ) ??
           other.threadReplyToMessageStyle,
+      messagePreviewTextTheme:
+          _this.messagePreviewTextTheme?.merge(other.messagePreviewTextTheme) ??
+          other.messagePreviewTextTheme,
       threadLatestReplyUsernameStyle:
           _this.threadLatestReplyUsernameStyle?.merge(
             other.threadLatestReplyUsernameStyle,
@@ -191,6 +202,7 @@ mixin _$StreamThreadListTileThemeData {
         _other.backgroundColor == _this.backgroundColor &&
         _other.threadChannelNameStyle == _this.threadChannelNameStyle &&
         _other.threadReplyToMessageStyle == _this.threadReplyToMessageStyle &&
+        _other.messagePreviewTextTheme == _this.messagePreviewTextTheme &&
         _other.threadLatestReplyUsernameStyle ==
             _this.threadLatestReplyUsernameStyle &&
         _other.threadLatestReplyMessageStyle ==
@@ -216,6 +228,7 @@ mixin _$StreamThreadListTileThemeData {
       _this.backgroundColor,
       _this.threadChannelNameStyle,
       _this.threadReplyToMessageStyle,
+      _this.messagePreviewTextTheme,
       _this.threadLatestReplyUsernameStyle,
       _this.threadLatestReplyMessageStyle,
       _this.threadLatestReplyTimestampStyle,

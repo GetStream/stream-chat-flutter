@@ -50,13 +50,18 @@ class StreamDraftMessagePreviewText extends StatelessWidget {
       _ => previewTextSpan.toPlainText(includePlaceholders: false),
     };
 
-    return Text.rich(
-      maxLines: 1,
-      previewTextSpan,
-      style: textStyle,
-      overflow: TextOverflow.ellipsis,
-      textAlign: TextAlign.start,
-      semanticsLabel: a11yLabel,
+    final textColor = textStyle?.color ?? DefaultTextStyle.of(context).style.color;
+
+    return IconTheme.merge(
+      data: IconThemeData(color: textColor),
+      child: Text.rich(
+        maxLines: 1,
+        previewTextSpan,
+        style: textStyle,
+        overflow: TextOverflow.ellipsis,
+        textAlign: TextAlign.start,
+        semanticsLabel: a11yLabel,
+      ),
     );
   }
 }

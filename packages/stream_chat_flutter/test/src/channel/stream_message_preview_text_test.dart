@@ -15,6 +15,8 @@ void main() {
     TextStyle? textStyle,
     ChannelModel? channel,
     StreamChatConfigurationData? configData,
+    StreamChatThemeData? themeData,
+    StreamMessagePreviewTextThemeData? previewTextTheme,
     bool showCaption = true,
   }) async {
     final client = MockClient();
@@ -30,14 +32,17 @@ void main() {
           body: StreamChat(
             client: client,
             configData: configData,
-            themeData: StreamChatThemeData(),
+            themeData: themeData ?? StreamChatThemeData(),
             child: Center(
-              child: StreamMessagePreviewText(
-                message: message,
-                language: language,
-                textStyle: textStyle,
-                channel: channel,
-                showCaption: showCaption,
+              child: StreamMessagePreviewTextTheme(
+                data: previewTextTheme ?? const StreamMessagePreviewTextThemeData(),
+                child: StreamMessagePreviewText(
+                  message: message,
+                  language: language,
+                  textStyle: textStyle,
+                  channel: channel,
+                  showCaption: showCaption,
+                ),
               ),
             ),
           ),
@@ -75,11 +80,104 @@ void main() {
       expect(icons.first.size, 16);
 
       expect(_extractText(tester), 'Message deleted');
+    });
+
+    testWidgets('renders deleted message in the surrounding text color', (tester) async {
+      final message = Message(
+        text: 'Original message',
+        type: MessageType.deleted,
+        user: User(id: 'other-user-id', name: 'Other User'),
+        deletedAt: DateTime.now(),
+      );
+
+      await pumpMessagePreview(tester, message, textStyle: const TextStyle(color: Colors.teal));
+
+      expect(_paintedStyle(tester, 'Message deleted')?.color, Colors.teal);
+    });
+
+    testWidgets('renders the deleted icon in the surrounding text color', (tester) async {
+      final message = Message(
+        text: 'Original message',
+        type: MessageType.deleted,
+        user: User(id: 'other-user-id', name: 'Other User'),
+        deletedAt: DateTime.now(),
+      );
+
+      await pumpMessagePreview(tester, message, textStyle: const TextStyle(color: Colors.teal));
+
+      expect(_iconColor(tester), Colors.teal);
+    });
+
+    testWidgets('renders deleted message in the themed deleted style', (tester) async {
+      final message = Message(
+        text: 'Original message',
+        type: MessageType.deleted,
+        user: User(id: 'other-user-id', name: 'Other User'),
+        deletedAt: DateTime.now(),
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        themeData: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(color: Colors.red, fontStyle: FontStyle.italic),
+          ),
+        ),
+      );
 
       final span = _getPreviewSpan(tester);
-      final styledSpans = _findTextSpans(span);
-      final deletedSpan = styledSpans.firstWhere((s) => s.text == 'Message deleted');
-      expect(deletedSpan.style?.color, isNotNull);
+      final deletedSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Message deleted');
+      expect(deletedSpan.style?.color, Colors.red);
+      expect(deletedSpan.style?.fontStyle, FontStyle.italic);
+    });
+
+    testWidgets('renders the deleted icon in the themed deleted color', (tester) async {
+      final message = Message(
+        text: 'Original message',
+        type: MessageType.deleted,
+        user: User(id: 'other-user-id', name: 'Other User'),
+        deletedAt: DateTime.now(),
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        themeData: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(color: Colors.red),
+          ),
+        ),
+      );
+
+      expect(_iconColor(tester), Colors.red);
+    });
+
+    testWidgets('renders deleted message in a local deleted style over the app-wide one', (tester) async {
+      final message = Message(
+        text: 'Original message',
+        type: MessageType.deleted,
+        user: User(id: 'other-user-id', name: 'Other User'),
+        deletedAt: DateTime.now(),
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        themeData: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            deletedContentStyle: TextStyle(color: Colors.red, fontStyle: FontStyle.italic),
+          ),
+        ),
+        previewTextTheme: const StreamMessagePreviewTextThemeData(
+          deletedContentStyle: TextStyle(color: Colors.blue),
+        ),
+      );
+
+      final span = _getPreviewSpan(tester);
+      final deletedSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Message deleted');
+      expect(deletedSpan.style?.color, Colors.blue);
+      expect(deletedSpan.style?.fontStyle, FontStyle.italic);
     });
 
     testWidgets('renders system message with text', (tester) async {
@@ -194,6 +292,18 @@ void main() {
   });
 
   group('Single attachments', () {
+    testWidgets('attachment icon matches the text color', (tester) async {
+      final message = Message(
+        text: '',
+        user: User(id: 'other-user-id', name: 'Other User'),
+        attachments: [Attachment(type: AttachmentType.image)],
+      );
+
+      await pumpMessagePreview(tester, message, textStyle: const TextStyle(color: Colors.teal));
+
+      expect(_iconColor(tester), Colors.teal);
+    });
+
     testWidgets('image attachment shows camera icon and "Photo" label', (tester) async {
       final message = Message(
         text: '',
@@ -680,7 +790,7 @@ void main() {
   });
 
   group('Channel context', () {
-    testWidgets('group channel prepends bold "You:" for current user', (tester) async {
+    testWidgets('group channel prepends a semibold "You:" for current user', (tester) async {
       final channel = ChannelModel(
         id: 'test-channel',
         type: 'messaging',
@@ -698,10 +808,74 @@ void main() {
 
       final span = _getPreviewSpan(tester);
       final youSpan = _findTextSpans(span).firstWhere((s) => s.text == 'You: ');
-      expect(youSpan.style?.fontWeight, FontWeight.bold);
+      expect(
+        youSpan.style?.fontWeight,
+        tester.element(find.byType(StreamMessagePreviewText)).streamTypography.fontWeight.semibold,
+      );
     });
 
-    testWidgets('group channel prepends bold first name for other users', (tester) async {
+    testWidgets('group channel prepends the sender name in the themed sender style', (tester) async {
+      final channel = ChannelModel(
+        id: 'test-channel',
+        type: 'messaging',
+        memberCount: 3,
+      );
+
+      final message = Message(
+        text: 'Hello everyone',
+        user: User(id: 'other-user-id', name: 'Jane Doe'),
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        channel: channel,
+        themeData: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            senderPrefixStyle: TextStyle(color: Colors.indigo, fontWeight: FontWeight.w500),
+          ),
+        ),
+      );
+
+      final span = _getPreviewSpan(tester);
+      final nameSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Jane: ');
+      expect(nameSpan.style?.color, Colors.indigo);
+      expect(nameSpan.style?.fontWeight, FontWeight.w500);
+    });
+
+    testWidgets('group channel keeps the semibold sender name under a color-only sender style', (tester) async {
+      final channel = ChannelModel(
+        id: 'test-channel',
+        type: 'messaging',
+        memberCount: 3,
+      );
+
+      final message = Message(
+        text: 'Hello everyone',
+        user: User(id: 'other-user-id', name: 'Jane Doe'),
+      );
+
+      await pumpMessagePreview(
+        tester,
+        message,
+        channel: channel,
+        themeData: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            senderPrefixStyle: TextStyle(color: Colors.indigo),
+          ),
+        ),
+      );
+
+      final span = _getPreviewSpan(tester);
+      final nameSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Jane: ');
+      expect(nameSpan.style?.color, Colors.indigo);
+      expect(
+        nameSpan.style?.fontWeight,
+        tester.element(find.byType(StreamMessagePreviewText)).streamTypography.fontWeight.semibold,
+      );
+    });
+
+    testWidgets('group channel prepends a semibold first name for other users', (tester) async {
       final channel = ChannelModel(
         id: 'test-channel',
         type: 'messaging',
@@ -719,7 +893,10 @@ void main() {
 
       final span = _getPreviewSpan(tester);
       final nameSpan = _findTextSpans(span).firstWhere((s) => s.text == 'Jane: ');
-      expect(nameSpan.style?.fontWeight, FontWeight.bold);
+      expect(
+        nameSpan.style?.fontWeight,
+        tester.element(find.byType(StreamMessagePreviewText)).streamTypography.fontWeight.semibold,
+      );
     });
 
     testWidgets('group channel skips prefix when message has no user', (tester) async {
@@ -1789,6 +1966,21 @@ List<_PreviewIcon> _findIcons(WidgetTester tester) {
 
   visit(span);
   return result;
+}
+
+// The color the single inline icon in the preview paints with.
+// The style the preview span with [text] paints with, after the surrounding
+// text style and every ancestor span's style are applied.
+TextStyle? _paintedStyle(WidgetTester tester, String text) {
+  final richText = tester.widget<RichText>(
+    find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(RichText)).first,
+  );
+  return _findTextSpans(richText.text).firstWhere((s) => s.text == text).style;
+}
+
+Color? _iconColor(WidgetTester tester) {
+  final finder = find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(Icon));
+  return tester.widget<Icon>(finder).color ?? IconTheme.of(tester.element(finder)).color;
 }
 
 /// Minimal stand-in for the old `Icon` widget in tests.

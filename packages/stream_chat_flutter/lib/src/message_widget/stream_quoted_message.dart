@@ -6,6 +6,7 @@ import '../attachment/thumbnail/media_attachment_thumbnail.dart';
 import '../channel/stream_message_preview_text.dart';
 import '../components/stream_chat_component_builders.dart';
 import '../stream_chat.dart';
+import '../theme/message_preview_text_theme.dart';
 import '../theme/quoted_message_theme.dart';
 import '../utils/extensions.dart';
 
@@ -192,6 +193,8 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
 
     final effectiveTitleTextStyle = theme.titleTextStyle ?? defaults.titleTextStyle;
     final effectiveSubtitleTextStyle = theme.subtitleTextStyle ?? defaults.subtitleTextStyle;
+    final basePreviewTextTheme = defaults.messagePreviewTextTheme.merge(StreamMessagePreviewTextTheme.of(context));
+    final effectiveMessagePreviewTextTheme = basePreviewTextTheme.merge(theme.messagePreviewTextTheme);
     final effectiveIndicatorColor = theme.indicatorColor ?? defaults.indicatorColor;
     final effectiveBackgroundColor = theme.backgroundColor ?? defaults.backgroundColor;
 
@@ -212,12 +215,12 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
       style: effectiveTitleTextStyle,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      // The visible title is just the quoted author's name, which leaves a
-      // screen reader to guess at the relationship. Announcing who replied to
-      // whom instead turns the preview into a sentence; it merges with the
-      // body preview below into one phrase.
+      // The visible title only names who wrote the quoted message, which
+      // leaves a screen reader to guess at the relationship. Announcing who
+      // replied to whom instead turns the preview into a sentence; it merges
+      // with the body preview below into one phrase.
       child: Text(
-        quotedMessage.user?.name ?? '',
+        _title(context),
         semanticsLabel: _semanticsLabel(context),
       ),
     );
@@ -226,7 +229,10 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
       style: effectiveSubtitleTextStyle,
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
-      child: StreamMessagePreviewText(message: quotedMessage),
+      child: StreamMessagePreviewTextTheme(
+        data: effectiveMessagePreviewTextTheme,
+        child: StreamMessagePreviewText(message: quotedMessage),
+      ),
     );
 
     Widget? effectiveThumbnail;
@@ -287,6 +293,17 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
     );
   }
 
+  // The quoted author's name, or "You" when the current user wrote it.
+  String _title(BuildContext context) {
+    final quotedAuthor = props.quotedMessage.user;
+    if (quotedAuthor == null) return '';
+
+    final currentUser = StreamChat.maybeOf(context)?.currentUser;
+    if (quotedAuthor.id == currentUser?.id) return context.translations.youText;
+
+    return quotedAuthor.name;
+  }
+
   Widget? _buildThumbnail(BuildContext context, Message message) {
     final attachments = message.attachments;
     if (attachments.isEmpty || attachments.length > 1) return null;
@@ -336,6 +353,10 @@ class _StreamQuotedMessageDefaults extends StreamQuotedMessageThemeData {
 
   @override
   TextStyle get subtitleTextStyle => _textTheme.metadataDefault.copyWith(color: _textColor);
+
+  @override
+  StreamMessagePreviewTextThemeData get messagePreviewTextTheme =>
+      const StreamMessagePreviewTextThemeData(iconSize: 12);
 
   @override
   Color get indicatorColor => switch (_alignment) {

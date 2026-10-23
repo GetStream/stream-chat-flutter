@@ -27,6 +27,7 @@ mixin _$StreamChatThemeData on ThemeExtension<StreamChatThemeData> {
     StreamVoiceRecordingAttachmentThemeData? voiceRecordingAttachmentTheme,
     StreamQuotedMessageThemeData? quotedMessageTheme,
     StreamChannelListItemThemeData? channelListItemTheme,
+    StreamMessagePreviewTextThemeData? messagePreviewTextTheme,
   }) {
     final _this = (this as StreamChatThemeData);
 
@@ -52,6 +53,8 @@ mixin _$StreamChatThemeData on ThemeExtension<StreamChatThemeData> {
           voiceRecordingAttachmentTheme ?? _this.voiceRecordingAttachmentTheme,
       quotedMessageTheme: quotedMessageTheme ?? _this.quotedMessageTheme,
       channelListItemTheme: channelListItemTheme ?? _this.channelListItemTheme,
+      messagePreviewTextTheme:
+          messagePreviewTextTheme ?? _this.messagePreviewTextTheme,
     );
   }
 
@@ -143,6 +146,11 @@ mixin _$StreamChatThemeData on ThemeExtension<StreamChatThemeData> {
         other.channelListItemTheme,
         t,
       )!,
+      messagePreviewTextTheme: StreamMessagePreviewTextThemeData.lerp(
+        _this.messagePreviewTextTheme,
+        other.messagePreviewTextTheme,
+        t,
+      )!,
     );
   }
 
@@ -174,7 +182,8 @@ mixin _$StreamChatThemeData on ThemeExtension<StreamChatThemeData> {
         _other.voiceRecordingAttachmentTheme ==
             _this.voiceRecordingAttachmentTheme &&
         _other.quotedMessageTheme == _this.quotedMessageTheme &&
-        _other.channelListItemTheme == _this.channelListItemTheme;
+        _other.channelListItemTheme == _this.channelListItemTheme &&
+        _other.messagePreviewTextTheme == _this.messagePreviewTextTheme;
   }
 
   @override
@@ -198,6 +207,7 @@ mixin _$StreamChatThemeData on ThemeExtension<StreamChatThemeData> {
       _this.voiceRecordingAttachmentTheme,
       _this.quotedMessageTheme,
       _this.channelListItemTheme,
+      _this.messagePreviewTextTheme,
     );
   }
 }

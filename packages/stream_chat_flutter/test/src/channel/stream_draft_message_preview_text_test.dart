@@ -12,6 +12,7 @@ void main() {
     DraftMessage draftMessage, {
     TextStyle? textStyle,
     StreamChatConfigurationData? configData,
+    StreamChatThemeData? themeData,
   }) async {
     final client = MockClient();
     final clientState = MockClientState();
@@ -26,7 +27,7 @@ void main() {
           body: StreamChat(
             client: client,
             configData: configData,
-            themeData: StreamChatThemeData(),
+            themeData: themeData ?? StreamChatThemeData(),
             child: Center(
               child: StreamDraftMessagePreviewText(
                 textStyle: textStyle,
@@ -49,6 +50,48 @@ void main() {
       await pumpDraftMessagePreview(tester, draftMessage);
 
       expect(find.text('Draft: This is a draft message'), findsOneWidget);
+    });
+
+    testWidgets('renders the draft prefix semibold in the accent color', (tester) async {
+      await pumpDraftMessagePreview(tester, DraftMessage(text: 'This is a draft message'));
+
+      final accentPrimary = tester.element(find.byType(StreamDraftMessagePreviewText)).streamColorScheme.accentPrimary;
+      final style = _draftPrefixStyle(tester);
+      expect(style?.color, accentPrimary);
+      expect(
+        style?.fontWeight,
+        tester.element(find.byType(StreamDraftMessagePreviewText)).streamTypography.fontWeight.semibold,
+      );
+    });
+
+    testWidgets('renders the draft prefix in the themed style on top of its default', (tester) async {
+      await pumpDraftMessagePreview(
+        tester,
+        DraftMessage(text: 'This is a draft message'),
+        themeData: StreamChatThemeData(
+          messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+            draftPrefixStyle: TextStyle(color: Colors.purple),
+          ),
+        ),
+      );
+
+      expect(_draftPrefixStyle(tester)?.color, Colors.purple);
+      expect(
+        _draftPrefixStyle(tester)?.fontWeight,
+        tester.element(find.byType(StreamDraftMessagePreviewText)).streamTypography.fontWeight.semibold,
+      );
+    });
+
+    testWidgets('renders attachment icons in the text color', (tester) async {
+      await pumpDraftMessagePreview(
+        tester,
+        DraftMessage(attachments: [Attachment(type: AttachmentType.image)]),
+        textStyle: const TextStyle(color: Colors.teal),
+      );
+
+      final finder = find.descendant(of: find.byType(StreamDraftMessagePreviewText), matching: find.byType(Icon));
+      final iconColor = tester.widget<Icon>(finder).color ?? IconTheme.of(tester.element(finder)).color;
+      expect(iconColor, Colors.teal);
     });
   });
 
@@ -126,6 +169,27 @@ void main() {
       expect(find.text('Draft: This is a draft message'), findsNothing);
     });
   });
+}
+
+// The style the "Draft:" label paints with, after every ancestor span's style
+// is applied.
+TextStyle? _draftPrefixStyle(WidgetTester tester) {
+  final text = tester.widget<RichText>(
+    find.descendant(of: find.byType(StreamDraftMessagePreviewText), matching: find.byType(RichText)),
+  );
+
+  TextStyle? result;
+  void visit(InlineSpan span, TextStyle? inherited) {
+    if (span is! TextSpan) return;
+    final style = inherited?.merge(span.style) ?? span.style;
+    if (span.text == 'Draft:') result = style;
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      visit(child, style);
+    }
+  }
+
+  visit(text.text, null);
+  return result;
 }
 
 // Custom formatter for testing draft message overrides

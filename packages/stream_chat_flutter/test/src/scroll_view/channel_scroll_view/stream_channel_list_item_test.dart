@@ -401,6 +401,14 @@ void main() {
       );
     }
 
+    testWidgets('shows "No messages yet" in the tertiary text color', (tester) async {
+      await pumpSubtitle(tester, channelA);
+      await tester.pumpAndSettle();
+
+      final colorScheme = tester.element(find.text(emptyText)).streamColorScheme;
+      expect(tester.widget<Text>(find.text(emptyText)).style?.color, colorScheme.textTertiary);
+    });
+
     testWidgets(
       'preserves the last-known message when state is not up-to-date and emits empty',
       (tester) async {
@@ -656,6 +664,195 @@ void main() {
       handle.dispose();
     });
   });
+
+  testWidgets('StreamChannelListTile shows a deleted message in the tertiary text color', (tester) async {
+    await _pumpTile(tester, message: _deletedMessage());
+
+    final colorScheme = tester.element(find.byType(StreamChannelListTile)).streamColorScheme;
+    expect(_deletedMessageColor(tester), colorScheme.textTertiary);
+  });
+
+  testWidgets('StreamChannelListTile shows a deleted message in an app-wide deleted style', (tester) async {
+    await _pumpTile(
+      tester,
+      message: _deletedMessage(),
+      chatTheme: StreamChatThemeData(
+        messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+          deletedContentStyle: TextStyle(color: Colors.red),
+        ),
+      ),
+    );
+
+    expect(_deletedMessageColor(tester), Colors.red);
+  });
+
+  testWidgets('StreamChannelListTile shows the sender prefix semibold in the tertiary text color', (tester) async {
+    await _pumpTile(
+      tester,
+      message: Message(
+        text: 'Hello everyone',
+        user: User(id: 'ann', name: 'Ann Lee'),
+      ),
+      channel: ChannelModel(id: 'general', type: 'messaging', memberCount: 3),
+    );
+
+    final element = tester.element(find.byType(StreamChannelListTile));
+    final style = _paintedStyle(tester, 'Ann: ');
+    expect(style?.color, element.streamColorScheme.textTertiary);
+    expect(style?.fontWeight, element.streamTypography.fontWeight.semibold);
+  });
+
+  testWidgets('StreamChannelListTile keeps the tertiary color under an app-wide italic deleted style', (tester) async {
+    await _pumpTile(
+      tester,
+      message: _deletedMessage(),
+      chatTheme: StreamChatThemeData(
+        messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+          deletedContentStyle: TextStyle(fontStyle: FontStyle.italic),
+        ),
+      ),
+    );
+
+    final colorScheme = tester.element(find.byType(StreamChannelListTile)).streamColorScheme;
+    expect(_deletedMessageColor(tester), colorScheme.textTertiary);
+    expect(_deletedMessageFontStyle(tester), FontStyle.italic);
+  });
+
+  testWidgets('StreamChannelListTile shows a deleted message in the themed preview style', (tester) async {
+    await _pumpTile(
+      tester,
+      message: _deletedMessage(),
+      theme: const StreamChannelListItemThemeData(
+        messagePreviewTextTheme: StreamMessagePreviewTextThemeData(
+          deletedContentStyle: TextStyle(color: Colors.orange),
+        ),
+      ),
+    );
+
+    expect(_deletedMessageColor(tester), Colors.orange);
+  });
+
+  testWidgets('StreamChannelListTile prefers the themed preview style over enclosing and app-wide ones', (
+    tester,
+  ) async {
+    await _pumpTile(
+      tester,
+      message: _deletedMessage(),
+      chatTheme: StreamChatThemeData(
+        messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(
+          deletedContentStyle: TextStyle(color: Colors.red),
+        ),
+      ),
+      previewTextTheme: const StreamMessagePreviewTextThemeData(
+        deletedContentStyle: TextStyle(color: Colors.blue),
+      ),
+      theme: const StreamChannelListItemThemeData(
+        messagePreviewTextTheme: StreamMessagePreviewTextThemeData(
+          deletedContentStyle: TextStyle(color: Colors.orange),
+        ),
+      ),
+    );
+
+    expect(_deletedMessageColor(tester), Colors.orange);
+  });
+
+  testWidgets('StreamChannelListTile colors only the preview icons with an app-wide icon color', (tester) async {
+    await _pumpTile(
+      tester,
+      message: _deletedMessage(),
+      chatTheme: StreamChatThemeData(
+        messagePreviewTextTheme: const StreamMessagePreviewTextThemeData(iconColor: Colors.green),
+      ),
+    );
+
+    final colorScheme = tester.element(find.byType(StreamChannelListTile)).streamColorScheme;
+    expect(_previewIcon(tester).color, Colors.green);
+    expect(_deletedMessageColor(tester), colorScheme.textTertiary);
+  });
+}
+
+// Pumps a channel list tile whose subtitle previews [message].
+Future<void> _pumpTile(
+  WidgetTester tester, {
+  required Message message,
+  StreamChannelListItemThemeData? theme,
+  StreamMessagePreviewTextThemeData? previewTextTheme,
+  StreamChatThemeData? chatTheme,
+  ChannelModel? channel,
+}) {
+  final client = MockClient();
+  final clientState = MockClientState();
+  final currentUser = OwnUser(id: 'me');
+
+  when(() => client.state).thenReturn(clientState);
+  when(() => clientState.currentUser).thenReturn(currentUser);
+  when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
+
+  return tester.pumpWidget(
+    MaterialApp(
+      home: StreamChat(
+        client: client,
+        connectivityStream: Stream.value(const [ConnectivityResult.wifi]),
+        themeData: chatTheme,
+        child: Scaffold(
+          body: StreamMessagePreviewTextTheme(
+            data: previewTextTheme ?? const StreamMessagePreviewTextThemeData(),
+            child: StreamChannelListItemTheme(
+              data: theme ?? const StreamChannelListItemThemeData(),
+              child: StreamChannelListTile(
+                avatar: const _SilentAvatar(),
+                title: const Text('General'),
+                subtitle: StreamMessagePreviewText(message: message, channel: channel),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+Message _deletedMessage() => Message(
+  id: 'deleted',
+  text: 'Original message',
+  type: MessageType.deleted,
+  user: User(id: 'jason', name: 'Jason Thompson'),
+  deletedAt: DateTime.parse('2021-07-20T17:00:00.000Z'),
+);
+
+// The icon inside the message preview.
+Icon _previewIcon(WidgetTester tester) {
+  return tester.widget<Icon>(find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(Icon)));
+}
+
+// The color the "Message deleted" text paints with.
+Color? _deletedMessageColor(WidgetTester tester) => _deletedMessageStyle(tester)?.color;
+
+// The font style the "Message deleted" text paints with.
+FontStyle? _deletedMessageFontStyle(WidgetTester tester) => _deletedMessageStyle(tester)?.fontStyle;
+
+// The style the "Message deleted" text paints with.
+TextStyle? _deletedMessageStyle(WidgetTester tester) => _paintedStyle(tester, 'Message deleted');
+
+// The style the preview span with [text] paints with, after every ancestor
+// span's style is applied.
+TextStyle? _paintedStyle(WidgetTester tester, String text) {
+  final richText = tester.widget<RichText>(
+    find.descendant(of: find.byType(StreamMessagePreviewText), matching: find.byType(RichText)).first,
+  );
+
+  TextStyle? result;
+  void visit(InlineSpan span, TextStyle? inherited) {
+    if (span is! TextSpan) return;
+    final style = inherited?.merge(span.style) ?? span.style;
+    if (span.text == text) result = style;
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      visit(child, style);
+    }
+  }
+
+  visit(richText.text, null);
+  return result;
 }
 
 // Simulates a DM avatar — silent (wraps its sentinel text in
