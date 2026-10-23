@@ -8,7 +8,10 @@ android {
     namespace = "io.getstream.chat.e2e_app"
     // The SDK's plugins need a newer compile SDK than Flutter's default.
     compileSdk = maxOf(flutter.compileSdkVersion, 36)
-    ndkVersion = flutter.ndkVersion
+    // GitHub's Ubuntu runners preinstall a few NDKs, but not Flutter's default, so every CI
+    // job used to download one mid-build (a failure point, and 1-2 min per job). Use the newest
+    // preinstalled NDK there; a newer NDK also serves plugins that ask for an older one.
+    ndkVersion = System.getenv("ANDROID_NDK_LATEST_HOME")?.let { File(it).name } ?: flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17

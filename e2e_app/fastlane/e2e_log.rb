@@ -30,6 +30,10 @@ module E2ELog
   # What the runner appends to the name of the test it pinned such an error on.
   POST_COMPLETION_SUFFIX = ' (failed after test completion)'
 
+  # The runner's entry for a test file that failed to load, e.g. when the app did
+  # not build. It is not a test, so it is neither owed a result nor a `--name`.
+  LOAD_FAILURE = /\Aloading \S+\.dart\z/
+
   class << self
     # The tests that reported a failure — what a retry should narrow to.
     def failed_test_names(log)
@@ -45,6 +49,7 @@ module E2ELog
     def phantom_test_names(log)
       accounted = read(log).scan(REPORTED_TEST).flatten
                            .map { |name| name.delete_suffix(POST_COMPLETION_SUFFIX).delete_suffix(FAILED_SUFFIX).strip }
+                           .reject { |name| name.match?(LOAD_FAILURE) }
                            .uniq
       return [] if accounted.empty?
 

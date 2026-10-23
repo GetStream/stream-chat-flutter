@@ -95,7 +95,7 @@ jobs:
       matrix:
         batch: ${{ fromJson(needs.select.outputs.e2e_batches) }}
     env:
-      ANDROID_API_LEVEL: "34"
+      ANDROID_API_LEVEL: "36"
       LAUNCH_ID: ${{ needs.allure_launch_android.outputs.launch_id }}
     steps:
       - uses: actions/checkout@v7
