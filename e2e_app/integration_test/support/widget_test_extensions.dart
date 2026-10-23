@@ -88,11 +88,33 @@ extension E2EWidgetTester on WidgetTester {
     await settle();
   }
 
+  /// Types [text] into the field, retrying while the field ignores it.
+  ///
+  /// [enterText] focuses the field and pumps one frame before sending the text to
+  /// whichever input connection is attached. On a slow device the field's connection
+  /// can open later (e.g. while its page is still transitioning in), and the text then
+  /// goes to a stale connection and is silently dropped. A field that rewrites what was
+  /// typed (a composer command) still counts as having taken it, so only an unchanged
+  /// field is retried.
   Future<void> enterTextInField(Type inputFieldType, String text) async {
     final finder = find.byType(inputFieldType);
     await waitUntilVisible(finder);
-    await enterText(finder, text);
-    await settle();
+    String fieldText() =>
+        widget<EditableText>(find.descendant(of: finder, matching: find.byType(EditableText))).controller.text;
+
+    final before = fieldText();
+    final end = DateTime.now().add(const Duration(seconds: 10));
+    while (true) {
+      await enterText(finder, text);
+      await settle();
+      if (before == text || fieldText() != before || DateTime.now().isAfter(end)) break;
+      await pump(const Duration(milliseconds: 250));
+    }
+    expect(
+      before == text || fieldText() != before,
+      isTrue,
+      reason: 'The field ignored the typed text: it still holds "${fieldText()}"',
+    );
   }
 
   /// Drags the message list by [delta] logical pixels. A positive [delta]
