@@ -171,7 +171,7 @@ class _EditMessageInHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return core.StreamMessageComposerEditMessageAttachment(
       title: Text(context.translations.editMessageLabel),
-      subtitle: StreamMessagePreviewText(message: message),
+      subtitle: _HeaderMessagePreviewText(message: message),
       onRemovePressed: onRemovePressed,
     );
   }
@@ -222,10 +222,29 @@ class _QuotedMessageInHeader extends StatelessWidget {
 
     return core.StreamMessageComposerReplyAttachment(
       title: Text(title),
-      subtitle: StreamMessagePreviewText(message: quotedMessage),
+      subtitle: _HeaderMessagePreviewText(message: quotedMessage),
       onRemovePressed: onRemovePressed,
       thumbnail: _buildThumbnail(context, quotedMessage),
       direction: isIncoming ? .incoming : .outgoing,
+    );
+  }
+}
+
+// The preview of the message being replied to or edited, with the smaller
+// icons the composer header uses.
+class _HeaderMessagePreviewText extends StatelessWidget {
+  const _HeaderMessagePreviewText({required this.message});
+
+  final Message message;
+
+  @override
+  Widget build(BuildContext context) {
+    const previewTextTheme = StreamMessagePreviewTextThemeData(iconSize: 12);
+    final effectiveMessagePreviewTextTheme = previewTextTheme.merge(StreamMessagePreviewTextTheme.of(context));
+
+    return StreamMessagePreviewTextTheme(
+      data: effectiveMessagePreviewTextTheme,
+      child: StreamMessagePreviewText(message: message),
     );
   }
 }

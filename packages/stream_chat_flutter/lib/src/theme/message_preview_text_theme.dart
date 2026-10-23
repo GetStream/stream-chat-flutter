@@ -78,7 +78,7 @@ class StreamMessagePreviewTextThemeData with _$StreamMessagePreviewTextThemeData
   /// The text style for the sender prefix, such as "You:" or "Ann:", that
   /// starts a preview in a channel or thread list.
   ///
-  /// Defaults to semibold.
+  /// Defaults to semibold, in a muted color in the channel and thread lists.
   final TextStyle? senderPrefixStyle;
 
   /// The text style for the "Message deleted" text and its icon.
@@ -90,7 +90,8 @@ class StreamMessagePreviewTextThemeData with _$StreamMessagePreviewTextThemeData
 
   /// The size of the icons in the preview, such as the photo or poll icon.
   ///
-  /// Defaults to 16, or 12 in a quoted reply.
+  /// Defaults to 16, or 12 in a quoted reply and in the composer's reply or
+  /// edit preview.
   final double? iconSize;
 
   /// The color of the icons in the preview.
