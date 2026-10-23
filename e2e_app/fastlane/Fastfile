@@ -107,6 +107,19 @@ def combine_runs(runs)
   [BATCH_ENTRYPOINT, names, files]
 end
 
+# Whether the Android device is online, after giving one that dropped off (e.g. a CI
+# emulator that hung) a minute to come back.
+def android_device_online?(device)
+  serial = device ? "-s #{device} " : ''
+  30.times do |i|
+    return true if `adb #{serial}get-state 2>/dev/null`.strip == 'device'
+
+    UI.important("Android device #{device || '(default)'} is not online; waiting for it to come back…") if i.zero?
+    sleep(2)
+  end
+  false
+end
+
 def boot_simulator(udid:)
   return if `xcrun simctl list devices booted`.to_s.include?(udid)
   return unless `xcrun simctl list devices`.to_s.include?(udid)
@@ -277,6 +290,18 @@ lane :run_e2e_test do |options|
       runs.each_with_index do |(target, selected, files), run_index|
         test_name = File.basename(target, '.dart')
         files ||= [test_name]
+
+        # A dead emulator turns every remaining run into an instant "No supported devices"
+        # failure. Stop instead, and count the remaining runs as failed, so the coverage
+        # map keeps their previous coverage rather than dropping them.
+        if !ios && !android_device_online?(device)
+          remaining = runs.drop(run_index)
+          UI.important("Android device #{device || '(default)'} is gone; skipping the #{remaining.size} remaining run(s)")
+          remaining.each do |t, s, _|
+            failed << (coverage ? "#{File.basename(t, '.dart')}/#{s.first}" : t)
+          end
+          break
+        end
 
         attempt_log = "#{videos_dir}/#{test_name}.attempt.log"
         coverage_dir = "#{e2e_coverage_path}/#{test_name}/#{selected.first}" if coverage

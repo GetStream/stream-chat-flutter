@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:e2e_app/app.dart';
 import 'package:e2e_app/auth/auth_controller.dart';
 import 'package:e2e_app/widgets/e2e_message_actions.dart' show lastCopiedMessageId;
-import 'package:flutter/widgets.dart' show AppLifecycleState, SizedBox;
+import 'package:flutter/widgets.dart' show AppLifecycleState, FlutterError, SizedBox, debugPrint;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
@@ -251,7 +251,16 @@ class StreamTestEnv {
       // makes their deactivate() throw (the composer saves its draft on the way
       // out). That aborts the unmount, and the half-disposed tree keeps global
       // pointer routes that break every later test sharing the process.
-      await _tester.pumpWidget(const SizedBox.shrink());
+      try {
+        await _tester.pumpWidget(const SizedBox.shrink());
+        // The conflict is reported as a FlutterError, which is an Error.
+        // ignore: avoid_catching_errors
+      } on FlutterError catch (e) {
+        // A test that failed while one of its pumps was still running (an async
+        // error) leaves that pump guarded, and pumping again is a "Guarded function
+        // conflict". The test has already failed; still reset the client below.
+        debugPrint('Could not unmount the app before resetting the client: ${e.message}');
+      }
       await authController.debugReset();
       lastCopiedMessageId = null;
     } finally {

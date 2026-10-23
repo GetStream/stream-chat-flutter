@@ -219,16 +219,20 @@ class UserRobot {
     return this;
   }
 
-  /// Scrolls the message list up until the message [text] is rendered.
+  /// Scrolls the message list up until the message [text] is on screen.
   Future<UserRobot> scrollMessageListUpUntilVisible(String text) async {
-    final message = MessageListPage.list.messageWithText(text);
+    // Hit-testable, not just built: the list also builds rows in its cache extent, just
+    // outside the viewport, where a tap or an on-screen assertion can't reach them.
+    final message = MessageListPage.list.messageWithText(text).hitTestable();
     await tester.scrollUpUntil(() => message.evaluate().isNotEmpty, description: 'the message "$text"');
     return this;
   }
 
-  /// Scrolls the message list down until the message [text] is rendered.
+  /// Scrolls the message list down until the message [text] is on screen.
   Future<UserRobot> scrollMessageListDownUntilVisible(String text) async {
-    final message = MessageListPage.list.messageWithText(text);
+    // Hit-testable, not just built: the list also builds rows in its cache extent, just
+    // outside the viewport, where a tap or an on-screen assertion can't reach them.
+    final message = MessageListPage.list.messageWithText(text).hitTestable();
     await tester.scrollDownUntil(() => message.evaluate().isNotEmpty, description: 'the message "$text"');
     return this;
   }
