@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/src/poll/creator/stream_poll_creator_sheet.dart';
 import 'package:stream_chat_flutter/src/stream_chat_configuration.dart';
 import 'package:stream_chat_flutter/src/theme/stream_chat_theme.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
 
 void main() {
@@ -15,6 +16,25 @@ void main() {
       constraints: const BoxConstraints.tightFor(width: 412, height: 916),
       builder: () => _wrapWithMaterialApp(
         const StreamPollCreatorSheet(),
+        brightness: brightness,
+      ),
+    );
+
+    goldenTest(
+      '[${brightness.name}] -> StreamPollCreatorSheet with several options should look fine',
+      fileName: 'stream_poll_creator_sheet_options_${brightness.name}',
+      constraints: const BoxConstraints.tightFor(width: 412, height: 916),
+      builder: () => _wrapWithMaterialApp(
+        StreamPollCreatorSheet(
+          poll: Poll(
+            name: 'What should we have for lunch?',
+            options: const [
+              PollOption(id: 'option-1', text: 'Pizza'),
+              PollOption(id: 'option-2', text: 'Sushi'),
+              PollOption(id: 'option-3', text: 'Tacos'),
+            ],
+          ),
+        ),
         brightness: brightness,
       ),
     );
