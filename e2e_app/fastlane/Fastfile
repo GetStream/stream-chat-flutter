@@ -399,7 +399,8 @@ lane :run_e2e_test do |options|
 
       retries = (options[:retries] || 2).to_i
       # GNU coreutils: present on the CI runners; on macOS only with coreutils installed.
-      timeout_bin = `command -v timeout`.strip
+      # The redirect makes Ruby run this through `sh`: `command` is a builtin with no binary on Linux.
+      timeout_bin = `command -v timeout 2>/dev/null`.strip
 
       first_attempt = true
       runs.each_with_index do |(target, selected, files), run_index|
