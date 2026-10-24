@@ -107,17 +107,95 @@ def combine_runs(runs)
   [BATCH_ENTRYPOINT, names, files]
 end
 
+# The stripped output of an adb command, or nil when it fails or takes over [timeout]
+# seconds. A frozen emulator can keep adb's connection open and still be listed as
+# `device`, while every command sent to it hangs.
+def adb_output(device, *args, timeout: 10)
+  serial = device ? ['-s', device] : []
+  reader, writer = IO.pipe
+  pid = Process.spawn('adb', *serial, *args, out: writer, err: File::NULL)
+  writer.close
+  deadline = Time.now + timeout
+  until (status = Process.wait2(pid, Process::WNOHANG)&.last)
+    if Time.now > deadline
+      Process.kill('KILL', pid) rescue nil
+      Process.wait(pid) rescue nil
+      return nil
+    end
+    sleep(0.2)
+  end
+  status.success? ? reader.read.strip : nil
+ensure
+  reader&.close
+end
+
 # Whether the Android device is online, after giving one that dropped off (e.g. a CI
 # emulator that hung) a minute to come back.
 def android_device_online?(device)
-  serial = device ? "-s #{device} " : ''
-  30.times do |i|
-    return true if `adb #{serial}get-state 2>/dev/null`.strip == 'device'
+  6.times do |i|
+    return true if adb_output(device, 'shell', 'echo', 'ok') == 'ok'
 
-    UI.important("Android device #{device || '(default)'} is not online; waiting for it to come back…") if i.zero?
+    UI.important("Android device #{device || '(default)'} is not responding; waiting for it to come back…") if i.zero?
     sleep(2)
   end
   false
+end
+
+# The AVD behind an emulator serial (e.g. emulator-5554), or nil for a physical device
+# or one that is not answering.
+def android_avd_name(device)
+  return nil unless device.to_s.start_with?('emulator-')
+
+  name = adb_output(device, 'emu', 'avd', 'name').to_s.lines.first.to_s.strip
+  name.empty? || name == 'OK' ? nil : name
+end
+
+# Kills a dead emulator and cold-boots the same AVD on the same port, so a long run
+# can carry on after the emulator hung (it does on CI, after an hour or more of tests).
+# Returns whether the device is back.
+def restart_android_emulator(device:, avd:)
+  UI.important("Restarting emulator #{device} (#{avd})…")
+  # Killed outright: `adb emu kill` hangs on a frozen emulator. The bracket keeps the
+  # pattern from matching the shell that runs pkill, whose own command line holds it.
+  sh("pkill -9 -f #{Shellwords.escape("[e]mulator.*-avd #{avd}")}", error_callback: ->(_) {})
+  sleep(5)
+  sh('adb reconnect offline', error_callback: ->(_) {})
+
+  sdk = ENV['ANDROID_HOME'] || ENV['ANDROID_SDK_ROOT'] || File.expand_path('~/Library/Android/sdk')
+  options = ENV['E2E_EMULATOR_OPTIONS'] || '-no-snapshot -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect'
+  log = "#{root_path}/build/emulator-restart.log"
+  pid = Process.spawn(
+    "#{sdk}/emulator/emulator -avd #{Shellwords.escape(avd)} -port #{device.delete_prefix('emulator-')} #{options}",
+    out: [log, 'a'], err: [log, 'a'], pgroup: true,
+  )
+  Process.detach(pid)
+
+  deadline = Time.now + 300
+  until adb_output(device, 'shell', 'getprop', 'sys.boot_completed') == '1'
+    if Time.now > deadline
+      UI.error("Emulator #{device} did not boot within 5 minutes; see #{log}")
+      return false
+    end
+    sleep(5)
+  end
+
+  # What android-emulator-runner does after its own boot.
+  %w[window_animation_scale transition_animation_scale animator_duration_scale].each do |setting|
+    sh("adb -s #{device} shell settings put global #{setting} 0.0")
+  end
+  sh("adb -s #{device} shell input keyevent 82")
+  sh("adb -s #{device} logcat -c")
+  true
+end
+
+# Whether the Android device is (back) online. On CI a dead emulator is restarted,
+# up to [max_restarts] times per lane run.
+def ensure_android_device(device:, avd:, restarts:, max_restarts: 3)
+  return true if android_device_online?(device)
+  return false unless is_ci && avd && restarts[:count] < max_restarts
+
+  restarts[:count] += 1
+  restart_android_emulator(device: device, avd: avd)
 end
 
 def boot_simulator(udid:)
@@ -250,6 +328,9 @@ lane :run_e2e_test do |options|
   else
     serial = device ? "-s #{device} " : ''
     sh("adb #{serial}logcat -c")
+    # Read while the emulator answers, so a dead one can be restarted with the same AVD.
+    avd = android_avd_name(device)
+    emulator_restarts = { count: 0 }
   end
 
   log_file = "#{root_path}/build/e2e-test.log"
@@ -292,9 +373,9 @@ lane :run_e2e_test do |options|
         files ||= [test_name]
 
         # A dead emulator turns every remaining run into an instant "No supported devices"
-        # failure. Stop instead, and count the remaining runs as failed, so the coverage
-        # map keeps their previous coverage rather than dropping them.
-        if !ios && !android_device_online?(device)
+        # failure. If it can't be restarted, stop instead, and count the remaining runs as
+        # failed, so the coverage map keeps their previous coverage rather than dropping them.
+        if !ios && !ensure_android_device(device: device, avd: avd, restarts: emulator_restarts)
           remaining = runs.drop(run_index)
           UI.important("Android device #{device || '(default)'} is gone; skipping the #{remaining.size} remaining run(s)")
           remaining.each do |t, s, _|
@@ -315,6 +396,11 @@ lane :run_e2e_test do |options|
         loop do
           boot_simulator(udid: device) if ios && !first_attempt
           first_attempt = false
+          # The emulator may have died during the attempt being retried.
+          if !ios && attempt.positive? && !ensure_android_device(device: device, avd: avd, restarts: emulator_restarts)
+            break
+          end
+
           attempt += 1
 
           flags = [target, '--no-pub', "--dart-define=E2E_TARGET=#{test_name}"]
