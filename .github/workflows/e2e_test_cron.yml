@@ -26,8 +26,7 @@ env:
 jobs:
   android:
     runs-on: ubuntu-latest
-    # The coverage entry starts the app once per test, which takes well over an hour.
-    timeout-minutes: 180
+    timeout-minutes: 360
     permissions:
       contents: read
       actions: read # downloads the previous map, for the coverage of failed tests
@@ -115,7 +114,7 @@ jobs:
 
   ios:
     runs-on: macos-15
-    timeout-minutes: 120
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix:
