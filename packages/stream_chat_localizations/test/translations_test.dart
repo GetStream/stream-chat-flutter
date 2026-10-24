@@ -573,6 +573,41 @@ void main() {
   }
 
   for (final language in kStreamChatSupportedLanguages) {
+    test('mute and block toggles name both states in $language', () async {
+      final l = await GlobalStreamChatLocalizations.delegate.load(Locale(language));
+
+      // Each toggle labels an action that flips state, so its two strings must differ.
+      final toggles = {
+        'toggleMuteUnmuteAction': (l.toggleMuteUnmuteAction(isMuted: true), l.toggleMuteUnmuteAction(isMuted: false)),
+        'toggleMuteUnmuteGroupQuestion': (
+          l.toggleMuteUnmuteGroupQuestion(isMuted: true),
+          l.toggleMuteUnmuteGroupQuestion(isMuted: false),
+        ),
+        'toggleMuteUnmuteGroupText': (
+          l.toggleMuteUnmuteGroupText(isMuted: true),
+          l.toggleMuteUnmuteGroupText(isMuted: false),
+        ),
+        'toggleMuteUnmuteUserQuestion': (
+          l.toggleMuteUnmuteUserQuestion(isMuted: true),
+          l.toggleMuteUnmuteUserQuestion(isMuted: false),
+        ),
+        'toggleMuteUnmuteUserText': (
+          l.toggleMuteUnmuteUserText(isMuted: true),
+          l.toggleMuteUnmuteUserText(isMuted: false),
+        ),
+        'toggleBlockUnblockUserText': (
+          l.toggleBlockUnblockUserText(isBlocked: true),
+          l.toggleBlockUnblockUserText(isBlocked: false),
+        ),
+      };
+
+      for (final MapEntry(key: name, value: (on, off)) in toggles.entries) {
+        expect(on, isNot(off), reason: '$name should differ between its two states');
+      }
+    });
+  }
+
+  for (final language in kStreamChatSupportedLanguages) {
     test('every translation language has a display name in $language', () async {
       final localizations = await GlobalStreamChatLocalizations.delegate.load(Locale(language));
       expectEveryLanguageNamed(localizations.translatedFromLanguageText, locale: language);
