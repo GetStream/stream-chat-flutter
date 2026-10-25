@@ -189,6 +189,30 @@ def restart_android_emulator(device:, avd:)
   true
 end
 
+# Prints the free memory and its biggest users every [interval] seconds. A runner that runs out
+# of memory is lost with its artifacts, and the streamed job log is all that is left. Linux only.
+def start_memory_log(interval: 30)
+  return unless File.exist?('/proc/meminfo')
+
+  Thread.new do
+    loop do
+      mb = File.read('/proc/meminfo').scan(/^(\w+):\s+(\d+)/).to_h { |key, kb| [key, kb.to_i / 1024] }
+      top = `ps -eo rss=,args= --sort=-rss`.lines.first(5).map do |line|
+        rss, args = line.strip.split(' ', 2)
+        name = args[/GradleDaemon|KotlinCompileDaemon|qemu-system\S*|frontend_server\S*|flutter_tools\S*/] ||
+               File.basename(args.split.first.to_s)
+        "#{name} #{rss.to_i / 1024}M"
+      end
+      puts("[memory] available #{mb['MemAvailable']}M of #{mb['MemTotal']}M, " \
+           "swap free #{mb['SwapFree']}M of #{mb['SwapTotal']}M; #{top.join(', ')}")
+      $stdout.flush
+      sleep(interval)
+    end
+  rescue StandardError => e
+    UI.important("Memory log stopped: #{e.message}")
+  end
+end
+
 # Whether the Android device is (back) online. On CI a dead emulator is restarted,
 # up to [max_restarts] times per lane run.
 def ensure_android_device(device:, avd:, restarts:, max_restarts: 3)
@@ -363,6 +387,7 @@ lane :run_e2e_test do |options|
     # Read while the emulator answers, so a dead one can be restarted with the same AVD.
     avd = android_avd_name(device)
     emulator_restarts = { count: 0 }
+    memory_log = start_memory_log if is_ci
   end
 
   log_file = "#{root_path}/build/e2e-test.log"
@@ -552,6 +577,7 @@ lane :run_e2e_test do |options|
       UI.user_error!("E2E failed after retries: #{failed.join(', ')}") unless failed.empty?
     end
   ensure
+    memory_log&.kill
     # build_e2e_coverage_map keeps the previous coverage of these, as a failed test stops early.
     if coverage
       FileUtils.mkdir_p(e2e_coverage_path)

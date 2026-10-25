@@ -56,6 +56,19 @@ jobs:
 
       - uses: ./.github/actions/enable-kvm
 
+      # The emulator, Gradle and flutter test together can briefly need more than the runner's
+      # 16 GB; without swap the host stalls and GitHub loses the runner.
+      - name: Make room for the builds
+        run: |
+          sudo fallocate -l 8G /mnt/e2e.swap
+          sudo chmod 600 /mnt/e2e.swap
+          sudo mkswap /mnt/e2e.swap
+          sudo swapon /mnt/e2e.swap
+          free -m
+          # Flutter's own Gradle plugin is an included build, which ignores e2e_app's
+          # gradle.properties; without this it starts a Kotlin daemon with Gradle's 4 GB heap.
+          echo 'kotlin.compiler.execution.strategy=in-process' >> ~/.gradle/gradle.properties
+
       - name: Bootstrap
         run: |
           flutter pub global activate melos
