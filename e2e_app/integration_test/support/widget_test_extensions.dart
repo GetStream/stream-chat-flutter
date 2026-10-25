@@ -282,6 +282,31 @@ extension E2EWidgetTester on WidgetTester {
     throw TestFailure('Timed out long-pressing $target waiting for $appears');
   }
 
+  /// Taps [target] until [appears] shows up.
+  ///
+  /// A tap that lands while the message list is still scrolling only stops the
+  /// scroll, so a single tap can be a no-op.
+  Future<void> tapUntilVisible(
+    Finder target,
+    Finder appears, {
+    Duration timeout = const Duration(seconds: 30),
+  }) async {
+    final end = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(end)) {
+      await pump(const Duration(milliseconds: 100));
+      if (appears.evaluate().isNotEmpty) return settle();
+
+      if (target.evaluateSafely().isEmpty) continue;
+
+      await tap(target);
+      await settle();
+      if (appears.evaluate().isNotEmpty) return;
+
+      await pump(const Duration(milliseconds: 500));
+    }
+    throw TestFailure('Timed out tapping $target waiting for $appears');
+  }
+
   bool _tryInvokeMessageLongPress(Finder target) {
     final inkWells = find.descendant(of: target, matching: find.byType(InkWell));
     if (inkWells.evaluateSafely().isEmpty) return false;

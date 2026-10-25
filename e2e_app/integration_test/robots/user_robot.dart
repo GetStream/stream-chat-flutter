@@ -135,9 +135,7 @@ class UserRobot {
       matching: find.byType(StreamMessageAttachment),
     );
     await tester.waitUntilVisible(images.at(index));
-    await tester.tap(images.at(index));
-    await tester.settle();
-    await tester.waitUntilVisible(MessageListPage.list.mediaGalleryPreview);
+    await tester.tapUntilVisible(images.at(index), MessageListPage.list.mediaGalleryPreview);
     return this;
   }
 
