@@ -27,18 +27,20 @@ jobs:
   android:
     runs-on: ubuntu-latest
     timeout-minutes: 360
-    permissions:
-      contents: read
-      actions: read # downloads the previous map, for the coverage of failed tests
     strategy:
       fail-fast: false
       matrix:
         include:
-          - api-level: 36
-            coverage: true # builds the map that selects e2e tests on pull requests
-          - api-level: 34
-          - api-level: 31
-          - api-level: 28
+          # Coverage runs every test in its own app process for the map that selects e2e tests on
+          # pull requests. That takes hours, longer than a hosted runner lasts under the emulator's
+          # load, so its tests are split across batches. coverage_map's batch_count must match.
+          - { api-level: 36, coverage: true, batch: 0, batch_count: 4 }
+          - { api-level: 36, coverage: true, batch: 1, batch_count: 4 }
+          - { api-level: 36, coverage: true, batch: 2, batch_count: 4 }
+          - { api-level: 36, coverage: true, batch: 3, batch_count: 4 }
+          - { api-level: 34, batch: 0, batch_count: 1 }
+          - { api-level: 31, batch: 0, batch_count: 1 }
+          - { api-level: 28, batch: 0, batch_count: 1 }
     steps:
       - uses: actions/checkout@v7
 
@@ -70,19 +72,20 @@ jobs:
           arch: x86_64
           profile: pixel_6
           emulator-options: -no-snapshot-save -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
-          script: cd e2e_app && bundle exec fastlane run_e2e_test device:emulator-5554 coverage:${{ matrix.coverage == true }} mock_server_branch:${{ env.mock_server_branch }}
+          script: cd e2e_app && bundle exec fastlane run_e2e_test device:emulator-5554 coverage:${{ matrix.coverage == true }} batch:${{ matrix.batch }} batch_count:${{ matrix.batch_count }} mock_server_branch:${{ env.mock_server_branch }}
 
-      - name: Build the coverage map
+      # A tarball, as upload-artifact rejects some characters a test name (the folder name) may hold.
+      - name: Pack the coverage
         if: matrix.coverage && !cancelled()
-        working-directory: e2e_app
-        run: bundle exec fastlane build_e2e_coverage_map
+        working-directory: e2e_app/build
+        run: tar -czf e2e-coverage-batch-${{ matrix.batch }}.tgz e2e-coverage
 
       - uses: actions/upload-artifact@v7
         if: matrix.coverage && !cancelled()
         with:
-          name: e2e-coverage-map
-          path: e2e_app/build/e2e_coverage_map.json
-          retention-days: 14
+          name: e2e-coverage-batch-${{ matrix.batch }}
+          path: e2e_app/build/e2e-coverage-batch-${{ matrix.batch }}.tgz
+          retention-days: 3
 
       - name: Attach videos to failed tests
         if: failure()
@@ -107,10 +110,48 @@ jobs:
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: e2e-nightly-android-${{ matrix.api-level }}
+          name: e2e-nightly-android-${{ matrix.api-level }}-batch-${{ matrix.batch }}
           path: |
             e2e_app/stream-chat-test-mock-server/logs
             e2e_app/build/e2e-test.log
+
+  coverage_map:
+    needs: android
+    # Failed tests keep their previous coverage; only a batch that never finished blocks the map.
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read # downloads the previous map, for the coverage of failed tests
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: e2e_app
+
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: e2e-coverage-batch-*
+          path: e2e_app/build/batches
+          merge-multiple: true
+
+      - name: Merge the batches
+        working-directory: e2e_app/build
+        run: |
+          shopt -s nullglob
+          for batch in batches/*.tgz; do tar -xzf "$batch"; done
+
+      - name: Build the coverage map
+        working-directory: e2e_app
+        run: bundle exec fastlane build_e2e_coverage_map batch_count:4
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: e2e-coverage-map
+          path: e2e_app/build/e2e_coverage_map.json
+          retention-days: 14
 
   ios:
     runs-on: macos-15
@@ -181,7 +222,7 @@ jobs:
     name: Slack Report
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [android, ios]
+    needs: [android, coverage_map, ios]
     if: failure() && github.event_name == 'schedule'
     steps:
       - uses: 8398a7/action-slack@v3

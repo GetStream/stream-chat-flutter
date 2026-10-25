@@ -392,6 +392,8 @@ lane :run_e2e_test do |options|
       UI.user_error!('No e2e test files found') if runs.empty?
 
       runs = batch_targets(runs, batch: options[:batch], batch_count: options[:batch_count])
+      # A batch comes back grouped by file, but every coverage run still needs its own app process.
+      runs = runs.flat_map { |target, names| names.map { |name| [target, [name]] } } if coverage
       next if runs.empty?
 
       # Only CI batches share an app process; a whole-suite run keeps a fresh one per file.
@@ -629,10 +631,15 @@ lane :select_e2e_tests do |options|
 end
 
 # Builds the coverage map select_e2e_tests reads from the lcov reports of
-# `run_e2e_test coverage:true` (every batch's, merged into one folder on CI).
+# `run_e2e_test coverage:true` (every batch's, merged into one folder on CI;
+# `batch_count` makes it fail unless all of them finished).
 lane :build_e2e_coverage_map do |options|
   coverage_dir = options[:coverage_dir] ? File.expand_path(options[:coverage_dir], root_path) : e2e_coverage_path
-  failed_tests = Dir["#{coverage_dir}/failed_tests_*.json"].flat_map { |file| JSON.parse(File.read(file)) }
+  # Every batch writes its failed tests even when they all pass, so a missing file means the batch
+  # never finished (e.g. its runner died). A map without its tests would stop selecting them.
+  missing = (0...options[:batch_count].to_i).reject { |batch| File.exist?("#{coverage_dir}/failed_tests_#{batch}.json") }
+  UI.user_error!("No coverage from batch(es) #{missing.join(', ')}; keeping the previous map") unless missing.empty?
+  failed_tests =Dir["#{coverage_dir}/failed_tests_*.json"].flat_map { |file| JSON.parse(File.read(file)) }
   build_test_coverage_map(
     coverage_dir: coverage_dir,
     lcov_base_dir: root_path,
