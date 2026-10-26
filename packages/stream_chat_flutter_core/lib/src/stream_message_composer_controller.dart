@@ -400,8 +400,17 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
     return attachments.firstWhereOrNull((it) => it.ogScrapeUrl != null);
   }
 
+  /// The url of the og attachment the user dismissed, if any.
+  ///
+  /// Set by [clearOGAttachment] with `dismissed: true`, and cleared when a new
+  /// og attachment is set or the controller is reset.
+  String? get dismissedOGUrl => _dismissedOGUrl;
+  String? _dismissedOGUrl;
+
   /// Sets the og attachment in the message.
   void setOGAttachment(Attachment attachment) {
+    _dismissedOGUrl = null;
+
     final updatedAttachments = [...attachments];
     // Remove the existing og attachment if it exists.
     if (ogAttachment case final existingOGAttachment?) {
@@ -416,8 +425,12 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   }
 
   /// Removes the og attachment.
-  void clearOGAttachment() {
+  ///
+  /// Pass [dismissed] true when the user removed it, so its url is remembered
+  /// as [dismissedOGUrl].
+  void clearOGAttachment({bool dismissed = false}) {
     if (ogAttachment case final existingOGAttachment?) {
+      if (dismissed) _dismissedOGUrl = existingOGAttachment.ogScrapeUrl;
       removeAttachment(existingOGAttachment);
     }
   }
@@ -519,6 +532,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   void clear() {
     // Clear the command state, if any.
     _messageBeforeCommand = null;
+    _dismissedOGUrl = null;
     message = Message();
   }
 
@@ -530,6 +544,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
 
     // Reset the command state, if any.
     _messageBeforeCommand = null;
+    _dismissedOGUrl = null;
 
     if (resetId) {
       final newId = const Uuid().v4();

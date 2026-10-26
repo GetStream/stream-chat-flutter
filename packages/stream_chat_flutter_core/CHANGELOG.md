@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `dismissed` to `StreamMessageComposerController.clearOGAttachment` and `StreamMessageComposerController.dismissedOGUrl`, to tell a link preview the user removed apart from one cleared automatically.
+
 ## 10.6.0
 
 ✅ Added
