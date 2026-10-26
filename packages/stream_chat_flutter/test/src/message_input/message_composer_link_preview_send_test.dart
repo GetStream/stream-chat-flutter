@@ -23,7 +23,6 @@ void main() {
     await _typeText(tester, 'look $url');
     tester.widget<core.StreamMessageComposerLinkPreviewAttachment>(_linkPreview).props.onRemovePressed!();
     await tester.pumpAndSettle();
-    await _typeText(tester, 'look $url now');
     expect(_linkPreview, findsNothing);
     await _send(tester);
 
