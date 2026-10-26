@@ -215,6 +215,29 @@ void main() {
       expect(error.isRetriable, isTrue);
     });
 
+    group('`.isRetriable` with a server response', () {
+      StreamChatNetworkError errorWithStatus(int statusCode) {
+        return StreamChatNetworkError.raw(
+          code: -1,
+          statusCode: statusCode,
+          message: 'error',
+          data: ErrorResponse()..statusCode = statusCode,
+        );
+      }
+
+      for (final statusCode in [408, 429, 500, 503]) {
+        test('is true for status code $statusCode', () {
+          expect(errorWithStatus(statusCode).isRetriable, isTrue);
+        });
+      }
+
+      for (final statusCode in [400, 403, 404]) {
+        test('is false for status code $statusCode', () {
+          expect(errorWithStatus(statusCode).isRetriable, isFalse);
+        });
+      }
+    });
+
     test('`.isMessageAlreadyExistsError` should return true for a duplicate message id rejection', () {
       const message = 'SendMessage failed with error: "a message with ID abc already exists"';
       final error = StreamChatNetworkError.raw(

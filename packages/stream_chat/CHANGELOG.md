@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed sending, updating and deleting a message not retrying when the server answers with a timeout (408), a rate limit (429) or a server error (5xx).
+
 ## 10.6.0
 
 ✅ Added
