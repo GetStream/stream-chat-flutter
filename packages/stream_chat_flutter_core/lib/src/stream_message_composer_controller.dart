@@ -402,10 +402,8 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
 
   /// Whether the message should be sent without the server scraping its links.
   ///
-  /// Set by [clearOGAttachment] with `dismissed: true`, and cleared when the
-  /// controller is reset.
-  bool get skipEnrichUrl => _skipEnrichUrl;
-  bool _skipEnrichUrl = false;
+  /// Reset to false by [clearOGAttachment] and when the controller is reset.
+  bool skipEnrichUrl = false;
 
   /// Sets the og attachment in the message.
   void setOGAttachment(Attachment attachment) {
@@ -423,12 +421,9 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   }
 
   /// Removes the og attachment.
-  ///
-  /// Pass [dismissed] true when the user removed it, which sets
-  /// [skipEnrichUrl].
-  void clearOGAttachment({bool dismissed = false}) {
+  void clearOGAttachment() {
+    skipEnrichUrl = false;
     if (ogAttachment case final existingOGAttachment?) {
-      if (dismissed) _skipEnrichUrl = true;
       removeAttachment(existingOGAttachment);
     }
   }
@@ -530,7 +525,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   void clear() {
     // Clear the command state, if any.
     _messageBeforeCommand = null;
-    _skipEnrichUrl = false;
+    skipEnrichUrl = false;
     message = Message();
   }
 
@@ -542,7 +537,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
 
     // Reset the command state, if any.
     _messageBeforeCommand = null;
-    _skipEnrichUrl = false;
+    skipEnrichUrl = false;
 
     if (resetId) {
       final newId = const Uuid().v4();

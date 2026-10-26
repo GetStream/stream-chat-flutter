@@ -2,7 +2,7 @@
 
 ✅ Added
 
-- Added `dismissed` to `StreamMessageComposerController.clearOGAttachment` and `StreamMessageComposerController.skipEnrichUrl`, which records that the user removed the link preview.
+- Added `StreamMessageComposerController.skipEnrichUrl`, to send the message without the server scraping its links.
 
 ## 10.6.0
 
