@@ -15,18 +15,6 @@ void main() {
 
   const url = 'https://example.com';
 
-  testWidgets('sends without scraping links the composer already previewed', (tester) async {
-    final (:client, :channel) = _channel();
-    when(() => client.enrichUrl(any())).thenAnswer((_) async => OGAttachmentResponse()..ogScrapeUrl = url);
-    await _pumpComposer(tester, client: client, channel: channel);
-
-    await _typeText(tester, 'look $url');
-    expect(_linkPreview, findsOneWidget);
-    await _send(tester);
-
-    verify(() => channel.sendMessage(any(), skipEnrichUrl: true)).called(1);
-  });
-
   testWidgets('sends without scraping links once the user dismissed the preview', (tester) async {
     final (:client, :channel) = _channel();
     when(() => client.enrichUrl(any())).thenAnswer((_) async => OGAttachmentResponse()..ogScrapeUrl = url);

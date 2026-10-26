@@ -551,16 +551,6 @@ void main() {
       expect(controller.attachments, isEmpty);
     });
 
-    test('skipEnrichUrl is true while an OG attachment is set', () {
-      controller.setOGAttachment(Attachment(ogScrapeUrl: 'https://example.com'));
-
-      expect(controller.skipEnrichUrl, isTrue);
-
-      controller.clearOGAttachment();
-
-      expect(controller.skipEnrichUrl, isFalse);
-    });
-
     test('clearOGAttachment with dismissed removes the OG attachment and skips url enrichment', () {
       controller.setOGAttachment(Attachment(ogScrapeUrl: 'https://example.com'));
 
