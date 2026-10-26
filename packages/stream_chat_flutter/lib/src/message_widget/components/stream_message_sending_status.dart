@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../../stream_chat_flutter.dart';
+import '../../misc/empty_widget.dart';
 import '../message_status_labels.dart';
 
 /// Displays the sending status of a message, including attachment upload
@@ -50,16 +51,19 @@ class StreamMessageSendingStatus extends StatelessWidget {
       stream: channel?.state?.readStream,
       initialData: channel?.state?.read,
       builder: (context, data) {
-        final readList = data.readsOf(message: message);
-        final isMessageRead = readList.isNotEmpty;
+        final status = MessageDeliveryStatus.of(
+          message,
+          isMessageRead: data.readsOf(message: message).isNotEmpty,
+          isMessageDelivered: data.deliveriesOf(message: message).isNotEmpty,
+          channel: channel,
+        );
 
-        final deliveriesList = data.deliveriesOf(message: message);
-        final isMessageDelivered = deliveriesList.isNotEmpty;
+        if (status == .none) return const Empty();
 
         return StreamSendingIndicator(
           message: message,
-          isMessageRead: isMessageRead,
-          isMessageDelivered: isMessageDelivered,
+          isMessageRead: status == .read,
+          isMessageDelivered: status == .delivered,
           color: iconColor,
         );
       },

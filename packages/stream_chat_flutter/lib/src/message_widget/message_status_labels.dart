@@ -33,12 +33,19 @@ enum MessageDeliveryStatus {
   none;
 
   /// Resolves the state [message] is in.
+  ///
+  /// In a [channel] without read events, a message that reached the server
+  /// has no delivery state to report.
   static MessageDeliveryStatus of(
     Message message, {
     required bool isMessageRead,
     required bool isMessageDelivered,
+    Channel? channel,
   }) {
     if (message.state.isFailed || message.isBouncedWithError) return failed;
+    if (channel != null && !channel.canUseReadReceipts) {
+      return message.state.isOutgoing ? sending : none;
+    }
     if (isMessageRead) return read;
     if (isMessageDelivered) return delivered;
     if (message.state.isCompleted) return sent;

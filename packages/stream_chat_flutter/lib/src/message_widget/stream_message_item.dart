@@ -1351,6 +1351,7 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
             context,
             isMessageRead: data.readsOf(message: message).isNotEmpty,
             isMessageDelivered: data.deliveriesOf(message: message).isNotEmpty,
+            channel: channel,
           ),
         ].join(', '),
       ),
@@ -1378,6 +1379,7 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
     BuildContext context, {
     required bool isMessageRead,
     required bool isMessageDelivered,
+    Channel? channel,
   }) {
     final translations = context.translations;
 
@@ -1386,6 +1388,7 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
           widget.message,
           isMessageRead: isMessageRead,
           isMessageDelivered: isMessageDelivered,
+          channel: channel,
         ).label(translations);
   }
 

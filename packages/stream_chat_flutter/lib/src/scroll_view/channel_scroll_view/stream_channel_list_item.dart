@@ -701,20 +701,18 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
         if (isOwnMessage) {
           if (widget.sendingIndicatorBuilder case final builder?) {
             deliveryPrefix = builder(context, latestLastMessage);
-          } else {
+          } else if (widget.channel.canUseReadReceipts || latestLastMessage.state.isOutgoing) {
             deliveryPrefix = _ChannelListDeliveryStatus(
               channel: widget.channel,
               message: latestLastMessage,
             );
           }
-
-          deliveryPrefix = ExcludeSemantics(child: deliveryPrefix);
         }
 
         return Row(
           spacing: spacing.xxs,
           children: [
-            if (!latestLastMessage.isDeleted) ?deliveryPrefix,
+            if (!latestLastMessage.isDeleted && deliveryPrefix != null) ExcludeSemantics(child: deliveryPrefix),
             Flexible(
               child: StreamMessagePreviewText(
                 message: latestLastMessage,
