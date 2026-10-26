@@ -1477,7 +1477,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       return _effectiveController.clearOGAttachment();
     }
 
-    // Don't preview the message's links once the user dismissed the preview
+    // Don't preview the message's links while skipEnrichUrl is set
     if (_effectiveController.skipEnrichUrl) return;
 
     // If the parsed url matches the ogAttachment url, don't do anything
