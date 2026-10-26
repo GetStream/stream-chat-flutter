@@ -281,6 +281,10 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
   bool _hideOptions = false;
   String _lastFieldText = '';
 
+  // Groups the field with its options, so a tap on either one is not a tap
+  // outside the other.
+  final _tapRegionGroupId = Object();
+
   // True if the state indicates that the options should be visible.
   bool get _shouldShowOptions {
     return !_hideOptions && _focusNode.hasFocus && _currentQuery != null && _currentTrigger != null;
@@ -500,11 +504,14 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
         final anchor = widget.optionsAlignment._toAnchor();
         final shouldShowOptions = _shouldShowOptions;
         final optionViewBuilder = shouldShowOptions
-            ? TextFieldTapRegion(
-                child: _currentTrigger!.optionsViewBuilder(
-                  context,
-                  _currentQuery!,
-                  _messageComposerController,
+            ? TapRegion(
+                groupId: _tapRegionGroupId,
+                child: TextFieldTapRegion(
+                  child: _currentTrigger!.optionsViewBuilder(
+                    context,
+                    _currentQuery!,
+                    _messageComposerController,
+                  ),
                 ),
               )
             : null;
@@ -513,10 +520,14 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
           anchor: anchor,
           visible: shouldShowOptions,
           portalFollower: optionViewBuilder,
-          child: widget.fieldViewBuilder(
-            context,
-            _messageComposerController,
-            _focusNode,
+          child: TapRegion(
+            groupId: _tapRegionGroupId,
+            onTapOutside: (_) => closeSuggestions(),
+            child: widget.fieldViewBuilder(
+              context,
+              _messageComposerController,
+              _focusNode,
+            ),
           ),
         );
       },
