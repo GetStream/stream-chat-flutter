@@ -479,8 +479,6 @@ Version-carrying files, all of which must move together:
 - `.github/workflows/legacy_version_analyze.yml` — `env.flutter_version`. Set it to the **new floor** (never the
   new stable): this job exists to prove the floor still analyses and tests clean.
 
-`sample_app/e2e_stubs/*/pubspec.yaml` pin `sdk: ^3.0.0` deliberately — they are throwaway stubs. Leave them.
-
 ### The floor raise activates dormant lints — budget for it
 
 This is the step that surprises people. Raising the Dart constraint raises each package's **language version**,
