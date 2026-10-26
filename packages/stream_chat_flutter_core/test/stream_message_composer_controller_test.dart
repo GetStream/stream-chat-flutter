@@ -561,17 +561,17 @@ void main() {
       expect(controller.skipEnrichUrl, isFalse);
     });
 
-    test('dismissOGAttachment removes the OG attachment and skips url enrichment', () {
+    test('clearOGAttachment with dismissed removes the OG attachment and skips url enrichment', () {
       controller.setOGAttachment(Attachment(ogScrapeUrl: 'https://example.com'));
 
-      controller.dismissOGAttachment();
+      controller.clearOGAttachment(dismissed: true);
 
       expect(controller.ogAttachment, isNull);
       expect(controller.skipEnrichUrl, isTrue);
     });
 
     test('clearOGAttachment forgets a dismissal', () {
-      controller.dismissOGAttachment();
+      controller.clearOGAttachment(dismissed: true);
 
       controller.clearOGAttachment();
 
@@ -579,7 +579,7 @@ void main() {
     });
 
     test('reset forgets a dismissal', () {
-      controller.dismissOGAttachment();
+      controller.clearOGAttachment(dismissed: true);
 
       controller.reset();
 

@@ -132,7 +132,7 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
                     _ => null,
                   },
                   onRemovePressed: () {
-                    controller.dismissOGAttachment();
+                    controller.clearOGAttachment(dismissed: true);
                     props.focusNode?.unfocus();
                   },
                 ),

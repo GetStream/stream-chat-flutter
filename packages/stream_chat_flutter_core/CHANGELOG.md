@@ -2,7 +2,7 @@
 
 ✅ Added
 
-- Added `StreamMessageComposerController.dismissOGAttachment` and `StreamMessageComposerController.skipEnrichUrl`, to send a message without a link preview the user removed.
+- Added `dismissed` to `StreamMessageComposerController.clearOGAttachment` and `StreamMessageComposerController.skipEnrichUrl`, to send a message without a link preview the user removed.
 
 ## 10.6.0
 
