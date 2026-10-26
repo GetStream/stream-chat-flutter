@@ -11,8 +11,6 @@ void main() {
 
   // An OG attachment without `title_link` renders as an image, not a preview.
   const noPreviewForImageOg = 'https://linear.app/stream/issue/FLU-1088';
-  // Dismissing the composer's preview doesn't send `skip_enrich_url`.
-  const enrichedAfterDismissal = 'https://linear.app/stream/issue/FLU-1089';
 
   streamTestWithEnv(
     allureId: '12706',
@@ -109,7 +107,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12710',
     description: 'user sends a YouTube link without a preview',
-    skip: enrichedAfterDismissal,
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.userRobot.login().openChannel();
@@ -176,7 +173,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12713',
     description: 'user sends a Giphy link without a preview',
-    skip: enrichedAfterDismissal,
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.userRobot.login().openChannel();
