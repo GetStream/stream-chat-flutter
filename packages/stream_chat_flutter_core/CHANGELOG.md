@@ -2,7 +2,7 @@
 
 ✅ Added
 
-- Added `dismissed` to `StreamMessageComposerController.clearOGAttachment` and `StreamMessageComposerController.dismissedOGUrl`, to tell a link preview the user removed apart from one cleared automatically.
+- Added `dismissed` to `StreamMessageComposerController.clearOGAttachment` and `StreamMessageComposerController.skipEnrichUrl`, which records that the user removed the link preview.
 
 ## 10.6.0
 

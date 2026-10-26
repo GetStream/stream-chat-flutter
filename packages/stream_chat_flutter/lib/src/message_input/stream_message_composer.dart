@@ -1477,8 +1477,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       return _effectiveController.clearOGAttachment();
     }
 
-    // Don't preview the url again once the user dismissed its preview
-    if (_effectiveController.dismissedOGUrl == firstMatchedUrl) return;
+    // Don't preview the message's links once the user dismissed the preview
+    if (_effectiveController.skipEnrichUrl) return;
 
     // If the parsed url matches the ogAttachment url, don't do anything
     if (_effectiveController.ogAttachment?.titleLink == firstMatchedUrl) {
@@ -1649,7 +1649,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     widget.props.onQuotedMessageCleared?.call();
     // The composer already previewed the message's links, or the user
     // dismissed the preview, so the backend shouldn't scrape them again.
-    final skipEnrichUrl = _effectiveController.ogAttachment != null || _effectiveController.dismissedOGUrl != null;
+    final skipEnrichUrl = _effectiveController.ogAttachment != null || _effectiveController.skipEnrichUrl;
     _effectiveController.reset();
 
     if (widget.props.preMessageSending case final onPreMessageSending?) {
