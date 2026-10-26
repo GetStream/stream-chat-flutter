@@ -1300,9 +1300,13 @@ class Channel {
     DraftMessage draft,
   ) {
     _checkInitialized();
-    state!.updateDraft(
-      Draft(channelCid: cid!, createdAt: DateTime.now(), message: draft, parentId: draft.parentId),
+    final localDraft = Draft(
+      channelCid: cid!,
+      createdAt: DateTime.now(),
+      message: draft,
+      parentId: draft.parentId,
     );
+    state!.updateDraft(localDraft);
     return _client.createDraft(draft, id!, type);
   }
 
