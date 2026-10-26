@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -42,7 +44,7 @@ void main() {
     verify(() => channel.sendMessage(any(), skipEnrichUrl: true)).called(1);
   });
 
-  testWidgets('lets the server scrape links the composer could not preview', (tester) async {
+  testWidgets('sends without scraping links the composer could not preview', (tester) async {
     final (:client, :channel) = _channel();
     when(() => client.enrichUrl(any())).thenAnswer((_) async => throw Exception('no og data'));
     await _pumpComposer(tester, client: client, channel: channel);
@@ -51,7 +53,37 @@ void main() {
     expect(_linkPreview, findsNothing);
     await _send(tester);
 
-    verify(() => channel.sendMessage(any(), skipEnrichUrl: false)).called(1);
+    verify(() => channel.sendMessage(any(), skipEnrichUrl: true)).called(1);
+  });
+
+  testWidgets('previews a new link after the dismissed one is removed', (tester) async {
+    final (:client, :channel) = _channel();
+    when(() => client.enrichUrl(any())).thenAnswer(
+      (invocation) async => OGAttachmentResponse()..ogScrapeUrl = invocation.positionalArguments.first as String,
+    );
+    await _pumpComposer(tester, client: client, channel: channel);
+
+    await _typeText(tester, 'look $url');
+    tester.widget<core.StreamMessageComposerLinkPreviewAttachment>(_linkPreview).props.onRemovePressed!();
+    await tester.pumpAndSettle();
+    await _typeText(tester, 'look');
+    await _typeText(tester, 'look https://other.example.com');
+
+    expect(_linkPreview, findsOneWidget);
+  });
+
+  testWidgets('keeps loading the preview while the user types', (tester) async {
+    final (:client, :channel) = _channel();
+    final response = Completer<OGAttachmentResponse>();
+    when(() => client.enrichUrl(any())).thenAnswer((_) => response.future);
+    await _pumpComposer(tester, client: client, channel: channel);
+
+    await _typeText(tester, 'look $url');
+    await _typeText(tester, 'look $url now');
+    response.complete(OGAttachmentResponse()..ogScrapeUrl = url);
+    await tester.pumpAndSettle();
+
+    expect(_linkPreview, findsOneWidget);
   });
 }
 
