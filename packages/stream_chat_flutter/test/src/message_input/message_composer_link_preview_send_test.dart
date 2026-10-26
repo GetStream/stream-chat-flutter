@@ -57,6 +57,22 @@ void main() {
 
     expect(_linkPreview, findsOneWidget);
   });
+
+  testWidgets('previews the link again once it changes after a dismissal', (tester) async {
+    final (:client, :channel) = _channel();
+    when(() => client.enrichUrl(any())).thenAnswer(
+      (invocation) async => OGAttachmentResponse()..ogScrapeUrl = invocation.positionalArguments.first as String,
+    );
+    await _pumpComposer(tester, client: client, channel: channel);
+
+    await _typeText(tester, 'look $url/page');
+    tester.widget<core.StreamMessageComposerLinkPreviewAttachment>(_linkPreview).props.onRemovePressed!();
+    await tester.pumpAndSettle();
+    await _typeText(tester, 'look $url/pag');
+    await _typeText(tester, 'look $url/page');
+
+    expect(_linkPreview, findsOneWidget);
+  });
 }
 
 final _linkPreview = find.byType(core.StreamMessageComposerLinkPreviewAttachment);

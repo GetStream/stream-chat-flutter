@@ -1446,6 +1446,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   }
 
   String? _lastSearchedContainsUrlText;
+  // The url of the current, or dismissed, og attachment.
+  String? _previewedUrl;
   CancelableOperation? _enrichUrlOperation;
   final _urlRegex = RegExp(
     r'https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)',
@@ -1477,8 +1479,11 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       return _effectiveController.clearOGAttachment();
     }
 
-    // Don't preview the url again once the user dismissed its preview
-    if (_effectiveController.skipEnrichUrl) return;
+    if (_effectiveController.skipEnrichUrl) {
+      // Keep a dismissed preview dismissed until its url changes
+      if (firstMatchedUrl == _previewedUrl) return;
+      _effectiveController.clearOGAttachment();
+    }
 
     // If the parsed url matches the ogAttachment url, don't do anything
     if (_effectiveController.ogAttachment?.titleLink == firstMatchedUrl) {
@@ -1494,6 +1499,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
         ).then(
           (ogAttachment) {
             final attachment = Attachment.fromOGAttachment(ogAttachment);
+            _previewedUrl = firstMatchedUrl;
             _effectiveController.setOGAttachment(attachment);
           },
           onError: (error, stackTrace) {
