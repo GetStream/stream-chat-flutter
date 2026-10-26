@@ -402,15 +402,14 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
 
   /// Whether the message should be sent without the server scraping its links.
   ///
-  /// True while the message has an [ogAttachment] and after
-  /// [clearOGAttachment]; false after [setOGAttachment] or a reset.
+  /// Always true while the message has an [ogAttachment]. Reset to false when
+  /// the controller is reset.
   bool get skipEnrichUrl => _skipEnrichUrl || ogAttachment != null;
   set skipEnrichUrl(bool skipEnrichUrl) => _skipEnrichUrl = skipEnrichUrl;
   bool _skipEnrichUrl = false;
 
   /// Sets the og attachment in the message.
   void setOGAttachment(Attachment attachment) {
-    _skipEnrichUrl = false;
     final updatedAttachments = [...attachments];
     // Remove the existing og attachment if it exists.
     if (ogAttachment case final existingOGAttachment?) {
@@ -426,7 +425,6 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
 
   /// Removes the og attachment.
   void clearOGAttachment() {
-    _skipEnrichUrl = true;
     if (ogAttachment case final existingOGAttachment?) {
       removeAttachment(existingOGAttachment);
     }

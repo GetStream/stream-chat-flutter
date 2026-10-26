@@ -555,29 +555,24 @@ void main() {
       controller.setOGAttachment(Attachment(ogScrapeUrl: 'https://example.com'));
 
       expect(controller.skipEnrichUrl, isTrue);
+
+      controller.clearOGAttachment();
+
+      expect(controller.skipEnrichUrl, isFalse);
     });
 
-    test('clearOGAttachment sets skipEnrichUrl', () {
-      controller.setOGAttachment(Attachment(ogScrapeUrl: 'https://example.com'));
+    test('clearOGAttachment keeps a set skipEnrichUrl', () {
+      controller
+        ..setOGAttachment(Attachment(ogScrapeUrl: 'https://example.com'))
+        ..skipEnrichUrl = true;
 
       controller.clearOGAttachment();
 
       expect(controller.skipEnrichUrl, isTrue);
     });
 
-    test('setOGAttachment stops skipping url enrichment', () {
-      final ogAttachment = Attachment(ogScrapeUrl: 'https://example.com');
-      controller.clearOGAttachment();
-
-      controller
-        ..setOGAttachment(ogAttachment)
-        ..removeAttachment(ogAttachment);
-
-      expect(controller.skipEnrichUrl, isFalse);
-    });
-
     test('reset stops skipping url enrichment', () {
-      controller.clearOGAttachment();
+      controller.skipEnrichUrl = true;
 
       controller.reset();
 

@@ -1446,7 +1446,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   }
 
   String? _lastSearchedContainsUrlText;
-  String? _lastEnrichedUrl;
   CancelableOperation? _enrichUrlOperation;
   final _urlRegex = RegExp(
     r'https?://(www\.)?[-a-zA-Z0-9@:%._+~#=]{2,256}\.[a-z]{2,}\b([-a-zA-Z0-9@:%_+.~#?&//=]*)',
@@ -1454,6 +1453,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   );
 
   void _checkContainsUrl(String value, Channel channel) async {
+    // Cancel the previous operation if it's still running
+    _enrichUrlOperation?.cancel();
+
     // If the text is same as the last time, don't do anything
     if (_lastSearchedContainsUrlText == value) return;
     _lastSearchedContainsUrlText = value;
@@ -1470,18 +1472,15 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       break;
     }
 
-    // Reset the og attachment once the text no longer contains a url
+    // Reset the og attachment, and any dismissal, if the text doesn't contain
+    // any url
     if (firstMatchedUrl == null || !channel.canSendLinks) {
-      if (_lastEnrichedUrl == null && _effectiveController.ogAttachment == null) return;
-      _enrichUrlOperation?.cancel();
-      _lastEnrichedUrl = null;
+      _effectiveController.skipEnrichUrl = false;
       return _effectiveController.clearOGAttachment();
     }
 
-    // Only enrich when the url changes, so a removed preview stays removed
-    if (firstMatchedUrl == _lastEnrichedUrl) return;
-    _lastEnrichedUrl = firstMatchedUrl;
-    _enrichUrlOperation?.cancel();
+    // Don't preview the url again once the user dismissed its preview
+    if (_effectiveController.skipEnrichUrl && _effectiveController.ogAttachment == null) return;
 
     // If the parsed url matches the ogAttachment url, don't do anything
     if (_effectiveController.ogAttachment?.titleLink == firstMatchedUrl) {
