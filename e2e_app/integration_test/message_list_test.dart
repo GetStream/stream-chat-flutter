@@ -934,7 +934,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12774',
     description: 'user sees a link preview for their own Unsplash link',
-    skip: 'https://linear.app/stream/issue/FLU-1088',
     body: (env) async {
       const link = 'https://unsplash.com/photos/1_2d3MRbI9c';
 
@@ -952,7 +951,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12775',
     description: 'user sees a link preview for an Unsplash link',
-    skip: 'https://linear.app/stream/issue/FLU-1088',
     body: (env) async {
       const link = 'https://unsplash.com/photos/1_2d3MRbI9c';
 
