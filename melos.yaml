@@ -3,6 +3,7 @@ repository: https://github.com/GetStream/stream-chat-flutter
 
 packages:
   - docs/*
+  - e2e_app
   - sample_app
   - packages/*
   - packages/*/example
@@ -10,6 +11,8 @@ packages:
 categories:
   docs:
     - docs/*
+  e2e_app:
+    - e2e_app
   sample_app:
     - sample_app
   packages:
@@ -217,7 +220,7 @@ scripts:
       dirExists: test
 
   e2e:run:
-    run: melos exec -c 1 --scope="sample_app" -- "flutter test integration_test/"
+    run: melos exec -c 1 --scope="e2e_app" -- "flutter test integration_test/"
     description: >
       Run the integration_test e2e suite. Start the mock-server driver first
       (`fastlane start_mock_server`), or use the `run_e2e_test` Fastlane lane to
