@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed hard-deleting an unread message not lowering the channel's unread count.
+
 ## 10.6.0
 
 ✅ Added

@@ -183,7 +183,7 @@ void main() {
       verify(() => state.unreadCount = 0).called(1);
     });
 
-    test('onMessageDeleted skips the unread count on server-driven channels', () {
+    test('onMessageDeleted skips the unread count on a channel without read receipts', () {
       client.isLocalUnreadCountEnabled = false;
 
       mutations.onMessageDeleted(message, hardDelete: true);

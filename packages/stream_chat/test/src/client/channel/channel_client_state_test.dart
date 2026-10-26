@@ -1874,6 +1874,44 @@ void main() {
           expect(channel.state!.messages, isEmpty);
         });
 
+        test('a hard delete of an unseen message decrements the unread count', () async {
+          final readAt = DateTime.now();
+          channel.state!.updateRead([Read(user: client.state.currentUser!, lastRead: readAt)]);
+
+          final message = Message(
+            id: 'unseen-message-id',
+            user: User(id: 'other-user'),
+            createdAt: readAt.add(const Duration(seconds: 1)),
+          );
+          client.addEvent(Event(cid: channel.cid, type: EventType.messageNew, message: message));
+          await Future.delayed(Duration.zero);
+          expect(channel.state!.unreadCount, 1);
+
+          client.addEvent(createDeleteMessageEvent(message, hardDelete: true));
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.unreadCount, 0);
+        });
+
+        test('a soft delete of an unseen message keeps the unread count', () async {
+          final readAt = DateTime.now();
+          channel.state!.updateRead([Read(user: client.state.currentUser!, lastRead: readAt)]);
+
+          final message = Message(
+            id: 'unseen-message-id',
+            user: User(id: 'other-user'),
+            createdAt: readAt.add(const Duration(seconds: 1)),
+          );
+          client.addEvent(Event(cid: channel.cid, type: EventType.messageNew, message: message));
+          await Future.delayed(Duration.zero);
+          expect(channel.state!.unreadCount, 1);
+
+          client.addEvent(createDeleteMessageEvent(message));
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.unreadCount, 1);
+        });
+
         test('deletedForMe is propagated to the stored message', () async {
           final message = Message(
             id: 'deleted-for-me-message-id',
