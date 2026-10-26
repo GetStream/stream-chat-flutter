@@ -1472,10 +1472,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       break;
     }
 
-    // Reset the og attachment, and any dismissal, if the text doesn't contain
-    // any url
+    // Reset the og attachment if the text doesn't contain any url
     if (firstMatchedUrl == null || !channel.canSendLinks) {
-      _effectiveController.skipEnrichUrl = false;
       return _effectiveController.clearOGAttachment();
     }
 

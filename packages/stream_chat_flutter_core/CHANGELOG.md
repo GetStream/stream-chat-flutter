@@ -2,7 +2,7 @@
 
 ✅ Added
 
-- Added `StreamMessageComposerController.skipEnrichUrl`, to send the message without the server scraping its links.
+- Added `StreamMessageComposerController.dismissOGAttachment` and `StreamMessageComposerController.skipEnrichUrl`, to send a message without a link preview the user removed.
 
 ## 10.6.0
 
