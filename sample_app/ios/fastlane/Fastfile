@@ -6,7 +6,6 @@ default_platform(:ios)
 
 # Xcode selection is the workflows' job, via .github/actions/setup-xcode.
 before_all do |lane|
-  @impact = impact_analysis
   if is_ci
     setup_ci
     setup_git_config
@@ -195,13 +194,6 @@ platform :ios do
       issuer_id: '69a6de96-0738-47e3-e053-5b8c7c11a4d1',
       key_content: ENV.fetch('APPSTORE_API_KEY', nil),
       in_house: false,
-    )
-  end
-
-  lane :install_runtime do |options|
-    install_ios_runtime(
-      version: options[:ios],
-      custom_script: File.join(root_path, 'scripts/install_ios_runtime.sh'),
     )
   end
 end

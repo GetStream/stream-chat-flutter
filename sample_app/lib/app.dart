@@ -104,7 +104,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
   void initState() {
     super.initState();
     _notificationService.onNotificationTap = _onNotificationTap;
-    if (!isE2eTestRun) _notificationService.initialize();
+    _notificationService.initialize();
 
     final timeOfStartMs = DateTime.now().millisecondsSinceEpoch;
 
@@ -219,9 +219,6 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                             if (client != null) {
                               return StreamChat(
                                 client: client,
-                                // Null in production → the SDK uses the real
-                                // connectivity monitor; set only by e2e tests.
-                                connectivityStream: authController.debugConnectivityStream,
                                 componentBuilders: StreamComponentBuilders(
                                   extensions: streamChatComponentBuilders(
                                     messageItem: customMessageItemBuilder,
