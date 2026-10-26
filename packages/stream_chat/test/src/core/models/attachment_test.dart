@@ -1,4 +1,3 @@
-import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/models/action.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
@@ -171,37 +170,6 @@ void main() {
         );
 
         expect(scrapedImageAttachment.type, AttachmentType.urlPreview);
-      });
-
-      test('serializes the original type of a scraped attachment', () {
-        final scrapedImageAttachment = Attachment(
-          type: 'image',
-          ogScrapeUrl: 'https://images.example.com/photo.jpg',
-          titleLink: 'https://images.example.com',
-        );
-
-        expect(scrapedImageAttachment.type, AttachmentType.urlPreview);
-        expect(scrapedImageAttachment.toJson()['type'], 'image');
-      });
-
-      test('keeps the original type of a scraped attachment when copied', () {
-        final scrapedImageAttachment = Attachment(
-          type: 'image',
-          ogScrapeUrl: 'https://images.example.com/photo.jpg',
-        );
-
-        final copy = scrapedImageAttachment.copyWith(title: 'Photo');
-
-        expect(copy.toJson()['type'], 'image');
-      });
-
-      test('sends no type for a scraped link the server gave no type', () {
-        final ogAttachment = OGAttachmentResponse()..ogScrapeUrl = 'https://example.com';
-
-        final attachment = Attachment.fromOGAttachment(ogAttachment);
-
-        expect(attachment.type, AttachmentType.urlPreview);
-        expect(attachment.toJson(), isNot(contains('type')));
       });
     });
   });

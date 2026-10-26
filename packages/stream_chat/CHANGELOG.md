@@ -3,7 +3,6 @@
 🔄 Changed
 
 - `Attachment.type` is now `url_preview` for every attachment scraped from a link in the message text, including a link to an image or file.
-- `Attachment.toJson` now keeps the attachment's original `type` instead of writing `url_preview`.
 
 ## 10.6.0
 
