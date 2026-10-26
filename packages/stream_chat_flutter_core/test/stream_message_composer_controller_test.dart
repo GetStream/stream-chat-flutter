@@ -564,7 +564,6 @@ void main() {
     test('clearOGAttachment keeps a set skipEnrichUrl', () {
       controller
         ..setOGAttachment(Attachment(ogScrapeUrl: 'https://example.com'))
-        ..clearOGAttachment()
         ..skipEnrichUrl = true;
 
       controller.clearOGAttachment();
