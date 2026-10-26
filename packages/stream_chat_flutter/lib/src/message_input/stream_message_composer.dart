@@ -1477,8 +1477,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       return _effectiveController.clearOGAttachment();
     }
 
-    // Don't preview the message's links while skipEnrichUrl is set
-    if (_effectiveController.skipEnrichUrl) return;
+    // Don't preview the message's links once skipEnrichUrl is set without one
+    if (_effectiveController.skipEnrichUrl && _effectiveController.ogAttachment == null) return;
 
     // If the parsed url matches the ogAttachment url, don't do anything
     if (_effectiveController.ogAttachment?.titleLink == firstMatchedUrl) {
@@ -1647,9 +1647,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
     _maybeDeleteDraftMessage(message, channel);
     widget.props.onQuotedMessageCleared?.call();
-    // The composer already previewed the message's links, or the user
-    // dismissed the preview, so the backend shouldn't scrape them again.
-    final skipEnrichUrl = _effectiveController.ogAttachment != null || _effectiveController.skipEnrichUrl;
+    final skipEnrichUrl = _effectiveController.skipEnrichUrl;
     _effectiveController.reset();
 
     if (widget.props.preMessageSending case final onPreMessageSending?) {

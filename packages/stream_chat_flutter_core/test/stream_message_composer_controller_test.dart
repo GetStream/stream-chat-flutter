@@ -551,26 +551,21 @@ void main() {
       expect(controller.attachments, isEmpty);
     });
 
-    test('setOGAttachment stops skipping url enrichment', () {
-      controller.skipEnrichUrl = true;
-
+    test('skipEnrichUrl is true while an OG attachment is set', () {
       controller.setOGAttachment(Attachment(ogScrapeUrl: 'https://example.com'));
 
-      expect(controller.skipEnrichUrl, isFalse);
-    });
-
-    test('clearOGAttachment stops skipping url enrichment when it removes an OG attachment', () {
-      controller
-        ..setOGAttachment(Attachment(ogScrapeUrl: 'https://example.com'))
-        ..skipEnrichUrl = true;
+      expect(controller.skipEnrichUrl, isTrue);
 
       controller.clearOGAttachment();
 
       expect(controller.skipEnrichUrl, isFalse);
     });
 
-    test('clearOGAttachment without an OG attachment keeps skipEnrichUrl', () {
-      controller.skipEnrichUrl = true;
+    test('clearOGAttachment keeps a set skipEnrichUrl', () {
+      controller
+        ..setOGAttachment(Attachment(ogScrapeUrl: 'https://example.com'))
+        ..clearOGAttachment()
+        ..skipEnrichUrl = true;
 
       controller.clearOGAttachment();
 
