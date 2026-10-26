@@ -1294,10 +1294,15 @@ class Channel {
   );
 
   /// Creates or updates a new [draft] for this channel.
+  ///
+  /// Updates the draft in [state] right away, even if the request fails.
   Future<CreateDraftResponse> createDraft(
     DraftMessage draft,
   ) {
     _checkInitialized();
+    state!.updateDraft(
+      Draft(channelCid: cid!, createdAt: DateTime.now(), message: draft, parentId: draft.parentId),
+    );
     return _client.createDraft(draft, id!, type);
   }
 
@@ -1315,10 +1320,17 @@ class Channel {
   ///
   /// Optionally, provide a [parentId] to delete the draft for a specific
   /// thread.
+  ///
+  /// Removes the draft from [state], even if the request fails.
   Future<EmptyResponse> deleteDraft({
     String? parentId,
   }) {
     _checkInitialized();
+    final draft = switch (parentId) {
+      final parentId? => state!.threadDraft(parentId),
+      null => state!.draft,
+    };
+    if (draft != null) state!.deleteDraft(draft);
     return _client.deleteDraft(id!, type, parentId: parentId);
   }
 
