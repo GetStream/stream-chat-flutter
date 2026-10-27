@@ -53,7 +53,12 @@ class StreamTestEnv {
         usePersistence: persistence,
         // The mock server hands out a short-lived JWT and plays the token
         // failure scenarios the backend robot sets up.
-        tokenProvider: jwt ? (_) => server.get('jwt/get') : null,
+        tokenProvider: jwt
+            ? (_) {
+                tokenRequests++;
+                return server.get('jwt/get');
+              }
+            : null,
       )
       ..debugConnectivityStream = _connectivity.stream;
 
@@ -106,6 +111,9 @@ class StreamTestEnv {
     throw TestFailure('Timed out waiting for a framework error to be reported');
   }
 
+  /// How many tokens the app has asked the mock server for.
+  int tokenRequests = 0;
+
   StreamSubscription<ConnectionStatus>? _connectionStatusSubscription;
   var _disconnections = 0;
 
@@ -129,6 +137,10 @@ class StreamTestEnv {
     }
     throw TestFailure('The connection never dropped, so the token never expired');
   }
+
+  /// Waits until the app has stopped reconnecting and is disconnected.
+  Future<void> assertDisconnected({Duration timeout = const Duration(seconds: 30)}) =>
+      _waitForConnection(ConnectionStatus.disconnected, timeout: timeout);
 
   /// Lets the mock server's short-lived token (5 s) run out.
   Future<void> waitForTokenToExpire() async {

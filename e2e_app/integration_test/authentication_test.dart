@@ -1,3 +1,5 @@
+import 'package:flutter_test/flutter_test.dart';
+
 import 'support/step.dart';
 import 'support/stream_test_case.dart';
 import 'support/stream_test_env.dart';
@@ -48,7 +50,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12668',
     description: 'token date invalidates before the user logs in',
-    skip: 'https://linear.app/stream/issue/FLU-1083',
     jwt: true,
     body: (env) async {
       step('GIVEN the token date is invalid');
@@ -57,33 +58,35 @@ void main() {
       step('WHEN the user tries to log in');
       await env.userRobot.login();
 
-      step('THEN the app requests a token refresh');
-      await env.assertConnected();
+      step('THEN the login fails without requesting another token');
+      await env.userRobot.assertLoginFailed(code: 42);
+      expect(env.tokenRequests, 1);
     },
   );
 
   streamTestWithEnv(
     allureId: '12669',
     description: 'token date invalidates after the user logs in',
-    skip: 'https://linear.app/stream/issue/FLU-1083',
+    skip: 'https://github.com/GetStream/stream-chat-test-mock-server/pull/95',
     jwt: true,
     body: (env) async {
       step('GIVEN the user logs in');
       await login(env);
 
       step('WHEN the token date invalidates');
-      await env.backendRobot.invalidateTokenDate();
+      // Long enough for the next refresh to fall inside it.
+      await env.backendRobot.invalidateTokenDate(duration: 10);
 
-      step('THEN the app requests a token refresh');
+      step('THEN the app reconnects with the same token once its date is valid');
       await env.assertTokenHasExpired();
       await env.assertConnected();
+      expect(env.tokenRequests, 2);
     },
   );
 
   streamTestWithEnv(
     allureId: '12670',
     description: 'token signature invalidates before the user logs in',
-    skip: 'https://linear.app/stream/issue/FLU-1083',
     jwt: true,
     body: (env) async {
       step('GIVEN the token signature is invalid');
@@ -92,26 +95,29 @@ void main() {
       step('WHEN the user tries to log in');
       await env.userRobot.login();
 
-      step('THEN the app requests a token refresh');
-      await env.assertConnected();
+      step('THEN the login fails without requesting another token');
+      await env.userRobot.assertLoginFailed(code: 43);
+      expect(env.tokenRequests, 1);
     },
   );
 
   streamTestWithEnv(
     allureId: '12671',
     description: 'token signature invalidates after the user logs in',
-    skip: 'https://linear.app/stream/issue/FLU-1083',
     jwt: true,
     body: (env) async {
       step('GIVEN the user logs in');
       await login(env);
 
       step('WHEN the token signature invalidates');
-      await env.backendRobot.invalidateTokenSignature();
+      // Long enough for the next refresh to fall inside it.
+      await env.backendRobot.invalidateTokenSignature(duration: 10);
 
-      step('THEN the app requests a token refresh');
+      step('THEN the app gives up without requesting another token');
       await env.assertTokenHasExpired();
-      await env.assertConnected();
+      // The reconnect attempts back off for up to about 45 seconds.
+      await env.assertDisconnected(timeout: const Duration(seconds: 90));
+      expect(env.tokenRequests, 2);
     },
   );
 
