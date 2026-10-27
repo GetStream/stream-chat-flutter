@@ -699,8 +699,9 @@ void main() {
 
       step('THEN the message delivery status shows clocks');
       await env.userRobot.assertMessageDeliveryStatus(MessageDeliveryStatus.pending);
-      // Let the held send complete, so it can't land in the next test.
-      await env.userRobot.assertMessageDeliveryStatus(MessageDeliveryStatus.sent);
+      // Let the held send complete, so it can't land in the next test. Once
+      // sent, the message shows no status, as read events are disabled.
+      await env.userRobot.assertMessageDeliveryStatus(MessageDeliveryStatus.nil);
     },
   );
 
