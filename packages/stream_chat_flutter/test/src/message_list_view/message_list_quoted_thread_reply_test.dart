@@ -42,7 +42,7 @@ void main() {
     await _pumpMessageList(
       tester,
       [parent, quoting(threadReply)],
-      onThreadTap: (parent, _) => openedThreads.add(parent),
+      onThreadTap: (opened, _) => openedThreads.add(opened),
     );
     await tester.tap(find.byType(StreamQuotedMessage));
     await tester.pumpAndSettle();
@@ -65,7 +65,31 @@ void main() {
     await _pumpMessageList(
       tester,
       [parent, channelReply, quoting(channelReply)],
-      onThreadTap: (parent, _) => openedThreads.add(parent),
+      onThreadTap: (opened, _) => openedThreads.add(opened),
+    );
+    await tester.tap(find.byType(StreamQuotedMessage));
+    await tester.pumpAndSettle();
+
+    expect(openedThreads, isEmpty);
+  });
+
+  testWidgets('does not open a thread for a quoted reply inside the thread', (tester) async {
+    final threadReply = Message(
+      id: 'thread-reply',
+      text: 'Lisbon in May',
+      createdAt: DateTime(2026, 8, 26, 15),
+      user: jason,
+      state: MessageState.sent,
+      parentId: parent.id,
+    );
+    final quotingReply = quoting(threadReply).copyWith(parentId: parent.id);
+    final openedThreads = <Message>[];
+
+    await _pumpMessageList(
+      tester,
+      [threadReply, quotingReply],
+      parentMessage: parent,
+      onThreadTap: (opened, _) => openedThreads.add(opened),
     );
     await tester.tap(find.byType(StreamQuotedMessage));
     await tester.pumpAndSettle();
@@ -78,6 +102,7 @@ Future<void> _pumpMessageList(
   WidgetTester tester,
   List<Message> messages, {
   required ThreadTapCallback onThreadTap,
+  Message? parentMessage,
 }) async {
   final currentUser = OwnUser(id: 'maya', name: 'Maya Ross');
   final client = MockClient();
@@ -90,11 +115,18 @@ Future<void> _pumpMessageList(
   when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
   when(() => channel.client).thenReturn(client);
   when(() => channel.state).thenReturn(channelState);
-  when(() => channelState.threadsStream).thenAnswer((_) => const Stream.empty());
-  when(() => channelState.threads).thenReturn({});
+  final threads = {if (parentMessage != null) parentMessage.id: messages};
+  when(() => channelState.threadsStream).thenAnswer((_) => Stream.value(threads));
+  when(() => channelState.threads).thenReturn(threads);
+  when(
+    () => channel.getReplies(
+      any(),
+      options: any(named: 'options'),
+      preferOffline: any(named: 'preferOffline'),
+    ),
+  ).thenAnswer((_) async => QueryRepliesResponse()..messages = messages);
   when(() => channelState.messagesStream).thenAnswer((_) => Stream.value(messages));
   when(() => channelState.messages).thenReturn(messages);
-  when(() => channelState.pinnedMessages).thenReturn([]);
   when(() => channelState.isUpToDate).thenReturn(true);
   when(() => channelState.isUpToDateStream).thenAnswer((_) => Stream.value(true));
   when(() => channelState.unreadCountStream).thenAnswer((_) => Stream.value(0));
@@ -113,7 +145,7 @@ Future<void> _pumpMessageList(
         connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
         child: StreamChannel(
           channel: channel,
-          child: StreamMessageListView(onThreadTap: onThreadTap),
+          child: StreamMessageListView(parentMessage: parentMessage, onThreadTap: onThreadTap),
         ),
       ),
     ),
