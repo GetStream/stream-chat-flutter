@@ -25,6 +25,13 @@ class UserRobot {
     return this;
   }
 
+  /// Asserts the login failed with the Stream error [code].
+  Future<UserRobot> assertLoginFailed({required int code}) async {
+    final error = find.textContaining('Login failed: StreamWebSocketError(code: $code,');
+    await tester.waitUntilVisible(error);
+    return this;
+  }
+
   /// Signs out from the drawer behind the current user's avatar on the channel
   /// list.
   Future<UserRobot> logout() async {

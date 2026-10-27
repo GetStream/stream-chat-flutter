@@ -53,7 +53,12 @@ class StreamTestEnv {
         usePersistence: persistence,
         // The mock server hands out a short-lived JWT and plays the token
         // failure scenarios the backend robot sets up.
-        tokenProvider: jwt ? (_) => server.get('jwt/get') : null,
+        tokenProvider: jwt
+            ? (_) {
+                _tokenRequests += 1;
+                return server.get('jwt/get');
+              }
+            : null,
       )
       ..debugConnectivityStream = _connectivity.stream;
 
@@ -106,6 +111,8 @@ class StreamTestEnv {
     throw TestFailure('Timed out waiting for a framework error to be reported');
   }
 
+  var _tokenRequests = 0;
+
   StreamSubscription<ConnectionStatus>? _connectionStatusSubscription;
   var _disconnections = 0;
 
@@ -128,6 +135,12 @@ class StreamTestEnv {
       await _tester.pump(const Duration(milliseconds: 200));
     }
     throw TestFailure('The connection never dropped, so the token never expired');
+  }
+
+  /// Asserts the app has requested [count] tokens from the mock server.
+  void assertTokenRequests(int count) {
+    if (_tokenRequests == count) return;
+    throw TestFailure('Expected $count token requests, but the app made $_tokenRequests');
   }
 
   /// Lets the mock server's short-lived token (5 s) run out.
