@@ -13,16 +13,13 @@ class ChooseUserPage extends StatefulWidget {
 }
 
 class _ChooseUserPageState extends State<ChooseUserPage> {
-  Object? _error;
-
   Future<void> _login(E2eUser user) async {
-    setState(() => _error = null);
     try {
       await authController.connect(user: user.toUser(), token: user.token);
-    } catch (error) {
-      // Shown rather than rethrown: an uncaught error would fail whichever
-      // test happens to be running when it lands.
-      if (mounted) setState(() => _error = error);
+    } catch (_) {
+      // Shown from the auth state rather than rethrown: an uncaught error
+      // would fail whichever test happens to be running when it lands. The
+      // state outlives this page, which the app replaces while connecting.
     }
   }
 
@@ -44,7 +41,7 @@ class _ChooseUserPageState extends State<ChooseUserPage> {
                 title: Text(user.name),
                 onTap: () => _login(user),
               ),
-            if (_error case final error?) Text('Login failed: $error'),
+            if (authController.value case Unauthenticated(:final error?)) Text('Login failed: $error'),
           ],
         ),
       ),
