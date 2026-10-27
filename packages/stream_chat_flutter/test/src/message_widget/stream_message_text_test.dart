@@ -245,4 +245,65 @@ void main() {
     expect(find.text('Hello again'), findsOneWidget);
     expect(listenCount, 1);
   });
+
+  // Renders [text] and returns the link opened by tapping [linkText], or
+  // null when the tap opens nothing.
+  Future<String?> tapLink(WidgetTester tester, String text, String linkText) async {
+    final user = OwnUser(id: 'test-user', language: 'en');
+    when(() => clientState.currentUser).thenReturn(user);
+    when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(user));
+
+    String? opened;
+    await tester.pumpWidget(
+      wrap(
+        StreamMessageText(
+          message: Message(text: text),
+          onLinkTap: (_, href, _) => opened = href,
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tapOnText(find.textRange.ofSubstring(linkText));
+    return opened;
+  }
+
+  testWidgets('StreamMessageText opens a domain without a scheme over https', (tester) async {
+    expect(await tapLink(tester, 'Some link: youtube.com', 'youtube.com'), 'https://youtube.com');
+  });
+
+  testWidgets('StreamMessageText opens the path of a domain without a scheme', (tester) async {
+    expect(await tapLink(tester, 'Docs at getstream.io/chat', 'getstream.io/chat'), 'https://getstream.io/chat');
+  });
+
+  testWidgets('StreamMessageText leaves trailing punctuation out of a link', (tester) async {
+    expect(await tapLink(tester, 'Try youtube.com.', 'youtube.com'), 'https://youtube.com');
+  });
+
+  testWidgets('StreamMessageText leaves an unknown top-level domain as plain text', (tester) async {
+    expect(await tapLink(tester, 'Open config.json', 'config.json'), isNull);
+  });
+
+  testWidgets('StreamMessageText keeps www addresses on http', (tester) async {
+    expect(await tapLink(tester, 'See www.google.com', 'www.google.com'), 'http://www.google.com');
+  });
+
+  testWidgets('StreamMessageText does not link a domain inside a word', (tester) async {
+    expect(await tapLink(tester, 'Broken http://stream_io.com', 'io.com'), isNull);
+  });
+
+  testWidgets('StreamMessageText keeps the target of a domain in a link label', (tester) async {
+    expect(
+      await tapLink(tester, '[visit youtube.com](https://example.com)', 'youtube.com'),
+      'https://example.com',
+    );
+  });
+
+  testWidgets('StreamMessageText leaves the punctuation after a path out of a link', (tester) async {
+    expect(await tapLink(tester, 'Docs at getstream.io/chat.', 'getstream.io/chat'), 'https://getstream.io/chat');
+  });
+
+  testWidgets('StreamMessageText opens an email address as an email', (tester) async {
+    expect(await tapLink(tester, 'Mail anna.li@gmail.com', 'anna.li'), 'mailto:anna.li@gmail.com');
+  });
 }
