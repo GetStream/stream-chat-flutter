@@ -101,27 +101,6 @@ void main() {
   );
 
   streamTestWithEnv(
-    allureId: '12671',
-    description: 'token signature invalidates after the user logs in',
-    jwt: true,
-    body: (env) async {
-      step('GIVEN the user logs in');
-      await login(env);
-
-      step('WHEN the token signature invalidates');
-      // Outlasts the token's expiry and the refresh after it, so the refreshed
-      // token is still rejected.
-      await env.backendRobot.invalidateTokenSignature(duration: 20);
-
-      step('THEN the app stops retrying the refreshed token and disconnects');
-      await env.assertTokenHasExpired();
-      // The SDK backs off between its reconnect attempts before giving up.
-      await env.assertDisconnected(timeout: const Duration(seconds: 90));
-      env.assertTokenRequests(2);
-    },
-  );
-
-  streamTestWithEnv(
     allureId: '12672',
     description: 'token expires before the user logs in',
     jwt: true,

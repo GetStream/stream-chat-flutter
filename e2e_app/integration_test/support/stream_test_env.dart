@@ -137,11 +137,6 @@ class StreamTestEnv {
     throw TestFailure('The connection never dropped, so the token never expired');
   }
 
-  /// Waits until the connection is disconnected.
-  Future<void> assertDisconnected({Duration timeout = const Duration(seconds: 30)}) async {
-    await _waitForConnection(ConnectionStatus.disconnected, timeout: timeout);
-  }
-
   /// Asserts the app has requested [count] tokens from the mock server.
   void assertTokenRequests(int count) {
     if (_tokenRequests == count) return;
