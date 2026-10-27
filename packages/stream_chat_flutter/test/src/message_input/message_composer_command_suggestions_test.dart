@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -17,38 +18,62 @@ void main() {
     await _typeText(tester, '/');
     expect(_commandSuggestions, findsOneWidget);
 
-    await tester.tap(_outside);
+    await tester.tapAt(_outside);
     await tester.pumpAndSettle();
 
     expect(_commandSuggestions, findsNothing);
     expect(_composerHasFocus(tester), isTrue);
   });
 
-  testWidgets('keeps the command suggestions open on a tap on the field', (tester) async {
-    await _pumpComposer(tester);
+  testWidgets('selects a command on a tap on a suggestion', (tester) async {
+    final controller = StreamMessageComposerController();
+    addTearDown(controller.dispose);
+    await _pumpComposer(tester, controller: controller);
     await _typeText(tester, '/');
 
-    await tester.tap(find.byType(TextField));
+    // Hold the press for a frame, so a tap outside on pointer down would have
+    // removed the suggestion before the release.
+    final suggestion = find.descendant(of: _commandSuggestions, matching: find.text('Giphy'));
+    final gesture = await tester.startGesture(tester.getCenter(suggestion));
+    await tester.pump(const Duration(milliseconds: 50));
+    await gesture.up();
     await tester.pumpAndSettle();
 
-    expect(_commandSuggestions, findsOneWidget);
+    expect(controller.message.command, 'giphy');
   });
 
   testWidgets('shows the command suggestions again on the next keystroke', (tester) async {
     await _pumpComposer(tester);
     await _typeText(tester, '/');
-    await tester.tap(_outside);
+    await tester.tapAt(_outside);
     await tester.pumpAndSettle();
 
     await _typeText(tester, '/gi');
 
     expect(_commandSuggestions, findsOneWidget);
   });
+
+  testWidgets(
+    'shows the command suggestions again when a click refocuses the field on desktop',
+    variant: TargetPlatformVariant.only(TargetPlatform.macOS),
+    (tester) async {
+      await _pumpComposer(tester);
+      await _typeText(tester, '/');
+
+      await tester.tapAt(_outside, kind: PointerDeviceKind.mouse);
+      await tester.pumpAndSettle();
+      expect(_commandSuggestions, findsNothing);
+
+      await tester.tap(find.byType(TextField), kind: PointerDeviceKind.mouse);
+      await tester.pumpAndSettle();
+
+      expect(_commandSuggestions, findsOneWidget);
+    },
+  );
 }
 
-const _outsideKey = ValueKey('outside');
-
-final _outside = find.byKey(_outsideKey);
+// A point on the message list area, above the composer.
+const _outside = Offset(20, 20);
 
 final _commandSuggestions = find.byType(StreamCommandAutocompleteOptions);
 
@@ -59,11 +84,11 @@ bool _composerHasFocus(WidgetTester tester) {
 Future<void> _typeText(WidgetTester tester, String text) async {
   await tester.enterText(find.byType(TextField), text);
   // Suggestions update behind a 300ms debounce; advance past it.
-  await tester.pump(const Duration(milliseconds: 500));
+  await tester.pump(const Duration(milliseconds: 300));
   await tester.pumpAndSettle();
 }
 
-Future<void> _pumpComposer(WidgetTester tester) async {
+Future<void> _pumpComposer(WidgetTester tester, {StreamMessageComposerController? controller}) async {
   final client = MockClient();
   final clientState = MockClientState();
   final channel = MockChannel(ownCapabilities: const [ChannelCapability.sendMessage]);
@@ -97,8 +122,8 @@ Future<void> _pumpComposer(WidgetTester tester) async {
           child: Scaffold(
             body: Column(
               children: [
-                const Expanded(child: SizedBox.expand(key: _outsideKey)),
-                StreamMessageComposer(),
+                const Expanded(child: SizedBox.expand()),
+                StreamMessageComposer(messageComposerController: controller),
               ],
             ),
           ),

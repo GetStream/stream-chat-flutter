@@ -281,8 +281,7 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
   bool _hideOptions = false;
   String _lastFieldText = '';
 
-  // Groups the field with its options, so a tap on either one is not a tap
-  // outside the other.
+  // A tap on the options is not a tap outside the field.
   final _tapRegionGroupId = Object();
 
   // True if the state indicates that the options should be visible.
@@ -522,7 +521,10 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
           portalFollower: optionViewBuilder,
           child: TapRegion(
             groupId: _tapRegionGroupId,
-            onTapOutside: (_) => closeSuggestions(),
+            enabled: shouldShowOptions,
+            // Hide the options the way losing focus does, for a touch outside
+            // that keeps the field focused.
+            onTapOutside: (_) => setState(() => _hideOptions = true),
             child: widget.fieldViewBuilder(
               context,
               _messageComposerController,
