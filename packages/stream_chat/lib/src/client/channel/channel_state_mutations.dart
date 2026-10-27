@@ -17,6 +17,7 @@ class ChannelStateMutations {
     required this._removeTypingEvent,
     required this._removeWatcher,
     required this._removeMember,
+    required this._clearMembership,
     required this._updateMember,
     required this._deleteMessagesFromUser,
   });
@@ -28,6 +29,7 @@ class ChannelStateMutations {
   final void Function(User user) _removeTypingEvent;
   final void Function(User watcher, {int? watcherCount}) _removeWatcher;
   final void Function(User user) _removeMember;
+  final void Function() _clearMembership;
   final void Function(Member member) _updateMember;
   final Future<void> Function({
     required String userId,
@@ -435,6 +437,16 @@ class ChannelStateMutations {
     );
   }
 
+  /// Records whether the current user has [hidden] the channel.
+  void onChannelHiddenChanged({required bool hidden}) {
+    final channel = _state.channelState.channel;
+    if (channel == null) return;
+
+    _state.updateChannelState(
+      _state.channelState.copyWith(channel: channel.copyWith(hidden: hidden)),
+    );
+  }
+
   /// Updates the channel [memberCount] and [messageCount].
   ///
   /// A null count leaves the currently stored value unchanged.
@@ -462,6 +474,13 @@ class ChannelStateMutations {
 
   /// Removes the [user]'s membership and read state.
   void onMemberRemoved(User user) => _removeMember(user);
+
+  /// Removes the current user from the channel's members, read state and
+  /// membership after they leave or are removed from it.
+  void onCurrentUserRemoved(User user) {
+    _removeMember(user);
+    _clearMembership();
+  }
 
   /// Merges the updated [user] into the matching member and membership.
   ///

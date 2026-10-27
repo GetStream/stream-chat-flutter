@@ -1,3 +1,15 @@
+## Upcoming
+
+🔄 Changed
+
+- `ChannelState.copyWith(membership: null)` now clears the membership instead of keeping it, as it already did for `draft`.
+
+🐞 Fixed
+
+- Fixed a `Channel` becoming unusable after the current user hides it or is removed from it, for example by blocking the other member of a direct message.
+- Fixed `Channel.hidden` not following the `channel.hidden` and `channel.visible` events.
+- Fixed the current user's membership staying on a channel after they are removed from it.
+
 ## 10.6.0
 
 ✅ Added

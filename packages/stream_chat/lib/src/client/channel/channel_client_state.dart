@@ -42,6 +42,7 @@ class ChannelClientState {
       removeTypingEvent: _removeTypingEvent,
       removeWatcher: _removeWatcher,
       removeMember: _removeMember,
+      clearMembership: _clearMembership,
       updateMember: _updateMember,
       deleteMessagesFromUser: _deleteMessagesFromUser,
     );
@@ -90,6 +91,12 @@ class ChannelClientState {
       members: existingMembers.where((member) => member.userId != user.id).toList(),
       read: existingReads.where((read) => read.user.id != user.id).toList(),
     );
+  }
+
+  // Clears the current user's membership once they are no longer a member.
+  void _clearMembership() {
+    if (channelState.membership == null) return;
+    _channelState = channelState.copyWith(membership: null);
   }
 
   // Replaces the member matching the given member's user id in the channel
@@ -584,7 +591,7 @@ class ChannelClientState {
       watchers: newWatchers.toList(),
       watcherCount: updatedState.watcherCount,
       members: updatedState.members,
-      membership: updatedState.membership,
+      membership: updatedState.membership ?? _channelState.membership,
       read: newReads.toList(),
       draft: updatedState.draft,
       pinnedMessages: newPinnedMessages,

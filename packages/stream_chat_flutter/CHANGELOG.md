@@ -15,6 +15,7 @@
 
 🐞 Fixed
 
+- Fixed the channel page crashing after the user is removed from the open channel or blocks the other member of a direct message.
 - Fixed a message that failed to send, update or delete hiding the timestamp and delivery status of the message before it.
 - Fixed a voice recording sent as a reply without text showing inside a filled container instead of directly on the message bubble.
 - Fixed a mention rendering as another mentioned user's shorter mention followed by leftover text, such as `@Anna` next to `@Ann`.
