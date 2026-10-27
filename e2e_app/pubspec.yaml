@@ -25,7 +25,6 @@ environment:
   flutter: ">=3.44.0"
 
 dependencies:
-  collection: ^1.19.1
   flutter:
     sdk: flutter
   flutter_slidable: ^3.1.1
@@ -39,6 +38,7 @@ dev_dependencies:
   integration_test:
     sdk: flutter
   url_launcher_platform_interface: ^2.3.2
+  uuid: ^4.5.3
 
 flutter:
   uses-material-design: true

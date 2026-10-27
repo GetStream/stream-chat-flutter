@@ -47,7 +47,6 @@ dependencies:
   stream_chat_localizations: ^10.6.0
   stream_chat_persistence: ^10.6.0
   streaming_shared_preferences: ^2.0.0
-  uuid: ^4.5.3
   video_player: ^2.11.1
   yaml: ^3.1.2
 
