@@ -96,13 +96,41 @@ void main() {
 
     expect(openedThreads, isEmpty);
   });
+
+  testWidgets('opens the thread of a quoted reply on that reply', (tester) async {
+    final replies = [
+      for (var i = 0; i < 20; i++)
+        Message(
+          id: 'reply-$i',
+          text: 'Offsite idea $i',
+          createdAt: DateTime(2026, 8, 26, 15, i),
+          user: jason,
+          state: MessageState.sent,
+          parentId: parent.id,
+        ),
+    ];
+
+    await _pumpMessageList(
+      tester,
+      [parent, quoting(replies.first)],
+      replies: replies,
+      threadBuilder: (_, parent) => StreamMessageListView(parentMessage: parent),
+    );
+    await tester.tap(find.byType(StreamQuotedMessage));
+    await tester.pumpAndSettle();
+
+    final quotedReply = find.textContaining('Offsite idea 0', findRichText: true).hitTestable();
+    expect(quotedReply, findsOneWidget);
+  });
 }
 
 Future<void> _pumpMessageList(
   WidgetTester tester,
   List<Message> messages, {
-  required ThreadTapCallback onThreadTap,
+  ThreadTapCallback? onThreadTap,
+  ThreadBuilder? threadBuilder,
   Message? parentMessage,
+  List<Message>? replies,
 }) async {
   final currentUser = OwnUser(id: 'maya', name: 'Maya Ross');
   final client = MockClient();
@@ -115,7 +143,10 @@ Future<void> _pumpMessageList(
   when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
   when(() => channel.client).thenReturn(client);
   when(() => channel.state).thenReturn(channelState);
-  final threads = {if (parentMessage != null) parentMessage.id: messages};
+  final threads = {
+    if (parentMessage != null) parentMessage.id: messages,
+    for (final reply in [...?replies]) reply.parentId!: replies!,
+  };
   when(() => channelState.threadsStream).thenAnswer((_) => Stream.value(threads));
   when(() => channelState.threads).thenReturn(threads);
   when(
@@ -124,7 +155,7 @@ Future<void> _pumpMessageList(
       options: any(named: 'options'),
       preferOffline: any(named: 'preferOffline'),
     ),
-  ).thenAnswer((_) async => QueryRepliesResponse()..messages = messages);
+  ).thenAnswer((_) async => QueryRepliesResponse()..messages = replies ?? messages);
   when(() => channelState.messagesStream).thenAnswer((_) => Stream.value(messages));
   when(() => channelState.messages).thenReturn([?parentMessage, ...messages]);
   when(() => channelState.isUpToDate).thenReturn(true);
@@ -140,12 +171,18 @@ Future<void> _pumpMessageList(
 
   await tester.pumpWidget(
     MaterialApp(
-      home: StreamChat(
+      // Above the navigator, so a thread page pushed from the list has it too.
+      builder: (context, child) => StreamChat(
         client: client,
         connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
-        child: StreamChannel(
-          channel: channel,
-          child: StreamMessageListView(parentMessage: parentMessage, onThreadTap: onThreadTap),
+        child: child!,
+      ),
+      home: StreamChannel(
+        channel: channel,
+        child: StreamMessageListView(
+          parentMessage: parentMessage,
+          onThreadTap: onThreadTap,
+          threadBuilder: threadBuilder,
         ),
       ),
     ),

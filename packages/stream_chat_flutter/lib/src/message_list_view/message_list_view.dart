@@ -358,6 +358,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   List<Message> messages = <Message>[];
 
+  // The thread reply to scroll to once [messages] include it.
+  String? _pendingThreadMessageId;
+
   // `generation` bumps on each highlight call so a re-highlight of the
   // same message restarts the fade animation.
   final _highlightState = ValueNotifier<({String? id, int generation})>((id: null, generation: 0));
@@ -416,12 +419,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       // that replay is checked against.
       _unreadController.attach();
 
-      final highlightInitialMessage = _config.highlightInitialMessage;
-      final highlightMessageId = switch ((highlightInitialMessage, _isThreadConversation)) {
-        (true, true) => _ThreadHighlightScope.of(context),
-        (true, false) => streamChannel?.initialMessageId,
-        _ => null,
-      };
+      // A thread opened for one of its replies scrolls to it once the replies
+      // include it. Highlighting it stays opt-in.
+      _pendingThreadMessageId = _isThreadConversation ? _ThreadHighlightScope.of(context) : null;
+
+      final highlightChannelMessage = _config.highlightInitialMessage && !_isThreadConversation;
+      final highlightMessageId = highlightChannelMessage ? streamChannel?.initialMessageId : null;
 
       if (highlightMessageId != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -670,6 +673,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   Widget _buildListView(List<Message> data) {
     messages = data;
+
+    if (_pendingThreadMessageId case final messageId? when messages.any((it) => it.id == messageId)) {
+      _pendingThreadMessageId = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _scrollToMessage(messageId: messageId, highlight: _config.highlightInitialMessage);
+      });
+    }
 
     // Top pagination may not have finished loading the unread boundary when
     // the baseline was first captured; retry once this frame's layout
