@@ -126,7 +126,7 @@ Future<void> _pumpMessageList(
     ),
   ).thenAnswer((_) async => QueryRepliesResponse()..messages = messages);
   when(() => channelState.messagesStream).thenAnswer((_) => Stream.value(messages));
-  when(() => channelState.messages).thenReturn(messages);
+  when(() => channelState.messages).thenReturn([?parentMessage, ...messages]);
   when(() => channelState.isUpToDate).thenReturn(true);
   when(() => channelState.isUpToDateStream).thenAnswer((_) => Stream.value(true));
   when(() => channelState.unreadCountStream).thenAnswer((_) => Stream.value(0));
