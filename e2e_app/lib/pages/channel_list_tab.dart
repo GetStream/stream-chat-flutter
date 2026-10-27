@@ -36,6 +36,7 @@ class _ChannelListTabState extends State<ChannelListTab> {
   );
 
   final _searchController = TextEditingController();
+  var _query = '';
   var _scope = SearchScope.messages;
   StreamChannelListController? _channelSearchController;
 
@@ -47,7 +48,17 @@ class _ChannelListTabState extends State<ChannelListTab> {
 
   void _onQueryChanged() {
     final query = _searchController.text;
-    setState(() {});
+    if (query == _query) return;
+    _search(query);
+  }
+
+  void _onScopeChanged(SearchScope scope) {
+    setState(() => _scope = scope);
+    _search(_query);
+  }
+
+  void _search(String query) {
+    setState(() => _query = query);
     if (query.isEmpty) return _messageSearchController.clearResults();
 
     switch (_scope) {
@@ -66,11 +77,6 @@ class _ChannelListTabState extends State<ChannelListTab> {
     }
   }
 
-  void _onScopeChanged(SearchScope scope) {
-    setState(() => _scope = scope);
-    _onQueryChanged();
-  }
-
   @override
   void dispose() {
     _searchController.dispose();
@@ -82,7 +88,7 @@ class _ChannelListTabState extends State<ChannelListTab> {
 
   @override
   Widget build(BuildContext context) {
-    final isSearching = _searchController.text.isNotEmpty;
+    final isSearching = _query.isNotEmpty;
 
     return Column(
       children: [
@@ -94,7 +100,10 @@ class _ChannelListTabState extends State<ChannelListTab> {
             children: [
               for (final scope in SearchScope.values)
                 ChoiceChip(
-                  label: Text(scope == SearchScope.messages ? 'Messages' : 'Channels'),
+                  label: Text(switch (scope) {
+                    SearchScope.messages => 'Messages',
+                    SearchScope.channels => 'Channels',
+                  }),
                   selected: _scope == scope,
                   onSelected: (_) => _onScopeChanged(scope),
                 ),
@@ -107,12 +116,12 @@ class _ChannelListTabState extends State<ChannelListTab> {
             (true, SearchScope.messages) => StreamMessageSearchListView(
               controller: _messageSearchController,
               onMessageTap: (response) {
-                final [type, id] = response.channel!.cid.split(':');
-                openMessage(context, _client.channel(type, id: id), response.message.id).ignore();
+                final channel = response.channel!;
+                openMessage(context, _client.channel(channel.type, id: channel.id), response.message.id).ignore();
               },
             ),
             (true, SearchScope.channels) => StreamChannelListView(
-              key: ValueKey(_searchController.text),
+              key: ValueKey(_query),
               controller: _channelSearchController!,
               onChannelTap: (channel) => openChannel(context, channel),
             ),
