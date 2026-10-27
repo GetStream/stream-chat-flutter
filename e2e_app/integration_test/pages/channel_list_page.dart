@@ -22,12 +22,6 @@ abstract final class ChannelListPage {
   /// The channel row titled [name].
   static Finder channelNamed(String name) => find.descendant(of: find.byType(channelTile), matching: find.text(name));
 
-  /// A channel row whose unread badge reads [count] (none when 0).
-  static Finder channelWithUnreadCount(int count) => find.byWidgetPredicate(
-    (it) => it is StreamChannelListTile && it.unreadCount == count,
-    description: 'channel row with $count unread',
-  );
-
   /// The swipe actions revealed behind a channel row: "more" (which opens the
   /// detail sheet) first, then mute / unmute.
   static Finder swipeAction(int index) => find.byType(CustomSlidableAction).at(index);
@@ -52,7 +46,8 @@ abstract final class ChannelListPage {
 abstract final class ChannelInfoPage {
   static Finder get pinnedMessagesOption => find.text('Pinned Messages');
 
-  static Finder get pinnedMessagesTitle => find.text('Pinned Messages');
+  static Finder get pinnedMessagesTitle =>
+      find.descendant(of: find.byType(AppBar), matching: find.text('Pinned Messages'));
 
   static Finder get pinnedMessages => find.byType(StreamMessageSearchListTile);
 

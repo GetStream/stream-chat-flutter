@@ -137,6 +137,20 @@ class StreamTestEnv {
     throw TestFailure('The connection never dropped, so the token never expired');
   }
 
+  /// How many tokens the app has requested from the mock server so far.
+  int get tokenRequests => _tokenRequests;
+
+  /// Waits until the app has requested more than [count] tokens from the mock
+  /// server.
+  Future<void> waitForTokenRequestAfter(int count, {Duration timeout = const Duration(seconds: 30)}) async {
+    final end = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(end)) {
+      if (_tokenRequests > count) return;
+      await _tester.pump(const Duration(milliseconds: 200));
+    }
+    throw TestFailure('The app never requested a new token');
+  }
+
   /// Asserts the app has requested [count] tokens from the mock server.
   void assertTokenRequests(int count) {
     if (_tokenRequests == count) return;
@@ -149,6 +163,18 @@ class StreamTestEnv {
     while (DateTime.now().isBefore(end)) {
       await _tester.pump(const Duration(milliseconds: 200));
     }
+  }
+
+  /// Waits until the channel the user has open lists [userId] as a member.
+  Future<void> waitForMember(String userId, {Duration timeout = const Duration(seconds: 10)}) async {
+    final context = _tester.element(find.byType(StreamMessageListView).first);
+    final channel = StreamChannel.of(context).channel;
+    final end = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(end)) {
+      if (channel.state?.members.any((it) => it.userId == userId) ?? false) return;
+      await _tester.pump(const Duration(milliseconds: 200));
+    }
+    throw TestFailure('$userId never became a member of the channel');
   }
 
   /// Truncates the channel the user currently has open, leaving the system
