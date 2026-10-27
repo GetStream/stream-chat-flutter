@@ -172,10 +172,13 @@ void main() {
       await env.waitForTokenToExpire();
 
       step('AND the user comes back online');
+      // Going offline already drops the connection, so a dropped connection
+      // can't prove the token expired; a new token request can.
+      final tokenRequests = env.tokenRequests;
       await env.goOnline();
 
       step('THEN the app requests a token refresh');
-      await env.assertTokenHasExpired();
+      await env.waitForTokenRequestAfter(tokenRequests);
       await env.assertConnected();
     },
   );

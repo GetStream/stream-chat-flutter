@@ -1,3 +1,5 @@
+import 'package:flutter/services.dart';
+
 import 'robots/user_robot.dart';
 import 'robots/user_robot_message_list_asserts.dart';
 import 'support/step.dart';
@@ -17,6 +19,8 @@ void main() {
       await env.participantRobot.sendMessage(sampleText);
 
       step('AND the user copies the message');
+      // The clipboard outlives the test, so a stale 'Test' would pass the assert.
+      await Clipboard.setData(const ClipboardData(text: ''));
       await env.userRobot.assertMessage(sampleText).copyMessage();
 
       step('THEN the message text is in the clipboard');

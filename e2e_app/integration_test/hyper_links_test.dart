@@ -38,10 +38,10 @@ void main() {
     },
   );
 
-  // Passes only because the Unsplash preview never renders at all (FLU-1088).
   streamTestWithEnv(
     allureId: '12707',
     description: 'user sends a Unsplash link without a preview',
+    skip: noPreviewForImageOg,
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.userRobot.login().openChannel();
