@@ -402,15 +402,14 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
 
   /// Whether the message should be sent without the server scraping its links.
   ///
-  /// True after [setOGAttachment], and after the user dismissed the og
-  /// attachment with [clearOGAttachment]. False after any other clear or a
-  /// reset.
-  bool get skipEnrichUrl => _skipEnrichUrl;
-  bool _skipEnrichUrl = false;
+  /// True while the message has an [ogAttachment], and after the user
+  /// dismissed one with [clearOGAttachment] until it is cleared again, or
+  /// [clear] or [reset] is called.
+  bool get skipEnrichUrl => _ogAttachmentDismissed || ogAttachment != null;
+  bool _ogAttachmentDismissed = false;
 
   /// Sets the og attachment in the message.
   void setOGAttachment(Attachment attachment) {
-    _skipEnrichUrl = true;
     final updatedAttachments = [...attachments];
     // Remove the existing og attachment if it exists.
     if (ogAttachment case final existingOGAttachment?) {
@@ -426,10 +425,10 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
 
   /// Removes the og attachment.
   ///
-  /// Pass [dismissed] true when the user removed it, so the message is sent
-  /// without the server scraping its links.
+  /// Pass [dismissed] as true when the user removed it, which sets
+  /// [skipEnrichUrl].
   void clearOGAttachment({bool dismissed = false}) {
-    _skipEnrichUrl = dismissed;
+    _ogAttachmentDismissed = dismissed;
     if (ogAttachment case final existingOGAttachment?) {
       removeAttachment(existingOGAttachment);
     }
@@ -532,7 +531,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   void clear() {
     // Clear the command state, if any.
     _messageBeforeCommand = null;
-    _skipEnrichUrl = false;
+    _ogAttachmentDismissed = false;
     message = Message();
   }
 
@@ -544,7 +543,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
 
     // Reset the command state, if any.
     _messageBeforeCommand = null;
-    _skipEnrichUrl = false;
+    _ogAttachmentDismissed = false;
 
     if (resetId) {
       final newId = const Uuid().v4();

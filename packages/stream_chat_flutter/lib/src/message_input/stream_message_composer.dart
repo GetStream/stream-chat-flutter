@@ -1675,7 +1675,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   Future<void> _sendOrUpdateMessage({
     required Message message,
     required Channel channel,
-    bool skipEnrichUrl = false,
+    required bool skipEnrichUrl,
   }) async {
     try {
       // A message is considered fresh if it doesn't have a remoteCreatedAt.

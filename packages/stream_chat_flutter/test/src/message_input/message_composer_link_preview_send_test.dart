@@ -53,20 +53,24 @@ void main() {
     verify(() => channel.sendMessage(any(), skipEnrichUrl: false)).called(1);
   });
 
-  testWidgets('previews a new link after the dismissed one is removed', (tester) async {
+  testWidgets('updates without scraping links when the edited message has a preview', (tester) async {
     final (:client, :channel) = _channel();
-    when(() => client.enrichUrl(any())).thenAnswer(
-      (invocation) async => OGAttachmentResponse()..ogScrapeUrl = invocation.positionalArguments.first as String,
+    final controller = StreamMessageComposerController();
+    addTearDown(controller.dispose);
+    controller.editMessage(
+      Message(
+        id: 'edited',
+        text: 'look $url',
+        createdAt: DateTime(2026),
+        attachments: [Attachment(ogScrapeUrl: url, titleLink: url)],
+      ),
     );
-    await _pumpComposer(tester, client: client, channel: channel);
+    await _pumpComposer(tester, client: client, channel: channel, controller: controller);
 
-    await _typeText(tester, 'look $url');
-    tester.widget<core.StreamMessageComposerLinkPreviewAttachment>(_linkPreview).props.onRemovePressed!();
-    await tester.pumpAndSettle();
-    await _typeText(tester, 'look');
-    await _typeText(tester, 'look https://other.example.com');
+    await _typeText(tester, 'look $url again');
+    await _send(tester);
 
-    expect(_linkPreview, findsOneWidget);
+    verify(() => channel.updateMessage(any(), skipEnrichUrl: true)).called(1);
   });
 }
 
@@ -108,6 +112,9 @@ Future<void> _send(WidgetTester tester) async {
   when(
     () => channel.sendMessage(any(), skipEnrichUrl: any(named: 'skipEnrichUrl')),
   ).thenAnswer((_) async => SendMessageResponse());
+  when(
+    () => channel.updateMessage(any(), skipEnrichUrl: any(named: 'skipEnrichUrl')),
+  ).thenAnswer((_) async => UpdateMessageResponse());
 
   return (client: client, channel: channel);
 }
@@ -116,6 +123,7 @@ Future<void> _pumpComposer(
   WidgetTester tester, {
   required MockClient client,
   required MockChannel channel,
+  StreamMessageComposerController? controller,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -124,7 +132,9 @@ Future<void> _pumpComposer(
         connectivityStream: Stream.value([ConnectivityResult.mobile]),
         child: StreamChannel(
           channel: channel,
-          child: Scaffold(body: StreamMessageComposer(enableVoiceRecording: false)),
+          child: Scaffold(
+            body: StreamMessageComposer(messageComposerController: controller, enableVoiceRecording: false),
+          ),
         ),
       ),
     ),
