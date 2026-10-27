@@ -1,11 +1,9 @@
-import 'package:flutter_test/flutter_test.dart';
-
 import 'support/step.dart';
 import 'support/stream_test_case.dart';
 import 'support/stream_test_env.dart';
 
-// Each scenario connects with a token the mock server hands out (valid for 5 s),
-// so the SDK has to refresh it as the backend robot breaks it.
+// Each scenario connects with a token the mock server hands out (valid for
+// 5 s); the SDK refreshes it only once it expires.
 void main() {
   Future<void> login(StreamTestEnv env) async {
     await env.userRobot.login();
@@ -60,7 +58,7 @@ void main() {
 
       step('THEN the login fails without requesting another token');
       await env.userRobot.assertLoginFailed(code: 42);
-      expect(env.tokenRequests, 1);
+      env.assertTokenRequests(1);
     },
   );
 
@@ -74,13 +72,14 @@ void main() {
       await login(env);
 
       step('WHEN the token date invalidates');
-      // Long enough for the next refresh to fall inside it.
-      await env.backendRobot.invalidateTokenDate(duration: 10);
+      // Outlasts the token's expiry and the refresh after it, so the refreshed
+      // token is still rejected.
+      await env.backendRobot.invalidateTokenDate(duration: 20);
 
       step('THEN the app reconnects with the same token once its date is valid');
       await env.assertTokenHasExpired();
       await env.assertConnected();
-      expect(env.tokenRequests, 2);
+      env.assertTokenRequests(2);
     },
   );
 
@@ -97,7 +96,7 @@ void main() {
 
       step('THEN the login fails without requesting another token');
       await env.userRobot.assertLoginFailed(code: 43);
-      expect(env.tokenRequests, 1);
+      env.assertTokenRequests(1);
     },
   );
 
@@ -110,14 +109,15 @@ void main() {
       await login(env);
 
       step('WHEN the token signature invalidates');
-      // Long enough for the next refresh to fall inside it.
-      await env.backendRobot.invalidateTokenSignature(duration: 10);
+      // Outlasts the token's expiry and the refresh after it, so the refreshed
+      // token is still rejected.
+      await env.backendRobot.invalidateTokenSignature(duration: 20);
 
-      step('THEN the app gives up without requesting another token');
+      step('THEN the app stops retrying the refreshed token and disconnects');
       await env.assertTokenHasExpired();
-      // The reconnect attempts back off for up to about 45 seconds.
+      // The SDK backs off between its reconnect attempts before giving up.
       await env.assertDisconnected(timeout: const Duration(seconds: 90));
-      expect(env.tokenRequests, 2);
+      env.assertTokenRequests(2);
     },
   );
 

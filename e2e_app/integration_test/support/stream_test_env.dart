@@ -55,7 +55,7 @@ class StreamTestEnv {
         // failure scenarios the backend robot sets up.
         tokenProvider: jwt
             ? (_) {
-                tokenRequests++;
+                _tokenRequests += 1;
                 return server.get('jwt/get');
               }
             : null,
@@ -111,8 +111,7 @@ class StreamTestEnv {
     throw TestFailure('Timed out waiting for a framework error to be reported');
   }
 
-  /// How many tokens the app has asked the mock server for.
-  int tokenRequests = 0;
+  var _tokenRequests = 0;
 
   StreamSubscription<ConnectionStatus>? _connectionStatusSubscription;
   var _disconnections = 0;
@@ -138,9 +137,16 @@ class StreamTestEnv {
     throw TestFailure('The connection never dropped, so the token never expired');
   }
 
-  /// Waits until the app has stopped reconnecting and is disconnected.
-  Future<void> assertDisconnected({Duration timeout = const Duration(seconds: 30)}) =>
-      _waitForConnection(ConnectionStatus.disconnected, timeout: timeout);
+  /// Waits until the connection is disconnected.
+  Future<void> assertDisconnected({Duration timeout = const Duration(seconds: 30)}) async {
+    await _waitForConnection(ConnectionStatus.disconnected, timeout: timeout);
+  }
+
+  /// Asserts the app has requested [count] tokens from the mock server.
+  void assertTokenRequests(int count) {
+    if (_tokenRequests == count) return;
+    throw TestFailure('Expected $count token requests, but the app made $_tokenRequests');
+  }
 
   /// Lets the mock server's short-lived token (5 s) run out.
   Future<void> waitForTokenToExpire() async {
