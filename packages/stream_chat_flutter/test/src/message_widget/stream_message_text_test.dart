@@ -284,12 +284,12 @@ void main() {
     expect(await tapLink(tester, 'Open config.json', 'config.json'), isNull);
   });
 
-  testWidgets('StreamMessageText keeps www addresses on http', (tester) async {
-    expect(await tapLink(tester, 'See www.google.com', 'www.google.com'), 'http://www.google.com');
+  testWidgets('StreamMessageText opens a www address over https', (tester) async {
+    expect(await tapLink(tester, 'See www.google.com', 'www.google.com'), 'https://www.google.com');
   });
 
-  testWidgets('StreamMessageText does not link a domain inside a word', (tester) async {
-    expect(await tapLink(tester, 'Broken http://stream_io.com', 'io.com'), isNull);
+  testWidgets('StreamMessageText links a whole address, not the domain at its end', (tester) async {
+    expect(await tapLink(tester, 'Broken http://stream_io.com', 'io.com'), 'http://stream_io.com');
   });
 
   testWidgets('StreamMessageText keeps the target of a domain in a link label', (tester) async {

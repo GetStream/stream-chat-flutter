@@ -10,7 +10,6 @@ import '../../stream_chat.dart';
 import '../../stream_chat_configuration.dart';
 import '../../utils/device_segmentation.dart';
 import '../../utils/extensions.dart';
-import 'web_url_syntax.dart';
 
 /// Displays the translated markdown message text, reacting to the current
 /// user's language preference.
@@ -96,9 +95,6 @@ class StreamMessageText extends StatelessWidget {
     );
   }
 
-  // Stateless, so shared instead of recompiling its pattern on every build.
-  static final _webUrlSyntax = WebUrlSyntax();
-
   Widget _buildText({required String? language, required bool translationEnabled}) {
     final translated = translationEnabled ? message.translate(language) : message;
     final messageText = translated.replaceMentions().text?.replaceAll('\n', '\n\n').trim();
@@ -111,7 +107,6 @@ class StreamMessageText extends StatelessWidget {
       onTapLink: onLinkTap,
       onTapMention: onMentionTap,
       onTapAnyMention: onAnyMentionTap,
-      inlineSyntaxes: [_webUrlSyntax],
     );
 
     if (isDesktopDeviceOrWeb) {
