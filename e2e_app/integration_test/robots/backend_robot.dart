@@ -45,11 +45,6 @@ class BackendRobot {
     return this;
   }
 
-  Future<BackendRobot> freezeNewMessages() async {
-    await _mockServer.post('freeze_messages');
-    return this;
-  }
-
   /// Turns slow mode on (or off) for the channel, with a cooldown of
   /// [duration] seconds between the user's messages.
   Future<BackendRobot> setCooldown({required bool enabled, int duration = 15}) async {
@@ -60,12 +55,6 @@ class BackendRobot {
   /// Turns the channel's read events (read receipts) on or off.
   Future<BackendRobot> setReadEvents({required bool enabled}) async {
     await _mockServer.post('config/read_events?value=$enabled');
-    return this;
-  }
-
-  /// Truncates the channel server-side, as if another client had done it.
-  Future<BackendRobot> truncateChannel({required bool withMessage}) async {
-    await _mockServer.post('truncate_channel?with_message=$withMessage');
     return this;
   }
 
@@ -103,18 +92,6 @@ class BackendRobot {
   Future<BackendRobot> createReminder({int? remindAtSeconds}) async {
     await _mockServer.post(remindAtSeconds == null ? 'create_reminder' : 'create_reminder?remind_at=$remindAtSeconds');
     return this;
-  }
-
-  /// Waits until the app has closed its WebSocket to the mock server, so a
-  /// server-side event that follows cannot be delivered live.
-  Future<BackendRobot> waitForWebSocketDisconnection({Duration timeout = const Duration(seconds: 10)}) async {
-    final end = DateTime.now().add(timeout);
-    while (DateTime.now().isBefore(end)) {
-      final status = await _mockServer.get('ws/status');
-      if (status.contains('"connected":false')) return this;
-      await Future<void>.delayed(const Duration(milliseconds: 500));
-    }
-    throw StateError('The WebSocket was not disconnected within $timeout');
   }
 
   Future<void> revokeToken({int duration = 5}) => _mockServer.post('jwt/revoke_token?duration=$duration');

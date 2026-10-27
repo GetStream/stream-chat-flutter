@@ -404,9 +404,9 @@ Flutter 3.47, showing how far apart the two are:
 
 | Tool | error floor | warn floor | **verified matrix** | Set in |
 |---|---|---|---|---|
-| Gradle | 8.14.0 | 9.1.0 | **9.3.1** | `sample_app/android/gradle/wrapper/gradle-wrapper.properties` |
-| AGP | 8.11.1 | 9.0.1 | **9.1.0** | `sample_app/android/settings.gradle` |
-| Kotlin (KGP) | 2.2.20 | 2.3.20 | **2.4.0** | `sample_app/android/settings.gradle` |
+| Gradle | 8.14.0 | 9.1.0 | **9.3.1** | `{sample_app,e2e_app}/android/gradle/wrapper/gradle-wrapper.properties` |
+| AGP | 8.11.1 | 9.0.1 | **9.1.0** | `sample_app/android/settings.gradle`, `e2e_app/android/settings.gradle.kts` |
+| Kotlin (KGP) | 2.2.20 | 2.3.20 | **2.4.0** | `sample_app/android/settings.gradle`, `e2e_app/android/settings.gradle.kts` |
 | Java | — | — | **17** minimum | `.github/actions/setup-java` + `app/build.gradle` |
 
 The matrix is internally constrained — "AGP 9.1.0 is the newest compatible with KGP 2.4.0; Gradle 9.3.1 is the
@@ -420,7 +420,8 @@ hardcoded numbers, so future releases carry the project forward automatically.
 5-minute CI round trips per attempt. Only fall back to "unverifiable locally" if the toolchain is genuinely
 missing.
 
-Also check `sample_app/android/{app/build.gradle,build.gradle,gradle.properties}` for SDK floors. Precedent: 3.44
+Also check `sample_app/android/{app/build.gradle,build.gradle,gradle.properties}` and their `e2e_app/android/*.kts`
+counterparts for SDK floors. Precedent: 3.44
 needed `compileSdk` floored at 36 via `Math.max(flutter.compileSdkVersion, 36)` in both the `:app` module and the
 root `subprojects` block.
 
@@ -475,6 +476,7 @@ Version-carrying files, all of which must move together:
   and carries **no** `flutter` constraint — do not add one)
 - `packages/*/example/pubspec.yaml` × 5
 - `sample_app/pubspec.yaml`
+- `e2e_app/pubspec.yaml`
 - `docs/docs_screenshots/pubspec.yaml`
 - `.github/workflows/legacy_version_analyze.yml` — `env.flutter_version`. Set it to the **new floor** (never the
   new stable): this job exists to prove the floor still analyses and tests clean.

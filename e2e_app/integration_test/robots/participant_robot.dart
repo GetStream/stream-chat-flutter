@@ -203,12 +203,6 @@ class ParticipantRobot {
     return this;
   }
 
-  /// Adds [answer] as a comment to the poll on the newest message.
-  Future<ParticipantRobot> addPollAnswer(String answer) async {
-    await _mockServer.post('participant/poll_vote?answer=${Uri.encodeQueryComponent(answer)}');
-    return this;
-  }
-
   Future<ParticipantRobot> addReaction(ReactionType type, {int delay = 0}) async {
     var endpoint = 'participant/reaction?type=${type.reaction}';
     if (delay > 0) endpoint += '&delay=$delay';
