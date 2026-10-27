@@ -4,12 +4,13 @@ import 'support/step.dart';
 import 'support/stream_test_case.dart';
 
 void main() {
-  const sampleText = 'Test';
-
   streamTestWithEnv(
     allureId: '12715',
     description: 'user copies a message',
     body: (env) async {
+      // Unique, so a stale value left on the device clipboard can't pass the assert.
+      final sampleText = 'Test ${DateTime.now().microsecondsSinceEpoch}';
+
       step('GIVEN the user opens a channel');
       await env.userRobot.login().openChannel();
 
