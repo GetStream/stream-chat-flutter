@@ -17,7 +17,7 @@ void main() {
       await env.userRobot.uploadGiphy();
 
       step('THEN the user observes the Giphy');
-      await env.userRobot.assertGiphy(isDisplayed: true);
+      await env.userRobot.assertGiphy(isDisplayed: true).assertGiphyButtons(areDisplayed: false);
     },
   );
 
@@ -48,7 +48,7 @@ void main() {
       await env.userRobot.openThread().uploadGiphy();
 
       step('THEN the user observes the Giphy in the thread');
-      await env.userRobot.assertGiphy(isDisplayed: true);
+      await env.userRobot.assertGiphy(isDisplayed: true).assertGiphyButtons(areDisplayed: false);
     },
   );
 
@@ -79,7 +79,7 @@ void main() {
       await env.userRobot.uploadGiphy(useComposerCommand: true);
 
       step('THEN the user observes the Giphy');
-      await env.userRobot.assertGiphy(isDisplayed: true);
+      await env.userRobot.assertGiphy(isDisplayed: true).assertGiphyButtons(areDisplayed: false);
     },
   );
 
