@@ -28,13 +28,6 @@ dependencies:
   stream_chat_localizations: ^10.6.0
 
 dependency_overrides:
-  # stream_core_flutter at its git ref needs a stream_core newer than the
-  # published one, so stream_core comes from the same ref.
-  stream_core:
-    git:
-      url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 4cabbcffa0873e3c4278e1df02c166afef3fb89f
-      path: packages/stream_core
   stream_chat:
     path: ../../stream_chat
   stream_chat_flutter:
@@ -43,6 +36,13 @@ dependency_overrides:
     path: ../../stream_chat_flutter_core
   stream_chat_localizations:
     path: ..
+  # stream_core_flutter at its git ref needs a stream_core newer than the
+  # published one, so stream_core comes from the same ref.
+  stream_core:
+    git:
+      url: https://github.com/GetStream/stream-core-flutter.git
+      ref: 4cabbcffa0873e3c4278e1df02c166afef3fb89f
+      path: packages/stream_core
 
 flutter:
   uses-material-design: true
