@@ -1,17 +1,16 @@
-import 'package:flutter/services.dart';
-
 import 'robots/user_robot.dart';
 import 'robots/user_robot_message_list_asserts.dart';
 import 'support/step.dart';
 import 'support/stream_test_case.dart';
 
 void main() {
-  const sampleText = 'Test';
-
   streamTestWithEnv(
     allureId: '12715',
     description: 'user copies a message',
     body: (env) async {
+      // Unique, so a stale value left on the device clipboard can't pass the assert.
+      final sampleText = 'Test ${DateTime.now().microsecondsSinceEpoch}';
+
       step('GIVEN the user opens a channel');
       await env.userRobot.login().openChannel();
 
@@ -19,8 +18,6 @@ void main() {
       await env.participantRobot.sendMessage(sampleText);
 
       step('AND the user copies the message');
-      // The clipboard outlives the test, so a stale 'Test' would pass the assert.
-      await Clipboard.setData(const ClipboardData(text: ''));
       await env.userRobot.assertMessage(sampleText).copyMessage();
 
       step('THEN the message text is in the clipboard');
