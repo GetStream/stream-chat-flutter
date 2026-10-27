@@ -1275,7 +1275,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onMessageLinkTap: widget.onMessageLinkTap,
       onUserMentionTap: widget.onUserMentionTap,
       onMentionTap: widget.onMentionTap,
-      onQuotedMessageTap: widget.onQuotedMessageTap ?? _scrollToQuotedMessage,
+      onQuotedMessageTap: widget.onQuotedMessageTap ?? _onQuotedMessageTap,
     );
 
     // The content kind follows from the message in [props], so it is resolved
@@ -1310,7 +1310,21 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   // Methods rather than closures, so rows built from them compare equal.
   void _popToMessage(Message message) => Navigator.of(context).pop(message.id);
-  void _scrollToQuotedMessage(Message quoted) => _scrollToMessage(messageId: quoted.id).ignore();
+  void _onQuotedMessageTap(Message quoted) => _openQuotedMessage(quoted).ignore();
+
+  // A quoted reply that lives only in a thread isn't in the channel, so open
+  // its thread on it instead of scrolling the channel.
+  Future<void> _openQuotedMessage(Message quoted) async {
+    final onThreadTap = _onThreadTap;
+    final parentId = quoted.parentId;
+    if (onThreadTap != null && parentId != null && !_isThreadConversation && quoted.showInChannel != true) {
+      final parent = await streamChannel!.getMessage(parentId);
+      if (!mounted) return;
+      return onThreadTap(parent, quoted);
+    }
+
+    await _scrollToMessage(messageId: quoted.id);
+  }
 
   void _handleItemPositionsChanged() {
     if (!mounted) return;
