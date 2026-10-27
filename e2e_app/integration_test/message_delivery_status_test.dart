@@ -169,7 +169,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12724',
     description: 'delivery status is shown for the previous message when a new message fails to be sent',
-    skip: 'https://linear.app/stream/issue/FLU-1090',
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.userRobot.login().openChannel();
