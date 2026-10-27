@@ -175,7 +175,7 @@ Future<void> _pumpMessageList(
       builder: (context, child) => StreamChat(
         client: client,
         connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
-        child: child!,
+        child: child,
       ),
       home: StreamChannel(
         channel: channel,
