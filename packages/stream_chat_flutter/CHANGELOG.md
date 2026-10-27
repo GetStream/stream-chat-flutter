@@ -27,6 +27,7 @@
 - Fixed icons in a quoted reply and in the composer's reply and edit previews showing at 16 pixels instead of 12.
 - Fixed "No messages yet" in the channel list showing in the secondary text color instead of the tertiary one.
 - Fixed the root message in a thread list preview showing in the app's default text color instead of the primary one.
+- Fixed a file size of 1 MB or more that is a whole number of kilobytes, such as 1.5 MB, showing rounded to a whole number, such as 2 MB.
 
 ## 10.6.0
 
