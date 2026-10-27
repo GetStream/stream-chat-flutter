@@ -90,6 +90,7 @@ void main() {
       ),
     );
 
+    expect(spacings, isNotEmpty);
     expect(spacings, everyElement(contains(SpacingType.otherUser)));
   });
 }

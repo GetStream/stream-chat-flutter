@@ -111,7 +111,7 @@ void main() {
       step('THEN each line of the message is displayed');
       // The markdown renderer collapses single newlines, so assert on the
       // individual line tokens rather than the literal multi-line string.
-      await env.userRobot.assertMessageContains('alpha').assertMessageContains('gamma');
+      await env.userRobot.assertMessageContains('alpha').assertMessageContains('beta').assertMessageContains('gamma');
     },
   );
 
@@ -705,7 +705,7 @@ void main() {
       await env.participantRobot.sendMessage(newMessage);
 
       step('THEN the new message is visible');
-      await env.userRobot.assertMessage(newMessage);
+      await env.userRobot.assertMessageOnScreen(newMessage);
     },
   );
 
@@ -726,7 +726,9 @@ void main() {
       await env.participantRobot.sendMessage(newMessage);
 
       step('THEN the new message is not visible');
-      await env.userRobot.assertMessage(newMessage, isDisplayed: false);
+      await env.userRobot
+          .assertScrollToBottomButton(isDisplayed: true, unreadCount: 1)
+          .assertMessageOnScreen(newMessage, isDisplayed: false);
     },
   );
 
@@ -813,8 +815,8 @@ void main() {
 
       step('THEN the message list is not scrolled down');
       await env.userRobot
-          .assertMessageOnScreen(newMessage, isDisplayed: false)
-          .assertScrollToBottomButton(isDisplayed: true, unreadCount: 1);
+          .assertScrollToBottomButton(isDisplayed: true, unreadCount: 1)
+          .assertMessageOnScreen(newMessage, isDisplayed: false);
 
       step('WHEN the user taps the scroll to bottom button');
       await env.userRobot.tapOnScrollToBottomButton().assertMessageOnScreen(newMessage);
@@ -864,9 +866,7 @@ void main() {
 
   // MARK: Link previews
 
-  // Link previews are asserted on a participant-sent YouTube message: the
-  // composer suppresses enrichment on the user's own outgoing link, and the
-  // mock server only serves a canned OG response for YouTube URLs.
+  // The mock server only serves a canned OG response for YouTube URLs.
   streamTestWithEnv(
     allureId: '11340',
     description: 'user sees a link preview for a YouTube link',
@@ -1047,7 +1047,7 @@ void main() {
       await env.userRobot.sendMessage(forbiddenWord);
 
       step('THEN the messages are not grouped and the 1st message shows the timestamp');
-      await env.userRobot.assertMessageTimestamps(1);
+      await env.userRobot.assertMessageDeliveryStatus(MessageDeliveryStatus.sent, count: 1).assertMessageTimestamps(1);
     },
   );
 
