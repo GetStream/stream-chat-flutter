@@ -38,8 +38,8 @@ class _HomePageState extends State<HomePage> {
           StreamBottomNavBarItem(icon: Icon(icons.bell), label: _labels[2]),
         ],
       ),
-      // Built on demand rather than kept alive, so a tab queries its list when
-      // it is opened, the way the native apps do.
+      // Built on demand rather than kept alive, so a tab queries its list each
+      // time it is opened.
       body: switch (_currentIndex) {
         1 => const ThreadListTab(),
         2 => const RemindersTab(),
