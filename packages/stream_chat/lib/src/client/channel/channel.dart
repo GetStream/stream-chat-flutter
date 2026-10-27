@@ -2237,8 +2237,9 @@ class Channel {
 
         // Watching a channel the user hid or was removed from makes it one of
         // the client's channels again.
-        if (cid case final cid? when watch && !_client.state.channels.containsKey(cid)) {
-          _client.state.addChannels({cid: this});
+        if (cid case final cid? when watch) {
+          final isListed = _client.state.channels.containsKey(cid);
+          if (!isListed) _client.state.addChannels({cid: this});
         }
       }
 

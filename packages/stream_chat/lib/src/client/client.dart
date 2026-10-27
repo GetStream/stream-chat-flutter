@@ -2888,7 +2888,9 @@ class ClientState {
 
   /// The channels in memory as a stream, leaving out the ones the current user
   /// hid or was removed from.
-  Stream<Map<String, Channel>> get channelsStream => _channelsController.stream.map(_activeChannels);
+  Stream<Map<String, Channel>> get channelsStream {
+    return _channelsController.stream.map(_activeChannels);
+  }
 
   /// The channels in memory, leaving out the ones the current user hid or was
   /// removed from.
@@ -2920,7 +2922,8 @@ class ClientState {
   Channel? _channelFor(String cid) => _channelsController.value[cid];
 
   // Leaves the channel out of [channels] without disposing it, so code still
-  // holding it can keep using it. A later query brings it back.
+  // holding it can keep using it. Watching it, a channels query returning it,
+  // or a channel.visible event brings it back.
   void _deactivateChannel(String cid) {
     if (!_channelsController.value.containsKey(cid)) return;
     if (!_inactiveCids.add(cid)) return;

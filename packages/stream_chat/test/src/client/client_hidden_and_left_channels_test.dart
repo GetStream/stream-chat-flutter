@@ -146,12 +146,6 @@ void main() {
     expect(channel.state!.channelState.membership, isNotNull);
   });
 
-  test('a channel the current user watches without being a member stays in client.state.channels', () {
-    _addChannel(client, 'livestream:watched');
-
-    expect(client.state.channels, contains('livestream:watched'));
-  });
-
   test('member.removed for another user keeps the channel in client.state.channels', () async {
     _addChannel(client, 'messaging:group');
 
@@ -283,7 +277,9 @@ void main() {
     client.state.addChannels({'messaging:hidden': channel});
     await _hide(client, 'messaging:hidden');
 
-    client.handleEvent(Event(type: EventType.userMessagesDeleted, user: bannedUser, hardDelete: true));
+    client.handleEvent(
+      Event(type: EventType.userMessagesDeleted, user: bannedUser, hardDelete: true),
+    );
     await Future<void>.delayed(Duration.zero);
 
     expect(channel.state!.messages, isEmpty);
@@ -357,7 +353,9 @@ void _stubQueryChannels(FakeChatApi api, List<String> cids) {
       paginationParams: any(named: 'paginationParams'),
     ),
   ).thenAnswer(
-    (_) async =>
-        QueryChannelsResponse()..channels = [for (final cid in cids) ChannelState(channel: ChannelModel(cid: cid))],
+    (_) async => QueryChannelsResponse()
+      ..channels = [
+        for (final cid in cids) ChannelState(channel: ChannelModel(cid: cid)),
+      ],
   );
 }

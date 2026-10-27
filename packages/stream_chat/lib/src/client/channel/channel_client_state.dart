@@ -93,7 +93,6 @@ class ChannelClientState {
     );
   }
 
-  // Clears the current user's membership once they are no longer a member.
   void _clearMembership() {
     if (channelState.membership == null) return;
     _channelState = channelState.copyWith(membership: null);
