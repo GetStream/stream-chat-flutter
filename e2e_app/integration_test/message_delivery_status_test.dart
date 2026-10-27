@@ -124,7 +124,9 @@ void main() {
       await env.userRobot.sendMessage('$sampleText 2').assertMessage('$sampleText 2');
 
       step('THEN the delivery status of the previous message is hidden');
-      await env.userRobot.assertMessageDeliveryStatus(MessageDeliveryStatus.sent, count: 1);
+      await env.userRobot
+          .assertMessageDeliveryStatus(MessageDeliveryStatus.sent)
+          .assertMessageDeliveryStatus(MessageDeliveryStatus.sent, count: 1);
     },
   );
 
@@ -229,6 +231,7 @@ void main() {
 
       step('WHEN a new participant is added to the channel');
       await env.backendRobot.addMember(newParticipantId);
+      await env.waitForMember(newParticipantId);
 
       step('THEN the user still spots a double checkmark below the message');
       await env.userRobot.assertMessageDeliveryStatus(MessageDeliveryStatus.read);
@@ -388,7 +391,9 @@ void main() {
       await env.userRobot.sendMessageInThread('$sampleText 2').assertMessage('$sampleText 2');
 
       step('THEN the delivery status of the previous thread reply is hidden');
-      await env.userRobot.assertMessageDeliveryStatus(MessageDeliveryStatus.sent, count: 2);
+      await env.userRobot
+          .assertMessageDeliveryStatus(MessageDeliveryStatus.sent)
+          .assertMessageDeliveryStatus(MessageDeliveryStatus.sent, count: 2);
     },
   );
 
@@ -430,6 +435,7 @@ void main() {
 
       step('WHEN a new participant is added to the channel');
       await env.backendRobot.addMember(newParticipantId);
+      await env.waitForMember(newParticipantId);
 
       step('THEN the user spots a single checkmark below the thread reply');
       await env.userRobot.assertMessageDeliveryStatus(MessageDeliveryStatus.sent);

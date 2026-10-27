@@ -4,12 +4,12 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 /// The id the last "Copy Message ID" copied.
 ///
-/// "Open Message by ID" reads it from here rather than from the system clipboard,
-/// which Android may refuse to read back (an app without input focus gets nothing).
-/// The id still goes on the clipboard for manual use.
+/// "Open Message by ID" reads it from here rather than from the system
+/// clipboard, which Android may refuse to read back (an app without input
+/// focus gets nothing). The id still goes on the clipboard for manual use.
 String? lastCopiedMessageId;
 
-/// Adds the message actions the native test apps offer and the SDK does not:
+/// Adds the message actions the e2e suite needs beyond the SDK's own:
 ///
 ///  * "Hard Delete Message", for the user's own messages — the SDK only
 ///    offers a hard delete for a message that failed to send.

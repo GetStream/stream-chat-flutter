@@ -49,6 +49,7 @@ jobs:
               - 'docs/**'
               - 'packages/**'
               - 'sample_app/**'
+              - 'e2e_app/**'
               - '.github/workflows/stream_flutter_workflow.yml'
 
   analyze:
