@@ -1086,7 +1086,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   // The rules are evaluated in the following order:
   // - [SpacingType.timeDiff] — messages are more than a minute apart.
   // - [SpacingType.otherUser] — messages belong to different groups. A group
-  //   boundary is forced when either message is a system or moderated message.
+  //   boundary is forced when either message is a system or moderated message,
+  //   or when only one of them failed.
   // - [SpacingType.thread] — the current message is part of a thread.
   // - [SpacingType.deleted] — the current message has been deleted.
   List<SpacingType>? _resolveSpacingRules({
@@ -1107,8 +1108,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     // Moderated (non-bounced error) messages always form their own group.
     final isModerated = (message.isError && !message.isBounced) || (nextMessage.isError && !nextMessage.isBounced);
 
-    // Two messages are from the same user group only if neither is system/moderated and they share the same sender.
-    final isNextUserSame = !isSystem && !isModerated && message.user!.id == nextMessage.user?.id;
+    // A failed message never groups with one that did not fail.
+    final onlyOneFailed = message.state.isFailed != nextMessage.state.isFailed;
+
+    // Two messages are from the same user group only if they share the same
+    // sender and none of the checks above separates them.
+    final isSameSender = message.user!.id == nextMessage.user?.id;
+    final isNextUserSame = isSameSender && !isSystem && !isModerated && !onlyOneFailed;
 
     // Thread messages shown in channel are part of a thread.
     final isPartOfThread = message.replyCount! > 0 || message.showInChannel == true;

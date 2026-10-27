@@ -53,7 +53,12 @@ class StreamTestEnv {
         usePersistence: persistence,
         // The mock server hands out a short-lived JWT and plays the token
         // failure scenarios the backend robot sets up.
-        tokenProvider: jwt ? (_) => server.get('jwt/get') : null,
+        tokenProvider: jwt
+            ? (_) {
+                _tokenRequests += 1;
+                return server.get('jwt/get');
+              }
+            : null,
       )
       ..debugConnectivityStream = _connectivity.stream;
 
@@ -106,6 +111,8 @@ class StreamTestEnv {
     throw TestFailure('Timed out waiting for a framework error to be reported');
   }
 
+  var _tokenRequests = 0;
+
   StreamSubscription<ConnectionStatus>? _connectionStatusSubscription;
   var _disconnections = 0;
 
@@ -130,12 +137,44 @@ class StreamTestEnv {
     throw TestFailure('The connection never dropped, so the token never expired');
   }
 
+  /// How many tokens the app has requested from the mock server so far.
+  int get tokenRequests => _tokenRequests;
+
+  /// Waits until the app has requested more than [count] tokens from the mock
+  /// server.
+  Future<void> waitForTokenRequestAfter(int count, {Duration timeout = const Duration(seconds: 30)}) async {
+    final end = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(end)) {
+      if (_tokenRequests > count) return;
+      await _tester.pump(const Duration(milliseconds: 200));
+    }
+    throw TestFailure('The app never requested a new token');
+  }
+
+  /// Asserts the app has requested [count] tokens from the mock server.
+  void assertTokenRequests(int count) {
+    if (_tokenRequests == count) return;
+    throw TestFailure('Expected $count token requests, but the app made $_tokenRequests');
+  }
+
   /// Lets the mock server's short-lived token (5 s) run out.
   Future<void> waitForTokenToExpire() async {
     final end = DateTime.now().add(const Duration(seconds: 6));
     while (DateTime.now().isBefore(end)) {
       await _tester.pump(const Duration(milliseconds: 200));
     }
+  }
+
+  /// Waits until the channel the user has open lists [userId] as a member.
+  Future<void> waitForMember(String userId, {Duration timeout = const Duration(seconds: 10)}) async {
+    final context = _tester.element(find.byType(StreamMessageListView).first);
+    final channel = StreamChannel.of(context).channel;
+    final end = DateTime.now().add(timeout);
+    while (DateTime.now().isBefore(end)) {
+      if (channel.state?.members.any((it) => it.userId == userId) ?? false) return;
+      await _tester.pump(const Duration(milliseconds: 200));
+    }
+    throw TestFailure('$userId never became a member of the channel');
   }
 
   /// Truncates the channel the user currently has open, leaving the system
