@@ -15,6 +15,7 @@
 
 🐞 Fixed
 
+- Fixed channel list previews showing a "You:" or sender name prefix, and the delivery status, in front of a system message.
 - Fixed a voice recording sent as a reply without text showing inside a filled container instead of directly on the message bubble.
 - Fixed a mention rendering as another mentioned user's shorter mention followed by leftover text, such as `@Anna` next to `@Ann`.
 - Fixed the poll creator showing the reorder handle and remove button when there is only one option.

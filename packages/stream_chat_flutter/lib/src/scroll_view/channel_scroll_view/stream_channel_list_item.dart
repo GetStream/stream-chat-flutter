@@ -714,7 +714,7 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
         return Row(
           spacing: spacing.xxs,
           children: [
-            if (!latestLastMessage.isDeleted) ?deliveryPrefix,
+            if (!latestLastMessage.isDeleted && !latestLastMessage.isSystem) ?deliveryPrefix,
             Flexible(
               child: StreamMessagePreviewText(
                 message: latestLastMessage,

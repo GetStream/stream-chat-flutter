@@ -208,6 +208,82 @@ void main() {
     );
   });
 
+  group('ChannelListTileSubtitle', () {
+    const currentUserId = 'me';
+
+    late MockClient client;
+    late MockChannel channel;
+    late MockChannelState channelState;
+
+    setUp(() {
+      client = MockClient();
+      final clientState = MockClientState();
+      channel = MockChannel();
+      channelState = MockChannelState();
+
+      final currentUser = OwnUser(id: currentUserId, name: 'Me');
+
+      when(() => client.state).thenReturn(clientState);
+      when(() => clientState.currentUser).thenReturn(currentUser);
+      when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
+      when(() => channel.state).thenReturn(channelState);
+      when(() => channel.client).thenReturn(client);
+      when(() => channelState.draft).thenReturn(null);
+      when(() => channelState.channelState).thenReturn(const ChannelState());
+    });
+
+    // Pumps the channel list subtitle with [message] as the last message,
+    // drawing its delivery status as "sent".
+    Future<void> pumpSubtitle(WidgetTester tester, Message message) async {
+      when(() => channelState.messages).thenReturn([message]);
+      when(() => channelState.messagesStream).thenAnswer((_) => Stream.value([message]));
+      when(() => channelState.draftStream).thenAnswer((_) => const Stream.empty());
+      when(() => channelState.typingEventsStream).thenAnswer((_) => const Stream.empty());
+      when(() => channelState.typingEvents).thenReturn({});
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: StreamChat(
+            client: client,
+            child: Scaffold(
+              body: ChannelListTileSubtitle(
+                channel: channel,
+                sendingIndicatorBuilder: (_, _) => const Text('sent'),
+              ),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('shows the delivery status of a message from the current user', (tester) async {
+      final message = Message(
+        text: 'hello world',
+        user: User(id: currentUserId),
+        createdAt: DateTime(2024, 1, 1),
+      );
+
+      await pumpSubtitle(tester, message);
+
+      expect(find.text('sent'), findsOneWidget);
+    });
+
+    testWidgets('hides the delivery status of a system message from the current user', (tester) async {
+      final message = Message(
+        text: 'Me truncated the channel',
+        type: MessageType.system,
+        user: User(id: currentUserId),
+        createdAt: DateTime(2024, 1, 1),
+      );
+
+      await pumpSubtitle(tester, message);
+
+      expect(find.text('Me truncated the channel'), findsOneWidget);
+      expect(find.text('sent'), findsNothing);
+    });
+  });
+
   group('ChannelLastMessageDate', () {
     const currentUserId = 'me';
 
