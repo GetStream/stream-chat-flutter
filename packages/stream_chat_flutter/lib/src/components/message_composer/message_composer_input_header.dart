@@ -131,10 +131,7 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
                     final imageUrl? when imageUrl.isNotEmpty => core.StreamNetworkImage(imageUrl, fit: .cover),
                     _ => null,
                   },
-                  onRemovePressed: () {
-                    controller.clearOGAttachment();
-                    props.focusNode?.unfocus();
-                  },
+                  onRemovePressed: controller.clearOGAttachment,
                 ),
               ),
           ],

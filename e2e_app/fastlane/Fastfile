@@ -182,10 +182,10 @@ def restart_android_emulator(device:, avd:)
 
   # What android-emulator-runner does after its own boot.
   %w[window_animation_scale transition_animation_scale animator_duration_scale].each do |setting|
-    sh("adb -s #{device} shell settings put global #{setting} 0.0")
+    sh("adb -s #{device} shell settings put global #{setting} 0.0", error_callback: ->(_) {})
   end
-  sh("adb -s #{device} shell input keyevent 82")
-  sh("adb -s #{device} logcat -c")
+  sh("adb -s #{device} shell input keyevent 82", error_callback: ->(_) {})
+  sh("adb -s #{device} logcat -c", error_callback: ->(_) {})
   true
 end
 
@@ -226,7 +226,8 @@ end
 # How long one `flutter test` may run before the lane kills it: a build plus a generous
 # allowance per test. A device that dies mid-run can leave `flutter test` waiting
 # forever (seen on CI: the emulator went offline while coverage was being collected),
-# and integration tests have no timeout of their own.
+# and integration tests have no timeout of their own. Capped under the 60-minute CI job
+# timeout, so a killed run still leaves time for retries and the failure uploads.
 def run_time_limit(target, selected, files)
   tests =
     if selected
@@ -236,7 +237,7 @@ def run_time_limit(target, selected, files)
         files.include?(File.basename(E2ETests.file(id, 'integration_test'), '.dart'))
       end
     end
-  (15 + (2 * [tests, 1].max)) * 60
+  [(15 + (2 * [tests, 1].max)) * 60, 45 * 60].min
 end
 
 def boot_simulator(udid:)
@@ -350,7 +351,7 @@ lane :start_mock_server do |options|
     unless options[:local_server]
       branch = options[:branch].to_s.empty? ? 'main' : options[:branch]
       sh("rm -rf #{mock_server_repo}") if File.directory?(mock_server_repo)
-      sh("git clone -b #{branch} https://github.com/#{github_repo.split('/').first}/#{mock_server_repo}.git")
+      sh("git clone -b #{Shellwords.escape(branch)} https://github.com/#{github_repo.split('/').first}/#{mock_server_repo}.git")
     end
 
     Dir.chdir(mock_server_repo) do
@@ -425,9 +426,15 @@ lane :run_e2e_test do |options|
       runs = [combine_runs(runs)] if !coverage && options[:batch_count].to_i > 1 && runs.size > 1
 
       retries = (options[:retries] || 2).to_i
-      # GNU coreutils: present on the CI runners; on macOS only with coreutils installed.
+      # GNU coreutils: present on the Linux runners; on macOS Homebrew installs it as `gtimeout`.
       # The redirect makes Ruby run this through `sh`: `command` is a builtin with no binary on Linux.
-      timeout_bin = `command -v timeout 2>/dev/null`.strip
+      find_timeout = -> { `command -v timeout 2>/dev/null || command -v gtimeout 2>/dev/null`.strip }
+      timeout_bin = find_timeout.call
+      if timeout_bin.empty? && is_ci && ios
+        sh('brew install coreutils')
+        timeout_bin = find_timeout.call
+      end
+      UI.important('No `timeout` binary: a hung `flutter test` will not be killed') if timeout_bin.empty?
 
       first_attempt = true
       runs.each_with_index do |(target, selected, files), run_index|
@@ -440,8 +447,8 @@ lane :run_e2e_test do |options|
         if !ios && !ensure_android_device(device: device, avd: avd, restarts: emulator_restarts)
           remaining = runs.drop(run_index)
           UI.important("Android device #{device || '(default)'} is gone; skipping the #{remaining.size} remaining run(s)")
-          remaining.each do |t, s, _|
-            failed << (coverage ? "#{File.basename(t, '.dart')}/#{s.first}" : t)
+          remaining.each do |t, s, f|
+            failed.concat(coverage ? ["#{File.basename(t, '.dart')}/#{s.first}"] : (f || [t]))
           end
           break
         end
@@ -570,7 +577,7 @@ lane :run_e2e_test do |options|
         elsif !ok
           # A batch names the tests that still fail, not every file it ran.
           still_failing = (E2ELog.failed_test_names(attempt_log) + E2ELog.phantom_test_names(attempt_log)).uniq
-          failed.concat(files.size > 1 && !still_failing.empty? ? still_failing : [target])
+          failed.concat(files.size > 1 && !still_failing.empty? ? still_failing : (files.size > 1 ? files : [target]))
         end
       end
 
@@ -648,7 +655,7 @@ lane :select_e2e_tests do |options|
   FileUtils.mkdir_p(File.dirname(e2e_selection_path))
   File.write(e2e_selection_path, JSON.pretty_generate(selection))
 
-  # run_e2e_test batches by test file, so there are no more batches than files.
+  # Every batch builds the app once, so a selection gets no more batches than test files.
   files = selection['tests'].map { |id| E2ETests.file(id, 'integration_test') }.uniq
   batches = (0...[files.size, 8].min).to_a
   UI.important("E2E batches: #{batches.size}")
@@ -665,7 +672,7 @@ lane :build_e2e_coverage_map do |options|
   # never finished (e.g. its runner died). A map without its tests would stop selecting them.
   missing = (0...options[:batch_count].to_i).reject { |batch| File.exist?("#{coverage_dir}/failed_tests_#{batch}.json") }
   UI.user_error!("No coverage from batch(es) #{missing.join(', ')}; keeping the previous map") unless missing.empty?
-  failed_tests =Dir["#{coverage_dir}/failed_tests_*.json"].flat_map { |file| JSON.parse(File.read(file)) }
+  failed_tests = Dir["#{coverage_dir}/failed_tests_*.json"].flat_map { |file| JSON.parse(File.read(file)) }
   build_test_coverage_map(
     coverage_dir: coverage_dir,
     lcov_base_dir: root_path,

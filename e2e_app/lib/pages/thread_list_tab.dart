@@ -20,19 +20,21 @@ class _ThreadListTabState extends State<ThreadListTab> {
     super.dispose();
   }
 
+  Future<void> _openThread(Thread thread) async {
+    final client = StreamChat.of(context).client;
+    final [type, id] = thread.channelCid.split(':');
+    final channel = client.channel(type, id: id);
+    if (channel.state == null) await channel.watch();
+    final parent = thread.parentMessage ?? (await client.getMessage(thread.parentMessageId)).message;
+    if (!mounted) return;
+    return openChannel(context, channel, parent: parent);
+  }
+
   @override
   Widget build(BuildContext context) {
     return StreamThreadListView(
       controller: _controller,
-      onThreadTap: (thread) async {
-        final client = StreamChat.of(context).client;
-        final [type, id] = thread.channelCid.split(':');
-        final channel = client.channel(type, id: id);
-        if (channel.state == null) await channel.watch();
-        final parent = thread.parentMessage ?? (await client.getMessage(thread.parentMessageId)).message;
-        if (!context.mounted) return;
-        return openChannel(context, channel, parent: parent);
-      },
+      onThreadTap: (thread) => _openThread(thread).ignore(),
     );
   }
 }

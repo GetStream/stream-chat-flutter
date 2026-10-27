@@ -62,7 +62,7 @@ class UserRobot {
     final tile = find.byType(ChannelListPage.channelTile).at(index);
     await tester.waitUntilVisible(tile);
     await tester.tap(tile);
-    await tester.pumpAndSettle();
+    await tester.settle();
     return this;
   }
 
@@ -354,7 +354,7 @@ class UserRobot {
     final tile = ChannelListPage.channelNamed(name);
     await tester.waitUntilVisible(tile);
     await tester.tap(tile.first);
-    await tester.pumpAndSettle();
+    await tester.settle();
     return this;
   }
 
@@ -651,11 +651,6 @@ class UserRobot {
     return this;
   }
 
-  Future<UserRobot> scrollMessageListDown() async {
-    await tester.scrollMessageList(-300);
-    return this;
-  }
-
   /// Taps the [link] inside a message's text, rather than the middle of the
   /// whole text, which may not be part of the link.
   Future<UserRobot> tapOnLinkText(String link) async {
@@ -892,8 +887,6 @@ extension UserRobotChain on Future<UserRobot> {
   Future<UserRobot> moveToChannelListFromThread() => then((it) => it.moveToChannelListFromThread());
 
   Future<UserRobot> scrollMessageListUp() => then((it) => it.scrollMessageListUp());
-
-  Future<UserRobot> scrollMessageListDown() => then((it) => it.scrollMessageListDown());
 
   Future<UserRobot> scrollToTopOfThread() => then((it) => it.scrollToTopOfThread());
 
