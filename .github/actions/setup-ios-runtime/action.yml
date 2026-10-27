@@ -29,13 +29,13 @@ runs:
 
     - name: Install iOS runtime
       shell: bash
-      working-directory: sample_app/ios
+      working-directory: e2e_app
       run: bundle exec fastlane install_runtime ios:${{ inputs.version }}
 
     - name: Cleanup iOS runtime install artifacts
       shell: bash
       run: |
-        sudo rm -rfv sample_app/*.dmg || true
+        sudo rm -rfv e2e_app/*.dmg || true
         xcrun simctl list runtimes
 
     - name: Create custom iOS simulator

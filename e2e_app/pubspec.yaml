@@ -1,0 +1,44 @@
+name: e2e_app
+description: The Stream Chat Flutter app the e2e suite runs against.
+publish_to: "none"
+version: 1.0.0
+
+# The app exists only to be driven by `integration_test/` against the Stream
+# Chat mock server. It keeps to the screens the suite exercises, carries no
+# Firebase or push setup, and may expose debug-only affordances the sample app
+# would not ship.
+#
+# Note: The environment configuration and dependency versions are managed by Melos.
+#
+# Do not edit them manually.
+#
+# Steps to update dependencies:
+#   1. Modify the version in the melos.yaml file.
+#   2. Run `melos bootstrap` to apply changes.
+#
+# Steps to add a new dependency:
+#   1. Add the dependency to this list.
+#   2. Add it to the melos.yaml file for future updates.
+
+environment:
+  sdk: ^3.12.0
+  flutter: ">=3.44.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_slidable: ^3.1.1
+  stream_chat_flutter: ^10.6.0
+  stream_chat_localizations: ^10.6.0
+  stream_chat_persistence: ^10.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  url_launcher_platform_interface: ^2.3.2
+  uuid: ^4.5.3
+
+flutter:
+  uses-material-design: true
