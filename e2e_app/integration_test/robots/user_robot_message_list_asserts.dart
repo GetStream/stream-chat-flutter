@@ -222,8 +222,8 @@ extension UserRobotMessageListAsserts on UserRobot {
   Future<UserRobot> assertCooldown({required bool isDisplayed}) =>
       _assertVisibility(MessageListPage.composer.slowModePlaceholder, isDisplayed: isDisplayed);
 
-  /// Asserts the composer is locked by slow mode: typing is ignored and there
-  /// is no send button, only the countdown.
+  /// Asserts the composer is locked by slow mode: there is no send button,
+  /// only the countdown.
   Future<UserRobot> assertComposerIsDisabledInSlowMode() async {
     await assertCooldown(isDisplayed: true);
     expect(find.byKey(MessageListPage.composer.sendButton), findsNothing);
@@ -380,7 +380,7 @@ extension UserRobotMessageListAsserts on UserRobot {
     return this;
   }
 
-  /// Asserts the annotation above the newest message: "Saved for later" for a
+  /// Asserts a message shows the reminder annotation: "Saved for later" for a
   /// reminder without a due date, "Reminder set" for one with.
   Future<UserRobot> assertMessageReminder({required bool remindAtIsSet}) async {
     await tester.waitUntilVisible(find.text(remindAtIsSet ? 'Reminder set' : 'Saved for later'));
@@ -567,8 +567,8 @@ extension UserRobotMessageListAsserts on UserRobot {
 
   /// Asserts the message list does (or does not) show a link preview card.
   ///
-  /// Absence is asserted only once the message itself has rendered — waiting
-  /// for "not there" right away would pass before the message even arrives.
+  /// Wait for the message itself first: asserting absence right away passes
+  /// before the message even arrives.
   Future<UserRobot> assertLinkPreviewInMessageList({required bool isDisplayed}) =>
       _assertVisibility(MessageListPage.list.linkPreview, isDisplayed: isDisplayed);
 
