@@ -76,7 +76,10 @@ sealed class AuthState {
 
 /// No user is connected; the login screen shows.
 final class Unauthenticated extends AuthState {
-  const Unauthenticated();
+  const Unauthenticated({this.error});
+
+  /// The error the last [AuthController.connect] failed with, if it failed.
+  final Object? error;
 }
 
 /// An [AuthController.connect] call is in flight.
@@ -127,8 +130,8 @@ class AuthController extends ValueNotifier<AuthState> {
         _ => await client.connectUser(user, token),
       };
       value = Authenticated(ownUser);
-    } catch (_) {
-      value = const Unauthenticated();
+    } catch (error) {
+      value = Unauthenticated(error: error);
       rethrow;
     }
   }
