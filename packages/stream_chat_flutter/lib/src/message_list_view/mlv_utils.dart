@@ -116,6 +116,7 @@ bool isElementAtIndexVisible(
 /// - The sender changes
 /// - The timestamps fall in different calendar minutes
 /// - The neighbor is a system, ephemeral, or error message
+/// - Only one of the two messages failed
 StreamMessageStackPosition computeStackPosition({
   required Message message,
   Message? previous,
@@ -136,6 +137,7 @@ bool _isGroupBoundary(Message message, Message? neighbor) {
   if (neighbor == null) return true;
   if (message.user?.id != neighbor.user?.id) return true;
   if (neighbor.isSystem || neighbor.isEphemeral || neighbor.isError) return true;
+  if (message.state.isFailed != neighbor.state.isFailed) return true;
 
   final createdAt = message.createdAt.toLocal();
   final neighborCreatedAt = neighbor.createdAt.toLocal();
