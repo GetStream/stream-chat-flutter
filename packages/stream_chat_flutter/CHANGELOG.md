@@ -29,6 +29,7 @@
 - Fixed the poll creator showing the reorder handle and remove button when there is only one option.
 - Fixed a link that points straight to an image showing as a plain image instead of a link preview, and appearing twice in the message composer.
 - Fixed the keyboard closing when removing the link preview in the message composer.
+- Fixed `StreamMessageComposer` always sending the default `skipEnrichUrl`, so the server could add a link preview the user removed, or a second one next to the attached preview.
 - Fixed the composer's command and mention suggestions staying open after tapping outside the composer, such as on the message list.
 - Fixed "Message deleted" in a quoted reply showing in a muted gray instead of the reply's text color.
 - Fixed icons in message previews showing in a different color from the text beside them.

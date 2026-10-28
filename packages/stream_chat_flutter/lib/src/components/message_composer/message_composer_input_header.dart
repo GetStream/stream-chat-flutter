@@ -134,7 +134,7 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
                     final imageUrl? when imageUrl.isNotEmpty => core.StreamNetworkImage(imageUrl, fit: .cover),
                     _ => null,
                   },
-                  onRemovePressed: controller.clearOGAttachment,
+                  onRemovePressed: () => controller.clearOGAttachment(dismissed: true),
                 ),
               ),
           ],

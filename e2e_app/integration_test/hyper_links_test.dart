@@ -9,9 +9,6 @@ void main() {
   const youtubeLink = 'https://youtube.com/watch?v=xOX7MsrbaPY';
   const giphyLink = 'https://giphy.com/gifs/test-gw3IWyGkC0rsazTi';
 
-  // Dismissing the composer's preview doesn't send `skip_enrich_url`.
-  const enrichedAfterDismissal = 'https://linear.app/stream/issue/FLU-1089';
-
   streamTestWithEnv(
     allureId: '12706',
     description: 'user sends a Unsplash link with a preview',
@@ -38,7 +35,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12707',
     description: 'user sends a Unsplash link without a preview',
-    skip: enrichedAfterDismissal,
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.userRobot.login().openChannel();
@@ -105,7 +101,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12710',
     description: 'user sends a YouTube link without a preview',
-    skip: enrichedAfterDismissal,
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.userRobot.login().openChannel();
@@ -172,7 +167,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12713',
     description: 'user sends a Giphy link without a preview',
-    skip: enrichedAfterDismissal,
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.userRobot.login().openChannel();
