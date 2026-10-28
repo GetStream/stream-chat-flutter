@@ -34,5 +34,5 @@ extension FlagItemResponseMapper on api.FlagItemResponse {
 /// Maps a [DeleteType] to the generated [api.DeleteMessages].
 extension DeleteTypeRequestMapper on DeleteType {
   /// Converts this delete type into an [api.DeleteMessages].
-  api.DeleteMessages toRequest() => api.DeleteMessages.fromJson(this);
+  api.DeleteMessages toRequest() => api.DeleteMessages(this);
 }

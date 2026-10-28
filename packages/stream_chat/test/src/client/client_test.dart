@@ -1660,7 +1660,7 @@ void main() {
       const id = 'test-device-id';
       final request = api.CreateDeviceRequest(
         id: id,
-        pushProvider: api.PushProviderName.fromJson('onesignal'),
+        pushProvider: api.PushProviderName('onesignal'),
       );
 
       when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
