@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -122,6 +124,43 @@ void main() {
     final quotedReply = find.textContaining('Offsite idea 0', findRichText: true).hitTestable();
     expect(quotedReply, findsOneWidget);
   });
+
+  testWidgets('does not jump to a quoted reply that loads after the user scrolled the thread', (tester) async {
+    final replies = [
+      for (var i = 0; i < 30; i++)
+        Message(
+          id: 'reply-$i',
+          text: 'Offsite idea $i',
+          createdAt: DateTime(2026, 8, 26, 15, i),
+          user: jason,
+          state: MessageState.sent,
+          parentId: parent.id,
+        ),
+    ];
+    final latestReplies = replies.sublist(10);
+    final threads = StreamController<Map<String, List<Message>>>.broadcast();
+    addTearDown(threads.close);
+
+    await _pumpMessageList(
+      tester,
+      [parent, quoting(replies.first)],
+      replies: latestReplies,
+      threadsStream: threads.stream,
+      threadBuilder: (_, parent) => StreamMessageListView(parentMessage: parent),
+    );
+    await tester.tap(find.byType(StreamQuotedMessage));
+    await tester.pumpAndSettle();
+
+    await tester.drag(find.byType(StreamMessageListView).last, const Offset(0, 200));
+    await tester.pumpAndSettle();
+
+    // Scrolling up loads the page with the quoted reply.
+    threads.add({parent.id: replies});
+    await tester.pumpAndSettle();
+
+    final quotedReply = find.textContaining('Offsite idea 0', findRichText: true).hitTestable();
+    expect(quotedReply, findsNothing);
+  });
 }
 
 Future<void> _pumpMessageList(
@@ -131,6 +170,7 @@ Future<void> _pumpMessageList(
   ThreadBuilder? threadBuilder,
   Message? parentMessage,
   List<Message>? replies,
+  Stream<Map<String, List<Message>>>? threadsStream,
 }) async {
   final currentUser = OwnUser(id: 'maya', name: 'Maya Ross');
   final client = MockClient();
@@ -147,7 +187,7 @@ Future<void> _pumpMessageList(
     if (parentMessage != null) parentMessage.id: messages,
     for (final reply in [...?replies]) reply.parentId!: replies!,
   };
-  when(() => channelState.threadsStream).thenAnswer((_) => Stream.value(threads));
+  when(() => channelState.threadsStream).thenAnswer((_) => threadsStream ?? Stream.value(threads));
   when(() => channelState.threads).thenReturn(threads);
   when(
     () => channel.getReplies(

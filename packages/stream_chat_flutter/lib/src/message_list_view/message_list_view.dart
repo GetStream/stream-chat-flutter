@@ -654,17 +654,20 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       labels: const [kPortalMessageListViewLabel],
       child: Portal(
         child: ScaffoldMessenger(
-          child: MessageListCore(
-            paginationLimit: _config.paginationLimit,
-            maximumMessageLimit: _config.maximumMessageLimit,
-            retentionTrimBuffer: _config.retentionTrimBuffer,
-            messageFilter: widget.messageFilter,
-            loadingBuilder: defaultLoadingBuilder,
-            emptyBuilder: defaultEmptyBuilder,
-            messageListBuilder: defaultMessageListBuilder,
-            messageListController: _messageListController,
-            parentMessage: widget.parentMessage,
-            errorBuilder: defaultErrorBuilder,
+          child: NotificationListener<ScrollStartNotification>(
+            onNotification: _onScrollStart,
+            child: MessageListCore(
+              paginationLimit: _config.paginationLimit,
+              maximumMessageLimit: _config.maximumMessageLimit,
+              retentionTrimBuffer: _config.retentionTrimBuffer,
+              messageFilter: widget.messageFilter,
+              loadingBuilder: defaultLoadingBuilder,
+              emptyBuilder: defaultEmptyBuilder,
+              messageListBuilder: defaultMessageListBuilder,
+              messageListController: _messageListController,
+              parentMessage: widget.parentMessage,
+              errorBuilder: defaultErrorBuilder,
+            ),
           ),
         ),
       ),
@@ -1344,6 +1347,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     }
 
     await _scrollToMessage(messageId: quoted.id);
+  }
+
+  // Scrolling the list yourself cancels the jump to a thread reply that
+  // hasn't loaded yet.
+  bool _onScrollStart(ScrollStartNotification notification) {
+    if (notification.dragDetails != null) _pendingThreadMessageId = null;
+    return false;
   }
 
   void _handleItemPositionsChanged() {
