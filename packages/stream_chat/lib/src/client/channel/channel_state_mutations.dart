@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:collection/collection.dart';
 
 import '../../../stream_chat.dart';
@@ -77,8 +75,9 @@ class ChannelStateMutations {
   void onMessageDeleted(Message message, {bool hardDelete = false}) {
     // A hard-deleted message that counted as unread no longer exists, so it
     // gives its unread slot back. Soft-deleted messages keep theirs.
-    if (hardDelete && MessageRules.canCountAsUnread(message, _channel)) {
-      _state.unreadCount = math.max(0, _state.unreadCount - 1);
+    final countedAsUnread = hardDelete && MessageRules.canCountAsUnread(message, _channel);
+    if (countedAsUnread && _state.unreadCount > 0) {
+      _state.unreadCount -= 1;
     }
 
     return _state.deleteMessage(message, hardDelete: hardDelete);

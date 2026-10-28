@@ -1893,6 +1893,20 @@ void main() {
           expect(channel.state!.unreadCount, 0);
         });
 
+        test('a hard delete without a read state for the current user leaves it unset', () async {
+          expect(channel.state!.currentUserRead, isNull);
+
+          final message = Message(
+            id: 'unseen-message-id',
+            user: User(id: 'other-user'),
+            createdAt: DateTime.now(),
+          );
+          client.addEvent(createDeleteMessageEvent(message, hardDelete: true));
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.currentUserRead, isNull);
+        });
+
         test('a soft delete of an unseen message keeps the unread count', () async {
           final readAt = DateTime.now();
           channel.state!.updateRead([Read(user: client.state.currentUser!, lastRead: readAt)]);
