@@ -1730,6 +1730,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     final channel = StreamChannel.maybeOf(context)?.channel;
     if (channel == null) return;
 
+    // A channel that isn't initialized yet or was disposed can't hold a draft.
+    if (channel.state == null) return;
+
     final message = _effectiveController.message;
     final isMessageValid = _effectiveController.validator.call(message);
 

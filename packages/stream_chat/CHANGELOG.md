@@ -4,6 +4,10 @@
 
 - `Attachment.type` is now `url_preview` for every attachment scraped from a link in the message text, including a link to an image or file.
 - `Attachment.toJson` keeps the original `type` of an attachment scraped from a link, such as `video` or `image`, instead of writing `url_preview`.
+🐞 Fixed
+
+- Fixed a draft saved or deleted while offline not being kept.
+- Fixed a thread draft replacing the channel's draft when the thread's parent message isn't loaded.
 
 ## 10.6.0
 
