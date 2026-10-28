@@ -706,7 +706,9 @@ void main() {
       await env.userRobot.assertMessageDeliveryStatus(MessageDeliveryStatus.pending);
       // Let the held send complete, so it can't land in the next test. Once
       // sent, the message shows no status, as read events are disabled.
-      await env.userRobot.assertMessageDeliveryStatus(MessageDeliveryStatus.nil);
+      await env.userRobot
+          .assertMessageDeliveryStatus(MessageDeliveryStatus.nil)
+          .assertMessageFailedToBeSent(isDisplayed: false);
     },
   );
 

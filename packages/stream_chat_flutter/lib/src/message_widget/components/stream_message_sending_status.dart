@@ -10,7 +10,8 @@ import '../message_status_labels.dart';
 ///
 /// While attachments are still uploading, a textual progress label is shown.
 /// Once the message is fully sent, an icon indicates whether it has been
-/// sent, delivered, or read.
+/// sent, delivered, or read. In a channel without read events, nothing is
+/// shown once the message is sent.
 ///
 /// This widget is typically used inside [StreamMessageFooter] and is only
 /// shown for messages sent by the current user.
@@ -39,6 +40,11 @@ class StreamMessageSendingStatus extends StatelessWidget {
 
     final channel = StreamChannel.maybeOf(context)?.channel;
 
+    // Without read events a sent tick could never become delivered or read, so
+    // only the clock of a message still sending is shown.
+    final canUseReadReceipts = channel?.canUseReadReceipts ?? true;
+    if (!canUseReadReceipts && !message.state.isOutgoing) return const Empty();
+
     // Previews sit on the modal scrim, where neither the accent-colored read
     // receipt nor the muted sent/delivered icon has enough contrast, so both
     // fall back to the on-scrim color.
@@ -51,19 +57,16 @@ class StreamMessageSendingStatus extends StatelessWidget {
       stream: channel?.state?.readStream,
       initialData: channel?.state?.read,
       builder: (context, data) {
-        final status = MessageDeliveryStatus.of(
-          message,
-          isMessageRead: data.readsOf(message: message).isNotEmpty,
-          isMessageDelivered: data.deliveriesOf(message: message).isNotEmpty,
-          channel: channel,
-        );
+        final readList = data.readsOf(message: message);
+        final isMessageRead = readList.isNotEmpty;
 
-        if (status == .none) return const Empty();
+        final deliveriesList = data.deliveriesOf(message: message);
+        final isMessageDelivered = deliveriesList.isNotEmpty;
 
         return StreamSendingIndicator(
           message: message,
-          isMessageRead: status == .read,
-          isMessageDelivered: status == .delivered,
+          isMessageRead: isMessageRead,
+          isMessageDelivered: isMessageDelivered,
           color: iconColor,
         );
       },

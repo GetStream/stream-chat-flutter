@@ -596,10 +596,16 @@ extension UserRobotMessageListAsserts on UserRobot {
     return this;
   }
 
-  /// Asserts the message at [messageIndex] is marked as failed to be sent.
+  /// Asserts the message at [messageIndex] is marked as failed to be sent, or
+  /// with [isDisplayed] false, that it isn't.
   /// Mirrors the native `assertMessageFailedToBeSent`.
-  Future<UserRobot> assertMessageFailedToBeSent({int messageIndex = 0}) async {
-    await _waitOnMessage(MessageListPage.list.errorBadge, messageIndex: messageIndex);
+  Future<UserRobot> assertMessageFailedToBeSent({int messageIndex = 0, bool isDisplayed = true}) async {
+    if (isDisplayed) {
+      await _waitOnMessage(MessageListPage.list.errorBadge, messageIndex: messageIndex);
+    } else {
+      final message = find.byType(MessageListPage.messageItem).at(messageIndex);
+      await tester.waitUntilNotVisible(find.descendant(of: message, matching: MessageListPage.list.errorBadge));
+    }
     return this;
   }
 
@@ -917,8 +923,8 @@ extension UserRobotMessageListAssertsChain on Future<UserRobot> {
   Future<UserRobot> assertAlsoInTheChannelLabel({required bool inThread}) =>
       then((it) => it.assertAlsoInTheChannelLabel(inThread: inThread));
 
-  Future<UserRobot> assertMessageFailedToBeSent({int messageIndex = 0}) =>
-      then((it) => it.assertMessageFailedToBeSent(messageIndex: messageIndex));
+  Future<UserRobot> assertMessageFailedToBeSent({int messageIndex = 0, bool isDisplayed = true}) =>
+      then((it) => it.assertMessageFailedToBeSent(messageIndex: messageIndex, isDisplayed: isDisplayed));
 
   Future<UserRobot> assertMessageDeliveryStatus(
     MessageDeliveryStatus status, {

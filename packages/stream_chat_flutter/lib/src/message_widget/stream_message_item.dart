@@ -1354,7 +1354,7 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
             context,
             isMessageRead: data.readsOf(message: message).isNotEmpty,
             isMessageDelivered: data.deliveriesOf(message: message).isNotEmpty,
-            channel: channel,
+            canUseReadReceipts: channel?.canUseReadReceipts ?? true,
           ),
         ].join(', '),
       ),
@@ -1382,17 +1382,22 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
     BuildContext context, {
     required bool isMessageRead,
     required bool isMessageDelivered,
-    Channel? channel,
+    required bool canUseReadReceipts,
   }) {
     final translations = context.translations;
+    final status = MessageDeliveryStatus.of(
+      widget.message,
+      isMessageRead: isMessageRead,
+      isMessageDelivered: isMessageDelivered,
+    );
 
     return attachmentUploadProgressLabel(translations, widget.message) ??
-        MessageDeliveryStatus.of(
-          widget.message,
-          isMessageRead: isMessageRead,
-          isMessageDelivered: isMessageDelivered,
-          channel: channel,
-        ).label(translations);
+        switch (status) {
+          // [StreamMessageSendingStatus] shows no sent tick without read
+          // events.
+          .sent when !canUseReadReceipts => null,
+          _ => status.label(translations),
+        };
   }
 
   // Composes the screen-reader announcement for the whole row: who sent the
