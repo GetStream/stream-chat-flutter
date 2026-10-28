@@ -10,8 +10,8 @@ import '../message_status_labels.dart';
 ///
 /// While attachments are still uploading, a textual progress label is shown.
 /// Once the message is fully sent, an icon indicates whether it has been
-/// sent, delivered, or read. In a channel without read events, nothing is
-/// shown once the message is sent.
+/// sent, delivered, or read. In a channel where [Channel.canUseReadReceipts]
+/// is false, nothing is shown once the message is sent.
 ///
 /// This widget is typically used inside [StreamMessageFooter] and is only
 /// shown for messages sent by the current user.

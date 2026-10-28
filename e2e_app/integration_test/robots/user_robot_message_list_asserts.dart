@@ -604,6 +604,7 @@ extension UserRobotMessageListAsserts on UserRobot {
       await _waitOnMessage(MessageListPage.list.errorBadge, messageIndex: messageIndex);
     } else {
       final message = find.byType(MessageListPage.messageItem).at(messageIndex);
+      await tester.waitUntilVisible(message);
       await tester.waitUntilNotVisible(find.descendant(of: message, matching: MessageListPage.list.errorBadge));
     }
     return this;

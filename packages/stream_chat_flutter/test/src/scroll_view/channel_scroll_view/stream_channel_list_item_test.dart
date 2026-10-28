@@ -463,7 +463,10 @@ void main() {
       );
     });
 
-    MockChannel ownMessageChannel({required List<ChannelCapability> ownCapabilities}) {
+    MockChannel ownMessageChannel({
+      required List<ChannelCapability> ownCapabilities,
+      MessageState messageState = MessageState.sent,
+    }) {
       final channel = MockChannel(id: 'c', type: 'messaging', ownCapabilities: ownCapabilities);
       final state = MockChannelState();
       final messages = StreamController<List<Message>>.broadcast();
@@ -476,8 +479,8 @@ void main() {
         cid: 'messaging:c',
       );
 
-      final sent = Message(id: 'mc', text: 'hello', user: currentUser, state: MessageState.sent);
-      when(() => state.messages).thenReturn([sent]);
+      final own = Message(id: 'mc', text: 'hello', user: currentUser, state: messageState);
+      when(() => state.messages).thenReturn([own]);
       return channel;
     }
 
@@ -635,6 +638,18 @@ void main() {
 
       expect(find.textContaining('hello', findRichText: true), findsOneWidget);
       expect(find.byType(StreamSendingIndicator), findsNothing);
+    });
+
+    testWidgets('keeps the clock of a message still sending in a channel without read events', (tester) async {
+      final channel = ownMessageChannel(
+        ownCapabilities: const [ChannelCapability.sendMessage],
+        messageState: MessageState.sending,
+      );
+
+      await pumpSubtitle(tester, channel);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamSendingIndicator), findsOneWidget);
     });
   });
 

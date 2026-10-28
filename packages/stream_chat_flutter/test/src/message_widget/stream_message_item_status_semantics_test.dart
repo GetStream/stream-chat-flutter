@@ -62,6 +62,44 @@ void main() {
     handle.dispose();
   });
 
+  group('in a channel without read events', () {
+    testWidgets('omits the sent status', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        buildMessageScene(
+          testMessage(user: currentUser),
+          alignment: StreamMessageAlignment.end,
+          readEvents: false,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(labelsOf(tester), contains('OUT:Are we still meeting tomorrow, AT-TIME'));
+      expect(labelsOf(tester).where((it) => it.contains('Sent')), isEmpty);
+
+      handle.dispose();
+    });
+
+    testWidgets('still announces a message that failed to send', (tester) async {
+      final handle = tester.ensureSemantics();
+
+      await tester.pumpWidget(
+        buildMessageScene(
+          testMessage(user: currentUser, state: MessageState.sendingFailed(skipPush: false, skipEnrichUrl: false)),
+          alignment: StreamMessageAlignment.end,
+          readEvents: false,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final failed = DefaultTranslations.instance.accessibility.messageFailedStatusLabel;
+      expect(labelsOf(tester).first, endsWith(', $failed'));
+
+      handle.dispose();
+    });
+  });
+
   testWidgets('announces upload progress while attachments are sending', (tester) async {
     final handle = tester.ensureSemantics();
 

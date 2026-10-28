@@ -204,18 +204,6 @@ void main() {
 
       expect(find.byType(StreamSendingIndicator), findsOneWidget);
     });
-
-    testWidgets('leaves the status out of the row label', (tester) async {
-      final handle = tester.ensureSemantics();
-
-      await tester.pumpWidget(wrap(StreamMessageItem(message: message()), readEvents: false));
-      await tester.pumpAndSettle();
-
-      final a11y = DefaultTranslations.instance.accessibility;
-      expect(labelsOf(tester).where((it) => it.contains(a11y.messageSentStatusLabel)), isEmpty);
-
-      handle.dispose();
-    });
   });
 
   testWidgets('StreamMessageFooter shows the delivery status on your own message', (tester) async {
