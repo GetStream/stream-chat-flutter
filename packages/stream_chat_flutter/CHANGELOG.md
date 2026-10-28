@@ -18,6 +18,7 @@
 
 - Fixed a web address written without `https://`, such as `youtube.com`, not being tappable in a message.
 - Fixed a web address right after a quote or Chinese or Japanese text not being tappable in a message.
+- Fixed a deleted message hiding its replies count, which left its thread unreachable from the channel.
 - Fixed `StreamMessageComposer` throwing when its channel is disposed while it still holds unsent text, for example when the user is disconnected with a channel page open.
 - Fixed a message that failed to send, update or delete hiding the timestamp and delivery status of the message before it.
 - Fixed a voice recording sent as a reply without text showing inside a filled container instead of directly on the message bubble.
