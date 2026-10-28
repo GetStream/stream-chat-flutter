@@ -290,11 +290,7 @@ void main() {
       await env.userRobot.tapBackButton();
 
       step('THEN the channel preview shows the system message');
-      // The mock server attributes the truncation to whoever asked for it, so
-      // the system message is the current user's and the preview carries the
-      // "You: " prefix — which the visual formatter applies even to a system
-      // message, unlike the a11y label.
-      await env.userRobot.assertMessageInChannelPreview(systemMessage, fromCurrentUser: true);
+      await env.userRobot.assertMessageInChannelPreview(systemMessage);
 
       step('AND the message timestamp is shown');
       await env.userRobot.assertMessagePreviewTimestamp();
