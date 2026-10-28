@@ -16,9 +16,11 @@ part 'ai_indicator_update_event.dart';
 part 'app_updated_event.dart';
 part 'channel_created_event.dart';
 part 'channel_deleted_event.dart';
+part 'channel_forked_event.dart';
 part 'channel_frozen_event.dart';
 part 'channel_hidden_event.dart';
 part 'channel_kicked_event.dart';
+part 'channel_rewound_event.dart';
 part 'channel_truncated_event.dart';
 part 'channel_un_frozen_event.dart';
 part 'channel_updated_event.dart';
@@ -42,6 +44,8 @@ part 'moderation_mark_reviewed_event.dart';
 part 'notification_added_to_channel_event.dart';
 part 'notification_channel_deleted_event.dart';
 part 'notification_channel_mutes_updated_event.dart';
+part 'notification_channel_partial_updated_event.dart';
+part 'notification_channel_rewound_event.dart';
 part 'notification_channel_truncated_event.dart';
 part 'notification_invite_accepted_event.dart';
 part 'notification_invite_rejected_event.dart';
@@ -116,10 +120,12 @@ sealed class WSClientEvent implements core.WsEvent {
       "app.updated" => AppUpdatedEvent.fromJson(json),
       "channel.created" => ChannelCreatedEvent.fromJson(json),
       "channel.deleted" => ChannelDeletedEvent.fromJson(json),
+      "channel.forked" => ChannelForkedEvent.fromJson(json),
       "channel.frozen" => ChannelFrozenEvent.fromJson(json),
       "channel.hidden" => ChannelHiddenEvent.fromJson(json),
       "channel.kicked" => ChannelKickedEvent.fromJson(json),
       "channel.max_streak_changed" => MaxStreakChangedEvent.fromJson(json),
+      "channel.rewound" => ChannelRewoundEvent.fromJson(json),
       "channel.truncated" => ChannelTruncatedEvent.fromJson(json),
       "channel.unfrozen" => ChannelUnFrozenEvent.fromJson(json),
       "channel.updated" => ChannelUpdatedEvent.fromJson(json),
@@ -142,6 +148,8 @@ sealed class WSClientEvent implements core.WsEvent {
       "notification.added_to_channel" => NotificationAddedToChannelEvent.fromJson(json),
       "notification.channel_deleted" => NotificationChannelDeletedEvent.fromJson(json),
       "notification.channel_mutes_updated" => NotificationChannelMutesUpdatedEvent.fromJson(json),
+      "notification.channel_partial_updated" => NotificationChannelPartialUpdatedEvent.fromJson(json),
+      "notification.channel_rewound" => NotificationChannelRewoundEvent.fromJson(json),
       "notification.channel_truncated" => NotificationChannelTruncatedEvent.fromJson(json),
       "notification.invite_accepted" => NotificationInviteAcceptedEvent.fromJson(json),
       "notification.invite_rejected" => NotificationInviteRejectedEvent.fromJson(json),
@@ -229,10 +237,12 @@ sealed class WSEvent implements core.WsEvent {
       "app.updated" => AppUpdatedEvent.fromJson(json),
       "channel.created" => ChannelCreatedEvent.fromJson(json),
       "channel.deleted" => ChannelDeletedEvent.fromJson(json),
+      "channel.forked" => ChannelForkedEvent.fromJson(json),
       "channel.frozen" => ChannelFrozenEvent.fromJson(json),
       "channel.hidden" => ChannelHiddenEvent.fromJson(json),
       "channel.kicked" => ChannelKickedEvent.fromJson(json),
       "channel.max_streak_changed" => MaxStreakChangedEvent.fromJson(json),
+      "channel.rewound" => ChannelRewoundEvent.fromJson(json),
       "channel.truncated" => ChannelTruncatedEvent.fromJson(json),
       "channel.unfrozen" => ChannelUnFrozenEvent.fromJson(json),
       "channel.updated" => ChannelUpdatedEvent.fromJson(json),
@@ -255,6 +265,8 @@ sealed class WSEvent implements core.WsEvent {
       "notification.added_to_channel" => NotificationAddedToChannelEvent.fromJson(json),
       "notification.channel_deleted" => NotificationChannelDeletedEvent.fromJson(json),
       "notification.channel_mutes_updated" => NotificationChannelMutesUpdatedEvent.fromJson(json),
+      "notification.channel_partial_updated" => NotificationChannelPartialUpdatedEvent.fromJson(json),
+      "notification.channel_rewound" => NotificationChannelRewoundEvent.fromJson(json),
       "notification.channel_truncated" => NotificationChannelTruncatedEvent.fromJson(json),
       "notification.invite_accepted" => NotificationInviteAcceptedEvent.fromJson(json),
       "notification.invite_rejected" => NotificationInviteRejectedEvent.fromJson(json),

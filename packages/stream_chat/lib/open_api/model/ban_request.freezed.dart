@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$BanRequest {
   bool? get banFromFutureChannels;
   String? get channelCid;
-  BanRequestDeleteMessages? get deleteMessages;
+  DeleteMessages? get deleteMessages;
   bool? get deleteReactions;
   bool? get ipBan;
   String? get reason;
@@ -76,7 +76,7 @@ abstract mixin class $BanRequestCopyWith<$Res> {
   $Res call({
     bool? banFromFutureChannels,
     String? channelCid,
-    BanRequestDeleteMessages? deleteMessages,
+    DeleteMessages? deleteMessages,
     bool? deleteReactions,
     bool? ipBan,
     String? reason,
@@ -121,7 +121,7 @@ class _$BanRequestCopyWithImpl<$Res> implements $BanRequestCopyWith<$Res> {
         deleteMessages: freezed == deleteMessages
             ? _self.deleteMessages
             : deleteMessages // ignore: cast_nullable_to_non_nullable
-                  as BanRequestDeleteMessages?,
+                  as DeleteMessages?,
         deleteReactions: freezed == deleteReactions
             ? _self.deleteReactions
             : deleteReactions // ignore: cast_nullable_to_non_nullable

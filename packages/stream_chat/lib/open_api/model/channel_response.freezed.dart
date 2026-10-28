@@ -13,6 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$ChannelResponse {
+  int? get activeMemberCount;
   bool? get autoTranslationEnabled;
   String? get autoTranslationLanguage;
   bool? get blocked;
@@ -56,6 +57,7 @@ mixin _$ChannelResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChannelResponse &&
+            (identical(other.activeMemberCount, activeMemberCount) || other.activeMemberCount == activeMemberCount) &&
             (identical(other.autoTranslationEnabled, autoTranslationEnabled) ||
                 other.autoTranslationEnabled == autoTranslationEnabled) &&
             (identical(
@@ -101,6 +103,7 @@ mixin _$ChannelResponse {
   @override
   int get hashCode => Object.hashAll([
     runtimeType,
+    activeMemberCount,
     autoTranslationEnabled,
     autoTranslationLanguage,
     blocked,
@@ -133,7 +136,7 @@ mixin _$ChannelResponse {
 
   @override
   String toString() {
-    return 'ChannelResponse(autoTranslationEnabled: $autoTranslationEnabled, autoTranslationLanguage: $autoTranslationLanguage, blocked: $blocked, cid: $cid, config: $config, cooldown: $cooldown, createdAt: $createdAt, createdBy: $createdBy, custom: $custom, deletedAt: $deletedAt, disabled: $disabled, filterTags: $filterTags, frozen: $frozen, hidden: $hidden, hideMessagesBefore: $hideMessagesBefore, id: $id, lastMessageAt: $lastMessageAt, memberCount: $memberCount, members: $members, messageCount: $messageCount, muteExpiresAt: $muteExpiresAt, muted: $muted, ownCapabilities: $ownCapabilities, team: $team, truncatedAt: $truncatedAt, truncatedBy: $truncatedBy, type: $type, updatedAt: $updatedAt)';
+    return 'ChannelResponse(activeMemberCount: $activeMemberCount, autoTranslationEnabled: $autoTranslationEnabled, autoTranslationLanguage: $autoTranslationLanguage, blocked: $blocked, cid: $cid, config: $config, cooldown: $cooldown, createdAt: $createdAt, createdBy: $createdBy, custom: $custom, deletedAt: $deletedAt, disabled: $disabled, filterTags: $filterTags, frozen: $frozen, hidden: $hidden, hideMessagesBefore: $hideMessagesBefore, id: $id, lastMessageAt: $lastMessageAt, memberCount: $memberCount, members: $members, messageCount: $messageCount, muteExpiresAt: $muteExpiresAt, muted: $muted, ownCapabilities: $ownCapabilities, team: $team, truncatedAt: $truncatedAt, truncatedBy: $truncatedBy, type: $type, updatedAt: $updatedAt)';
   }
 }
 
@@ -145,6 +148,7 @@ abstract mixin class $ChannelResponseCopyWith<$Res> {
   ) = _$ChannelResponseCopyWithImpl;
   @useResult
   $Res call({
+    int? activeMemberCount,
     bool? autoTranslationEnabled,
     String? autoTranslationLanguage,
     bool? blocked,
@@ -188,6 +192,7 @@ class _$ChannelResponseCopyWithImpl<$Res> implements $ChannelResponseCopyWith<$R
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? activeMemberCount = freezed,
     Object? autoTranslationEnabled = freezed,
     Object? autoTranslationLanguage = freezed,
     Object? blocked = freezed,
@@ -219,6 +224,10 @@ class _$ChannelResponseCopyWithImpl<$Res> implements $ChannelResponseCopyWith<$R
   }) {
     return _then(
       ChannelResponse(
+        activeMemberCount: freezed == activeMemberCount
+            ? _self.activeMemberCount
+            : activeMemberCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
         autoTranslationEnabled: freezed == autoTranslationEnabled
             ? _self.autoTranslationEnabled
             : autoTranslationEnabled // ignore: cast_nullable_to_non_nullable

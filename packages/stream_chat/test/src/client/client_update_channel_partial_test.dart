@@ -308,10 +308,10 @@ api.ChannelResponse _channelResponse({
   cid: 'messaging:general',
   config: api.ChannelConfigWithInfo(
     allowedFlagReasons: const ['spam'],
-    automod: api.ChannelConfigWithInfoAutomod.simple,
-    automodBehavior: api.ChannelConfigWithInfoAutomodBehavior.flag,
+    automod: api.AutomodMode.simple,
+    automodBehavior: api.ChannelModerationBehavior.flag,
     blocklist: 'profanity',
-    blocklistBehavior: api.ChannelConfigWithInfoBlocklistBehavior.block,
+    blocklistBehavior: api.ChannelModerationBehavior.block,
     chatPreferences: const api.ChatPreferences(
       channelMentions: 'all',
       defaultPreference: 'none',
@@ -348,7 +348,7 @@ api.ChannelResponse _channelResponse({
     partitionSize: 10,
     partitionTtl: '24h',
     polls: true,
-    pushLevel: api.ChannelConfigWithInfoPushLevel.directMentions,
+    pushLevel: api.PushLevel.directMentions,
     pushNotifications: false,
     quotes: true,
     reactions: true,

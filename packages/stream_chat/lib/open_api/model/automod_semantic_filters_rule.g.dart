@@ -9,7 +9,7 @@ part of 'automod_semantic_filters_rule.dart';
 AutomodSemanticFiltersRule _$AutomodSemanticFiltersRuleFromJson(
   Map<String, dynamic> json,
 ) => AutomodSemanticFiltersRule(
-  action: AutomodSemanticFiltersRuleAction.fromJson(json['action'] as String),
+  action: ModerationAction.fromJson(json['action'] as String),
   name: json['name'] as String,
   threshold: (json['threshold'] as num).toDouble(),
 );

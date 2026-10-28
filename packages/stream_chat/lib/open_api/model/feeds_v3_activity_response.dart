@@ -228,7 +228,7 @@ class FeedsV3ActivityResponse with _$FeedsV3ActivityResponse {
 
   @override
   @JsonKey(name: 'restrict_replies')
-  final String restrictReplies;
+  final RestrictReplies restrictReplies;
 
   @override
   @JsonKey(name: 'score')
@@ -269,7 +269,7 @@ class FeedsV3ActivityResponse with _$FeedsV3ActivityResponse {
 
   @override
   @JsonKey(name: 'visibility')
-  final String visibility;
+  final ActivityVisibility visibility;
 
   @override
   @JsonKey(name: 'visibility_tag')

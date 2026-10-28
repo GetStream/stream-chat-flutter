@@ -108,7 +108,7 @@ FeedsV3ActivityResponse _$FeedsV3ActivityResponseFromJson(
       FeedsReactionGroupResponse.fromJson(e as Map<String, dynamic>),
     ),
   ),
-  restrictReplies: json['restrict_replies'] as String,
+  restrictReplies: RestrictReplies.fromJson(json['restrict_replies'] as String),
   score: (json['score'] as num).toDouble(),
   scoreVars: json['score_vars'] as Map<String, dynamic>?,
   searchData: json['search_data'] as Map<String, dynamic>,
@@ -120,7 +120,7 @@ FeedsV3ActivityResponse _$FeedsV3ActivityResponseFromJson(
     json['updated_at'] as Object,
   ),
   user: UserResponse.fromJson(json['user'] as Map<String, dynamic>),
-  visibility: json['visibility'] as String,
+  visibility: ActivityVisibility.fromJson(json['visibility'] as String),
   visibilityTag: json['visibility_tag'] as String?,
 );
 
@@ -176,7 +176,7 @@ Map<String, dynamic> _$FeedsV3ActivityResponseToJson(
   'reaction_groups': instance.reactionGroups.map(
     (k, e) => MapEntry(k, e.toJson()),
   ),
-  'restrict_replies': instance.restrictReplies,
+  'restrict_replies': instance.restrictReplies.toJson(),
   'score': instance.score,
   'score_vars': instance.scoreVars,
   'search_data': instance.searchData,
@@ -186,7 +186,7 @@ Map<String, dynamic> _$FeedsV3ActivityResponseToJson(
   'type': instance.type,
   'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
   'user': instance.user.toJson(),
-  'visibility': instance.visibility,
+  'visibility': instance.visibility.toJson(),
   'visibility_tag': instance.visibilityTag,
 };
 

@@ -7,7 +7,6 @@ part of 'push_preference_input.dart';
 // **************************************************************************
 
 PushPreferenceInput _$PushPreferenceInputFromJson(Map<String, dynamic> json) => PushPreferenceInput(
-  callLevel: json['call_level'] == null ? null : PushPreferenceInputCallLevel.fromJson(json['call_level'] as String),
   channelCid: json['channel_cid'] as String?,
   chatLevel: json['chat_level'] == null ? null : PushPreferenceInputChatLevel.fromJson(json['chat_level'] as String),
   chatPreferences: json['chat_preferences'] == null
@@ -19,24 +18,19 @@ PushPreferenceInput _$PushPreferenceInputFromJson(Map<String, dynamic> json) => 
     json['disabled_until'],
     const StreamDateTimeConverter().fromJson,
   ),
-  feedsLevel: json['feeds_level'] == null
-      ? null
-      : PushPreferenceInputFeedsLevel.fromJson(
-          json['feeds_level'] as String,
-        ),
-  feedsPreferences: json['feeds_preferences'] == null
-      ? null
-      : FeedsPreferences.fromJson(
-          json['feeds_preferences'] as Map<String, dynamic>,
-        ),
   removeDisable: json['remove_disable'] as bool?,
+  removeSchedule: json['remove_schedule'] as bool?,
+  schedule: json['schedule'] == null
+      ? null
+      : PushScheduleInput.fromJson(
+          json['schedule'] as Map<String, dynamic>,
+        ),
   userId: json['user_id'] as String?,
 );
 
 Map<String, dynamic> _$PushPreferenceInputToJson(
   PushPreferenceInput instance,
 ) => <String, dynamic>{
-  'call_level': instance.callLevel?.toJson(),
   'channel_cid': instance.channelCid,
   'chat_level': instance.chatLevel?.toJson(),
   'chat_preferences': instance.chatPreferences?.toJson(),
@@ -44,9 +38,9 @@ Map<String, dynamic> _$PushPreferenceInputToJson(
     instance.disabledUntil,
     const StreamDateTimeConverter().toJson,
   ),
-  'feeds_level': instance.feedsLevel?.toJson(),
-  'feeds_preferences': instance.feedsPreferences?.toJson(),
   'remove_disable': instance.removeDisable,
+  'remove_schedule': instance.removeSchedule,
+  'schedule': instance.schedule?.toJson(),
   'user_id': instance.userId,
 };
 

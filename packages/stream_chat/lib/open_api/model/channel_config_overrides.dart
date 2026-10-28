@@ -13,29 +13,6 @@ import '../models.dart';
 part 'channel_config_overrides.g.dart';
 part 'channel_config_overrides.freezed.dart';
 
-extension type const ChannelConfigOverridesBlocklistBehavior(String _) implements String {
-  static const block = ChannelConfigOverridesBlocklistBehavior('block');
-  static const flag = ChannelConfigOverridesBlocklistBehavior('flag');
-
-  factory ChannelConfigOverridesBlocklistBehavior.fromJson(String json) =>
-      ChannelConfigOverridesBlocklistBehavior(json);
-
-  String toJson() => this;
-}
-
-extension type const ChannelConfigOverridesPushLevel(String _) implements String {
-  static const all = ChannelConfigOverridesPushLevel('all');
-  static const allMentions = ChannelConfigOverridesPushLevel('all_mentions');
-  static const directMentions = ChannelConfigOverridesPushLevel('direct_mentions');
-  @Deprecated('Use directMentions instead.')
-  static const mentions = ChannelConfigOverridesPushLevel('mentions');
-  static const none = ChannelConfigOverridesPushLevel('none');
-
-  factory ChannelConfigOverridesPushLevel.fromJson(String json) => ChannelConfigOverridesPushLevel(json);
-
-  String toJson() => this;
-}
-
 @freezed
 @immutable
 @JsonSerializable()
@@ -65,7 +42,7 @@ class ChannelConfigOverrides with _$ChannelConfigOverrides {
 
   @override
   @JsonKey(name: 'blocklist_behavior')
-  final ChannelConfigOverridesBlocklistBehavior? blocklistBehavior;
+  final BlocklistBehavior? blocklistBehavior;
 
   @override
   @JsonKey(name: 'chat_preferences')
@@ -89,7 +66,7 @@ class ChannelConfigOverrides with _$ChannelConfigOverrides {
 
   @override
   @JsonKey(name: 'push_level')
-  final ChannelConfigOverridesPushLevel? pushLevel;
+  final PushLevel? pushLevel;
 
   @override
   @JsonKey(name: 'quotes')

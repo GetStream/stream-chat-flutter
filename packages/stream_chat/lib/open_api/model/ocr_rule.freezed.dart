@@ -13,7 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$OCRRule {
-  OCRRuleAction get action;
+  ModerationAction get action;
   String get label;
 
   /// Create a copy of OCRRule
@@ -44,7 +44,7 @@ mixin _$OCRRule {
 abstract mixin class $OCRRuleCopyWith<$Res> {
   factory $OCRRuleCopyWith(OCRRule value, $Res Function(OCRRule) _then) = _$OCRRuleCopyWithImpl;
   @useResult
-  $Res call({OCRRuleAction action, String label});
+  $Res call({ModerationAction action, String label});
 }
 
 /// @nodoc
@@ -64,7 +64,7 @@ class _$OCRRuleCopyWithImpl<$Res> implements $OCRRuleCopyWith<$Res> {
         action: null == action
             ? _self.action
             : action // ignore: cast_nullable_to_non_nullable
-                  as OCRRuleAction,
+                  as ModerationAction,
         label: null == label
             ? _self.label
             : label // ignore: cast_nullable_to_non_nullable

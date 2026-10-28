@@ -56,7 +56,7 @@ PollResponseData _$PollResponseDataFromJson(
   voteCountsByOption: Map<String, int>.from(
     json['vote_counts_by_option'] as Map,
   ),
-  votingVisibility: PollResponseDataVotingVisibility.fromJson(
+  votingVisibility: VotingVisibility.fromJson(
     json['voting_visibility'] as String,
   ),
 );

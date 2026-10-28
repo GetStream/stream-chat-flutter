@@ -13,19 +13,6 @@ import '../models.dart';
 part 'automod_rule.g.dart';
 part 'automod_rule.freezed.dart';
 
-extension type const AutomodRuleAction(String _) implements String {
-  static const bounce = AutomodRuleAction('bounce');
-  static const bounceFlag = AutomodRuleAction('bounce_flag');
-  static const bounceRemove = AutomodRuleAction('bounce_remove');
-  static const flag = AutomodRuleAction('flag');
-  static const remove = AutomodRuleAction('remove');
-  static const shadow = AutomodRuleAction('shadow');
-
-  factory AutomodRuleAction.fromJson(String json) => AutomodRuleAction(json);
-
-  String toJson() => this;
-}
-
 @freezed
 @immutable
 @JsonSerializable()
@@ -38,7 +25,7 @@ class AutomodRule with _$AutomodRule {
 
   @override
   @JsonKey(name: 'action')
-  final AutomodRuleAction action;
+  final ModerationAction action;
 
   @override
   @JsonKey(name: 'label')

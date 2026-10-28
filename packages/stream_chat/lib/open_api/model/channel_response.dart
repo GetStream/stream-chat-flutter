@@ -18,6 +18,7 @@ part 'channel_response.freezed.dart';
 @JsonSerializable()
 class ChannelResponse with _$ChannelResponse {
   const ChannelResponse({
+    this.activeMemberCount,
     this.autoTranslationEnabled,
     this.autoTranslationLanguage,
     this.blocked,
@@ -47,6 +48,10 @@ class ChannelResponse with _$ChannelResponse {
     required this.type,
     required this.updatedAt,
   });
+
+  @override
+  @JsonKey(name: 'active_member_count')
+  final int? activeMemberCount;
 
   @override
   @JsonKey(name: 'auto_translation_enabled')

@@ -16,7 +16,7 @@ ChannelMetadata _$ChannelMetadataFromJson(Map<String, dynamic> json) => ChannelM
   ),
   memberCount: (json['member_count'] as num?)?.toInt(),
   messageCount: (json['message_count'] as num?)?.toInt(),
-  pushLevel: json['push_level'] as String?,
+  pushLevel: json['push_level'] == null ? null : PushLevel.fromJson(json['push_level'] as String),
   team: json['team'] as String?,
   type: json['type'] as String,
 );
@@ -31,7 +31,7 @@ Map<String, dynamic> _$ChannelMetadataToJson(ChannelMetadata instance) => <Strin
   ),
   'member_count': instance.memberCount,
   'message_count': instance.messageCount,
-  'push_level': instance.pushLevel,
+  'push_level': instance.pushLevel?.toJson(),
   'team': instance.team,
   'type': instance.type,
 };

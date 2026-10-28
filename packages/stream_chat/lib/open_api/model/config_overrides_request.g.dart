@@ -12,9 +12,7 @@ ConfigOverridesRequest _$ConfigOverridesRequestFromJson(
   blocklist: json['blocklist'] as String?,
   blocklistBehavior: json['blocklist_behavior'] == null
       ? null
-      : ConfigOverridesRequestBlocklistBehavior.fromJson(
-          json['blocklist_behavior'] as String,
-        ),
+      : BlocklistBehavior.fromJson(json['blocklist_behavior'] as String),
   chatPreferences: json['chat_preferences'] == null
       ? null
       : ChatPreferences.fromJson(
@@ -26,7 +24,7 @@ ConfigOverridesRequest _$ConfigOverridesRequestFromJson(
     (k, e) => MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
   ),
   maxMessageLength: (json['max_message_length'] as num?)?.toInt(),
-  pushLevel: json['push_level'] == null ? null : ConfigOverridesRequestPushLevel.fromJson(json['push_level'] as String),
+  pushLevel: json['push_level'] == null ? null : PushLevel.fromJson(json['push_level'] as String),
   quotes: json['quotes'] as bool?,
   reactions: json['reactions'] as bool?,
   replies: json['replies'] as bool?,

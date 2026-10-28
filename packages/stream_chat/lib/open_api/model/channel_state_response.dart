@@ -32,6 +32,7 @@ class ChannelStateResponse with _$ChannelStateResponse {
     required this.pinnedMessages,
     this.pushPreferences,
     this.read,
+    this.scheduledMessages,
     required this.threads,
     this.watcherCount,
     this.watchers,
@@ -93,6 +94,10 @@ class ChannelStateResponse with _$ChannelStateResponse {
   @override
   @JsonKey(name: 'read')
   final List<ReadStateResponse>? read;
+
+  @override
+  @JsonKey(name: 'scheduled_messages')
+  final List<ScheduledMessageResponse>? scheduledMessages;
 
   @override
   @JsonKey(name: 'threads')

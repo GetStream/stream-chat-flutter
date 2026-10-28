@@ -7,7 +7,7 @@ part of 'automod_rule.dart';
 // **************************************************************************
 
 AutomodRule _$AutomodRuleFromJson(Map<String, dynamic> json) => AutomodRule(
-  action: AutomodRuleAction.fromJson(json['action'] as String),
+  action: ModerationAction.fromJson(json['action'] as String),
   label: json['label'] as String,
   threshold: (json['threshold'] as num).toDouble(),
 );

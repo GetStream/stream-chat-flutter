@@ -10,8 +10,8 @@ ChannelConfigWithInfo _$ChannelConfigWithInfoFromJson(
   Map<String, dynamic> json,
 ) => ChannelConfigWithInfo(
   allowedFlagReasons: (json['allowed_flag_reasons'] as List<dynamic>?)?.map((e) => e as String).toList(),
-  automod: ChannelConfigWithInfoAutomod.fromJson(json['automod'] as String),
-  automodBehavior: ChannelConfigWithInfoAutomodBehavior.fromJson(
+  automod: AutomodMode.fromJson(json['automod'] as String),
+  automodBehavior: ChannelModerationBehavior.fromJson(
     json['automod_behavior'] as String,
   ),
   automodThresholds: json['automod_thresholds'] == null
@@ -20,7 +20,7 @@ ChannelConfigWithInfo _$ChannelConfigWithInfoFromJson(
   blocklist: json['blocklist'] as String?,
   blocklistBehavior: json['blocklist_behavior'] == null
       ? null
-      : ChannelConfigWithInfoBlocklistBehavior.fromJson(
+      : ChannelModerationBehavior.fromJson(
           json['blocklist_behavior'] as String,
         ),
   blocklists: (json['blocklists'] as List<dynamic>?)
@@ -50,13 +50,17 @@ ChannelConfigWithInfo _$ChannelConfigWithInfoFromJson(
   partitionSize: (json['partition_size'] as num?)?.toInt(),
   partitionTtl: json['partition_ttl'] as String?,
   polls: json['polls'] as bool,
-  pushLevel: json['push_level'] == null ? null : ChannelConfigWithInfoPushLevel.fromJson(json['push_level'] as String),
+  pushLevel: json['push_level'] == null ? null : PushLevel.fromJson(json['push_level'] as String),
   pushNotifications: json['push_notifications'] as bool,
   quotes: json['quotes'] as bool,
   reactions: json['reactions'] as bool,
   readEvents: json['read_events'] as bool,
   reminders: json['reminders'] as bool,
   replies: json['replies'] as bool,
+  scheduledMessagesMaxLeadTimeSeconds: (json['scheduled_messages_max_lead_time_seconds'] as num?)?.toInt(),
+  scheduledMessagesMaxPerChannel: (json['scheduled_messages_max_per_channel'] as num?)?.toInt(),
+  scheduledMessagesMaxPerUser: (json['scheduled_messages_max_per_user'] as num?)?.toInt(),
+  scheduledMessagesMinLeadTimeSeconds: (json['scheduled_messages_min_lead_time_seconds'] as num?)?.toInt(),
   search: json['search'] as bool,
   sharedLocations: json['shared_locations'] as bool,
   skipLastMsgUpdateForSystemMsgs: json['skip_last_msg_update_for_system_msgs'] as bool,
@@ -102,6 +106,10 @@ Map<String, dynamic> _$ChannelConfigWithInfoToJson(
   'read_events': instance.readEvents,
   'reminders': instance.reminders,
   'replies': instance.replies,
+  'scheduled_messages_max_lead_time_seconds': instance.scheduledMessagesMaxLeadTimeSeconds,
+  'scheduled_messages_max_per_channel': instance.scheduledMessagesMaxPerChannel,
+  'scheduled_messages_max_per_user': instance.scheduledMessagesMaxPerUser,
+  'scheduled_messages_min_lead_time_seconds': instance.scheduledMessagesMinLeadTimeSeconds,
   'search': instance.search,
   'shared_locations': instance.sharedLocations,
   'skip_last_msg_update_for_system_msgs': instance.skipLastMsgUpdateForSystemMsgs,

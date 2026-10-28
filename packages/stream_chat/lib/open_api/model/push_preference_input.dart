@@ -13,16 +13,6 @@ import '../models.dart';
 part 'push_preference_input.g.dart';
 part 'push_preference_input.freezed.dart';
 
-extension type const PushPreferenceInputCallLevel(String _) implements String {
-  static const all = PushPreferenceInputCallLevel('all');
-  static const default_ = PushPreferenceInputCallLevel('default');
-  static const none = PushPreferenceInputCallLevel('none');
-
-  factory PushPreferenceInputCallLevel.fromJson(String json) => PushPreferenceInputCallLevel(json);
-
-  String toJson() => this;
-}
-
 extension type const PushPreferenceInputChatLevel(String _) implements String {
   static const all = PushPreferenceInputChatLevel('all');
   static const allMentions = PushPreferenceInputChatLevel('all_mentions');
@@ -37,35 +27,20 @@ extension type const PushPreferenceInputChatLevel(String _) implements String {
   String toJson() => this;
 }
 
-extension type const PushPreferenceInputFeedsLevel(String _) implements String {
-  static const all = PushPreferenceInputFeedsLevel('all');
-  static const default_ = PushPreferenceInputFeedsLevel('default');
-  static const none = PushPreferenceInputFeedsLevel('none');
-
-  factory PushPreferenceInputFeedsLevel.fromJson(String json) => PushPreferenceInputFeedsLevel(json);
-
-  String toJson() => this;
-}
-
 @freezed
 @immutable
 @JsonSerializable()
 class PushPreferenceInput with _$PushPreferenceInput {
   const PushPreferenceInput({
-    this.callLevel,
     this.channelCid,
     this.chatLevel,
     this.chatPreferences,
     this.disabledUntil,
-    this.feedsLevel,
-    this.feedsPreferences,
     this.removeDisable,
+    this.removeSchedule,
+    this.schedule,
     this.userId,
   });
-
-  @override
-  @JsonKey(name: 'call_level')
-  final PushPreferenceInputCallLevel? callLevel;
 
   @override
   @JsonKey(name: 'channel_cid')
@@ -85,16 +60,16 @@ class PushPreferenceInput with _$PushPreferenceInput {
   final DateTime? disabledUntil;
 
   @override
-  @JsonKey(name: 'feeds_level')
-  final PushPreferenceInputFeedsLevel? feedsLevel;
-
-  @override
-  @JsonKey(name: 'feeds_preferences')
-  final FeedsPreferences? feedsPreferences;
-
-  @override
   @JsonKey(name: 'remove_disable')
   final bool? removeDisable;
+
+  @override
+  @JsonKey(name: 'remove_schedule')
+  final bool? removeSchedule;
+
+  @override
+  @JsonKey(name: 'schedule')
+  final PushScheduleInput? schedule;
 
   @override
   @JsonKey(name: 'user_id')

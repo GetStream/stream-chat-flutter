@@ -7,7 +7,7 @@ part of 'aws_rekognition_rule.dart';
 // **************************************************************************
 
 AWSRekognitionRule _$AWSRekognitionRuleFromJson(Map<String, dynamic> json) => AWSRekognitionRule(
-  action: AWSRekognitionRuleAction.fromJson(json['action'] as String),
+  action: ModerationAction.fromJson(json['action'] as String),
   label: json['label'] as String,
   minConfidence: (json['min_confidence'] as num).toDouble(),
   subclassifications: json['subclassifications'] as Map<String, dynamic>?,

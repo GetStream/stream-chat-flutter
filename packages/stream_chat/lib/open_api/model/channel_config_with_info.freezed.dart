@@ -14,11 +14,11 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChannelConfigWithInfo {
   List<String>? get allowedFlagReasons;
-  ChannelConfigWithInfoAutomod get automod;
-  ChannelConfigWithInfoAutomodBehavior get automodBehavior;
+  AutomodMode get automod;
+  ChannelModerationBehavior get automodBehavior;
   Thresholds? get automodThresholds;
   String? get blocklist;
-  ChannelConfigWithInfoBlocklistBehavior? get blocklistBehavior;
+  ChannelModerationBehavior? get blocklistBehavior;
   List<BlockListOptions>? get blocklists;
   ChatPreferences? get chatPreferences;
   List<Command> get commands;
@@ -36,13 +36,17 @@ mixin _$ChannelConfigWithInfo {
   int? get partitionSize;
   String? get partitionTtl;
   bool get polls;
-  ChannelConfigWithInfoPushLevel? get pushLevel;
+  PushLevel? get pushLevel;
   bool get pushNotifications;
   bool get quotes;
   bool get reactions;
   bool get readEvents;
   bool get reminders;
   bool get replies;
+  int? get scheduledMessagesMaxLeadTimeSeconds;
+  int? get scheduledMessagesMaxPerChannel;
+  int? get scheduledMessagesMaxPerUser;
+  int? get scheduledMessagesMinLeadTimeSeconds;
   bool get search;
   bool get sharedLocations;
   bool get skipLastMsgUpdateForSystemMsgs;
@@ -104,6 +108,26 @@ mixin _$ChannelConfigWithInfo {
             (identical(other.readEvents, readEvents) || other.readEvents == readEvents) &&
             (identical(other.reminders, reminders) || other.reminders == reminders) &&
             (identical(other.replies, replies) || other.replies == replies) &&
+            (identical(
+                  other.scheduledMessagesMaxLeadTimeSeconds,
+                  scheduledMessagesMaxLeadTimeSeconds,
+                ) ||
+                other.scheduledMessagesMaxLeadTimeSeconds == scheduledMessagesMaxLeadTimeSeconds) &&
+            (identical(
+                  other.scheduledMessagesMaxPerChannel,
+                  scheduledMessagesMaxPerChannel,
+                ) ||
+                other.scheduledMessagesMaxPerChannel == scheduledMessagesMaxPerChannel) &&
+            (identical(
+                  other.scheduledMessagesMaxPerUser,
+                  scheduledMessagesMaxPerUser,
+                ) ||
+                other.scheduledMessagesMaxPerUser == scheduledMessagesMaxPerUser) &&
+            (identical(
+                  other.scheduledMessagesMinLeadTimeSeconds,
+                  scheduledMessagesMinLeadTimeSeconds,
+                ) ||
+                other.scheduledMessagesMinLeadTimeSeconds == scheduledMessagesMinLeadTimeSeconds) &&
             (identical(other.search, search) || other.search == search) &&
             (identical(other.sharedLocations, sharedLocations) || other.sharedLocations == sharedLocations) &&
             (identical(
@@ -152,6 +176,10 @@ mixin _$ChannelConfigWithInfo {
     readEvents,
     reminders,
     replies,
+    scheduledMessagesMaxLeadTimeSeconds,
+    scheduledMessagesMaxPerChannel,
+    scheduledMessagesMaxPerUser,
+    scheduledMessagesMinLeadTimeSeconds,
     search,
     sharedLocations,
     skipLastMsgUpdateForSystemMsgs,
@@ -164,7 +192,7 @@ mixin _$ChannelConfigWithInfo {
 
   @override
   String toString() {
-    return 'ChannelConfigWithInfo(allowedFlagReasons: $allowedFlagReasons, automod: $automod, automodBehavior: $automodBehavior, automodThresholds: $automodThresholds, blocklist: $blocklist, blocklistBehavior: $blocklistBehavior, blocklists: $blocklists, chatPreferences: $chatPreferences, commands: $commands, connectEvents: $connectEvents, countMessages: $countMessages, createdAt: $createdAt, customEvents: $customEvents, deliveryEvents: $deliveryEvents, grants: $grants, markMessagesPending: $markMessagesPending, maxMessageLength: $maxMessageLength, messageRetention: $messageRetention, mutes: $mutes, name: $name, partitionSize: $partitionSize, partitionTtl: $partitionTtl, polls: $polls, pushLevel: $pushLevel, pushNotifications: $pushNotifications, quotes: $quotes, reactions: $reactions, readEvents: $readEvents, reminders: $reminders, replies: $replies, search: $search, sharedLocations: $sharedLocations, skipLastMsgUpdateForSystemMsgs: $skipLastMsgUpdateForSystemMsgs, typingEvents: $typingEvents, updatedAt: $updatedAt, uploads: $uploads, urlEnrichment: $urlEnrichment, userMessageReminders: $userMessageReminders)';
+    return 'ChannelConfigWithInfo(allowedFlagReasons: $allowedFlagReasons, automod: $automod, automodBehavior: $automodBehavior, automodThresholds: $automodThresholds, blocklist: $blocklist, blocklistBehavior: $blocklistBehavior, blocklists: $blocklists, chatPreferences: $chatPreferences, commands: $commands, connectEvents: $connectEvents, countMessages: $countMessages, createdAt: $createdAt, customEvents: $customEvents, deliveryEvents: $deliveryEvents, grants: $grants, markMessagesPending: $markMessagesPending, maxMessageLength: $maxMessageLength, messageRetention: $messageRetention, mutes: $mutes, name: $name, partitionSize: $partitionSize, partitionTtl: $partitionTtl, polls: $polls, pushLevel: $pushLevel, pushNotifications: $pushNotifications, quotes: $quotes, reactions: $reactions, readEvents: $readEvents, reminders: $reminders, replies: $replies, scheduledMessagesMaxLeadTimeSeconds: $scheduledMessagesMaxLeadTimeSeconds, scheduledMessagesMaxPerChannel: $scheduledMessagesMaxPerChannel, scheduledMessagesMaxPerUser: $scheduledMessagesMaxPerUser, scheduledMessagesMinLeadTimeSeconds: $scheduledMessagesMinLeadTimeSeconds, search: $search, sharedLocations: $sharedLocations, skipLastMsgUpdateForSystemMsgs: $skipLastMsgUpdateForSystemMsgs, typingEvents: $typingEvents, updatedAt: $updatedAt, uploads: $uploads, urlEnrichment: $urlEnrichment, userMessageReminders: $userMessageReminders)';
   }
 }
 
@@ -177,11 +205,11 @@ abstract mixin class $ChannelConfigWithInfoCopyWith<$Res> {
   @useResult
   $Res call({
     List<String>? allowedFlagReasons,
-    ChannelConfigWithInfoAutomod automod,
-    ChannelConfigWithInfoAutomodBehavior automodBehavior,
+    AutomodMode automod,
+    ChannelModerationBehavior automodBehavior,
     Thresholds? automodThresholds,
     String? blocklist,
-    ChannelConfigWithInfoBlocklistBehavior? blocklistBehavior,
+    ChannelModerationBehavior? blocklistBehavior,
     List<BlockListOptions>? blocklists,
     ChatPreferences? chatPreferences,
     List<Command> commands,
@@ -199,13 +227,17 @@ abstract mixin class $ChannelConfigWithInfoCopyWith<$Res> {
     int? partitionSize,
     String? partitionTtl,
     bool polls,
-    ChannelConfigWithInfoPushLevel? pushLevel,
+    PushLevel? pushLevel,
     bool pushNotifications,
     bool quotes,
     bool reactions,
     bool readEvents,
     bool reminders,
     bool replies,
+    int? scheduledMessagesMaxLeadTimeSeconds,
+    int? scheduledMessagesMaxPerChannel,
+    int? scheduledMessagesMaxPerUser,
+    int? scheduledMessagesMinLeadTimeSeconds,
     bool search,
     bool sharedLocations,
     bool skipLastMsgUpdateForSystemMsgs,
@@ -259,6 +291,10 @@ class _$ChannelConfigWithInfoCopyWithImpl<$Res> implements $ChannelConfigWithInf
     Object? readEvents = null,
     Object? reminders = null,
     Object? replies = null,
+    Object? scheduledMessagesMaxLeadTimeSeconds = freezed,
+    Object? scheduledMessagesMaxPerChannel = freezed,
+    Object? scheduledMessagesMaxPerUser = freezed,
+    Object? scheduledMessagesMinLeadTimeSeconds = freezed,
     Object? search = null,
     Object? sharedLocations = null,
     Object? skipLastMsgUpdateForSystemMsgs = null,
@@ -277,11 +313,11 @@ class _$ChannelConfigWithInfoCopyWithImpl<$Res> implements $ChannelConfigWithInf
         automod: null == automod
             ? _self.automod
             : automod // ignore: cast_nullable_to_non_nullable
-                  as ChannelConfigWithInfoAutomod,
+                  as AutomodMode,
         automodBehavior: null == automodBehavior
             ? _self.automodBehavior
             : automodBehavior // ignore: cast_nullable_to_non_nullable
-                  as ChannelConfigWithInfoAutomodBehavior,
+                  as ChannelModerationBehavior,
         automodThresholds: freezed == automodThresholds
             ? _self.automodThresholds
             : automodThresholds // ignore: cast_nullable_to_non_nullable
@@ -293,7 +329,7 @@ class _$ChannelConfigWithInfoCopyWithImpl<$Res> implements $ChannelConfigWithInf
         blocklistBehavior: freezed == blocklistBehavior
             ? _self.blocklistBehavior
             : blocklistBehavior // ignore: cast_nullable_to_non_nullable
-                  as ChannelConfigWithInfoBlocklistBehavior?,
+                  as ChannelModerationBehavior?,
         blocklists: freezed == blocklists
             ? _self.blocklists
             : blocklists // ignore: cast_nullable_to_non_nullable
@@ -365,7 +401,7 @@ class _$ChannelConfigWithInfoCopyWithImpl<$Res> implements $ChannelConfigWithInf
         pushLevel: freezed == pushLevel
             ? _self.pushLevel
             : pushLevel // ignore: cast_nullable_to_non_nullable
-                  as ChannelConfigWithInfoPushLevel?,
+                  as PushLevel?,
         pushNotifications: null == pushNotifications
             ? _self.pushNotifications
             : pushNotifications // ignore: cast_nullable_to_non_nullable
@@ -390,6 +426,22 @@ class _$ChannelConfigWithInfoCopyWithImpl<$Res> implements $ChannelConfigWithInf
             ? _self.replies
             : replies // ignore: cast_nullable_to_non_nullable
                   as bool,
+        scheduledMessagesMaxLeadTimeSeconds: freezed == scheduledMessagesMaxLeadTimeSeconds
+            ? _self.scheduledMessagesMaxLeadTimeSeconds
+            : scheduledMessagesMaxLeadTimeSeconds // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        scheduledMessagesMaxPerChannel: freezed == scheduledMessagesMaxPerChannel
+            ? _self.scheduledMessagesMaxPerChannel
+            : scheduledMessagesMaxPerChannel // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        scheduledMessagesMaxPerUser: freezed == scheduledMessagesMaxPerUser
+            ? _self.scheduledMessagesMaxPerUser
+            : scheduledMessagesMaxPerUser // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        scheduledMessagesMinLeadTimeSeconds: freezed == scheduledMessagesMinLeadTimeSeconds
+            ? _self.scheduledMessagesMinLeadTimeSeconds
+            : scheduledMessagesMinLeadTimeSeconds // ignore: cast_nullable_to_non_nullable
+                  as int?,
         search: null == search
             ? _self.search
             : search // ignore: cast_nullable_to_non_nullable

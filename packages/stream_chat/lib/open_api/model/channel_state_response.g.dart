@@ -46,6 +46,9 @@ ChannelStateResponse _$ChannelStateResponseFromJson(
           json['push_preferences'] as Map<String, dynamic>,
         ),
   read: (json['read'] as List<dynamic>?)?.map((e) => ReadStateResponse.fromJson(e as Map<String, dynamic>)).toList(),
+  scheduledMessages: (json['scheduled_messages'] as List<dynamic>?)
+      ?.map((e) => ScheduledMessageResponse.fromJson(e as Map<String, dynamic>))
+      .toList(),
   threads: (json['threads'] as List<dynamic>)
       .map((e) => ThreadStateResponse.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -73,6 +76,7 @@ Map<String, dynamic> _$ChannelStateResponseToJson(
   'pinned_messages': instance.pinnedMessages.map((e) => e.toJson()).toList(),
   'push_preferences': instance.pushPreferences?.toJson(),
   'read': instance.read?.map((e) => e.toJson()).toList(),
+  'scheduled_messages': instance.scheduledMessages?.map((e) => e.toJson()).toList(),
   'threads': instance.threads.map((e) => e.toJson()).toList(),
   'watcher_count': instance.watcherCount,
   'watchers': instance.watchers?.map((e) => e.toJson()).toList(),

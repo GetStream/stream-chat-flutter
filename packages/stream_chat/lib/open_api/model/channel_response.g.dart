@@ -9,6 +9,7 @@ part of 'channel_response.dart';
 ChannelResponse _$ChannelResponseFromJson(
   Map<String, dynamic> json,
 ) => ChannelResponse(
+  activeMemberCount: (json['active_member_count'] as num?)?.toInt(),
   autoTranslationEnabled: json['auto_translation_enabled'] as bool?,
   autoTranslationLanguage: json['auto_translation_language'] as String?,
   blocked: json['blocked'] as bool?,
@@ -67,6 +68,7 @@ ChannelResponse _$ChannelResponseFromJson(
 Map<String, dynamic> _$ChannelResponseToJson(
   ChannelResponse instance,
 ) => <String, dynamic>{
+  'active_member_count': instance.activeMemberCount,
   'auto_translation_enabled': instance.autoTranslationEnabled,
   'auto_translation_language': instance.autoTranslationLanguage,
   'blocked': instance.blocked,

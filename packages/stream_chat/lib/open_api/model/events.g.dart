@@ -236,6 +236,50 @@ Map<String, dynamic> _$ChannelDeletedEventToJson(
   'user': instance.user?.toJson(),
 };
 
+ChannelForkedEvent _$ChannelForkedEventFromJson(
+  Map<String, dynamic> json,
+) => ChannelForkedEvent(
+  channel: ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channelCustom: json['channel_custom'] as Map<String, dynamic>?,
+  channelId: json['channel_id'] as String?,
+  channelMemberCount: (json['channel_member_count'] as num?)?.toInt(),
+  channelMessageCount: (json['channel_message_count'] as num?)?.toInt(),
+  channelType: json['channel_type'] as String?,
+  cid: json['cid'] as String?,
+  createdAt: const StreamDateTimeConverter().fromJson(
+    json['created_at'] as Object,
+  ),
+  custom: json['custom'] as Map<String, dynamic>,
+  fork: ChannelForkSummary.fromJson(json['fork'] as Map<String, dynamic>),
+  receivedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['received_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
+  team: json['team'] as String?,
+  type: json['type'] as String,
+  user: json['user'] == null ? null : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$ChannelForkedEventToJson(ChannelForkedEvent instance) => <String, dynamic>{
+  'channel': instance.channel.toJson(),
+  'channel_custom': instance.channelCustom,
+  'channel_id': instance.channelId,
+  'channel_member_count': instance.channelMemberCount,
+  'channel_message_count': instance.channelMessageCount,
+  'channel_type': instance.channelType,
+  'cid': instance.cid,
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
+  'custom': instance.custom,
+  'fork': instance.fork.toJson(),
+  'received_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.receivedAt,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'team': instance.team,
+  'type': instance.type,
+  'user': instance.user?.toJson(),
+};
+
 ChannelFrozenEvent _$ChannelFrozenEventFromJson(Map<String, dynamic> json) => ChannelFrozenEvent(
   channelId: json['channel_id'] as String?,
   channelType: json['channel_type'] as String?,
@@ -342,6 +386,54 @@ Map<String, dynamic> _$ChannelKickedEventToJson(ChannelKickedEvent instance) => 
   ),
   'team': instance.team,
   'type': instance.type,
+};
+
+ChannelRewoundEvent _$ChannelRewoundEventFromJson(
+  Map<String, dynamic> json,
+) => ChannelRewoundEvent(
+  channel: ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channelCustom: json['channel_custom'] as Map<String, dynamic>?,
+  channelId: json['channel_id'] as String?,
+  channelMemberCount: (json['channel_member_count'] as num?)?.toInt(),
+  channelMessageCount: (json['channel_message_count'] as num?)?.toInt(),
+  channelType: json['channel_type'] as String?,
+  cid: json['cid'] as String?,
+  createdAt: const StreamDateTimeConverter().fromJson(
+    json['created_at'] as Object,
+  ),
+  custom: json['custom'] as Map<String, dynamic>,
+  receivedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['received_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
+  rewind: ChannelRewindResponse.fromJson(
+    json['rewind'] as Map<String, dynamic>,
+  ),
+  team: json['team'] as String?,
+  type: json['type'] as String,
+  user: json['user'] == null ? null : UserResponseCommonFields.fromJson(json['user'] as Map<String, dynamic>),
+);
+
+Map<String, dynamic> _$ChannelRewoundEventToJson(
+  ChannelRewoundEvent instance,
+) => <String, dynamic>{
+  'channel': instance.channel.toJson(),
+  'channel_custom': instance.channelCustom,
+  'channel_id': instance.channelId,
+  'channel_member_count': instance.channelMemberCount,
+  'channel_message_count': instance.channelMessageCount,
+  'channel_type': instance.channelType,
+  'cid': instance.cid,
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
+  'custom': instance.custom,
+  'received_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.receivedAt,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'rewind': instance.rewind.toJson(),
+  'team': instance.team,
+  'type': instance.type,
+  'user': instance.user?.toJson(),
 };
 
 ChannelTruncatedEvent _$ChannelTruncatedEventFromJson(
@@ -822,7 +914,10 @@ MessageDeliveredEvent _$MessageDeliveredEventFromJson(
     json['created_at'] as Object,
   ),
   custom: json['custom'] as Map<String, dynamic>,
-  lastDeliveredAt: json['last_delivered_at'] as String?,
+  lastDeliveredAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['last_delivered_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
   lastDeliveredMessageId: json['last_delivered_message_id'] as String?,
   receivedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['received_at'],
@@ -845,7 +940,10 @@ Map<String, dynamic> _$MessageDeliveredEventToJson(
   'cid': instance.cid,
   'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'custom': instance.custom,
-  'last_delivered_at': instance.lastDeliveredAt,
+  'last_delivered_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.lastDeliveredAt,
+    const StreamDateTimeConverter().toJson,
+  ),
   'last_delivered_message_id': instance.lastDeliveredMessageId,
   'received_at': _$JsonConverterToJson<Object, DateTime>(
     instance.receivedAt,
@@ -1291,6 +1389,105 @@ Map<String, dynamic> _$NotificationChannelMutesUpdatedEventToJson(
     const StreamDateTimeConverter().toJson,
   ),
   'type': instance.type,
+};
+
+NotificationChannelPartialUpdatedEvent _$NotificationChannelPartialUpdatedEventFromJson(Map<String, dynamic> json) =>
+    NotificationChannelPartialUpdatedEvent(
+      channel: ChannelPartialUpdateResponse.fromJson(
+        json['channel'] as Map<String, dynamic>,
+      ),
+      channelCustom: json['channel_custom'] as Map<String, dynamic>?,
+      channelId: json['channel_id'] as String?,
+      channelMemberCount: (json['channel_member_count'] as num?)?.toInt(),
+      channelMessageCount: (json['channel_message_count'] as num?)?.toInt(),
+      channelType: json['channel_type'] as String?,
+      cid: json['cid'] as String?,
+      createdAt: const StreamDateTimeConverter().fromJson(
+        json['created_at'] as Object,
+      ),
+      custom: json['custom'] as Map<String, dynamic>,
+      receivedAt: _$JsonConverterFromJson<Object, DateTime>(
+        json['received_at'],
+        const StreamDateTimeConverter().fromJson,
+      ),
+      team: json['team'] as String?,
+      type: json['type'] as String,
+    );
+
+Map<String, dynamic> _$NotificationChannelPartialUpdatedEventToJson(
+  NotificationChannelPartialUpdatedEvent instance,
+) => <String, dynamic>{
+  'channel': instance.channel.toJson(),
+  'channel_custom': instance.channelCustom,
+  'channel_id': instance.channelId,
+  'channel_member_count': instance.channelMemberCount,
+  'channel_message_count': instance.channelMessageCount,
+  'channel_type': instance.channelType,
+  'cid': instance.cid,
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
+  'custom': instance.custom,
+  'received_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.receivedAt,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'team': instance.team,
+  'type': instance.type,
+};
+
+NotificationChannelRewoundEvent _$NotificationChannelRewoundEventFromJson(
+  Map<String, dynamic> json,
+) => NotificationChannelRewoundEvent(
+  channel: ChannelResponse.fromJson(json['channel'] as Map<String, dynamic>),
+  channelCustom: json['channel_custom'] as Map<String, dynamic>?,
+  channelId: json['channel_id'] as String?,
+  channelMemberCount: (json['channel_member_count'] as num?)?.toInt(),
+  channelMessageCount: (json['channel_message_count'] as num?)?.toInt(),
+  channelType: json['channel_type'] as String?,
+  cid: json['cid'] as String?,
+  createdAt: const StreamDateTimeConverter().fromJson(
+    json['created_at'] as Object,
+  ),
+  custom: json['custom'] as Map<String, dynamic>,
+  groupedUnreadChannels: (json['grouped_unread_channels'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, (e as num).toInt()),
+  ),
+  receivedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['received_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
+  rewind: ChannelRewindResponse.fromJson(
+    json['rewind'] as Map<String, dynamic>,
+  ),
+  team: json['team'] as String?,
+  totalUnreadCount: (json['total_unread_count'] as num?)?.toInt(),
+  type: json['type'] as String,
+  unreadChannels: (json['unread_channels'] as num?)?.toInt(),
+  unreadCount: (json['unread_count'] as num?)?.toInt(),
+);
+
+Map<String, dynamic> _$NotificationChannelRewoundEventToJson(
+  NotificationChannelRewoundEvent instance,
+) => <String, dynamic>{
+  'channel': instance.channel.toJson(),
+  'channel_custom': instance.channelCustom,
+  'channel_id': instance.channelId,
+  'channel_member_count': instance.channelMemberCount,
+  'channel_message_count': instance.channelMessageCount,
+  'channel_type': instance.channelType,
+  'cid': instance.cid,
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
+  'custom': instance.custom,
+  'grouped_unread_channels': instance.groupedUnreadChannels,
+  'received_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.receivedAt,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'rewind': instance.rewind.toJson(),
+  'team': instance.team,
+  'total_unread_count': instance.totalUnreadCount,
+  'type': instance.type,
+  'unread_channels': instance.unreadChannels,
+  'unread_count': instance.unreadCount,
 };
 
 NotificationChannelTruncatedEvent _$NotificationChannelTruncatedEventFromJson(

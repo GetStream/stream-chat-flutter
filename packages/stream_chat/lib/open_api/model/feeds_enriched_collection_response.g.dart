@@ -15,7 +15,7 @@ FeedsEnrichedCollectionResponse _$FeedsEnrichedCollectionResponseFromJson(
   custom: json['custom'] as Map<String, dynamic>,
   id: json['id'] as String,
   name: json['name'] as String,
-  status: json['status'] as String,
+  status: CollectionStatus.fromJson(json['status'] as String),
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
@@ -29,7 +29,7 @@ Map<String, dynamic> _$FeedsEnrichedCollectionResponseToJson(
   'custom': instance.custom,
   'id': instance.id,
   'name': instance.name,
-  'status': instance.status,
+  'status': instance.status.toJson(),
   'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
   'user_id': instance.userId,
 };

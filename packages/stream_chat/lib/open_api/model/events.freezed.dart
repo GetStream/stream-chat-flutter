@@ -915,6 +915,198 @@ class _$ChannelDeletedEventCopyWithImpl<$Res> implements $ChannelDeletedEventCop
 }
 
 /// @nodoc
+mixin _$ChannelForkedEvent {
+  ChannelResponse get channel;
+  Map<String, Object?>? get channelCustom;
+  String? get channelId;
+  int? get channelMemberCount;
+  int? get channelMessageCount;
+  String? get channelType;
+  String? get cid;
+  DateTime get createdAt;
+  Map<String, Object?> get custom;
+  ChannelForkSummary get fork;
+  DateTime? get receivedAt;
+  String? get team;
+  String get type;
+  UserResponseCommonFields? get user;
+
+  /// Create a copy of ChannelForkedEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $ChannelForkedEventCopyWith<ChannelForkedEvent> get copyWith => _$ChannelForkedEventCopyWithImpl<ChannelForkedEvent>(
+    this as ChannelForkedEvent,
+    _$identity,
+  );
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is ChannelForkedEvent &&
+            (identical(other.channel, channel) || other.channel == channel) &&
+            const DeepCollectionEquality().equals(
+              other.channelCustom,
+              channelCustom,
+            ) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
+            (identical(other.channelMemberCount, channelMemberCount) ||
+                other.channelMemberCount == channelMemberCount) &&
+            (identical(other.channelMessageCount, channelMessageCount) ||
+                other.channelMessageCount == channelMessageCount) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
+            (identical(other.cid, cid) || other.cid == cid) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            const DeepCollectionEquality().equals(other.custom, custom) &&
+            (identical(other.fork, fork) || other.fork == fork) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
+            (identical(other.team, team) || other.team == team) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.user, user) || other.user == user));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    channel,
+    const DeepCollectionEquality().hash(channelCustom),
+    channelId,
+    channelMemberCount,
+    channelMessageCount,
+    channelType,
+    cid,
+    createdAt,
+    const DeepCollectionEquality().hash(custom),
+    fork,
+    receivedAt,
+    team,
+    type,
+    user,
+  );
+
+  @override
+  String toString() {
+    return 'ChannelForkedEvent(channel: $channel, channelCustom: $channelCustom, channelId: $channelId, channelMemberCount: $channelMemberCount, channelMessageCount: $channelMessageCount, channelType: $channelType, cid: $cid, createdAt: $createdAt, custom: $custom, fork: $fork, receivedAt: $receivedAt, team: $team, type: $type, user: $user)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $ChannelForkedEventCopyWith<$Res> {
+  factory $ChannelForkedEventCopyWith(
+    ChannelForkedEvent value,
+    $Res Function(ChannelForkedEvent) _then,
+  ) = _$ChannelForkedEventCopyWithImpl;
+  @useResult
+  $Res call({
+    ChannelResponse channel,
+    Map<String, Object?>? channelCustom,
+    String? channelId,
+    int? channelMemberCount,
+    int? channelMessageCount,
+    String? channelType,
+    String? cid,
+    DateTime createdAt,
+    Map<String, Object?> custom,
+    ChannelForkSummary fork,
+    DateTime? receivedAt,
+    String? team,
+    String type,
+    UserResponseCommonFields? user,
+  });
+}
+
+/// @nodoc
+class _$ChannelForkedEventCopyWithImpl<$Res> implements $ChannelForkedEventCopyWith<$Res> {
+  _$ChannelForkedEventCopyWithImpl(this._self, this._then);
+
+  final ChannelForkedEvent _self;
+  final $Res Function(ChannelForkedEvent) _then;
+
+  /// Create a copy of ChannelForkedEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? channel = null,
+    Object? channelCustom = freezed,
+    Object? channelId = freezed,
+    Object? channelMemberCount = freezed,
+    Object? channelMessageCount = freezed,
+    Object? channelType = freezed,
+    Object? cid = freezed,
+    Object? createdAt = null,
+    Object? custom = null,
+    Object? fork = null,
+    Object? receivedAt = freezed,
+    Object? team = freezed,
+    Object? type = null,
+    Object? user = freezed,
+  }) {
+    return _then(
+      ChannelForkedEvent(
+        channel: null == channel
+            ? _self.channel
+            : channel // ignore: cast_nullable_to_non_nullable
+                  as ChannelResponse,
+        channelCustom: freezed == channelCustom
+            ? _self.channelCustom
+            : channelCustom // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>?,
+        channelId: freezed == channelId
+            ? _self.channelId
+            : channelId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        channelMemberCount: freezed == channelMemberCount
+            ? _self.channelMemberCount
+            : channelMemberCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        channelMessageCount: freezed == channelMessageCount
+            ? _self.channelMessageCount
+            : channelMessageCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        channelType: freezed == channelType
+            ? _self.channelType
+            : channelType // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        cid: freezed == cid
+            ? _self.cid
+            : cid // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        custom: null == custom
+            ? _self.custom
+            : custom // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>,
+        fork: null == fork
+            ? _self.fork
+            : fork // ignore: cast_nullable_to_non_nullable
+                  as ChannelForkSummary,
+        receivedAt: freezed == receivedAt
+            ? _self.receivedAt
+            : receivedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        team: freezed == team
+            ? _self.team
+            : team // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String,
+        user: freezed == user
+            ? _self.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as UserResponseCommonFields?,
+      ),
+    );
+  }
+}
+
+/// @nodoc
 mixin _$ChannelFrozenEvent {
   String? get channelId;
   String? get channelType;
@@ -1390,6 +1582,199 @@ class _$ChannelKickedEventCopyWithImpl<$Res> implements $ChannelKickedEventCopyW
             ? _self.type
             : type // ignore: cast_nullable_to_non_nullable
                   as String,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+mixin _$ChannelRewoundEvent {
+  ChannelResponse get channel;
+  Map<String, Object?>? get channelCustom;
+  String? get channelId;
+  int? get channelMemberCount;
+  int? get channelMessageCount;
+  String? get channelType;
+  String? get cid;
+  DateTime get createdAt;
+  Map<String, Object?> get custom;
+  DateTime? get receivedAt;
+  ChannelRewindResponse get rewind;
+  String? get team;
+  String get type;
+  UserResponseCommonFields? get user;
+
+  /// Create a copy of ChannelRewoundEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $ChannelRewoundEventCopyWith<ChannelRewoundEvent> get copyWith =>
+      _$ChannelRewoundEventCopyWithImpl<ChannelRewoundEvent>(
+        this as ChannelRewoundEvent,
+        _$identity,
+      );
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is ChannelRewoundEvent &&
+            (identical(other.channel, channel) || other.channel == channel) &&
+            const DeepCollectionEquality().equals(
+              other.channelCustom,
+              channelCustom,
+            ) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
+            (identical(other.channelMemberCount, channelMemberCount) ||
+                other.channelMemberCount == channelMemberCount) &&
+            (identical(other.channelMessageCount, channelMessageCount) ||
+                other.channelMessageCount == channelMessageCount) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
+            (identical(other.cid, cid) || other.cid == cid) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            const DeepCollectionEquality().equals(other.custom, custom) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
+            (identical(other.rewind, rewind) || other.rewind == rewind) &&
+            (identical(other.team, team) || other.team == team) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.user, user) || other.user == user));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    channel,
+    const DeepCollectionEquality().hash(channelCustom),
+    channelId,
+    channelMemberCount,
+    channelMessageCount,
+    channelType,
+    cid,
+    createdAt,
+    const DeepCollectionEquality().hash(custom),
+    receivedAt,
+    rewind,
+    team,
+    type,
+    user,
+  );
+
+  @override
+  String toString() {
+    return 'ChannelRewoundEvent(channel: $channel, channelCustom: $channelCustom, channelId: $channelId, channelMemberCount: $channelMemberCount, channelMessageCount: $channelMessageCount, channelType: $channelType, cid: $cid, createdAt: $createdAt, custom: $custom, receivedAt: $receivedAt, rewind: $rewind, team: $team, type: $type, user: $user)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $ChannelRewoundEventCopyWith<$Res> {
+  factory $ChannelRewoundEventCopyWith(
+    ChannelRewoundEvent value,
+    $Res Function(ChannelRewoundEvent) _then,
+  ) = _$ChannelRewoundEventCopyWithImpl;
+  @useResult
+  $Res call({
+    ChannelResponse channel,
+    Map<String, Object?>? channelCustom,
+    String? channelId,
+    int? channelMemberCount,
+    int? channelMessageCount,
+    String? channelType,
+    String? cid,
+    DateTime createdAt,
+    Map<String, Object?> custom,
+    DateTime? receivedAt,
+    ChannelRewindResponse rewind,
+    String? team,
+    String type,
+    UserResponseCommonFields? user,
+  });
+}
+
+/// @nodoc
+class _$ChannelRewoundEventCopyWithImpl<$Res> implements $ChannelRewoundEventCopyWith<$Res> {
+  _$ChannelRewoundEventCopyWithImpl(this._self, this._then);
+
+  final ChannelRewoundEvent _self;
+  final $Res Function(ChannelRewoundEvent) _then;
+
+  /// Create a copy of ChannelRewoundEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? channel = null,
+    Object? channelCustom = freezed,
+    Object? channelId = freezed,
+    Object? channelMemberCount = freezed,
+    Object? channelMessageCount = freezed,
+    Object? channelType = freezed,
+    Object? cid = freezed,
+    Object? createdAt = null,
+    Object? custom = null,
+    Object? receivedAt = freezed,
+    Object? rewind = null,
+    Object? team = freezed,
+    Object? type = null,
+    Object? user = freezed,
+  }) {
+    return _then(
+      ChannelRewoundEvent(
+        channel: null == channel
+            ? _self.channel
+            : channel // ignore: cast_nullable_to_non_nullable
+                  as ChannelResponse,
+        channelCustom: freezed == channelCustom
+            ? _self.channelCustom
+            : channelCustom // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>?,
+        channelId: freezed == channelId
+            ? _self.channelId
+            : channelId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        channelMemberCount: freezed == channelMemberCount
+            ? _self.channelMemberCount
+            : channelMemberCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        channelMessageCount: freezed == channelMessageCount
+            ? _self.channelMessageCount
+            : channelMessageCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        channelType: freezed == channelType
+            ? _self.channelType
+            : channelType // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        cid: freezed == cid
+            ? _self.cid
+            : cid // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        custom: null == custom
+            ? _self.custom
+            : custom // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>,
+        receivedAt: freezed == receivedAt
+            ? _self.receivedAt
+            : receivedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        rewind: null == rewind
+            ? _self.rewind
+            : rewind // ignore: cast_nullable_to_non_nullable
+                  as ChannelRewindResponse,
+        team: freezed == team
+            ? _self.team
+            : team // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String,
+        user: freezed == user
+            ? _self.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as UserResponseCommonFields?,
       ),
     );
   }
@@ -3347,7 +3732,7 @@ mixin _$MessageDeliveredEvent {
   String? get cid;
   DateTime get createdAt;
   Map<String, Object?> get custom;
-  String? get lastDeliveredAt;
+  DateTime? get lastDeliveredAt;
   String? get lastDeliveredMessageId;
   DateTime? get receivedAt;
   String? get team;
@@ -3435,7 +3820,7 @@ abstract mixin class $MessageDeliveredEventCopyWith<$Res> {
     String? cid,
     DateTime createdAt,
     Map<String, Object?> custom,
-    String? lastDeliveredAt,
+    DateTime? lastDeliveredAt,
     String? lastDeliveredMessageId,
     DateTime? receivedAt,
     String? team,
@@ -3513,7 +3898,7 @@ class _$MessageDeliveredEventCopyWithImpl<$Res> implements $MessageDeliveredEven
         lastDeliveredAt: freezed == lastDeliveredAt
             ? _self.lastDeliveredAt
             : lastDeliveredAt // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as DateTime?,
         lastDeliveredMessageId: freezed == lastDeliveredMessageId
             ? _self.lastDeliveredMessageId
             : lastDeliveredMessageId // ignore: cast_nullable_to_non_nullable
@@ -5305,6 +5690,405 @@ class _$NotificationChannelMutesUpdatedEventCopyWithImpl<$Res>
             ? _self.type
             : type // ignore: cast_nullable_to_non_nullable
                   as String,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+mixin _$NotificationChannelPartialUpdatedEvent {
+  ChannelPartialUpdateResponse get channel;
+  Map<String, Object?>? get channelCustom;
+  String? get channelId;
+  int? get channelMemberCount;
+  int? get channelMessageCount;
+  String? get channelType;
+  String? get cid;
+  DateTime get createdAt;
+  Map<String, Object?> get custom;
+  DateTime? get receivedAt;
+  String? get team;
+  String get type;
+
+  /// Create a copy of NotificationChannelPartialUpdatedEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $NotificationChannelPartialUpdatedEventCopyWith<NotificationChannelPartialUpdatedEvent> get copyWith =>
+      _$NotificationChannelPartialUpdatedEventCopyWithImpl<NotificationChannelPartialUpdatedEvent>(
+        this as NotificationChannelPartialUpdatedEvent,
+        _$identity,
+      );
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is NotificationChannelPartialUpdatedEvent &&
+            (identical(other.channel, channel) || other.channel == channel) &&
+            const DeepCollectionEquality().equals(
+              other.channelCustom,
+              channelCustom,
+            ) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
+            (identical(other.channelMemberCount, channelMemberCount) ||
+                other.channelMemberCount == channelMemberCount) &&
+            (identical(other.channelMessageCount, channelMessageCount) ||
+                other.channelMessageCount == channelMessageCount) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
+            (identical(other.cid, cid) || other.cid == cid) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            const DeepCollectionEquality().equals(other.custom, custom) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
+            (identical(other.team, team) || other.team == team) &&
+            (identical(other.type, type) || other.type == type));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    channel,
+    const DeepCollectionEquality().hash(channelCustom),
+    channelId,
+    channelMemberCount,
+    channelMessageCount,
+    channelType,
+    cid,
+    createdAt,
+    const DeepCollectionEquality().hash(custom),
+    receivedAt,
+    team,
+    type,
+  );
+
+  @override
+  String toString() {
+    return 'NotificationChannelPartialUpdatedEvent(channel: $channel, channelCustom: $channelCustom, channelId: $channelId, channelMemberCount: $channelMemberCount, channelMessageCount: $channelMessageCount, channelType: $channelType, cid: $cid, createdAt: $createdAt, custom: $custom, receivedAt: $receivedAt, team: $team, type: $type)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $NotificationChannelPartialUpdatedEventCopyWith<$Res> {
+  factory $NotificationChannelPartialUpdatedEventCopyWith(
+    NotificationChannelPartialUpdatedEvent value,
+    $Res Function(NotificationChannelPartialUpdatedEvent) _then,
+  ) = _$NotificationChannelPartialUpdatedEventCopyWithImpl;
+  @useResult
+  $Res call({
+    ChannelPartialUpdateResponse channel,
+    Map<String, Object?>? channelCustom,
+    String? channelId,
+    int? channelMemberCount,
+    int? channelMessageCount,
+    String? channelType,
+    String? cid,
+    DateTime createdAt,
+    Map<String, Object?> custom,
+    DateTime? receivedAt,
+    String? team,
+    String type,
+  });
+}
+
+/// @nodoc
+class _$NotificationChannelPartialUpdatedEventCopyWithImpl<$Res>
+    implements $NotificationChannelPartialUpdatedEventCopyWith<$Res> {
+  _$NotificationChannelPartialUpdatedEventCopyWithImpl(this._self, this._then);
+
+  final NotificationChannelPartialUpdatedEvent _self;
+  final $Res Function(NotificationChannelPartialUpdatedEvent) _then;
+
+  /// Create a copy of NotificationChannelPartialUpdatedEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? channel = null,
+    Object? channelCustom = freezed,
+    Object? channelId = freezed,
+    Object? channelMemberCount = freezed,
+    Object? channelMessageCount = freezed,
+    Object? channelType = freezed,
+    Object? cid = freezed,
+    Object? createdAt = null,
+    Object? custom = null,
+    Object? receivedAt = freezed,
+    Object? team = freezed,
+    Object? type = null,
+  }) {
+    return _then(
+      NotificationChannelPartialUpdatedEvent(
+        channel: null == channel
+            ? _self.channel
+            : channel // ignore: cast_nullable_to_non_nullable
+                  as ChannelPartialUpdateResponse,
+        channelCustom: freezed == channelCustom
+            ? _self.channelCustom
+            : channelCustom // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>?,
+        channelId: freezed == channelId
+            ? _self.channelId
+            : channelId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        channelMemberCount: freezed == channelMemberCount
+            ? _self.channelMemberCount
+            : channelMemberCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        channelMessageCount: freezed == channelMessageCount
+            ? _self.channelMessageCount
+            : channelMessageCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        channelType: freezed == channelType
+            ? _self.channelType
+            : channelType // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        cid: freezed == cid
+            ? _self.cid
+            : cid // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        custom: null == custom
+            ? _self.custom
+            : custom // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>,
+        receivedAt: freezed == receivedAt
+            ? _self.receivedAt
+            : receivedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        team: freezed == team
+            ? _self.team
+            : team // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+mixin _$NotificationChannelRewoundEvent {
+  ChannelResponse get channel;
+  Map<String, Object?>? get channelCustom;
+  String? get channelId;
+  int? get channelMemberCount;
+  int? get channelMessageCount;
+  String? get channelType;
+  String? get cid;
+  DateTime get createdAt;
+  Map<String, Object?> get custom;
+  Map<String, int>? get groupedUnreadChannels;
+  DateTime? get receivedAt;
+  ChannelRewindResponse get rewind;
+  String? get team;
+  int? get totalUnreadCount;
+  String get type;
+  int? get unreadChannels;
+  int? get unreadCount;
+
+  /// Create a copy of NotificationChannelRewoundEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $NotificationChannelRewoundEventCopyWith<NotificationChannelRewoundEvent> get copyWith =>
+      _$NotificationChannelRewoundEventCopyWithImpl<NotificationChannelRewoundEvent>(
+        this as NotificationChannelRewoundEvent,
+        _$identity,
+      );
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is NotificationChannelRewoundEvent &&
+            (identical(other.channel, channel) || other.channel == channel) &&
+            const DeepCollectionEquality().equals(
+              other.channelCustom,
+              channelCustom,
+            ) &&
+            (identical(other.channelId, channelId) || other.channelId == channelId) &&
+            (identical(other.channelMemberCount, channelMemberCount) ||
+                other.channelMemberCount == channelMemberCount) &&
+            (identical(other.channelMessageCount, channelMessageCount) ||
+                other.channelMessageCount == channelMessageCount) &&
+            (identical(other.channelType, channelType) || other.channelType == channelType) &&
+            (identical(other.cid, cid) || other.cid == cid) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            const DeepCollectionEquality().equals(other.custom, custom) &&
+            const DeepCollectionEquality().equals(
+              other.groupedUnreadChannels,
+              groupedUnreadChannels,
+            ) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
+            (identical(other.rewind, rewind) || other.rewind == rewind) &&
+            (identical(other.team, team) || other.team == team) &&
+            (identical(other.totalUnreadCount, totalUnreadCount) || other.totalUnreadCount == totalUnreadCount) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.unreadChannels, unreadChannels) || other.unreadChannels == unreadChannels) &&
+            (identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    channel,
+    const DeepCollectionEquality().hash(channelCustom),
+    channelId,
+    channelMemberCount,
+    channelMessageCount,
+    channelType,
+    cid,
+    createdAt,
+    const DeepCollectionEquality().hash(custom),
+    const DeepCollectionEquality().hash(groupedUnreadChannels),
+    receivedAt,
+    rewind,
+    team,
+    totalUnreadCount,
+    type,
+    unreadChannels,
+    unreadCount,
+  );
+
+  @override
+  String toString() {
+    return 'NotificationChannelRewoundEvent(channel: $channel, channelCustom: $channelCustom, channelId: $channelId, channelMemberCount: $channelMemberCount, channelMessageCount: $channelMessageCount, channelType: $channelType, cid: $cid, createdAt: $createdAt, custom: $custom, groupedUnreadChannels: $groupedUnreadChannels, receivedAt: $receivedAt, rewind: $rewind, team: $team, totalUnreadCount: $totalUnreadCount, type: $type, unreadChannels: $unreadChannels, unreadCount: $unreadCount)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $NotificationChannelRewoundEventCopyWith<$Res> {
+  factory $NotificationChannelRewoundEventCopyWith(
+    NotificationChannelRewoundEvent value,
+    $Res Function(NotificationChannelRewoundEvent) _then,
+  ) = _$NotificationChannelRewoundEventCopyWithImpl;
+  @useResult
+  $Res call({
+    ChannelResponse channel,
+    Map<String, Object?>? channelCustom,
+    String? channelId,
+    int? channelMemberCount,
+    int? channelMessageCount,
+    String? channelType,
+    String? cid,
+    DateTime createdAt,
+    Map<String, Object?> custom,
+    Map<String, int>? groupedUnreadChannels,
+    DateTime? receivedAt,
+    ChannelRewindResponse rewind,
+    String? team,
+    int? totalUnreadCount,
+    String type,
+    int? unreadChannels,
+    int? unreadCount,
+  });
+}
+
+/// @nodoc
+class _$NotificationChannelRewoundEventCopyWithImpl<$Res> implements $NotificationChannelRewoundEventCopyWith<$Res> {
+  _$NotificationChannelRewoundEventCopyWithImpl(this._self, this._then);
+
+  final NotificationChannelRewoundEvent _self;
+  final $Res Function(NotificationChannelRewoundEvent) _then;
+
+  /// Create a copy of NotificationChannelRewoundEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? channel = null,
+    Object? channelCustom = freezed,
+    Object? channelId = freezed,
+    Object? channelMemberCount = freezed,
+    Object? channelMessageCount = freezed,
+    Object? channelType = freezed,
+    Object? cid = freezed,
+    Object? createdAt = null,
+    Object? custom = null,
+    Object? groupedUnreadChannels = freezed,
+    Object? receivedAt = freezed,
+    Object? rewind = null,
+    Object? team = freezed,
+    Object? totalUnreadCount = freezed,
+    Object? type = null,
+    Object? unreadChannels = freezed,
+    Object? unreadCount = freezed,
+  }) {
+    return _then(
+      NotificationChannelRewoundEvent(
+        channel: null == channel
+            ? _self.channel
+            : channel // ignore: cast_nullable_to_non_nullable
+                  as ChannelResponse,
+        channelCustom: freezed == channelCustom
+            ? _self.channelCustom
+            : channelCustom // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>?,
+        channelId: freezed == channelId
+            ? _self.channelId
+            : channelId // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        channelMemberCount: freezed == channelMemberCount
+            ? _self.channelMemberCount
+            : channelMemberCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        channelMessageCount: freezed == channelMessageCount
+            ? _self.channelMessageCount
+            : channelMessageCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        channelType: freezed == channelType
+            ? _self.channelType
+            : channelType // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        cid: freezed == cid
+            ? _self.cid
+            : cid // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        custom: null == custom
+            ? _self.custom
+            : custom // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>,
+        groupedUnreadChannels: freezed == groupedUnreadChannels
+            ? _self.groupedUnreadChannels
+            : groupedUnreadChannels // ignore: cast_nullable_to_non_nullable
+                  as Map<String, int>?,
+        receivedAt: freezed == receivedAt
+            ? _self.receivedAt
+            : receivedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        rewind: null == rewind
+            ? _self.rewind
+            : rewind // ignore: cast_nullable_to_non_nullable
+                  as ChannelRewindResponse,
+        team: freezed == team
+            ? _self.team
+            : team // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        totalUnreadCount: freezed == totalUnreadCount
+            ? _self.totalUnreadCount
+            : totalUnreadCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String,
+        unreadChannels: freezed == unreadChannels
+            ? _self.unreadChannels
+            : unreadChannels // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        unreadCount: freezed == unreadCount
+            ? _self.unreadCount
+            : unreadCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
       ),
     );
   }

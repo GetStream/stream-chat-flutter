@@ -13,17 +13,6 @@ import '../models.dart';
 part 'delete_user_messages_request_payload.g.dart';
 part 'delete_user_messages_request_payload.freezed.dart';
 
-extension type const DeleteUserMessagesRequestPayloadDeleteMessages(String _) implements String {
-  static const hard = DeleteUserMessagesRequestPayloadDeleteMessages('hard');
-  static const pruning = DeleteUserMessagesRequestPayloadDeleteMessages('pruning');
-  static const soft = DeleteUserMessagesRequestPayloadDeleteMessages('soft');
-
-  factory DeleteUserMessagesRequestPayloadDeleteMessages.fromJson(String json) =>
-      DeleteUserMessagesRequestPayloadDeleteMessages(json);
-
-  String toJson() => this;
-}
-
 @freezed
 @immutable
 @JsonSerializable()
@@ -43,7 +32,7 @@ class DeleteUserMessagesRequestPayload with _$DeleteUserMessagesRequestPayload {
 
   @override
   @JsonKey(name: 'delete_messages')
-  final DeleteUserMessagesRequestPayloadDeleteMessages deleteMessages;
+  final DeleteMessages deleteMessages;
 
   @override
   @JsonKey(name: 'delete_reactions')

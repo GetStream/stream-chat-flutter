@@ -22,9 +22,7 @@ CreatePollRequest _$CreatePollRequestFromJson(Map<String, dynamic> json) => Crea
   team: json['team'] as String?,
   votingVisibility: json['voting_visibility'] == null
       ? null
-      : CreatePollRequestVotingVisibility.fromJson(
-          json['voting_visibility'] as String,
-        ),
+      : VotingVisibility.fromJson(json['voting_visibility'] as String),
 );
 
 Map<String, dynamic> _$CreatePollRequestToJson(CreatePollRequest instance) => <String, dynamic>{

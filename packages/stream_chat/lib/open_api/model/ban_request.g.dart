@@ -9,9 +9,7 @@ part of 'ban_request.dart';
 BanRequest _$BanRequestFromJson(Map<String, dynamic> json) => BanRequest(
   banFromFutureChannels: json['ban_from_future_channels'] as bool?,
   channelCid: json['channel_cid'] as String?,
-  deleteMessages: json['delete_messages'] == null
-      ? null
-      : BanRequestDeleteMessages.fromJson(json['delete_messages'] as String),
+  deleteMessages: json['delete_messages'] == null ? null : DeleteMessages.fromJson(json['delete_messages'] as String),
   deleteReactions: json['delete_reactions'] as bool?,
   ipBan: json['ip_ban'] as bool?,
   reason: json['reason'] as String?,

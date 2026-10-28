@@ -20,6 +20,7 @@ class ChannelGetOrCreateRequest with _$ChannelGetOrCreateRequest {
   const ChannelGetOrCreateRequest({
     this.data,
     this.hideForCreator,
+    this.includeScheduledMessages,
     this.memberCustomInclude,
     this.members,
     this.messages,
@@ -37,6 +38,10 @@ class ChannelGetOrCreateRequest with _$ChannelGetOrCreateRequest {
   @override
   @JsonKey(name: 'hide_for_creator')
   final bool? hideForCreator;
+
+  @override
+  @JsonKey(name: 'include_scheduled_messages')
+  final bool? includeScheduledMessages;
 
   @override
   @JsonKey(name: 'member_custom_include')

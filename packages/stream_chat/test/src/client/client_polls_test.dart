@@ -42,7 +42,7 @@ void main() {
           api.PollOptionInput(text: 'Pizza', custom: {'color': 'red', 'text': 'Pasta'}),
           api.PollOptionInput(text: 'Sushi', custom: {}),
         ],
-        votingVisibility: api.CreatePollRequestVotingVisibility.anonymous,
+        votingVisibility: api.VotingVisibility.anonymous,
         enforceUniqueVote: false,
         maxVotesAllowed: 2,
         allowAnswers: true,
@@ -102,7 +102,7 @@ void main() {
   test('StreamChatClient.getPoll keeps a voting visibility the SDK does not name', () async {
     final response = api.PollResponse(
       duration: '4.21ms',
-      poll: generatedPoll.copyWith(votingVisibility: api.PollResponseDataVotingVisibility.fromJson('members_only')),
+      poll: generatedPoll.copyWith(votingVisibility: api.VotingVisibility.fromJson('members_only')),
     );
     when(() => defaultApi.getPoll(pollId: 'poll-id')).thenAnswer((_) async => Result.success(response));
 
@@ -166,7 +166,7 @@ void main() {
           api.PollOptionRequest(id: 'pizza', text: 'Pizza', custom: {'color': 'red', 'id': 'pasta'}),
           api.PollOptionRequest(id: 'sushi', text: 'Sushi', custom: {}),
         ],
-        votingVisibility: api.UpdatePollRequestVotingVisibility.fromJson('members_only'),
+        votingVisibility: api.VotingVisibility.fromJson('members_only'),
         enforceUniqueVote: false,
         maxVotesAllowed: 2,
         allowAnswers: true,

@@ -21,9 +21,7 @@ UpdatePollRequest _$UpdatePollRequestFromJson(Map<String, dynamic> json) => Upda
       .toList(),
   votingVisibility: json['voting_visibility'] == null
       ? null
-      : UpdatePollRequestVotingVisibility.fromJson(
-          json['voting_visibility'] as String,
-        ),
+      : VotingVisibility.fromJson(json['voting_visibility'] as String),
 );
 
 Map<String, dynamic> _$UpdatePollRequestToJson(UpdatePollRequest instance) => <String, dynamic>{

@@ -7,7 +7,7 @@ part of 'ocr_rule.dart';
 // **************************************************************************
 
 OCRRule _$OCRRuleFromJson(Map<String, dynamic> json) => OCRRule(
-  action: OCRRuleAction.fromJson(json['action'] as String),
+  action: ModerationAction.fromJson(json['action'] as String),
   label: json['label'] as String,
 );
 

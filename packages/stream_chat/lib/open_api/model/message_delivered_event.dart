@@ -65,8 +65,9 @@ class MessageDeliveredEvent extends core.WsEvent with _$MessageDeliveredEvent im
   final Map<String, Object?> custom;
 
   @override
+  @StreamDateTimeConverter()
   @JsonKey(name: 'last_delivered_at')
-  final String? lastDeliveredAt;
+  final DateTime? lastDeliveredAt;
 
   @override
   @JsonKey(name: 'last_delivered_message_id')

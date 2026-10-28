@@ -268,7 +268,7 @@ void main() {
       reason: 'spam',
       shadow: true,
       ipBan: true,
-      deleteMessages: api.BanRequestDeleteMessages.hard,
+      deleteMessages: api.DeleteMessages.hard,
     );
 
     when(() => defaultApi.ban(banRequest: request)).thenAnswer(
