@@ -16,7 +16,7 @@ void main() {
 
   // Stands up a composer with the given controller and a draft stream the
   // test can drive on demand.
-  Future<void> pumpComposer(
+  Future<MockChannel> pumpComposer(
     WidgetTester tester, {
     required StreamMessageComposerController composerController,
     required Stream<Draft?> draftStream,
@@ -72,6 +72,8 @@ void main() {
     // Let the post-frame callback fire and set up the draft stream listener
     // before the test starts emitting events.
     await tester.pumpAndSettle();
+
+    return channel;
   }
 
   group('draft stream', () {
@@ -196,6 +198,43 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(composerController.text, isEmpty);
+    });
+  });
+
+  group('when the composer is removed with unsent text', () {
+    testWidgets('saves the text as a draft', (tester) async {
+      final composerController = StreamMessageComposerController()..text = 'unsent';
+      addTearDown(composerController.dispose);
+
+      final channel = await pumpComposer(
+        tester,
+        composerController: composerController,
+        draftStream: const Stream.empty(),
+      );
+
+      await tester.pumpWidget(const SizedBox());
+
+      verify(() => channel.createDraft(any())).called(1);
+    });
+
+    testWidgets('does not throw once the channel is disposed', (tester) async {
+      final composerController = StreamMessageComposerController()..text = 'unsent';
+      addTearDown(composerController.dispose);
+
+      final channel = await pumpComposer(
+        tester,
+        composerController: composerController,
+        draftStream: const Stream.empty(),
+      );
+
+      // A disposed channel has no state, and throws on any call that needs it.
+      when(() => channel.state).thenReturn(null);
+      when(() => channel.createDraft(any())).thenThrow(StateError('disposed'));
+
+      await tester.pumpWidget(const SizedBox());
+
+      expect(tester.takeException(), isNull);
+      verifyNever(() => channel.createDraft(any()));
     });
   });
 }

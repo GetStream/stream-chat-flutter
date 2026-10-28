@@ -9,6 +9,10 @@
 - Fixed a `Channel` becoming unusable after the current user hides it or is removed from it, for example by blocking the other member of a direct message.
 - Fixed `Channel.hidden` not following the `channel.hidden` and `channel.visible` events.
 - Fixed the current user's membership staying on a channel after they are removed from it.
+🐞 Fixed
+
+- Fixed a draft saved or deleted while offline not being kept.
+- Fixed a thread draft replacing the channel's draft when the thread's parent message isn't loaded.
 
 ## 10.6.0
 
