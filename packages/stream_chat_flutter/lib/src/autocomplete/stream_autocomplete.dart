@@ -281,6 +281,9 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
   bool _hideOptions = false;
   String _lastFieldText = '';
 
+  // A tap on the options is not a tap outside the field.
+  final _tapRegionGroupId = Object();
+
   // True if the state indicates that the options should be visible.
   bool get _shouldShowOptions {
     return !_hideOptions && _focusNode.hasFocus && _currentQuery != null && _currentTrigger != null;
@@ -500,11 +503,14 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
         final anchor = widget.optionsAlignment._toAnchor();
         final shouldShowOptions = _shouldShowOptions;
         final optionViewBuilder = shouldShowOptions
-            ? TextFieldTapRegion(
-                child: _currentTrigger!.optionsViewBuilder(
-                  context,
-                  _currentQuery!,
-                  _messageComposerController,
+            ? TapRegion(
+                groupId: _tapRegionGroupId,
+                child: TextFieldTapRegion(
+                  child: _currentTrigger!.optionsViewBuilder(
+                    context,
+                    _currentQuery!,
+                    _messageComposerController,
+                  ),
                 ),
               )
             : null;
@@ -513,10 +519,17 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
           anchor: anchor,
           visible: shouldShowOptions,
           portalFollower: optionViewBuilder,
-          child: widget.fieldViewBuilder(
-            context,
-            _messageComposerController,
-            _focusNode,
+          child: TapRegion(
+            groupId: _tapRegionGroupId,
+            enabled: shouldShowOptions,
+            // Hide the options the way losing focus does, for a touch outside
+            // that keeps the field focused.
+            onTapOutside: (_) => setState(() => _hideOptions = true),
+            child: widget.fieldViewBuilder(
+              context,
+              _messageComposerController,
+              _focusNode,
+            ),
           ),
         );
       },

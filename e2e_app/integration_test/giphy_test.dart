@@ -127,7 +127,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12702',
     description: 'delivery status is hidden when an ephemeral message is shown',
-    skip: 'https://linear.app/stream/issue/FLU-1087',
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.userRobot.login().openChannel();
@@ -143,7 +142,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12703',
     description: 'delivery status is hidden when an ephemeral message is shown in a thread',
-    skip: 'https://linear.app/stream/issue/FLU-1087',
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.backendRobot.generateChannels(channelsCount: 1, messagesCount: 1);

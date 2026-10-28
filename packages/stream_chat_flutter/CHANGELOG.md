@@ -12,15 +12,27 @@
 - A deleted message in `StreamMessagePreviewText` now matches the rest of the preview unless `StreamMessagePreviewTextThemeData.deletedContentStyle` sets a style. The channel list, thread list and message search still apply their own deleted style.
 - Icons in `StreamMessagePreviewText` and `StreamDraftMessagePreviewText` no longer follow a surrounding `IconTheme`.
 - Values a local `StreamThreadListTileTheme` leaves unset now keep their `StreamChatThemeData.threadListTileTheme` setting instead of resetting to the default.
+- A `www.` address in a message now opens over `https://` instead of `http://`.
 
 🐞 Fixed
 
+- Fixed a web address written without `https://`, such as `youtube.com`, not being tappable in a message.
+- Fixed a web address right after a quote or Chinese or Japanese text not being tappable in a message.
+- Fixed `StreamThreadPage` hiding the composer for a deleted parent message that already has replies, which can still be replied to.
+- Fixed the "Only visible to you" Giphy preview showing a delivery status.
+- Fixed channel list previews showing a "You:" or sender name prefix, and the delivery status, in front of a system message.
+- Fixed a deleted message hiding its replies count, which left its thread unreachable from the channel.
+- Fixed `StreamMessageComposer` throwing when its channel is disposed while it still holds unsent text, for example when the user is disconnected with a channel page open.
 - Fixed a message that failed to send, update or delete hiding the timestamp and delivery status of the message before it.
 - Fixed a voice recording sent as a reply without text showing inside a filled container instead of directly on the message bubble.
 - Fixed a mention rendering as another mentioned user's shorter mention followed by leftover text, such as `@Anna` next to `@Ann`.
 - Fixed the poll creator showing the reorder handle and remove button when there is only one option.
+- Fixed a link that points straight to an image showing as a plain image instead of a link preview, and appearing twice in the message composer.
 - Fixed the keyboard closing when removing the link preview in the message composer.
 - Fixed messages and their channel list preview showing a "sent" checkmark in a channel without read events, where it could never become delivered or read.
+- Fixed tapping a quote of a thread reply in the channel not opening the thread, and a thread opened at one of its replies not scrolling to it.
+- Fixed `StreamMessageComposer` always sending the default `skipEnrichUrl`, so the server could add a link preview the user removed, or a second one next to the attached preview.
+- Fixed the composer's command and mention suggestions staying open after tapping outside the composer, such as on the message list.
 - Fixed "Message deleted" in a quoted reply showing in a muted gray instead of the reply's text color.
 - Fixed icons in message previews showing in a different color from the text beside them.
 - Fixed a quoted reply to your own message showing your name instead of "You".

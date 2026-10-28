@@ -695,10 +695,11 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
         }
 
         final isOwnMessage = currentUser != null && latestLastMessage.user?.id == currentUser.id;
+        final showsDeliveryStatus = isOwnMessage && !latestLastMessage.isDeleted && !latestLastMessage.isSystem;
 
         // Show delivery status prefix only for own messages.
         Widget? deliveryPrefix;
-        if (isOwnMessage) {
+        if (showsDeliveryStatus) {
           if (widget.sendingIndicatorBuilder case final builder?) {
             deliveryPrefix = builder(context, latestLastMessage);
           } else if (widget.channel.canUseReadReceipts || latestLastMessage.state.isOutgoing) {
@@ -712,7 +713,7 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
         return Row(
           spacing: spacing.xxs,
           children: [
-            if (!latestLastMessage.isDeleted && deliveryPrefix != null) ExcludeSemantics(child: deliveryPrefix),
+            if (deliveryPrefix != null) ExcludeSemantics(child: deliveryPrefix),
             Flexible(
               child: StreamMessagePreviewText(
                 message: latestLastMessage,

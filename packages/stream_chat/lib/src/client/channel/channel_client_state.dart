@@ -198,14 +198,15 @@ class ChannelClientState {
     );
   }
 
-  /// Updates the [draft] in the channel state or the message if it exists.
+  /// Updates the [draft] in the channel state, or on its thread's parent
+  /// message for a thread draft.
+  ///
+  /// A thread draft whose parent message isn't loaded is left out.
   void updateDraft(Draft draft) {
     if (draft.parentId case final parentId?) {
-      for (final message in messages) {
-        if (message.id == parentId) {
-          return updateMessage(message.copyWith(draft: draft));
-        }
-      }
+      final parent = messages.firstWhereOrNull((it) => it.id == parentId);
+      if (parent == null) return;
+      return updateMessage(parent.copyWith(draft: draft));
     }
 
     updateChannelState(
@@ -224,13 +225,9 @@ class ChannelClientState {
     );
 
     if (draft.parentId case final parentId?) {
-      for (final message in messages) {
-        if (message.id == parentId) {
-          return updateMessage(
-            message.copyWith(draft: null),
-          );
-        }
-      }
+      final parent = messages.firstWhereOrNull((it) => it.id == parentId);
+      if (parent == null) return;
+      return updateMessage(parent.copyWith(draft: null));
     }
 
     updateChannelState(

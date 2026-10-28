@@ -322,14 +322,17 @@ class WebSocket with TimerHelper {
         // Reconnect may have been paused while the delay was pending.
         if (!_reconnectEnabled) return;
 
-        final uri = await _buildUri(
-          refreshToken: refreshToken,
-          includeUserDetails: false,
-        );
-        _logger?.info('[reconnect] #ws; uri: $uri');
         try {
+          final uri = await _buildUri(
+            refreshToken: refreshToken,
+            includeUserDetails: false,
+          );
+          // Disconnected while the token was loading.
+          if (_user == null) return;
+          _logger?.info('[reconnect] #ws; uri: $uri');
           _initWebSocketChannel(uri);
         } catch (e, stk) {
+          if (_user == null) return;
           _onConnectionError(e, stk);
         }
       },

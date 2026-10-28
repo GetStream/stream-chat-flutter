@@ -1332,8 +1332,11 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
     };
 
     // Only the sender sees a delivery status, and only a row that renders the
-    // footer shows one.
-    if (!isOwnMessage || !widget.showsMetadata) return _annotate(_label);
+    // footer shows one. An ephemeral message is never delivered, so its footer
+    // shows no status either.
+    if (!isOwnMessage || message.isEphemeral || !widget.showsMetadata) {
+      return _annotate(_label);
+    }
 
     final channel = StreamChannel.maybeOf(context)?.channel;
 

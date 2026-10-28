@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -214,7 +215,9 @@ class StreamMessageListView extends StatefulWidget {
   /// [StreamMessageItem] in the list.
   ///
   /// When null (the default), tapping a quoted message scrolls to it in
-  /// the list, loading it if necessary.
+  /// the list, loading it if necessary. A reply that was only sent to its
+  /// thread opens that thread instead, when [threadBuilder] or [onThreadTap]
+  /// is set.
   final void Function(Message quotedMessage)? onQuotedMessageTap;
 
   /// Called when a link is tapped in message text.
@@ -357,6 +360,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   List<Message> messages = <Message>[];
 
+  // The thread reply to scroll to once [messages] include it.
+  String? _pendingThreadMessageId;
+
   // `generation` bumps on each highlight call so a re-highlight of the
   // same message restarts the fade animation.
   final _highlightState = ValueNotifier<({String? id, int generation})>((id: null, generation: 0));
@@ -415,12 +421,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       // that replay is checked against.
       _unreadController.attach();
 
-      final highlightInitialMessage = _config.highlightInitialMessage;
-      final highlightMessageId = switch ((highlightInitialMessage, _isThreadConversation)) {
-        (true, true) => _ThreadHighlightScope.of(context),
-        (true, false) => streamChannel?.initialMessageId,
-        _ => null,
-      };
+      // A thread opened for one of its replies scrolls to it once the replies
+      // include it. Highlighting it stays opt-in.
+      _pendingThreadMessageId = _isThreadConversation ? _ThreadHighlightScope.of(context) : null;
+
+      final highlightChannelMessage = _config.highlightInitialMessage && !_isThreadConversation;
+      final highlightMessageId = highlightChannelMessage ? streamChannel?.initialMessageId : null;
 
       if (highlightMessageId != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -650,17 +656,20 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       labels: const [kPortalMessageListViewLabel],
       child: Portal(
         child: ScaffoldMessenger(
-          child: MessageListCore(
-            paginationLimit: _config.paginationLimit,
-            maximumMessageLimit: _config.maximumMessageLimit,
-            retentionTrimBuffer: _config.retentionTrimBuffer,
-            messageFilter: widget.messageFilter,
-            loadingBuilder: defaultLoadingBuilder,
-            emptyBuilder: defaultEmptyBuilder,
-            messageListBuilder: defaultMessageListBuilder,
-            messageListController: _messageListController,
-            parentMessage: widget.parentMessage,
-            errorBuilder: defaultErrorBuilder,
+          child: NotificationListener<UserScrollNotification>(
+            onNotification: _onUserScroll,
+            child: MessageListCore(
+              paginationLimit: _config.paginationLimit,
+              maximumMessageLimit: _config.maximumMessageLimit,
+              retentionTrimBuffer: _config.retentionTrimBuffer,
+              messageFilter: widget.messageFilter,
+              loadingBuilder: defaultLoadingBuilder,
+              emptyBuilder: defaultEmptyBuilder,
+              messageListBuilder: defaultMessageListBuilder,
+              messageListController: _messageListController,
+              parentMessage: widget.parentMessage,
+              errorBuilder: defaultErrorBuilder,
+            ),
           ),
         ),
       ),
@@ -669,6 +678,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   Widget _buildListView(List<Message> data) {
     messages = data;
+
+    if (_pendingThreadMessageId case final messageId? when messages.any((it) => it.id == messageId)) {
+      _pendingThreadMessageId = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _scrollToMessage(messageId: messageId, highlight: _config.highlightInitialMessage);
+      });
+    }
 
     // Top pagination may not have finished loading the unread boundary when
     // the baseline was first captured; retry once this frame's layout
@@ -1281,7 +1298,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onMessageLinkTap: widget.onMessageLinkTap,
       onUserMentionTap: widget.onUserMentionTap,
       onMentionTap: widget.onMentionTap,
-      onQuotedMessageTap: widget.onQuotedMessageTap ?? _scrollToQuotedMessage,
+      onQuotedMessageTap: widget.onQuotedMessageTap ?? _onQuotedMessageTap,
     );
 
     // The content kind follows from the message in [props], so it is resolved
@@ -1316,7 +1333,31 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   // Methods rather than closures, so rows built from them compare equal.
   void _popToMessage(Message message) => Navigator.of(context).pop(message.id);
-  void _scrollToQuotedMessage(Message quoted) => _scrollToMessage(messageId: quoted.id).ignore();
+  void _onQuotedMessageTap(Message quoted) => _openQuotedMessage(quoted).ignore();
+
+  // A reply that lives only in its thread isn't in the channel list, so open
+  // the thread instead of scrolling.
+  Future<void> _openQuotedMessage(Message quoted) async {
+    final onThreadTap = _onThreadTap;
+    final parentId = quoted.parentId;
+    final isThreadOnlyReply = parentId != null && quoted.showInChannel != true;
+    if (onThreadTap != null && isThreadOnlyReply && !_isThreadConversation) {
+      final parent = await streamChannel!.getMessage(parentId);
+      if (!mounted) return;
+      onThreadTap(parent, quoted);
+      return;
+    }
+
+    await _scrollToMessage(messageId: quoted.id);
+  }
+
+  // A user scroll cancels the jump to a thread reply that hasn't loaded yet.
+  bool _onUserScroll(UserScrollNotification notification) {
+    final isListScroll = notification.depth == 0;
+    final isUserScroll = notification.direction != ScrollDirection.idle;
+    if (isListScroll && isUserScroll) _pendingThreadMessageId = null;
+    return false;
+  }
 
   void _handleItemPositionsChanged() {
     if (!mounted) return;
@@ -1352,10 +1393,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       // The created callback will use widget.onThreadTap, passing the result
       // of widget.threadBuilder (if provided) as the second argument.
       (final onThreadTap?, final threadBuilder) => (Message parentMessage, Message? threadMessage) {
-        onThreadTap(
-          parentMessage,
-          threadBuilder?.call(context, parentMessage),
-        );
+        var threadPage = threadBuilder?.call(context, parentMessage);
+        if (threadPage != null && threadMessage != null) {
+          threadPage = _ThreadHighlightScope(messageId: threadMessage.id, child: threadPage);
+        }
+
+        onThreadTap(parentMessage, threadPage);
       },
       // Case 2: widget.onThreadTap is null, but widget.threadBuilder is provided.
       // The created callback will perform the default navigation action,

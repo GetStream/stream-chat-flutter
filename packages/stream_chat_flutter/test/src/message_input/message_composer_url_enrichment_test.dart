@@ -115,5 +115,20 @@ void main() {
       expect(preview, findsNothing);
       expect(tester.widget<EditableText>(find.byType(EditableText)).focusNode.hasFocus, isTrue);
     });
+
+    testWidgets('shows a scraped image as a single link preview', (tester) async {
+      const url = 'https://example.com/photo.jpg';
+      when(() => client.enrichUrl(any())).thenAnswer(
+        (_) async => OGAttachmentResponse()
+          ..type = 'image'
+          ..imageUrl = url
+          ..ogScrapeUrl = url,
+      );
+
+      await enrichUrlFrom(tester, 'look $url');
+
+      expect(find.byType(StreamMessageComposerAttachmentList), findsNothing);
+      expect(find.text(url), findsOneWidget);
+    });
   });
 }

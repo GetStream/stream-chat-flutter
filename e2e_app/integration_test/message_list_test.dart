@@ -530,7 +530,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12761',
     description: 'thread is not locked after the user deletes the parent message',
-    skip: 'https://linear.app/stream/issue/FLU-1092',
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.backendRobot.generateChannels(channelsCount: 1, messagesCount: 1);
@@ -551,7 +550,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12762',
     description: 'thread is not locked after the participant deletes the parent message',
-    skip: 'https://linear.app/stream/issue/FLU-1092',
     body: (env) async {
       const threadReply = 'thread reply';
 
@@ -674,7 +672,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12767',
     description: 'command suggestions disappear when the user taps on the message list',
-    skip: 'https://linear.app/stream/issue/FLU-1093',
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.backendRobot.generateChannels(channelsCount: 1, messagesCount: 30);
@@ -934,7 +931,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12774',
     description: 'user sees a link preview for their own Unsplash link',
-    skip: 'https://linear.app/stream/issue/FLU-1088',
     body: (env) async {
       const link = 'https://unsplash.com/photos/1_2d3MRbI9c';
 
@@ -952,7 +948,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12775',
     description: 'user sees a link preview for an Unsplash link',
-    skip: 'https://linear.app/stream/issue/FLU-1088',
     body: (env) async {
       const link = 'https://unsplash.com/photos/1_2d3MRbI9c';
 
@@ -970,7 +965,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12776',
     description: 'message with a link without a scheme opens the browser',
-    skip: 'https://linear.app/stream/issue/FLU-1094',
     body: (env) async {
       const link = 'youtube.com';
 

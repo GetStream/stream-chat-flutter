@@ -174,16 +174,16 @@ void main() {
       verify(() => state.deleteMessage(message, hardDelete: true)).called(1);
     });
 
-    test('onMessageDeleted never decrements the unread count below zero', () {
+    test('onMessageDeleted leaves a zero unread count untouched', () {
       client.isLocalUnreadCountEnabled = true;
       when(() => state.unreadCount).thenReturn(0);
 
       mutations.onMessageDeleted(message, hardDelete: true);
 
-      verify(() => state.unreadCount = 0).called(1);
+      verifyNever(() => state.unreadCount = any());
     });
 
-    test('onMessageDeleted skips the unread count on server-driven channels', () {
+    test('onMessageDeleted skips the unread count on a channel without read receipts', () {
       client.isLocalUnreadCountEnabled = false;
 
       mutations.onMessageDeleted(message, hardDelete: true);

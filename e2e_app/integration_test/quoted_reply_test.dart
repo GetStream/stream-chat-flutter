@@ -859,7 +859,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12807',
     description: 'user jumps from the channel to a quoted message in a thread',
-    skip: 'https://linear.app/stream/issue/FLU-1095',
     body: (env) async {
       step('GIVEN the user opens a channel with a thread');
       await env.backendRobot.generateChannels(

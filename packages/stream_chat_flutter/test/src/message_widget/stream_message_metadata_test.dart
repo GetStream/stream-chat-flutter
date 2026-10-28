@@ -94,6 +94,15 @@ void main() {
       expect(find.byType(StreamMessageSendingStatus), findsOneWidget);
     });
 
+    testWidgets('shows the replies count on a deleted thread parent', (tester) async {
+      final parent = deleted.copyWith(replyCount: 2, threadParticipants: [otherUser]);
+
+      await tester.pumpWidget(wrap(StreamMessageItem(message: parent)));
+      await tester.pumpAndSettle();
+
+      expect(find.text(DefaultTranslations.instance.threadReplyCountText(2)), findsOneWidget);
+    });
+
     testWidgets('drops the edited marker', (tester) async {
       await tester.pumpWidget(wrap(StreamMessageItem(message: deleted)));
       await tester.pumpAndSettle();
@@ -207,5 +216,21 @@ void main() {
 
       handle.dispose();
     });
+  });
+
+  testWidgets('StreamMessageFooter shows the delivery status on your own message', (tester) async {
+    await tester.pumpWidget(wrap(StreamMessageFooter(message: message())));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamMessageSendingStatus), findsOneWidget);
+  });
+
+  testWidgets('StreamMessageFooter hides the delivery status on your own ephemeral message', (tester) async {
+    final ephemeral = message().copyWith(type: MessageType.ephemeral);
+
+    await tester.pumpWidget(wrap(StreamMessageFooter(message: ephemeral)));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamMessageSendingStatus), findsNothing);
   });
 }

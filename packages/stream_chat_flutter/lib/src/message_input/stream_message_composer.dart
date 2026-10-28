@@ -1478,7 +1478,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     }
 
     // If the parsed url matches the ogAttachment url, don't do anything
-    if (_effectiveController.ogAttachment?.titleLink == firstMatchedUrl) {
+    if (_effectiveController.ogAttachment?.ogScrapeUrl == firstMatchedUrl) {
       return;
     }
 
@@ -1644,6 +1644,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
     _maybeDeleteDraftMessage(message, channel);
     widget.props.onQuotedMessageCleared?.call();
+    final skipEnrichUrl = _effectiveController.skipEnrichUrl;
     _effectiveController.reset();
 
     if (widget.props.preMessageSending case final onPreMessageSending?) {
@@ -1660,7 +1661,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       await WidgetsBinding.instance.endOfFrame;
     }
 
-    await _sendOrUpdateMessage(message: message, channel: channel);
+    await _sendOrUpdateMessage(message: message, channel: channel, skipEnrichUrl: skipEnrichUrl);
 
     if (mounted) {
       if (widget.props.shouldKeepFocusAfterMessage ?? !_commandEnabled) {
@@ -1674,6 +1675,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   Future<void> _sendOrUpdateMessage({
     required Message message,
     required Channel channel,
+    required bool skipEnrichUrl,
   }) async {
     try {
       // A message is considered fresh if it doesn't have a remoteCreatedAt.
@@ -1682,8 +1684,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       // Note: edited messages which are bounced back with an error needs to be
       // sent as new messages as the backend doesn't store them.
       final resp = await switch (!isFreshMessage && !message.isBouncedWithError) {
-        true => channel.updateMessage(message),
-        false => channel.sendMessage(message),
+        true => channel.updateMessage(message, skipEnrichUrl: skipEnrichUrl),
+        false => channel.sendMessage(message, skipEnrichUrl: skipEnrichUrl),
       };
 
       widget.props.onMessageSent?.call(resp.message);
@@ -1729,6 +1731,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
   void _maybeUpdateOrDeleteDraftMessage() {
     final channel = StreamChannel.maybeOf(context)?.channel;
     if (channel == null) return;
+
+    // A channel that isn't initialized yet or was disposed can't hold a draft.
+    if (channel.state == null) return;
 
     final message = _effectiveController.message;
     final isMessageValid = _effectiveController.validator.call(message);

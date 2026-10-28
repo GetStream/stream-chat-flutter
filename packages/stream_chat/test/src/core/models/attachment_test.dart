@@ -1,3 +1,4 @@
+import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/models/action.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
@@ -160,6 +161,54 @@ void main() {
           titleLink: 'https://example.com',
         );
         expect(autoUrlAttachment.isUrlPreview, isTrue);
+      });
+
+      test('reports a scraped image without a title link as a url preview', () {
+        final scrapedImageAttachment = Attachment(
+          type: 'image',
+          ogScrapeUrl: 'https://images.example.com/photo.jpg',
+          imageUrl: 'https://images.example.com/photo.jpg',
+        );
+
+        expect(scrapedImageAttachment.type, AttachmentType.urlPreview);
+      });
+
+      test('serializes the original type of a scraped attachment', () {
+        final scrapedVideoAttachment = Attachment(
+          type: 'video',
+          ogScrapeUrl: 'https://youtube.com/watch?v=xOX7MsrbaPY',
+          titleLink: 'https://www.youtube.com/watch?v=xOX7MsrbaPY',
+        );
+
+        expect(scrapedVideoAttachment.toJson()['type'], 'video');
+      });
+
+      test('keeps the original type of a scraped attachment when copied', () {
+        final scrapedImageAttachment = Attachment(
+          type: 'image',
+          ogScrapeUrl: 'https://images.example.com/photo.jpg',
+        );
+
+        final copy = scrapedImageAttachment.copyWith(title: 'Photo');
+
+        expect(copy.toJson()['type'], 'image');
+      });
+
+      test('tells apart scraped attachments with different original types', () {
+        const link = 'https://example.com/media';
+        final scrapedImage = Attachment(id: 'og', type: 'image', ogScrapeUrl: link);
+        final scrapedVideo = Attachment(id: 'og', type: 'video', ogScrapeUrl: link);
+
+        expect(scrapedImage, isNot(scrapedVideo));
+      });
+
+      test('sends no type for a scraped link the server gave no type', () {
+        final ogAttachment = OGAttachmentResponse()..ogScrapeUrl = 'https://getstream.io/blog';
+
+        final attachment = Attachment.fromOGAttachment(ogAttachment);
+
+        expect(attachment.type, AttachmentType.urlPreview);
+        expect(attachment.toJson(), isNot(contains('type')));
       });
     });
   });
