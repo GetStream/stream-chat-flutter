@@ -2,7 +2,7 @@
 
 🐞 Fixed
 
-- Fixed the German mute strings showing Dutch text, and the message action showing "mute" for a user who is already muted.
+- Fixed German mute strings showing Dutch text, and the German "Mute user" action not switching to "unmute" for an already-muted user.
 
 ## 10.6.0
 
