@@ -13,11 +13,11 @@ import '../models.dart';
 part 'poll_response_data.g.dart';
 part 'poll_response_data.freezed.dart';
 
-extension type const PollResponseDataVotingVisibility._(String _) implements String {
-  static const anonymous = PollResponseDataVotingVisibility._('anonymous');
-  static const public = PollResponseDataVotingVisibility._('public');
+extension type const PollResponseDataVotingVisibility(String _) implements String {
+  static const anonymous = PollResponseDataVotingVisibility('anonymous');
+  static const public = PollResponseDataVotingVisibility('public');
 
-  factory PollResponseDataVotingVisibility.fromJson(String json) => PollResponseDataVotingVisibility._(json);
+  factory PollResponseDataVotingVisibility.fromJson(String json) => PollResponseDataVotingVisibility(json);
 
   String toJson() => this;
 }

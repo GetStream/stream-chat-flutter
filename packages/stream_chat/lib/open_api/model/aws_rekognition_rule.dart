@@ -13,15 +13,15 @@ import '../models.dart';
 part 'aws_rekognition_rule.g.dart';
 part 'aws_rekognition_rule.freezed.dart';
 
-extension type const AWSRekognitionRuleAction._(String _) implements String {
-  static const bounce = AWSRekognitionRuleAction._('bounce');
-  static const bounceFlag = AWSRekognitionRuleAction._('bounce_flag');
-  static const bounceRemove = AWSRekognitionRuleAction._('bounce_remove');
-  static const flag = AWSRekognitionRuleAction._('flag');
-  static const remove = AWSRekognitionRuleAction._('remove');
-  static const shadow = AWSRekognitionRuleAction._('shadow');
+extension type const AWSRekognitionRuleAction(String _) implements String {
+  static const bounce = AWSRekognitionRuleAction('bounce');
+  static const bounceFlag = AWSRekognitionRuleAction('bounce_flag');
+  static const bounceRemove = AWSRekognitionRuleAction('bounce_remove');
+  static const flag = AWSRekognitionRuleAction('flag');
+  static const remove = AWSRekognitionRuleAction('remove');
+  static const shadow = AWSRekognitionRuleAction('shadow');
 
-  factory AWSRekognitionRuleAction.fromJson(String json) => AWSRekognitionRuleAction._(json);
+  factory AWSRekognitionRuleAction.fromJson(String json) => AWSRekognitionRuleAction(json);
 
   String toJson() => this;
 }

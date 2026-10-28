@@ -13,15 +13,15 @@ import '../models.dart';
 part 'ocr_rule.g.dart';
 part 'ocr_rule.freezed.dart';
 
-extension type const OCRRuleAction._(String _) implements String {
-  static const bounce = OCRRuleAction._('bounce');
-  static const bounceFlag = OCRRuleAction._('bounce_flag');
-  static const bounceRemove = OCRRuleAction._('bounce_remove');
-  static const flag = OCRRuleAction._('flag');
-  static const remove = OCRRuleAction._('remove');
-  static const shadow = OCRRuleAction._('shadow');
+extension type const OCRRuleAction(String _) implements String {
+  static const bounce = OCRRuleAction('bounce');
+  static const bounceFlag = OCRRuleAction('bounce_flag');
+  static const bounceRemove = OCRRuleAction('bounce_remove');
+  static const flag = OCRRuleAction('flag');
+  static const remove = OCRRuleAction('remove');
+  static const shadow = OCRRuleAction('shadow');
 
-  factory OCRRuleAction.fromJson(String json) => OCRRuleAction._(json);
+  factory OCRRuleAction.fromJson(String json) => OCRRuleAction(json);
 
   String toJson() => this;
 }

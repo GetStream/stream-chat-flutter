@@ -13,25 +13,25 @@ import '../models.dart';
 part 'config_overrides_request.g.dart';
 part 'config_overrides_request.freezed.dart';
 
-extension type const ConfigOverridesRequestBlocklistBehavior._(String _) implements String {
-  static const block = ConfigOverridesRequestBlocklistBehavior._('block');
-  static const flag = ConfigOverridesRequestBlocklistBehavior._('flag');
+extension type const ConfigOverridesRequestBlocklistBehavior(String _) implements String {
+  static const block = ConfigOverridesRequestBlocklistBehavior('block');
+  static const flag = ConfigOverridesRequestBlocklistBehavior('flag');
 
   factory ConfigOverridesRequestBlocklistBehavior.fromJson(String json) =>
-      ConfigOverridesRequestBlocklistBehavior._(json);
+      ConfigOverridesRequestBlocklistBehavior(json);
 
   String toJson() => this;
 }
 
-extension type const ConfigOverridesRequestPushLevel._(String _) implements String {
-  static const all = ConfigOverridesRequestPushLevel._('all');
-  static const allMentions = ConfigOverridesRequestPushLevel._('all_mentions');
-  static const directMentions = ConfigOverridesRequestPushLevel._('direct_mentions');
+extension type const ConfigOverridesRequestPushLevel(String _) implements String {
+  static const all = ConfigOverridesRequestPushLevel('all');
+  static const allMentions = ConfigOverridesRequestPushLevel('all_mentions');
+  static const directMentions = ConfigOverridesRequestPushLevel('direct_mentions');
   @Deprecated('Use directMentions instead.')
-  static const mentions = ConfigOverridesRequestPushLevel._('mentions');
-  static const none = ConfigOverridesRequestPushLevel._('none');
+  static const mentions = ConfigOverridesRequestPushLevel('mentions');
+  static const none = ConfigOverridesRequestPushLevel('none');
 
-  factory ConfigOverridesRequestPushLevel.fromJson(String json) => ConfigOverridesRequestPushLevel._(json);
+  factory ConfigOverridesRequestPushLevel.fromJson(String json) => ConfigOverridesRequestPushLevel(json);
 
   String toJson() => this;
 }

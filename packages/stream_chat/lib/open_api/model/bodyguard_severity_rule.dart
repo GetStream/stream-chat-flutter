@@ -13,28 +13,28 @@ import '../models.dart';
 part 'bodyguard_severity_rule.g.dart';
 part 'bodyguard_severity_rule.freezed.dart';
 
-extension type const BodyguardSeverityRuleAction._(String _) implements String {
-  static const bounce = BodyguardSeverityRuleAction._('bounce');
-  static const bounceFlag = BodyguardSeverityRuleAction._('bounce_flag');
-  static const bounceRemove = BodyguardSeverityRuleAction._('bounce_remove');
-  static const flag = BodyguardSeverityRuleAction._('flag');
-  static const keep = BodyguardSeverityRuleAction._('keep');
-  static const mask = BodyguardSeverityRuleAction._('mask');
-  static const remove = BodyguardSeverityRuleAction._('remove');
-  static const shadow = BodyguardSeverityRuleAction._('shadow');
+extension type const BodyguardSeverityRuleAction(String _) implements String {
+  static const bounce = BodyguardSeverityRuleAction('bounce');
+  static const bounceFlag = BodyguardSeverityRuleAction('bounce_flag');
+  static const bounceRemove = BodyguardSeverityRuleAction('bounce_remove');
+  static const flag = BodyguardSeverityRuleAction('flag');
+  static const keep = BodyguardSeverityRuleAction('keep');
+  static const mask = BodyguardSeverityRuleAction('mask');
+  static const remove = BodyguardSeverityRuleAction('remove');
+  static const shadow = BodyguardSeverityRuleAction('shadow');
 
-  factory BodyguardSeverityRuleAction.fromJson(String json) => BodyguardSeverityRuleAction._(json);
+  factory BodyguardSeverityRuleAction.fromJson(String json) => BodyguardSeverityRuleAction(json);
 
   String toJson() => this;
 }
 
-extension type const BodyguardSeverityRuleSeverity._(String _) implements String {
-  static const critical = BodyguardSeverityRuleSeverity._('critical');
-  static const high = BodyguardSeverityRuleSeverity._('high');
-  static const low = BodyguardSeverityRuleSeverity._('low');
-  static const medium = BodyguardSeverityRuleSeverity._('medium');
+extension type const BodyguardSeverityRuleSeverity(String _) implements String {
+  static const critical = BodyguardSeverityRuleSeverity('critical');
+  static const high = BodyguardSeverityRuleSeverity('high');
+  static const low = BodyguardSeverityRuleSeverity('low');
+  static const medium = BodyguardSeverityRuleSeverity('medium');
 
-  factory BodyguardSeverityRuleSeverity.fromJson(String json) => BodyguardSeverityRuleSeverity._(json);
+  factory BodyguardSeverityRuleSeverity.fromJson(String json) => BodyguardSeverityRuleSeverity(json);
 
   String toJson() => this;
 }

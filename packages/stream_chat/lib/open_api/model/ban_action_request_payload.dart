@@ -13,12 +13,12 @@ import '../models.dart';
 part 'ban_action_request_payload.g.dart';
 part 'ban_action_request_payload.freezed.dart';
 
-extension type const BanActionRequestPayloadDeleteMessages._(String _) implements String {
-  static const hard = BanActionRequestPayloadDeleteMessages._('hard');
-  static const pruning = BanActionRequestPayloadDeleteMessages._('pruning');
-  static const soft = BanActionRequestPayloadDeleteMessages._('soft');
+extension type const BanActionRequestPayloadDeleteMessages(String _) implements String {
+  static const hard = BanActionRequestPayloadDeleteMessages('hard');
+  static const pruning = BanActionRequestPayloadDeleteMessages('pruning');
+  static const soft = BanActionRequestPayloadDeleteMessages('soft');
 
-  factory BanActionRequestPayloadDeleteMessages.fromJson(String json) => BanActionRequestPayloadDeleteMessages._(json);
+  factory BanActionRequestPayloadDeleteMessages.fromJson(String json) => BanActionRequestPayloadDeleteMessages(json);
 
   String toJson() => this;
 }

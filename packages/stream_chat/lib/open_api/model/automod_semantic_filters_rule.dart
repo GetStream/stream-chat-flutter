@@ -13,15 +13,15 @@ import '../models.dart';
 part 'automod_semantic_filters_rule.g.dart';
 part 'automod_semantic_filters_rule.freezed.dart';
 
-extension type const AutomodSemanticFiltersRuleAction._(String _) implements String {
-  static const bounce = AutomodSemanticFiltersRuleAction._('bounce');
-  static const bounceFlag = AutomodSemanticFiltersRuleAction._('bounce_flag');
-  static const bounceRemove = AutomodSemanticFiltersRuleAction._('bounce_remove');
-  static const flag = AutomodSemanticFiltersRuleAction._('flag');
-  static const remove = AutomodSemanticFiltersRuleAction._('remove');
-  static const shadow = AutomodSemanticFiltersRuleAction._('shadow');
+extension type const AutomodSemanticFiltersRuleAction(String _) implements String {
+  static const bounce = AutomodSemanticFiltersRuleAction('bounce');
+  static const bounceFlag = AutomodSemanticFiltersRuleAction('bounce_flag');
+  static const bounceRemove = AutomodSemanticFiltersRuleAction('bounce_remove');
+  static const flag = AutomodSemanticFiltersRuleAction('flag');
+  static const remove = AutomodSemanticFiltersRuleAction('remove');
+  static const shadow = AutomodSemanticFiltersRuleAction('shadow');
 
-  factory AutomodSemanticFiltersRuleAction.fromJson(String json) => AutomodSemanticFiltersRuleAction._(json);
+  factory AutomodSemanticFiltersRuleAction.fromJson(String json) => AutomodSemanticFiltersRuleAction(json);
 
   String toJson() => this;
 }

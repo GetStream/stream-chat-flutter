@@ -13,15 +13,15 @@ import '../models.dart';
 part 'automod_rule.g.dart';
 part 'automod_rule.freezed.dart';
 
-extension type const AutomodRuleAction._(String _) implements String {
-  static const bounce = AutomodRuleAction._('bounce');
-  static const bounceFlag = AutomodRuleAction._('bounce_flag');
-  static const bounceRemove = AutomodRuleAction._('bounce_remove');
-  static const flag = AutomodRuleAction._('flag');
-  static const remove = AutomodRuleAction._('remove');
-  static const shadow = AutomodRuleAction._('shadow');
+extension type const AutomodRuleAction(String _) implements String {
+  static const bounce = AutomodRuleAction('bounce');
+  static const bounceFlag = AutomodRuleAction('bounce_flag');
+  static const bounceRemove = AutomodRuleAction('bounce_remove');
+  static const flag = AutomodRuleAction('flag');
+  static const remove = AutomodRuleAction('remove');
+  static const shadow = AutomodRuleAction('shadow');
 
-  factory AutomodRuleAction.fromJson(String json) => AutomodRuleAction._(json);
+  factory AutomodRuleAction.fromJson(String json) => AutomodRuleAction(json);
 
   String toJson() => this;
 }

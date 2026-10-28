@@ -3,20 +3,12 @@
 // coverage:ignore-file
 // ignore_for_file: unused_import, unnecessary_import, prefer_single_quotes, require_trailing_commas, unnecessary_raw_strings, public_member_api_docs, sort_constructors_first, provide_deprecation_message
 
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
-import 'package:stream_core/stream_core.dart' as core;
-
-import '../models.dart';
-
-part 'reminder_updated_event.g.dart';
-part 'reminder_updated_event.freezed.dart';
+part of 'events.dart';
 
 @freezed
 @immutable
 @JsonSerializable()
-class ReminderUpdatedEvent extends core.WsEvent with _$ReminderUpdatedEvent {
+class ReminderUpdatedEvent extends core.WsEvent with _$ReminderUpdatedEvent implements WSClientEvent, WSEvent {
   const ReminderUpdatedEvent({
     required this.cid,
     required this.createdAt,
@@ -67,6 +59,7 @@ class ReminderUpdatedEvent extends core.WsEvent with _$ReminderUpdatedEvent {
   @JsonKey(name: 'user_id')
   final String userId;
 
+  @override
   Map<String, dynamic> toJson() => _$ReminderUpdatedEventToJson(this);
 
   static ReminderUpdatedEvent fromJson(Map<String, dynamic> json) => _$ReminderUpdatedEventFromJson(json);

@@ -13,26 +13,26 @@ import '../models.dart';
 part 'rule_builder_action.g.dart';
 part 'rule_builder_action.freezed.dart';
 
-extension type const RuleBuilderActionType._(String _) implements String {
-  static const banUser = RuleBuilderActionType._('ban_user');
-  static const blockContent = RuleBuilderActionType._('block_content');
-  static const blur = RuleBuilderActionType._('blur');
-  static const bounceContent = RuleBuilderActionType._('bounce_content');
-  static const bounceFlagContent = RuleBuilderActionType._('bounce_flag_content');
-  static const bounceRemoveContent = RuleBuilderActionType._('bounce_remove_content');
-  static const callBlur = RuleBuilderActionType._('call_blur');
-  static const callWarning = RuleBuilderActionType._('call_warning');
-  static const endCall = RuleBuilderActionType._('end_call');
-  static const flagContent = RuleBuilderActionType._('flag_content');
-  static const flagUser = RuleBuilderActionType._('flag_user');
-  static const kickUser = RuleBuilderActionType._('kick_user');
-  static const muteAudio = RuleBuilderActionType._('mute_audio');
-  static const muteVideo = RuleBuilderActionType._('mute_video');
-  static const shadowContent = RuleBuilderActionType._('shadow_content');
-  static const warning = RuleBuilderActionType._('warning');
-  static const webhookOnly = RuleBuilderActionType._('webhook_only');
+extension type const RuleBuilderActionType(String _) implements String {
+  static const banUser = RuleBuilderActionType('ban_user');
+  static const blockContent = RuleBuilderActionType('block_content');
+  static const blur = RuleBuilderActionType('blur');
+  static const bounceContent = RuleBuilderActionType('bounce_content');
+  static const bounceFlagContent = RuleBuilderActionType('bounce_flag_content');
+  static const bounceRemoveContent = RuleBuilderActionType('bounce_remove_content');
+  static const callBlur = RuleBuilderActionType('call_blur');
+  static const callWarning = RuleBuilderActionType('call_warning');
+  static const endCall = RuleBuilderActionType('end_call');
+  static const flagContent = RuleBuilderActionType('flag_content');
+  static const flagUser = RuleBuilderActionType('flag_user');
+  static const kickUser = RuleBuilderActionType('kick_user');
+  static const muteAudio = RuleBuilderActionType('mute_audio');
+  static const muteVideo = RuleBuilderActionType('mute_video');
+  static const shadowContent = RuleBuilderActionType('shadow_content');
+  static const warning = RuleBuilderActionType('warning');
+  static const webhookOnly = RuleBuilderActionType('webhook_only');
 
-  factory RuleBuilderActionType.fromJson(String json) => RuleBuilderActionType._(json);
+  factory RuleBuilderActionType.fromJson(String json) => RuleBuilderActionType(json);
 
   String toJson() => this;
 }

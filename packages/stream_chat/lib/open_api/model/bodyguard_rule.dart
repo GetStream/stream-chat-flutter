@@ -13,18 +13,18 @@ import '../models.dart';
 part 'bodyguard_rule.g.dart';
 part 'bodyguard_rule.freezed.dart';
 
-extension type const BodyguardRuleAction._(String _) implements String {
-  static const bounce = BodyguardRuleAction._('bounce');
-  static const bounceFlag = BodyguardRuleAction._('bounce_flag');
-  static const bounceRemove = BodyguardRuleAction._('bounce_remove');
-  static const flag = BodyguardRuleAction._('flag');
-  static const keep = BodyguardRuleAction._('keep');
-  static const mask = BodyguardRuleAction._('mask');
-  static const maskFlag = BodyguardRuleAction._('mask_flag');
-  static const remove = BodyguardRuleAction._('remove');
-  static const shadow = BodyguardRuleAction._('shadow');
+extension type const BodyguardRuleAction(String _) implements String {
+  static const bounce = BodyguardRuleAction('bounce');
+  static const bounceFlag = BodyguardRuleAction('bounce_flag');
+  static const bounceRemove = BodyguardRuleAction('bounce_remove');
+  static const flag = BodyguardRuleAction('flag');
+  static const keep = BodyguardRuleAction('keep');
+  static const mask = BodyguardRuleAction('mask');
+  static const maskFlag = BodyguardRuleAction('mask_flag');
+  static const remove = BodyguardRuleAction('remove');
+  static const shadow = BodyguardRuleAction('shadow');
 
-  factory BodyguardRuleAction.fromJson(String json) => BodyguardRuleAction._(json);
+  factory BodyguardRuleAction.fromJson(String json) => BodyguardRuleAction(json);
 
   String toJson() => this;
 }

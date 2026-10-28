@@ -13,46 +13,45 @@ import '../models.dart';
 part 'channel_config_with_info.g.dart';
 part 'channel_config_with_info.freezed.dart';
 
-extension type const ChannelConfigWithInfoAutomod._(String _) implements String {
-  static const aI = ChannelConfigWithInfoAutomod._('AI');
-  static const disabled = ChannelConfigWithInfoAutomod._('disabled');
-  static const simple = ChannelConfigWithInfoAutomod._('simple');
+extension type const ChannelConfigWithInfoAutomod(String _) implements String {
+  static const aI = ChannelConfigWithInfoAutomod('AI');
+  static const disabled = ChannelConfigWithInfoAutomod('disabled');
+  static const simple = ChannelConfigWithInfoAutomod('simple');
 
-  factory ChannelConfigWithInfoAutomod.fromJson(String json) => ChannelConfigWithInfoAutomod._(json);
-
-  String toJson() => this;
-}
-
-extension type const ChannelConfigWithInfoAutomodBehavior._(String _) implements String {
-  static const block = ChannelConfigWithInfoAutomodBehavior._('block');
-  static const flag = ChannelConfigWithInfoAutomodBehavior._('flag');
-  static const shadowBlock = ChannelConfigWithInfoAutomodBehavior._('shadow_block');
-
-  factory ChannelConfigWithInfoAutomodBehavior.fromJson(String json) => ChannelConfigWithInfoAutomodBehavior._(json);
+  factory ChannelConfigWithInfoAutomod.fromJson(String json) => ChannelConfigWithInfoAutomod(json);
 
   String toJson() => this;
 }
 
-extension type const ChannelConfigWithInfoBlocklistBehavior._(String _) implements String {
-  static const block = ChannelConfigWithInfoBlocklistBehavior._('block');
-  static const flag = ChannelConfigWithInfoBlocklistBehavior._('flag');
-  static const shadowBlock = ChannelConfigWithInfoBlocklistBehavior._('shadow_block');
+extension type const ChannelConfigWithInfoAutomodBehavior(String _) implements String {
+  static const block = ChannelConfigWithInfoAutomodBehavior('block');
+  static const flag = ChannelConfigWithInfoAutomodBehavior('flag');
+  static const shadowBlock = ChannelConfigWithInfoAutomodBehavior('shadow_block');
 
-  factory ChannelConfigWithInfoBlocklistBehavior.fromJson(String json) =>
-      ChannelConfigWithInfoBlocklistBehavior._(json);
+  factory ChannelConfigWithInfoAutomodBehavior.fromJson(String json) => ChannelConfigWithInfoAutomodBehavior(json);
 
   String toJson() => this;
 }
 
-extension type const ChannelConfigWithInfoPushLevel._(String _) implements String {
-  static const all = ChannelConfigWithInfoPushLevel._('all');
-  static const allMentions = ChannelConfigWithInfoPushLevel._('all_mentions');
-  static const directMentions = ChannelConfigWithInfoPushLevel._('direct_mentions');
+extension type const ChannelConfigWithInfoBlocklistBehavior(String _) implements String {
+  static const block = ChannelConfigWithInfoBlocklistBehavior('block');
+  static const flag = ChannelConfigWithInfoBlocklistBehavior('flag');
+  static const shadowBlock = ChannelConfigWithInfoBlocklistBehavior('shadow_block');
+
+  factory ChannelConfigWithInfoBlocklistBehavior.fromJson(String json) => ChannelConfigWithInfoBlocklistBehavior(json);
+
+  String toJson() => this;
+}
+
+extension type const ChannelConfigWithInfoPushLevel(String _) implements String {
+  static const all = ChannelConfigWithInfoPushLevel('all');
+  static const allMentions = ChannelConfigWithInfoPushLevel('all_mentions');
+  static const directMentions = ChannelConfigWithInfoPushLevel('direct_mentions');
   @Deprecated('Use directMentions instead.')
-  static const mentions = ChannelConfigWithInfoPushLevel._('mentions');
-  static const none = ChannelConfigWithInfoPushLevel._('none');
+  static const mentions = ChannelConfigWithInfoPushLevel('mentions');
+  static const none = ChannelConfigWithInfoPushLevel('none');
 
-  factory ChannelConfigWithInfoPushLevel.fromJson(String json) => ChannelConfigWithInfoPushLevel._(json);
+  factory ChannelConfigWithInfoPushLevel.fromJson(String json) => ChannelConfigWithInfoPushLevel(json);
 
   String toJson() => this;
 }

@@ -13,11 +13,11 @@ import '../models.dart';
 part 'create_queue_request.g.dart';
 part 'create_queue_request.freezed.dart';
 
-extension type const CreateQueueRequestType._(String _) implements String {
-  static const operationalQueue = CreateQueueRequestType._('operational_queue');
-  static const personalView = CreateQueueRequestType._('personal_view');
+extension type const CreateQueueRequestType(String _) implements String {
+  static const operationalQueue = CreateQueueRequestType('operational_queue');
+  static const personalView = CreateQueueRequestType('personal_view');
 
-  factory CreateQueueRequestType.fromJson(String json) => CreateQueueRequestType._(json);
+  factory CreateQueueRequestType.fromJson(String json) => CreateQueueRequestType(json);
 
   String toJson() => this;
 }

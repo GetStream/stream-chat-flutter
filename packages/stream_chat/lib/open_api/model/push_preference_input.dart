@@ -13,36 +13,36 @@ import '../models.dart';
 part 'push_preference_input.g.dart';
 part 'push_preference_input.freezed.dart';
 
-extension type const PushPreferenceInputCallLevel._(String _) implements String {
-  static const all = PushPreferenceInputCallLevel._('all');
-  static const default_ = PushPreferenceInputCallLevel._('default');
-  static const none = PushPreferenceInputCallLevel._('none');
+extension type const PushPreferenceInputCallLevel(String _) implements String {
+  static const all = PushPreferenceInputCallLevel('all');
+  static const default_ = PushPreferenceInputCallLevel('default');
+  static const none = PushPreferenceInputCallLevel('none');
 
-  factory PushPreferenceInputCallLevel.fromJson(String json) => PushPreferenceInputCallLevel._(json);
+  factory PushPreferenceInputCallLevel.fromJson(String json) => PushPreferenceInputCallLevel(json);
 
   String toJson() => this;
 }
 
-extension type const PushPreferenceInputChatLevel._(String _) implements String {
-  static const all = PushPreferenceInputChatLevel._('all');
-  static const allMentions = PushPreferenceInputChatLevel._('all_mentions');
-  static const default_ = PushPreferenceInputChatLevel._('default');
-  static const directMentions = PushPreferenceInputChatLevel._('direct_mentions');
+extension type const PushPreferenceInputChatLevel(String _) implements String {
+  static const all = PushPreferenceInputChatLevel('all');
+  static const allMentions = PushPreferenceInputChatLevel('all_mentions');
+  static const default_ = PushPreferenceInputChatLevel('default');
+  static const directMentions = PushPreferenceInputChatLevel('direct_mentions');
   @Deprecated('Use directMentions instead.')
-  static const mentions = PushPreferenceInputChatLevel._('mentions');
-  static const none = PushPreferenceInputChatLevel._('none');
+  static const mentions = PushPreferenceInputChatLevel('mentions');
+  static const none = PushPreferenceInputChatLevel('none');
 
-  factory PushPreferenceInputChatLevel.fromJson(String json) => PushPreferenceInputChatLevel._(json);
+  factory PushPreferenceInputChatLevel.fromJson(String json) => PushPreferenceInputChatLevel(json);
 
   String toJson() => this;
 }
 
-extension type const PushPreferenceInputFeedsLevel._(String _) implements String {
-  static const all = PushPreferenceInputFeedsLevel._('all');
-  static const default_ = PushPreferenceInputFeedsLevel._('default');
-  static const none = PushPreferenceInputFeedsLevel._('none');
+extension type const PushPreferenceInputFeedsLevel(String _) implements String {
+  static const all = PushPreferenceInputFeedsLevel('all');
+  static const default_ = PushPreferenceInputFeedsLevel('default');
+  static const none = PushPreferenceInputFeedsLevel('none');
 
-  factory PushPreferenceInputFeedsLevel.fromJson(String json) => PushPreferenceInputFeedsLevel._(json);
+  factory PushPreferenceInputFeedsLevel.fromJson(String json) => PushPreferenceInputFeedsLevel(json);
 
   String toJson() => this;
 }

@@ -13,12 +13,12 @@ import '../models.dart';
 part 'block_list_options.g.dart';
 part 'block_list_options.freezed.dart';
 
-extension type const BlockListOptionsBehavior._(String _) implements String {
-  static const block = BlockListOptionsBehavior._('block');
-  static const flag = BlockListOptionsBehavior._('flag');
-  static const shadowBlock = BlockListOptionsBehavior._('shadow_block');
+extension type const BlockListOptionsBehavior(String _) implements String {
+  static const block = BlockListOptionsBehavior('block');
+  static const flag = BlockListOptionsBehavior('flag');
+  static const shadowBlock = BlockListOptionsBehavior('shadow_block');
 
-  factory BlockListOptionsBehavior.fromJson(String json) => BlockListOptionsBehavior._(json);
+  factory BlockListOptionsBehavior.fromJson(String json) => BlockListOptionsBehavior(json);
 
   String toJson() => this;
 }

@@ -13,11 +13,11 @@ import '../models.dart';
 part 'message_request.g.dart';
 part 'message_request.freezed.dart';
 
-extension type const MessageRequestType._(String _) implements String {
-  static const regular = MessageRequestType._('regular');
-  static const system = MessageRequestType._('system');
+extension type const MessageRequestType(String _) implements String {
+  static const regular = MessageRequestType('regular');
+  static const system = MessageRequestType('system');
 
-  factory MessageRequestType.fromJson(String json) => MessageRequestType._(json);
+  factory MessageRequestType.fromJson(String json) => MessageRequestType(json);
 
   String toJson() => this;
 }

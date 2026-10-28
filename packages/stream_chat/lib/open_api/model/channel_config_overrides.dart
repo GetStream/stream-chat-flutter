@@ -13,25 +13,25 @@ import '../models.dart';
 part 'channel_config_overrides.g.dart';
 part 'channel_config_overrides.freezed.dart';
 
-extension type const ChannelConfigOverridesBlocklistBehavior._(String _) implements String {
-  static const block = ChannelConfigOverridesBlocklistBehavior._('block');
-  static const flag = ChannelConfigOverridesBlocklistBehavior._('flag');
+extension type const ChannelConfigOverridesBlocklistBehavior(String _) implements String {
+  static const block = ChannelConfigOverridesBlocklistBehavior('block');
+  static const flag = ChannelConfigOverridesBlocklistBehavior('flag');
 
   factory ChannelConfigOverridesBlocklistBehavior.fromJson(String json) =>
-      ChannelConfigOverridesBlocklistBehavior._(json);
+      ChannelConfigOverridesBlocklistBehavior(json);
 
   String toJson() => this;
 }
 
-extension type const ChannelConfigOverridesPushLevel._(String _) implements String {
-  static const all = ChannelConfigOverridesPushLevel._('all');
-  static const allMentions = ChannelConfigOverridesPushLevel._('all_mentions');
-  static const directMentions = ChannelConfigOverridesPushLevel._('direct_mentions');
+extension type const ChannelConfigOverridesPushLevel(String _) implements String {
+  static const all = ChannelConfigOverridesPushLevel('all');
+  static const allMentions = ChannelConfigOverridesPushLevel('all_mentions');
+  static const directMentions = ChannelConfigOverridesPushLevel('direct_mentions');
   @Deprecated('Use directMentions instead.')
-  static const mentions = ChannelConfigOverridesPushLevel._('mentions');
-  static const none = ChannelConfigOverridesPushLevel._('none');
+  static const mentions = ChannelConfigOverridesPushLevel('mentions');
+  static const none = ChannelConfigOverridesPushLevel('none');
 
-  factory ChannelConfigOverridesPushLevel.fromJson(String json) => ChannelConfigOverridesPushLevel._(json);
+  factory ChannelConfigOverridesPushLevel.fromJson(String json) => ChannelConfigOverridesPushLevel(json);
 
   String toJson() => this;
 }

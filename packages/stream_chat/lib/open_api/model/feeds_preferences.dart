@@ -13,65 +13,65 @@ import '../models.dart';
 part 'feeds_preferences.g.dart';
 part 'feeds_preferences.freezed.dart';
 
-extension type const FeedsPreferencesComment._(String _) implements String {
-  static const all = FeedsPreferencesComment._('all');
-  static const none = FeedsPreferencesComment._('none');
+extension type const FeedsPreferencesComment(String _) implements String {
+  static const all = FeedsPreferencesComment('all');
+  static const none = FeedsPreferencesComment('none');
 
-  factory FeedsPreferencesComment.fromJson(String json) => FeedsPreferencesComment._(json);
-
-  String toJson() => this;
-}
-
-extension type const FeedsPreferencesCommentMention._(String _) implements String {
-  static const all = FeedsPreferencesCommentMention._('all');
-  static const none = FeedsPreferencesCommentMention._('none');
-
-  factory FeedsPreferencesCommentMention.fromJson(String json) => FeedsPreferencesCommentMention._(json);
+  factory FeedsPreferencesComment.fromJson(String json) => FeedsPreferencesComment(json);
 
   String toJson() => this;
 }
 
-extension type const FeedsPreferencesCommentReaction._(String _) implements String {
-  static const all = FeedsPreferencesCommentReaction._('all');
-  static const none = FeedsPreferencesCommentReaction._('none');
+extension type const FeedsPreferencesCommentMention(String _) implements String {
+  static const all = FeedsPreferencesCommentMention('all');
+  static const none = FeedsPreferencesCommentMention('none');
 
-  factory FeedsPreferencesCommentReaction.fromJson(String json) => FeedsPreferencesCommentReaction._(json);
-
-  String toJson() => this;
-}
-
-extension type const FeedsPreferencesCommentReply._(String _) implements String {
-  static const all = FeedsPreferencesCommentReply._('all');
-  static const none = FeedsPreferencesCommentReply._('none');
-
-  factory FeedsPreferencesCommentReply.fromJson(String json) => FeedsPreferencesCommentReply._(json);
+  factory FeedsPreferencesCommentMention.fromJson(String json) => FeedsPreferencesCommentMention(json);
 
   String toJson() => this;
 }
 
-extension type const FeedsPreferencesFollow._(String _) implements String {
-  static const all = FeedsPreferencesFollow._('all');
-  static const none = FeedsPreferencesFollow._('none');
+extension type const FeedsPreferencesCommentReaction(String _) implements String {
+  static const all = FeedsPreferencesCommentReaction('all');
+  static const none = FeedsPreferencesCommentReaction('none');
 
-  factory FeedsPreferencesFollow.fromJson(String json) => FeedsPreferencesFollow._(json);
-
-  String toJson() => this;
-}
-
-extension type const FeedsPreferencesMention._(String _) implements String {
-  static const all = FeedsPreferencesMention._('all');
-  static const none = FeedsPreferencesMention._('none');
-
-  factory FeedsPreferencesMention.fromJson(String json) => FeedsPreferencesMention._(json);
+  factory FeedsPreferencesCommentReaction.fromJson(String json) => FeedsPreferencesCommentReaction(json);
 
   String toJson() => this;
 }
 
-extension type const FeedsPreferencesReaction._(String _) implements String {
-  static const all = FeedsPreferencesReaction._('all');
-  static const none = FeedsPreferencesReaction._('none');
+extension type const FeedsPreferencesCommentReply(String _) implements String {
+  static const all = FeedsPreferencesCommentReply('all');
+  static const none = FeedsPreferencesCommentReply('none');
 
-  factory FeedsPreferencesReaction.fromJson(String json) => FeedsPreferencesReaction._(json);
+  factory FeedsPreferencesCommentReply.fromJson(String json) => FeedsPreferencesCommentReply(json);
+
+  String toJson() => this;
+}
+
+extension type const FeedsPreferencesFollow(String _) implements String {
+  static const all = FeedsPreferencesFollow('all');
+  static const none = FeedsPreferencesFollow('none');
+
+  factory FeedsPreferencesFollow.fromJson(String json) => FeedsPreferencesFollow(json);
+
+  String toJson() => this;
+}
+
+extension type const FeedsPreferencesMention(String _) implements String {
+  static const all = FeedsPreferencesMention('all');
+  static const none = FeedsPreferencesMention('none');
+
+  factory FeedsPreferencesMention.fromJson(String json) => FeedsPreferencesMention(json);
+
+  String toJson() => this;
+}
+
+extension type const FeedsPreferencesReaction(String _) implements String {
+  static const all = FeedsPreferencesReaction('all');
+  static const none = FeedsPreferencesReaction('none');
+
+  factory FeedsPreferencesReaction.fromJson(String json) => FeedsPreferencesReaction(json);
 
   String toJson() => this;
 }

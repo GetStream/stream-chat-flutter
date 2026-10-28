@@ -13,12 +13,12 @@ import '../models.dart';
 part 'ws_auth_message.g.dart';
 part 'ws_auth_message.freezed.dart';
 
-extension type const WSAuthMessageProducts._(String _) implements String {
-  static const chat = WSAuthMessageProducts._('chat');
-  static const feeds = WSAuthMessageProducts._('feeds');
-  static const video = WSAuthMessageProducts._('video');
+extension type const WSAuthMessageProducts(String _) implements String {
+  static const chat = WSAuthMessageProducts('chat');
+  static const feeds = WSAuthMessageProducts('feeds');
+  static const video = WSAuthMessageProducts('video');
 
-  factory WSAuthMessageProducts.fromJson(String json) => WSAuthMessageProducts._(json);
+  factory WSAuthMessageProducts.fromJson(String json) => WSAuthMessageProducts(json);
 
   String toJson() => this;
 }

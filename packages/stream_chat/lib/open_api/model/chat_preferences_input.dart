@@ -13,65 +13,65 @@ import '../models.dart';
 part 'chat_preferences_input.g.dart';
 part 'chat_preferences_input.freezed.dart';
 
-extension type const ChatPreferencesInputChannelMentions._(String _) implements String {
-  static const all = ChatPreferencesInputChannelMentions._('all');
-  static const none = ChatPreferencesInputChannelMentions._('none');
+extension type const ChatPreferencesInputChannelMentions(String _) implements String {
+  static const all = ChatPreferencesInputChannelMentions('all');
+  static const none = ChatPreferencesInputChannelMentions('none');
 
-  factory ChatPreferencesInputChannelMentions.fromJson(String json) => ChatPreferencesInputChannelMentions._(json);
-
-  String toJson() => this;
-}
-
-extension type const ChatPreferencesInputDefaultPreference._(String _) implements String {
-  static const all = ChatPreferencesInputDefaultPreference._('all');
-  static const none = ChatPreferencesInputDefaultPreference._('none');
-
-  factory ChatPreferencesInputDefaultPreference.fromJson(String json) => ChatPreferencesInputDefaultPreference._(json);
+  factory ChatPreferencesInputChannelMentions.fromJson(String json) => ChatPreferencesInputChannelMentions(json);
 
   String toJson() => this;
 }
 
-extension type const ChatPreferencesInputDirectMentions._(String _) implements String {
-  static const all = ChatPreferencesInputDirectMentions._('all');
-  static const none = ChatPreferencesInputDirectMentions._('none');
+extension type const ChatPreferencesInputDefaultPreference(String _) implements String {
+  static const all = ChatPreferencesInputDefaultPreference('all');
+  static const none = ChatPreferencesInputDefaultPreference('none');
 
-  factory ChatPreferencesInputDirectMentions.fromJson(String json) => ChatPreferencesInputDirectMentions._(json);
-
-  String toJson() => this;
-}
-
-extension type const ChatPreferencesInputGroupMentions._(String _) implements String {
-  static const all = ChatPreferencesInputGroupMentions._('all');
-  static const none = ChatPreferencesInputGroupMentions._('none');
-
-  factory ChatPreferencesInputGroupMentions.fromJson(String json) => ChatPreferencesInputGroupMentions._(json);
+  factory ChatPreferencesInputDefaultPreference.fromJson(String json) => ChatPreferencesInputDefaultPreference(json);
 
   String toJson() => this;
 }
 
-extension type const ChatPreferencesInputHereMentions._(String _) implements String {
-  static const all = ChatPreferencesInputHereMentions._('all');
-  static const none = ChatPreferencesInputHereMentions._('none');
+extension type const ChatPreferencesInputDirectMentions(String _) implements String {
+  static const all = ChatPreferencesInputDirectMentions('all');
+  static const none = ChatPreferencesInputDirectMentions('none');
 
-  factory ChatPreferencesInputHereMentions.fromJson(String json) => ChatPreferencesInputHereMentions._(json);
-
-  String toJson() => this;
-}
-
-extension type const ChatPreferencesInputRoleMentions._(String _) implements String {
-  static const all = ChatPreferencesInputRoleMentions._('all');
-  static const none = ChatPreferencesInputRoleMentions._('none');
-
-  factory ChatPreferencesInputRoleMentions.fromJson(String json) => ChatPreferencesInputRoleMentions._(json);
+  factory ChatPreferencesInputDirectMentions.fromJson(String json) => ChatPreferencesInputDirectMentions(json);
 
   String toJson() => this;
 }
 
-extension type const ChatPreferencesInputThreadReplies._(String _) implements String {
-  static const all = ChatPreferencesInputThreadReplies._('all');
-  static const none = ChatPreferencesInputThreadReplies._('none');
+extension type const ChatPreferencesInputGroupMentions(String _) implements String {
+  static const all = ChatPreferencesInputGroupMentions('all');
+  static const none = ChatPreferencesInputGroupMentions('none');
 
-  factory ChatPreferencesInputThreadReplies.fromJson(String json) => ChatPreferencesInputThreadReplies._(json);
+  factory ChatPreferencesInputGroupMentions.fromJson(String json) => ChatPreferencesInputGroupMentions(json);
+
+  String toJson() => this;
+}
+
+extension type const ChatPreferencesInputHereMentions(String _) implements String {
+  static const all = ChatPreferencesInputHereMentions('all');
+  static const none = ChatPreferencesInputHereMentions('none');
+
+  factory ChatPreferencesInputHereMentions.fromJson(String json) => ChatPreferencesInputHereMentions(json);
+
+  String toJson() => this;
+}
+
+extension type const ChatPreferencesInputRoleMentions(String _) implements String {
+  static const all = ChatPreferencesInputRoleMentions('all');
+  static const none = ChatPreferencesInputRoleMentions('none');
+
+  factory ChatPreferencesInputRoleMentions.fromJson(String json) => ChatPreferencesInputRoleMentions(json);
+
+  String toJson() => this;
+}
+
+extension type const ChatPreferencesInputThreadReplies(String _) implements String {
+  static const all = ChatPreferencesInputThreadReplies('all');
+  static const none = ChatPreferencesInputThreadReplies('none');
+
+  factory ChatPreferencesInputThreadReplies.fromJson(String json) => ChatPreferencesInputThreadReplies(json);
 
   String toJson() => this;
 }
