@@ -314,6 +314,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   // Snapshot of the composer message taken when [editMessage] is first called,
   // so [cancelEditMessage] can restore the user's draft.
   Message? _messageBeforeEdit;
+  bool _ogAttachmentDismissedBeforeEdit = false;
 
   /// Switches the controller to edit mode for the given [message].
   ///
@@ -330,7 +331,11 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
     // command alongside an edit.
     clearCommand();
 
-    _messageBeforeEdit ??= this.message;
+    if (_messageBeforeEdit == null) {
+      _messageBeforeEdit = this.message;
+      _ogAttachmentDismissedBeforeEdit = _ogAttachmentDismissed;
+      _ogAttachmentDismissed = false;
+    }
     _messageBeingEdited = message;
 
     this.message = message.copyWith(state: MessageState.updating);
@@ -345,6 +350,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
     if (_messageBeforeEdit case final message?) {
       this.message = message;
       _messageBeforeEdit = null;
+      _ogAttachmentDismissed = _ogAttachmentDismissedBeforeEdit;
     }
   }
 
@@ -404,7 +410,8 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   ///
   /// True while the message has an [ogAttachment], and after the user
   /// dismissed one with [clearOGAttachment] until it is cleared again, or
-  /// [clear] or [reset] is called.
+  /// [clear] or [reset] is called. A dismissal on the draft doesn't apply
+  /// while [editMessage] is editing another message.
   bool get skipEnrichUrl => _ogAttachmentDismissed || ogAttachment != null;
   bool _ogAttachmentDismissed = false;
 

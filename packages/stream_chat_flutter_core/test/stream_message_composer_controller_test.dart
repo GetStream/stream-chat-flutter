@@ -582,6 +582,33 @@ void main() {
       expect(controller.skipEnrichUrl, isFalse);
     });
 
+    test('editMessage does not carry the draft dismissal into the edit', () {
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.editMessage(Message(id: 'edited', text: 'See https://example.com'));
+
+      expect(controller.skipEnrichUrl, isFalse);
+    });
+
+    test('cancelEditMessage restores the draft dismissal', () {
+      controller.clearOGAttachment(dismissed: true);
+      controller.editMessage(Message(id: 'edited', text: 'See https://example.com'));
+
+      controller.cancelEditMessage();
+
+      expect(controller.skipEnrichUrl, isTrue);
+    });
+
+    test('editMessage keeps a dismissal made during the edit when called again', () {
+      final edited = Message(id: 'edited', text: 'See https://example.com');
+      controller.editMessage(edited);
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.editMessage(edited);
+
+      expect(controller.skipEnrichUrl, isTrue);
+    });
+
     test('reset forgets a dismissal', () {
       controller.clearOGAttachment(dismissed: true);
 
