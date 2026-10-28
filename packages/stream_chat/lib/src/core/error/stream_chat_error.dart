@@ -162,7 +162,18 @@ class StreamChatNetworkError extends StreamChatError {
   ChatErrorCode? get errorCode => chatErrorCodeFromCode(code);
 
   /// Whether the operation can be retried.
-  bool get isRetriable => data == null;
+  ///
+  /// True when the request failed without a Stream error response, or when
+  /// the response is a timeout (408), a rate limit (429) or a server error
+  /// (5xx).
+  bool get isRetriable {
+    if (data == null) return true;
+    return switch (statusCode) {
+      408 || 429 => true,
+      final status? => status >= 500,
+      null => false,
+    };
+  }
 
   /// Whether the server rejected a send because it already stored a message
   /// with the same id.

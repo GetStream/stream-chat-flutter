@@ -180,4 +180,20 @@ void main() {
       handle.dispose();
     });
   });
+
+  testWidgets('StreamMessageFooter shows the delivery status on your own message', (tester) async {
+    await tester.pumpWidget(wrap(StreamMessageFooter(message: message())));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamMessageSendingStatus), findsOneWidget);
+  });
+
+  testWidgets('StreamMessageFooter hides the delivery status on your own ephemeral message', (tester) async {
+    final ephemeral = message().copyWith(type: MessageType.ephemeral);
+
+    await tester.pumpWidget(wrap(StreamMessageFooter(message: ephemeral)));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamMessageSendingStatus), findsNothing);
+  });
 }

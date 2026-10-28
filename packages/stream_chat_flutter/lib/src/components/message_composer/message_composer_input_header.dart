@@ -43,7 +43,7 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
     final ogAttachment = controller.ogAttachment;
     final nonOGAttachments = controller.attachments
         .where((it) {
-          return it.titleLink == null && it.type != AttachmentType.voiceRecording;
+          return it.ogScrapeUrl == null && it.type != AttachmentType.voiceRecording;
         })
         .toList(growable: false);
     final voiceRecordings = controller.attachments
@@ -126,12 +126,15 @@ class _DefaultStreamMessageComposerInputHeader extends StatelessWidget {
                 child: core.StreamMessageComposerLinkPreviewAttachment(
                   title: ogAttachment.title != null ? Text(ogAttachment.title!) : null,
                   subtitle: ogAttachment.text != null ? Text(ogAttachment.text!) : null,
-                  caption: ogAttachment.titleLink != null ? Text(ogAttachment.titleLink!) : null,
+                  caption: switch (ogAttachment.titleLink ?? ogAttachment.ogScrapeUrl) {
+                    final link? => Text(link),
+                    null => null,
+                  },
                   thumbnail: switch (ogAttachment.imageUrl) {
                     final imageUrl? when imageUrl.isNotEmpty => core.StreamNetworkImage(imageUrl, fit: .cover),
                     _ => null,
                   },
-                  onRemovePressed: controller.clearOGAttachment,
+                  onRemovePressed: () => controller.clearOGAttachment(dismissed: true),
                 ),
               ),
           ],

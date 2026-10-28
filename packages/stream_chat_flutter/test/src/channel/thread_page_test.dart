@@ -33,12 +33,20 @@ void main() {
     expect(_composerController(tester).message.parentId, 'parent-id');
   });
 
-  testWidgets('hides the composer when the parent message is deleted', (tester) async {
+  testWidgets('hides the composer when the deleted parent message has no replies', (tester) async {
     final parent = Message(id: 'parent-id', text: 'Hello world!', type: 'deleted');
 
     await _pumpThreadPage(tester, parent: parent);
 
     expect(find.byType(StreamMessageComposer), findsNothing);
+  });
+
+  testWidgets('shows the composer when the deleted parent message has replies', (tester) async {
+    final parent = Message(id: 'parent-id', text: 'Hello world!', type: 'deleted', replyCount: 1);
+
+    await _pumpThreadPage(tester, parent: parent);
+
+    expect(find.byType(StreamMessageComposer), findsOneWidget);
   });
 
   testWidgets('still shows the thread when the parent message is deleted', (tester) async {

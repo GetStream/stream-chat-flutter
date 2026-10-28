@@ -42,3 +42,12 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+dependency_overrides:
+  # stream_core_flutter at its git ref needs a stream_core newer than the
+  # published one, so stream_core comes from the same ref.
+  stream_core:
+    git:
+      url: https://github.com/GetStream/stream-core-flutter.git
+      ref: 74a65f0d9730f91236f467c7cb18580cbfdc582a
+      path: packages/stream_core
