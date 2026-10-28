@@ -98,8 +98,6 @@ part 'user_watching_stop_event.dart';
 part 'events.freezed.dart';
 part 'events.g.dart';
 
-/// Every event this union maps to is a subtype, so a switch over it can be
-/// exhaustive.
 sealed class WSClientEvent implements core.WsEvent {
   String get type;
 
@@ -215,8 +213,6 @@ final class UnknownWSClientEvent extends core.WsEvent implements WSClientEvent {
   Map<String, dynamic> toJson() => rawJson;
 }
 
-/// Every event this union maps to is a subtype, so a switch over it can be
-/// exhaustive.
 sealed class WSEvent implements core.WsEvent {
   String get type;
 
