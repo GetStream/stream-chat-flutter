@@ -9,8 +9,13 @@
 - Fixed a `Channel` becoming unusable after the current user hides it or is removed from it, for example by blocking the other member of a direct message.
 - Fixed `Channel.hidden` not following the `channel.hidden` and `channel.visible` events.
 - Fixed the current user's membership staying on a channel after they are removed from it.
+- `Attachment.type` is now `url_preview` for every attachment scraped from a link in the message text, including a link to an image or file. Use `Attachment.rawType` to read the type it was created or received with.
+- `Attachment.toJson` keeps the original `type` of an attachment scraped from a link, such as `video` or `image`, instead of writing `url_preview`.
+
 🐞 Fixed
 
+- Fixed sending, updating and deleting a message not retrying when the server answers with a timeout (408), a rate limit (429) or a server error (5xx).
+- Fixed hard-deleting an unread message not lowering the channel's unread count.
 - Fixed a draft saved or deleted while offline not being kept.
 - Fixed a thread draft replacing the channel's draft when the thread's parent message isn't loaded.
 
