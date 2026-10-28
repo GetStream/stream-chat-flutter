@@ -15,6 +15,7 @@
 
 🐞 Fixed
 
+- Fixed `StreamThreadPage` hiding the composer for a deleted parent message that already has replies, which can still be replied to.
 - Fixed the "Only visible to you" Giphy preview showing a delivery status.
 - Fixed channel list previews showing a "You:" or sender name prefix, and the delivery status, in front of a system message.
 - Fixed a deleted message hiding its replies count, which left its thread unreachable from the channel.
