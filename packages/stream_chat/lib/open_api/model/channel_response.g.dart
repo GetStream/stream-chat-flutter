@@ -48,9 +48,7 @@ ChannelResponse _$ChannelResponseFromJson(
     const StreamDateTimeConverter().fromJson,
   ),
   muted: json['muted'] as bool?,
-  ownCapabilities: (json['own_capabilities'] as List<dynamic>?)
-      ?.map((e) => ChannelOwnCapability.fromJson(e as String))
-      .toList(),
+  ownCapabilities: (json['own_capabilities'] as List<dynamic>?)?.map((e) => e as ChannelOwnCapability).toList(),
   team: json['team'] as String?,
   truncatedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['truncated_at'],
@@ -65,9 +63,7 @@ ChannelResponse _$ChannelResponseFromJson(
   ),
 );
 
-Map<String, dynamic> _$ChannelResponseToJson(
-  ChannelResponse instance,
-) => <String, dynamic>{
+Map<String, dynamic> _$ChannelResponseToJson(ChannelResponse instance) => <String, dynamic>{
   'active_member_count': instance.activeMemberCount,
   'auto_translation_enabled': instance.autoTranslationEnabled,
   'auto_translation_language': instance.autoTranslationLanguage,
@@ -103,7 +99,7 @@ Map<String, dynamic> _$ChannelResponseToJson(
     const StreamDateTimeConverter().toJson,
   ),
   'muted': instance.muted,
-  'own_capabilities': instance.ownCapabilities?.map((e) => e.toJson()).toList(),
+  'own_capabilities': instance.ownCapabilities,
   'team': instance.team,
   'truncated_at': _$JsonConverterToJson<Object, DateTime>(
     instance.truncatedAt,

@@ -49,8 +49,4 @@ extension type const ChannelOwnCapability(String _) implements String {
   static const updateOwnMessage = ChannelOwnCapability('update-own-message');
   static const updateThread = ChannelOwnCapability('update-thread');
   static const uploadFile = ChannelOwnCapability('upload-file');
-
-  factory ChannelOwnCapability.fromJson(String json) => ChannelOwnCapability(json);
-
-  String toJson() => this;
 }

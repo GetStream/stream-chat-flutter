@@ -8,8 +8,4 @@ import '../models.dart';
 extension type const VotingVisibility(String _) implements String {
   static const anonymous = VotingVisibility('anonymous');
   static const public = VotingVisibility('public');
-
-  factory VotingVisibility.fromJson(String json) => VotingVisibility(json);
-
-  String toJson() => this;
 }

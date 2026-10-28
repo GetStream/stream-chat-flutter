@@ -16,10 +16,6 @@ part 'message_request.freezed.dart';
 extension type const MessageRequestType(String _) implements String {
   static const regular = MessageRequestType('regular');
   static const system = MessageRequestType('system');
-
-  factory MessageRequestType.fromJson(String json) => MessageRequestType(json);
-
-  String toJson() => this;
 }
 
 @freezed

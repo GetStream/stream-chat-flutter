@@ -9,8 +9,4 @@ extension type const ChannelModerationBehavior(String _) implements String {
   static const block = ChannelModerationBehavior('block');
   static const flag = ChannelModerationBehavior('flag');
   static const shadowBlock = ChannelModerationBehavior('shadow_block');
-
-  factory ChannelModerationBehavior.fromJson(String json) => ChannelModerationBehavior(json);
-
-  String toJson() => this;
 }

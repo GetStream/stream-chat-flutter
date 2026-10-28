@@ -9,8 +9,4 @@ extension type const ActivityVisibility(String _) implements String {
   static const private = ActivityVisibility('private');
   static const public = ActivityVisibility('public');
   static const tag = ActivityVisibility('tag');
-
-  factory ActivityVisibility.fromJson(String json) => ActivityVisibility(json);
-
-  String toJson() => this;
 }

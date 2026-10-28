@@ -9,8 +9,4 @@ extension type const RestrictReplies(String _) implements String {
   static const everyone = RestrictReplies('everyone');
   static const nobody = RestrictReplies('nobody');
   static const peopleIFollow = RestrictReplies('people_i_follow');
-
-  factory RestrictReplies.fromJson(String json) => RestrictReplies(json);
-
-  String toJson() => this;
 }

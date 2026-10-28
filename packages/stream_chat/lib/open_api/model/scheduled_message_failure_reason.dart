@@ -17,8 +17,4 @@ extension type const ScheduledMessageFailureReason(String _) implements String {
   static const noPermission = ScheduledMessageFailureReason('no_permission');
   static const pendingNotSupported = ScheduledMessageFailureReason('pending_not_supported');
   static const userDeleted = ScheduledMessageFailureReason('user_deleted');
-
-  factory ScheduledMessageFailureReason.fromJson(String json) => ScheduledMessageFailureReason(json);
-
-  String toJson() => this;
 }

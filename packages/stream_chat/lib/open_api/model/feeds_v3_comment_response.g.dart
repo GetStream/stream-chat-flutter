@@ -59,7 +59,7 @@ FeedsV3CommentResponse _$FeedsV3CommentResponseFromJson(
   ),
   replyCount: (json['reply_count'] as num).toInt(),
   score: (json['score'] as num).toInt(),
-  status: CommentStatus.fromJson(json['status'] as String),
+  status: json['status'] as CommentStatus,
   text: json['text'] as String?,
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
@@ -102,7 +102,7 @@ Map<String, dynamic> _$FeedsV3CommentResponseToJson(
   ),
   'reply_count': instance.replyCount,
   'score': instance.score,
-  'status': instance.status.toJson(),
+  'status': instance.status,
   'text': instance.text,
   'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
   'upvote_count': instance.upvoteCount,

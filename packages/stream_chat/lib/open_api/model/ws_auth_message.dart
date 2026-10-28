@@ -17,10 +17,6 @@ extension type const WSAuthMessageProducts(String _) implements String {
   static const chat = WSAuthMessageProducts('chat');
   static const feeds = WSAuthMessageProducts('feeds');
   static const video = WSAuthMessageProducts('video');
-
-  factory WSAuthMessageProducts.fromJson(String json) => WSAuthMessageProducts(json);
-
-  String toJson() => this;
 }
 
 @freezed

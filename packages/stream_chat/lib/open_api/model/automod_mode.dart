@@ -9,8 +9,4 @@ extension type const AutomodMode(String _) implements String {
   static const aI = AutomodMode('AI');
   static const disabled = AutomodMode('disabled');
   static const simple = AutomodMode('simple');
-
-  factory AutomodMode.fromJson(String json) => AutomodMode(json);
-
-  String toJson() => this;
 }

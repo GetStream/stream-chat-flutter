@@ -12,8 +12,4 @@ extension type const ModerationAction(String _) implements String {
   static const flag = ModerationAction('flag');
   static const remove = ModerationAction('remove');
   static const shadow = ModerationAction('shadow');
-
-  factory ModerationAction.fromJson(String json) => ModerationAction(json);
-
-  String toJson() => this;
 }

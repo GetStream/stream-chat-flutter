@@ -16,10 +16,6 @@ part 'create_queue_request.freezed.dart';
 extension type const CreateQueueRequestType(String _) implements String {
   static const operationalQueue = CreateQueueRequestType('operational_queue');
   static const personalView = CreateQueueRequestType('personal_view');
-
-  factory CreateQueueRequestType.fromJson(String json) => CreateQueueRequestType(json);
-
-  String toJson() => this;
 }
 
 @freezed

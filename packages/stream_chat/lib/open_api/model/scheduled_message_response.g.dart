@@ -18,11 +18,7 @@ ScheduledMessageResponse _$ScheduledMessageResponseFromJson(
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  failureReason: json['failure_reason'] == null
-      ? null
-      : ScheduledMessageFailureReason.fromJson(
-          json['failure_reason'] as String,
-        ),
+  failureReason: json['failure_reason'] as ScheduledMessageFailureReason?,
   id: json['id'] as String,
   message: ScheduledMessageContentResponse.fromJson(
     json['message'] as Map<String, dynamic>,
@@ -30,7 +26,7 @@ ScheduledMessageResponse _$ScheduledMessageResponseFromJson(
   scheduledAt: const StreamDateTimeConverter().fromJson(
     json['scheduled_at'] as Object,
   ),
-  status: ScheduledMessageStatus.fromJson(json['status'] as String),
+  status: json['status'] as ScheduledMessageStatus,
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
@@ -43,11 +39,11 @@ Map<String, dynamic> _$ScheduledMessageResponseToJson(
   'channel': instance.channel?.toJson(),
   'cid': instance.cid,
   'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
-  'failure_reason': instance.failureReason?.toJson(),
+  'failure_reason': instance.failureReason,
   'id': instance.id,
   'message': instance.message.toJson(),
   'scheduled_at': const StreamDateTimeConverter().toJson(instance.scheduledAt),
-  'status': instance.status.toJson(),
+  'status': instance.status,
   'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
   'user': instance.user.toJson(),
 };

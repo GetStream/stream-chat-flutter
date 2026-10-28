@@ -8,8 +8,4 @@ import '../models.dart';
 extension type const BlocklistBehavior(String _) implements String {
   static const block = BlocklistBehavior('block');
   static const flag = BlocklistBehavior('flag');
-
-  factory BlocklistBehavior.fromJson(String json) => BlocklistBehavior(json);
-
-  String toJson() => this;
 }

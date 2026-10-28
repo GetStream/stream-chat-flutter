@@ -22,10 +22,6 @@ extension type const BlockListRuleAction(String _) implements String {
   static const maskFlag = BlockListRuleAction('mask_flag');
   static const remove = BlockListRuleAction('remove');
   static const shadow = BlockListRuleAction('shadow');
-
-  factory BlockListRuleAction.fromJson(String json) => BlockListRuleAction(json);
-
-  String toJson() => this;
 }
 
 @freezed

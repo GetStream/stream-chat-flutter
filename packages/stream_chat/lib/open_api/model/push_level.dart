@@ -12,8 +12,4 @@ extension type const PushLevel(String _) implements String {
   @Deprecated('Use directMentions instead.')
   static const mentions = PushLevel('mentions');
   static const none = PushLevel('none');
-
-  factory PushLevel.fromJson(String json) => PushLevel(json);
-
-  String toJson() => this;
 }

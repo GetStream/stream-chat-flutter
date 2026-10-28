@@ -10,9 +10,7 @@ ConfigOverridesRequest _$ConfigOverridesRequestFromJson(
   Map<String, dynamic> json,
 ) => ConfigOverridesRequest(
   blocklist: json['blocklist'] as String?,
-  blocklistBehavior: json['blocklist_behavior'] == null
-      ? null
-      : BlocklistBehavior.fromJson(json['blocklist_behavior'] as String),
+  blocklistBehavior: json['blocklist_behavior'] as BlocklistBehavior?,
   chatPreferences: json['chat_preferences'] == null
       ? null
       : ChatPreferences.fromJson(
@@ -24,7 +22,7 @@ ConfigOverridesRequest _$ConfigOverridesRequestFromJson(
     (k, e) => MapEntry(k, (e as List<dynamic>).map((e) => e as String).toList()),
   ),
   maxMessageLength: (json['max_message_length'] as num?)?.toInt(),
-  pushLevel: json['push_level'] == null ? null : PushLevel.fromJson(json['push_level'] as String),
+  pushLevel: json['push_level'] as PushLevel?,
   quotes: json['quotes'] as bool?,
   reactions: json['reactions'] as bool?,
   replies: json['replies'] as bool?,
@@ -39,13 +37,13 @@ Map<String, dynamic> _$ConfigOverridesRequestToJson(
   ConfigOverridesRequest instance,
 ) => <String, dynamic>{
   'blocklist': instance.blocklist,
-  'blocklist_behavior': instance.blocklistBehavior?.toJson(),
+  'blocklist_behavior': instance.blocklistBehavior,
   'chat_preferences': instance.chatPreferences?.toJson(),
   'commands': instance.commands,
   'count_messages': instance.countMessages,
   'grants': instance.grants,
   'max_message_length': instance.maxMessageLength,
-  'push_level': instance.pushLevel?.toJson(),
+  'push_level': instance.pushLevel,
   'quotes': instance.quotes,
   'reactions': instance.reactions,
   'replies': instance.replies,

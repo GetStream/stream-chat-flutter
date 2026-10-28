@@ -9,8 +9,4 @@ extension type const ScheduledMessageQueryStatus(String _) implements String {
   static const failed = ScheduledMessageQueryStatus('failed');
   static const scheduled = ScheduledMessageQueryStatus('scheduled');
   static const sending = ScheduledMessageQueryStatus('sending');
-
-  factory ScheduledMessageQueryStatus.fromJson(String json) => ScheduledMessageQueryStatus(json);
-
-  String toJson() => this;
 }

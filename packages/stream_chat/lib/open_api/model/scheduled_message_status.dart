@@ -11,8 +11,4 @@ extension type const ScheduledMessageStatus(String _) implements String {
   static const scheduled = ScheduledMessageStatus('scheduled');
   static const sending = ScheduledMessageStatus('sending');
   static const sent = ScheduledMessageStatus('sent');
-
-  factory ScheduledMessageStatus.fromJson(String json) => ScheduledMessageStatus(json);
-
-  String toJson() => this;
 }

@@ -21,10 +21,6 @@ extension type const PushPreferenceInputChatLevel(String _) implements String {
   @Deprecated('Use directMentions instead.')
   static const mentions = PushPreferenceInputChatLevel('mentions');
   static const none = PushPreferenceInputChatLevel('none');
-
-  factory PushPreferenceInputChatLevel.fromJson(String json) => PushPreferenceInputChatLevel(json);
-
-  String toJson() => this;
 }
 
 @freezed

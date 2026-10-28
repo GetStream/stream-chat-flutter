@@ -71,10 +71,6 @@ extension type const TranslateMessageRequestLanguage(String _) implements String
   static const vi = TranslateMessageRequestLanguage('vi');
   static const zh = TranslateMessageRequestLanguage('zh');
   static const zhTW = TranslateMessageRequestLanguage('zh-TW');
-
-  factory TranslateMessageRequestLanguage.fromJson(String json) => TranslateMessageRequestLanguage(json);
-
-  String toJson() => this;
 }
 
 @freezed

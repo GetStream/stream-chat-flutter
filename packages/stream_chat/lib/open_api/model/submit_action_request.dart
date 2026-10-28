@@ -39,10 +39,6 @@ extension type const SubmitActionRequestActionType(String _) implements String {
   static const unban = SubmitActionRequestActionType('unban');
   static const unblock = SubmitActionRequestActionType('unblock');
   static const unmask = SubmitActionRequestActionType('unmask');
-
-  factory SubmitActionRequestActionType.fromJson(String json) => SubmitActionRequestActionType(json);
-
-  String toJson() => this;
 }
 
 @freezed

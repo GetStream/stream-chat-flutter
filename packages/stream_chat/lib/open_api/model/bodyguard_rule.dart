@@ -23,10 +23,6 @@ extension type const BodyguardRuleAction(String _) implements String {
   static const maskFlag = BodyguardRuleAction('mask_flag');
   static const remove = BodyguardRuleAction('remove');
   static const shadow = BodyguardRuleAction('shadow');
-
-  factory BodyguardRuleAction.fromJson(String json) => BodyguardRuleAction(json);
-
-  String toJson() => this;
 }
 
 @freezed

@@ -21,10 +21,6 @@ extension type const CreateBlockListRequestType(String _) implements String {
   static const regex = CreateBlockListRequestType('regex');
   static const word = CreateBlockListRequestType('word');
   static const wordAllowlist = CreateBlockListRequestType('word_allowlist');
-
-  factory CreateBlockListRequestType.fromJson(String json) => CreateBlockListRequestType(json);
-
-  String toJson() => this;
 }
 
 @freezed

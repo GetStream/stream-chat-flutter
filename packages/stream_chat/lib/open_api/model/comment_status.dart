@@ -11,8 +11,4 @@ extension type const CommentStatus(String _) implements String {
   static const hidden = CommentStatus('hidden');
   static const removed = CommentStatus('removed');
   static const shadowBlocked = CommentStatus('shadow_blocked');
-
-  factory CommentStatus.fromJson(String json) => CommentStatus(json);
-
-  String toJson() => this;
 }

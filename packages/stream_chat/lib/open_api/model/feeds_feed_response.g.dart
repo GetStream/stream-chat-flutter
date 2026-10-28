@@ -37,7 +37,7 @@ FeedsFeedResponse _$FeedsFeedResponseFromJson(Map<String, dynamic> json) => Feed
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
-  visibility: json['visibility'] == null ? null : FeedVisibility.fromJson(json['visibility'] as String),
+  visibility: json['visibility'] as FeedVisibility?,
 );
 
 Map<String, dynamic> _$FeedsFeedResponseToJson(FeedsFeedResponse instance) => <String, dynamic>{
@@ -61,7 +61,7 @@ Map<String, dynamic> _$FeedsFeedResponseToJson(FeedsFeedResponse instance) => <S
   'name': instance.name,
   'pin_count': instance.pinCount,
   'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
-  'visibility': instance.visibility?.toJson(),
+  'visibility': instance.visibility,
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

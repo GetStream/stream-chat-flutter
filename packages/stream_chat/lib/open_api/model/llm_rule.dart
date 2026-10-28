@@ -21,10 +21,6 @@ extension type const LLMRuleAction(String _) implements String {
   static const keep = LLMRuleAction('keep');
   static const remove = LLMRuleAction('remove');
   static const shadow = LLMRuleAction('shadow');
-
-  factory LLMRuleAction.fromJson(String json) => LLMRuleAction(json);
-
-  String toJson() => this;
 }
 
 @freezed

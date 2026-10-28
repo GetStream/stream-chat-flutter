@@ -31,10 +31,6 @@ extension type const RuleBuilderActionType(String _) implements String {
   static const shadowContent = RuleBuilderActionType('shadow_content');
   static const warning = RuleBuilderActionType('warning');
   static const webhookOnly = RuleBuilderActionType('webhook_only');
-
-  factory RuleBuilderActionType.fromJson(String json) => RuleBuilderActionType(json);
-
-  String toJson() => this;
 }
 
 @freezed

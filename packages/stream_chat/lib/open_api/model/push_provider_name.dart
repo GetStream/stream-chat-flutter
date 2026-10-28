@@ -10,8 +10,4 @@ extension type const PushProviderName(String _) implements String {
   static const firebase = PushProviderName('firebase');
   static const huawei = PushProviderName('huawei');
   static const xiaomi = PushProviderName('xiaomi');
-
-  factory PushProviderName.fromJson(String json) => PushProviderName(json);
-
-  String toJson() => this;
 }

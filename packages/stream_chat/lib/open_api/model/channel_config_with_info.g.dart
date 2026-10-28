@@ -10,19 +10,13 @@ ChannelConfigWithInfo _$ChannelConfigWithInfoFromJson(
   Map<String, dynamic> json,
 ) => ChannelConfigWithInfo(
   allowedFlagReasons: (json['allowed_flag_reasons'] as List<dynamic>?)?.map((e) => e as String).toList(),
-  automod: AutomodMode.fromJson(json['automod'] as String),
-  automodBehavior: ChannelModerationBehavior.fromJson(
-    json['automod_behavior'] as String,
-  ),
+  automod: json['automod'] as AutomodMode,
+  automodBehavior: json['automod_behavior'] as ChannelModerationBehavior,
   automodThresholds: json['automod_thresholds'] == null
       ? null
       : Thresholds.fromJson(json['automod_thresholds'] as Map<String, dynamic>),
   blocklist: json['blocklist'] as String?,
-  blocklistBehavior: json['blocklist_behavior'] == null
-      ? null
-      : ChannelModerationBehavior.fromJson(
-          json['blocklist_behavior'] as String,
-        ),
+  blocklistBehavior: json['blocklist_behavior'] as ChannelModerationBehavior?,
   blocklists: (json['blocklists'] as List<dynamic>?)
       ?.map((e) => BlockListOptions.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -50,7 +44,7 @@ ChannelConfigWithInfo _$ChannelConfigWithInfoFromJson(
   partitionSize: (json['partition_size'] as num?)?.toInt(),
   partitionTtl: json['partition_ttl'] as String?,
   polls: json['polls'] as bool,
-  pushLevel: json['push_level'] == null ? null : PushLevel.fromJson(json['push_level'] as String),
+  pushLevel: json['push_level'] as PushLevel?,
   pushNotifications: json['push_notifications'] as bool,
   quotes: json['quotes'] as bool,
   reactions: json['reactions'] as bool,
@@ -77,11 +71,11 @@ Map<String, dynamic> _$ChannelConfigWithInfoToJson(
   ChannelConfigWithInfo instance,
 ) => <String, dynamic>{
   'allowed_flag_reasons': instance.allowedFlagReasons,
-  'automod': instance.automod.toJson(),
-  'automod_behavior': instance.automodBehavior.toJson(),
+  'automod': instance.automod,
+  'automod_behavior': instance.automodBehavior,
   'automod_thresholds': instance.automodThresholds?.toJson(),
   'blocklist': instance.blocklist,
-  'blocklist_behavior': instance.blocklistBehavior?.toJson(),
+  'blocklist_behavior': instance.blocklistBehavior,
   'blocklists': instance.blocklists?.map((e) => e.toJson()).toList(),
   'chat_preferences': instance.chatPreferences?.toJson(),
   'commands': instance.commands.map((e) => e.toJson()).toList(),
@@ -99,7 +93,7 @@ Map<String, dynamic> _$ChannelConfigWithInfoToJson(
   'partition_size': instance.partitionSize,
   'partition_ttl': instance.partitionTtl,
   'polls': instance.polls,
-  'push_level': instance.pushLevel?.toJson(),
+  'push_level': instance.pushLevel,
   'push_notifications': instance.pushNotifications,
   'quotes': instance.quotes,
   'reactions': instance.reactions,

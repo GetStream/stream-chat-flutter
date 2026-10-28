@@ -56,9 +56,7 @@ PollResponseData _$PollResponseDataFromJson(
   voteCountsByOption: Map<String, int>.from(
     json['vote_counts_by_option'] as Map,
   ),
-  votingVisibility: VotingVisibility.fromJson(
-    json['voting_visibility'] as String,
-  ),
+  votingVisibility: json['voting_visibility'] as VotingVisibility,
 );
 
 Map<String, dynamic> _$PollResponseDataToJson(PollResponseData instance) => <String, dynamic>{
@@ -86,5 +84,5 @@ Map<String, dynamic> _$PollResponseDataToJson(PollResponseData instance) => <Str
   'updated_at': const StreamDateTimeConverter().toJson(instance.updatedAt),
   'vote_count': instance.voteCount,
   'vote_counts_by_option': instance.voteCountsByOption,
-  'voting_visibility': instance.votingVisibility.toJson(),
+  'voting_visibility': instance.votingVisibility,
 };

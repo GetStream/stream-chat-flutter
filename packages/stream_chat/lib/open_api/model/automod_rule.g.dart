@@ -7,13 +7,13 @@ part of 'automod_rule.dart';
 // **************************************************************************
 
 AutomodRule _$AutomodRuleFromJson(Map<String, dynamic> json) => AutomodRule(
-  action: ModerationAction.fromJson(json['action'] as String),
+  action: json['action'] as ModerationAction,
   label: json['label'] as String,
   threshold: (json['threshold'] as num).toDouble(),
 );
 
 Map<String, dynamic> _$AutomodRuleToJson(AutomodRule instance) => <String, dynamic>{
-  'action': instance.action.toJson(),
+  'action': instance.action,
   'label': instance.label,
   'threshold': instance.threshold,
 };

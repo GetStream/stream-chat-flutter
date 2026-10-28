@@ -17,10 +17,6 @@ extension type const MediaDisplayResponseMode(String _) implements String {
   static const blur = MediaDisplayResponseMode('blur');
   static const blurGrayscale = MediaDisplayResponseMode('blur_grayscale');
   static const normal = MediaDisplayResponseMode('normal');
-
-  factory MediaDisplayResponseMode.fromJson(String json) => MediaDisplayResponseMode(json);
-
-  String toJson() => this;
 }
 
 @freezed

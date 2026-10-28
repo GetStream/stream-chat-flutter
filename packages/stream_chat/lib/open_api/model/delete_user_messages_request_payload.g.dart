@@ -10,7 +10,7 @@ DeleteUserMessagesRequestPayload _$DeleteUserMessagesRequestPayloadFromJson(
   Map<String, dynamic> json,
 ) => DeleteUserMessagesRequestPayload(
   channelCid: json['channel_cid'] as String?,
-  deleteMessages: DeleteMessages.fromJson(json['delete_messages'] as String),
+  deleteMessages: json['delete_messages'] as DeleteMessages,
   deleteReactions: json['delete_reactions'] as bool?,
   entityId: json['entity_id'] as String?,
   entityType: json['entity_type'] as String?,
@@ -21,7 +21,7 @@ Map<String, dynamic> _$DeleteUserMessagesRequestPayloadToJson(
   DeleteUserMessagesRequestPayload instance,
 ) => <String, dynamic>{
   'channel_cid': instance.channelCid,
-  'delete_messages': instance.deleteMessages.toJson(),
+  'delete_messages': instance.deleteMessages,
   'delete_reactions': instance.deleteReactions,
   'entity_id': instance.entityId,
   'entity_type': instance.entityType,

@@ -10,7 +10,7 @@ MediaDisplayResponse _$MediaDisplayResponseFromJson(
   Map<String, dynamic> json,
 ) => MediaDisplayResponse(
   auditReveal: json['audit_reveal'] as bool,
-  mode: MediaDisplayResponseMode.fromJson(json['mode'] as String),
+  mode: json['mode'] as MediaDisplayResponseMode,
   revealRestricted: json['reveal_restricted'] as bool,
 );
 
@@ -18,6 +18,6 @@ Map<String, dynamic> _$MediaDisplayResponseToJson(
   MediaDisplayResponse instance,
 ) => <String, dynamic>{
   'audit_reveal': instance.auditReveal,
-  'mode': instance.mode.toJson(),
+  'mode': instance.mode,
   'reveal_restricted': instance.revealRestricted,
 };

@@ -7,7 +7,7 @@ part of 'quiet_hours_rule_input.dart';
 // **************************************************************************
 
 QuietHoursRuleInput _$QuietHoursRuleInputFromJson(Map<String, dynamic> json) => QuietHoursRuleInput(
-  days: (json['days'] as List<dynamic>?)?.map((e) => QuietHoursRuleInputDays.fromJson(e as String)).toList(),
+  days: (json['days'] as List<dynamic>?)?.map((e) => e as QuietHoursRuleInputDays).toList(),
   end: json['end'] as String,
   start: json['start'] as String,
 );
@@ -15,7 +15,7 @@ QuietHoursRuleInput _$QuietHoursRuleInputFromJson(Map<String, dynamic> json) => 
 Map<String, dynamic> _$QuietHoursRuleInputToJson(
   QuietHoursRuleInput instance,
 ) => <String, dynamic>{
-  'days': instance.days?.map((e) => e.toJson()).toList(),
+  'days': instance.days,
   'end': instance.end,
   'start': instance.start,
 };

@@ -19,10 +19,6 @@ extension type const BulkActionAppealsRequestActionType(String _) implements Str
   static const restore = BulkActionAppealsRequestActionType('restore');
   static const unban = BulkActionAppealsRequestActionType('unban');
   static const unblock = BulkActionAppealsRequestActionType('unblock');
-
-  factory BulkActionAppealsRequestActionType.fromJson(String json) => BulkActionAppealsRequestActionType(json);
-
-  String toJson() => this;
 }
 
 @freezed

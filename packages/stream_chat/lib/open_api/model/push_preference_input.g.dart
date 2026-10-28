@@ -8,7 +8,7 @@ part of 'push_preference_input.dart';
 
 PushPreferenceInput _$PushPreferenceInputFromJson(Map<String, dynamic> json) => PushPreferenceInput(
   channelCid: json['channel_cid'] as String?,
-  chatLevel: json['chat_level'] == null ? null : PushPreferenceInputChatLevel.fromJson(json['chat_level'] as String),
+  chatLevel: json['chat_level'] as PushPreferenceInputChatLevel?,
   chatPreferences: json['chat_preferences'] == null
       ? null
       : ChatPreferencesInput.fromJson(
@@ -32,7 +32,7 @@ Map<String, dynamic> _$PushPreferenceInputToJson(
   PushPreferenceInput instance,
 ) => <String, dynamic>{
   'channel_cid': instance.channelCid,
-  'chat_level': instance.chatLevel?.toJson(),
+  'chat_level': instance.chatLevel,
   'chat_preferences': instance.chatPreferences?.toJson(),
   'disabled_until': _$JsonConverterToJson<Object, DateTime>(
     instance.disabledUntil,

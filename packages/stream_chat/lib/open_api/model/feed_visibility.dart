@@ -11,8 +11,4 @@ extension type const FeedVisibility(String _) implements String {
   static const private = FeedVisibility('private');
   static const public = FeedVisibility('public');
   static const visible = FeedVisibility('visible');
-
-  factory FeedVisibility.fromJson(String json) => FeedVisibility(json);
-
-  String toJson() => this;
 }

@@ -9,8 +9,4 @@ extension type const SortParamType(String _) implements String {
   static const boolean = SortParamType('boolean');
   static const empty = SortParamType('');
   static const number = SortParamType('number');
-
-  factory SortParamType.fromJson(String json) => SortParamType(json);
-
-  String toJson() => this;
 }

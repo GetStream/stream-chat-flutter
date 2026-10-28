@@ -9,8 +9,4 @@ extension type const DeleteMessages(String _) implements String {
   static const hard = DeleteMessages('hard');
   static const pruning = DeleteMessages('pruning');
   static const soft = DeleteMessages('soft');
-
-  factory DeleteMessages.fromJson(String json) => DeleteMessages(json);
-
-  String toJson() => this;
 }

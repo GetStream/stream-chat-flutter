@@ -18,10 +18,6 @@ extension type const VelocityFilterConfigRuleAction(String _) implements String 
   static const flag = VelocityFilterConfigRuleAction('flag');
   static const remove = VelocityFilterConfigRuleAction('remove');
   static const shadow = VelocityFilterConfigRuleAction('shadow');
-
-  factory VelocityFilterConfigRuleAction.fromJson(String json) => VelocityFilterConfigRuleAction(json);
-
-  String toJson() => this;
 }
 
 extension type const VelocityFilterConfigRuleCascadingAction(String _) implements String {
@@ -29,11 +25,6 @@ extension type const VelocityFilterConfigRuleCascadingAction(String _) implement
   static const flag = VelocityFilterConfigRuleCascadingAction('flag');
   static const remove = VelocityFilterConfigRuleCascadingAction('remove');
   static const shadow = VelocityFilterConfigRuleCascadingAction('shadow');
-
-  factory VelocityFilterConfigRuleCascadingAction.fromJson(String json) =>
-      VelocityFilterConfigRuleCascadingAction(json);
-
-  String toJson() => this;
 }
 
 @freezed

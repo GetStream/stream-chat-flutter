@@ -22,10 +22,6 @@ extension type const BodyguardSeverityRuleAction(String _) implements String {
   static const mask = BodyguardSeverityRuleAction('mask');
   static const remove = BodyguardSeverityRuleAction('remove');
   static const shadow = BodyguardSeverityRuleAction('shadow');
-
-  factory BodyguardSeverityRuleAction.fromJson(String json) => BodyguardSeverityRuleAction(json);
-
-  String toJson() => this;
 }
 
 extension type const BodyguardSeverityRuleSeverity(String _) implements String {
@@ -33,10 +29,6 @@ extension type const BodyguardSeverityRuleSeverity(String _) implements String {
   static const high = BodyguardSeverityRuleSeverity('high');
   static const low = BodyguardSeverityRuleSeverity('low');
   static const medium = BodyguardSeverityRuleSeverity('medium');
-
-  factory BodyguardSeverityRuleSeverity.fromJson(String json) => BodyguardSeverityRuleSeverity(json);
-
-  String toJson() => this;
 }
 
 @freezed

@@ -16,64 +16,36 @@ part 'chat_preferences_input.freezed.dart';
 extension type const ChatPreferencesInputChannelMentions(String _) implements String {
   static const all = ChatPreferencesInputChannelMentions('all');
   static const none = ChatPreferencesInputChannelMentions('none');
-
-  factory ChatPreferencesInputChannelMentions.fromJson(String json) => ChatPreferencesInputChannelMentions(json);
-
-  String toJson() => this;
 }
 
 extension type const ChatPreferencesInputDefaultPreference(String _) implements String {
   static const all = ChatPreferencesInputDefaultPreference('all');
   static const none = ChatPreferencesInputDefaultPreference('none');
-
-  factory ChatPreferencesInputDefaultPreference.fromJson(String json) => ChatPreferencesInputDefaultPreference(json);
-
-  String toJson() => this;
 }
 
 extension type const ChatPreferencesInputDirectMentions(String _) implements String {
   static const all = ChatPreferencesInputDirectMentions('all');
   static const none = ChatPreferencesInputDirectMentions('none');
-
-  factory ChatPreferencesInputDirectMentions.fromJson(String json) => ChatPreferencesInputDirectMentions(json);
-
-  String toJson() => this;
 }
 
 extension type const ChatPreferencesInputGroupMentions(String _) implements String {
   static const all = ChatPreferencesInputGroupMentions('all');
   static const none = ChatPreferencesInputGroupMentions('none');
-
-  factory ChatPreferencesInputGroupMentions.fromJson(String json) => ChatPreferencesInputGroupMentions(json);
-
-  String toJson() => this;
 }
 
 extension type const ChatPreferencesInputHereMentions(String _) implements String {
   static const all = ChatPreferencesInputHereMentions('all');
   static const none = ChatPreferencesInputHereMentions('none');
-
-  factory ChatPreferencesInputHereMentions.fromJson(String json) => ChatPreferencesInputHereMentions(json);
-
-  String toJson() => this;
 }
 
 extension type const ChatPreferencesInputRoleMentions(String _) implements String {
   static const all = ChatPreferencesInputRoleMentions('all');
   static const none = ChatPreferencesInputRoleMentions('none');
-
-  factory ChatPreferencesInputRoleMentions.fromJson(String json) => ChatPreferencesInputRoleMentions(json);
-
-  String toJson() => this;
 }
 
 extension type const ChatPreferencesInputThreadReplies(String _) implements String {
   static const all = ChatPreferencesInputThreadReplies('all');
   static const none = ChatPreferencesInputThreadReplies('none');
-
-  factory ChatPreferencesInputThreadReplies.fromJson(String json) => ChatPreferencesInputThreadReplies(json);
-
-  String toJson() => this;
 }
 
 @freezed

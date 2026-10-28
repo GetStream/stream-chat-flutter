@@ -21,10 +21,6 @@ extension type const QuietHoursRuleInputDays(String _) implements String {
   static const thu = QuietHoursRuleInputDays('thu');
   static const tue = QuietHoursRuleInputDays('tue');
   static const wed = QuietHoursRuleInputDays('wed');
-
-  factory QuietHoursRuleInputDays.fromJson(String json) => QuietHoursRuleInputDays(json);
-
-  String toJson() => this;
 }
 
 @freezed

@@ -8,8 +8,4 @@ import '../models.dart';
 extension type const CollectionStatus(String _) implements String {
   static const notfound = CollectionStatus('notfound');
   static const ok = CollectionStatus('ok');
-
-  factory CollectionStatus.fromJson(String json) => CollectionStatus(json);
-
-  String toJson() => this;
 }
