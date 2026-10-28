@@ -15,6 +15,7 @@
 
 🐞 Fixed
 
+- Fixed the "Only visible to you" Giphy preview showing a delivery status.
 - Fixed channel list previews showing a "You:" or sender name prefix, and the delivery status, in front of a system message.
 - Fixed a deleted message hiding its replies count, which left its thread unreachable from the channel.
 - Fixed `StreamMessageComposer` throwing when its channel is disposed while it still holds unsent text, for example when the user is disconnected with a channel page open.
