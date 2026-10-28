@@ -3,6 +3,8 @@
 🐞 Fixed
 
 - Fixed the connection getting stuck while connecting, and requests never completing, when the token provider throws while refreshing an expired token.
+- Fixed a draft saved or deleted while offline not being kept.
+- Fixed a thread draft replacing the channel's draft when the thread's parent message isn't loaded.
 
 ## 10.6.0
 
