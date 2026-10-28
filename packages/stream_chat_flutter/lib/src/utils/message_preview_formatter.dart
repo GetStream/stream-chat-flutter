@@ -71,7 +71,7 @@ abstract interface class MessagePreviewFormatter {
   /// The output adapts to the message kind (regular, deleted, system, poll,
   /// location) and to the surrounding [channel] — for example, a "You:"
   /// prefix on the current user's messages, or "FirstName:" in group
-  /// channels.
+  /// channels. System messages show no prefix.
   ///
   /// [showCaption] controls how attachment and location previews label
   /// themselves: when `true` (the default) they display the message text; when
@@ -221,7 +221,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
       showCaption: showCaption,
     );
 
-    if (channel == null) return content;
+    if (channel == null || message.isSystem) return content;
 
     if (message.user?.id == currentUser?.id) {
       return formatCurrentUserMessage(context, content);
