@@ -194,6 +194,14 @@ void main() {
         expect(copy.toJson()['type'], 'image');
       });
 
+      test('tells apart scraped attachments with different original types', () {
+        const link = 'https://example.com/media';
+        final scrapedImage = Attachment(id: 'og', type: 'image', ogScrapeUrl: link);
+        final scrapedVideo = Attachment(id: 'og', type: 'video', ogScrapeUrl: link);
+
+        expect(scrapedImage, isNot(scrapedVideo));
+      });
+
       test('sends no type for a scraped link the server gave no type', () {
         final ogAttachment = OGAttachmentResponse()..ogScrapeUrl = 'https://getstream.io/blog';
 

@@ -307,7 +307,7 @@ class Attachment extends Equatable {
   @override
   List<Object?> get props => [
     id,
-    type,
+    rawType,
     titleLink,
     title,
     thumbUrl,
