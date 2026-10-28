@@ -37,7 +37,7 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) => Attachment(
 );
 
 Map<String, dynamic> _$AttachmentToJson(Attachment instance) => <String, dynamic>{
-  'type': ?AttachmentType.toJson(instance.type),
+  'type': ?instance.rawType,
   'title_link': ?instance.titleLink,
   'title': ?instance.title,
   'thumb_url': ?instance.thumbUrl,

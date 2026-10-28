@@ -18,12 +18,15 @@
 
 - Fixed a web address written without `https://`, such as `youtube.com`, not being tappable in a message.
 - Fixed a web address right after a quote or Chinese or Japanese text not being tappable in a message.
+- Fixed the "Only visible to you" Giphy preview showing a delivery status.
+- Fixed channel list previews showing a "You:" or sender name prefix, and the delivery status, in front of a system message.
 - Fixed a deleted message hiding its replies count, which left its thread unreachable from the channel.
 - Fixed `StreamMessageComposer` throwing when its channel is disposed while it still holds unsent text, for example when the user is disconnected with a channel page open.
 - Fixed a message that failed to send, update or delete hiding the timestamp and delivery status of the message before it.
 - Fixed a voice recording sent as a reply without text showing inside a filled container instead of directly on the message bubble.
 - Fixed a mention rendering as another mentioned user's shorter mention followed by leftover text, such as `@Anna` next to `@Ann`.
 - Fixed the poll creator showing the reorder handle and remove button when there is only one option.
+- Fixed a link that points straight to an image showing as a plain image instead of a link preview, and appearing twice in the message composer.
 - Fixed the keyboard closing when removing the link preview in the message composer.
 - Fixed the composer's command and mention suggestions staying open after tapping outside the composer, such as on the message list.
 - Fixed "Message deleted" in a quoted reply showing in a muted gray instead of the reply's text color.

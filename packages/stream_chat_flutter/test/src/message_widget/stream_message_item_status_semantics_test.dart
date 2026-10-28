@@ -45,6 +45,23 @@ void main() {
     handle.dispose();
   });
 
+  testWidgets('omits the delivery status on an ephemeral message', (tester) async {
+    final handle = tester.ensureSemantics();
+
+    await tester.pumpWidget(
+      buildMessageScene(
+        testMessage(user: currentUser, type: MessageType.ephemeral),
+        alignment: StreamMessageAlignment.end,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(labelsOf(tester), contains('OUT:Are we still meeting tomorrow, AT-TIME'));
+    expect(labelsOf(tester).where((it) => it.contains('Sent')), isEmpty);
+
+    handle.dispose();
+  });
+
   testWidgets('announces upload progress while attachments are sending', (tester) async {
     final handle = tester.ensureSemantics();
 

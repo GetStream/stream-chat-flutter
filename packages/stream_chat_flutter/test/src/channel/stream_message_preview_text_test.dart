@@ -814,6 +814,42 @@ void main() {
       );
     });
 
+    testWidgets('group channel shows a system message from the current user without a prefix', (tester) async {
+      final channel = ChannelModel(
+        id: 'test-channel',
+        type: 'messaging',
+        memberCount: 3,
+      );
+
+      final message = Message(
+        text: 'Test User truncated the channel',
+        type: MessageType.system,
+        user: User(id: 'test-user-id', name: 'Test User'),
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.text('Test User truncated the channel'), findsOneWidget);
+    });
+
+    testWidgets('group channel shows a system message from another user without a prefix', (tester) async {
+      final channel = ChannelModel(
+        id: 'test-channel',
+        type: 'messaging',
+        memberCount: 3,
+      );
+
+      final message = Message(
+        text: 'Jane Doe added Maya',
+        type: MessageType.system,
+        user: User(id: 'other-user-id', name: 'Jane Doe'),
+      );
+
+      await pumpMessagePreview(tester, message, channel: channel);
+
+      expect(find.text('Jane Doe added Maya'), findsOneWidget);
+    });
+
     testWidgets('group channel prepends the sender name in the themed sender style', (tester) async {
       final channel = ChannelModel(
         id: 'test-channel',

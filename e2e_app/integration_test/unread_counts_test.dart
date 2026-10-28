@@ -57,7 +57,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12832',
     description: 'new system message increments the unread count',
-    skip: 'https://linear.app/stream/issue/FLU-1096',
     body: (env) async {
       const systemMessage = 'System message';
 
@@ -104,7 +103,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12834',
     description: 'hard delete of an unseen message decrements the unread count',
-    skip: 'https://linear.app/stream/issue/FLU-1097',
     body: (env) async {
       step('GIVEN the user opens a channel and sends a message');
       await env.userRobot.login().openChannel().sendMessage(sampleText);
