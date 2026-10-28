@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -654,8 +655,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       labels: const [kPortalMessageListViewLabel],
       child: Portal(
         child: ScaffoldMessenger(
-          child: NotificationListener<ScrollStartNotification>(
-            onNotification: _onScrollStart,
+          child: NotificationListener<UserScrollNotification>(
+            onNotification: _onUserScroll,
             child: MessageListCore(
               paginationLimit: _config.paginationLimit,
               maximumMessageLimit: _config.maximumMessageLimit,
@@ -1349,10 +1350,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     await _scrollToMessage(messageId: quoted.id);
   }
 
-  // Scrolling the list yourself cancels the jump to a thread reply that
-  // hasn't loaded yet.
-  bool _onScrollStart(ScrollStartNotification notification) {
-    if (notification.dragDetails != null) _pendingThreadMessageId = null;
+  // A user scroll cancels the jump to a thread reply that hasn't loaded yet.
+  bool _onUserScroll(UserScrollNotification notification) {
+    final isListScroll = notification.depth == 0;
+    final isUserScroll = notification.direction != ScrollDirection.idle;
+    if (isListScroll && isUserScroll) _pendingThreadMessageId = null;
     return false;
   }
 
