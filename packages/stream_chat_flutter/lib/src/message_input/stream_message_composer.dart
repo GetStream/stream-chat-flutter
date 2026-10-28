@@ -1478,7 +1478,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     }
 
     // If the parsed url matches the ogAttachment url, don't do anything
-    if (_effectiveController.ogAttachment?.titleLink == firstMatchedUrl) {
+    if (_effectiveController.ogAttachment?.ogScrapeUrl == firstMatchedUrl) {
       return;
     }
 

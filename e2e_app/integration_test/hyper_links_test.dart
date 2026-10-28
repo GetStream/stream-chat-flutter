@@ -9,13 +9,9 @@ void main() {
   const youtubeLink = 'https://youtube.com/watch?v=xOX7MsrbaPY';
   const giphyLink = 'https://giphy.com/gifs/test-gw3IWyGkC0rsazTi';
 
-  // An OG attachment without `title_link` renders as an image, not a preview.
-  const noPreviewForImageOg = 'https://linear.app/stream/issue/FLU-1088';
-
   streamTestWithEnv(
     allureId: '12706',
     description: 'user sends a Unsplash link with a preview',
-    skip: noPreviewForImageOg,
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.userRobot.login().openChannel();
@@ -39,7 +35,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12707',
     description: 'user sends a Unsplash link without a preview',
-    skip: noPreviewForImageOg,
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.userRobot.login().openChannel();
@@ -66,7 +61,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12708',
     description: 'participant sends a Unsplash link',
-    skip: noPreviewForImageOg,
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.userRobot.login().openChannel();
