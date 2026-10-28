@@ -1,5 +1,10 @@
 ## Upcoming
 
+🔄 Changed
+
+- `Attachment.type` is now `url_preview` for every attachment scraped from a link in the message text, including a link to an image or file. Use `Attachment.rawType` to read the type it was created or received with.
+- `Attachment.toJson` keeps the original `type` of an attachment scraped from a link, such as `video` or `image`, instead of writing `url_preview`.
+
 🐞 Fixed
 
 - Fixed hard-deleting an unread message not lowering the channel's unread count.
