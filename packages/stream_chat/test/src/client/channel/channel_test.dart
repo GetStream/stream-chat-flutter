@@ -1226,6 +1226,56 @@ void main() {
       });
     });
 
+    group('`.createDraft` while offline', () {
+      final draftMessage = DraftMessage(text: 'Typed while offline');
+
+      setUp(() {
+        when(
+          () => client.createDraft(draftMessage, channelId, channelType),
+        ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
+      });
+
+      test('keeps the draft in the channel state', () async {
+        await expectLater(() => channel.createDraft(draftMessage), throwsA(isA<StreamChatNetworkError>()));
+
+        expect(channel.state!.draft?.message, draftMessage);
+      });
+
+      test('leaves the channel draft alone for a thread whose parent is not loaded', () async {
+        final threadDraft = DraftMessage(text: 'Thread reply', parentId: 'unloaded-parent-id');
+        when(
+          () => client.createDraft(threadDraft, channelId, channelType),
+        ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
+
+        await expectLater(() => channel.createDraft(threadDraft), throwsA(isA<StreamChatNetworkError>()));
+
+        expect(channel.state!.draft, isNull);
+      });
+    });
+
+    group('`.deleteDraft` while offline', () {
+      setUp(() {
+        when(
+          () => client.deleteDraft(channelId, channelType, parentId: any(named: 'parentId')),
+        ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
+      });
+
+      test('removes the draft from the channel state', () async {
+        channel.state!.updateDraft(
+          Draft(
+            channelCid: channelCid,
+            createdAt: DateTime.now(),
+            message: DraftMessage(text: 'Old draft'),
+          ),
+        );
+
+        await expectLater(() => channel.deleteDraft(), throwsA(isA<StreamChatNetworkError>()));
+        await Future<void>.delayed(Duration.zero);
+
+        expect(channel.state!.draft, isNull);
+      });
+    });
+
     group('`.getDraft`', () {
       final draftMessage = DraftMessage(text: 'Draft message text');
 
