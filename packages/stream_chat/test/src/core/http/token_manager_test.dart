@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:test/test.dart';
@@ -124,6 +126,50 @@ void main() {
       expect(returnedRefreshToken, refreshToken);
     },
   );
+
+  test('`.loadToken` fetches a new token after a refresh fails', () async {
+    const userId = 'test-user-id';
+    final expiredToken = Token.development(userId);
+    final newToken = Token.fromRawValue('${expiredToken.rawValue}-new');
+
+    var providerCalls = 0;
+    Future<String> tokenProvider(String userId) async {
+      providerCalls += 1;
+      return switch (providerCalls) {
+        1 => expiredToken.rawValue,
+        2 => throw Exception('token provider is down'),
+        _ => newToken.rawValue,
+      };
+    }
+
+    await tokenManager.setTokenOrProvider(userId, provider: tokenProvider);
+
+    await expectLater(tokenManager.loadToken(refresh: true), throwsException);
+
+    expect(await tokenManager.loadToken(), newToken);
+  });
+
+  test('`.loadToken` keeps a token set while a failed refresh was pending', () async {
+    final refresh = Completer<String>();
+    var providerCalls = 0;
+    Future<String> tokenProvider(String userId) async {
+      providerCalls += 1;
+      if (providerCalls == 2) return refresh.future;
+      return Token.development(userId).rawValue;
+    }
+
+    await tokenManager.setTokenOrProvider('user-a', provider: tokenProvider);
+    final pendingRefresh = tokenManager.loadToken(refresh: true);
+
+    tokenManager.reset();
+    final userBToken = Token.development('user-b');
+    await tokenManager.setTokenOrProvider('user-b', token: userBToken);
+
+    refresh.completeError(Exception('token provider is down'));
+    await expectLater(pendingRefresh, throwsException);
+
+    expect(await tokenManager.loadToken(), userBToken);
+  });
 
   test('`.reset` should reset the tokenManager', () async {
     const userId = 'test-user-id';

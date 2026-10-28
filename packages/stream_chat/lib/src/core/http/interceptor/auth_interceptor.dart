@@ -58,7 +58,13 @@ class AuthInterceptor extends QueuedInterceptor {
     final error = ErrorResponse.fromJson(data);
     if (error.code == ChatErrorCode.tokenExpired.code) {
       if (_tokenManager.isStatic) return handler.next(exception);
-      await _tokenManager.loadToken(refresh: true);
+      try {
+        await _tokenManager.loadToken(refresh: true);
+      } catch (_) {
+        // Without a new token the request can't be retried, so it fails with
+        // the original error.
+        return handler.next(exception);
+      }
       try {
         final options = exception.requestOptions;
         final response = await _client.fetch(options);

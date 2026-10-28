@@ -7,6 +7,7 @@
 
 🐞 Fixed
 
+- Fixed the connection getting stuck while connecting, and requests never completing, when the token provider throws while refreshing an expired token.
 - Fixed sending, updating and deleting a message not retrying when the server answers with a timeout (408), a rate limit (429) or a server error (5xx).
 - Fixed hard-deleting an unread message not lowering the channel's unread count.
 - Fixed a draft saved or deleted while offline not being kept.
