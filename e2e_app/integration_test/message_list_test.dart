@@ -672,7 +672,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12767',
     description: 'command suggestions disappear when the user taps on the message list',
-    skip: 'https://linear.app/stream/issue/FLU-1093',
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.backendRobot.generateChannels(channelsCount: 1, messagesCount: 30);
