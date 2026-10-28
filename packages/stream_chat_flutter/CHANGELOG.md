@@ -12,9 +12,12 @@
 - A deleted message in `StreamMessagePreviewText` now matches the rest of the preview unless `StreamMessagePreviewTextThemeData.deletedContentStyle` sets a style. The channel list, thread list and message search still apply their own deleted style.
 - Icons in `StreamMessagePreviewText` and `StreamDraftMessagePreviewText` no longer follow a surrounding `IconTheme`.
 - Values a local `StreamThreadListTileTheme` leaves unset now keep their `StreamChatThemeData.threadListTileTheme` setting instead of resetting to the default.
+- A `www.` address in a message now opens over `https://` instead of `http://`.
 
 🐞 Fixed
 
+- Fixed a web address written without `https://`, such as `youtube.com`, not being tappable in a message.
+- Fixed a web address right after a quote or Chinese or Japanese text not being tappable in a message.
 - Fixed `StreamThreadPage` hiding the composer for a deleted parent message that already has replies, which can still be replied to.
 - Fixed the "Only visible to you" Giphy preview showing a delivery status.
 - Fixed channel list previews showing a "You:" or sender name prefix, and the delivery status, in front of a system message.

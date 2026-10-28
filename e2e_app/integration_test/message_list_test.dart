@@ -965,7 +965,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12776',
     description: 'message with a link without a scheme opens the browser',
-    skip: 'https://linear.app/stream/issue/FLU-1094',
     body: (env) async {
       const link = 'youtube.com';
 
