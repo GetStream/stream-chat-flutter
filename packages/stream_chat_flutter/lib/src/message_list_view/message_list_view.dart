@@ -216,7 +216,8 @@ class StreamMessageListView extends StatefulWidget {
   ///
   /// When null (the default), tapping a quoted message scrolls to it in
   /// the list, loading it if necessary. A reply that was only sent to its
-  /// thread opens that thread instead.
+  /// thread opens that thread instead, when [threadBuilder] or [onThreadTap]
+  /// is set.
   final void Function(Message quotedMessage)? onQuotedMessageTap;
 
   /// Called when a link is tapped in message text.
@@ -1392,10 +1393,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       // The created callback will use widget.onThreadTap, passing the result
       // of widget.threadBuilder (if provided) as the second argument.
       (final onThreadTap?, final threadBuilder) => (Message parentMessage, Message? threadMessage) {
-        onThreadTap(
-          parentMessage,
-          threadBuilder?.call(context, parentMessage),
-        );
+        var threadPage = threadBuilder?.call(context, parentMessage);
+        if (threadPage != null && threadMessage != null) {
+          threadPage = _ThreadHighlightScope(messageId: threadMessage.id, child: threadPage);
+        }
+
+        onThreadTap(parentMessage, threadPage);
       },
       // Case 2: widget.onThreadTap is null, but widget.threadBuilder is provided.
       // The created callback will perform the default navigation action,

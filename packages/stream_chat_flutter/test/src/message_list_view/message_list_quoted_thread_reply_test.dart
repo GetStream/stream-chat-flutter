@@ -125,6 +125,41 @@ void main() {
     expect(quotedReply, findsOneWidget);
   });
 
+  testWidgets('opens the thread of a quoted reply on that reply through a custom thread tap', (tester) async {
+    final replies = [
+      for (var i = 0; i < 20; i++)
+        Message(
+          id: 'reply-$i',
+          text: 'Offsite idea $i',
+          createdAt: DateTime(2026, 8, 26, 15, i),
+          user: jason,
+          state: MessageState.sent,
+          parentId: parent.id,
+        ),
+    ];
+
+    late NavigatorState navigator;
+    late Channel channel;
+    await _pumpMessageList(
+      tester,
+      [parent, quoting(replies.first)],
+      replies: replies,
+      threadBuilder: (_, parent) => StreamMessageListView(parentMessage: parent),
+      onThreadTap: (_, threadPage) => navigator.push(
+        MaterialPageRoute<void>(
+          builder: (_) => StreamChannel.value(channel: channel, child: threadPage!),
+        ),
+      ),
+    );
+    navigator = tester.state<NavigatorState>(find.byType(Navigator));
+    channel = StreamChannel.of(tester.element(find.byType(StreamMessageListView))).channel;
+    await tester.tap(find.byType(StreamQuotedMessage));
+    await tester.pumpAndSettle();
+
+    final quotedReply = find.textContaining('Offsite idea 0', findRichText: true).hitTestable();
+    expect(quotedReply, findsOneWidget);
+  });
+
   testWidgets('does not jump to a quoted reply that loads after the user scrolled the thread', (tester) async {
     final replies = [
       for (var i = 0; i < 30; i++)
