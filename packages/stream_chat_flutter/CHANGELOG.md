@@ -18,6 +18,7 @@
 
 - Fixed a web address written without `https://`, such as `youtube.com`, not being tappable in a message.
 - Fixed a web address right after a quote or Chinese or Japanese text not being tappable in a message.
+- Fixed `StreamThreadPage` hiding the composer for a deleted parent message that already has replies, which can still be replied to.
 - Fixed the "Only visible to you" Giphy preview showing a delivery status.
 - Fixed channel list previews showing a "You:" or sender name prefix, and the delivery status, in front of a system message.
 - Fixed a deleted message hiding its replies count, which left its thread unreachable from the channel.
