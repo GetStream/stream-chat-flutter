@@ -57,7 +57,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12832',
     description: 'new system message increments the unread count',
-    skip: 'https://linear.app/stream/issue/FLU-1096',
     body: (env) async {
       const systemMessage = 'System message';
 
