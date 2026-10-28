@@ -2,6 +2,7 @@
 
 🐞 Fixed
 
+- Fixed hard-deleting an unread message not lowering the channel's unread count.
 - Fixed a draft saved or deleted while offline not being kept.
 - Fixed a thread draft replacing the channel's draft when the thread's parent message isn't loaded.
 
