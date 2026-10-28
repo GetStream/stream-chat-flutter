@@ -127,21 +127,24 @@ void main() {
 
   test('`.loadToken` fetches a new token after a refresh fails', () async {
     const userId = 'test-user-id';
-    final token = Token.development(userId);
+    final expiredToken = Token.development(userId);
+    final newToken = Token.fromRawValue('${expiredToken.rawValue}-new');
 
     var providerCalls = 0;
     Future<String> tokenProvider(String userId) async {
       providerCalls += 1;
-      if (providerCalls == 2) throw Exception('token provider is down');
-      return token.rawValue;
+      return switch (providerCalls) {
+        1 => expiredToken.rawValue,
+        2 => throw Exception('token provider is down'),
+        _ => newToken.rawValue,
+      };
     }
 
     await tokenManager.setTokenOrProvider(userId, provider: tokenProvider);
 
     await expectLater(tokenManager.loadToken(refresh: true), throwsException);
 
-    expect(await tokenManager.loadToken(), token);
-    expect(providerCalls, 3);
+    expect(await tokenManager.loadToken(), newToken);
   });
 
   test('`.reset` should reset the tokenManager', () async {

@@ -327,10 +327,11 @@ class WebSocket with TimerHelper {
             refreshToken: refreshToken,
             includeUserDetails: false,
           );
+          // Disconnected while the token was loading.
+          if (_user == null) return;
           _logger?.info('[reconnect] #ws; uri: $uri');
           _initWebSocketChannel(uri);
         } catch (e, stk) {
-          // Disconnected while the token was loading.
           if (_user == null) return;
           _onConnectionError(e, stk);
         }
