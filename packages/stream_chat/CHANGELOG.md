@@ -1,3 +1,10 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed a draft saved or deleted while offline not being kept.
+- Fixed a thread draft replacing the channel's draft when the thread's parent message isn't loaded.
+
 ## 10.6.0
 
 ✅ Added
