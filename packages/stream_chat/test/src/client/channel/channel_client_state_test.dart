@@ -1893,7 +1893,7 @@ void main() {
           expect(channel.state!.unreadCount, 0);
         });
 
-        test('a hard delete without a read state for the current user leaves it unset', () async {
+        test('a hard delete leaves a missing current-user read state missing', () async {
           expect(channel.state!.currentUserRead, isNull);
 
           final message = Message(

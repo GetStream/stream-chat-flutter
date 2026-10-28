@@ -75,8 +75,7 @@ class ChannelStateMutations {
   void onMessageDeleted(Message message, {bool hardDelete = false}) {
     // A hard-deleted message that counted as unread no longer exists, so it
     // gives its unread slot back. Soft-deleted messages keep theirs.
-    final countedAsUnread = hardDelete && MessageRules.canCountAsUnread(message, _channel);
-    if (countedAsUnread && _state.unreadCount > 0) {
+    if (hardDelete && MessageRules.canCountAsUnread(message, _channel) && _state.unreadCount > 0) {
       _state.unreadCount -= 1;
     }
 
