@@ -88,6 +88,15 @@ void main() {
       expect(find.byType(StreamMessageSendingStatus), findsOneWidget);
     });
 
+    testWidgets('shows the replies count on a deleted thread parent', (tester) async {
+      final parent = deleted.copyWith(replyCount: 2, threadParticipants: [otherUser]);
+
+      await tester.pumpWidget(wrap(StreamMessageItem(message: parent)));
+      await tester.pumpAndSettle();
+
+      expect(find.text(DefaultTranslations.instance.threadReplyCountText(2)), findsOneWidget);
+    });
+
     testWidgets('drops the edited marker', (tester) async {
       await tester.pumpWidget(wrap(StreamMessageItem(message: deleted)));
       await tester.pumpAndSettle();

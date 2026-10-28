@@ -530,7 +530,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12761',
     description: 'thread is not locked after the user deletes the parent message',
-    skip: 'https://linear.app/stream/issue/FLU-1092',
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.backendRobot.generateChannels(channelsCount: 1, messagesCount: 1);
@@ -551,7 +550,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12762',
     description: 'thread is not locked after the participant deletes the parent message',
-    skip: 'https://linear.app/stream/issue/FLU-1092',
     body: (env) async {
       const threadReply = 'thread reply';
 
@@ -674,7 +672,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12767',
     description: 'command suggestions disappear when the user taps on the message list',
-    skip: 'https://linear.app/stream/issue/FLU-1093',
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.backendRobot.generateChannels(channelsCount: 1, messagesCount: 30);
