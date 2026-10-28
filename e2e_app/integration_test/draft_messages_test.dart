@@ -86,7 +86,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12694',
     description: 'user updates a draft message while offline',
-    skip: 'https://linear.app/stream/issue/FLU-1086',
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.userRobot.login().openChannel();
