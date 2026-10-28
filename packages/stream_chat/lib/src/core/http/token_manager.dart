@@ -64,13 +64,15 @@ class TokenManager {
       'Please call `setTokenOrProvider` before calling `loadToken`',
     );
     if (refresh || _token == null) {
+      final expiredToken = _token;
       try {
         final rawValue = await _tokenProvider!(_userId!);
         _token = Token.fromRawValue(rawValue);
       } catch (_) {
         // The token being refreshed has expired, so the next load fetches a
-        // new one instead of returning it.
-        if (refresh) _token = null;
+        // new one instead of returning it. A token set while the refresh was
+        // pending is kept.
+        if (refresh && identical(_token, expiredToken)) _token = null;
         rethrow;
       }
     }
