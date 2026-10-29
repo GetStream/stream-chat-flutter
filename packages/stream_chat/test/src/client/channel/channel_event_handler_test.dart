@@ -581,8 +581,21 @@ void main() {
 
       verifyInOrder([
         () => persistence.deleteMessageByCid('messaging:test'),
-        () => mutations.onChannelTruncated(message: systemMessage),
+        () => mutations.onChannelTruncated(truncatedAt: event.createdAt, message: systemMessage),
       ]);
+    });
+
+    test("channel.truncated truncates at the channel's truncatedAt", () async {
+      final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+      final event = Event(
+        type: EventType.channelTruncated,
+        channel: ChannelModel(cid: 'messaging:test', truncatedAt: truncatedAt),
+      );
+
+      handler.handleEvent(event);
+      await Future<void>.value();
+
+      verify(() => mutations.onChannelTruncated(truncatedAt: truncatedAt)).called(1);
     });
 
     test('channel.updated delegates the channel model', () {

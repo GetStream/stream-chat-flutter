@@ -369,7 +369,10 @@ class ChannelEventHandler {
     final channel = event.channel!;
     await _client.chatPersistenceClient?.deleteMessageByCid(channel.cid);
 
-    _mutations.onChannelTruncated(message: event.message);
+    _mutations.onChannelTruncated(
+      truncatedAt: channel.truncatedAt ?? event.createdAt,
+      message: event.message,
+    );
   }
 
   void _onChannelUpdated(Event event) {

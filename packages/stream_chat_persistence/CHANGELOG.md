@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed stored messages from before a channel's truncation staying in the offline cache when the truncation event was missed.
+
 ## 10.6.0
 
 ✅ Added
