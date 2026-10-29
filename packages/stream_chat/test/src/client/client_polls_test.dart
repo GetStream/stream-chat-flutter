@@ -102,7 +102,7 @@ void main() {
   test('StreamChatClient.getPoll keeps a voting visibility the SDK does not name', () async {
     final response = api.PollResponse(
       duration: '4.21ms',
-      poll: generatedPoll.copyWith(votingVisibility: api.VotingVisibility('members_only')),
+      poll: generatedPoll.copyWith(votingVisibility: const api.VotingVisibility('members_only')),
     );
     when(() => defaultApi.getPoll(pollId: 'poll-id')).thenAnswer((_) async => Result.success(response));
 
@@ -158,11 +158,11 @@ void main() {
     ).captured.single;
     expect(
       request,
-      api.UpdatePollRequest(
+      const api.UpdatePollRequest(
         id: 'poll-id',
         name: 'Lunch?',
         description: 'Pick one',
-        options: const [
+        options: [
           api.PollOptionRequest(id: 'pizza', text: 'Pizza', custom: {'color': 'red', 'id': 'pasta'}),
           api.PollOptionRequest(id: 'sushi', text: 'Sushi', custom: {}),
         ],
@@ -172,7 +172,7 @@ void main() {
         allowAnswers: true,
         allowUserSuggestedOptions: true,
         isClosed: true,
-        custom: const {'topic': 'food', 'name': 'Dinner?'},
+        custom: {'topic': 'food', 'name': 'Dinner?'},
       ),
     );
     expect(result, Result.success(pollResponse));

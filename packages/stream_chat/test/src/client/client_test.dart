@@ -1658,7 +1658,7 @@ void main() {
 
     test('StreamChatClient.addDevice sends a provider without a constant by its wire value', () async {
       const id = 'test-device-id';
-      final request = api.CreateDeviceRequest(
+      const request = api.CreateDeviceRequest(
         id: id,
         pushProvider: api.PushProviderName('onesignal'),
       );
