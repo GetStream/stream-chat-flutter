@@ -727,7 +727,12 @@ class DefaultStreamMessageItem extends StatelessWidget {
       ),
     );
 
-    if (props.swipeToReply && props.onReplyTap != null && !message.isDeleted && !message.state.isFailed) {
+    final canQuoteMessage = StreamChannel.maybeOf(context)?.channel.canQuoteMessage ?? false;
+    if (props.swipeToReply &&
+        canQuoteMessage &&
+        props.onReplyTap != null &&
+        !message.isDeleted &&
+        !message.state.isFailed) {
       result = _SwipeToReplyWrapper(
         message: message,
         onReplyTap: props.onReplyTap!,
