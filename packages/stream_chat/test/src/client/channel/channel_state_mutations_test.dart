@@ -59,6 +59,7 @@ void main() {
       removeTypingEvent: removeTypingEventCalls.add,
       removeWatcher: (watcher, {watcherCount}) => removeWatcherCalls.add((watcher, watcherCount)),
       removeMember: removeMemberCalls.add,
+      clearMembership: () {},
       updateMember: updateMemberCalls.add,
       deleteMessagesFromUser: ({required userId, hardDelete = false, deletedAt}) async {
         deleteMessagesFromUserCalls.add((userId, hardDelete, deletedAt));

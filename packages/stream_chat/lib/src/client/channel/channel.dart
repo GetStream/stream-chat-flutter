@@ -2250,6 +2250,13 @@ class Channel {
 
         if (isQueryingAround) this.state?.truncate();
         this.state?.updateChannelStateFromServer(channelState);
+
+        // Watching a channel the user hid or was removed from makes it one of
+        // the client's channels again.
+        if (cid case final cid? when watch) {
+          final isListed = _client.state.channels.containsKey(cid);
+          if (!isListed) _client.state.addChannels({cid: this});
+        }
       }
 
       // Submit for delivery reporting only when fetching the latest messages.

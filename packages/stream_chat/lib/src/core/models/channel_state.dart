@@ -98,6 +98,9 @@ class ChannelState implements ComparableFieldProvider {
   Map<String, dynamic> toJson() => _$ChannelStateToJson(this);
 
   /// Creates a copy of [ChannelState] with specified attributes overridden.
+  ///
+  /// Passing null for [membership] or [draft] clears it, while leaving it out
+  /// keeps the current value.
   ChannelState copyWith({
     ChannelModel? channel,
     List<Message>? messages,
@@ -106,7 +109,7 @@ class ChannelState implements ComparableFieldProvider {
     int? watcherCount,
     List<User>? watchers,
     List<Read>? read,
-    Member? membership,
+    Object? membership = _nullConst,
     Object? draft = _nullConst,
     List<Message>? pendingMessages,
     ChannelPushPreference? pushPreferences,
@@ -119,7 +122,7 @@ class ChannelState implements ComparableFieldProvider {
     watcherCount: watcherCount ?? this.watcherCount,
     watchers: watchers ?? this.watchers,
     read: read ?? this.read,
-    membership: membership ?? this.membership,
+    membership: membership == _nullConst ? this.membership : membership as Member?,
     draft: draft == _nullConst ? this.draft : draft as Draft?,
     pendingMessages: pendingMessages ?? this.pendingMessages,
     pushPreferences: pushPreferences ?? this.pushPreferences,

@@ -110,6 +110,10 @@ class ChannelEventHandler {
         _onChannelTruncated(event);
       case EventType.channelUpdated:
         _onChannelUpdated(event);
+      case EventType.channelHidden:
+        _mutations.onChannelHiddenChanged(hidden: true);
+      case EventType.channelVisible:
+        _mutations.onChannelHiddenChanged(hidden: false);
     }
   }
 
@@ -121,6 +125,8 @@ class ChannelEventHandler {
         _onMemberAdded(event);
       case EventType.memberRemoved:
         _onMemberRemoved(event);
+      case EventType.notificationRemovedFromChannel:
+        _mutations.onCurrentUserRemoved(event.user!);
     }
   }
 
@@ -397,6 +403,9 @@ class ChannelEventHandler {
 
   void _onMemberRemoved(Event event) {
     final user = event.user!;
+    if (user.id == _client.state.currentUser?.id) {
+      return _mutations.onCurrentUserRemoved(user);
+    }
 
     return _mutations.onMemberRemoved(user);
   }
