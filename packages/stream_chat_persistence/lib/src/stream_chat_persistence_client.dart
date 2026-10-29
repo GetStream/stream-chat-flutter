@@ -625,7 +625,19 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   Future<void> updateChannelStates(List<ChannelState> channelStates) {
     assert(_debugIsConnected, '');
     _logger.info('updateChannelStates');
-    return db!.transaction(() => super.updateChannelStates(channelStates));
+    return db!.transaction(() async {
+      await super.updateChannelStates(channelStates);
+
+      // Clears messages left over from a truncation this client never heard
+      // about.
+      for (final channel in channelStates.map((it) => it.channel).nonNulls) {
+        final truncatedAt = channel.truncatedAt;
+        if (truncatedAt == null) continue;
+
+        await db!.messageDao.deleteMessagesCreatedBefore(channel.cid, truncatedAt);
+        await db!.pinnedMessageDao.deleteMessagesCreatedBefore(channel.cid, truncatedAt);
+      }
+    });
   }
 
   @override

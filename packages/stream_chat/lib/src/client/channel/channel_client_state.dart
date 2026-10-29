@@ -27,8 +27,13 @@ class ChannelClientState {
       ),
     );
 
+    final truncatedAt = channelState.channel?.truncatedAt;
     final seededState = channelState.copyWith(
-      pinnedMessages: MessageMerging.sortPinnedMessages(channelState.pinnedMessages),
+      messages: _withoutTruncated(channelState.messages, truncatedAt),
+      pinnedMessages: _withoutTruncated(
+        MessageMerging.sortPinnedMessages(channelState.pinnedMessages),
+        truncatedAt,
+      ),
     );
 
     _channelStateController = BehaviorSubject.seeded(seededState);
@@ -62,6 +67,16 @@ class ChannelClientState {
           if (threads.isNotEmpty) _threads = threads;
         })
         .then((_) => retryFailedMessages());
+  }
+
+  // Messages the server created before the channel was truncated no longer
+  // exist, even when they were still stored or in flight.
+  static List<Message>? _withoutTruncated(List<Message>? messages, DateTime? truncatedAt) {
+    if (messages == null || truncatedAt == null) return messages;
+
+    bool isTruncated(Message it) => it.remoteCreatedAt?.isBefore(truncatedAt) ?? false;
+    if (!messages.any(isTruncated)) return messages;
+    return messages.whereNot(isTruncated).toList();
   }
 
   final Channel _channel;
@@ -575,16 +590,19 @@ class ChannelClientState {
       final pinned => MessageMerging.sortPinnedMessages(pinned),
     };
 
+    final newChannel = _channelState.channel?.merge(updatedState.channel);
+    final truncatedAt = newChannel?.truncatedAt;
+
     _channelState = _channelState.copyWith(
-      messages: newMessages,
-      channel: _channelState.channel?.merge(updatedState.channel),
+      messages: _withoutTruncated(newMessages, truncatedAt),
+      channel: newChannel,
       watchers: newWatchers.toList(),
       watcherCount: updatedState.watcherCount,
       members: updatedState.members,
       membership: updatedState.membership,
       read: newReads.toList(),
       draft: updatedState.draft,
-      pinnedMessages: newPinnedMessages,
+      pinnedMessages: _withoutTruncated(newPinnedMessages, truncatedAt),
       pendingMessages: updatedState.pendingMessages,
       pushPreferences: updatedState.pushPreferences,
       activeLiveLocations: updatedState.activeLiveLocations,

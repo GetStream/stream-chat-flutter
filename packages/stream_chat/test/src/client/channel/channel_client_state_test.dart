@@ -2086,6 +2086,116 @@ void main() {
 
         expect(channel.state!.messages.map((m) => m.id), ['system-message-id']);
       });
+
+      Message messageAt(String id, DateTime createdAt) {
+        return Message(
+          id: id,
+          user: User(id: 'other-user'),
+          text: id,
+          createdAt: createdAt,
+        );
+      }
+
+      test('${EventType.channelTruncated} keeps the messages sent after the channel was truncated', () async {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.updateMessage(messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))));
+        channel.state!.updateMessage(messageAt('after', truncatedAt.add(const Duration(minutes: 1))));
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.messages.map((m) => m.id), ['after']);
+      });
+
+      test('${EventType.channelTruncated} keeps a message that is not sent yet', () async {
+        seedMessage('truncated-message');
+        channel.state!.updateMessage(
+          Message(
+            id: 'pending',
+            user: User(id: 'current-user'),
+            text: 'Hello',
+            state: MessageState.sending,
+          ),
+        );
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.messages.map((m) => m.id), ['pending']);
+      });
+
+      test('${EventType.channelTruncated} removes the pinned messages sent before the truncation', () async {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        final pinnedAt = truncatedAt.add(const Duration(minutes: 2));
+        channel.state!.updateChannelState(
+          ChannelState(
+            pinnedMessages: [
+              messageAt(
+                'before',
+                truncatedAt.subtract(const Duration(minutes: 1)),
+              ).copyWith(pinned: true, pinnedAt: pinnedAt),
+              messageAt(
+                'after',
+                truncatedAt.add(const Duration(minutes: 1)),
+              ).copyWith(pinned: true, pinnedAt: pinnedAt),
+            ],
+          ),
+        );
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.pinnedMessages.map((m) => m.id), ['after']);
+      });
+
+      test('a channel loaded with a truncatedAt leaves out the messages sent before it', () {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        final loaded = Channel.fromState(
+          client,
+          ChannelState(
+            channel: ChannelModel(id: 'loaded', type: channelType, truncatedAt: truncatedAt),
+            messages: [
+              messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))),
+              messageAt('after', truncatedAt.add(const Duration(minutes: 1))),
+            ],
+          ),
+        );
+        addTearDown(loaded.dispose);
+
+        expect(loaded.state!.messages.map((m) => m.id), ['after']);
+      });
+
+      test('a channel update with a newer truncatedAt drops the messages sent before it', () {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.updateMessage(messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))));
+        channel.state!.updateMessage(messageAt('after', truncatedAt.add(const Duration(minutes: 1))));
+
+        channel.state!.updateChannelState(
+          ChannelState(
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+
+        expect(channel.state!.messages.map((m) => m.id), ['after']);
+      });
     });
 
     group('Member Events', () {
