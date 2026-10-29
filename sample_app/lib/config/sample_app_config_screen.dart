@@ -50,10 +50,10 @@ class SampleAppConfigScreen extends StatelessWidget {
                         ThemeMode.light: 'Light',
                         ThemeMode.dark: 'Dark',
                       },
-                      segmentIcons: const {
+                      segmentIcons: {
                         ThemeMode.system: Icons.brightness_auto_outlined,
-                        ThemeMode.light: Icons.light_mode_outlined,
-                        ThemeMode.dark: Icons.dark_mode_outlined,
+                        ThemeMode.light: icons.lightMode,
+                        ThemeMode.dark: icons.darkMode,
                       },
                       onChanged: (v) => SampleAppConfig.update(context, config.copyWith(themeMode: v)),
                     ),
@@ -347,23 +347,12 @@ class _LocaleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spacing = context.streamSpacing;
-    final colorScheme = context.streamColorScheme;
-    final textTheme = context.streamTextTheme;
-    final icons = context.streamIcons;
     final currentLabel = config.locale == null ? 'System' : _localeLabels[config.locale!.languageCode] ?? 'System';
 
-    return StreamListTile(
-      leading: Icon(icons.translate, size: 24),
-      title: const Text('Language'),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: spacing.xxs,
-        children: [
-          Text(currentLabel, style: textTheme.captionEmphasis.copyWith(color: colorScheme.textTertiary)),
-          Icon(Icons.chevron_right_outlined, size: 20, color: colorScheme.textTertiary),
-        ],
-      ),
+    return SettingsValueRow(
+      icon: context.streamIcons.translate,
+      title: 'Language',
+      value: currentLabel,
       onTap: () => _showLocalePicker(context),
     );
   }

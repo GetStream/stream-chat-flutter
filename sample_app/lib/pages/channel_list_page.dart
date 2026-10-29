@@ -253,7 +253,7 @@ class LeftDrawer extends StatelessWidget {
                   ),
                   StreamListTile(
                     contentPadding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xxxs),
-                    leading: const Icon(Icons.tune_outlined, size: 24),
+                    leading: Icon(icons.settings, size: 24),
                     title: const Text('Configuration'),
                     trailing: Icon(icons.chevronRight, size: 20, color: colorScheme.textTertiary),
                     onTap: () {
@@ -293,7 +293,7 @@ class LeftDrawer extends StatelessWidget {
                   ),
                   IconButton(
                     icon: Icon(
-                      isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                      isDark ? icons.lightMode : icons.darkMode,
                       color: colorScheme.textSecondary,
                     ),
                     onPressed: () {
