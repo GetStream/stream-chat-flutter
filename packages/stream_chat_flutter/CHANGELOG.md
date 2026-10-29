@@ -16,7 +16,7 @@
 
 🐞 Fixed
 
-- Fixed swiping a message to reply in a channel that doesn't allow quoting.
+- Fixed swiping a message starting a reply in a channel that doesn't allow quoting.
 - Fixed a web address written without `https://`, such as `youtube.com`, not being tappable in a message.
 - Fixed a web address right after a quote or Chinese or Japanese text not being tappable in a message.
 - Fixed `StreamThreadPage` hiding the composer for a deleted parent message that already has replies, which can still be replied to.
