@@ -60,18 +60,19 @@ class ChannelClientState {
         ?.getChannelThreads(_channel.cid!)
         .then((threads) {
           // Load all the threads for the channel from the offline storage.
-          if (threads.isNotEmpty) {
-            _threads = {
-              for (final MapEntry(:key, :value) in threads.entries) key: _failInterruptedRequests(value)!,
-            };
-          }
+          if (threads.isEmpty) return;
+          _threads = threads.map(
+            (parentId, replies) => MapEntry(parentId, _failInterruptedRequests(replies)!),
+          );
         })
         .then((_) => retryFailedMessages());
   }
 
   // A message that was still being sent, updated or deleted when this state
   // was created belongs to a request that never finished, such as one cut off
-  // when the app was closed. It is marked failed so it gets retried.
+  // when the app was closed. A send or delete is marked failed so it gets
+  // retried. An update can't be retried as it was made, so it is settled and
+  // the server's copy replaces it.
   static List<Message>? _failInterruptedRequests(List<Message>? messages) {
     if (messages == null || !messages.any((it) => it.state.isOutgoing)) return messages;
 
@@ -81,9 +82,7 @@ class ChannelClientState {
           MessageOutgoing(state: Sending()) => message.copyWith(
             state: MessageState.sendingFailed(skipPush: false, skipEnrichUrl: false),
           ),
-          MessageOutgoing(state: Updating()) => message.copyWith(
-            state: MessageState.updatingFailed(skipPush: false, skipEnrichUrl: false),
-          ),
+          MessageOutgoing(state: Updating()) => message.copyWith(state: MessageState.updated),
           MessageOutgoing(state: Deleting(:final scope)) => message.copyWith(
             state: MessageState.deletingFailed(scope: scope),
           ),

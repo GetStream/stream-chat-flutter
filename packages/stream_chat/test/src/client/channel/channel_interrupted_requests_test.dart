@@ -8,74 +8,100 @@ import '../../mocks.dart';
 void main() {
   setUpAll(() => registerFallbackValue(FakeMessage()));
 
-  test('marks a message left sending as failed to send', () {
-    final channel = _channel(messages: [_message(state: MessageState.sending)]);
+  group('Channel.fromState', () {
+    test('marks a message left sending as failed to send', () {
+      final channel = _channel(messages: [_message(state: MessageState.sending)]);
 
-    expect(
-      channel.state!.messages.single.state,
-      MessageState.sendingFailed(skipPush: false, skipEnrichUrl: false),
-    );
-  });
+      expect(
+        channel.state!.messages.single.state,
+        MessageState.sendingFailed(skipPush: false, skipEnrichUrl: false),
+      );
+    });
 
-  test('marks a message left updating as failed to update', () {
-    final channel = _channel(messages: [_message(state: MessageState.updating)]);
+    test('settles a message left updating, so it no longer shows as in progress', () {
+      final channel = _channel(messages: [_message(state: MessageState.updating)]);
 
-    expect(
-      channel.state!.messages.single.state,
-      MessageState.updatingFailed(skipPush: false, skipEnrichUrl: false),
-    );
-  });
+      expect(channel.state!.messages.single.state, MessageState.updated);
+    });
 
-  test('marks a message left deleting as failed to delete for the same scope', () {
-    final channel = _channel(
-      messages: [_message(state: MessageState.deleting(scope: const MessageDeleteScope.deleteForMe()))],
-    );
+    test('does not send a message left updating again', () async {
+      final client = MockStreamChatClientWithPersistence();
+      when(() => client.chatPersistenceClient.getChannelThreads(any())).thenAnswer((_) async => {});
 
-    expect(
-      channel.state!.messages.single.state,
-      MessageState.deletingFailed(scope: const MessageDeleteScope.deleteForMe()),
-    );
-  });
+      _channel(
+        client: client,
+        messages: [_message(state: MessageState.updating)],
+      );
+      await pumpEventQueue();
 
-  test('keeps the messages as they are when none was left in progress', () {
-    final messages = [_message(), _message(id: 'other-message')];
+      verifyNever(
+        () => client.updateMessage(
+          any(),
+          skipPush: any(named: 'skipPush'),
+          skipEnrichUrl: any(named: 'skipEnrichUrl'),
+        ),
+      );
+      verifyNever(
+        () => client.partialUpdateMessage(
+          any(),
+          set: any(named: 'set'),
+          unset: any(named: 'unset'),
+          skipEnrichUrl: any(named: 'skipEnrichUrl'),
+        ),
+      );
+    });
 
-    final channel = _channel(messages: messages);
+    test('marks a message left deleting as failed to delete for the same scope', () {
+      final channel = _channel(
+        messages: [_message(state: MessageState.deleting(scope: const MessageDeleteScope.deleteForMe()))],
+      );
 
-    expect(channel.state!.messages, same(messages));
-  });
+      expect(
+        channel.state!.messages.single.state,
+        MessageState.deletingFailed(scope: const MessageDeleteScope.deleteForMe()),
+      );
+    });
 
-  test('sends a stored thread reply left sending again', () async {
-    final client = MockStreamChatClientWithPersistence();
-    final reply = _message(id: 'reply', parentId: 'parent', state: MessageState.sending);
-    when(() => client.chatPersistenceClient.getChannelThreads(any())).thenAnswer(
-      (_) async => {
-        'parent': [reply],
-      },
-    );
-    _stubSend(client);
+    test('keeps the messages as they are when none was left in progress', () {
+      final messages = [_message(), _message(id: 'other-message')];
 
-    final channel = _channel(client: client);
-    await pumpEventQueue();
+      final channel = _channel(messages: messages);
 
-    verify(
-      () => client.sendMessage(any(that: isA<Message>().having((it) => it.id, 'id', 'reply')), any(), any()),
-    ).called(1);
-    expect(channel.state!.threads['parent']?.single.state.isCompleted, isTrue);
-  });
+      expect(channel.state!.messages, same(messages));
+    });
 
-  test('sends a message left sending again', () async {
-    final client = MockStreamChatClientWithPersistence();
-    when(() => client.chatPersistenceClient.getChannelThreads(any())).thenAnswer((_) async => {});
-    _stubSend(client);
+    test('sends a stored thread reply left sending again', () async {
+      final client = MockStreamChatClientWithPersistence();
+      final reply = _message(id: 'reply', parentId: 'parent', state: MessageState.sending);
+      when(() => client.chatPersistenceClient.getChannelThreads(any())).thenAnswer(
+        (_) async => {
+          'parent': [reply],
+        },
+      );
+      _stubSend(client);
 
-    final channel = _channel(
-      client: client,
-      messages: [_message(state: MessageState.sending)],
-    );
-    await pumpEventQueue();
+      final channel = _channel(client: client);
+      await pumpEventQueue();
 
-    verify(() => client.sendMessage(any(), channel.id!, channel.type)).called(1);
+      verify(
+        () => client.sendMessage(any(that: isA<Message>().having((it) => it.id, 'id', 'reply')), any(), any()),
+      ).called(1);
+      expect(channel.state!.threads['parent']?.single.state.isCompleted, isTrue);
+    });
+
+    test('sends a message left sending again', () async {
+      final client = MockStreamChatClientWithPersistence();
+      when(() => client.chatPersistenceClient.getChannelThreads(any())).thenAnswer((_) async => {});
+      _stubSend(client);
+
+      final channel = _channel(
+        client: client,
+        messages: [_message(state: MessageState.sending)],
+      );
+      await pumpEventQueue();
+
+      verify(() => client.sendMessage(any(), channel.id!, channel.type)).called(1);
+    });
   });
 }
 
