@@ -671,7 +671,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       ),
     );
 
-    Widget result = Material(
+    final result = Material(
       animateColor: true,
       color: effectiveBackgroundColor,
       child: PlatformWidgetBuilder(
@@ -728,21 +728,18 @@ class DefaultStreamMessageItem extends StatelessWidget {
       ),
     );
 
-    final channel = StreamChannel.maybeOf(context)?.channel;
-    final canQuoteMessage = channel?.canQuoteMessage ?? false;
-    if (props.swipeToReply &&
-        canQuoteMessage &&
-        props.onReplyTap != null &&
-        !message.isDeleted &&
-        !message.state.isFailed) {
-      result = _SwipeToReplyWrapper(
-        message: message,
-        onReplyTap: props.onReplyTap!,
-        child: result,
-      );
-    }
+    final onReplyTap = props.onReplyTap;
+    if (!props.swipeToReply || onReplyTap == null) return result;
+    if (message.isDeleted || message.state.isFailed) return result;
 
-    return result;
+    final channel = StreamChannel.maybeOf(context)?.channel;
+    if (channel == null || !channel.canQuoteMessage) return result;
+
+    return _SwipeToReplyWrapper(
+      message: message,
+      onReplyTap: onReplyTap,
+      child: result,
+    );
   }
 
   // Builds the action list for a bounced (moderation-error) message.
