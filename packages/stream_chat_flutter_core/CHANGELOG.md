@@ -8,6 +8,10 @@
 
 - A subclass of `StreamMessageComposerController` that overrides `clearOGAttachment` must add the new `dismissed` parameter.
 
+🐞 Fixed
+
+- Fixed `StreamChannel.getFirstUnreadMessage` finding no unread message when the read state has no last read message, which left the unread separator and the jump to unread button without a target.
+
 ## 10.6.0
 
 ✅ Added

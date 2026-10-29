@@ -764,8 +764,8 @@ class StreamChannelState extends State<StreamChannel> {
   /// - The last read message is the most recent message in the channel
   /// - The last read message can't be found in the current message list
   ///
-  /// If there's no last read message ID (all messages are unread), it returns
-  /// the oldest regular message when pagination is complete.
+  /// Without a last read message ID, it returns the first message sent after
+  /// the last read date, once the loaded messages reach back to that date.
   Message? getFirstUnreadMessage([Read? currentUserRead]) {
     final messages = channel.state?.messages;
     if (messages == null || messages.isEmpty) return null;
@@ -791,10 +791,22 @@ class StreamChannelState extends State<StreamChannel> {
       return null;
     }
 
+    // The current user's own messages and deleted messages don't count as
+    // unread.
+    bool countsAsUnread(Message message) {
+      if (message.isDeleted) return false;
+      return message.user?.id != userRead.user.id;
+    }
+
     final lastReadMessageId = userRead.lastReadMessageId;
-    // No last read message ID, consider all messages unread.
     if (lastReadMessageId == null) {
-      return getOldestRegularMessage();
+      final lastRead = userRead.lastRead;
+      final oldestLoadedAt = messages.first.createdAt;
+      final reachesLastRead = _topPaginationEnded || !oldestLoadedAt.isAfter(lastRead);
+      if (!reachesLastRead) return null;
+
+      bool isUnread(Message it) => it.createdAt.isAfter(lastRead) && countsAsUnread(it);
+      return messages.firstWhereOrNull(isUnread);
     }
 
     // If the last read message is the last message in the channel, there are no
@@ -816,16 +828,7 @@ class StreamChannelState extends State<StreamChannel> {
       return getOldestRegularMessage();
     }
 
-    // Return the first valid unread message after the last read message
-    // Skip messages from the current user and deleted messages
-    return messages.sublist(lastReadIndex + 1).firstWhereOrNull((message) {
-      // Skip deleted messages
-      if (message.isDeleted) return false;
-      // Skip messages from the current user
-      if (message.user?.id == userRead.user.id) return false;
-
-      return true;
-    });
+    return messages.sublist(lastReadIndex + 1).firstWhereOrNull(countsAsUnread);
   }
 
   /// Reloads the channel with latest messages, replacing the loaded window.
