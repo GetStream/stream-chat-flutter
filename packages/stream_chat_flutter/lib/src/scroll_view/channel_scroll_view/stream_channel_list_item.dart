@@ -708,12 +708,14 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
               message: latestLastMessage,
             );
           }
+
+          if (deliveryPrefix != null) deliveryPrefix = ExcludeSemantics(child: deliveryPrefix);
         }
 
         return Row(
           spacing: spacing.xxs,
           children: [
-            if (deliveryPrefix != null) ExcludeSemantics(child: deliveryPrefix),
+            ?deliveryPrefix,
             Flexible(
               child: StreamMessagePreviewText(
                 message: latestLastMessage,

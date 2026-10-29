@@ -1385,9 +1385,8 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
     required bool canUseReadReceipts,
   }) {
     final translations = context.translations;
-    if (attachmentUploadProgressLabel(translations, widget.message) case final progress?) {
-      return progress;
-    }
+    final progress = attachmentUploadProgressLabel(translations, widget.message);
+    if (progress != null) return progress;
 
     final status = MessageDeliveryStatus.of(
       widget.message,
