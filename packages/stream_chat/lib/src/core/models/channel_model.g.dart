@@ -29,6 +29,7 @@ ChannelModel _$ChannelModelFromJson(Map<String, dynamic> json) => ChannelModel(
   blocked: json['blocked'] as bool?,
   truncatedAt: json['truncated_at'] == null ? null : DateTime.parse(json['truncated_at'] as String),
   messageCount: (json['message_count'] as num?)?.toInt(),
+  activeMemberCount: (json['active_member_count'] as num?)?.toInt(),
   filterTags: (json['filter_tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
   truncatedBy: json['truncated_by'] == null ? null : User.fromJson(json['truncated_by'] as Map<String, dynamic>),
   autoTranslationEnabled: json['auto_translation_enabled'] as bool?,

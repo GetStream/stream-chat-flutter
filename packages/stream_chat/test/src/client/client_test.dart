@@ -1450,6 +1450,92 @@ void main() {
         },
       );
 
+      test('concurrent calls that differ only in includeActiveMemberCount do not share the cache', () async {
+        final pendingQuery = Completer<QueryChannelsResponse>();
+        when(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            includeActiveMemberCount: any(named: 'includeActiveMemberCount'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).thenAnswer((_) => pendingQuery.future);
+        clearInteractions(fakeChatApi.channel);
+
+        final queries = Future.wait([
+          client.queryChannels(includeActiveMemberCount: true).toList(),
+          client.queryChannels().toList(),
+        ]);
+        await pumpEventQueue();
+        pendingQuery.complete(QueryChannelsResponse()..channels = []);
+        await queries;
+
+        verify(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            includeActiveMemberCount: true,
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).called(1);
+        verify(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            includeActiveMemberCount: false,
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).called(1);
+      });
+
+      test('queryChannelsOnline forwards includeActiveMemberCount', () async {
+        when(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            includeActiveMemberCount: any(named: 'includeActiveMemberCount'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).thenAnswer((_) async => QueryChannelsResponse()..channels = const []);
+        clearInteractions(fakeChatApi.channel);
+
+        await client.queryChannelsOnline(includeActiveMemberCount: true);
+
+        verify(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            includeActiveMemberCount: true,
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).called(1);
+      });
+
       test(
         'concurrent calls share the same error when the request fails',
         () async {

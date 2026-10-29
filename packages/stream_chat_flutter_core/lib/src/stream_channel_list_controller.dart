@@ -61,6 +61,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
     this.memberLimit,
+    this.includeActiveMemberCount = false,
   }) : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
        channelStateSort = channelStateSort ?? ChannelSort.defaultSort,
        super(const PagedValue.loading());
@@ -79,6 +80,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     this.limit = defaultChannelPagedLimit,
     this.messageLimit,
     this.memberLimit,
+    this.includeActiveMemberCount = false,
   }) : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
        channelStateSort = channelStateSort ?? ChannelSort.defaultSort;
 
@@ -144,6 +146,12 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   /// Number of members to fetch in each channel.
   final int? memberLimit;
 
+  /// Whether the channels this controller loads carry their
+  /// [Channel.activeMemberCount].
+  ///
+  /// Applies to every page and every refresh. Defaults to false.
+  final bool includeActiveMemberCount;
+
   @override
   set value(PagedValue<int, Channel> newValue) {
     super.value = newValue.maybeMap(
@@ -186,6 +194,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
         memberLimit: memberLimit,
         messageLimit: messageLimit,
         presence: presence,
+        includeActiveMemberCount: includeActiveMemberCount,
         paginationParams: PaginationParams(limit: limit),
       )) {
         _resolveSort(result);
@@ -221,6 +230,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
         memberLimit: memberLimit,
         messageLimit: messageLimit,
         presence: presence,
+        includeActiveMemberCount: includeActiveMemberCount,
         paginationParams: PaginationParams(limit: limit, offset: nextPageKey),
       )) {
         final channels = result.channels;

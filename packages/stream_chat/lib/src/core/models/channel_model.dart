@@ -35,6 +35,7 @@ class ChannelModel {
     this.blocked,
     this.truncatedAt,
     this.messageCount,
+    this.activeMemberCount,
     this.filterTags,
     this.truncatedBy,
     this.autoTranslationEnabled,
@@ -185,6 +186,14 @@ class ChannelModel {
   @JsonKey(includeToJson: false)
   final int? messageCount;
 
+  /// The number of members whose users are neither deactivated nor deleted.
+  ///
+  /// Null until a channel query made with `includeActiveMemberCount` loads this
+  /// channel. Once set, it keeps its last value until another such query
+  /// refreshes it.
+  @JsonKey(includeToJson: false)
+  final int? activeMemberCount;
+
   /// List of filter tags applied to the channel.
   ///
   /// This is generally used for querying filtered channels based on tags.
@@ -211,6 +220,7 @@ class ChannelModel {
     'team',
     'cooldown',
     'message_count',
+    'active_member_count',
     'filter_tags',
     'disabled',
     'hidden',
@@ -259,6 +269,7 @@ class ChannelModel {
     bool? blocked,
     DateTime? truncatedAt,
     int? messageCount,
+    int? activeMemberCount,
     List<String>? filterTags,
     User? truncatedBy,
     bool? autoTranslationEnabled,
@@ -286,6 +297,7 @@ class ChannelModel {
     blocked: blocked ?? this.blocked,
     truncatedAt: truncatedAt ?? this.truncatedAt,
     messageCount: messageCount ?? this.messageCount,
+    activeMemberCount: activeMemberCount ?? this.activeMemberCount,
     filterTags: filterTags ?? this.filterTags,
     truncatedBy: truncatedBy ?? this.truncatedBy,
     autoTranslationEnabled: autoTranslationEnabled ?? this.autoTranslationEnabled,
@@ -324,6 +336,7 @@ class ChannelModel {
       blocked: other.blocked ?? blocked,
       truncatedAt: other.truncatedAt ?? truncatedAt,
       messageCount: other.messageCount ?? messageCount,
+      activeMemberCount: other.activeMemberCount ?? activeMemberCount,
       filterTags: other.filterTags ?? filterTags,
       truncatedBy: other.truncatedBy ?? truncatedBy,
       autoTranslationEnabled: other.autoTranslationEnabled ?? false,

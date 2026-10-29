@@ -17,6 +17,10 @@
 
 - `StreamThreadListController` no longer reorders a thread when a reply it does not hold is deleted.
 
+✅ Added
+
+- Added `StreamChannelListController.includeActiveMemberCount`, which fills `Channel.activeMemberCount` on every page the controller loads.
+
 ## Upcoming
 
 ✅ Added

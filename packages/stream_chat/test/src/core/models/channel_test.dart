@@ -178,6 +178,34 @@ void main() {
     expect(merged.autoTranslationLanguage, isNull);
   });
 
+  test('ChannelModel.fromJson reads the active member count', () {
+    final channel = ChannelModel.fromJson({'id': 'test', 'type': 'livestream', 'active_member_count': 3});
+
+    expect(channel.activeMemberCount, 3);
+  });
+
+  test('ChannelModel.fromJson does not keep the active member count in custom data', () {
+    final channel = ChannelModel.fromJson({'id': 'test', 'type': 'livestream', 'active_member_count': 3});
+
+    expect(channel.custom, isNot(contains('active_member_count')));
+  });
+
+  test('ChannelModel.copyWith replaces the active member count', () {
+    final channel = ChannelModel(cid: 'test:cid', activeMemberCount: 3);
+
+    final newChannel = channel.copyWith(activeMemberCount: 4);
+
+    expect(newChannel.activeMemberCount, 4);
+  });
+
+  test('ChannelModel.merge takes the active member count from the other channel', () {
+    final channel = ChannelModel(cid: 'test:cid', activeMemberCount: 3);
+
+    final merged = channel.merge(ChannelModel(cid: 'test:cid', activeMemberCount: 2));
+
+    expect(merged.activeMemberCount, 2);
+  });
+
   test('.name should fetch from custom if available', () {
     final channel = ChannelModel(
       cid: 'test:channel',

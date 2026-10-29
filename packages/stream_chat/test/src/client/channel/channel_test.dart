@@ -5690,6 +5690,36 @@ void main() {
       );
     });
 
+    test('a channel update without an active member count keeps the last one', () async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      final channelState = _generateChannelState(channelId, channelType);
+      final channel = Channel.fromState(
+        client,
+        channelState.copyWith(
+          channel: channelState.channel!.copyWith(activeMemberCount: 3),
+        ),
+      );
+      addTearDown(channel.dispose);
+
+      final emitted = <int?>[];
+      final subscription = channel.activeMemberCountStream.listen(emitted.add);
+      addTearDown(subscription.cancel);
+      await Future.delayed(Duration.zero);
+
+      client.addEvent(
+        Event(
+          cid: channel.cid,
+          type: EventType.channelUpdated,
+          channel: ChannelModel(id: channelId, type: channelType),
+        ),
+      );
+      await Future.delayed(Duration.zero);
+
+      expect(channel.activeMemberCount, 3);
+      expect(emitted, [3]);
+    });
+
     group('Channel member count events', () {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
