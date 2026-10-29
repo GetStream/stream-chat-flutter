@@ -270,6 +270,79 @@ void main() {
       expect(() => channel.name = 'New name', throwsA(isA<StateError>()));
     });
 
+    group('`.scheduleMessage`', () {
+      final scheduledAt = DateTime.utc(2026, 11, 2, 9);
+
+      ScheduledMessage scheduledMessageFor(Message message, {String cid = channelCid}) => ScheduledMessage(
+        id: message.id,
+        cid: cid,
+        user: client.state.currentUser!,
+        message: message,
+        scheduledAt: scheduledAt,
+        status: ScheduledMessageStatus.scheduled,
+        createdAt: DateTime.utc(2026, 10, 29),
+        updatedAt: DateTime.utc(2026, 10, 29),
+      );
+
+      test('keeps a scheduled message out of the channel', () async {
+        final message = Message(id: 'scheduled-id', text: 'Good morning');
+        when(
+          () => client.sendMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer(
+          (_) async => SendMessageResponse()
+            ..message = message
+            ..scheduledMessage = scheduledMessageFor(message),
+        );
+
+        final res = await channel.scheduleMessage(message, scheduledAt);
+
+        expect(res.scheduledMessage?.id, message.id);
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test('adds the message to the channel when it was sent right away', () async {
+        final message = Message(id: 'sent-id', text: 'Good morning');
+        when(
+          () => client.sendMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer((_) async => SendMessageResponse()..message = message);
+
+        final res = await channel.scheduleMessage(message, scheduledAt);
+
+        expect(res.scheduledMessage, isNull);
+        expect(
+          channel.state!.messages.single,
+          isSameMessageAs(message.copyWith(state: MessageState.sent), matchMessageState: true),
+        );
+      });
+
+      test('refuses attachments that are not uploaded', () async {
+        final message = Message(
+          text: 'Good morning',
+          attachments: [
+            Attachment(
+              type: AttachmentType.image,
+              file: AttachmentFile(size: 100, path: 'image.png'),
+            ),
+          ],
+        );
+
+        await expectLater(channel.scheduleMessage(message, scheduledAt), throwsArgumentError);
+
+        verifyNever(
+          () => client.sendMessage(any(), any(), any(), scheduledAt: any(named: 'scheduledAt')),
+        );
+      });
+
+      test('`.scheduledMessages` holds only the ones in this channel', () {
+        final here = scheduledMessageFor(Message(id: 'here'));
+        final elsewhere = scheduledMessageFor(Message(id: 'elsewhere'), cid: 'messaging:other');
+        client.state.updateScheduledMessages([here, elsewhere]);
+        addTearDown(() => client.state.updateScheduledMessages(const []));
+
+        expect(channel.scheduledMessages, [here]);
+      });
+    });
+
     group('`.sendMessage`', () {
       test('should work fine', () async {
         final message = Message(

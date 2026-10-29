@@ -400,5 +400,6 @@
   "pinned_messages": [],
   "members": [],
   "active_live_locations": [],
+  "scheduled_messages": null,
   "watcher_count": 5
 }

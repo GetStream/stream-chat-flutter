@@ -13,6 +13,7 @@ import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
 import 'package:stream_chat/src/core/api/roles_api.dart';
+import 'package:stream_chat/src/core/api/scheduled_messages_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/api/user_groups_api.dart';
 import 'package:stream_chat/src/core/http/connection_id_manager.dart';
@@ -72,6 +73,8 @@ class MockUserGroupsApi extends Mock implements UserGroupsApi {}
 class MockRolesApi extends Mock implements RolesApi {}
 
 class MockGeneralApi extends Mock implements GeneralApi {}
+
+class MockScheduledMessagesApi extends Mock implements ScheduledMessagesApi {}
 
 class MockAttachmentFileUploader extends Mock implements AttachmentFileUploader {}
 

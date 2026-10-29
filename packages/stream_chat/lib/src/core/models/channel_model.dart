@@ -295,6 +295,9 @@ extension type const ChannelCapability(String capability) implements String {
   /// Ability to reply to a message.
   static const sendReply = ChannelCapability('send-reply');
 
+  /// Ability to schedule a message to be sent later.
+  static const scheduleMessage = ChannelCapability('schedule-message');
+
   /// Ability to send a message with restricted visibility.
   static const sendRestrictedVisibilityMessage = ChannelCapability(
     'send-restricted-visibility-message',

@@ -171,6 +171,22 @@ class EventType {
   /// Event sent when a message reminder is due.
   static const String notificationReminderDue = 'notification.reminder_due';
 
+  /// Event sent when the current user schedules a message.
+  static const String scheduledMessageCreated = 'scheduled_message.created';
+
+  /// Event sent when the current user edits or reschedules a scheduled message.
+  static const String scheduledMessageUpdated = 'scheduled_message.updated';
+
+  /// Event sent when the current user deletes a scheduled message.
+  static const String scheduledMessageDeleted = 'scheduled_message.deleted';
+
+  /// Event sent when a scheduled message of the current user is sent.
+  static const String scheduledMessageSent = 'scheduled_message.sent';
+
+  /// Event sent when a scheduled message of the current user could not be
+  /// sent.
+  static const String scheduledMessageFailed = 'scheduled_message.failed';
+
   /// Event sent when a new shared location is created.
   static const String locationShared = 'location.shared';
 

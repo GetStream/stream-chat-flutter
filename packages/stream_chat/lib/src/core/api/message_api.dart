@@ -18,12 +18,16 @@ class MessageApi {
   final StreamHttpClient _client;
 
   /// Sends the [message] to the given [channelId] of given [channelType]
+  ///
+  /// If [scheduledAt] is in the future, the message is scheduled to be sent
+  /// then instead.
   Future<SendMessageResponse> sendMessage(
     String channelId,
     String channelType,
     Message message, {
     bool skipPush = false,
     bool skipEnrichUrl = false,
+    DateTime? scheduledAt,
   }) async {
     final response = await _client.post(
       '/channels/$channelType/$channelId/message',
@@ -31,6 +35,7 @@ class MessageApi {
         'message': message,
         'skip_push': skipPush,
         'skip_enrich_url': skipEnrichUrl,
+        if (scheduledAt != null) 'scheduled_at': scheduledAt.toUtc().toIso8601String(),
       },
     );
     return SendMessageResponse.fromJson(response.data);

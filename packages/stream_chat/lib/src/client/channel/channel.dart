@@ -490,6 +490,25 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.messageCount).distinct();
   }
 
+  /// The current user's scheduled messages in this channel that are not sent
+  /// yet, earliest first.
+  ///
+  /// Holds the ones in [ClientState.scheduledMessages]; [query] or [watch]
+  /// with `includeScheduledMessages` loads them.
+  List<ScheduledMessage> get scheduledMessages => _scheduledMessagesIn(_client.state.scheduledMessages);
+
+  /// The [scheduledMessages] as a stream.
+  Stream<List<ScheduledMessage>> get scheduledMessagesStream {
+    return _client.state.scheduledMessagesStream.map(_scheduledMessagesIn).distinct(const ListEquality().equals);
+  }
+
+  List<ScheduledMessage> _scheduledMessagesIn(List<ScheduledMessage> scheduledMessages) {
+    final cid = this.cid;
+    if (cid == null) return const [];
+
+    return [...scheduledMessages.where((it) => it.cid == cid)];
+  }
+
   /// List of filter tags applied to this channel.
   ///
   /// Generally used for filtering channels while querying.
@@ -872,6 +891,48 @@ class Channel {
 
       rethrow;
     }
+  }
+
+  /// Schedules [message] to be sent to this channel at [scheduledAt].
+  ///
+  /// Also stops the current user's typing.
+  ///
+  /// The message is kept out of the channel until it is sent, and joins
+  /// [scheduledMessages] instead. The [scheduledAt] is rounded up to a whole
+  /// minute, at least a minute from now. A time that has already passed sends
+  /// the message right away, leaving [SendMessageResponse.scheduledMessage]
+  /// null.
+  ///
+  /// Every attachment must already be uploaded; one that is not throws an
+  /// [ArgumentError].
+  Future<SendMessageResponse> scheduleMessage(
+    Message message,
+    DateTime scheduledAt, {
+    bool skipPush = false,
+    bool skipEnrichUrl = false,
+  }) async {
+    _checkInitialized();
+
+    if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
+      throw ArgumentError.value(message, 'message', 'Attachments must be uploaded before scheduling');
+    }
+
+    _keyStrokeHandler.cancel();
+
+    final response = await _client.sendMessage(
+      message,
+      id!,
+      type,
+      skipPush: skipPush,
+      skipEnrichUrl: skipEnrichUrl,
+      scheduledAt: scheduledAt,
+    );
+
+    if (response.scheduledMessage == null) {
+      state?.updateMessage(response.message.copyWith(state: MessageState.sent));
+    }
+
+    return response;
   }
 
   Message _markMessageAsSent(Message message) {
@@ -2074,11 +2135,15 @@ class Channel {
   }
 
   /// Loads the initial channel state and watches for changes.
+  ///
+  /// If [includeScheduledMessages] is true, the current user's
+  /// [scheduledMessages] in this channel are loaded too.
   Future<ChannelState> watch({
     bool presence = false,
     PaginationParams? messagesPagination,
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
+    bool includeScheduledMessages = false,
   }) {
     return query(
       watch: true,
@@ -2086,6 +2151,7 @@ class Channel {
       messagesPagination: messagesPagination,
       membersPagination: membersPagination,
       watchersPagination: watchersPagination,
+      includeScheduledMessages: includeScheduledMessages,
     );
   }
 
@@ -2178,6 +2244,9 @@ class Channel {
   ///
   /// Set [preferOffline] to true to avoid the API call if the data is already
   /// in the offline storage.
+  ///
+  /// If [includeScheduledMessages] is true, the current user's
+  /// [scheduledMessages] in this channel are loaded too.
   Future<ChannelState> query({
     bool state = true,
     bool watch = false,
@@ -2186,6 +2255,7 @@ class Channel {
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
     bool preferOffline = false,
+    bool includeScheduledMessages = false,
   }) async {
     // A prior failed init left the completer errored; reset it so this attempt
     // owns the `initialized` result. Must stay before the first `await` so a
@@ -2226,6 +2296,7 @@ class Channel {
         messagesPagination: messagesPagination,
         membersPagination: membersPagination,
         watchersPagination: watchersPagination,
+        includeScheduledMessages: includeScheduledMessages,
       );
 
       if (_id == null) {

@@ -29,6 +29,9 @@ ChannelState _$ChannelStateFromJson(Map<String, dynamic> json) => ChannelState(
   activeLiveLocations: (json['active_live_locations'] as List<dynamic>?)
       ?.map((e) => Location.fromJson(e as Map<String, dynamic>))
       .toList(),
+  scheduledMessages: (json['scheduled_messages'] as List<dynamic>?)
+      ?.map((e) => ScheduledMessage.fromJson(e as Map<String, dynamic>))
+      .toList(),
 );
 
 Map<String, dynamic> _$ChannelStateToJson(
@@ -46,4 +49,5 @@ Map<String, dynamic> _$ChannelStateToJson(
   'pending_messages': instance.pendingMessages?.map((e) => e.toJson()).toList(),
   'push_preferences': instance.pushPreferences?.toJson(),
   'active_live_locations': instance.activeLiveLocations?.map((e) => e.toJson()).toList(),
+  'scheduled_messages': instance.scheduledMessages?.map((e) => e.toJson()).toList(),
 };
