@@ -1,0 +1,16 @@
+include: ../../analysis_options.yaml
+
+analyzer:
+  errors:
+    # NOTE(re-evaluate): This package reaches into `package:stream_chat/src/...`
+    # for seams that are not exported from the public barrel (WebSocket,
+    # TokenManager, Token, and the sub-API classes). Re-evaluate this once
+    # stream_chat exposes a dedicated testing entrypoint (e.g. `lib/testing.dart`)
+    # or exports these types from the main barrel.
+    implementation_imports: ignore
+    # Allow accessing @internal and @visibleForTesting members in test utilities.
+    invalid_use_of_internal_member: ignore
+    invalid_use_of_visible_for_testing_member: ignore
+    # Currently unused (no @protected member is accessed across a subclass
+    # boundary yet); kept for symmetry with stream_feeds_test's setup.
+    invalid_use_of_protected_member: ignore
