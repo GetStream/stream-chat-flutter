@@ -702,14 +702,14 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
         if (showsDeliveryStatus) {
           if (widget.sendingIndicatorBuilder case final builder?) {
             deliveryPrefix = builder(context, latestLastMessage);
-          } else {
+          } else if (widget.channel.canUseReadReceipts || latestLastMessage.state.isOutgoing) {
             deliveryPrefix = _ChannelListDeliveryStatus(
               channel: widget.channel,
               message: latestLastMessage,
             );
           }
 
-          deliveryPrefix = ExcludeSemantics(child: deliveryPrefix);
+          if (deliveryPrefix != null) deliveryPrefix = ExcludeSemantics(child: deliveryPrefix);
         }
 
         return Row(

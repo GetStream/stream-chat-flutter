@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../../stream_chat_flutter.dart';
+import '../../misc/empty_widget.dart';
 import '../message_status_labels.dart';
 
 /// Displays the sending status of a message, including attachment upload
@@ -9,7 +10,8 @@ import '../message_status_labels.dart';
 ///
 /// While attachments are still uploading, a textual progress label is shown.
 /// Once the message is fully sent, an icon indicates whether it has been
-/// sent, delivered, or read.
+/// sent, delivered, or read. In a channel where [Channel.canUseReadReceipts]
+/// is false, nothing is shown once the message is sent.
 ///
 /// This widget is typically used inside [StreamMessageFooter] and is only
 /// shown for messages sent by the current user.
@@ -37,6 +39,11 @@ class StreamMessageSendingStatus extends StatelessWidget {
     }
 
     final channel = StreamChannel.maybeOf(context)?.channel;
+
+    // Without read events a sent tick could never become delivered or read, so
+    // only the clock of a message still sending is shown.
+    final canUseReadReceipts = channel?.canUseReadReceipts ?? true;
+    if (!canUseReadReceipts && !message.state.isOutgoing) return const Empty();
 
     // Previews sit on the modal scrim, where neither the accent-colored read
     // receipt nor the muted sent/delivered icon has enough contrast, so both
