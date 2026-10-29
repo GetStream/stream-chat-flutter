@@ -75,8 +75,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
+      final sent = DefaultTranslations.instance.accessibility.messageSentStatusLabel;
       expect(labelsOf(tester), contains('OUT:Are we still meeting tomorrow, AT-TIME'));
-      expect(labelsOf(tester).where((it) => it.contains('Sent')), isEmpty);
+      expect(labelsOf(tester).where((it) => it.contains(sent)), isEmpty);
 
       handle.dispose();
     });

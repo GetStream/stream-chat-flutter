@@ -700,10 +700,9 @@ class _ChannelLastMessageWithStatusState extends State<_ChannelLastMessageWithSt
         // Show delivery status prefix only for own messages.
         Widget? deliveryPrefix;
         if (showsDeliveryStatus) {
-          final statusCanChange = widget.channel.canUseReadReceipts || latestLastMessage.state.isOutgoing;
           if (widget.sendingIndicatorBuilder case final builder?) {
             deliveryPrefix = builder(context, latestLastMessage);
-          } else if (statusCanChange) {
+          } else if (widget.channel.canUseReadReceipts || latestLastMessage.state.isOutgoing) {
             deliveryPrefix = _ChannelListDeliveryStatus(
               channel: widget.channel,
               message: latestLastMessage,

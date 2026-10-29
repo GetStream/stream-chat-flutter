@@ -187,7 +187,7 @@ void main() {
     });
   });
 
-  group('delivery status in a channel without read events', () {
+  group('in a channel without read events', () {
     testWidgets('hides the status of a sent message', (tester) async {
       await tester.pumpWidget(wrap(StreamMessageFooter(message: message()), readEvents: false));
       await tester.pumpAndSettle();
