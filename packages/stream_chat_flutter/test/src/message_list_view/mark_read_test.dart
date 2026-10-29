@@ -890,8 +890,8 @@ void main() {
       'tapping jump scrolls to the oldest loaded message instead of doing nothing',
       (tester) async {
         // A channel the user has never opened reports unread messages with no
-        // read boundary at all: no `lastReadMessageId`, and the anchor can't
-        // resolve until top pagination ends. The tap used to be inert.
+        // `lastReadMessageId`, and more of them than are loaded, so the anchor
+        // can't resolve yet. The tap used to be inert.
         final other = User(id: 'otherid');
         final messages = generateConversation(20, users: [other]).reversed.toList();
 
@@ -899,12 +899,12 @@ void main() {
           tester,
           messages: messages,
           isUpToDate: true,
-          unreadCount: 5,
+          unreadCount: 25,
           openAtFirstUnread: false,
           currentUserRead: Read(
             user: ownUser,
             lastRead: DateTime.utc(1970),
-            unreadMessages: 5,
+            unreadMessages: 25,
           ),
         );
 
