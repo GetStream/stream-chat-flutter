@@ -47,8 +47,8 @@
 //    on the next layout tick.
 //  - **Never opened by this user.** The channel reports unread messages but
 //    has no `lastReadMessageId`, so the anchor resolves from the last read
-//    date once the loaded messages reach back to it. Until then the pill still
-//    shows, and tapping it jumps as far back as is currently loaded (pulling
+//    date once the loaded messages reach back to it or include every unread
+//    message. Until then the pill still shows, and tapping it jumps as far back as is currently loaded (pulling
 //    in the next page) rather than doing nothing; it stays up, since the real
 //    boundary has not been reached. Auto mark-read is exempt from waiting for a
 //    boundary here — see [_maybeMarkMessagesAsRead] condition 5 — as are
@@ -529,8 +529,8 @@ class MessageListUnreadController {
 
     // A channel the user has never opened reports unread messages but has
     // no `lastReadMessageId`: the anchor can't resolve until the loaded
-    // messages reach back to the last read date, and there's no id to fall
-    // back on either. Everything loaded is unread, so head for the oldest message
+    // messages reach back to the last read date or include every unread
+    // message, and there's no id to fall back on either. Everything loaded is unread, so head for the oldest message
     // currently loaded — as far back as the boundary can be, and it pulls
     // the next page in on arrival — rather than leaving the tap inert.
     //
