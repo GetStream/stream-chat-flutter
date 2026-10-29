@@ -10,7 +10,7 @@
 
 🐞 Fixed
 
-- Fixed `StreamChannel.getFirstUnreadMessage` finding no unread message when the read state has no last read message, which left the unread separator and the jump to unread button without a target.
+- Fixed `StreamChannelState.getFirstUnreadMessage` returning no message when the current user's read state has unread messages but no last read message.
 
 ## 10.6.0
 

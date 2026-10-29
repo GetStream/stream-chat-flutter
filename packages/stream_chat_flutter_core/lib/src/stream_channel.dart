@@ -764,8 +764,9 @@ class StreamChannelState extends State<StreamChannel> {
   /// - The last read message is the most recent message in the channel
   /// - The last read message can't be found in the current message list
   ///
-  /// Without a last read message ID, it returns the first message sent after
-  /// the last read date, once the loaded messages reach back to that date.
+  /// Without a last read message ID, it returns the first message from another
+  /// user sent after the last read date, or null until the loaded messages
+  /// reach back to that date.
   Message? getFirstUnreadMessage([Read? currentUserRead]) {
     final messages = channel.state?.messages;
     if (messages == null || messages.isEmpty) return null;
@@ -791,8 +792,6 @@ class StreamChannelState extends State<StreamChannel> {
       return null;
     }
 
-    // The current user's own messages and deleted messages don't count as
-    // unread.
     bool countsAsUnread(Message message) {
       if (message.isDeleted) return false;
       return message.user?.id != userRead.user.id;
@@ -805,8 +804,9 @@ class StreamChannelState extends State<StreamChannel> {
       final reachesLastRead = _topPaginationEnded || !oldestLoadedAt.isAfter(lastRead);
       if (!reachesLastRead) return null;
 
-      bool isUnread(Message it) => it.createdAt.isAfter(lastRead) && countsAsUnread(it);
-      return messages.firstWhereOrNull(isUnread);
+      return messages.firstWhereOrNull(
+        (it) => it.createdAt.isAfter(lastRead) && countsAsUnread(it),
+      );
     }
 
     // If the last read message is the last message in the channel, there are no

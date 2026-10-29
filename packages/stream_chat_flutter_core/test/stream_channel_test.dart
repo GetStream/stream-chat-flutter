@@ -1036,22 +1036,17 @@ void main() {
         when(() => mockChannel.state.messages).thenReturn(messages);
         when(() => mockChannel.state.currentUserRead).thenReturn(mockRead);
 
-        final streamChannel = await _pumpStreamChannel(tester, mockChannel);
+        // Opening at the first unread would load around the last read date.
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel, openAtFirstUnread: false);
 
         expect(streamChannel.getFirstUnreadMessage(), equals(firstUnread));
       },
     );
 
     testWidgets(
-      'Returns null without a last read message until the loaded messages reach the last read date',
+      'Returns null without a last read message while the loaded messages start after the last read date',
       (tester) async {
         final lastRead = DateTime(2026, 10, 28, 12);
-        final firstLoaded = Message(
-          id: 'message2',
-          createdAt: lastRead.add(const Duration(minutes: 2)),
-          user: User(id: 'otherUserId'),
-        );
-
         final mockRead = Read(
           user: User(id: 'testUserId'),
           lastRead: lastRead,
@@ -1059,7 +1054,11 @@ void main() {
         );
 
         final messages = [
-          firstLoaded,
+          Message(
+            id: 'message2',
+            createdAt: lastRead.add(const Duration(minutes: 2)),
+            user: User(id: 'otherUserId'),
+          ),
           Message(
             id: 'message3',
             createdAt: lastRead.add(const Duration(minutes: 3)),
@@ -1074,13 +1073,79 @@ void main() {
         // Opening at the first unread would load around the last read date.
         final streamChannel = await _pumpStreamChannel(tester, mockChannel, openAtFirstUnread: false);
 
-        // An older unread message may not be loaded yet.
         expect(streamChannel.getFirstUnreadMessage(), isNull);
+      },
+    );
 
-        // Paging up finds no older messages, so the oldest loaded one is the
-        // first unread.
+    testWidgets(
+      'Returns the oldest message after the last read date once no older messages are left',
+      (tester) async {
+        final lastRead = DateTime(2026, 10, 28, 12);
+        final oldestLoaded = Message(
+          id: 'message2',
+          createdAt: lastRead.add(const Duration(minutes: 2)),
+          user: User(id: 'otherUserId'),
+        );
+
+        final mockRead = Read(
+          user: User(id: 'testUserId'),
+          lastRead: lastRead,
+          unreadMessages: 2,
+        );
+
+        final messages = [
+          oldestLoaded,
+          Message(
+            id: 'message3',
+            createdAt: lastRead.add(const Duration(minutes: 3)),
+            user: User(id: 'otherUserId'),
+          ),
+        ];
+
+        when(() => mockChannel.state.unreadCount).thenReturn(2);
+        when(() => mockChannel.state.messages).thenReturn(messages);
+        when(() => mockChannel.state.currentUserRead).thenReturn(mockRead);
+
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel, openAtFirstUnread: false);
+        // Paging up finds no older messages.
         await streamChannel.queryMessages();
-        expect(streamChannel.getFirstUnreadMessage(), equals(firstLoaded));
+
+        expect(streamChannel.getFirstUnreadMessage(), equals(oldestLoaded));
+      },
+    );
+
+    testWidgets(
+      'Treats a message sent at the last read date as read',
+      (tester) async {
+        final lastRead = DateTime(2026, 10, 28, 12);
+        final firstUnread = Message(
+          id: 'message2',
+          createdAt: lastRead.add(const Duration(minutes: 1)),
+          user: User(id: 'otherUserId'),
+        );
+
+        final mockRead = Read(
+          user: User(id: 'testUserId'),
+          lastRead: lastRead,
+          unreadMessages: 1,
+        );
+
+        final messages = [
+          Message(
+            id: 'message1',
+            createdAt: lastRead,
+            user: User(id: 'otherUserId'),
+          ),
+          firstUnread,
+        ];
+
+        when(() => mockChannel.state.unreadCount).thenReturn(1);
+        when(() => mockChannel.state.messages).thenReturn(messages);
+        when(() => mockChannel.state.currentUserRead).thenReturn(mockRead);
+
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel, openAtFirstUnread: false);
+
+        expect(streamChannel.getFirstUnreadMessage(), equals(firstUnread));
       },
     );
 
