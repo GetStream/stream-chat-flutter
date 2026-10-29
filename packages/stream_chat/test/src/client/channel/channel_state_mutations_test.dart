@@ -735,23 +735,26 @@ void main() {
   });
 
   group('channel', () {
-    test('onChannelTruncated marks the channel truncated before applying the system message', () {
+    test('onChannelTruncated truncates before applying the system message', () {
       final truncatedAt = DateTime.utc(2026, 10, 29, 12);
       final systemMessage = Message(id: 'system-id');
       stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
 
       mutations.onChannelTruncated(truncatedAt: truncatedAt, message: systemMessage);
 
-      expect(capturedChannelState().channel?.truncatedAt, truncatedAt);
-      verify(() => state.updateMessage(systemMessage)).called(1);
+      final truncated = isA<ChannelState>().having((it) => it.channel?.truncatedAt, 'truncatedAt', truncatedAt);
+      verifyInOrder([
+        () => state.updateChannelState(any(that: truncated)),
+        () => state.updateMessage(systemMessage),
+      ]);
     });
 
-    test('onChannelTruncated clears the messages of a state without a channel', () {
-      stubChannelState(const ChannelState());
+    test('onChannelTruncated only truncates without a system message', () {
+      stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
 
       mutations.onChannelTruncated(truncatedAt: DateTime.utc(2026, 10, 29, 12));
 
-      verify(() => state.truncate()).called(1);
+      verify(() => state.updateChannelState(any())).called(1);
       verifyNever(() => state.updateMessage(any()));
     });
 

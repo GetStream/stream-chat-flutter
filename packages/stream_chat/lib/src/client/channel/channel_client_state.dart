@@ -69,12 +69,12 @@ class ChannelClientState {
         .then((_) => retryFailedMessages());
   }
 
-  // Messages the server created before the channel was truncated no longer
-  // exist, even when they were still stored or in flight.
+  // Messages created before the channel was truncated no longer exist, even
+  // when they were still stored. Messages not sent yet are kept.
   static List<Message>? _withoutTruncated(List<Message>? messages, DateTime? truncatedAt) {
     if (messages == null || truncatedAt == null) return messages;
 
-    bool isTruncated(Message it) => it.remoteCreatedAt?.isBefore(truncatedAt) ?? false;
+    bool isTruncated(Message message) => message.remoteCreatedAt?.isBefore(truncatedAt) ?? false;
     if (!messages.any(isTruncated)) return messages;
     return messages.whereNot(isTruncated).toList();
   }

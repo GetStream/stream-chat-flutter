@@ -35,11 +35,13 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
   Future<void> deleteMessageByCids(List<String> cids) async =>
       (delete(messages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
 
-  /// Removes the messages of the channel with [cid] that the server created
-  /// before [createdBefore].
-  Future<void> deleteMessagesCreatedBefore(String cid, DateTime createdBefore) async => (delete(
-    messages,
-  )..where((tbl) => tbl.channelCid.equals(cid) & tbl.remoteCreatedAt.isSmallerThanValue(createdBefore))).go();
+  /// Removes the messages of the channel with [cid] created before
+  /// [createdBefore], keeping the ones not sent yet.
+  Future<void> deleteMessagesCreatedBefore(String cid, DateTime createdBefore) {
+    final query = delete(messages)
+      ..where((tbl) => tbl.channelCid.equals(cid) & tbl.remoteCreatedAt.isSmallerThanValue(createdBefore));
+    return query.go();
+  }
 
   /// Hydrates `rows` into `Message`s using batched lookups for related
   /// entities. Reactions, polls, and (optionally) quoted messages and drafts

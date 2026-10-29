@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_chat_persistence/src/stream_chat_persistence_client.dart';
+import 'package:stream_chat_persistence/stream_chat_persistence.dart';
 
 import 'stream_chat_persistence_client_test.dart' show testDatabaseProvider;
 
@@ -17,8 +17,10 @@ void main() {
   tearDown(() => client.disconnect());
 
   test('updateChannelStates removes the stored messages sent before the channel was truncated', () async {
+    final before = _message('before', createdAt: truncatedAt.subtract(const Duration(minutes: 1)));
+    final after = _message('after', createdAt: truncatedAt.add(const Duration(minutes: 1)));
     await client.updateChannelStates([
-      ChannelState(channel: channel, messages: [_messageAt('before', truncatedAt), _messageAt('after', truncatedAt)]),
+      ChannelState(channel: channel, messages: [before, after]),
     ]);
 
     await client.updateChannelStates([
@@ -54,9 +56,9 @@ void main() {
       ChannelState(
         channel: channel,
         pinnedMessages: [
-          _messageAt('before', truncatedAt).copyWith(pinned: true, pinnedAt: pinnedAt),
-          _messageAt('after', truncatedAt).copyWith(pinned: true, pinnedAt: pinnedAt),
-        ],
+          _message('before', createdAt: truncatedAt.subtract(const Duration(minutes: 1))),
+          _message('after', createdAt: truncatedAt.add(const Duration(minutes: 1))),
+        ].map((it) => it.copyWith(pinned: true, pinnedAt: pinnedAt)).toList(),
       ),
     ]);
 
@@ -67,15 +69,26 @@ void main() {
     final pinned = await client.getPinnedMessagesByCid(channel.cid);
     expect(pinned.map((it) => it.id), ['after']);
   });
+
+  test('updateChannelStates keeps the truncation system message', () async {
+    final system = _message('system', createdAt: truncatedAt.add(const Duration(microseconds: 1)));
+    await client.updateChannelStates([
+      ChannelState(
+        channel: channel.copyWith(truncatedAt: truncatedAt),
+        messages: [system],
+      ),
+    ]);
+
+    final messages = await client.getMessagesByCid(channel.cid);
+    expect(messages.map((it) => it.id), ['system']);
+  });
 }
 
-// A message sent a minute before or after [truncatedAt], as its [id] says.
-Message _messageAt(String id, DateTime truncatedAt) {
-  final offset = const Duration(minutes: 1) * (id == 'before' ? -1 : 1);
+Message _message(String id, {required DateTime createdAt}) {
   return Message(
     id: id,
     text: id,
     user: User(id: 'other-user'),
-    createdAt: truncatedAt.add(offset),
+    createdAt: createdAt,
   );
 }
