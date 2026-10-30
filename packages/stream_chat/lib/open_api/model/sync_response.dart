@@ -28,7 +28,7 @@ class SyncResponse with _$SyncResponse {
   final String duration;
 
   @override
-  @JsonKey(name: 'events', fromJson: wsEventListFromJson, toJson: wsEventListToJson)
+  @JsonKey(name: 'events')
   final List<WSEvent> events;
 
   @override

@@ -262,6 +262,12 @@ abstract interface class DefaultApi {
   });
 
   @UseCallAdapter(_ResultCallAdapter)
+  @DELETE('/api/v2/chat/scheduled_messages/{id}')
+  Future<Result<DeleteScheduledMessageResponse>> deleteScheduledMessage({
+    @Path('id') required String id,
+  });
+
+  @UseCallAdapter(_ResultCallAdapter)
   @DELETE('/api/v2/usergroups/{id}')
   Future<Result<DurationResponse>> deleteUserGroup({
     @Path('id') required String id,
@@ -272,6 +278,22 @@ abstract interface class DefaultApi {
   @POST('/api/v2/moderation/flag')
   Future<Result<FlagItemResponse>> flag({
     @Body() required FlagRequest flagRequest,
+  });
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @POST('/api/v2/chat/channels/{type}/{id}/fork')
+  Future<Result<ForkChannelResponse>> forkChannel({
+    @Path('type') required String type,
+    @Path('id') required String id,
+    @Body() required ForkChannelRequest forkChannelRequest,
+  });
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @POST('/api/v2/chat/channels/{type}/{id}/fork/message_ids')
+  Future<Result<ForkMessageIDsResponse>> forkMessageIDs({
+    @Path('type') required String type,
+    @Path('id') required String id,
+    @Body() required ForkMessageIDsRequest forkMessageIDsRequest,
   });
 
   @UseCallAdapter(_ResultCallAdapter)
@@ -520,13 +542,6 @@ abstract interface class DefaultApi {
   });
 
   @UseCallAdapter(_ResultCallAdapter)
-  @POST('/api/v2/blocklists/{id}/import')
-  Future<Result<ImportBlockListResponse>> importBlockList({
-    @Path('id') required String id,
-    @Body() required ImportBlockListRequest importBlockListRequest,
-  });
-
-  @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/blocklists')
   Future<Result<ListBlockListResponse>> listBlockLists({
     @Query('team') String? team,
@@ -719,6 +734,12 @@ abstract interface class DefaultApi {
   });
 
   @UseCallAdapter(_ResultCallAdapter)
+  @POST('/api/v2/chat/scheduled_messages/query')
+  Future<Result<QueryScheduledMessagesResponse>> queryScheduledMessages({
+    @Body() QueryScheduledMessagesRequest? queryScheduledMessagesRequest,
+  });
+
+  @UseCallAdapter(_ResultCallAdapter)
   @POST('/api/v2/chat/threads')
   Future<Result<QueryThreadsResponse>> queryThreads({
     @Body() QueryThreadsRequest? queryThreadsRequest,
@@ -741,6 +762,20 @@ abstract interface class DefaultApi {
   Future<Result<RemoveUserGroupMembersResponse>> removeUserGroupMembers({
     @Path('id') required String id,
     @Body() required RemoveUserGroupMembersRequest removeUserGroupMembersRequest,
+  });
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @POST('/api/v2/moderation/reveal_media')
+  Future<Result<RevealMediaResponse>> revealMedia({
+    @Body() required RevealMediaRequest revealMediaRequest,
+  });
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @POST('/api/v2/chat/channels/{type}/{id}/rewind')
+  Future<Result<RewindChannelResponse>> rewindChannel({
+    @Path('type') required String type,
+    @Path('id') required String id,
+    @Body() required RewindChannelRequest rewindChannelRequest,
   });
 
   @UseCallAdapter(_ResultCallAdapter)
@@ -803,6 +838,12 @@ abstract interface class DefaultApi {
   Future<Result<SendReactionResponse>> sendReaction({
     @Path('id') required String id,
     @Body() required SendReactionRequest sendReactionRequest,
+  });
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @POST('/api/v2/chat/scheduled_messages/{id}/send_now')
+  Future<Result<SendScheduledMessageNowResponse>> sendScheduledMessageNow({
+    @Path('id') required String id,
   });
 
   @UseCallAdapter(_ResultCallAdapter)
@@ -875,7 +916,9 @@ abstract interface class DefaultApi {
 
   @UseCallAdapter(_ResultCallAdapter)
   @GET('/api/v2/chat/unread')
-  Future<Result<WrappedUnreadCountsResponse>> unreadCounts();
+  Future<Result<WrappedUnreadCountsResponse>> unreadCounts({
+    @Query('include_large_channels') bool? includeLargeChannels,
+  });
 
   @UseCallAdapter(_ResultCallAdapter)
   @PUT('/api/v2/blocklists/{name}')
@@ -966,6 +1009,13 @@ abstract interface class DefaultApi {
   Future<Result<UpdateReminderResponse>> updateReminder({
     @Path('message_id') required String messageId,
     @Body() UpdateReminderRequest? updateReminderRequest,
+  });
+
+  @UseCallAdapter(_ResultCallAdapter)
+  @PATCH('/api/v2/chat/scheduled_messages/{id}')
+  Future<Result<UpdateScheduledMessageResponse>> updateScheduledMessage({
+    @Path('id') required String id,
+    @Body() UpdateScheduledMessageRequest? updateScheduledMessageRequest,
   });
 
   @UseCallAdapter(_ResultCallAdapter)

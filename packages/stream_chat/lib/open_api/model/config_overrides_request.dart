@@ -13,29 +13,6 @@ import '../models.dart';
 part 'config_overrides_request.g.dart';
 part 'config_overrides_request.freezed.dart';
 
-extension type const ConfigOverridesRequestBlocklistBehavior._(String _) implements String {
-  static const block = ConfigOverridesRequestBlocklistBehavior._('block');
-  static const flag = ConfigOverridesRequestBlocklistBehavior._('flag');
-
-  factory ConfigOverridesRequestBlocklistBehavior.fromJson(String json) =>
-      ConfigOverridesRequestBlocklistBehavior._(json);
-
-  String toJson() => this;
-}
-
-extension type const ConfigOverridesRequestPushLevel._(String _) implements String {
-  static const all = ConfigOverridesRequestPushLevel._('all');
-  static const allMentions = ConfigOverridesRequestPushLevel._('all_mentions');
-  static const directMentions = ConfigOverridesRequestPushLevel._('direct_mentions');
-  @Deprecated('Use directMentions instead.')
-  static const mentions = ConfigOverridesRequestPushLevel._('mentions');
-  static const none = ConfigOverridesRequestPushLevel._('none');
-
-  factory ConfigOverridesRequestPushLevel.fromJson(String json) => ConfigOverridesRequestPushLevel._(json);
-
-  String toJson() => this;
-}
-
 @freezed
 @immutable
 @JsonSerializable()
@@ -65,7 +42,7 @@ class ConfigOverridesRequest with _$ConfigOverridesRequest {
 
   @override
   @JsonKey(name: 'blocklist_behavior')
-  final ConfigOverridesRequestBlocklistBehavior? blocklistBehavior;
+  final BlocklistBehavior? blocklistBehavior;
 
   @override
   @JsonKey(name: 'chat_preferences')
@@ -89,7 +66,7 @@ class ConfigOverridesRequest with _$ConfigOverridesRequest {
 
   @override
   @JsonKey(name: 'push_level')
-  final ConfigOverridesRequestPushLevel? pushLevel;
+  final PushLevel? pushLevel;
 
   @override
   @JsonKey(name: 'quotes')

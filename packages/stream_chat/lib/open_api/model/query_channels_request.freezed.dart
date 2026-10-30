@@ -15,6 +15,8 @@ T _$identity<T>(T value) => value;
 mixin _$QueryChannelsRequest {
   Map<String, Object?>? get filterConditions;
   Map<String, Object?>? get filterValues;
+  bool? get includeActiveMemberCount;
+  bool? get includeScheduledMessages;
   int? get limit;
   List<String>? get memberCustomInclude;
   int? get memberLimit;
@@ -50,6 +52,16 @@ mixin _$QueryChannelsRequest {
               other.filterValues,
               filterValues,
             ) &&
+            (identical(
+                  other.includeActiveMemberCount,
+                  includeActiveMemberCount,
+                ) ||
+                other.includeActiveMemberCount == includeActiveMemberCount) &&
+            (identical(
+                  other.includeScheduledMessages,
+                  includeScheduledMessages,
+                ) ||
+                other.includeScheduledMessages == includeScheduledMessages) &&
             (identical(other.limit, limit) || other.limit == limit) &&
             const DeepCollectionEquality().equals(
               other.memberCustomInclude,
@@ -74,6 +86,8 @@ mixin _$QueryChannelsRequest {
     runtimeType,
     const DeepCollectionEquality().hash(filterConditions),
     const DeepCollectionEquality().hash(filterValues),
+    includeActiveMemberCount,
+    includeScheduledMessages,
     limit,
     const DeepCollectionEquality().hash(memberCustomInclude),
     memberLimit,
@@ -89,7 +103,7 @@ mixin _$QueryChannelsRequest {
 
   @override
   String toString() {
-    return 'QueryChannelsRequest(filterConditions: $filterConditions, filterValues: $filterValues, limit: $limit, memberCustomInclude: $memberCustomInclude, memberLimit: $memberLimit, messageLimit: $messageLimit, offset: $offset, predefinedFilter: $predefinedFilter, presence: $presence, sort: $sort, sortValues: $sortValues, state: $state, watch: $watch)';
+    return 'QueryChannelsRequest(filterConditions: $filterConditions, filterValues: $filterValues, includeActiveMemberCount: $includeActiveMemberCount, includeScheduledMessages: $includeScheduledMessages, limit: $limit, memberCustomInclude: $memberCustomInclude, memberLimit: $memberLimit, messageLimit: $messageLimit, offset: $offset, predefinedFilter: $predefinedFilter, presence: $presence, sort: $sort, sortValues: $sortValues, state: $state, watch: $watch)';
   }
 }
 
@@ -103,6 +117,8 @@ abstract mixin class $QueryChannelsRequestCopyWith<$Res> {
   $Res call({
     Map<String, Object?>? filterConditions,
     Map<String, Object?>? filterValues,
+    bool? includeActiveMemberCount,
+    bool? includeScheduledMessages,
     int? limit,
     List<String>? memberCustomInclude,
     int? memberLimit,
@@ -131,6 +147,8 @@ class _$QueryChannelsRequestCopyWithImpl<$Res> implements $QueryChannelsRequestC
   $Res call({
     Object? filterConditions = freezed,
     Object? filterValues = freezed,
+    Object? includeActiveMemberCount = freezed,
+    Object? includeScheduledMessages = freezed,
     Object? limit = freezed,
     Object? memberCustomInclude = freezed,
     Object? memberLimit = freezed,
@@ -153,6 +171,14 @@ class _$QueryChannelsRequestCopyWithImpl<$Res> implements $QueryChannelsRequestC
             ? _self.filterValues
             : filterValues // ignore: cast_nullable_to_non_nullable
                   as Map<String, Object?>?,
+        includeActiveMemberCount: freezed == includeActiveMemberCount
+            ? _self.includeActiveMemberCount
+            : includeActiveMemberCount // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        includeScheduledMessages: freezed == includeScheduledMessages
+            ? _self.includeScheduledMessages
+            : includeScheduledMessages // ignore: cast_nullable_to_non_nullable
+                  as bool?,
         limit: freezed == limit
             ? _self.limit
             : limit // ignore: cast_nullable_to_non_nullable

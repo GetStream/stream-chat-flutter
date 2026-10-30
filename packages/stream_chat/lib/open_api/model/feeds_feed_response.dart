@@ -111,7 +111,7 @@ class FeedsFeedResponse with _$FeedsFeedResponse {
 
   @override
   @JsonKey(name: 'visibility')
-  final String? visibility;
+  final FeedVisibility? visibility;
 
   Map<String, dynamic> toJson() => _$FeedsFeedResponseToJson(this);
 

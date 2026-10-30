@@ -9,6 +9,7 @@ part of 'channel_response.dart';
 ChannelResponse _$ChannelResponseFromJson(
   Map<String, dynamic> json,
 ) => ChannelResponse(
+  activeMemberCount: (json['active_member_count'] as num?)?.toInt(),
   autoTranslationEnabled: json['auto_translation_enabled'] as bool?,
   autoTranslationLanguage: json['auto_translation_language'] as String?,
   blocked: json['blocked'] as bool?,
@@ -26,6 +27,7 @@ ChannelResponse _$ChannelResponseFromJson(
   ),
   disabled: json['disabled'] as bool,
   filterTags: (json['filter_tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  fork: json['fork'] == null ? null : ChannelForkSummary.fromJson(json['fork'] as Map<String, dynamic>),
   frozen: json['frozen'] as bool,
   hidden: json['hidden'] as bool?,
   hideMessagesBefore: _$JsonConverterFromJson<Object, DateTime>(
@@ -47,9 +49,7 @@ ChannelResponse _$ChannelResponseFromJson(
     const StreamDateTimeConverter().fromJson,
   ),
   muted: json['muted'] as bool?,
-  ownCapabilities: (json['own_capabilities'] as List<dynamic>?)
-      ?.map((e) => ChannelOwnCapability.fromJson(e as String))
-      .toList(),
+  ownCapabilities: (json['own_capabilities'] as List<dynamic>?)?.map((e) => e as ChannelOwnCapability).toList(),
   team: json['team'] as String?,
   truncatedAt: _$JsonConverterFromJson<Object, DateTime>(
     json['truncated_at'],
@@ -64,9 +64,8 @@ ChannelResponse _$ChannelResponseFromJson(
   ),
 );
 
-Map<String, dynamic> _$ChannelResponseToJson(
-  ChannelResponse instance,
-) => <String, dynamic>{
+Map<String, dynamic> _$ChannelResponseToJson(ChannelResponse instance) => <String, dynamic>{
+  'active_member_count': instance.activeMemberCount,
   'auto_translation_enabled': instance.autoTranslationEnabled,
   'auto_translation_language': instance.autoTranslationLanguage,
   'blocked': instance.blocked,
@@ -82,6 +81,7 @@ Map<String, dynamic> _$ChannelResponseToJson(
   ),
   'disabled': instance.disabled,
   'filter_tags': instance.filterTags,
+  'fork': instance.fork?.toJson(),
   'frozen': instance.frozen,
   'hidden': instance.hidden,
   'hide_messages_before': _$JsonConverterToJson<Object, DateTime>(
@@ -101,7 +101,7 @@ Map<String, dynamic> _$ChannelResponseToJson(
     const StreamDateTimeConverter().toJson,
   ),
   'muted': instance.muted,
-  'own_capabilities': instance.ownCapabilities?.map((e) => e.toJson()).toList(),
+  'own_capabilities': instance.ownCapabilities,
   'team': instance.team,
   'truncated_at': _$JsonConverterToJson<Object, DateTime>(
     instance.truncatedAt,

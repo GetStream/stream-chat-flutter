@@ -11,6 +11,7 @@ ChannelGetOrCreateRequest _$ChannelGetOrCreateRequestFromJson(
 ) => ChannelGetOrCreateRequest(
   data: json['data'] == null ? null : ChannelInput.fromJson(json['data'] as Map<String, dynamic>),
   hideForCreator: json['hide_for_creator'] as bool?,
+  includeScheduledMessages: json['include_scheduled_messages'] as bool?,
   memberCustomInclude: (json['member_custom_include'] as List<dynamic>?)?.map((e) => e as String).toList(),
   members: json['members'] == null ? null : PaginationParams.fromJson(json['members'] as Map<String, dynamic>),
   messages: json['messages'] == null
@@ -30,6 +31,7 @@ Map<String, dynamic> _$ChannelGetOrCreateRequestToJson(
 ) => <String, dynamic>{
   'data': instance.data?.toJson(),
   'hide_for_creator': instance.hideForCreator,
+  'include_scheduled_messages': instance.includeScheduledMessages,
   'member_custom_include': instance.memberCustomInclude,
   'members': instance.members?.toJson(),
   'messages': instance.messages?.toJson(),

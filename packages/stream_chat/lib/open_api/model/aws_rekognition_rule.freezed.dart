@@ -13,7 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$AWSRekognitionRule {
-  AWSRekognitionRuleAction get action;
+  ModerationAction get action;
   String get label;
   double get minConfidence;
   Map<String, Object?>? get subclassifications;
@@ -64,7 +64,7 @@ abstract mixin class $AWSRekognitionRuleCopyWith<$Res> {
   ) = _$AWSRekognitionRuleCopyWithImpl;
   @useResult
   $Res call({
-    AWSRekognitionRuleAction action,
+    ModerationAction action,
     String label,
     double minConfidence,
     Map<String, Object?>? subclassifications,
@@ -93,7 +93,7 @@ class _$AWSRekognitionRuleCopyWithImpl<$Res> implements $AWSRekognitionRuleCopyW
         action: null == action
             ? _self.action
             : action // ignore: cast_nullable_to_non_nullable
-                  as AWSRekognitionRuleAction,
+                  as ModerationAction,
         label: null == label
             ? _self.label
             : label // ignore: cast_nullable_to_non_nullable

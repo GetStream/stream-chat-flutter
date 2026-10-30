@@ -9,11 +9,9 @@ part of 'velocity_filter_config_rule.dart';
 VelocityFilterConfigRule _$VelocityFilterConfigRuleFromJson(
   Map<String, dynamic> json,
 ) => VelocityFilterConfigRule(
-  action: VelocityFilterConfigRuleAction.fromJson(json['action'] as String),
+  action: json['action'] as VelocityFilterConfigRuleAction,
   banDuration: (json['ban_duration'] as num).toInt(),
-  cascadingAction: VelocityFilterConfigRuleCascadingAction.fromJson(
-    json['cascading_action'] as String,
-  ),
+  cascadingAction: json['cascading_action'] as VelocityFilterConfigRuleCascadingAction,
   cascadingThreshold: (json['cascading_threshold'] as num).toInt(),
   checkMessageContext: json['check_message_context'] as bool,
   fastSpamThreshold: (json['fast_spam_threshold'] as num).toInt(),
@@ -30,9 +28,9 @@ VelocityFilterConfigRule _$VelocityFilterConfigRuleFromJson(
 Map<String, dynamic> _$VelocityFilterConfigRuleToJson(
   VelocityFilterConfigRule instance,
 ) => <String, dynamic>{
-  'action': instance.action.toJson(),
+  'action': instance.action,
   'ban_duration': instance.banDuration,
-  'cascading_action': instance.cascadingAction.toJson(),
+  'cascading_action': instance.cascadingAction,
   'cascading_threshold': instance.cascadingThreshold,
   'check_message_context': instance.checkMessageContext,
   'fast_spam_threshold': instance.fastSpamThreshold,

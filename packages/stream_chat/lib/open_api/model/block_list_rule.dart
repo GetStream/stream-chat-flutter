@@ -13,19 +13,15 @@ import '../models.dart';
 part 'block_list_rule.g.dart';
 part 'block_list_rule.freezed.dart';
 
-extension type const BlockListRuleAction._(String _) implements String {
-  static const bounce = BlockListRuleAction._('bounce');
-  static const bounceFlag = BlockListRuleAction._('bounce_flag');
-  static const bounceRemove = BlockListRuleAction._('bounce_remove');
-  static const flag = BlockListRuleAction._('flag');
-  static const mask = BlockListRuleAction._('mask');
-  static const maskFlag = BlockListRuleAction._('mask_flag');
-  static const remove = BlockListRuleAction._('remove');
-  static const shadow = BlockListRuleAction._('shadow');
-
-  factory BlockListRuleAction.fromJson(String json) => BlockListRuleAction._(json);
-
-  String toJson() => this;
+extension type const BlockListRuleAction(String _) implements String {
+  static const bounce = BlockListRuleAction('bounce');
+  static const bounceFlag = BlockListRuleAction('bounce_flag');
+  static const bounceRemove = BlockListRuleAction('bounce_remove');
+  static const flag = BlockListRuleAction('flag');
+  static const mask = BlockListRuleAction('mask');
+  static const maskFlag = BlockListRuleAction('mask_flag');
+  static const remove = BlockListRuleAction('remove');
+  static const shadow = BlockListRuleAction('shadow');
 }
 
 @freezed

@@ -3,20 +3,12 @@
 // coverage:ignore-file
 // ignore_for_file: unused_import, unnecessary_import, prefer_single_quotes, require_trailing_commas, unnecessary_raw_strings, public_member_api_docs, sort_constructors_first, provide_deprecation_message
 
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
-import 'package:stream_core/stream_core.dart' as core;
-
-import '../models.dart';
-
-part 'channel_deleted_event.g.dart';
-part 'channel_deleted_event.freezed.dart';
+part of 'events.dart';
 
 @freezed
 @immutable
 @JsonSerializable()
-class ChannelDeletedEvent extends core.WsEvent with _$ChannelDeletedEvent {
+class ChannelDeletedEvent extends core.WsEvent with _$ChannelDeletedEvent implements WSClientEvent, WSEvent {
   const ChannelDeletedEvent({
     required this.channel,
     this.channelCustom,
@@ -87,6 +79,7 @@ class ChannelDeletedEvent extends core.WsEvent with _$ChannelDeletedEvent {
   @JsonKey(name: 'user')
   final UserResponseCommonFields? user;
 
+  @override
   Map<String, dynamic> toJson() => _$ChannelDeletedEventToJson(this);
 
   static ChannelDeletedEvent fromJson(Map<String, dynamic> json) => _$ChannelDeletedEventFromJson(json);

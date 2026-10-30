@@ -13,19 +13,6 @@ import '../models.dart';
 part 'ocr_rule.g.dart';
 part 'ocr_rule.freezed.dart';
 
-extension type const OCRRuleAction._(String _) implements String {
-  static const bounce = OCRRuleAction._('bounce');
-  static const bounceFlag = OCRRuleAction._('bounce_flag');
-  static const bounceRemove = OCRRuleAction._('bounce_remove');
-  static const flag = OCRRuleAction._('flag');
-  static const remove = OCRRuleAction._('remove');
-  static const shadow = OCRRuleAction._('shadow');
-
-  factory OCRRuleAction.fromJson(String json) => OCRRuleAction._(json);
-
-  String toJson() => this;
-}
-
 @freezed
 @immutable
 @JsonSerializable()
@@ -37,7 +24,7 @@ class OCRRule with _$OCRRule {
 
   @override
   @JsonKey(name: 'action')
-  final OCRRuleAction action;
+  final ModerationAction action;
 
   @override
   @JsonKey(name: 'label')

@@ -139,7 +139,7 @@ includes a named response that carries only `duration` today, such as `HideChann
    ours.
 6. **Request enums are hand-written extension types** over the wire string, per `STYLE_GUIDE.md` § Prefer
    extension types over enums for server-defined values, and mapped to the generated type in the repository
-   (`PushProvider` → `CreateDeviceRequestPushProvider`).
+   (`PushProvider` → `PushProviderName`).
 7. **A plain model embedded in a json_serializable parent gets a temporary converter.** Some parents still decode
    v1 REST or WebSocket JSON with json_serializable; their field gets a `JsonConverter` — or a decode-only
    `fromJson` function when the parent never writes the field — in

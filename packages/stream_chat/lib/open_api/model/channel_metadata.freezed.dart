@@ -19,7 +19,7 @@ mixin _$ChannelMetadata {
   DateTime? get lastMessageAt;
   int? get memberCount;
   int? get messageCount;
-  String? get pushLevel;
+  PushLevel? get pushLevel;
   String? get team;
   String get type;
 
@@ -82,7 +82,7 @@ abstract mixin class $ChannelMetadataCopyWith<$Res> {
     DateTime? lastMessageAt,
     int? memberCount,
     int? messageCount,
-    String? pushLevel,
+    PushLevel? pushLevel,
     String? team,
     String type,
   });
@@ -139,7 +139,7 @@ class _$ChannelMetadataCopyWithImpl<$Res> implements $ChannelMetadataCopyWith<$R
         pushLevel: freezed == pushLevel
             ? _self.pushLevel
             : pushLevel // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as PushLevel?,
         team: freezed == team
             ? _self.team
             : team // ignore: cast_nullable_to_non_nullable

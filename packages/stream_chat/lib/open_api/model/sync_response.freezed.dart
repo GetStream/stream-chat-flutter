@@ -62,7 +62,7 @@ abstract mixin class $SyncResponseCopyWith<$Res> {
   @useResult
   $Res call({
     String duration,
-    List<WSEvent<WsEvent>> events,
+    List<WSEvent> events,
     List<String>? inaccessibleCids,
   });
 }
@@ -92,7 +92,7 @@ class _$SyncResponseCopyWithImpl<$Res> implements $SyncResponseCopyWith<$Res> {
         events: null == events
             ? _self.events
             : events // ignore: cast_nullable_to_non_nullable
-                  as List<WSEvent<WsEvent>>,
+                  as List<WSEvent>,
         inaccessibleCids: freezed == inaccessibleCids
             ? _self.inaccessibleCids
             : inaccessibleCids // ignore: cast_nullable_to_non_nullable

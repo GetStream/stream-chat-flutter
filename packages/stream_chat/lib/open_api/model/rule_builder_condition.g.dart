@@ -9,6 +9,16 @@ part of 'rule_builder_condition.dart';
 RuleBuilderCondition _$RuleBuilderConditionFromJson(
   Map<String, dynamic> json,
 ) => RuleBuilderCondition(
+  appChannelCountParams: json['app_channel_count_params'] == null
+      ? null
+      : AppChannelCountParameters.fromJson(
+          json['app_channel_count_params'] as Map<String, dynamic>,
+        ),
+  appMessageCountParams: json['app_message_count_params'] == null
+      ? null
+      : AppMessageCountParameters.fromJson(
+          json['app_message_count_params'] as Map<String, dynamic>,
+        ),
   callCustomPropertyParams: json['call_custom_property_params'] == null
       ? null
       : CallCustomPropertyParameters.fromJson(
@@ -186,6 +196,8 @@ RuleBuilderCondition _$RuleBuilderConditionFromJson(
 Map<String, dynamic> _$RuleBuilderConditionToJson(
   RuleBuilderCondition instance,
 ) => <String, dynamic>{
+  'app_channel_count_params': instance.appChannelCountParams?.toJson(),
+  'app_message_count_params': instance.appMessageCountParams?.toJson(),
   'call_custom_property_params': instance.callCustomPropertyParams?.toJson(),
   'call_type_rule_params': instance.callTypeRuleParams?.toJson(),
   'call_violation_count_params': instance.callViolationCountParams?.toJson(),

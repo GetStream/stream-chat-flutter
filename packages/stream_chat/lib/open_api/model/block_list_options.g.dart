@@ -7,11 +7,11 @@ part of 'block_list_options.dart';
 // **************************************************************************
 
 BlockListOptions _$BlockListOptionsFromJson(Map<String, dynamic> json) => BlockListOptions(
-  behavior: BlockListOptionsBehavior.fromJson(json['behavior'] as String),
+  behavior: json['behavior'] as ChannelModerationBehavior,
   blocklist: json['blocklist'] as String,
 );
 
 Map<String, dynamic> _$BlockListOptionsToJson(BlockListOptions instance) => <String, dynamic>{
-  'behavior': instance.behavior.toJson(),
+  'behavior': instance.behavior,
   'blocklist': instance.blocklist,
 };

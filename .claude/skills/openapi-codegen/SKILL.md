@@ -129,18 +129,7 @@ Fix the templates in the monolith (`monolith/openapi/generator/templates/templat
 ours. A post-generation patch in `scripts/generate.sh` is acceptable only against a reproducible failure, and only
 while the upstream fix is in flight.
 
-There is exactly one such patch today. `EventResponse.event` and `SyncResponse.events` are typed as the WSEvent
-union, and the generator emits them broken twice over: a static `fromJson` with no `toJson` and no `@JsonKey`
-converters, so json_serializable can't serialize the field; plus a `.freezed.dart` that writes the `WsEvent` type
-argument without its `core.` prefix. `patch_ws_event_models()` fixes both in four edits — add `WsEvent` to the
-barrel's `show` list, append converter functions to `ws_event.dart`, and point each field's `@JsonKey` at them.
-
-The patch exits with an error if the `@JsonKey(name: 'event')` line it expects is gone. That is the signal upstream
-landed the fix and the patch should be deleted, not repaired.
-
-Don't propose "make `fromJson` a factory" — `WSEvent<T>` is generic, so a factory cannot return
-`_CustomEvent extends WSEvent<CustomEvent>` where `WSEvent<T>` is expected. The upstream shape is converters
-emitted by `model.tpl` / `discriminator.tpl` plus a `WsEvent` re-export from `models-barrel.tpl`.
+There are no such patches today.
 
 ## Dependencies
 

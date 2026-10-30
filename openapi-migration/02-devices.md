@@ -25,7 +25,8 @@
 ## Decisions taken
 
 Revisited after landing: the group first adopted the generated `DeviceResponse`,
-`ListDevicesResponse` and `CreateDeviceRequestPushProvider` as public types. It now follows the
+`ListDevicesResponse` and `CreateDeviceRequestPushProvider` (since renamed `PushProviderName`) as
+public types. It now follows the
 [domain-model rules](README.md#domain-models), and the decisions below are the ones in force.
 
 - **`Device` stays our public type, in its v10 shape** (`id`, `pushProvider`), as a plain class with
@@ -39,7 +40,7 @@ Revisited after landing: the group first adopted the generated `DeviceResponse`,
   `Device.pushProvider` is typed with it rather than `String`. The server answers the provider as a
   free-form string, so a device registered with a provider the SDK does not name still decodes, and a
   provider added later is a new constant rather than a breaking enum value. The repository maps it to
-  the generated `CreateDeviceRequestPushProvider` by its wire value. **This is the enum precedent for
+  the generated `PushProviderName` by its wire value. **This is the enum precedent for
   every later group:** a generated request enum gets a hand-written public type, so the generator's
   naming never reaches a signature.
 - **The write calls answer nothing.** `addDevice` and `removeDevice` return `Result<void>`: the

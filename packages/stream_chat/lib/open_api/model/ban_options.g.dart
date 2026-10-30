@@ -7,9 +7,7 @@ part of 'ban_options.dart';
 // **************************************************************************
 
 BanOptions _$BanOptionsFromJson(Map<String, dynamic> json) => BanOptions(
-  deleteMessages: json['delete_messages'] == null
-      ? null
-      : BanOptionsDeleteMessages.fromJson(json['delete_messages'] as String),
+  deleteMessages: json['delete_messages'] as DeleteMessages?,
   duration: (json['duration'] as num?)?.toInt(),
   ipBan: json['ip_ban'] as bool?,
   reason: json['reason'] as String?,
@@ -17,7 +15,7 @@ BanOptions _$BanOptionsFromJson(Map<String, dynamic> json) => BanOptions(
 );
 
 Map<String, dynamic> _$BanOptionsToJson(BanOptions instance) => <String, dynamic>{
-  'delete_messages': instance.deleteMessages?.toJson(),
+  'delete_messages': instance.deleteMessages,
   'duration': instance.duration,
   'ip_ban': instance.ipBan,
   'reason': instance.reason,

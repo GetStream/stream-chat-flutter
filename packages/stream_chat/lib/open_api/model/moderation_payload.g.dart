@@ -11,6 +11,7 @@ ModerationPayload _$ModerationPayloadFromJson(
 ) => ModerationPayload(
   audios: (json['audios'] as List<dynamic>?)?.map((e) => e as String).toList(),
   countryCode: json['country_code'] as String?,
+  countryCodes: (json['country_codes'] as List<dynamic>?)?.map((e) => e as String).toList(),
   custom: json['custom'] as Map<String, dynamic>?,
   imageIds: (json['image_ids'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, e as String),
@@ -29,6 +30,7 @@ ModerationPayload _$ModerationPayloadFromJson(
 Map<String, dynamic> _$ModerationPayloadToJson(ModerationPayload instance) => <String, dynamic>{
   'audios': instance.audios,
   'country_code': instance.countryCode,
+  'country_codes': instance.countryCodes,
   'custom': instance.custom,
   'image_ids': instance.imageIds,
   'image_ordered_keys': instance.imageOrderedKeys,

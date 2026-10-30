@@ -1642,7 +1642,7 @@ void main() {
       const id = 'test-device-id';
       const request = api.CreateDeviceRequest(
         id: id,
-        pushProvider: api.CreateDeviceRequestPushProvider.firebase,
+        pushProvider: api.PushProviderName.firebase,
       );
 
       when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
@@ -1658,9 +1658,9 @@ void main() {
 
     test('StreamChatClient.addDevice sends a provider without a constant by its wire value', () async {
       const id = 'test-device-id';
-      final request = api.CreateDeviceRequest(
+      const request = api.CreateDeviceRequest(
         id: id,
-        pushProvider: api.CreateDeviceRequestPushProvider.fromJson('onesignal'),
+        pushProvider: api.PushProviderName('onesignal'),
       );
 
       when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
@@ -1678,7 +1678,7 @@ void main() {
       const pushProviderName = 'my-custom-config';
       const request = api.CreateDeviceRequest(
         id: id,
-        pushProvider: api.CreateDeviceRequestPushProvider.firebase,
+        pushProvider: api.PushProviderName.firebase,
         pushProviderName: pushProviderName,
       );
 
@@ -1696,7 +1696,7 @@ void main() {
       const id = 'test-device-id';
       const request = api.CreateDeviceRequest(
         id: id,
-        pushProvider: api.CreateDeviceRequestPushProvider.apn,
+        pushProvider: api.PushProviderName.apn,
       );
 
       when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
@@ -1713,7 +1713,7 @@ void main() {
       const error = StreamClientException(message: 'boom');
       const request = api.CreateDeviceRequest(
         id: 'test-device-id',
-        pushProvider: api.CreateDeviceRequestPushProvider.firebase,
+        pushProvider: api.PushProviderName.firebase,
       );
 
       when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
@@ -6119,5 +6119,10 @@ UserGroup _userGroup(String id) {
 }
 
 api.DeviceResponse _generatedDevice({required String id, required String pushProvider}) {
-  return api.DeviceResponse(id: id, pushProvider: pushProvider, createdAt: DateTime.utc(2024), userId: 'test-user-id');
+  return api.DeviceResponse(
+    id: id,
+    pushProvider: api.PushProviderName(pushProvider),
+    createdAt: DateTime.utc(2024),
+    userId: 'test-user-id',
+  );
 }

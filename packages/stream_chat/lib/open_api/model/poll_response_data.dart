@@ -13,15 +13,6 @@ import '../models.dart';
 part 'poll_response_data.g.dart';
 part 'poll_response_data.freezed.dart';
 
-extension type const PollResponseDataVotingVisibility._(String _) implements String {
-  static const anonymous = PollResponseDataVotingVisibility._('anonymous');
-  static const public = PollResponseDataVotingVisibility._('public');
-
-  factory PollResponseDataVotingVisibility.fromJson(String json) => PollResponseDataVotingVisibility._(json);
-
-  String toJson() => this;
-}
-
 @freezed
 @immutable
 @JsonSerializable()
@@ -144,7 +135,7 @@ class PollResponseData with _$PollResponseData {
 
   @override
   @JsonKey(name: 'voting_visibility')
-  final PollResponseDataVotingVisibility votingVisibility;
+  final VotingVisibility votingVisibility;
 
   Map<String, dynamic> toJson() => _$PollResponseDataToJson(this);
 

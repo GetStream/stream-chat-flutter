@@ -15,6 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$ChannelGetOrCreateRequest {
   ChannelInput? get data;
   bool? get hideForCreator;
+  bool? get includeScheduledMessages;
   List<String>? get memberCustomInclude;
   PaginationParams? get members;
   MessagePaginationParams? get messages;
@@ -41,6 +42,11 @@ mixin _$ChannelGetOrCreateRequest {
             other is ChannelGetOrCreateRequest &&
             (identical(other.data, data) || other.data == data) &&
             (identical(other.hideForCreator, hideForCreator) || other.hideForCreator == hideForCreator) &&
+            (identical(
+                  other.includeScheduledMessages,
+                  includeScheduledMessages,
+                ) ||
+                other.includeScheduledMessages == includeScheduledMessages) &&
             const DeepCollectionEquality().equals(
               other.memberCustomInclude,
               memberCustomInclude,
@@ -60,6 +66,7 @@ mixin _$ChannelGetOrCreateRequest {
     runtimeType,
     data,
     hideForCreator,
+    includeScheduledMessages,
     const DeepCollectionEquality().hash(memberCustomInclude),
     members,
     messages,
@@ -72,7 +79,7 @@ mixin _$ChannelGetOrCreateRequest {
 
   @override
   String toString() {
-    return 'ChannelGetOrCreateRequest(data: $data, hideForCreator: $hideForCreator, memberCustomInclude: $memberCustomInclude, members: $members, messages: $messages, presence: $presence, state: $state, threadUnreadCounts: $threadUnreadCounts, watch: $watch, watchers: $watchers)';
+    return 'ChannelGetOrCreateRequest(data: $data, hideForCreator: $hideForCreator, includeScheduledMessages: $includeScheduledMessages, memberCustomInclude: $memberCustomInclude, members: $members, messages: $messages, presence: $presence, state: $state, threadUnreadCounts: $threadUnreadCounts, watch: $watch, watchers: $watchers)';
   }
 }
 
@@ -86,6 +93,7 @@ abstract mixin class $ChannelGetOrCreateRequestCopyWith<$Res> {
   $Res call({
     ChannelInput? data,
     bool? hideForCreator,
+    bool? includeScheduledMessages,
     List<String>? memberCustomInclude,
     PaginationParams? members,
     MessagePaginationParams? messages,
@@ -111,6 +119,7 @@ class _$ChannelGetOrCreateRequestCopyWithImpl<$Res> implements $ChannelGetOrCrea
   $Res call({
     Object? data = freezed,
     Object? hideForCreator = freezed,
+    Object? includeScheduledMessages = freezed,
     Object? memberCustomInclude = freezed,
     Object? members = freezed,
     Object? messages = freezed,
@@ -129,6 +138,10 @@ class _$ChannelGetOrCreateRequestCopyWithImpl<$Res> implements $ChannelGetOrCrea
         hideForCreator: freezed == hideForCreator
             ? _self.hideForCreator
             : hideForCreator // ignore: cast_nullable_to_non_nullable
+                  as bool?,
+        includeScheduledMessages: freezed == includeScheduledMessages
+            ? _self.includeScheduledMessages
+            : includeScheduledMessages // ignore: cast_nullable_to_non_nullable
                   as bool?,
         memberCustomInclude: freezed == memberCustomInclude
             ? _self.memberCustomInclude

@@ -13,16 +13,6 @@ import '../models.dart';
 part 'block_list_options.g.dart';
 part 'block_list_options.freezed.dart';
 
-extension type const BlockListOptionsBehavior._(String _) implements String {
-  static const block = BlockListOptionsBehavior._('block');
-  static const flag = BlockListOptionsBehavior._('flag');
-  static const shadowBlock = BlockListOptionsBehavior._('shadow_block');
-
-  factory BlockListOptionsBehavior.fromJson(String json) => BlockListOptionsBehavior._(json);
-
-  String toJson() => this;
-}
-
 @freezed
 @immutable
 @JsonSerializable()
@@ -34,7 +24,7 @@ class BlockListOptions with _$BlockListOptions {
 
   @override
   @JsonKey(name: 'behavior')
-  final BlockListOptionsBehavior behavior;
+  final ChannelModerationBehavior behavior;
 
   @override
   @JsonKey(name: 'blocklist')

@@ -13,6 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$ChannelResponse {
+  int? get activeMemberCount;
   bool? get autoTranslationEnabled;
   String? get autoTranslationLanguage;
   bool? get blocked;
@@ -25,6 +26,7 @@ mixin _$ChannelResponse {
   DateTime? get deletedAt;
   bool get disabled;
   List<String>? get filterTags;
+  ChannelForkSummary? get fork;
   bool get frozen;
   bool? get hidden;
   DateTime? get hideMessagesBefore;
@@ -56,6 +58,7 @@ mixin _$ChannelResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ChannelResponse &&
+            (identical(other.activeMemberCount, activeMemberCount) || other.activeMemberCount == activeMemberCount) &&
             (identical(other.autoTranslationEnabled, autoTranslationEnabled) ||
                 other.autoTranslationEnabled == autoTranslationEnabled) &&
             (identical(
@@ -76,6 +79,7 @@ mixin _$ChannelResponse {
               other.filterTags,
               filterTags,
             ) &&
+            (identical(other.fork, fork) || other.fork == fork) &&
             (identical(other.frozen, frozen) || other.frozen == frozen) &&
             (identical(other.hidden, hidden) || other.hidden == hidden) &&
             (identical(other.hideMessagesBefore, hideMessagesBefore) ||
@@ -101,6 +105,7 @@ mixin _$ChannelResponse {
   @override
   int get hashCode => Object.hashAll([
     runtimeType,
+    activeMemberCount,
     autoTranslationEnabled,
     autoTranslationLanguage,
     blocked,
@@ -113,6 +118,7 @@ mixin _$ChannelResponse {
     deletedAt,
     disabled,
     const DeepCollectionEquality().hash(filterTags),
+    fork,
     frozen,
     hidden,
     hideMessagesBefore,
@@ -133,7 +139,7 @@ mixin _$ChannelResponse {
 
   @override
   String toString() {
-    return 'ChannelResponse(autoTranslationEnabled: $autoTranslationEnabled, autoTranslationLanguage: $autoTranslationLanguage, blocked: $blocked, cid: $cid, config: $config, cooldown: $cooldown, createdAt: $createdAt, createdBy: $createdBy, custom: $custom, deletedAt: $deletedAt, disabled: $disabled, filterTags: $filterTags, frozen: $frozen, hidden: $hidden, hideMessagesBefore: $hideMessagesBefore, id: $id, lastMessageAt: $lastMessageAt, memberCount: $memberCount, members: $members, messageCount: $messageCount, muteExpiresAt: $muteExpiresAt, muted: $muted, ownCapabilities: $ownCapabilities, team: $team, truncatedAt: $truncatedAt, truncatedBy: $truncatedBy, type: $type, updatedAt: $updatedAt)';
+    return 'ChannelResponse(activeMemberCount: $activeMemberCount, autoTranslationEnabled: $autoTranslationEnabled, autoTranslationLanguage: $autoTranslationLanguage, blocked: $blocked, cid: $cid, config: $config, cooldown: $cooldown, createdAt: $createdAt, createdBy: $createdBy, custom: $custom, deletedAt: $deletedAt, disabled: $disabled, filterTags: $filterTags, fork: $fork, frozen: $frozen, hidden: $hidden, hideMessagesBefore: $hideMessagesBefore, id: $id, lastMessageAt: $lastMessageAt, memberCount: $memberCount, members: $members, messageCount: $messageCount, muteExpiresAt: $muteExpiresAt, muted: $muted, ownCapabilities: $ownCapabilities, team: $team, truncatedAt: $truncatedAt, truncatedBy: $truncatedBy, type: $type, updatedAt: $updatedAt)';
   }
 }
 
@@ -145,6 +151,7 @@ abstract mixin class $ChannelResponseCopyWith<$Res> {
   ) = _$ChannelResponseCopyWithImpl;
   @useResult
   $Res call({
+    int? activeMemberCount,
     bool? autoTranslationEnabled,
     String? autoTranslationLanguage,
     bool? blocked,
@@ -157,6 +164,7 @@ abstract mixin class $ChannelResponseCopyWith<$Res> {
     DateTime? deletedAt,
     bool disabled,
     List<String>? filterTags,
+    ChannelForkSummary? fork,
     bool frozen,
     bool? hidden,
     DateTime? hideMessagesBefore,
@@ -188,6 +196,7 @@ class _$ChannelResponseCopyWithImpl<$Res> implements $ChannelResponseCopyWith<$R
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? activeMemberCount = freezed,
     Object? autoTranslationEnabled = freezed,
     Object? autoTranslationLanguage = freezed,
     Object? blocked = freezed,
@@ -200,6 +209,7 @@ class _$ChannelResponseCopyWithImpl<$Res> implements $ChannelResponseCopyWith<$R
     Object? deletedAt = freezed,
     Object? disabled = null,
     Object? filterTags = freezed,
+    Object? fork = freezed,
     Object? frozen = null,
     Object? hidden = freezed,
     Object? hideMessagesBefore = freezed,
@@ -219,6 +229,10 @@ class _$ChannelResponseCopyWithImpl<$Res> implements $ChannelResponseCopyWith<$R
   }) {
     return _then(
       ChannelResponse(
+        activeMemberCount: freezed == activeMemberCount
+            ? _self.activeMemberCount
+            : activeMemberCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
         autoTranslationEnabled: freezed == autoTranslationEnabled
             ? _self.autoTranslationEnabled
             : autoTranslationEnabled // ignore: cast_nullable_to_non_nullable
@@ -267,6 +281,10 @@ class _$ChannelResponseCopyWithImpl<$Res> implements $ChannelResponseCopyWith<$R
             ? _self.filterTags
             : filterTags // ignore: cast_nullable_to_non_nullable
                   as List<String>?,
+        fork: freezed == fork
+            ? _self.fork
+            : fork // ignore: cast_nullable_to_non_nullable
+                  as ChannelForkSummary?,
         frozen: null == frozen
             ? _self.frozen
             : frozen // ignore: cast_nullable_to_non_nullable

@@ -13,16 +13,12 @@ import '../models.dart';
 part 'bulk_action_appeals_request.g.dart';
 part 'bulk_action_appeals_request.freezed.dart';
 
-extension type const BulkActionAppealsRequestActionType._(String _) implements String {
-  static const markReviewed = BulkActionAppealsRequestActionType._('mark_reviewed');
-  static const rejectAppeal = BulkActionAppealsRequestActionType._('reject_appeal');
-  static const restore = BulkActionAppealsRequestActionType._('restore');
-  static const unban = BulkActionAppealsRequestActionType._('unban');
-  static const unblock = BulkActionAppealsRequestActionType._('unblock');
-
-  factory BulkActionAppealsRequestActionType.fromJson(String json) => BulkActionAppealsRequestActionType._(json);
-
-  String toJson() => this;
+extension type const BulkActionAppealsRequestActionType(String _) implements String {
+  static const markReviewed = BulkActionAppealsRequestActionType('mark_reviewed');
+  static const rejectAppeal = BulkActionAppealsRequestActionType('reject_appeal');
+  static const restore = BulkActionAppealsRequestActionType('restore');
+  static const unban = BulkActionAppealsRequestActionType('unban');
+  static const unblock = BulkActionAppealsRequestActionType('unblock');
 }
 
 @freezed
