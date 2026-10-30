@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- Added `onSendLongPress` to `StreamMessageComposer` and `StreamChatMessageInput`, called when the send button is long-pressed with a new message, for example to schedule it.
 - Added a next action to the poll creator's option fields, which moves to the next option or adds a new one from the last.
 - Added `StreamMessagePreviewTextTheme` and `StreamChatThemeData.messagePreviewTextTheme`, to style the "Draft:" and sender prefixes, the deleted message and the icons in message previews.
 - Added `messagePreviewTextTheme` to `StreamQuotedMessageThemeData`, `StreamChannelListItemThemeData` and `StreamThreadListTileThemeData`, to style parts of the message preview on each.

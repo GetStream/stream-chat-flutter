@@ -19,8 +19,8 @@ import 'routes/app_routes.dart';
 import 'routes/routes.dart';
 import 'widgets/custom_message_actions.dart';
 import 'widgets/location/location_attachment.dart';
-import 'widgets/location/location_aware_message_composer.dart';
 import 'widgets/location/location_detail_dialog.dart';
+import 'widgets/scheduled_messages/schedule_aware_message_composer.dart';
 
 /// Root widget of the sample app: boots prefs + notifications, runs
 /// the router, and owns the [StreamChat] ancestor.
@@ -222,7 +222,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                                 componentBuilders: StreamComponentBuilders(
                                   extensions: streamChatComponentBuilders(
                                     messageItem: customMessageItemBuilder,
-                                    messageComposer: locationAwareMessageComposer,
+                                    messageComposer: scheduleAwareMessageComposer,
                                   ),
                                 ),
                                 themeData: config.toStreamChatThemeData(),
