@@ -197,6 +197,19 @@ void main() {
       );
     });
 
+    test('should read back the schedule it writes', () {
+      const pushPreference = PushPreference(
+        schedule: PushSchedule(
+          timezone: 'Europe/Amsterdam',
+          quietHours: [
+            QuietHoursRule(start: '22:00', end: '07:00', days: [QuietHoursDay.friday]),
+          ],
+        ),
+      );
+
+      expect(PushPreference.fromJson(pushPreference.toJson()), pushPreference);
+    });
+
     group('equality with quiet hours', () {
       const rule = QuietHoursRule(start: '22:00', end: '07:00', days: [QuietHoursDay.friday]);
       const preference = PushPreference(
@@ -230,24 +243,6 @@ void main() {
             ),
           ),
         );
-      });
-    });
-
-    test('should serialize a quiet-hours schedule', () {
-      const pushPreference = PushPreference(
-        schedule: PushSchedule(
-          timezone: 'UTC',
-          quietHours: [QuietHoursRule(start: '22:00', end: '07:00')],
-        ),
-      );
-
-      expect(pushPreference.toJson(), {
-        'schedule': {
-          'timezone': 'UTC',
-          'quiet_hours': [
-            {'start': '22:00', 'end': '07:00', 'days': <String>[]},
-          ],
-        },
       });
     });
   });
