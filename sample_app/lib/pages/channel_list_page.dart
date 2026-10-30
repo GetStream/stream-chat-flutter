@@ -16,6 +16,7 @@ import '../utils/shared_location_service.dart';
 import '../widgets/channel_list.dart';
 import '../widgets/split_view.dart';
 import 'draft_list_page.dart';
+import 'push_preferences_screen.dart';
 import 'reminders_page.dart';
 import 'thread_list_page.dart';
 
@@ -233,20 +234,36 @@ class LeftDrawer extends StatelessWidget {
             Divider(height: 1, indent: spacing.md, endIndent: spacing.md, color: colorScheme.borderSubtle),
             SizedBox(height: spacing.xs),
 
-            // ── Configuration ──
+            // ── Settings ──
             Padding(
               padding: EdgeInsets.symmetric(horizontal: spacing.xs),
-              child: StreamListTile(
-                contentPadding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xxxs),
-                leading: const Icon(Icons.tune_outlined, size: 24),
-                title: const Text('Configuration'),
-                trailing: Icon(Icons.chevron_right_outlined, size: 20, color: colorScheme.textTertiary),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  Navigator.of(context).push(
-                    MaterialPageRoute<void>(builder: (_) => const SampleAppConfigScreen()),
-                  );
-                },
+              child: Column(
+                children: [
+                  StreamListTile(
+                    contentPadding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xxxs),
+                    leading: Icon(icons.bell, size: 24),
+                    title: const Text('Notifications'),
+                    trailing: Icon(icons.chevronRight, size: 20, color: colorScheme.textTertiary),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(builder: (_) => const PushPreferencesScreen()),
+                      );
+                    },
+                  ),
+                  StreamListTile(
+                    contentPadding: EdgeInsets.symmetric(horizontal: spacing.sm, vertical: spacing.xxxs),
+                    leading: Icon(icons.settings, size: 24),
+                    title: const Text('Configuration'),
+                    trailing: Icon(icons.chevronRight, size: 20, color: colorScheme.textTertiary),
+                    onTap: () {
+                      Navigator.of(context).pop();
+                      Navigator.of(context).push(
+                        MaterialPageRoute<void>(builder: (_) => const SampleAppConfigScreen()),
+                      );
+                    },
+                  ),
+                ],
               ),
             ),
 
@@ -276,7 +293,7 @@ class LeftDrawer extends StatelessWidget {
                   ),
                   IconButton(
                     icon: Icon(
-                      isDark ? Icons.light_mode_outlined : Icons.dark_mode_outlined,
+                      isDark ? icons.lightMode : icons.darkMode,
                       color: colorScheme.textSecondary,
                     ),
                     onPressed: () {
