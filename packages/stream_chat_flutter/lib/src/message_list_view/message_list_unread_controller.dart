@@ -46,13 +46,14 @@
 //    blocked until the viewport genuinely moves, so the action is not undone
 //    on the next layout tick.
 //  - **Never opened by this user.** The channel reports unread messages but
-//    has no read boundary at all, so the anchor cannot resolve until top
-//    pagination reaches the start of the channel. The pill still shows, and
-//    tapping it jumps as far back as is currently loaded (pulling in the next
-//    page) rather than doing nothing; it stays up, since the real boundary
-//    has not been reached. Auto mark-read is exempt from waiting for a
-//    boundary here — see [_maybeMarkMessagesAsRead] condition 5 — as are
-//    channels tracking unread counts locally.
+//    has no `lastReadMessageId`, so the anchor resolves from the last read
+//    date once the loaded messages reach back to it or include every unread
+//    message. Until then the pill still shows, and tapping it jumps as far
+//    back as is currently loaded (pulling in the next page) rather than doing
+//    nothing; it stays up, since the real boundary has not been reached. Auto
+//    mark-read is exempt from waiting for a boundary that hasn't resolved —
+//    see [_maybeMarkMessagesAsRead] condition 5 — as are channels tracking
+//    unread counts locally.
 //  - **Threads.** None of the three surfaces apply; only the thread's own
 //    mark-read does.
 //
@@ -528,10 +529,10 @@ class MessageListUnreadController {
     final anchorId = _unreadDivider.value.anchorId ?? _unreadBaseline?.lastReadMessageId;
 
     // A channel the user has never opened reports unread messages but has
-    // no read boundary at all: the anchor can't resolve until top
-    // pagination ends, and there's no `lastReadMessageId` to fall back on
-    // either. Everything loaded is unread, so head for the oldest message
-    // currently loaded — as far back as the boundary can be, and it pulls
+    // no `lastReadMessageId`: the anchor can't resolve until the loaded
+    // messages reach back to the last read date or include every unread
+    // message, and there's no id to fall back on either. Everything loaded
+    // is unread, so head for the oldest message currently loaded — as far back as the boundary can be, and it pulls
     // the next page in on arrival — rather than leaving the tap inert.
     //
     // `_hasSeenFirstUnread` is deliberately not latched here: the real
@@ -744,11 +745,11 @@ class MessageListUnreadController {
   //  5. The unread divider's anchor has actually been seen or scrolled past
   //     (`hasSeenFirstUnreadMessage`) — trivially satisfied when there is
   //     no boundary to see in the first place: the channel opened fully
-  //     read, the user has never opened it at all (no `lastReadMessageId`,
-  //     so the anchor could only resolve once top pagination reached the
-  //     very start of the channel — effectively never for real history),
-  //     or the channel uses local unread counts and so has no server read
-  //     state to anchor against.
+  //     read, the user has never opened it at all (no `lastReadMessageId`)
+  //     and the divider hasn't resolved — a long unread history could keep
+  //     it unresolved for good, which would leave the channel permanently
+  //     unread — or the channel uses local unread counts and so has no
+  //     server read state to anchor against.
   Future<void> _maybeMarkMessagesAsRead({required bool isAtBottom}) async {
     final channel = _channel();
     if (channel == null) return;
@@ -769,10 +770,10 @@ class MessageListUnreadController {
     if (unreadCount <= 0) return;
 
     // True both when the channel opened fully read (no baseline) and when
-    // the user has never opened it (a baseline with no `lastReadMessageId`).
-    // Neither has a boundary the user could reach, so requiring one would
-    // leave the channel permanently unread — see condition 5 above.
-    final hasNoUnreadBoundary = _unreadBaselineCaptured && _unreadBaseline?.lastReadMessageId == null;
+    // the user has never opened it (a baseline with no `lastReadMessageId`)
+    // while the divider hasn't resolved — see condition 5 above.
+    final hasNoUnreadBoundary =
+        _unreadBaselineCaptured && _unreadBaseline?.lastReadMessageId == null && _unreadDivider.value.anchorId == null;
     // Equivalent to `channel.usesLocalUnreadCount`, spelled out via
     // `channel.client` rather than `Channel`'s private client field so it
     // stays evaluable against a test double that only implements the public

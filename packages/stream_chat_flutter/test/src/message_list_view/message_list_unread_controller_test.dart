@@ -471,6 +471,19 @@ void main() {
       verify(() => channel.markRead()).called(1);
     });
 
+    test('does not mark read on a never-opened channel while its resolved boundary has not been seen', () {
+      when(() => channelState.unreadCount).thenReturn(3);
+      when(() => channelState.currentUserRead).thenReturn(read(unreadMessages: 3));
+      firstUnreadMessage = message(id: 'm-5');
+      messages = [message(id: 'newest'), message(id: 'm-5')];
+      final controller = buildController()..attach();
+
+      // At the bottom, but the anchor (item index 3) is out of view.
+      tick(controller, [2], isAtBottom: true);
+
+      verifyNever(() => channel.markRead());
+    });
+
     test('does nothing while markReadWhenAtTheBottom is off', () {
       markReadWhenAtTheBottom = false;
       when(() => channelState.unreadCount).thenReturn(3);

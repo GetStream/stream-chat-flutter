@@ -764,8 +764,9 @@ class StreamChannelState extends State<StreamChannel> {
   /// - The last read message is the most recent message in the channel
   /// - The last read message can't be found in the current message list
   ///
-  /// If there's no last read message ID (all messages are unread), it returns
-  /// the oldest regular message when pagination is complete.
+  /// Without a last read message ID, it returns the first message from another
+  /// user sent after the last read date, or null until the loaded messages
+  /// reach back to that date or include every unread message.
   Message? getFirstUnreadMessage([Read? currentUserRead]) {
     final messages = channel.state?.messages;
     if (messages == null || messages.isEmpty) return null;
@@ -791,10 +792,26 @@ class StreamChannelState extends State<StreamChannel> {
       return null;
     }
 
+    final mutedUserIds = {...?channel.client.state.currentUser?.mutes.map((it) => it.target.id)};
+    bool countsAsUnread(Message message) {
+      if (message.isDeleted || message.isEphemeral) return false;
+      if (message.silent || message.shadowed) return false;
+
+      final userId = message.user?.id;
+      return userId != userRead.user.id && !mutedUserIds.contains(userId);
+    }
+
     final lastReadMessageId = userRead.lastReadMessageId;
-    // No last read message ID, consider all messages unread.
     if (lastReadMessageId == null) {
-      return getOldestRegularMessage();
+      final lastRead = userRead.lastRead;
+      final unread = messages.where((it) => it.createdAt.isAfter(lastRead) && countsAsUnread(it));
+
+      final oldestLoadedAt = messages.first.createdAt;
+      final reachesLastRead = _topPaginationEnded || !oldestLoadedAt.isAfter(lastRead);
+      final loadsAllUnread = unread.length >= userRead.unreadMessages;
+      if (!reachesLastRead && !loadsAllUnread) return null;
+
+      return unread.firstOrNull;
     }
 
     // If the last read message is the last message in the channel, there are no
@@ -816,16 +833,7 @@ class StreamChannelState extends State<StreamChannel> {
       return getOldestRegularMessage();
     }
 
-    // Return the first valid unread message after the last read message
-    // Skip messages from the current user and deleted messages
-    return messages.sublist(lastReadIndex + 1).firstWhereOrNull((message) {
-      // Skip deleted messages
-      if (message.isDeleted) return false;
-      // Skip messages from the current user
-      if (message.user?.id == userRead.user.id) return false;
-
-      return true;
-    });
+    return messages.sublist(lastReadIndex + 1).firstWhereOrNull(countsAsUnread);
   }
 
   /// Reloads the channel with latest messages, replacing the loaded window.
