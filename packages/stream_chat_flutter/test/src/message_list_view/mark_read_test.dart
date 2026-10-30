@@ -191,10 +191,10 @@ void main() {
       'fires on a channel the user has never opened, whose boundary can '
       'never resolve',
       (tester) async {
-        // No `lastReadMessageId` at all, and top pagination hasn't reached
-        // the start of the channel, so the unread anchor can never resolve.
-        // Requiring the boundary to have been seen would leave a channel
-        // like this permanently unread.
+        // No `lastReadMessageId` at all, and the loaded messages neither
+        // reach back to the last read date nor include every unread message,
+        // so the unread anchor can't resolve. Requiring the boundary to have
+        // been seen would leave a channel like this permanently unread.
         final other = User(id: 'otherid');
         final messages = generateConversation(20, users: [other]).reversed.toList();
 
@@ -202,11 +202,11 @@ void main() {
           tester,
           messages: messages,
           isUpToDate: true,
-          unreadCount: 5,
+          unreadCount: 50,
           currentUserRead: Read(
             user: ownUser,
             lastRead: DateTime.now().subtract(const Duration(days: 1)),
-            unreadMessages: 5,
+            unreadMessages: 50,
           ),
         );
 

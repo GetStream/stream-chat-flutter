@@ -793,7 +793,8 @@ class StreamChannelState extends State<StreamChannel> {
     }
 
     bool countsAsUnread(Message message) {
-      if (message.isDeleted) return false;
+      if (message.isDeleted || message.isEphemeral) return false;
+      if (message.silent || message.shadowed) return false;
       return message.user?.id != userRead.user.id;
     }
 
