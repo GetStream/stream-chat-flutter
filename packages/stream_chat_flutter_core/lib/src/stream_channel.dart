@@ -792,10 +792,13 @@ class StreamChannelState extends State<StreamChannel> {
       return null;
     }
 
+    final mutedUserIds = {...?channel.client.state.currentUser?.mutes.map((it) => it.target.id)};
     bool countsAsUnread(Message message) {
       if (message.isDeleted || message.isEphemeral) return false;
       if (message.silent || message.shadowed) return false;
-      return message.user?.id != userRead.user.id;
+
+      final userId = message.user?.id;
+      return userId != userRead.user.id && !mutedUserIds.contains(userId);
     }
 
     final lastReadMessageId = userRead.lastReadMessageId;

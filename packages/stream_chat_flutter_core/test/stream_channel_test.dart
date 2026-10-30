@@ -1045,6 +1045,61 @@ void main() {
     );
 
     testWidgets(
+      'Skips the messages of muted users without a last read message',
+      (tester) async {
+        final lastRead = DateTime(2026, 10, 28, 12);
+        final mutedUser = User(id: 'mutedUserId');
+        final firstUnread = Message(
+          id: 'message2',
+          createdAt: lastRead.add(const Duration(minutes: 2)),
+          user: User(id: 'otherUserId'),
+        );
+
+        final mockRead = Read(
+          user: User(id: 'testUserId'),
+          lastRead: lastRead,
+          unreadMessages: 2,
+        );
+
+        final messages = [
+          Message(
+            id: 'message1',
+            createdAt: lastRead.add(const Duration(minutes: 1)),
+            user: mutedUser,
+          ),
+          firstUnread,
+          Message(
+            id: 'message3',
+            createdAt: lastRead.add(const Duration(minutes: 3)),
+            user: User(id: 'otherUserId'),
+          ),
+        ];
+
+        final clientState = mockChannel.client.state as MockClientState
+          ..currentUser = OwnUser(
+            id: 'testUserId',
+            mutes: [
+              Mute(
+                user: User(id: 'testUserId'),
+                target: mutedUser,
+                createdAt: lastRead,
+                updatedAt: lastRead,
+              ),
+            ],
+          );
+        addTearDown(() => clientState.currentUser = null);
+
+        when(() => mockChannel.state.unreadCount).thenReturn(2);
+        when(() => mockChannel.state.messages).thenReturn(messages);
+        when(() => mockChannel.state.currentUserRead).thenReturn(mockRead);
+
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel, openAtFirstUnread: false);
+
+        expect(streamChannel.getFirstUnreadMessage(), equals(firstUnread));
+      },
+    );
+
+    testWidgets(
       'Skips the messages that never count as unread without a last read message',
       (tester) async {
         final lastRead = DateTime(2026, 10, 28, 12);
