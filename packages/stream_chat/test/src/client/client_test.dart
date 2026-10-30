@@ -4897,7 +4897,18 @@ void main() {
         verify(() => api.scheduledMessages.queryScheduledMessages(limit: 100)).called(2);
       });
 
-      test('does not load them on recovery when there are none', () async {
+      test('loads them again on recovery even once none are left', () async {
+        clearInteractions(api.scheduledMessages);
+        stubQuery([]);
+        await client.queryScheduledMessages();
+
+        client.handleEvent(Event(type: EventType.connectionRecovered));
+        await pumpEventQueue();
+
+        verify(() => api.scheduledMessages.queryScheduledMessages(limit: 100)).called(2);
+      });
+
+      test('does not load them on recovery when they were never loaded', () async {
         clearInteractions(api.scheduledMessages);
         client.handleEvent(Event(type: EventType.connectionRecovered));
         await pumpEventQueue();

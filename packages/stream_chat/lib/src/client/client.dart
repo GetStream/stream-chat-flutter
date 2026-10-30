@@ -2947,7 +2947,7 @@ class ClientState {
     // is loaded again.
     _eventsSubscription?.add(
       _client.on(EventType.connectionRecovered).listen((_) {
-        if (scheduledMessages.isEmpty) return;
+        if (!_hasLoadedScheduledMessages) return;
 
         _client.queryScheduledMessages().ignore();
       }),
@@ -3037,8 +3037,8 @@ class ClientState {
   ///
   /// Holds the ones this client has loaded or seen created since it connected:
   /// load them all with [StreamChatClient.queryScheduledMessages], or a
-  /// channel's with `includeScheduledMessages` on its query. Once it holds
-  /// any, it is loaded again when the connection recovers.
+  /// channel's with `includeScheduledMessages` on its query. Once any are
+  /// loaded, it is loaded again whenever the connection recovers.
   List<ScheduledMessage> get scheduledMessages => _scheduledMessagesController.value;
 
   /// The [scheduledMessages] as a stream.
@@ -3067,6 +3067,8 @@ class ClientState {
     bool Function(ScheduledMessage) test,
     Iterable<ScheduledMessage> scheduledMessages,
   ) {
+    _hasLoadedScheduledMessages = true;
+
     // A match that is also added stays, so a newer copy of it is not replaced
     // by an older one.
     final incomingIds = {for (final it in scheduledMessages) it.id};
@@ -3163,6 +3165,10 @@ class ClientState {
   final _totalUnreadCountController = BehaviorSubject<int>.seeded(0);
   final _activeLiveLocationsController = ImmutableListBehaviorSubject<Location>.seeded(const []);
   final _scheduledMessagesController = ImmutableListBehaviorSubject<ScheduledMessage>.seeded(const []);
+
+  // Whether scheduled messages were loaded this session, even if none are
+  // left, so the list is kept current after a reconnect.
+  var _hasLoadedScheduledMessages = false;
 
   /// Call this method to dispose this object
   void dispose() {
