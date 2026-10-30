@@ -21,6 +21,18 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
 
   $UsersTable get _pinnedByUsers => alias(users, 'pinnedByUsers');
 
+  // Matches the messages created at or after their channel's last truncation,
+  // and the messages not sent yet.
+  Expression<bool> get _survivesTruncation {
+    final truncatedLater = select(_db.channels)
+      ..where(
+        (channel) =>
+            channel.cid.equalsExp(pinnedMessages.channelCid) &
+            channel.truncatedAt.isBiggerThan(pinnedMessages.remoteCreatedAt),
+      );
+    return notExistsQuery(truncatedLater);
+  }
+
   /// Removes all the messages by matching [PinnedMessages.id] in [messageIds]
   ///
   /// This will automatically delete the following linked records
@@ -313,6 +325,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
           ])
           ..where(pinnedMessages.channelCid.equals(cid))
           ..where(pinnedMessages.parentId.isNull() | pinnedMessages.showInChannel.equals(true))
+          ..where(_survivesTruncation)
           ..orderBy(orderBy);
 
     // Cursor predicates compare the full `(createdAt, id)` tuple — the same
