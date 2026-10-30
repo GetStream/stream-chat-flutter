@@ -20,6 +20,9 @@ class ChannelApi {
   String _getChannelUrl(String channelId, String channelType) => '/channels/$channelType/$channelId';
 
   /// Query the API, get messages, members or other channel fields
+  ///
+  /// If [includeScheduledMessages] is true, the result carries the current
+  /// user's [ChannelState.scheduledMessages].
   Future<ChannelState> queryChannel(
     String channelType, {
     bool state = true,
@@ -30,6 +33,7 @@ class ChannelApi {
     PaginationParams? messagesPagination,
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
+    bool includeScheduledMessages = false,
   }) async {
     var channelPath = '/channels/$channelType';
     if (channelId != null) channelPath = '$channelPath/$channelId';
@@ -43,6 +47,7 @@ class ChannelApi {
         if (messagesPagination != null) 'messages': messagesPagination,
         if (membersPagination != null) 'members': membersPagination,
         if (watchersPagination != null) 'watchers': watchersPagination,
+        if (includeScheduledMessages) 'include_scheduled_messages': true,
       },
     );
     return ChannelState.fromJson(response.data);
@@ -54,6 +59,9 @@ class ChannelApi {
   /// (optionally interpolated with [filterValues] and [sortValues]) can be
   /// provided. When a predefined filter is used, the server resolves it and
   /// returns the materialized filter/sort on [QueryChannelsResponse].
+  ///
+  /// If [includeScheduledMessages] is true, each returned channel carries the
+  /// current user's [ChannelState.scheduledMessages].
   Future<QueryChannelsResponse> queryChannels({
     Filter? filter,
     SortOrder<ChannelState>? sort,
@@ -65,6 +73,7 @@ class ChannelApi {
     bool state = true,
     bool watch = true,
     bool presence = false,
+    bool includeScheduledMessages = false,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
     final response = await _client.get(
@@ -84,6 +93,7 @@ class ChannelApi {
           if (sortValues != null) 'sort_values': sortValues,
           if (memberLimit != null) 'member_limit': memberLimit,
           if (messageLimit != null) 'message_limit': messageLimit,
+          if (includeScheduledMessages) 'include_scheduled_messages': true,
 
           // pagination
           ...paginationParams.toJson(),

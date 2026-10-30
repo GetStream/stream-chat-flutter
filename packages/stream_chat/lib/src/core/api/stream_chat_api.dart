@@ -15,6 +15,7 @@ import 'moderation_api.dart';
 import 'polls_api.dart';
 import 'reminders_api.dart';
 import 'roles_api.dart';
+import 'scheduled_messages_api.dart';
 import 'threads_api.dart';
 import 'user_api.dart';
 import 'user_groups_api.dart';
@@ -87,6 +88,10 @@ class StreamChatApi {
   /// Api dedicated to message reminders operations
   RemindersApi get reminders => _reminders ??= RemindersApi(_client);
   RemindersApi? _reminders;
+
+  /// Api dedicated to scheduled messages operations
+  ScheduledMessagesApi get scheduledMessages => _scheduledMessages ??= ScheduledMessagesApi(_client);
+  ScheduledMessagesApi? _scheduledMessages;
 
   /// Api dedicated to user groups operations
   UserGroupsApi get userGroups => _userGroups ??= UserGroupsApi(_client);

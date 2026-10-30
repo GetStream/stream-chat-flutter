@@ -20,6 +20,7 @@ import '../models/push_preference.dart';
 import '../models/reaction.dart';
 import '../models/read.dart';
 import '../models/role.dart';
+import '../models/scheduled_message.dart';
 import '../models/thread.dart';
 import '../models/unread_counts.dart';
 import '../models/user.dart';
@@ -261,6 +262,12 @@ class UpdateMessageResponse extends MessageResponse {
 /// Model response for [Channel.sendMessage] api call
 @JsonSerializable(createToJson: false)
 class SendMessageResponse extends MessageResponse {
+  /// The scheduled message, if the message was scheduled rather than sent.
+  ///
+  /// When set, [message] is a preview of what will be sent and is not part of
+  /// the channel yet.
+  ScheduledMessage? scheduledMessage;
+
   /// Create a new instance from a json
   static SendMessageResponse fromJson(Map<String, dynamic> json) => _$SendMessageResponseFromJson(json);
 }
@@ -744,6 +751,31 @@ class QueryRemindersResponse extends _BaseResponse {
 
   /// Create a new instance from a json
   static QueryRemindersResponse fromJson(Map<String, dynamic> json) => _$QueryRemindersResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.queryScheduledMessages] api call
+@JsonSerializable(createToJson: false)
+class QueryScheduledMessagesResponse extends _BaseResponse {
+  /// The scheduled messages in this page
+  @JsonKey(defaultValue: [])
+  late List<ScheduledMessage> scheduledMessages;
+
+  /// The token for the next page, or null on the last page
+  late String? next;
+
+  /// Create a new instance from a json
+  static QueryScheduledMessagesResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryScheduledMessagesResponseFromJson(json);
+}
+
+/// Model response for the api calls that change a [ScheduledMessage]
+@JsonSerializable(createToJson: false)
+class ScheduledMessageResponse extends _BaseResponse {
+  /// The scheduled message after the change
+  late ScheduledMessage scheduledMessage;
+
+  /// Create a new instance from a json
+  static ScheduledMessageResponse fromJson(Map<String, dynamic> json) => _$ScheduledMessageResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.getUnreadCount] api call

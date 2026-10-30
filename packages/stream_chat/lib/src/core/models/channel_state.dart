@@ -7,6 +7,7 @@ import 'member.dart';
 import 'message.dart';
 import 'push_preference.dart';
 import 'read.dart';
+import 'scheduled_message.dart';
 import 'user.dart';
 
 part 'channel_state.g.dart';
@@ -34,6 +35,7 @@ class ChannelState implements ComparableFieldProvider {
     this.pendingMessages,
     this.pushPreferences,
     this.activeLiveLocations,
+    this.scheduledMessages,
   });
 
   /// The channel to which this state belongs
@@ -91,6 +93,13 @@ class ChannelState implements ComparableFieldProvider {
   /// The list of active live locations in the channel.
   final List<Location>? activeLiveLocations;
 
+  /// The current user's scheduled messages in the channel that are not sent
+  /// yet.
+  ///
+  /// Null when the channel was loaded without asking for them, or when there
+  /// were too many to include.
+  final List<ScheduledMessage>? scheduledMessages;
+
   /// Create a new instance from a json
   static ChannelState fromJson(Map<String, dynamic> json) => _$ChannelStateFromJson(json);
 
@@ -111,6 +120,7 @@ class ChannelState implements ComparableFieldProvider {
     List<Message>? pendingMessages,
     ChannelPushPreference? pushPreferences,
     List<Location>? activeLiveLocations,
+    List<ScheduledMessage>? scheduledMessages,
   }) => ChannelState(
     channel: channel ?? this.channel,
     messages: messages ?? this.messages,
@@ -124,6 +134,7 @@ class ChannelState implements ComparableFieldProvider {
     pendingMessages: pendingMessages ?? this.pendingMessages,
     pushPreferences: pushPreferences ?? this.pushPreferences,
     activeLiveLocations: activeLiveLocations ?? this.activeLiveLocations,
+    scheduledMessages: scheduledMessages ?? this.scheduledMessages,
   );
 
   @override

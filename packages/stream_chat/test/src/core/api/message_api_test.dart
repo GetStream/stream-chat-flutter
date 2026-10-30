@@ -95,6 +95,59 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
+  test('sendMessage with scheduledAt sends the time in UTC', () async {
+    const channelId = 'test-channel-id';
+    const channelType = 'test-channel-type';
+    final user = User(id: 'test-user-id');
+    final message = Message(id: 'test-message-id', text: 'test-message-text');
+    final scheduledAt = DateTime.utc(2026, 11, 2, 9);
+    final scheduledMessage = ScheduledMessage(
+      id: message.id,
+      cid: '$channelType:$channelId',
+      user: user,
+      message: message.copyWith(user: user),
+      scheduledAt: scheduledAt,
+      status: ScheduledMessageStatus.scheduled,
+      createdAt: DateTime.utc(2026, 10, 29),
+      updatedAt: DateTime.utc(2026, 10, 29),
+    );
+
+    const path = '/channels/$channelType/$channelId/message';
+
+    when(
+      () => client.post(
+        path,
+        data: {
+          'message': message,
+          'skip_push': false,
+          'skip_enrich_url': false,
+          'scheduled_at': '2026-11-02T09:00:00.000Z',
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'message': message.toJson(),
+          'scheduled_message': scheduledMessage.toJson(),
+        },
+      ),
+    );
+
+    final res = await messageApi.sendMessage(
+      channelId,
+      channelType,
+      message,
+      scheduledAt: scheduledAt.toLocal(),
+    );
+
+    expect(res.scheduledMessage?.id, message.id);
+    expect(res.scheduledMessage?.scheduledAt, scheduledAt);
+
+    verify(() => client.post(path, data: any(named: 'data'))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
   test('getMessagesById', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';

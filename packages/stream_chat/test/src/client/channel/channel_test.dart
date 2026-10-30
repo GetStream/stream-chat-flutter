@@ -202,6 +202,37 @@ void main() {
     tearDown(() {
       channel.dispose();
     });
+
+    test('`.query` skips the offline cache when scheduled messages are asked for', () async {
+      when(
+        () => client.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: any(named: 'channelData'),
+          includeScheduledMessages: true,
+        ),
+      ).thenAnswer((_) async => _generateChannelState(channelId, channelType));
+      when(() => client.channelDeliveryReporter.submitForDelivery(any())).thenAnswer((_) async {});
+      await pumpEventQueue();
+      clearInteractions(client.chatPersistenceClient);
+
+      await channel.query(preferOffline: true, includeScheduledMessages: true);
+
+      verifyNever(
+        () => client.chatPersistenceClient.getChannelStateByCid(
+          channelCid,
+          messagePagination: any(named: 'messagePagination'),
+        ),
+      );
+      verify(
+        () => client.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: any(named: 'channelData'),
+          includeScheduledMessages: true,
+        ),
+      ).called(1);
+    });
   });
 
   group('Initialized Channel', () {
@@ -268,6 +299,96 @@ void main() {
 
     test('should throw if trying to set `name`', () {
       expect(() => channel.name = 'New name', throwsA(isA<StateError>()));
+    });
+
+    group('`.scheduleMessage`', () {
+      final scheduledAt = DateTime.now().add(const Duration(days: 1));
+
+      ScheduledMessage scheduledMessageFor(Message message, {String cid = channelCid}) => ScheduledMessage(
+        id: message.id,
+        cid: cid,
+        user: client.state.currentUser!,
+        message: message,
+        scheduledAt: scheduledAt,
+        status: ScheduledMessageStatus.scheduled,
+        createdAt: DateTime.utc(2026, 10, 29),
+        updatedAt: DateTime.utc(2026, 10, 29),
+      );
+
+      test('keeps a scheduled message out of the channel', () async {
+        final message = Message(id: 'scheduled-id', text: 'Good morning');
+        when(
+          () => client.sendMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer(
+          (_) async => SendMessageResponse()
+            ..message = message
+            ..scheduledMessage = scheduledMessageFor(message),
+        );
+
+        final res = await channel.scheduleMessage(message, scheduledAt);
+
+        expect(res.scheduledMessage?.id, message.id);
+        expect(channel.state!.messages, isEmpty);
+        expect(channel.state!.scheduledMessages.single.id, message.id);
+      });
+
+      test('adds the message to the channel when it was sent right away', () async {
+        final message = Message(id: 'sent-id', text: 'Good morning');
+        when(
+          () => client.sendMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer((_) async => SendMessageResponse()..message = message);
+
+        final res = await channel.scheduleMessage(message, scheduledAt);
+
+        expect(res.scheduledMessage, isNull);
+        expect(
+          channel.state!.messages.single,
+          isSameMessageAs(message.copyWith(state: MessageState.sent), matchMessageState: true),
+        );
+      });
+
+      test('refuses a time that is not in the future', () async {
+        final message = Message(id: 'past-id', text: 'Good morning');
+        final past = DateTime.now().subtract(const Duration(minutes: 5));
+
+        await expectLater(channel.scheduleMessage(message, past), throwsArgumentError);
+
+        verifyNever(
+          () => client.sendMessage(any(), any(), any(), scheduledAt: any(named: 'scheduledAt')),
+        );
+      });
+
+      test('refuses attachments that are not uploaded', () async {
+        final message = Message(
+          text: 'Good morning',
+          attachments: [
+            Attachment(
+              type: AttachmentType.image,
+              file: AttachmentFile(size: 100, path: 'image.png'),
+            ),
+          ],
+        );
+
+        await expectLater(channel.scheduleMessage(message, scheduledAt), throwsArgumentError);
+
+        verifyNever(
+          () => client.sendMessage(any(), any(), any(), scheduledAt: any(named: 'scheduledAt')),
+        );
+      });
+
+      test('`.queryScheduledMessages` loads them into the channel state', () async {
+        final loaded = scheduledMessageFor(Message(id: 'loaded'));
+        when(() => client.queryScheduledMessages(cid: channelCid, limit: 100)).thenAnswer(
+          (_) async => QueryScheduledMessagesResponse()
+            ..scheduledMessages = [loaded]
+            ..next = null,
+        );
+
+        final result = await channel.queryScheduledMessages();
+
+        expect(result, [loaded]);
+        expect(channel.state!.scheduledMessages, [loaded]);
+      });
     });
 
     group('`.sendMessage`', () {

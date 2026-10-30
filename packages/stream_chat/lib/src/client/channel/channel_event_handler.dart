@@ -72,6 +72,14 @@ class ChannelEventHandler {
         _onDraftUpdated(event);
       case EventType.draftDeleted:
         _onDraftDeleted(event);
+      // scheduled message events
+      case EventType.scheduledMessageCreated:
+      case EventType.scheduledMessageUpdated:
+      case EventType.scheduledMessageFailed:
+        _onScheduledMessageUpdated(event);
+      case EventType.scheduledMessageSent:
+      case EventType.scheduledMessageDeleted:
+        _onScheduledMessageRemoved(event);
       // reaction events
       case EventType.reactionNew:
         _onReactionNew(event);
@@ -226,6 +234,20 @@ class ChannelEventHandler {
     if (draft == null) return;
 
     return _mutations.onDraftDeleted(draft);
+  }
+
+  void _onScheduledMessageUpdated(Event event) {
+    final scheduledMessage = event.scheduledMessage;
+    if (scheduledMessage == null) return;
+
+    return _mutations.onScheduledMessageUpdated(scheduledMessage);
+  }
+
+  void _onScheduledMessageRemoved(Event event) {
+    final scheduledMessage = event.scheduledMessage;
+    if (scheduledMessage == null) return;
+
+    return _mutations.onScheduledMessageRemoved(scheduledMessage);
   }
 
   void _onReactionNew(Event event) {

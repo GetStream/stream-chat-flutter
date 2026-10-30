@@ -4677,6 +4677,42 @@ void main() {
       verifyNoMoreInteractions(api.message);
     });
 
+    test('`.queryScheduledMessages` asks for 100 messages by default', () async {
+      when(
+        () => api.scheduledMessages.queryScheduledMessages(
+          cid: 'messaging:general',
+          limit: 100,
+        ),
+      ).thenAnswer(
+        (_) async => QueryScheduledMessagesResponse()
+          ..scheduledMessages = []
+          ..next = null,
+      );
+
+      await client.queryScheduledMessages(cid: 'messaging:general');
+
+      verify(
+        () => api.scheduledMessages.queryScheduledMessages(
+          cid: 'messaging:general',
+          limit: 100,
+        ),
+      ).called(1);
+    });
+
+    test('`.queryScheduledMessages` refuses statuses that are never listed', () {
+      expect(
+        () => client.queryScheduledMessages(statuses: [ScheduledMessageStatus.sent]),
+        throwsA(isA<AssertionError>()),
+      );
+    });
+
+    test('`.updateScheduledMessage` needs a message or a time', () {
+      expect(
+        () => client.updateScheduledMessage('scheduled-id'),
+        throwsArgumentError,
+      );
+    });
+
     test('`.queryDrafts`', () async {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';

@@ -874,6 +874,67 @@ class Channel {
     }
   }
 
+  /// Schedules [message] to be sent to this channel at [scheduledAt].
+  ///
+  /// Also stops the current user's typing.
+  ///
+  /// The message is kept out of the channel until it is sent, and joins
+  /// [ChannelClientState.scheduledMessages] instead. The [scheduledAt] is rounded up to a whole
+  /// minute, at least a minute from now. If it has passed by the time the
+  /// request arrives, the message is sent right away and
+  /// [SendMessageResponse.scheduledMessage] is null.
+  ///
+  /// A [scheduledAt] that is not in the future, or an attachment that is not
+  /// uploaded yet, throws an [ArgumentError].
+  Future<SendMessageResponse> scheduleMessage(
+    Message message,
+    DateTime scheduledAt, {
+    bool skipPush = false,
+    bool skipEnrichUrl = false,
+  }) async {
+    _checkInitialized();
+
+    if (!scheduledAt.isAfter(DateTime.now())) {
+      throw ArgumentError.value(scheduledAt, 'scheduledAt', 'Must be in the future');
+    }
+
+    if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
+      throw ArgumentError.value(message, 'message', 'Attachments must be uploaded before scheduling');
+    }
+
+    _keyStrokeHandler.cancel();
+
+    final response = await _client.sendMessage(
+      message,
+      id!,
+      type,
+      skipPush: skipPush,
+      skipEnrichUrl: skipEnrichUrl,
+      scheduledAt: scheduledAt,
+    );
+
+    if (response.scheduledMessage case final scheduledMessage?) {
+      state?.updateScheduledMessage(scheduledMessage);
+    } else {
+      state?.updateMessage(response.message.copyWith(state: MessageState.sent));
+    }
+
+    return response;
+  }
+
+  /// Loads the current user's scheduled messages in this channel into
+  /// [ChannelClientState.scheduledMessages], and returns them.
+  Future<List<ScheduledMessage>> queryScheduledMessages() async {
+    _checkInitialized();
+
+    // A user has at most 100 scheduled messages, so one page holds them all.
+    final response = await _client.queryScheduledMessages(cid: cid, limit: 100);
+    final scheduledMessages = response.scheduledMessages;
+
+    state?.updateChannelState(state!.channelState.copyWith(scheduledMessages: scheduledMessages));
+    return scheduledMessages;
+  }
+
   Message _markMessageAsSent(Message message) {
     if (state == null) return message.copyWith(state: MessageState.sent);
 
@@ -2074,11 +2135,15 @@ class Channel {
   }
 
   /// Loads the initial channel state and watches for changes.
+  ///
+  /// If [includeScheduledMessages] is true, the current user's
+  /// [ChannelClientState.scheduledMessages] in this channel are loaded too.
   Future<ChannelState> watch({
     bool presence = false,
     PaginationParams? messagesPagination,
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
+    bool includeScheduledMessages = false,
   }) {
     return query(
       watch: true,
@@ -2086,6 +2151,7 @@ class Channel {
       messagesPagination: messagesPagination,
       membersPagination: membersPagination,
       watchersPagination: watchersPagination,
+      includeScheduledMessages: includeScheduledMessages,
     );
   }
 
@@ -2178,6 +2244,9 @@ class Channel {
   ///
   /// Set [preferOffline] to true to avoid the API call if the data is already
   /// in the offline storage.
+  ///
+  /// If [includeScheduledMessages] is true, the current user's
+  /// [ChannelClientState.scheduledMessages] in this channel are loaded too.
   Future<ChannelState> query({
     bool state = true,
     bool watch = false,
@@ -2186,6 +2255,7 @@ class Channel {
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
     bool preferOffline = false,
+    bool includeScheduledMessages = false,
   }) async {
     // A prior failed init left the completer errored; reset it so this attempt
     // owns the `initialized` result. Must stay before the first `await` so a
@@ -2199,8 +2269,8 @@ class Channel {
 
     try {
       // If we prefer offline, we first try to get the channel state from the
-      // offline storage.
-      if (preferOffline && !watch && cid != null) {
+      // offline storage, which has no scheduled messages.
+      if (preferOffline && !watch && !includeScheduledMessages && cid != null) {
         final persistenceClient = _client.chatPersistenceClient;
         if (persistenceClient != null) {
           final cachedState = await persistenceClient.getChannelStateByCid(
@@ -2226,6 +2296,7 @@ class Channel {
         messagesPagination: messagesPagination,
         membersPagination: membersPagination,
         watchersPagination: watchersPagination,
+        includeScheduledMessages: includeScheduledMessages,
       );
 
       if (_id == null) {

@@ -49,6 +49,7 @@ class Event {
     this.lastReadMessageId,
     this.draft,
     this.reminder,
+    this.scheduledMessage,
     this.pushPreference,
     this.channelPushPreference,
     this.channelMemberCount,
@@ -180,6 +181,12 @@ class Event {
   /// The message reminder sent with the event.
   final MessageReminder? reminder;
 
+  /// The scheduled message sent with the event.
+  ///
+  /// On [EventType.scheduledMessageSent], [messageId] is the ID of the sent
+  /// message.
+  final ScheduledMessage? scheduledMessage;
+
   /// Push notification preferences for the current user.
   final PushPreference? pushPreference;
 
@@ -248,6 +255,7 @@ class Event {
     'last_read_message_id',
     'draft',
     'reminder',
+    'scheduled_message',
     'push_preference',
     'channel_push_preference',
     'channel_member_count',
@@ -297,6 +305,7 @@ class Event {
     String? lastReadMessageId,
     Draft? draft,
     MessageReminder? reminder,
+    ScheduledMessage? scheduledMessage,
     PushPreference? pushPreference,
     ChannelPushPreference? channelPushPreference,
     int? channelMemberCount,
@@ -339,6 +348,7 @@ class Event {
     lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
     draft: draft ?? this.draft,
     reminder: reminder ?? this.reminder,
+    scheduledMessage: scheduledMessage ?? this.scheduledMessage,
     pushPreference: pushPreference ?? this.pushPreference,
     channelPushPreference: channelPushPreference ?? this.channelPushPreference,
     channelMemberCount: channelMemberCount ?? this.channelMemberCount,

@@ -10,6 +10,7 @@ import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/polls_api.dart';
 import 'package:stream_chat/src/core/api/roles_api.dart';
+import 'package:stream_chat/src/core/api/scheduled_messages_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/api/user_groups_api.dart';
 import 'package:stream_chat/src/core/http/token.dart';
@@ -168,6 +169,11 @@ class FakeChatApi extends Fake implements StreamChatApi {
 
   @override
   GeneralApi get general => _general ??= MockGeneralApi();
+
+  ScheduledMessagesApi? _scheduledMessages;
+
+  @override
+  ScheduledMessagesApi get scheduledMessages => _scheduledMessages ??= MockScheduledMessagesApi();
 
   AttachmentFileUploader? _fileUploader;
 

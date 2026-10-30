@@ -15,6 +15,11 @@ extension ChannelCapabilityCheck on Channel {
     return ownCapabilities.contains(ChannelCapability.sendReply);
   }
 
+  /// True, if the current user can schedule a message in this channel.
+  bool get canScheduleMessage {
+    return ownCapabilities.contains(ChannelCapability.scheduleMessage);
+  }
+
   /// True, if the current user can send a message with restricted visibility.
   bool get canSendRestrictedVisibilityMessage {
     return ownCapabilities.contains(
