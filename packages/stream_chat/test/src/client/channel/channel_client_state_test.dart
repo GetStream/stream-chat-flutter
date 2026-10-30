@@ -42,6 +42,111 @@ void main() {
       ).thenAnswer((_) async {});
     });
 
+    group('Scheduled messages', () {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      const cid = '$channelType:$channelId';
+      late Channel channel;
+
+      ScheduledMessage scheduledMessage(
+        String id, {
+        DateTime? scheduledAt,
+        DateTime? updatedAt,
+        String text = 'Good morning',
+      }) => ScheduledMessage(
+        id: id,
+        cid: cid,
+        user: User(id: 'test-user-id'),
+        message: Message(id: id, text: text),
+        scheduledAt: scheduledAt ?? DateTime.utc(2026, 11, 2, 9),
+        status: ScheduledMessageStatus.scheduled,
+        createdAt: DateTime.utc(2026, 10, 29),
+        updatedAt: updatedAt ?? DateTime.utc(2026, 10, 29),
+      );
+
+      ChannelState stateWith(List<ScheduledMessage>? scheduledMessages) {
+        return _generateChannelState(channelId, channelType).copyWith(scheduledMessages: scheduledMessages);
+      }
+
+      setUp(() {
+        channel = Channel.fromState(client, _generateChannelState(channelId, channelType));
+      });
+
+      tearDown(() {
+        channel.dispose();
+      });
+
+      test('are empty until loaded', () {
+        expect(channel.state!.scheduledMessages, isEmpty);
+      });
+
+      test('take the ones a channel update carries, earliest first', () {
+        channel.state!.updateChannelStateFromServer(
+          stateWith([
+            scheduledMessage('later', scheduledAt: DateTime.utc(2026, 11, 3)),
+            scheduledMessage('sooner', scheduledAt: DateTime.utc(2026, 11, 1)),
+          ]),
+        );
+
+        expect(channel.state!.scheduledMessages.map((it) => it.id), ['sooner', 'later']);
+      });
+
+      test('are kept by a channel update that carries none', () {
+        channel.state!.updateChannelStateFromServer(stateWith([scheduledMessage('kept')]));
+
+        channel.state!.updateChannelStateFromServer(stateWith(null));
+
+        expect(channel.state!.scheduledMessages.single.id, 'kept');
+      });
+
+      test('keep a newer copy when an update carries an older one', () {
+        final edited = scheduledMessage('edited', text: 'Good evening', updatedAt: DateTime.utc(2026, 10, 30));
+        channel.state!.updateScheduledMessage(edited);
+
+        channel.state!.updateChannelStateFromServer(stateWith([scheduledMessage('edited')]));
+
+        expect(channel.state!.scheduledMessages, [edited]);
+      });
+
+      test('follow the scheduled message events of the channel', () async {
+        client.addEvent(
+          Event(type: EventType.scheduledMessageCreated, cid: cid, scheduledMessage: scheduledMessage('new')),
+        );
+        await Future<void>.delayed(Duration.zero);
+        expect(channel.state!.scheduledMessages.single.id, 'new');
+
+        client.addEvent(
+          Event(type: EventType.scheduledMessageSent, cid: cid, scheduledMessage: scheduledMessage('new')),
+        );
+        await Future<void>.delayed(Duration.zero);
+        expect(channel.state!.scheduledMessages, isEmpty);
+      });
+
+      test('are loaded again when the connection recovers', () async {
+        when(
+          () => client.queryScheduledMessages(cid: cid, limit: 100),
+        ).thenAnswer(
+          (_) async => QueryScheduledMessagesResponse()
+            ..scheduledMessages = [scheduledMessage('missed')]
+            ..next = null,
+        );
+        channel.state!.updateChannelStateFromServer(stateWith([]));
+
+        client.addEvent(Event(type: EventType.connectionRecovered));
+        await Future<void>.delayed(Duration.zero);
+
+        expect(channel.state!.scheduledMessages.single.id, 'missed');
+      });
+
+      test('are not loaded on recovery when they never were', () async {
+        clearInteractions(client);
+        client.addEvent(Event(type: EventType.connectionRecovered));
+        await Future<void>.delayed(Duration.zero);
+
+        verifyNever(() => client.queryScheduledMessages(cid: cid, limit: 100));
+      });
+    });
+
     group('Typing events', () {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';

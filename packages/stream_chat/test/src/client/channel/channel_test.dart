@@ -329,6 +329,7 @@ void main() {
 
         expect(res.scheduledMessage?.id, message.id);
         expect(channel.state!.messages, isEmpty);
+        expect(channel.state!.scheduledMessages.single.id, message.id);
       });
 
       test('adds the message to the channel when it was sent right away', () async {
@@ -375,13 +376,18 @@ void main() {
         );
       });
 
-      test('`.scheduledMessages` holds only the ones in this channel', () {
-        final here = scheduledMessageFor(Message(id: 'here'));
-        final elsewhere = scheduledMessageFor(Message(id: 'elsewhere'), cid: 'messaging:other');
-        client.state.updateScheduledMessages([here, elsewhere]);
-        addTearDown(() => client.state.updateScheduledMessages(const []));
+      test('`.queryScheduledMessages` loads them into the channel state', () async {
+        final loaded = scheduledMessageFor(Message(id: 'loaded'));
+        when(() => client.queryScheduledMessages(cid: channelCid, limit: 100)).thenAnswer(
+          (_) async => QueryScheduledMessagesResponse()
+            ..scheduledMessages = [loaded]
+            ..next = null,
+        );
 
-        expect(channel.scheduledMessages, [here]);
+        final result = await channel.queryScheduledMessages();
+
+        expect(result, [loaded]);
+        expect(channel.state!.scheduledMessages, [loaded]);
       });
     });
 

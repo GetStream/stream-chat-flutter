@@ -215,19 +215,6 @@ class FakeClientState extends Fake implements ClientState {
   int totalUnreadCount = 0;
 
   @override
-  List<ScheduledMessage> get scheduledMessages => _scheduledMessages.value;
-
-  @override
-  Stream<List<ScheduledMessage>> get scheduledMessagesStream => _scheduledMessages.stream;
-
-  @override
-  void updateScheduledMessages(Iterable<ScheduledMessage> scheduledMessages) {
-    _scheduledMessages.add([...scheduledMessages]);
-  }
-
-  final _scheduledMessages = BehaviorSubject<List<ScheduledMessage>>.seeded(const []);
-
-  @override
   Map<String, Channel> get channels => _channels;
   final _channels = <String, Channel>{};
 

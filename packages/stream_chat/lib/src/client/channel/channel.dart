@@ -490,26 +490,6 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.messageCount).distinct();
   }
 
-  /// The current user's scheduled messages in this channel that are not sent
-  /// yet, earliest first.
-  ///
-  /// Holds the ones in [ClientState.scheduledMessages]; [query] or [watch]
-  /// with `includeScheduledMessages` loads them.
-  List<ScheduledMessage> get scheduledMessages => _scheduledMessagesIn(_client.state.scheduledMessages);
-
-  /// The [scheduledMessages] as a stream.
-  Stream<List<ScheduledMessage>> get scheduledMessagesStream {
-    final stream = _client.state.scheduledMessagesStream.map(_scheduledMessagesIn);
-    return stream.distinct(const ListEquality<ScheduledMessage>().equals);
-  }
-
-  List<ScheduledMessage> _scheduledMessagesIn(List<ScheduledMessage> scheduledMessages) {
-    final cid = this.cid;
-    if (cid == null) return const [];
-
-    return [...scheduledMessages.where((it) => it.cid == cid)];
-  }
-
   /// List of filter tags applied to this channel.
   ///
   /// Generally used for filtering channels while querying.
@@ -899,7 +879,7 @@ class Channel {
   /// Also stops the current user's typing.
   ///
   /// The message is kept out of the channel until it is sent, and joins
-  /// [scheduledMessages] instead. The [scheduledAt] is rounded up to a whole
+  /// [ChannelClientState.scheduledMessages] instead. The [scheduledAt] is rounded up to a whole
   /// minute, at least a minute from now. If it has passed by the time the
   /// request arrives, the message is sent right away and
   /// [SendMessageResponse.scheduledMessage] is null.
@@ -933,11 +913,26 @@ class Channel {
       scheduledAt: scheduledAt,
     );
 
-    if (response.scheduledMessage == null) {
+    if (response.scheduledMessage case final scheduledMessage?) {
+      state?.updateScheduledMessage(scheduledMessage);
+    } else {
       state?.updateMessage(response.message.copyWith(state: MessageState.sent));
     }
 
     return response;
+  }
+
+  /// Loads the current user's scheduled messages in this channel into
+  /// [ChannelClientState.scheduledMessages], and returns them.
+  Future<List<ScheduledMessage>> queryScheduledMessages() async {
+    _checkInitialized();
+
+    // A user has at most 100 scheduled messages, so one page holds them all.
+    final response = await _client.queryScheduledMessages(cid: cid, limit: 100);
+    final scheduledMessages = response.scheduledMessages;
+
+    state?.updateChannelState(state!.channelState.copyWith(scheduledMessages: scheduledMessages));
+    return scheduledMessages;
   }
 
   Message _markMessageAsSent(Message message) {
@@ -2142,7 +2137,7 @@ class Channel {
   /// Loads the initial channel state and watches for changes.
   ///
   /// If [includeScheduledMessages] is true, the current user's
-  /// [scheduledMessages] in this channel are loaded too.
+  /// [ChannelClientState.scheduledMessages] in this channel are loaded too.
   Future<ChannelState> watch({
     bool presence = false,
     PaginationParams? messagesPagination,
@@ -2251,7 +2246,7 @@ class Channel {
   /// in the offline storage.
   ///
   /// If [includeScheduledMessages] is true, the current user's
-  /// [scheduledMessages] in this channel are loaded too.
+  /// [ChannelClientState.scheduledMessages] in this channel are loaded too.
   Future<ChannelState> query({
     bool state = true,
     bool watch = false,

@@ -104,6 +104,16 @@ class ChannelStateMutations {
   /// Removes the deleted [draft].
   void onDraftDeleted(Draft draft) => _state.deleteDraft(draft);
 
+  /// Applies the created or updated [scheduledMessage].
+  void onScheduledMessageUpdated(ScheduledMessage scheduledMessage) {
+    _state.updateScheduledMessage(scheduledMessage);
+  }
+
+  /// Removes the sent or deleted [scheduledMessage].
+  void onScheduledMessageRemoved(ScheduledMessage scheduledMessage) {
+    _state.removeScheduledMessage(scheduledMessage.id);
+  }
+
   /// Applies the [eventMessage] carrying the new [eventReaction], preserving
   /// the current user's own reactions.
   void onReactionNew(Message eventMessage, Reaction eventReaction) {

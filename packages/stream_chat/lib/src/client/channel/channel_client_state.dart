@@ -29,10 +29,10 @@ class ChannelClientState {
 
     final seededState = channelState.copyWith(
       pinnedMessages: MessageMerging.sortPinnedMessages(channelState.pinnedMessages),
+      scheduledMessages: _mergeScheduledMessages(const [], channelState.scheduledMessages),
     );
 
     _channelStateController = BehaviorSubject.seeded(seededState);
-    _syncScheduledMessages(seededState);
     // Update the persistence storage with the seeded channel state.
     _debouncedUpdatePersistenceChannelState.call([seededState]);
 
@@ -47,7 +47,15 @@ class ChannelClientState {
       deleteMessagesFromUser: _deleteMessagesFromUser,
     );
     final handler = ChannelEventHandler(channel: _channel, mutations: mutations);
-    _subscriptions.add(_channel.on().listen(handler.handleEvent));
+    _subscriptions
+      ..add(_channel.on().listen(handler.handleEvent))
+      // Events missed while offline can leave loaded scheduled messages stale.
+      ..add(
+        _client.on(EventType.connectionRecovered).listen((_) {
+          if (_channelState.scheduledMessages == null) return;
+          _channel.queryScheduledMessages().ignore();
+        }),
+      );
 
     _startCleaningStaleTypingEvents();
 
@@ -343,6 +351,58 @@ class ChannelClientState {
   Stream<List<Location>> get activeLiveLocationsStream =>
       channelStateStream.map((cs) => cs.activeLiveLocations ?? <Location>[]).distinct(const ListEquality().equals);
 
+  /// The current user's scheduled messages in this channel that are not sent
+  /// yet, earliest first.
+  ///
+  /// Empty until loaded with [Channel.queryScheduledMessages] or a channel
+  /// query with `includeScheduledMessages`. Once loaded, they are kept current
+  /// and loaded again when the connection recovers.
+  List<ScheduledMessage> get scheduledMessages => _channelState.scheduledMessages ?? const [];
+
+  /// The [scheduledMessages] as a stream.
+  Stream<List<ScheduledMessage>> get scheduledMessagesStream {
+    final stream = channelStateStream.map((cs) => cs.scheduledMessages ?? const <ScheduledMessage>[]);
+    return stream.distinct(const ListEquality<ScheduledMessage>().equals);
+  }
+
+  /// Adds the [scheduledMessage], or replaces the one with its ID unless that
+  /// one is newer.
+  void updateScheduledMessage(ScheduledMessage scheduledMessage) {
+    final current = scheduledMessages;
+    final updated = _mergeScheduledMessages(current, [...current, scheduledMessage]);
+    _channelState = _channelState.copyWith(scheduledMessages: updated);
+  }
+
+  /// Removes the scheduled message [id].
+  void removeScheduledMessage(String id) {
+    final current = scheduledMessages;
+    if (!current.any((it) => it.id == id)) return;
+
+    _channelState = _channelState.copyWith(
+      scheduledMessages: [...current.where((it) => it.id != id)],
+    );
+  }
+
+  // The [incoming] scheduled messages, earliest first, each kept as its copy in
+  // [current] when that one is newer. Null [incoming] keeps [current] as is.
+  static List<ScheduledMessage>? _mergeScheduledMessages(
+    List<ScheduledMessage> current,
+    List<ScheduledMessage>? incoming,
+  ) {
+    if (incoming == null) return null;
+
+    final currentById = {for (final it in current) it.id: it};
+    final merged = {
+      for (final it in incoming)
+        it.id: switch (currentById[it.id]) {
+          final existing? when existing.updatedAt.isAfter(it.updatedAt) => existing,
+          _ => it,
+        },
+    };
+
+    return merged.values.toList()..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+  }
+
   /// Channel draft.
   Draft? get draft => _channelState.draft;
 
@@ -589,6 +649,7 @@ class ChannelClientState {
       pendingMessages: updatedState.pendingMessages,
       pushPreferences: updatedState.pushPreferences,
       activeLiveLocations: updatedState.activeLiveLocations,
+      scheduledMessages: _mergeScheduledMessages(scheduledMessages, updatedState.scheduledMessages),
     );
   }
 
@@ -606,17 +667,6 @@ class ChannelClientState {
   /// genuinely comes from the network or offline storage.
   void updateChannelStateFromServer(ChannelState remoteState) {
     updateChannelState(_preserveLocalUnreadState(remoteState));
-    _syncScheduledMessages(remoteState);
-  }
-
-  // Replaces this channel's entries in the client's scheduled messages with
-  // the ones [channelState] carries, if it carries any.
-  void _syncScheduledMessages(ChannelState channelState) {
-    final cid = channelState.channel?.cid;
-    final scheduledMessages = channelState.scheduledMessages;
-    if (cid == null || scheduledMessages == null) return;
-
-    _client.state.replaceScheduledMessages((it) => it.cid == cid, scheduledMessages);
   }
 
   /// Rewrites the current user's [Read] in [remoteState], if present, to

@@ -2,7 +2,7 @@
 
 ✅ Added
 
-- Added scheduled messages: `Channel.scheduleMessage` to schedule one, `StreamChatClient.queryScheduledMessages` and methods to edit, send now or delete one, the pending ones in `ClientState.scheduledMessages` and `Channel.scheduledMessages`, and `includeScheduledMessages` on channel queries to load them.
+- Added scheduled messages: `Channel.scheduleMessage` to schedule one, `StreamChatClient.queryScheduledMessages` and methods to edit, send now or delete one, a channel's pending ones in `ChannelClientState.scheduledMessages`, loaded with `Channel.queryScheduledMessages` or `includeScheduledMessages` on channel queries.
 
 🔄 Changed
 
