@@ -733,7 +733,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
     if (message.isDeleted || message.state.isFailed) return result;
 
     final channel = StreamChannel.maybeOf(context)?.channel;
-    if (channel == null || !channel.canQuoteMessage) return result;
+    if (channel != null && !channel.canQuoteMessage) return result;
 
     return _SwipeToReplyWrapper(
       message: message,

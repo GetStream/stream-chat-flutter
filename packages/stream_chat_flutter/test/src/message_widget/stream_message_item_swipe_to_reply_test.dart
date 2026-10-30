@@ -24,6 +24,16 @@ void main() {
 
     expect(replies, isEmpty);
   });
+
+  testWidgets('StreamMessageItem replies to a message swiped outside a channel', (tester) async {
+    final message = _message();
+    final replies = <Message>[];
+    await _pumpMessageItem(tester, message, inChannel: false, onReplyTap: replies.add);
+
+    await _swipe(tester);
+
+    expect(replies, [message]);
+  });
 }
 
 Message _message() {
@@ -39,7 +49,8 @@ Message _message() {
 Future<void> _pumpMessageItem(
   WidgetTester tester,
   Message message, {
-  required bool canQuoteMessage,
+  bool canQuoteMessage = true,
+  bool inChannel = true,
   required ValueChanged<Message> onReplyTap,
 }) async {
   final currentUser = OwnUser(id: 'me', name: 'Luke Skywalker');
@@ -57,17 +68,16 @@ Future<void> _pumpMessageItem(
   when(() => channel.state).thenReturn(channelState);
   when(() => channelState.readStream).thenAnswer((_) => Stream.value(const []));
 
+  final page = Scaffold(
+    body: StreamMessageItem(message: message, swipeToReply: true, onReplyTap: onReplyTap),
+  );
+
   await tester.pumpWidget(
     MaterialApp(
       home: StreamChat(
         client: client,
         connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
-        child: StreamChannel(
-          channel: channel,
-          child: Scaffold(
-            body: StreamMessageItem(message: message, swipeToReply: true, onReplyTap: onReplyTap),
-          ),
-        ),
+        child: inChannel ? StreamChannel(channel: channel, child: page) : page,
       ),
     ),
   );
