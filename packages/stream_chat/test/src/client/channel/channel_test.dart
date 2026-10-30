@@ -302,7 +302,7 @@ void main() {
     });
 
     group('`.scheduleMessage`', () {
-      final scheduledAt = DateTime.utc(2026, 11, 2, 9);
+      final scheduledAt = DateTime.now().add(const Duration(days: 1));
 
       ScheduledMessage scheduledMessageFor(Message message, {String cid = channelCid}) => ScheduledMessage(
         id: message.id,
@@ -343,6 +343,17 @@ void main() {
         expect(
           channel.state!.messages.single,
           isSameMessageAs(message.copyWith(state: MessageState.sent), matchMessageState: true),
+        );
+      });
+
+      test('refuses a time that is not in the future', () async {
+        final message = Message(id: 'past-id', text: 'Good morning');
+        final past = DateTime.now().subtract(const Duration(minutes: 5));
+
+        await expectLater(channel.scheduleMessage(message, past), throwsArgumentError);
+
+        verifyNever(
+          () => client.sendMessage(any(), any(), any(), scheduledAt: any(named: 'scheduledAt')),
         );
       });
 

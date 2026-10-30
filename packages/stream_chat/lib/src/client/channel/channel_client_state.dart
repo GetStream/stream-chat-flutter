@@ -32,6 +32,7 @@ class ChannelClientState {
     );
 
     _channelStateController = BehaviorSubject.seeded(seededState);
+    _syncScheduledMessages(seededState);
     // Update the persistence storage with the seeded channel state.
     _debouncedUpdatePersistenceChannelState.call([seededState]);
 
@@ -605,6 +606,17 @@ class ChannelClientState {
   /// genuinely comes from the network or offline storage.
   void updateChannelStateFromServer(ChannelState remoteState) {
     updateChannelState(_preserveLocalUnreadState(remoteState));
+    _syncScheduledMessages(remoteState);
+  }
+
+  // Replaces this channel's entries in the client's scheduled messages with
+  // the ones [channelState] carries, if it carries any.
+  void _syncScheduledMessages(ChannelState channelState) {
+    final cid = channelState.channel?.cid;
+    final scheduledMessages = channelState.scheduledMessages;
+    if (cid == null || scheduledMessages == null) return;
+
+    _client.state.replaceScheduledMessages((it) => it.cid == cid, scheduledMessages);
   }
 
   /// Rewrites the current user's [Read] in [remoteState], if present, to

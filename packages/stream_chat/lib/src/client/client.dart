@@ -899,7 +899,6 @@ class StreamChatClient {
     }
 
     final channels = res.channels;
-    _replaceChannelScheduledMessages(channels);
 
     final users = channels.expand((it) => it.members ?? <Member>[]).map((it) => it.user).toList(growable: false);
 
@@ -1357,8 +1356,7 @@ class StreamChatClient {
   /// Creates the channel first if not yet created
   ///
   /// If [includeScheduledMessages] is true, the result carries the current
-  /// user's [ChannelState.scheduledMessages], which also replace the channel's
-  /// ones in [ClientState.scheduledMessages].
+  /// user's [ChannelState.scheduledMessages].
   Future<ChannelState> queryChannel(
     String channelType, {
     bool state = true,
@@ -1370,38 +1368,18 @@ class StreamChatClient {
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
     bool includeScheduledMessages = false,
-  }) async {
-    final channelState = await _chatApi.channel.queryChannel(
-      channelType,
-      channelId: channelId,
-      channelData: channelData,
-      state: state,
-      watch: watch,
-      presence: presence,
-      messagesPagination: messagesPagination,
-      membersPagination: membersPagination,
-      watchersPagination: watchersPagination,
-      includeScheduledMessages: includeScheduledMessages,
-    );
-
-    _replaceChannelScheduledMessages([channelState]);
-    return channelState;
-  }
-
-  // Replaces the scheduled messages of the channels that carry them, in a
-  // single update.
-  void _replaceChannelScheduledMessages(Iterable<ChannelState> channelStates) {
-    final loaded = {
-      for (final it in channelStates)
-        if ((it.channel?.cid, it.scheduledMessages) case (final cid?, final scheduledMessages?)) cid: scheduledMessages,
-    };
-    if (loaded.isEmpty) return;
-
-    state.replaceScheduledMessages(
-      (it) => loaded.containsKey(it.cid),
-      loaded.values.expand((it) => it),
-    );
-  }
+  }) => _chatApi.channel.queryChannel(
+    channelType,
+    channelId: channelId,
+    channelData: channelData,
+    state: state,
+    watch: watch,
+    presence: presence,
+    messagesPagination: messagesPagination,
+    membersPagination: membersPagination,
+    watchersPagination: watchersPagination,
+    includeScheduledMessages: includeScheduledMessages,
+  );
 
   /// Query channel members
   Future<QueryMembersResponse> queryMembers(
@@ -2492,16 +2470,15 @@ class StreamChatClient {
   /// [scheduledAt], or both.
   ///
   /// The [scheduledAt] is rounded up to a whole minute, at least a minute from
-  /// now; one in the past fails.
+  /// now; one in the past fails. Passing neither throws an [ArgumentError].
   Future<ScheduledMessageResponse> updateScheduledMessage(
     String id, {
     Message? message,
     DateTime? scheduledAt,
   }) async {
-    assert(
-      message != null || scheduledAt != null,
-      'Pass a message, a scheduledAt or both.',
-    );
+    if (message == null && scheduledAt == null) {
+      throw ArgumentError('Pass a message, a scheduledAt or both.');
+    }
 
     final response = await _chatApi.scheduledMessages.updateScheduledMessage(
       id,

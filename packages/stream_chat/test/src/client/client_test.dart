@@ -4709,7 +4709,7 @@ void main() {
     test('`.updateScheduledMessage` needs a message or a time', () {
       expect(
         () => client.updateScheduledMessage('scheduled-id'),
-        throwsA(isA<AssertionError>()),
+        throwsArgumentError,
       );
     });
 
@@ -4852,26 +4852,27 @@ void main() {
         expect(client.state.scheduledMessages, isEmpty);
       });
 
-      test('takes the ones a channel query includes', () async {
+      test('takes the ones a channel is built or updated with', () async {
         stubQuery([scheduledMessage('gone'), scheduledMessage('other', cid: 'messaging:other')]);
         await client.queryScheduledMessages();
 
-        when(
-          () => api.channel.queryChannel(
-            'messaging',
-            channelId: 'general',
-            includeScheduledMessages: true,
-          ),
-        ).thenAnswer(
-          (_) async => ChannelState(
+        final channel = Channel.fromState(
+          client,
+          ChannelState(
             channel: ChannelModel(cid: cid),
-            scheduledMessages: [scheduledMessage('new')],
+            scheduledMessages: [scheduledMessage('built')],
           ),
         );
+        addTearDown(channel.dispose);
+        expect(client.state.scheduledMessages.map((it) => it.id), unorderedEquals(['built', 'other']));
 
-        await client.queryChannel('messaging', channelId: 'general', includeScheduledMessages: true);
-
-        expect(client.state.scheduledMessages.map((it) => it.id), unorderedEquals(['new', 'other']));
+        channel.state!.updateChannelStateFromServer(
+          ChannelState(
+            channel: ChannelModel(cid: cid),
+            scheduledMessages: [scheduledMessage('updated')],
+          ),
+        );
+        expect(client.state.scheduledMessages.map((it) => it.id), unorderedEquals(['updated', 'other']));
       });
 
       test('keeps a newer copy when a complete page holds an older one', () async {
@@ -4908,11 +4909,8 @@ void main() {
         stubQuery([scheduledMessage('kept')]);
         await client.queryScheduledMessages();
 
-        when(
-          () => api.channel.queryChannel('messaging', channelId: 'general'),
-        ).thenAnswer((_) async => ChannelState(channel: ChannelModel(cid: cid)));
-
-        await client.queryChannel('messaging', channelId: 'general');
+        final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: cid)));
+        addTearDown(channel.dispose);
 
         expect(client.state.scheduledMessages.single.id, 'kept');
       });

@@ -899,12 +899,12 @@ class Channel {
   ///
   /// The message is kept out of the channel until it is sent, and joins
   /// [scheduledMessages] instead. The [scheduledAt] is rounded up to a whole
-  /// minute, at least a minute from now. A time that has already passed sends
-  /// the message right away, leaving [SendMessageResponse.scheduledMessage]
-  /// null.
+  /// minute, at least a minute from now. If it has passed by the time the
+  /// request arrives, the message is sent right away and
+  /// [SendMessageResponse.scheduledMessage] is null.
   ///
-  /// Every attachment must already be uploaded; one that is not throws an
-  /// [ArgumentError].
+  /// A [scheduledAt] that is not in the future, or an attachment that is not
+  /// uploaded yet, throws an [ArgumentError].
   Future<SendMessageResponse> scheduleMessage(
     Message message,
     DateTime scheduledAt, {
@@ -912,6 +912,10 @@ class Channel {
     bool skipEnrichUrl = false,
   }) async {
     _checkInitialized();
+
+    if (!scheduledAt.isAfter(DateTime.now())) {
+      throw ArgumentError.value(scheduledAt, 'scheduledAt', 'Must be in the future');
+    }
 
     if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
       throw ArgumentError.value(message, 'message', 'Attachments must be uploaded before scheduling');
