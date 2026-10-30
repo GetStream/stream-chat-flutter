@@ -284,6 +284,92 @@ void main() {
     expect((captured.single as PaginationParams).offset, equals(nextPageKey));
   });
 
+  test('doInitialLoad asks for the active member count when includeActiveMemberCount is set', () async {
+    when(
+      () => client.queryChannelsWithResult(
+        filter: any(named: 'filter'),
+        channelStateSort: any(named: 'channelStateSort'),
+        predefinedFilter: any(named: 'predefinedFilter'),
+        filterValues: any(named: 'filterValues'),
+        sortValues: any(named: 'sortValues'),
+        memberLimit: any(named: 'memberLimit'),
+        messageLimit: any(named: 'messageLimit'),
+        presence: any(named: 'presence'),
+        includeActiveMemberCount: any(named: 'includeActiveMemberCount'),
+        paginationParams: any(named: 'paginationParams'),
+      ),
+    ).thenAnswer((_) => Stream.value(const QueryChannelsResult(channels: [])));
+
+    final controller = StreamChannelListController(
+      client: client,
+      includeActiveMemberCount: true,
+    );
+
+    await controller.doInitialLoad();
+    await pumpEventQueue();
+
+    verify(
+      () => client.queryChannelsWithResult(
+        filter: any(named: 'filter'),
+        channelStateSort: any(named: 'channelStateSort'),
+        predefinedFilter: any(named: 'predefinedFilter'),
+        filterValues: any(named: 'filterValues'),
+        sortValues: any(named: 'sortValues'),
+        memberLimit: any(named: 'memberLimit'),
+        messageLimit: any(named: 'messageLimit'),
+        presence: any(named: 'presence'),
+        includeActiveMemberCount: true,
+        paginationParams: any(named: 'paginationParams'),
+      ),
+    ).called(1);
+  });
+
+  test('loadMore asks for the active member count when includeActiveMemberCount is set', () async {
+    const nextPageKey = 2;
+
+    when(
+      () => client.queryChannelsWithResult(
+        filter: any(named: 'filter'),
+        channelStateSort: any(named: 'channelStateSort'),
+        predefinedFilter: any(named: 'predefinedFilter'),
+        filterValues: any(named: 'filterValues'),
+        sortValues: any(named: 'sortValues'),
+        memberLimit: any(named: 'memberLimit'),
+        messageLimit: any(named: 'messageLimit'),
+        presence: any(named: 'presence'),
+        includeActiveMemberCount: any(named: 'includeActiveMemberCount'),
+        paginationParams: any(named: 'paginationParams'),
+      ),
+    ).thenAnswer((_) => Stream.value(const QueryChannelsResult(channels: [])));
+
+    final controller = StreamChannelListController.fromValue(
+      PagedValue<int, Channel>(
+        items: [unsortedMockChannel()],
+        nextPageKey: nextPageKey,
+      ),
+      client: client,
+      includeActiveMemberCount: true,
+    );
+
+    await controller.loadMore(nextPageKey);
+    await pumpEventQueue();
+
+    verify(
+      () => client.queryChannelsWithResult(
+        filter: any(named: 'filter'),
+        channelStateSort: any(named: 'channelStateSort'),
+        predefinedFilter: any(named: 'predefinedFilter'),
+        filterValues: any(named: 'filterValues'),
+        sortValues: any(named: 'sortValues'),
+        memberLimit: any(named: 'memberLimit'),
+        messageLimit: any(named: 'messageLimit'),
+        presence: any(named: 'presence'),
+        includeActiveMemberCount: true,
+        paginationParams: any(named: 'paginationParams'),
+      ),
+    ).called(1);
+  });
+
   test('local sort places channels with disposed state last instead of crashing', () {
     ChannelState channelStateFor({required DateTime createdAt}) => ChannelState(
       channel: ChannelModel(cid: 'messaging:${createdAt.millisecondsSinceEpoch}', createdAt: createdAt),

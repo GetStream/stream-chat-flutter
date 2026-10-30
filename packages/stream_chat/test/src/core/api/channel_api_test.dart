@@ -265,6 +265,23 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
+  test('queryChannels asks for the active member count when requested', () async {
+    const path = '/channels';
+
+    when(
+      () => client.get(path, queryParameters: any(named: 'queryParameters')),
+    ).thenAnswer((_) async => successResponse(path, data: {'channels': []}));
+
+    await channelApi.queryChannels(includeActiveMemberCount: true);
+
+    final captured = verify(
+      () => client.get(path, queryParameters: captureAny(named: 'queryParameters')),
+    ).captured;
+    final queryParameters = captured.single as Map<String, Object?>;
+    final payload = jsonDecode(queryParameters['payload']! as String) as Map<String, Object?>;
+    expect(payload['include_active_member_count'], isTrue);
+  });
+
   test('updateChannel', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';

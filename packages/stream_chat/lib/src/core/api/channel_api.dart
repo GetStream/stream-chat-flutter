@@ -52,6 +52,9 @@ class ChannelApi {
   /// provided. When a predefined filter is used,
   /// [QueryChannelsResponse.predefinedFilter] carries the filter and sort it
   /// resolved to.
+  ///
+  /// If [includeActiveMemberCount] is true, each returned channel carries its
+  /// [ChannelModel.activeMemberCount].
   Future<QueryChannelsResponse> queryChannels({
     ChannelFilter? filter,
     List<ChannelSort>? sort,
@@ -63,6 +66,7 @@ class ChannelApi {
     bool state = true,
     bool watch = true,
     bool presence = false,
+    bool includeActiveMemberCount = false,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
     final response = await _client.get(
@@ -82,6 +86,7 @@ class ChannelApi {
           if (sortValues != null) 'sort_values': sortValues,
           if (memberLimit != null) 'member_limit': memberLimit,
           if (messageLimit != null) 'message_limit': messageLimit,
+          if (includeActiveMemberCount) 'include_active_member_count': true,
 
           // pagination
           ...paginationParams.toJson(),

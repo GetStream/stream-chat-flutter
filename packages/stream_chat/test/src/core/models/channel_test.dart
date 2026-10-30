@@ -24,6 +24,8 @@ void main() {
       expect(channel.truncatedBy?.name, 'Truncator');
       expect(channel.autoTranslationEnabled, isTrue);
       expect(channel.autoTranslationLanguage, 'fr');
+      expect(channel.activeMemberCount, 3);
+      expect(channel.custom, isNot(contains('active_member_count')));
     });
 
     test('should serialize to json correctly', () {
@@ -90,6 +92,7 @@ void main() {
       truncatedBy: User(id: 'truncator'),
       autoTranslationEnabled: true,
       autoTranslationLanguage: 'fr',
+      activeMemberCount: 3,
     );
 
     final newChannel = channel.copyWith(team: 'blue');
@@ -98,6 +101,7 @@ void main() {
     expect(newChannel.truncatedBy?.id, 'truncator');
     expect(newChannel.autoTranslationEnabled, isTrue);
     expect(newChannel.autoTranslationLanguage, 'fr');
+    expect(newChannel.activeMemberCount, 3);
   });
 
   test('ChannelModel.copyWith does not set a field from custom data named like it', () {
@@ -119,6 +123,7 @@ void main() {
       truncatedBy: User(id: 'truncator'),
       autoTranslationEnabled: true,
       autoTranslationLanguage: 'fr',
+      activeMemberCount: 3,
     );
 
     final newChannel = channel.copyWith(
@@ -130,6 +135,7 @@ void main() {
       truncatedBy: User(id: 'other'),
       autoTranslationEnabled: false,
       autoTranslationLanguage: 'de',
+      activeMemberCount: 4,
     );
 
     expect(newChannel.disabled, isTrue);
@@ -140,6 +146,7 @@ void main() {
     expect(newChannel.truncatedBy?.id, 'other');
     expect(newChannel.autoTranslationEnabled, isFalse);
     expect(newChannel.autoTranslationLanguage, 'de');
+    expect(newChannel.activeMemberCount, 4);
   });
 
   test('ChannelModel.merge keeps the flags the other channel leaves out', () {
@@ -150,6 +157,7 @@ void main() {
       blocked: true,
       truncatedAt: DateTime.utc(2026),
       truncatedBy: User(id: 'truncator'),
+      activeMemberCount: 3,
     );
 
     final merged = channel.merge(ChannelModel(cid: 'test:cid', custom: const {'color': 'red'}));
@@ -159,6 +167,7 @@ void main() {
     expect(merged.blocked, isTrue);
     expect(merged.truncatedAt, DateTime.utc(2026));
     expect(merged.truncatedBy?.id, 'truncator');
+    expect(merged.activeMemberCount, 3);
   });
 
   test('ChannelModel.merge takes the custom data from the other channel', () {
@@ -176,6 +185,14 @@ void main() {
 
     expect(merged.autoTranslationEnabled, isFalse);
     expect(merged.autoTranslationLanguage, isNull);
+  });
+
+  test('ChannelModel.merge takes the active member count from the other channel', () {
+    final channel = ChannelModel(cid: 'test:cid', activeMemberCount: 3);
+
+    final merged = channel.merge(ChannelModel(cid: 'test:cid', activeMemberCount: 2));
+
+    expect(merged.activeMemberCount, 2);
   });
 
   test('.name should fetch from custom if available', () {

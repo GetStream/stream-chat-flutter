@@ -508,6 +508,24 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.messageCount).distinct();
   }
 
+  /// The number of members whose users are neither deactivated nor deleted.
+  ///
+  /// Null until a channel query made with `includeActiveMemberCount` loads this
+  /// channel. Once set, it keeps its last value until another such query
+  /// refreshes it.
+  int? get activeMemberCount {
+    _checkInitialized();
+    return state!.channelState.channel?.activeMemberCount;
+  }
+
+  /// The [activeMemberCount] of this channel as a stream.
+  ///
+  /// Emits the current value on listen, then a new value each time it changes.
+  Stream<int?> get activeMemberCountStream {
+    _checkInitialized();
+    return state!.channelStateStream.map((cs) => cs.channel?.activeMemberCount).distinct();
+  }
+
   /// List of filter tags applied to this channel.
   ///
   /// Generally used for filtering channels while querying.
