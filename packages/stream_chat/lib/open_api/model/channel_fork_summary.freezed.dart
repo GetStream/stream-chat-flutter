@@ -16,10 +16,13 @@ mixin _$ChannelForkSummary {
   String get channelCid;
   int get copiedMessageCount;
   DateTime get createdAt;
+  String? get failedReason;
+  String? get oldestSourceMessageId;
   String get sourceChannelCid;
   String get sourceMessageId;
   String get status;
   String? get taskId;
+  bool? get truncated;
 
   /// Create a copy of ChannelForkSummary
   /// with the given fields replaced by the non-null parameter values.
@@ -39,10 +42,14 @@ mixin _$ChannelForkSummary {
             (identical(other.copiedMessageCount, copiedMessageCount) ||
                 other.copiedMessageCount == copiedMessageCount) &&
             (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.failedReason, failedReason) || other.failedReason == failedReason) &&
+            (identical(other.oldestSourceMessageId, oldestSourceMessageId) ||
+                other.oldestSourceMessageId == oldestSourceMessageId) &&
             (identical(other.sourceChannelCid, sourceChannelCid) || other.sourceChannelCid == sourceChannelCid) &&
             (identical(other.sourceMessageId, sourceMessageId) || other.sourceMessageId == sourceMessageId) &&
             (identical(other.status, status) || other.status == status) &&
-            (identical(other.taskId, taskId) || other.taskId == taskId));
+            (identical(other.taskId, taskId) || other.taskId == taskId) &&
+            (identical(other.truncated, truncated) || other.truncated == truncated));
   }
 
   @override
@@ -51,15 +58,18 @@ mixin _$ChannelForkSummary {
     channelCid,
     copiedMessageCount,
     createdAt,
+    failedReason,
+    oldestSourceMessageId,
     sourceChannelCid,
     sourceMessageId,
     status,
     taskId,
+    truncated,
   );
 
   @override
   String toString() {
-    return 'ChannelForkSummary(channelCid: $channelCid, copiedMessageCount: $copiedMessageCount, createdAt: $createdAt, sourceChannelCid: $sourceChannelCid, sourceMessageId: $sourceMessageId, status: $status, taskId: $taskId)';
+    return 'ChannelForkSummary(channelCid: $channelCid, copiedMessageCount: $copiedMessageCount, createdAt: $createdAt, failedReason: $failedReason, oldestSourceMessageId: $oldestSourceMessageId, sourceChannelCid: $sourceChannelCid, sourceMessageId: $sourceMessageId, status: $status, taskId: $taskId, truncated: $truncated)';
   }
 }
 
@@ -74,10 +84,13 @@ abstract mixin class $ChannelForkSummaryCopyWith<$Res> {
     String channelCid,
     int copiedMessageCount,
     DateTime createdAt,
+    String? failedReason,
+    String? oldestSourceMessageId,
     String sourceChannelCid,
     String sourceMessageId,
     String status,
     String? taskId,
+    bool? truncated,
   });
 }
 
@@ -96,10 +109,13 @@ class _$ChannelForkSummaryCopyWithImpl<$Res> implements $ChannelForkSummaryCopyW
     Object? channelCid = null,
     Object? copiedMessageCount = null,
     Object? createdAt = null,
+    Object? failedReason = freezed,
+    Object? oldestSourceMessageId = freezed,
     Object? sourceChannelCid = null,
     Object? sourceMessageId = null,
     Object? status = null,
     Object? taskId = freezed,
+    Object? truncated = freezed,
   }) {
     return _then(
       ChannelForkSummary(
@@ -115,6 +131,14 @@ class _$ChannelForkSummaryCopyWithImpl<$Res> implements $ChannelForkSummaryCopyW
             ? _self.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
                   as DateTime,
+        failedReason: freezed == failedReason
+            ? _self.failedReason
+            : failedReason // ignore: cast_nullable_to_non_nullable
+                  as String?,
+        oldestSourceMessageId: freezed == oldestSourceMessageId
+            ? _self.oldestSourceMessageId
+            : oldestSourceMessageId // ignore: cast_nullable_to_non_nullable
+                  as String?,
         sourceChannelCid: null == sourceChannelCid
             ? _self.sourceChannelCid
             : sourceChannelCid // ignore: cast_nullable_to_non_nullable
@@ -131,6 +155,10 @@ class _$ChannelForkSummaryCopyWithImpl<$Res> implements $ChannelForkSummaryCopyW
             ? _self.taskId
             : taskId // ignore: cast_nullable_to_non_nullable
                   as String?,
+        truncated: freezed == truncated
+            ? _self.truncated
+            : truncated // ignore: cast_nullable_to_non_nullable
+                  as bool?,
       ),
     );
   }

@@ -2932,6 +2932,36 @@ Map<String, dynamic> _$UserBannedEventToJson(UserBannedEvent instance) => <Strin
   'user': instance.user.toJson(),
 };
 
+UserClaimedEvent _$UserClaimedEventFromJson(Map<String, dynamic> json) => UserClaimedEvent(
+  claimedBy: UserResponseCommonFields.fromJson(
+    json['claimed_by'] as Map<String, dynamic>,
+  ),
+  createdAt: const StreamDateTimeConverter().fromJson(
+    json['created_at'] as Object,
+  ),
+  custom: json['custom'] as Map<String, dynamic>,
+  receivedAt: _$JsonConverterFromJson<Object, DateTime>(
+    json['received_at'],
+    const StreamDateTimeConverter().fromJson,
+  ),
+  type: json['type'] as String,
+  user: UserResponseCommonFields.fromJson(
+    json['user'] as Map<String, dynamic>,
+  ),
+);
+
+Map<String, dynamic> _$UserClaimedEventToJson(UserClaimedEvent instance) => <String, dynamic>{
+  'claimed_by': instance.claimedBy.toJson(),
+  'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
+  'custom': instance.custom,
+  'received_at': _$JsonConverterToJson<Object, DateTime>(
+    instance.receivedAt,
+    const StreamDateTimeConverter().toJson,
+  ),
+  'type': instance.type,
+  'user': instance.user.toJson(),
+};
+
 UserDeactivatedEvent _$UserDeactivatedEventFromJson(
   Map<String, dynamic> json,
 ) => UserDeactivatedEvent(

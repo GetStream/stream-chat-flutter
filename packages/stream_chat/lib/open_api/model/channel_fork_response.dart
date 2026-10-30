@@ -21,11 +21,14 @@ class ChannelForkResponse with _$ChannelForkResponse {
     required this.channelCid,
     required this.copiedMessageCount,
     required this.createdAt,
+    this.failedReason,
     required this.messageIdMap,
+    this.oldestSourceMessageId,
     required this.sourceChannelCid,
     required this.sourceMessageId,
     required this.status,
     this.taskId,
+    this.truncated,
   });
 
   @override
@@ -42,8 +45,16 @@ class ChannelForkResponse with _$ChannelForkResponse {
   final DateTime createdAt;
 
   @override
+  @JsonKey(name: 'failed_reason')
+  final String? failedReason;
+
+  @override
   @JsonKey(name: 'message_id_map')
   final Map<String, String> messageIdMap;
+
+  @override
+  @JsonKey(name: 'oldest_source_message_id')
+  final String? oldestSourceMessageId;
 
   @override
   @JsonKey(name: 'source_channel_cid')
@@ -60,6 +71,10 @@ class ChannelForkResponse with _$ChannelForkResponse {
   @override
   @JsonKey(name: 'task_id')
   final String? taskId;
+
+  @override
+  @JsonKey(name: 'truncated')
+  final bool? truncated;
 
   Map<String, dynamic> toJson() => _$ChannelForkResponseToJson(this);
 

@@ -29,6 +29,7 @@ class ReviewQueueItemResponse with _$ReviewQueueItemResponse {
     this.confidenceScore,
     this.configKey,
     this.countryCode,
+    this.countryCodes,
     required this.createdAt,
     this.entityCreator,
     this.entityCreatorId,
@@ -106,6 +107,10 @@ class ReviewQueueItemResponse with _$ReviewQueueItemResponse {
   @override
   @JsonKey(name: 'country_code')
   final String? countryCode;
+
+  @override
+  @JsonKey(name: 'country_codes')
+  final List<String>? countryCodes;
 
   @override
   @StreamDateTimeConverter()

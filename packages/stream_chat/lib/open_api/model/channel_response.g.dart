@@ -27,6 +27,7 @@ ChannelResponse _$ChannelResponseFromJson(
   ),
   disabled: json['disabled'] as bool,
   filterTags: (json['filter_tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  fork: json['fork'] == null ? null : ChannelForkSummary.fromJson(json['fork'] as Map<String, dynamic>),
   frozen: json['frozen'] as bool,
   hidden: json['hidden'] as bool?,
   hideMessagesBefore: _$JsonConverterFromJson<Object, DateTime>(
@@ -80,6 +81,7 @@ Map<String, dynamic> _$ChannelResponseToJson(ChannelResponse instance) => <Strin
   ),
   'disabled': instance.disabled,
   'filter_tags': instance.filterTags,
+  'fork': instance.fork?.toJson(),
   'frozen': instance.frozen,
   'hidden': instance.hidden,
   'hide_messages_before': _$JsonConverterToJson<Object, DateTime>(

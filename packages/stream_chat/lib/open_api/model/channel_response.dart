@@ -31,6 +31,7 @@ class ChannelResponse with _$ChannelResponse {
     this.deletedAt,
     required this.disabled,
     this.filterTags,
+    this.fork,
     required this.frozen,
     this.hidden,
     this.hideMessagesBefore,
@@ -102,6 +103,10 @@ class ChannelResponse with _$ChannelResponse {
   @override
   @JsonKey(name: 'filter_tags')
   final List<String>? filterTags;
+
+  @override
+  @JsonKey(name: 'fork')
+  final ChannelForkSummary? fork;
 
   @override
   @JsonKey(name: 'frozen')

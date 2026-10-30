@@ -11775,6 +11775,121 @@ class _$UserBannedEventCopyWithImpl<$Res> implements $UserBannedEventCopyWith<$R
 }
 
 /// @nodoc
+mixin _$UserClaimedEvent {
+  UserResponseCommonFields get claimedBy;
+  DateTime get createdAt;
+  Map<String, Object?> get custom;
+  DateTime? get receivedAt;
+  String get type;
+  UserResponseCommonFields get user;
+
+  /// Create a copy of UserClaimedEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $UserClaimedEventCopyWith<UserClaimedEvent> get copyWith => _$UserClaimedEventCopyWithImpl<UserClaimedEvent>(
+    this as UserClaimedEvent,
+    _$identity,
+  );
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is UserClaimedEvent &&
+            (identical(other.claimedBy, claimedBy) || other.claimedBy == claimedBy) &&
+            (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            const DeepCollectionEquality().equals(other.custom, custom) &&
+            (identical(other.receivedAt, receivedAt) || other.receivedAt == receivedAt) &&
+            (identical(other.type, type) || other.type == type) &&
+            (identical(other.user, user) || other.user == user));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    claimedBy,
+    createdAt,
+    const DeepCollectionEquality().hash(custom),
+    receivedAt,
+    type,
+    user,
+  );
+
+  @override
+  String toString() {
+    return 'UserClaimedEvent(claimedBy: $claimedBy, createdAt: $createdAt, custom: $custom, receivedAt: $receivedAt, type: $type, user: $user)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $UserClaimedEventCopyWith<$Res> {
+  factory $UserClaimedEventCopyWith(
+    UserClaimedEvent value,
+    $Res Function(UserClaimedEvent) _then,
+  ) = _$UserClaimedEventCopyWithImpl;
+  @useResult
+  $Res call({
+    UserResponseCommonFields claimedBy,
+    DateTime createdAt,
+    Map<String, Object?> custom,
+    DateTime? receivedAt,
+    String type,
+    UserResponseCommonFields user,
+  });
+}
+
+/// @nodoc
+class _$UserClaimedEventCopyWithImpl<$Res> implements $UserClaimedEventCopyWith<$Res> {
+  _$UserClaimedEventCopyWithImpl(this._self, this._then);
+
+  final UserClaimedEvent _self;
+  final $Res Function(UserClaimedEvent) _then;
+
+  /// Create a copy of UserClaimedEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? claimedBy = null,
+    Object? createdAt = null,
+    Object? custom = null,
+    Object? receivedAt = freezed,
+    Object? type = null,
+    Object? user = null,
+  }) {
+    return _then(
+      UserClaimedEvent(
+        claimedBy: null == claimedBy
+            ? _self.claimedBy
+            : claimedBy // ignore: cast_nullable_to_non_nullable
+                  as UserResponseCommonFields,
+        createdAt: null == createdAt
+            ? _self.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime,
+        custom: null == custom
+            ? _self.custom
+            : custom // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>,
+        receivedAt: freezed == receivedAt
+            ? _self.receivedAt
+            : receivedAt // ignore: cast_nullable_to_non_nullable
+                  as DateTime?,
+        type: null == type
+            ? _self.type
+            : type // ignore: cast_nullable_to_non_nullable
+                  as String,
+        user: null == user
+            ? _self.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as UserResponseCommonFields,
+      ),
+    );
+  }
+}
+
+/// @nodoc
 mixin _$UserDeactivatedEvent {
   DateTime get createdAt;
   UserResponseCommonFields? get createdBy;

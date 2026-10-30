@@ -25,6 +25,7 @@ ReviewQueueItemResponse _$ReviewQueueItemResponseFromJson(
   confidenceScore: (json['confidence_score'] as num?)?.toDouble(),
   configKey: json['config_key'] as String?,
   countryCode: json['country_code'] as String?,
+  countryCodes: (json['country_codes'] as List<dynamic>?)?.map((e) => e as String).toList(),
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
@@ -115,6 +116,7 @@ Map<String, dynamic> _$ReviewQueueItemResponseToJson(
   'confidence_score': instance.confidenceScore,
   'config_key': instance.configKey,
   'country_code': instance.countryCode,
+  'country_codes': instance.countryCodes,
   'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'entity_creator': instance.entityCreator?.toJson(),
   'entity_creator_id': instance.entityCreatorId,

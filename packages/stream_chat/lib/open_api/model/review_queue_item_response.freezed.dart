@@ -24,6 +24,7 @@ mixin _$ReviewQueueItemResponse {
   double? get confidenceScore;
   String? get configKey;
   String? get countryCode;
+  List<String>? get countryCodes;
   DateTime get createdAt;
   EntityCreatorResponse? get entityCreator;
   String? get entityCreatorId;
@@ -82,6 +83,10 @@ mixin _$ReviewQueueItemResponse {
             (identical(other.confidenceScore, confidenceScore) || other.confidenceScore == confidenceScore) &&
             (identical(other.configKey, configKey) || other.configKey == configKey) &&
             (identical(other.countryCode, countryCode) || other.countryCode == countryCode) &&
+            const DeepCollectionEquality().equals(
+              other.countryCodes,
+              countryCodes,
+            ) &&
             (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.entityCreator, entityCreator) || other.entityCreator == entityCreator) &&
             (identical(other.entityCreatorId, entityCreatorId) || other.entityCreatorId == entityCreatorId) &&
@@ -134,6 +139,7 @@ mixin _$ReviewQueueItemResponse {
     confidenceScore,
     configKey,
     countryCode,
+    const DeepCollectionEquality().hash(countryCodes),
     createdAt,
     entityCreator,
     entityCreatorId,
@@ -169,7 +175,7 @@ mixin _$ReviewQueueItemResponse {
 
   @override
   String toString() {
-    return 'ReviewQueueItemResponse(actions: $actions, activity: $activity, aiTextSeverity: $aiTextSeverity, appeal: $appeal, assignedTo: $assignedTo, bans: $bans, call: $call, completedAt: $completedAt, confidenceScore: $confidenceScore, configKey: $configKey, countryCode: $countryCode, createdAt: $createdAt, entityCreator: $entityCreator, entityCreatorId: $entityCreatorId, entityId: $entityId, entityType: $entityType, escalated: $escalated, escalatedAt: $escalatedAt, escalatedBy: $escalatedBy, escalationMetadata: $escalationMetadata, falsePositiveFlags: $falsePositiveFlags, feedsV2Activity: $feedsV2Activity, feedsV2Reaction: $feedsV2Reaction, feedsV3Activity: $feedsV3Activity, feedsV3Comment: $feedsV3Comment, flags: $flags, flagsCount: $flagsCount, id: $id, languages: $languages, latestModeratorAction: $latestModeratorAction, mediaDisplay: $mediaDisplay, message: $message, moderationPayload: $moderationPayload, poll: $poll, reaction: $reaction, recommendedAction: $recommendedAction, reviewedAt: $reviewedAt, reviewedBy: $reviewedBy, severity: $severity, status: $status, teams: $teams, updatedAt: $updatedAt)';
+    return 'ReviewQueueItemResponse(actions: $actions, activity: $activity, aiTextSeverity: $aiTextSeverity, appeal: $appeal, assignedTo: $assignedTo, bans: $bans, call: $call, completedAt: $completedAt, confidenceScore: $confidenceScore, configKey: $configKey, countryCode: $countryCode, countryCodes: $countryCodes, createdAt: $createdAt, entityCreator: $entityCreator, entityCreatorId: $entityCreatorId, entityId: $entityId, entityType: $entityType, escalated: $escalated, escalatedAt: $escalatedAt, escalatedBy: $escalatedBy, escalationMetadata: $escalationMetadata, falsePositiveFlags: $falsePositiveFlags, feedsV2Activity: $feedsV2Activity, feedsV2Reaction: $feedsV2Reaction, feedsV3Activity: $feedsV3Activity, feedsV3Comment: $feedsV3Comment, flags: $flags, flagsCount: $flagsCount, id: $id, languages: $languages, latestModeratorAction: $latestModeratorAction, mediaDisplay: $mediaDisplay, message: $message, moderationPayload: $moderationPayload, poll: $poll, reaction: $reaction, recommendedAction: $recommendedAction, reviewedAt: $reviewedAt, reviewedBy: $reviewedBy, severity: $severity, status: $status, teams: $teams, updatedAt: $updatedAt)';
   }
 }
 
@@ -192,6 +198,7 @@ abstract mixin class $ReviewQueueItemResponseCopyWith<$Res> {
     double? confidenceScore,
     String? configKey,
     String? countryCode,
+    List<String>? countryCodes,
     DateTime createdAt,
     EntityCreatorResponse? entityCreator,
     String? entityCreatorId,
@@ -249,6 +256,7 @@ class _$ReviewQueueItemResponseCopyWithImpl<$Res> implements $ReviewQueueItemRes
     Object? confidenceScore = freezed,
     Object? configKey = freezed,
     Object? countryCode = freezed,
+    Object? countryCodes = freezed,
     Object? createdAt = null,
     Object? entityCreator = freezed,
     Object? entityCreatorId = freezed,
@@ -327,6 +335,10 @@ class _$ReviewQueueItemResponseCopyWithImpl<$Res> implements $ReviewQueueItemRes
             ? _self.countryCode
             : countryCode // ignore: cast_nullable_to_non_nullable
                   as String?,
+        countryCodes: freezed == countryCodes
+            ? _self.countryCodes
+            : countryCodes // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
         createdAt: null == createdAt
             ? _self.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable

@@ -16,11 +16,14 @@ mixin _$ChannelForkResponse {
   String get channelCid;
   int get copiedMessageCount;
   DateTime get createdAt;
+  String? get failedReason;
   Map<String, String> get messageIdMap;
+  String? get oldestSourceMessageId;
   String get sourceChannelCid;
   String get sourceMessageId;
   String get status;
   String? get taskId;
+  bool? get truncated;
 
   /// Create a copy of ChannelForkResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -41,14 +44,18 @@ mixin _$ChannelForkResponse {
             (identical(other.copiedMessageCount, copiedMessageCount) ||
                 other.copiedMessageCount == copiedMessageCount) &&
             (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
+            (identical(other.failedReason, failedReason) || other.failedReason == failedReason) &&
             const DeepCollectionEquality().equals(
               other.messageIdMap,
               messageIdMap,
             ) &&
+            (identical(other.oldestSourceMessageId, oldestSourceMessageId) ||
+                other.oldestSourceMessageId == oldestSourceMessageId) &&
             (identical(other.sourceChannelCid, sourceChannelCid) || other.sourceChannelCid == sourceChannelCid) &&
             (identical(other.sourceMessageId, sourceMessageId) || other.sourceMessageId == sourceMessageId) &&
             (identical(other.status, status) || other.status == status) &&
-            (identical(other.taskId, taskId) || other.taskId == taskId));
+            (identical(other.taskId, taskId) || other.taskId == taskId) &&
+            (identical(other.truncated, truncated) || other.truncated == truncated));
   }
 
   @override
@@ -57,16 +64,19 @@ mixin _$ChannelForkResponse {
     channelCid,
     copiedMessageCount,
     createdAt,
+    failedReason,
     const DeepCollectionEquality().hash(messageIdMap),
+    oldestSourceMessageId,
     sourceChannelCid,
     sourceMessageId,
     status,
     taskId,
+    truncated,
   );
 
   @override
   String toString() {
-    return 'ChannelForkResponse(channelCid: $channelCid, copiedMessageCount: $copiedMessageCount, createdAt: $createdAt, messageIdMap: $messageIdMap, sourceChannelCid: $sourceChannelCid, sourceMessageId: $sourceMessageId, status: $status, taskId: $taskId)';
+    return 'ChannelForkResponse(channelCid: $channelCid, copiedMessageCount: $copiedMessageCount, createdAt: $createdAt, failedReason: $failedReason, messageIdMap: $messageIdMap, oldestSourceMessageId: $oldestSourceMessageId, sourceChannelCid: $sourceChannelCid, sourceMessageId: $sourceMessageId, status: $status, taskId: $taskId, truncated: $truncated)';
   }
 }
 
@@ -81,11 +91,14 @@ abstract mixin class $ChannelForkResponseCopyWith<$Res> {
     String channelCid,
     int copiedMessageCount,
     DateTime createdAt,
+    String? failedReason,
     Map<String, String> messageIdMap,
+    String? oldestSourceMessageId,
     String sourceChannelCid,
     String sourceMessageId,
     String status,
     String? taskId,
+    bool? truncated,
   });
 }
 
@@ -104,11 +117,14 @@ class _$ChannelForkResponseCopyWithImpl<$Res> implements $ChannelForkResponseCop
     Object? channelCid = null,
     Object? copiedMessageCount = null,
     Object? createdAt = null,
+    Object? failedReason = freezed,
     Object? messageIdMap = null,
+    Object? oldestSourceMessageId = freezed,
     Object? sourceChannelCid = null,
     Object? sourceMessageId = null,
     Object? status = null,
     Object? taskId = freezed,
+    Object? truncated = freezed,
   }) {
     return _then(
       ChannelForkResponse(
@@ -124,10 +140,18 @@ class _$ChannelForkResponseCopyWithImpl<$Res> implements $ChannelForkResponseCop
             ? _self.createdAt
             : createdAt // ignore: cast_nullable_to_non_nullable
                   as DateTime,
+        failedReason: freezed == failedReason
+            ? _self.failedReason
+            : failedReason // ignore: cast_nullable_to_non_nullable
+                  as String?,
         messageIdMap: null == messageIdMap
             ? _self.messageIdMap
             : messageIdMap // ignore: cast_nullable_to_non_nullable
                   as Map<String, String>,
+        oldestSourceMessageId: freezed == oldestSourceMessageId
+            ? _self.oldestSourceMessageId
+            : oldestSourceMessageId // ignore: cast_nullable_to_non_nullable
+                  as String?,
         sourceChannelCid: null == sourceChannelCid
             ? _self.sourceChannelCid
             : sourceChannelCid // ignore: cast_nullable_to_non_nullable
@@ -144,6 +168,10 @@ class _$ChannelForkResponseCopyWithImpl<$Res> implements $ChannelForkResponseCop
             ? _self.taskId
             : taskId // ignore: cast_nullable_to_non_nullable
                   as String?,
+        truncated: freezed == truncated
+            ? _self.truncated
+            : truncated // ignore: cast_nullable_to_non_nullable
+                  as bool?,
       ),
     );
   }

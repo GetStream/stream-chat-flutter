@@ -79,6 +79,7 @@ part 'thread_updated_event.dart';
 part 'typing_start_event.dart';
 part 'typing_stop_event.dart';
 part 'user_banned_event.dart';
+part 'user_claimed_event.dart';
 part 'user_deactivated_event.dart';
 part 'user_deleted_event.dart';
 part 'user_group_created_event.dart';
@@ -180,6 +181,7 @@ sealed class WSClientEvent implements core.WsEvent {
       'typing.start' => TypingStartEvent.fromJson(json),
       'typing.stop' => TypingStopEvent.fromJson(json),
       'user.banned' => UserBannedEvent.fromJson(json),
+      'user.claimed' => UserClaimedEvent.fromJson(json),
       'user.deactivated' => UserDeactivatedEvent.fromJson(json),
       'user.deleted' => UserDeletedEvent.fromJson(json),
       'user.messages.deleted' => UserMessagesDeletedEvent.fromJson(json),
@@ -295,6 +297,7 @@ sealed class WSEvent implements core.WsEvent {
       'typing.start' => TypingStartEvent.fromJson(json),
       'typing.stop' => TypingStopEvent.fromJson(json),
       'user.banned' => UserBannedEvent.fromJson(json),
+      'user.claimed' => UserClaimedEvent.fromJson(json),
       'user.deactivated' => UserDeactivatedEvent.fromJson(json),
       'user.deleted' => UserDeletedEvent.fromJson(json),
       'user.messages.deleted' => UserMessagesDeletedEvent.fromJson(json),
