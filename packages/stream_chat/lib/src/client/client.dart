@@ -2432,15 +2432,13 @@ class StreamChatClient {
     int limit = 100,
     String? next,
   }) async {
+    const listedStatuses = {
+      ScheduledMessageStatus.scheduled,
+      ScheduledMessageStatus.sending,
+      ScheduledMessageStatus.failed,
+    };
     assert(
-      statuses == null ||
-          statuses.every(
-            (status) => const [
-              ScheduledMessageStatus.scheduled,
-              ScheduledMessageStatus.sending,
-              ScheduledMessageStatus.failed,
-            ].contains(status),
-          ),
+      statuses?.every(listedStatuses.contains) ?? true,
       'Only scheduled, sending and failed messages can be queried.',
     );
 
@@ -2458,11 +2456,12 @@ class StreamChatClient {
       return response;
     }
 
-    state.replaceScheduledMessages(
-      (it) => (cid == null || it.cid == cid) && (statuses == null || statuses.contains(it.status)),
-      response.scheduledMessages,
-    );
+    bool matchesQuery(ScheduledMessage it) {
+      if (cid != null && it.cid != cid) return false;
+      return statuses?.contains(it.status) ?? true;
+    }
 
+    state.replaceScheduledMessages(matchesQuery, response.scheduledMessages);
     return response;
   }
 

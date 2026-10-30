@@ -499,7 +499,8 @@ class Channel {
 
   /// The [scheduledMessages] as a stream.
   Stream<List<ScheduledMessage>> get scheduledMessagesStream {
-    return _client.state.scheduledMessagesStream.map(_scheduledMessagesIn).distinct(const ListEquality().equals);
+    final stream = _client.state.scheduledMessagesStream.map(_scheduledMessagesIn);
+    return stream.distinct(const ListEquality<ScheduledMessage>().equals);
   }
 
   List<ScheduledMessage> _scheduledMessagesIn(List<ScheduledMessage> scheduledMessages) {

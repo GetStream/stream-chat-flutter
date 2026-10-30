@@ -143,12 +143,13 @@ Message _messageFromContent(
   required String id,
   required User user,
 }) {
-  final custom = content['custom'] as Map<String, dynamic>? ?? const {};
-  final mentionedUserIds = content['mentioned_users'] as List<dynamic>? ?? const [];
+  final fields = {...content};
+  final custom = fields.remove('custom') as Map<String, dynamic>? ?? const {};
+  final mentionedUserIds = fields['mentioned_users'] as List<dynamic>? ?? const [];
 
   return Message.fromJson({
     ...custom,
-    ...{...content}..remove('custom'),
+    ...fields,
     'id': id,
     'user': user.toJson(),
     'mentioned_users': [
