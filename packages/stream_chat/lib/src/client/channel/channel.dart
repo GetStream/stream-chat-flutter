@@ -2269,8 +2269,8 @@ class Channel {
 
     try {
       // If we prefer offline, we first try to get the channel state from the
-      // offline storage.
-      if (preferOffline && !watch && cid != null) {
+      // offline storage, which has no scheduled messages.
+      if (preferOffline && !watch && !includeScheduledMessages && cid != null) {
         final persistenceClient = _client.chatPersistenceClient;
         if (persistenceClient != null) {
           final cachedState = await persistenceClient.getChannelStateByCid(

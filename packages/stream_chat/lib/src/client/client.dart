@@ -2966,6 +2966,16 @@ class ClientState {
             }
           }),
     );
+
+    // Events missed while offline can leave the list stale, so a list in use
+    // is loaded again.
+    _eventsSubscription?.add(
+      _client.on(EventType.connectionRecovered).listen((_) {
+        if (scheduledMessages.isEmpty) return;
+
+        _client.queryScheduledMessages().ignore();
+      }),
+    );
   }
 
   late final _locationExpirationScheduler = LiveLocationExpirationScheduler(
@@ -3051,7 +3061,8 @@ class ClientState {
   ///
   /// Holds the ones this client has loaded or seen created since it connected:
   /// load them all with [StreamChatClient.queryScheduledMessages], or a
-  /// channel's with `includeScheduledMessages` on its query.
+  /// channel's with `includeScheduledMessages` on its query. Once it holds
+  /// any, it is loaded again when the connection recovers.
   List<ScheduledMessage> get scheduledMessages => _scheduledMessagesController.value;
 
   /// The [scheduledMessages] as a stream.
@@ -3073,16 +3084,19 @@ class ClientState {
     _scheduledMessagesController.safeAdd([...current.where((it) => it.id != id)]);
   }
 
-  /// Removes the scheduled messages that match [test], then adds the
-  /// [scheduledMessages] as [updateScheduledMessages] does.
+  /// Removes the scheduled messages that match [test] and are not among
+  /// [scheduledMessages], then adds those as [updateScheduledMessages] does.
   @internal
   void replaceScheduledMessages(
     bool Function(ScheduledMessage) test,
     Iterable<ScheduledMessage> scheduledMessages,
   ) {
+    // A match that is also added stays, so a newer copy of it is not replaced
+    // by an older one.
+    final incomingIds = {for (final it in scheduledMessages) it.id};
     final byId = {
       for (final it in this.scheduledMessages)
-        if (!test(it)) it.id: it,
+        if (!test(it) || incomingIds.contains(it.id)) it.id: it,
     };
 
     for (final incoming in scheduledMessages) {

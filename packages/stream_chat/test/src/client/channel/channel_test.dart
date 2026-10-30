@@ -202,6 +202,37 @@ void main() {
     tearDown(() {
       channel.dispose();
     });
+
+    test('`.query` skips the offline cache when scheduled messages are asked for', () async {
+      when(
+        () => client.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: any(named: 'channelData'),
+          includeScheduledMessages: true,
+        ),
+      ).thenAnswer((_) async => _generateChannelState(channelId, channelType));
+      when(() => client.channelDeliveryReporter.submitForDelivery(any())).thenAnswer((_) async {});
+      await pumpEventQueue();
+      clearInteractions(client.chatPersistenceClient);
+
+      await channel.query(preferOffline: true, includeScheduledMessages: true);
+
+      verifyNever(
+        () => client.chatPersistenceClient.getChannelStateByCid(
+          channelCid,
+          messagePagination: any(named: 'messagePagination'),
+        ),
+      );
+      verify(
+        () => client.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: any(named: 'channelData'),
+          includeScheduledMessages: true,
+        ),
+      ).called(1);
+    });
   });
 
   group('Initialized Channel', () {

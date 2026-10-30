@@ -68,6 +68,17 @@ void main() {
     });
   });
 
+  test('ScheduledMessage tells apart a renamed channel', () {
+    final scheduledMessage = ScheduledMessage.fromJson(scheduledMessageJson());
+    final renamed = ScheduledMessage.fromJson({
+      ...scheduledMessageJson(),
+      'channel': const {'cid': 'messaging:general', 'type': 'messaging', 'id': 'general', 'name': 'Renamed'},
+    });
+
+    expect(ScheduledMessage.fromJson(scheduledMessageJson()), scheduledMessage);
+    expect(renamed, isNot(scheduledMessage));
+  });
+
   test('ScheduledMessage survives a JSON round trip', () {
     final scheduledMessage = ScheduledMessage.fromJson(scheduledMessageJson());
 

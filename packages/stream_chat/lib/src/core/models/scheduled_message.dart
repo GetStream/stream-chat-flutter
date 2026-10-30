@@ -108,12 +108,13 @@ class ScheduledMessage extends Equatable {
     );
   }
 
-  // The channel summary is left out: it has no timestamps of its own, so two
-  // reads of the same scheduled message would never compare equal.
+  // Only the channel's custom data, which holds its name and image, is
+  // compared: two reads of the same channel model never compare equal.
   @override
   List<Object?> get props => [
     id,
     cid,
+    channel?.extraData,
     user,
     message,
     scheduledAt,

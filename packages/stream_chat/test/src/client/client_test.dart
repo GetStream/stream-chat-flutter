@@ -4874,6 +4874,36 @@ void main() {
         expect(client.state.scheduledMessages.map((it) => it.id), unorderedEquals(['new', 'other']));
       });
 
+      test('keeps a newer copy when a complete page holds an older one', () async {
+        final edited = scheduledMessage('edited', text: 'Good evening', updatedAt: DateTime.utc(2026, 10, 30));
+        client.handleEvent(Event(type: EventType.scheduledMessageUpdated, scheduledMessage: edited));
+        await pumpEventQueue();
+
+        stubQuery([scheduledMessage('edited')]);
+        await client.queryScheduledMessages();
+
+        expect(client.state.scheduledMessages, [edited]);
+      });
+
+      test('loads them again when the connection recovers', () async {
+        clearInteractions(api.scheduledMessages);
+        stubQuery([scheduledMessage('missed')]);
+        await client.queryScheduledMessages();
+
+        client.handleEvent(Event(type: EventType.connectionRecovered));
+        await pumpEventQueue();
+
+        verify(() => api.scheduledMessages.queryScheduledMessages(limit: 100)).called(2);
+      });
+
+      test('does not load them on recovery when there are none', () async {
+        clearInteractions(api.scheduledMessages);
+        client.handleEvent(Event(type: EventType.connectionRecovered));
+        await pumpEventQueue();
+
+        verifyNever(() => api.scheduledMessages.queryScheduledMessages(limit: 100));
+      });
+
       test('keeps the ones of a channel loaded without them', () async {
         stubQuery([scheduledMessage('kept')]);
         await client.queryScheduledMessages();
