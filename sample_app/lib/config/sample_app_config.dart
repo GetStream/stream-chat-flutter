@@ -18,6 +18,7 @@ const _kThreadHeaderSurfaceStyle = 'config.threadHeaderSurfaceStyle';
 const _kForceRtl = 'config.forceRtl';
 const _kEnableDynamicColor = 'config.enableDynamicColor';
 const _kEnableReminderActions = 'config.enableReminderActions';
+const _kEnableScheduledMessages = 'config.enableScheduledMessages';
 const _kEnableDeleteForMe = 'config.enableDeleteForMe';
 const _kEnableMessageInfo = 'config.enableMessageInfo';
 const _kEnableMessageTranslation = 'config.enableMessageTranslation';
@@ -57,6 +58,7 @@ class SampleAppConfigData {
     bool forceRtl = false,
     bool enableDynamicColor = false,
     bool enableReminderActions = false,
+    bool enableScheduledMessages = false,
     bool enableDeleteForMe = false,
     bool enableMessageInfo = false,
     bool enableMessageTranslation = false,
@@ -79,6 +81,7 @@ class SampleAppConfigData {
       forceRtl: forceRtl,
       enableDynamicColor: enableDynamicColor,
       enableReminderActions: enableReminderActions,
+      enableScheduledMessages: enableScheduledMessages,
       enableDeleteForMe: enableDeleteForMe,
       enableMessageInfo: enableMessageInfo,
       enableMessageTranslation: enableMessageTranslation,
@@ -104,6 +107,7 @@ class SampleAppConfigData {
     required this.forceRtl,
     required this.enableDynamicColor,
     required this.enableReminderActions,
+    required this.enableScheduledMessages,
     required this.enableDeleteForMe,
     required this.enableMessageInfo,
     required this.enableMessageTranslation,
@@ -139,6 +143,7 @@ class SampleAppConfigData {
       forceRtl: prefs.getBool(_kForceRtl, defaultValue: false).getValue(),
       enableDynamicColor: prefs.getBool(_kEnableDynamicColor, defaultValue: false).getValue(),
       enableReminderActions: prefs.getBool(_kEnableReminderActions, defaultValue: false).getValue(),
+      enableScheduledMessages: prefs.getBool(_kEnableScheduledMessages, defaultValue: false).getValue(),
       enableDeleteForMe: prefs.getBool(_kEnableDeleteForMe, defaultValue: false).getValue(),
       enableMessageInfo: prefs.getBool(_kEnableMessageInfo, defaultValue: false).getValue(),
       enableMessageTranslation: prefs.getBool(_kEnableMessageTranslation, defaultValue: false).getValue(),
@@ -206,6 +211,10 @@ class SampleAppConfigData {
   /// Whether reminder actions appear in the message context menu.
   final bool enableReminderActions;
 
+  /// Whether messages can be scheduled from the composer, with a tab listing
+  /// the scheduled ones.
+  final bool enableScheduledMessages;
+
   /// Whether the "Delete for Me" action appears in the message context menu.
   final bool enableDeleteForMe;
 
@@ -257,6 +266,7 @@ class SampleAppConfigData {
     bool? forceRtl,
     bool? enableDynamicColor,
     bool? enableReminderActions,
+    bool? enableScheduledMessages,
     bool? enableDeleteForMe,
     bool? enableMessageInfo,
     bool? enableMessageTranslation,
@@ -291,6 +301,7 @@ class SampleAppConfigData {
       forceRtl: forceRtl ?? this.forceRtl,
       enableDynamicColor: enableDynamicColor ?? this.enableDynamicColor,
       enableReminderActions: enableReminderActions ?? this.enableReminderActions,
+      enableScheduledMessages: enableScheduledMessages ?? this.enableScheduledMessages,
       enableDeleteForMe: enableDeleteForMe ?? this.enableDeleteForMe,
       enableMessageInfo: enableMessageInfo ?? this.enableMessageInfo,
       enableMessageTranslation: enableMessageTranslation ?? this.enableMessageTranslation,
@@ -320,6 +331,7 @@ class SampleAppConfigData {
     prefs.setBool(_kForceRtl, forceRtl);
     prefs.setBool(_kEnableDynamicColor, enableDynamicColor);
     prefs.setBool(_kEnableReminderActions, enableReminderActions);
+    prefs.setBool(_kEnableScheduledMessages, enableScheduledMessages);
     prefs.setBool(_kEnableDeleteForMe, enableDeleteForMe);
     prefs.setBool(_kEnableMessageInfo, enableMessageInfo);
     prefs.setBool(_kEnableMessageTranslation, enableMessageTranslation);

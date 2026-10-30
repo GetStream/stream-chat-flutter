@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- Added `StreamScheduledMessageListController` and `StreamScheduledMessageListEventHandler`, a paged list of the current user's scheduled messages that stays current as they are scheduled, edited, sent or deleted.
 - Added `StreamMessageComposerController.skipEnrichUrl` and a `dismissed` parameter to `StreamMessageComposerController.clearOGAttachment`, to send a message without a link preview the user removed.
 
 🔄 Changed

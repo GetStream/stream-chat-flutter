@@ -71,6 +71,7 @@ class StreamMessageComposer extends StatelessWidget {
     super.key,
     void Function(Message)? onMessageSent,
     FutureOr<Message> Function(Message)? preMessageSending,
+    ValueSetter<StreamMessageComposerController>? onSendLongPress,
     StreamMessageComposerController? messageComposerController,
     FocusNode? focusNode,
     bool disableAttachments = false,
@@ -109,6 +110,7 @@ class StreamMessageComposer extends StatelessWidget {
   }) : props = .new(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
+         onSendLongPress: onSendLongPress,
          messageComposerController: messageComposerController,
          focusNode: focusNode,
          disableAttachments: disableAttachments,
@@ -185,6 +187,7 @@ class MessageComposerProps {
   const MessageComposerProps({
     this.onMessageSent,
     this.preMessageSending,
+    this.onSendLongPress,
     this.messageComposerController,
     this.focusNode,
     this.disableAttachments = false,
@@ -232,6 +235,13 @@ class MessageComposerProps {
   ///
   /// Use this to transform the message.
   final FutureOr<Message> Function(Message)? preMessageSending;
+
+  /// Called with the composer's controller when the send button is
+  /// long-pressed while it would send a new message.
+  ///
+  /// The composer is left as it is, so the callback decides what to do with
+  /// the message, such as scheduling it and then resetting the controller.
+  final ValueSetter<StreamMessageComposerController>? onSendLongPress;
 
   /// The controller for the message composer.
   final StreamMessageComposerController? messageComposerController;
@@ -461,6 +471,7 @@ class MessageComposerProps {
   MessageComposerProps copyWith({
     void Function(Message)? onMessageSent,
     FutureOr<Message> Function(Message)? preMessageSending,
+    ValueSetter<StreamMessageComposerController>? onSendLongPress,
     StreamMessageComposerController? messageComposerController,
     FocusNode? focusNode,
     bool? disableAttachments,
@@ -499,6 +510,7 @@ class MessageComposerProps {
     return MessageComposerProps(
       onMessageSent: onMessageSent ?? this.onMessageSent,
       preMessageSending: preMessageSending ?? this.preMessageSending,
+      onSendLongPress: onSendLongPress ?? this.onSendLongPress,
       messageComposerController: messageComposerController ?? this.messageComposerController,
       focusNode: focusNode ?? this.focusNode,
       disableAttachments: disableAttachments ?? this.disableAttachments,
@@ -1082,6 +1094,10 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               placeholder: _buildPlaceholder(context),
               focusNode: focusNode,
               onSendPressed: sendMessage,
+              onSendLongPress: switch (widget.props.onSendLongPress) {
+                final onSendLongPress? => () => onSendLongPress(_effectiveController),
+                null => null,
+              },
               canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
               audioRecorderController: canRecordVoice ? _audioRecorderController : null,
               sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,
