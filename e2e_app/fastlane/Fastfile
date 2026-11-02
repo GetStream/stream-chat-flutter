@@ -240,18 +240,25 @@ def run_time_limit(target, selected, files)
   [(15 + (2 * [tests, 1].max)) * 60, 45 * 60].min
 end
 
-# How long the app may take, once its APK is installed, to print anything. A healthy
-# run reports its first test within seconds; seen on CI, an app that installed but
-# never started a test would otherwise hold the run until its time limit.
+# How long the app may take, once its APK starts installing, to print anything. A
+# healthy run installs and reports its first test within seconds; seen on CI, an app
+# that installed but never started a test would otherwise hold the run until its time
+# limit.
 STARTUP_LIMIT = 4 * 60
 
 # Runs [argv], whose output is copied to [log], and returns whether it succeeded. A run
 # whose app installs but prints nothing within STARTUP_LIMIT is stopped and fails,
-# after [on_stalled] is called. [argv] runs from the app folder, like `sh`, and without
+# after [on_stalled] is called, and so does one that can't be started. [argv] runs from the app folder, like `sh`, and without
 # a shell in between, so its process group is the one `timeout` creates and stopping
 # it reaches flutter too.
 def run_watching_startup(argv, log, on_stalled:)
-  pid = Process.spawn(*argv, pgroup: true, chdir: root_path)
+  pid =
+    begin
+      Process.spawn(*argv, pgroup: true, chdir: root_path)
+    rescue StandardError => e
+      UI.important("Could not start flutter test: #{e.message}")
+      return false
+    end
   installed_at = nil
   loop do
     _, status = Process.wait2(pid, Process::WNOHANG)

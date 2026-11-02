@@ -12,7 +12,7 @@ runs:
         # The NDK Flutter sets for plugins (`flutter.ndkVersion`), read from the
         # installed Flutter so an upgrade keeps it in step.
         ndk=$(grep -oP 'ndkVersion: String = "\K[0-9.]+' \
-          "$FLUTTER_ROOT/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt")
+          "$FLUTTER_ROOT/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt" || true)
         if [ -z "$ndk" ]; then
           echo "::error::Could not read flutter.ndkVersion from the Flutter SDK"
           exit 1
@@ -34,12 +34,15 @@ runs:
         # sdkmanager unpacks the download itself. Gradle's own NDK download can
         # arrive corrupt ("Archive is not a ZIP archive"), and then every retry
         # of the build reuses the broken copy.
+        # A stalled sdkmanager fails its attempt instead of holding the job.
         for attempt in 1 2 3; do
-          yes | "$sdkmanager" --install "ndk;$ndk" "cmake;$cmake" > /dev/null || true
           installed && break
-          echo "::warning::Installing NDK $ndk and CMake $cmake failed (attempt $attempt); retrying"
-          rm -rf "$ndk_dir" "$ANDROID_HOME/cmake/$cmake" "$ANDROID_HOME/.temp"
-          sleep 15
+          if [ "$attempt" -gt 1 ]; then
+            echo "::warning::Installing NDK $ndk and CMake $cmake failed; retrying (attempt $attempt)"
+            rm -rf "$ndk_dir" "$ANDROID_HOME/cmake/$cmake" "$ANDROID_HOME/.temp"
+            sleep 15
+          fi
+          yes | timeout 600 "$sdkmanager" --install "ndk;$ndk" "cmake;$cmake" > /dev/null || true
         done
 
         if ! installed; then
