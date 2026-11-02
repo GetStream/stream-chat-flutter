@@ -1659,6 +1659,31 @@ void main() {
         ).called(1);
       });
 
+      test('queryChannelsOnline returns channels with their active member count', () async {
+        when(
+          () => api.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            includeActiveMemberCount: any(named: 'includeActiveMemberCount'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).thenAnswer(
+          (_) async => QueryChannelsResponse()
+            ..channels = [
+              ChannelState(channel: ChannelModel(cid: 'test-type:test-id', activeMemberCount: 3)),
+            ],
+        );
+
+        final channels = await client.queryChannelsOnline(includeActiveMemberCount: true);
+
+        expect(channels.single.activeMemberCount, 3);
+      });
+
       test(
         'concurrent calls share the same error when the request fails',
         () async {
