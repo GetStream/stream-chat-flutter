@@ -4,12 +4,14 @@
 
 - Added quiet hours to push preferences, set and cleared through `PushPreferenceInput` and reported on `PushPreference.schedule`.
 - Added `includeActiveMemberCount` to the channel queries, which fills the new `Channel.activeMemberCount`: the number of members who are neither deactivated nor deleted.
-- Added `ChatPersistenceClient.deleteMessagesCreatedBefore` for removing a channel's stored messages from before a given time.
+- Added `ChatPersistenceClient.truncateChannel` for removing a channel's stored messages from before a given time.
+- Added `ChannelClientState.clearMessages` for emptying the loaded messages.
 
 🔄 Changed
 
 - `Attachment.type` is now `url_preview` for every attachment scraped from a link in the message text, including a link to an image or file. Use `Attachment.rawType` to read the type it was created or received with.
 - `Attachment.toJson` keeps the original `type` of an attachment scraped from a link, such as `video` or `image`, instead of writing `url_preview`.
+- `ChannelClientState.truncate` now truncates the channel: it removes the messages, pinned messages and thread replies from before an optional `truncatedAt`, keeps messages not sent yet, and lowers the unread count. To only empty the loaded messages, as `truncate` did before, use `clearMessages`.
 
 🐞 Fixed
 

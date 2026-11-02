@@ -1749,7 +1749,7 @@ void main() {
       when(() => mockChannel.state.messages).thenAnswer((_) => stateMessages);
       when(() => mockChannel.state.isUpToDate).thenReturn(true);
       when(() => mockChannel.state.unreadCount).thenReturn(0);
-      when(() => mockChannel.state.truncate()).thenAnswer((_) {
+      when(() => mockChannel.state.clearMessages()).thenAnswer((_) {
         stateMessages = [];
       });
       when(
@@ -1773,14 +1773,14 @@ void main() {
     });
 
     testWidgets(
-      'truncates the existing window before querying the latest messages',
+      'clears the existing window before querying the latest messages',
       (tester) async {
         final streamChannel = await _pumpStreamChannel(tester, mockChannel);
 
         await streamChannel.reloadChannel();
 
         verifyInOrder([
-          () => mockChannel.state.truncate(),
+          () => mockChannel.state.clearMessages(),
           () => mockChannel.query(
             preferOffline: any(named: 'preferOffline'),
             messagesPagination: any(named: 'messagesPagination'),

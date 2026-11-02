@@ -1,5 +1,6 @@
 // ignore_for_file: lines_longer_than_80_chars, cascade_invocations, deprecated_member_use_from_same_package, avoid_redundant_argument_values
 
+import 'package:clock/clock.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
@@ -2024,7 +2025,9 @@ void main() {
       setUp(() {
         persistenceClient = MockPersistenceClient();
         when(() => client.chatPersistenceClient).thenReturn(persistenceClient);
-        when(() => persistenceClient.deleteMessagesCreatedBefore(any(), any())).thenAnswer((_) async {});
+        when(
+          () => persistenceClient.truncateChannel(any(), truncatedAt: any(named: 'truncatedAt')),
+        ).thenAnswer((_) async {});
         when(() => persistenceClient.getChannelThreads(any())).thenAnswer((_) async => {});
 
         final channelState = _generateChannelState(channelId, channelType);
@@ -2074,7 +2077,7 @@ void main() {
         client.addEvent(event);
         await Future.delayed(Duration.zero);
 
-        verify(() => persistenceClient.deleteMessagesCreatedBefore(channel.cid!, event.createdAt)).called(1);
+        verify(() => persistenceClient.truncateChannel(channel.cid!, truncatedAt: event.createdAt)).called(1);
       });
 
       test('${EventType.notificationChannelTruncated} keeps the event system message', () async {
@@ -2232,6 +2235,54 @@ void main() {
         await Future.delayed(Duration.zero);
 
         expect(channel.state!.threads[parent.id]?.map((m) => m.id), ['new-reply']);
+      });
+
+      test('truncate without a truncatedAt removes the messages sent before now', () {
+        final now = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.updateMessage(messageAt('before', now.subtract(const Duration(minutes: 1))));
+        channel.state!.updateMessage(messageAt('after', now.add(const Duration(minutes: 1))));
+
+        withClock(Clock.fixed(now), () => channel.state!.truncate());
+
+        expect(channel.state!.messages.map((m) => m.id), ['after']);
+      });
+
+      test('clearMessages removes the loaded messages', () {
+        seedMessage('loaded');
+
+        channel.state!.clearMessages();
+
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test('clearMessages keeps the pinned messages', () {
+        final pinned = messageAt('pinned', DateTime.utc(2026, 10, 29, 12));
+        channel.state!.updateChannelState(
+          ChannelState(pinnedMessages: [pinned.copyWith(pinned: true, pinnedAt: pinned.createdAt)]),
+        );
+
+        channel.state!.clearMessages();
+
+        expect(channel.state!.pinnedMessages.map((m) => m.id), ['pinned']);
+      });
+
+      test('clearMessages keeps the thread replies', () {
+        when(() => persistenceClient.updateChannelThreads(any(), any())).thenAnswer((_) async {});
+        final reply = messageAt('reply', DateTime.utc(2026, 10, 29, 12)).copyWith(parentId: 'parent');
+        channel.state!.updateThreadInfo('parent', [reply]);
+
+        channel.state!.clearMessages();
+
+        expect(channel.state!.threads['parent']?.map((m) => m.id), ['reply']);
+      });
+
+      test('clearMessages keeps the unread count', () {
+        seedMessage('loaded');
+        channel.state!.unreadCount = 3;
+
+        channel.state!.clearMessages();
+
+        expect(channel.state!.unreadCount, 3);
       });
 
       test('a channel loaded with a truncatedAt leaves out the messages sent before it', () {

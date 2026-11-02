@@ -568,7 +568,7 @@ void main() {
       when(() => persistentClient.state).thenReturn(FakeClientState());
 
       final persistence = persistentClient.chatPersistenceClient;
-      when(() => persistence.deleteMessagesCreatedBefore(any(), any())).thenAnswer((_) async {});
+      when(() => persistence.truncateChannel(any(), truncatedAt: any(named: 'truncatedAt'))).thenAnswer((_) async {});
 
       final systemMessage = Message(id: 'system-id');
       final event = Event(
@@ -581,7 +581,7 @@ void main() {
       await Future<void>.value();
 
       verifyInOrder([
-        () => persistence.deleteMessagesCreatedBefore('messaging:test', event.createdAt),
+        () => persistence.truncateChannel('messaging:test', truncatedAt: event.createdAt),
         () => mutations.onChannelTruncated(createdBefore: event.createdAt, message: systemMessage),
       ]);
     });

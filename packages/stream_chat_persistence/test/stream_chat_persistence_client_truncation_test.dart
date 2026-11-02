@@ -83,7 +83,7 @@ void main() {
     expect(messages.map((it) => it.id), ['system']);
   });
 
-  test('deleteMessagesCreatedBefore removes only the stored messages sent before the cutoff', () async {
+  test('truncateChannel removes only the stored messages sent before the cutoff', () async {
     final pending = Message(
       id: 'pending',
       text: 'pending',
@@ -101,26 +101,44 @@ void main() {
       ),
     ]);
 
-    await client.deleteMessagesCreatedBefore(channel.cid, truncatedAt);
+    await client.truncateChannel(channel.cid, truncatedAt: truncatedAt);
 
     final messages = await client.getMessagesByCid(channel.cid);
     expect(messages.map((it) => it.id), ['after', 'pending']);
   });
 
-  test('deleteMessagesCreatedBefore keeps the stored messages of other channels', () async {
+  test('truncateChannel without a truncatedAt removes the stored messages sent before now', () async {
+    final now = DateTime.now();
+    await client.updateChannelStates([
+      ChannelState(
+        channel: channel,
+        messages: [
+          _message('earlier', createdAt: now.subtract(const Duration(hours: 1))),
+          _message('later', createdAt: now.add(const Duration(hours: 1))),
+        ],
+      ),
+    ]);
+
+    await client.truncateChannel(channel.cid);
+
+    final messages = await client.getMessagesByCid(channel.cid);
+    expect(messages.map((it) => it.id), ['later']);
+  });
+
+  test('truncateChannel keeps the stored messages of other channels', () async {
     final other = ChannelModel(type: 'messaging', id: 'other');
     final before = _message('before', createdAt: truncatedAt.subtract(const Duration(minutes: 1)));
     await client.updateChannelStates([
       ChannelState(channel: other, messages: [before]),
     ]);
 
-    await client.deleteMessagesCreatedBefore(channel.cid, truncatedAt);
+    await client.truncateChannel(channel.cid, truncatedAt: truncatedAt);
 
     final messages = await client.getMessagesByCid(other.cid);
     expect(messages.map((it) => it.id), ['before']);
   });
 
-  test('deleteMessagesCreatedBefore removes the stored pinned messages sent before the cutoff', () async {
+  test('truncateChannel removes the stored pinned messages sent before the cutoff', () async {
     final pinnedAt = truncatedAt.add(const Duration(minutes: 5));
     await client.updateChannelStates([
       ChannelState(
@@ -132,7 +150,7 @@ void main() {
       ),
     ]);
 
-    await client.deleteMessagesCreatedBefore(channel.cid, truncatedAt);
+    await client.truncateChannel(channel.cid, truncatedAt: truncatedAt);
 
     final pinned = await client.getPinnedMessagesByCid(channel.cid);
     expect(pinned.map((it) => it.id), ['after']);

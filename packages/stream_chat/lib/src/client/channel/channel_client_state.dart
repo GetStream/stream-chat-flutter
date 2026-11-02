@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
@@ -545,22 +546,23 @@ class ChannelClientState {
   }
 
   /// Removes the messages, pinned messages and thread replies created before
-  /// [createdBefore], keeping the messages not sent yet.
+  /// [truncatedAt], or before now when omitted.
   ///
-  /// Also lowers the unread count to the number of messages left, when the
-  /// loaded messages are known to include every message after
-  /// [createdBefore].
-  @internal
-  void truncateBefore(DateTime createdBefore) {
+  /// Messages not sent yet are kept. The unread count is lowered to the
+  /// messages left when the loaded messages include every message after the
+  /// cutoff. To only empty the loaded messages, consider [clearMessages].
+  void truncate({DateTime? truncatedAt}) {
+    final cutoff = truncatedAt ?? clock.now();
+
     final loaded = messages;
-    final remaining = _withoutTruncated(loaded, createdBefore)!;
+    final remaining = _withoutTruncated(loaded, cutoff)!;
     final pinnedMessages = _channelState.pinnedMessages;
     _channelState = _channelState.copyWith(
       messages: remaining,
-      pinnedMessages: _withoutTruncated(pinnedMessages, createdBefore),
+      pinnedMessages: _withoutTruncated(pinnedMessages, cutoff),
     );
 
-    _removeThreadRepliesCreatedBefore(createdBefore);
+    _removeThreadRepliesCreatedBefore(cutoff);
 
     // Removing messages from the start of an up-to-date list leaves every
     // message sent after the cutoff, which bounds the unread count.
@@ -572,19 +574,26 @@ class ChannelClientState {
 
   void _removeThreadRepliesCreatedBefore(DateTime createdBefore) {
     final threads = this.threads;
-    final trimmed = {
-      for (final MapEntry(:key, :value) in threads.entries) key: _withoutTruncated(value, createdBefore)!,
-    };
+    final trimmed = threads.map(
+      (parentId, replies) {
+        final kept = _withoutTruncated(replies, createdBefore)!;
+        return MapEntry(parentId, kept);
+      },
+    );
 
-    final changed = threads.keys.any((it) => !identical(threads[it], trimmed[it]));
-    if (changed) _threads = trimmed;
+    bool isTrimmed(String parentId) {
+      return !identical(threads[parentId], trimmed[parentId]);
+    }
+
+    if (threads.keys.any(isTrimmed)) _threads = trimmed;
   }
 
-  /// Delete all channel messages.
-  void truncate() {
-    _channelState = _channelState.copyWith(
-      messages: [],
-    );
+  /// Removes the loaded messages, so a different range of them can be loaded.
+  ///
+  /// Pinned messages, thread replies and the unread count are left as they
+  /// are.
+  void clearMessages() {
+    _channelState = _channelState.copyWith(messages: []);
   }
 
   /// Drops the oldest messages, keeping at most [maxMessages].

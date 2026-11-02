@@ -411,8 +411,8 @@ class ChannelStateMutations {
     _state.updateRead([updatedRead]);
   }
 
-  /// Removes the messages and thread replies created before [createdBefore],
-  /// and lowers the unread count to the messages left.
+  /// Truncates the channel at [createdBefore], removing the older messages,
+  /// pinned messages and thread replies.
   ///
   /// Applies the truncation system [message] when provided, and makes
   /// [truncatedAt], when provided, the channel's truncation time.
@@ -421,7 +421,7 @@ class ChannelStateMutations {
     DateTime? truncatedAt,
     Message? message,
   }) {
-    _state.truncateBefore(createdBefore);
+    _state.truncate(truncatedAt: createdBefore);
 
     if (truncatedAt != null) {
       final channelState = _state.channelState;

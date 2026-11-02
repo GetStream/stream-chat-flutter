@@ -209,10 +209,10 @@ void main() {
       persistenceClient.deletePinnedMessageByCid(messageId);
     });
 
-    test('deleteMessagesCreatedBefore removes every message of the channel by default', () async {
+    test('truncateChannel removes every message of the channel by default', () async {
       final client = _RecordingPersistenceClient();
 
-      await client.deleteMessagesCreatedBefore('test:cid', DateTime.utc(2026, 10, 29));
+      await client.truncateChannel('test:cid', truncatedAt: DateTime.utc(2026, 10, 29));
 
       expect(client.deletedMessageCids, ['test:cid']);
     });
