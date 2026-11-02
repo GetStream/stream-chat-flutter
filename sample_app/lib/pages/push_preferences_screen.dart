@@ -19,7 +19,7 @@ class _PushPreferencesScreenState extends State<PushPreferencesScreen> {
   var _saving = false;
 
   Future<void> _save(PushPreferenceInput input) async {
-    if (!mounted) return;
+    if (!mounted || _saving) return;
     final client = StreamChat.of(context).client;
     final messenger = StreamSnackbarMessenger.maybeOf(context);
 
@@ -76,6 +76,7 @@ class _PushPreferencesScreenState extends State<PushPreferencesScreen> {
                 title: 'Messages',
                 value: preferences?.chatLevel ?? ChatLevel.all,
                 segments: const {
+                  ChatLevel.defaultValue: 'Default',
                   ChatLevel.all: 'All',
                   ChatLevel.directMentions: 'Mentions',
                   ChatLevel.none: 'None',
@@ -89,6 +90,7 @@ class _PushPreferencesScreenState extends State<PushPreferencesScreen> {
                 title: 'Calls',
                 value: preferences?.callLevel ?? CallLevel.all,
                 segments: const {
+                  CallLevel.defaultValue: 'Default',
                   CallLevel.all: 'All',
                   CallLevel.none: 'None',
                 },
@@ -202,6 +204,13 @@ class _PushPreferencesScreenState extends State<PushPreferencesScreen> {
     if (!on) return _save(const PushPreferenceInput(removeSchedule: true));
 
     final timezone = await _localTimezone();
+    if (timezone == null) {
+      if (!mounted) return;
+      final messenger = StreamSnackbarMessenger.maybeOf(context);
+      messenger?.show(StreamSnackbar(message: const Text("Couldn't read the device's time zone")));
+      return;
+    }
+
     return _save(
       PushPreferenceInput(
         schedule: PushSchedule(
@@ -218,7 +227,7 @@ class _PushPreferencesScreenState extends State<PushPreferencesScreen> {
     final available = await _availableTimezones();
     if (!context.mounted) return;
 
-    final zones = {schedule.timezone, local, ...available};
+    final zones = {schedule.timezone, ?local, ...available};
 
     final choice = await _showOptionsSheet<String>(
       context,
@@ -429,12 +438,12 @@ const _dayLabels = {
   QuietHoursDay.sunday: 'Sun',
 };
 
-// The device's IANA time zone, or UTC if the platform can't report one.
-Future<String> _localTimezone() async {
+// The device's IANA time zone, or null if the platform can't report one.
+Future<String?> _localTimezone() async {
   try {
     return (await FlutterTimezone.getLocalTimezone()).identifier;
   } catch (_) {
-    return 'UTC';
+    return null;
   }
 }
 

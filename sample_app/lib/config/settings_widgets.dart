@@ -215,7 +215,16 @@ class SettingsValueRow extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         spacing: spacing.xxs,
         children: [
-          Text(value, style: textTheme.captionEmphasis.copyWith(color: colorScheme.textTertiary)),
+          // Capped so a long value, such as a time zone, leaves room for the title.
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: MediaQuery.sizeOf(context).width * 0.4),
+            child: Text(
+              value,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: textTheme.captionEmphasis.copyWith(color: colorScheme.textTertiary),
+            ),
+          ),
           Icon(context.streamIcons.chevronRight, size: 20, color: colorScheme.textTertiary),
         ],
       ),
