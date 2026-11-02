@@ -34,6 +34,15 @@ void main() {
     expect(replies, isEmpty);
   });
 
+  testWidgets('StreamMessageItem ignores a swipe on a message deleted for the current user', (tester) async {
+    final replies = <Message>[];
+    await _pumpMessageItem(tester, _message(state: MessageState.deletedForMe), onReplyTap: replies.add);
+
+    await _swipe(tester);
+
+    expect(replies, isEmpty);
+  });
+
   testWidgets('StreamMessageItem keeps its state when a message finishes sending', (tester) async {
     final row = find.descendant(of: find.byType(StreamMessageItem), matching: find.byType(Material)).first;
     await _pumpMessageItem(tester, _message(state: MessageState.sending), onReplyTap: (_) {});

@@ -734,7 +734,8 @@ class DefaultStreamMessageItem extends StatelessWidget {
 
     final channel = StreamChannel.maybeOf(context)?.channel;
     final canQuote = channel?.canQuoteMessage ?? true;
-    final isSettled = !message.isDeleted && !message.state.isOutgoing && !message.state.isFailed;
+    final state = message.state;
+    final isSettled = !message.isDeleted && !(state.isDeleted || state.isOutgoing || state.isFailed);
 
     // Kept in place and turned off, so the message keeps its state as it
     // moves between states.
