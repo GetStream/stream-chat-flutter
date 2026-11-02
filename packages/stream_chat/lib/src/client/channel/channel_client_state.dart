@@ -589,12 +589,12 @@ class ChannelClientState {
     }).toList();
   }
 
-  // Removes the thread replies created before [cutoff].
-  void _truncateThreads(DateTime cutoff) {
+  // Removes the thread replies created before [truncatedAt].
+  void _truncateThreads(DateTime truncatedAt) {
     final threads = this.threads;
     final truncated = threads.map(
       (parentId, replies) {
-        final kept = _truncateMessages(replies, cutoff)!;
+        final kept = _truncateMessages(replies, truncatedAt)!;
         return MapEntry(parentId, kept);
       },
     );
