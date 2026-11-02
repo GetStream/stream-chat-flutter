@@ -421,9 +421,10 @@ class ChannelStateMutations {
     _state.truncate(truncatedAt: channel.truncatedAt);
 
     final channelState = _state.channelState;
+    final current = channelState.channel;
     final lastMessageAt = channel.lastMessageAt;
-    if (lastMessageAt != null && lastMessageAt != channelState.channel?.lastMessageAt) {
-      final updated = channelState.channel?.copyWith(lastMessageAt: lastMessageAt);
+    if (lastMessageAt != null && lastMessageAt != current?.lastMessageAt) {
+      final updated = current?.copyWith(lastMessageAt: lastMessageAt);
       _state.updateChannelState(channelState.copyWith(channel: updated));
     }
 

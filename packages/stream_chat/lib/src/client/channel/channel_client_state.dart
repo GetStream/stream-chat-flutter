@@ -30,8 +30,8 @@ class ChannelClientState {
 
     final truncatedAt = channelState.channel?.truncatedAt;
     final seededState = channelState.copyWith(
-      messages: _survivingTruncationAt(channelState.messages, truncatedAt),
-      pinnedMessages: _survivingTruncationAt(
+      messages: _truncateMessages(channelState.messages, truncatedAt),
+      pinnedMessages: _truncateMessages(
         MessageMerging.sortPinnedMessages(channelState.pinnedMessages),
         truncatedAt,
       ),
@@ -70,9 +70,9 @@ class ChannelClientState {
         .then((_) => retryFailedMessages());
   }
 
-  // Keeps the messages created at or after [truncatedAt], and the messages not
-  // sent yet. Returns [messages] itself when every message survives.
-  static List<Message>? _survivingTruncationAt(
+  // Returns the [messages] created at or after [truncatedAt], and the ones not
+  // sent yet; [messages] itself when none is older.
+  static List<Message>? _truncateMessages(
     List<Message>? messages,
     DateTime? truncatedAt,
   ) {
@@ -558,55 +558,60 @@ class ChannelClientState {
 
     final channelState = _channelState;
     final loaded = channelState.messages ?? const <Message>[];
-    final remaining = _survivingTruncationAt(loaded, cutoff)!;
+    final remaining = _truncateMessages(loaded, cutoff)!;
 
     final channel = channelState.channel;
-    final latestTruncatedAt = [channel?.truncatedAt, truncatedAt].nonNulls.maxOrNull;
+    final latestTruncatedAt = [
+      channel?.truncatedAt,
+      truncatedAt,
+    ].nonNulls.maxOrNull;
 
-    // Written at once, so the state streams update a single time.
+    // Removing messages from the start of an up-to-date list leaves every
+    // message sent after the cutoff, which bounds the unread count.
+    final knowsMessagesLeft = isUpToDate && remaining.length < loaded.length;
+    final sentLeft = remaining.where((it) => it.remoteCreatedAt != null);
+    final unreadCap = knowsMessagesLeft ? sentLeft.length : null;
+
+    // Writes the state directly: the message merge in [updateChannelState]
+    // would undo the removal. One write also updates the state streams once.
     _channelState = channelState.copyWith(
       channel: channel?.copyWith(truncatedAt: latestTruncatedAt),
       messages: remaining,
-      pinnedMessages: _survivingTruncationAt(channelState.pinnedMessages, cutoff),
-      read: _readsCappedAfterTruncation(channelState.read, loaded, remaining),
+      pinnedMessages: _truncateMessages(channelState.pinnedMessages, cutoff),
+      read: _capUnreadCount(channelState.read, at: unreadCap),
     );
 
-    _removeThreadRepliesCreatedBefore(cutoff);
+    _truncateThreads(cutoff);
   }
 
-  // Lowers the current user's unread count to the messages left, when they
-  // are known: removing messages from the start of an up-to-date list leaves
-  // every message sent after the cutoff.
-  List<Read>? _readsCappedAfterTruncation(
-    List<Read>? reads,
-    List<Message> loaded,
-    List<Message> remaining,
-  ) {
-    if (!isUpToDate || remaining.length == loaded.length) return reads;
+  // Returns [reads] with the current user's unread count lowered to [at], or
+  // unchanged when [at] is null.
+  List<Read>? _capUnreadCount(List<Read>? reads, {required int? at}) {
+    if (at == null) return reads;
 
-    final sent = remaining.where((it) => it.remoteCreatedAt != null).length;
     final currentUserId = _client.state.currentUser?.id;
     return reads?.map((read) {
       if (read.user.id != currentUserId) return read;
-      if (read.unreadMessages <= sent) return read;
-      return read.copyWith(unreadMessages: sent);
+      if (read.unreadMessages <= at) return read;
+      return read.copyWith(unreadMessages: at);
     }).toList();
   }
 
-  void _removeThreadRepliesCreatedBefore(DateTime createdBefore) {
+  // Removes the thread replies created before [cutoff].
+  void _truncateThreads(DateTime cutoff) {
     final threads = this.threads;
-    final trimmed = threads.map(
+    final truncated = threads.map(
       (parentId, replies) {
-        final kept = _survivingTruncationAt(replies, createdBefore)!;
+        final kept = _truncateMessages(replies, cutoff)!;
         return MapEntry(parentId, kept);
       },
     );
 
-    bool isTrimmed(String parentId) {
-      return !identical(threads[parentId], trimmed[parentId]);
+    bool isChanged(String parentId) {
+      return !identical(threads[parentId], truncated[parentId]);
     }
 
-    if (threads.keys.any(isTrimmed)) _threads = trimmed;
+    if (threads.keys.any(isChanged)) _threads = truncated;
   }
 
   /// Removes the loaded messages, so a different range of them can be loaded.
@@ -672,7 +677,7 @@ class ChannelClientState {
     ].nonNulls.maxOrNull;
 
     _channelState = _channelState.copyWith(
-      messages: _survivingTruncationAt(newMessages, truncatedAt),
+      messages: _truncateMessages(newMessages, truncatedAt),
       channel: newChannel?.copyWith(truncatedAt: truncatedAt),
       watchers: newWatchers.toList(),
       watcherCount: updatedState.watcherCount,
@@ -680,7 +685,7 @@ class ChannelClientState {
       membership: updatedState.membership,
       read: newReads.toList(),
       draft: updatedState.draft,
-      pinnedMessages: _survivingTruncationAt(newPinnedMessages, truncatedAt),
+      pinnedMessages: _truncateMessages(newPinnedMessages, truncatedAt),
       pendingMessages: updatedState.pendingMessages,
       pushPreferences: updatedState.pushPreferences,
       activeLiveLocations: updatedState.activeLiveLocations,
