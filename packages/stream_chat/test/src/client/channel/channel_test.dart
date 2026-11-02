@@ -5590,6 +5590,19 @@ void main() {
       expect(emitted, [3, 5]);
     });
 
+    test('activeMemberCount reads the count the channel was loaded with', () {
+      final channelState = _generateChannelState('test-channel-id', 'test-channel-type');
+      final channel = Channel.fromState(
+        client,
+        channelState.copyWith(
+          channel: channelState.channel!.copyWith(activeMemberCount: 3),
+        ),
+      );
+      addTearDown(channel.dispose);
+
+      expect(channel.activeMemberCount, 3);
+    });
+
     group('Channel member count events', () {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
