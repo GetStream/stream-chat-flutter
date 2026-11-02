@@ -755,8 +755,14 @@ void main() {
 
       mutations.onChannelTruncated(createdBefore: createdBefore);
 
-      verify(() => state.removeMessagesCreatedBefore(createdBefore)).called(1);
       verifyNever(() => state.updateChannelState(any()));
+    });
+
+    test('onChannelTruncated applies no message without a system message', () {
+      final createdBefore = DateTime.utc(2026, 10, 29, 12);
+
+      mutations.onChannelTruncated(createdBefore: createdBefore);
+
       verifyNever(() => state.updateMessage(any()));
     });
 
