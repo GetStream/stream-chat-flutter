@@ -65,6 +65,19 @@ class ChannelClientState {
         .then((_) => retryFailedMessages());
   }
 
+  // Whether the [message] was created before [truncatedAt]. Messages not sent
+  // yet never are.
+  static bool _isTruncated(Message message, DateTime truncatedAt) {
+    final createdAt = message.remoteCreatedAt;
+    return createdAt != null && createdAt.isBefore(truncatedAt);
+  }
+
+  // Whether any of the [messages] was created before [truncatedAt].
+  static bool _hasTruncated(List<Message>? messages, DateTime? truncatedAt) {
+    if (messages == null || truncatedAt == null) return false;
+    return messages.any((it) => _isTruncated(it, truncatedAt));
+  }
+
   // Returns the [messages] created at or after [truncatedAt], and the ones not
   // sent yet; [messages] itself when none is older.
   static List<Message>? _truncateMessages(
@@ -72,14 +85,8 @@ class ChannelClientState {
     DateTime? truncatedAt,
   ) {
     if (messages == null || truncatedAt == null) return messages;
-
-    bool survives(Message message) {
-      final createdAt = message.remoteCreatedAt;
-      return createdAt == null || !createdAt.isBefore(truncatedAt);
-    }
-
-    if (messages.every(survives)) return messages;
-    return messages.where(survives).toList();
+    if (!_hasTruncated(messages, truncatedAt)) return messages;
+    return messages.whereNot((it) => _isTruncated(it, truncatedAt)).toList();
   }
 
   final Channel _channel;
@@ -641,20 +648,22 @@ class ChannelClientState {
     final truncatedAt = [channel?.truncatedAt, newChannel?.truncatedAt].nonNulls.maxOrNull;
     final isNewCutoff = truncatedAt != channel?.truncatedAt;
 
-    // The stored messages already passed the cutoff, so only the incoming ones
-    // are checked, unless the cutoff moved: a channel can hold many messages.
     final incoming = updatedState.messages;
-    final isStoredMessages = identical(incoming, _channelState.messages);
-    final checkIncoming = !isNewCutoff && !isStoredMessages;
-
     var newMessages = messages.mergeSorted(
-      checkIncoming ? _truncateMessages(incoming, truncatedAt) : incoming,
+      incoming,
       key: (message) => message.id,
       update: MessageMerging.mergeUpdate,
       compare: MessageMerging.sortByCreatedAt,
     );
 
-    if (isNewCutoff) newMessages = _truncateMessages(newMessages, truncatedAt)!;
+    // The stored messages already passed the cutoff, so the merged list is
+    // checked only when the cutoff moved or an incoming message is older: a
+    // channel can hold many messages.
+    final isStored = identical(incoming, _channelState.messages);
+    final hasOlderIncoming = !isStored && _hasTruncated(incoming, truncatedAt);
+    if (isNewCutoff || hasOlderIncoming) {
+      newMessages = _truncateMessages(newMessages, truncatedAt)!;
+    }
 
     final watchers = _channelState.watchers ?? const <User>[];
     final newWatchers = watchers.merge(
