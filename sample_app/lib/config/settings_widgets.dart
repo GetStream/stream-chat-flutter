@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-// ---------------------------------------------------------------------------
-// Section header
-// ---------------------------------------------------------------------------
-
 class SettingsSectionHeader extends StatelessWidget {
   const SettingsSectionHeader({super.key, required this.title});
 
@@ -28,10 +24,6 @@ class SettingsSectionHeader extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Settings card — canonical DS pattern with foregroundDecoration for borders
-// ---------------------------------------------------------------------------
 
 class SettingsCard extends StatelessWidget {
   const SettingsCard({super.key, required this.children});
@@ -69,10 +61,6 @@ class SettingsCard extends StatelessWidget {
   }
 }
 
-// ---------------------------------------------------------------------------
-// Switch row — plain icon, DS list tile + switch
-// ---------------------------------------------------------------------------
-
 class SettingsSwitchRow extends StatelessWidget {
   const SettingsSwitchRow({
     super.key,
@@ -105,10 +93,6 @@ class SettingsSwitchRow extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Segmented row
-// ---------------------------------------------------------------------------
 
 class SettingsSegmentedRow<T> extends StatelessWidget {
   const SettingsSegmentedRow({
@@ -177,10 +161,6 @@ class SettingsSegmentedRow<T> extends StatelessWidget {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Value row — DS list tile showing the current value, tapped to change it
-// ---------------------------------------------------------------------------
 
 class SettingsValueRow extends StatelessWidget {
   const SettingsValueRow({

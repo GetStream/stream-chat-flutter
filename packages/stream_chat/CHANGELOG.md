@@ -2,7 +2,7 @@
 
 ✅ Added
 
-- Added quiet hours to push preferences: `PushPreferenceInput.schedule` and `removeSchedule` set and clear a recurring `PushSchedule`, which `PushPreference.schedule` reports.
+- Added quiet hours to push preferences, set and cleared through `PushPreferenceInput` and reported on `PushPreference.schedule`.
 
 🔄 Changed
 

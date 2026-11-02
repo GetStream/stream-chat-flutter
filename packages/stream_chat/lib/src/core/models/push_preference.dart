@@ -220,11 +220,11 @@ class QuietHoursRule extends Equatable {
   /// Creates a [QuietHoursRule] from [json].
   factory QuietHoursRule.fromJson(Map<String, dynamic> json) => _$QuietHoursRuleFromJson(json);
 
-  /// When the window opens, from `00:00` to `23:59`.
+  /// The time the window opens, from `00:00` to `23:59`.
   final String start;
 
-  /// When the window closes, from `00:00` to `24:00`, and never equal to
-  /// [start].
+  /// The time the window closes, from `00:00` to `24:00`, and never equal
+  /// to [start].
   ///
   /// The window ends just before [end], so `24:00` runs to the end of the day.
   /// An [end] earlier than [start] wraps past midnight.
@@ -265,5 +265,13 @@ extension type const QuietHoursDay(String _) implements String {
   static const sunday = QuietHoursDay('sun');
 
   /// Every day of the week, from Monday to Sunday.
-  static const values = [monday, tuesday, wednesday, thursday, friday, saturday, sunday];
+  static const List<QuietHoursDay> values = [
+    monday,
+    tuesday,
+    wednesday,
+    thursday,
+    friday,
+    saturday,
+    sunday,
+  ];
 }

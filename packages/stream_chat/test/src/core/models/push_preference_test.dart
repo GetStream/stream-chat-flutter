@@ -26,7 +26,6 @@ void main() {
           timezone: 'Europe/Amsterdam',
           quietHours: [
             QuietHoursRule(start: '22:00', end: '07:00', days: [QuietHoursDay.friday]),
-            QuietHoursRule(start: '00:00', end: '24:00'),
           ],
         ),
       );
@@ -40,6 +39,23 @@ void main() {
               'end': '07:00',
               'days': ['fri'],
             },
+          ],
+        },
+      });
+    });
+
+    test('should serialize a rule without days as an empty list', () {
+      const input = PushPreferenceInput(
+        schedule: PushSchedule(
+          timezone: 'Europe/Amsterdam',
+          quietHours: [QuietHoursRule(start: '00:00', end: '24:00')],
+        ),
+      );
+
+      expect(input.toJson(), {
+        'schedule': {
+          'timezone': 'Europe/Amsterdam',
+          'quiet_hours': [
             {'start': '00:00', 'end': '24:00', 'days': <String>[]},
           ],
         },
@@ -174,7 +190,6 @@ void main() {
               'end': '07:00',
               'days': ['sat', 'sun'],
             },
-            {'start': '12:00', 'end': '13:00'},
           ],
         },
       });
@@ -190,11 +205,23 @@ void main() {
                 end: '07:00',
                 days: [QuietHoursDay.saturday, QuietHoursDay.sunday],
               ),
-              QuietHoursRule(start: '12:00', end: '13:00'),
             ],
           ),
         ),
       );
+    });
+
+    test('should parse a rule without days as every day', () {
+      final pushPreference = PushPreference.fromJson(const {
+        'schedule': {
+          'timezone': 'Europe/Amsterdam',
+          'quiet_hours': [
+            {'start': '12:00', 'end': '13:00'},
+          ],
+        },
+      });
+
+      expect(pushPreference.schedule?.quietHours.single.days, isEmpty);
     });
 
     test('should read back the schedule it writes', () {

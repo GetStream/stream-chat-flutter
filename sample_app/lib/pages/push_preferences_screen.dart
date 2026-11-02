@@ -67,7 +67,6 @@ class _PushPreferencesScreenState extends State<PushPreferencesScreen> {
         children: [
           SizedBox(height: spacing.xs),
 
-          // ── Notify me about ──
           const SettingsSectionHeader(title: 'Notify me about'),
           SizedBox(height: spacing.xs),
           SettingsCard(
@@ -110,7 +109,6 @@ class _PushPreferencesScreenState extends State<PushPreferencesScreen> {
 
           SizedBox(height: spacing.xl),
 
-          // ── Quiet hours ──
           const SettingsSectionHeader(title: 'Quiet hours'),
           SizedBox(height: spacing.xs),
           SettingsCard(
@@ -172,12 +170,9 @@ class _PushPreferencesScreenState extends State<PushPreferencesScreen> {
     return SafeArea(
       top: false,
       bottom: false,
-      // Opening one rule's swipe action closes any other that is open.
       child: SlidableAutoCloseBehavior(child: content),
     );
   }
-
-  // ── Snooze ──
 
   Future<void> _pickSnooze(BuildContext context, {required bool snoozed}) async {
     final choice = await _showOptionsSheet<Duration?>(
@@ -197,8 +192,6 @@ class _PushPreferencesScreenState extends State<PushPreferencesScreen> {
     if (duration == null) return _save(const PushPreferenceInput(removeDisable: true));
     return _save(PushPreferenceInput(disabledUntil: DateTime.now().add(duration).toUtc()));
   }
-
-  // ── Quiet hours ──
 
   Future<void> _toggleSchedule({required bool on}) async {
     if (!on) return _save(const PushPreferenceInput(removeSchedule: true));
@@ -286,10 +279,6 @@ class _PushPreferencesScreenState extends State<PushPreferencesScreen> {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Quiet-hours rule editor sheet
-// ---------------------------------------------------------------------------
 
 class _QuietHoursRuleEditor extends StatefulWidget {
   const _QuietHoursRuleEditor({
@@ -420,10 +409,6 @@ class _QuietHoursRuleEditorState extends State<_QuietHoursRuleEditor> {
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Shared helpers
-// ---------------------------------------------------------------------------
 
 // The most rules a schedule can hold.
 const _maxQuietHoursRules = 7;
