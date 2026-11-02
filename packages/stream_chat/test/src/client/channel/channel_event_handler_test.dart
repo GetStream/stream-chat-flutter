@@ -581,8 +581,8 @@ void main() {
       await Future<void>.value();
 
       verifyInOrder([
-        () => persistence.truncateChannel('messaging:test', truncatedAt: event.createdAt),
-        () => mutations.onChannelTruncated(createdBefore: event.createdAt, message: systemMessage),
+        () => persistence.truncateChannel('messaging:test'),
+        () => mutations.onChannelTruncated(message: systemMessage),
       ]);
     });
 
@@ -596,9 +596,7 @@ void main() {
       handler.handleEvent(event);
       await Future<void>.value();
 
-      verify(
-        () => mutations.onChannelTruncated(createdBefore: truncatedAt, truncatedAt: truncatedAt),
-      ).called(1);
+      verify(() => mutations.onChannelTruncated(truncatedAt: truncatedAt)).called(1);
     });
 
     test('channel.updated delegates the channel model', () {

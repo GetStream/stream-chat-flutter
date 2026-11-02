@@ -2068,16 +2068,18 @@ void main() {
         expect(channel.state!.messages, isEmpty);
       });
 
-      test('${EventType.channelTruncated} removes the stored messages created before the event', () async {
-        final event = Event(
-          cid: channel.cid,
-          type: EventType.channelTruncated,
-          channel: ChannelModel(id: channelId, type: channelType),
+      test('${EventType.channelTruncated} removes the stored messages created before the truncation', () async {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
         );
-        client.addEvent(event);
         await Future.delayed(Duration.zero);
 
-        verify(() => persistenceClient.truncateChannel(channel.cid!, truncatedAt: event.createdAt)).called(1);
+        verify(() => persistenceClient.truncateChannel(channel.cid!, truncatedAt: truncatedAt)).called(1);
       });
 
       test('${EventType.notificationChannelTruncated} keeps the event system message', () async {

@@ -411,17 +411,13 @@ class ChannelStateMutations {
     _state.updateRead([updatedRead]);
   }
 
-  /// Truncates the channel at [createdBefore], removing the older messages,
-  /// pinned messages and thread replies.
+  /// Truncates the channel at [truncatedAt], or at now when omitted, removing
+  /// the older messages, pinned messages and thread replies.
   ///
-  /// Applies the truncation system [message] when provided, and makes
-  /// [truncatedAt], when provided, the channel's truncation time.
-  void onChannelTruncated({
-    required DateTime createdBefore,
-    DateTime? truncatedAt,
-    Message? message,
-  }) {
-    _state.truncate(truncatedAt: createdBefore);
+  /// A provided [truncatedAt] also becomes the channel's truncation time.
+  /// Applies the truncation system [message] when provided.
+  void onChannelTruncated({DateTime? truncatedAt, Message? message}) {
+    _state.truncate(truncatedAt: truncatedAt);
 
     if (truncatedAt != null) {
       final channelState = _state.channelState;
