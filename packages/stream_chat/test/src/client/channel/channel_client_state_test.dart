@@ -108,6 +108,18 @@ void main() {
         expect(channel.state!.scheduledMessages, [edited]);
       });
 
+      test('are replaced by a loaded list, keeping a newer copy', () {
+        final edited = scheduledMessage('edited', text: 'Good evening', updatedAt: DateTime.utc(2026, 10, 30));
+        channel.state!
+          ..updateScheduledMessage(scheduledMessage('gone'))
+          ..updateScheduledMessage(edited);
+
+        channel.state!.updateScheduledMessages([scheduledMessage('edited'), scheduledMessage('new')]);
+
+        expect(channel.state!.scheduledMessages.map((it) => it.id), unorderedEquals(['edited', 'new']));
+        expect(channel.state!.scheduledMessages.firstWhere((it) => it.id == 'edited'), edited);
+      });
+
       test('follow the scheduled message events of the channel', () async {
         client.addEvent(
           Event(type: EventType.scheduledMessageCreated, cid: cid, scheduledMessage: scheduledMessage('new')),

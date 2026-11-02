@@ -365,6 +365,13 @@ class ChannelClientState {
     return stream.distinct(const ListEquality<ScheduledMessage>().equals);
   }
 
+  /// Replaces the scheduled messages with [scheduledMessages], keeping the
+  /// copy already held of any that is newer.
+  void updateScheduledMessages(List<ScheduledMessage> scheduledMessages) {
+    final updated = _mergeScheduledMessages(this.scheduledMessages, scheduledMessages);
+    _channelState = _channelState.copyWith(scheduledMessages: updated);
+  }
+
   /// Adds the [scheduledMessage], or replaces the one with its ID unless that
   /// one is newer.
   void updateScheduledMessage(ScheduledMessage scheduledMessage) {

@@ -931,7 +931,7 @@ class Channel {
     final response = await _client.queryScheduledMessages(cid: cid, limit: 100);
     final scheduledMessages = response.scheduledMessages;
 
-    state?.updateChannelState(state!.channelState.copyWith(scheduledMessages: scheduledMessages));
+    state?.updateScheduledMessages(scheduledMessages);
     return scheduledMessages;
   }
 
