@@ -27,6 +27,9 @@ class MockClientState extends Mock implements ClientState {
   OwnUser? _currentUser;
 
   @override
+  set currentUser(OwnUser? user) => _currentUser = user;
+
+  @override
   OwnUser get currentUser => _currentUser ??= OwnUser(
     id: 'testUserId',
     role: 'admin',
