@@ -25,10 +25,12 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
   // and the messages not sent yet.
   Expression<bool> get _survivesTruncation {
     final truncatedLater = select(_db.channels)
-      ..where(
-        (channel) =>
-            channel.cid.equalsExp(messages.channelCid) & channel.truncatedAt.isBiggerThan(messages.remoteCreatedAt),
-      );
+      ..where((channel) {
+        final createdAt = messages.remoteCreatedAt;
+        final sameChannel = channel.cid.equalsExp(messages.channelCid);
+        final isLater = channel.truncatedAt.isBiggerThan(createdAt);
+        return sameChannel & isLater;
+      });
     return notExistsQuery(truncatedLater);
   }
 

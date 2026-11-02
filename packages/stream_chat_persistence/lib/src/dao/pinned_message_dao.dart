@@ -25,11 +25,12 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
   // and the messages not sent yet.
   Expression<bool> get _survivesTruncation {
     final truncatedLater = select(_db.channels)
-      ..where(
-        (channel) =>
-            channel.cid.equalsExp(pinnedMessages.channelCid) &
-            channel.truncatedAt.isBiggerThan(pinnedMessages.remoteCreatedAt),
-      );
+      ..where((channel) {
+        final createdAt = pinnedMessages.remoteCreatedAt;
+        final sameChannel = channel.cid.equalsExp(pinnedMessages.channelCid);
+        final isLater = channel.truncatedAt.isBiggerThan(createdAt);
+        return sameChannel & isLater;
+      });
     return notExistsQuery(truncatedLater);
   }
 
