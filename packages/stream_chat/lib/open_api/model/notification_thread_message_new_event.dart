@@ -3,20 +3,14 @@
 // coverage:ignore-file
 // ignore_for_file: unused_import, unnecessary_import, prefer_single_quotes, require_trailing_commas, unnecessary_raw_strings, public_member_api_docs, sort_constructors_first, provide_deprecation_message
 
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
-import 'package:stream_core/stream_core.dart' as core;
-
-import '../models.dart';
-
-part 'notification_thread_message_new_event.g.dart';
-part 'notification_thread_message_new_event.freezed.dart';
+part of 'events.dart';
 
 @freezed
 @immutable
 @JsonSerializable()
-class NotificationThreadMessageNewEvent extends core.WsEvent with _$NotificationThreadMessageNewEvent {
+class NotificationThreadMessageNewEvent extends core.WsEvent
+    with _$NotificationThreadMessageNewEvent
+    implements WSClientEvent, WSEvent {
   const NotificationThreadMessageNewEvent({
     required this.channel,
     this.channelCustom,
@@ -122,6 +116,7 @@ class NotificationThreadMessageNewEvent extends core.WsEvent with _$Notification
   @JsonKey(name: 'watcher_count')
   final int watcherCount;
 
+  @override
   Map<String, dynamic> toJson() => _$NotificationThreadMessageNewEventToJson(this);
 
   static NotificationThreadMessageNewEvent fromJson(Map<String, dynamic> json) =>

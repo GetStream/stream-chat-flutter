@@ -46,7 +46,7 @@ class FeedsEnrichedCollectionResponse with _$FeedsEnrichedCollectionResponse {
 
   @override
   @JsonKey(name: 'status')
-  final String status;
+  final CollectionStatus status;
 
   @override
   @StreamDateTimeConverter()

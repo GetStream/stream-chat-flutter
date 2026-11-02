@@ -9,9 +9,7 @@ part of 'bulk_action_appeals_request.dart';
 BulkActionAppealsRequest _$BulkActionAppealsRequestFromJson(
   Map<String, dynamic> json,
 ) => BulkActionAppealsRequest(
-  actionType: BulkActionAppealsRequestActionType.fromJson(
-    json['action_type'] as String,
-  ),
+  actionType: json['action_type'] as BulkActionAppealsRequestActionType,
   appealIds: (json['appeal_ids'] as List<dynamic>).map((e) => e as String).toList(),
   markReviewed: json['mark_reviewed'] == null
       ? null
@@ -43,7 +41,7 @@ BulkActionAppealsRequest _$BulkActionAppealsRequestFromJson(
 Map<String, dynamic> _$BulkActionAppealsRequestToJson(
   BulkActionAppealsRequest instance,
 ) => <String, dynamic>{
-  'action_type': instance.actionType.toJson(),
+  'action_type': instance.actionType,
   'appeal_ids': instance.appealIds,
   'mark_reviewed': instance.markReviewed?.toJson(),
   'reject_appeal': instance.rejectAppeal?.toJson(),

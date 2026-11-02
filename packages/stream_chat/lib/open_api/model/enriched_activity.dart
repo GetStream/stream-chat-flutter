@@ -28,6 +28,7 @@ class EnrichedActivity with _$EnrichedActivity {
     this.reactionCounts,
     this.score,
     this.target,
+    this.time,
     this.to,
     this.verb,
   });
@@ -71,6 +72,10 @@ class EnrichedActivity with _$EnrichedActivity {
   @override
   @JsonKey(name: 'target')
   final Data? target;
+
+  @override
+  @JsonKey(name: 'time')
+  final String? time;
 
   @override
   @JsonKey(name: 'to')

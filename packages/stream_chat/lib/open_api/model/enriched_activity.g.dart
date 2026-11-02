@@ -29,6 +29,7 @@ EnrichedActivity _$EnrichedActivityFromJson(Map<String, dynamic> json) => Enrich
   ),
   score: (json['score'] as num?)?.toDouble(),
   target: json['target'] == null ? null : Data.fromJson(json['target'] as Map<String, dynamic>),
+  time: json['time'] as String?,
   to: (json['to'] as List<dynamic>?)?.map((e) => e as String).toList(),
   verb: json['verb'] as String?,
 );
@@ -48,6 +49,7 @@ Map<String, dynamic> _$EnrichedActivityToJson(EnrichedActivity instance) => <Str
   'reaction_counts': instance.reactionCounts,
   'score': instance.score,
   'target': instance.target?.toJson(),
+  'time': instance.time,
   'to': instance.to,
   'verb': instance.verb,
 };

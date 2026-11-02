@@ -20,6 +20,7 @@ class BlockListConfig with _$BlockListConfig {
   const BlockListConfig({
     this.async,
     required this.enabled,
+    this.explicitUrlsOnly,
     this.matchSubstring,
     required this.rules,
   });
@@ -31,6 +32,10 @@ class BlockListConfig with _$BlockListConfig {
   @override
   @JsonKey(name: 'enabled')
   final bool enabled;
+
+  @override
+  @JsonKey(name: 'explicit_urls_only')
+  final bool? explicitUrlsOnly;
 
   @override
   @JsonKey(name: 'match_substring')

@@ -12,6 +12,7 @@ MarkReviewedRequestPayload _$MarkReviewedRequestPayloadFromJson(
   contentToMarkAsReviewedLimit: (json['content_to_mark_as_reviewed_limit'] as num?)?.toInt(),
   decisionReason: json['decision_reason'] as String?,
   disableMarkingContentAsReviewed: json['disable_marking_content_as_reviewed'] as bool?,
+  reason: json['reason'] as String?,
 );
 
 Map<String, dynamic> _$MarkReviewedRequestPayloadToJson(
@@ -20,4 +21,5 @@ Map<String, dynamic> _$MarkReviewedRequestPayloadToJson(
   'content_to_mark_as_reviewed_limit': instance.contentToMarkAsReviewedLimit,
   'decision_reason': instance.decisionReason,
   'disable_marking_content_as_reviewed': instance.disableMarkingContentAsReviewed,
+  'reason': instance.reason,
 };

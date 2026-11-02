@@ -122,8 +122,9 @@ GROUPS = [
         decisions=[],
         taken=textwrap.dedent("""\
             Revisited after landing: the group first adopted the generated `DeviceResponse`,
-            `ListDevicesResponse` and `CreateDeviceRequestPushProvider` as public types. It now follows the
-            [domain-model rules](README.md#domain-models), and the decisions below are the ones in force.
+            `ListDevicesResponse` and `CreateDeviceRequestPushProvider` (now the shared `PushProviderName`)
+            as public types. It now follows the [domain-model rules](README.md#domain-models), and the
+            decisions below are the ones in force.
 
             - **`Device` stays our public type, in its v10 shape** (`id`, `pushProvider`), as a plain class with
               no JSON. The repository maps the generated `DeviceResponse` into it. The seven further fields the
@@ -133,12 +134,12 @@ GROUPS = [
               and `devices`. An envelope rather than a bare list, so a field the server adds to the response can
               be exposed without changing the method's signature.
             - **`PushProvider` becomes an extension type over its wire string,** where v10 declared an enum, and
-              `Device.pushProvider` is typed with it rather than `String`. The server answers the provider as a
-              free-form string, so a device registered with a provider the SDK does not name still decodes, and a
-              provider added later is a new constant rather than a breaking enum value. The repository maps it to
-              the generated `CreateDeviceRequestPushProvider` by its wire value. **This is the enum precedent for
-              every later group:** a generated request enum gets a hand-written public type, so the generator's
-              naming never reaches a signature.
+              `Device.pushProvider` is typed with it rather than `String`. The spec types the provider as
+              `PushProviderName`, but the server does not check the one it answers with, so a device registered
+              with a provider the SDK does not name still decodes, and a provider added later is a new constant
+              rather than a breaking enum value. The repository maps it to the generated `PushProviderName` by
+              its wire value. **This is the enum precedent for every later group:** a generated request enum
+              gets a hand-written public type, so the generator's naming never reaches a signature.
             - **The write calls answer nothing.** `addDevice` and `removeDevice` return `Result<void>`: the
               generated `DurationResponse` carries only a server-timing string no integrator acts on, and v10's
               `EmptyResponse` is a json_serializable, mutable envelope the domain-model rules retire. **The
@@ -507,10 +508,10 @@ GROUPS = [
               otherwise truncate to means no expiry at all.
 
             - **`deleteMessages` is a hand-written `DeleteType`, not the generated enum.** The generated
-              `BanRequestDeleteMessages` is already a correct extension type over `String` with the same three
-              values, so this is not about quality — it is about the name. A caller writing
-              `BanRequestDeleteMessages.hard` is naming our request DTO rather than the concept, and the type
-              is what hovers show. This follows `PushProvider`, which group 02 first adopted from the
+              `DeleteMessages` (once the per-request `BanRequestDeleteMessages`) is already a correct extension
+              type over `String` with the same three values, so this is not about quality — it is about the
+              name. `DeleteMessages` names the action rather than the kind of delete it takes, and the type is
+              what hovers show. This follows `PushProvider`, which group 02 first adopted from the
               generated side and [#3004](https://github.com/GetStream/stream-chat-flutter/pull/3004) replaced
               with a hand-written one for exactly that reason, and it settles the rule group 02 left open:
               **adopt a generated type only when its name names the concept.** It also leaves the barrel with
@@ -693,8 +694,8 @@ GROUPS = [
             '**Expose `hide_messages_before` on `ChannelState`.** `clear_history` writes it on the caller\'s '
             'member row, and the server returns it next to `channel` in each channel-state entry '
             '(`ChannelStateResponse.hideMessagesBefore`), never on the channel itself. v1 drops it today.',
-            '`sync` returns `SyncResponse` — one of the two models that needed the WSEvent generator patch. '
-            'Verify it decodes before relying on it.',
+            '`sync` returns `SyncResponse`, whose `events` is the sealed `WSEvent` union; map it with an '
+            'exhaustive switch.',
             '**How `Channel` hands its creation data to `getOrCreateChannel`.** The `Channel` constructor and '
             '`StreamChatClient.channel` take one `custom` map, and v1 sends it whole as the request\'s flat `data`, '
             'so `client.channel(\'messaging\', custom: {\'members\': [...]})` creates the channel with those '

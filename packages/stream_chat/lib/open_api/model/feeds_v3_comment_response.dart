@@ -145,7 +145,7 @@ class FeedsV3CommentResponse with _$FeedsV3CommentResponse {
 
   @override
   @JsonKey(name: 'status')
-  final String status;
+  final CommentStatus status;
 
   @override
   @JsonKey(name: 'text')

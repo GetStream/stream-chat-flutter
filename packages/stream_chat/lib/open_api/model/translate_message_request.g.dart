@@ -9,11 +9,9 @@ part of 'translate_message_request.dart';
 TranslateMessageRequest _$TranslateMessageRequestFromJson(
   Map<String, dynamic> json,
 ) => TranslateMessageRequest(
-  language: TranslateMessageRequestLanguage.fromJson(
-    json['language'] as String,
-  ),
+  language: json['language'] as TranslateMessageRequestLanguage,
 );
 
 Map<String, dynamic> _$TranslateMessageRequestToJson(
   TranslateMessageRequest instance,
-) => <String, dynamic>{'language': instance.language.toJson()};
+) => <String, dynamic>{'language': instance.language};

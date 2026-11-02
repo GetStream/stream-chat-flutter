@@ -3,20 +3,14 @@
 // coverage:ignore-file
 // ignore_for_file: unused_import, unnecessary_import, prefer_single_quotes, require_trailing_commas, unnecessary_raw_strings, public_member_api_docs, sort_constructors_first, provide_deprecation_message
 
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
-import 'package:stream_core/stream_core.dart' as core;
-
-import '../models.dart';
-
-part 'notification_added_to_channel_event.g.dart';
-part 'notification_added_to_channel_event.freezed.dart';
+part of 'events.dart';
 
 @freezed
 @immutable
 @JsonSerializable()
-class NotificationAddedToChannelEvent extends core.WsEvent with _$NotificationAddedToChannelEvent {
+class NotificationAddedToChannelEvent extends core.WsEvent
+    with _$NotificationAddedToChannelEvent
+    implements WSClientEvent, WSEvent {
   const NotificationAddedToChannelEvent({
     required this.channel,
     this.channelCustom,
@@ -107,6 +101,7 @@ class NotificationAddedToChannelEvent extends core.WsEvent with _$NotificationAd
   @JsonKey(name: 'unread_count')
   final int? unreadCount;
 
+  @override
   Map<String, dynamic> toJson() => _$NotificationAddedToChannelEventToJson(this);
 
   static NotificationAddedToChannelEvent fromJson(Map<String, dynamic> json) =>

@@ -20,6 +20,7 @@ class ModerationPayload with _$ModerationPayload {
   const ModerationPayload({
     this.audios,
     this.countryCode,
+    this.countryCodes,
     this.custom,
     this.imageIds,
     this.imageOrderedKeys,
@@ -38,6 +39,10 @@ class ModerationPayload with _$ModerationPayload {
   @override
   @JsonKey(name: 'country_code')
   final String? countryCode;
+
+  @override
+  @JsonKey(name: 'country_codes')
+  final List<String>? countryCodes;
 
   @override
   @JsonKey(name: 'custom')

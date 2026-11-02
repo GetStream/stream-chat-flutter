@@ -19,6 +19,7 @@ mixin _$ModerationFlagResponse {
   String? get entityCreatorId;
   String get entityId;
   String get entityType;
+  String? get id;
   List<String>? get labels;
   ModerationPayloadResponse? get moderationPayload;
   String? get reason;
@@ -52,6 +53,7 @@ mixin _$ModerationFlagResponse {
             (identical(other.entityCreatorId, entityCreatorId) || other.entityCreatorId == entityCreatorId) &&
             (identical(other.entityId, entityId) || other.entityId == entityId) &&
             (identical(other.entityType, entityType) || other.entityType == entityType) &&
+            (identical(other.id, id) || other.id == id) &&
             const DeepCollectionEquality().equals(other.labels, labels) &&
             (identical(other.moderationPayload, moderationPayload) || other.moderationPayload == moderationPayload) &&
             (identical(other.reason, reason) || other.reason == reason) &&
@@ -73,6 +75,7 @@ mixin _$ModerationFlagResponse {
     entityCreatorId,
     entityId,
     entityType,
+    id,
     const DeepCollectionEquality().hash(labels),
     moderationPayload,
     reason,
@@ -87,7 +90,7 @@ mixin _$ModerationFlagResponse {
 
   @override
   String toString() {
-    return 'ModerationFlagResponse(contentPublishedAt: $contentPublishedAt, createdAt: $createdAt, custom: $custom, entityCreatorId: $entityCreatorId, entityId: $entityId, entityType: $entityType, labels: $labels, moderationPayload: $moderationPayload, reason: $reason, result: $result, reviewQueueItem: $reviewQueueItem, reviewQueueItemId: $reviewQueueItemId, type: $type, updatedAt: $updatedAt, user: $user, userId: $userId)';
+    return 'ModerationFlagResponse(contentPublishedAt: $contentPublishedAt, createdAt: $createdAt, custom: $custom, entityCreatorId: $entityCreatorId, entityId: $entityId, entityType: $entityType, id: $id, labels: $labels, moderationPayload: $moderationPayload, reason: $reason, result: $result, reviewQueueItem: $reviewQueueItem, reviewQueueItemId: $reviewQueueItemId, type: $type, updatedAt: $updatedAt, user: $user, userId: $userId)';
   }
 }
 
@@ -105,6 +108,7 @@ abstract mixin class $ModerationFlagResponseCopyWith<$Res> {
     String? entityCreatorId,
     String entityId,
     String entityType,
+    String? id,
     List<String>? labels,
     ModerationPayloadResponse? moderationPayload,
     String? reason,
@@ -136,6 +140,7 @@ class _$ModerationFlagResponseCopyWithImpl<$Res> implements $ModerationFlagRespo
     Object? entityCreatorId = freezed,
     Object? entityId = null,
     Object? entityType = null,
+    Object? id = freezed,
     Object? labels = freezed,
     Object? moderationPayload = freezed,
     Object? reason = freezed,
@@ -173,6 +178,10 @@ class _$ModerationFlagResponseCopyWithImpl<$Res> implements $ModerationFlagRespo
             ? _self.entityType
             : entityType // ignore: cast_nullable_to_non_nullable
                   as String,
+        id: freezed == id
+            ? _self.id
+            : id // ignore: cast_nullable_to_non_nullable
+                  as String?,
         labels: freezed == labels
             ? _self.labels
             : labels // ignore: cast_nullable_to_non_nullable

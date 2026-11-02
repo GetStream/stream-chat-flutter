@@ -20,6 +20,7 @@ ModerationFlagResponse _$ModerationFlagResponseFromJson(
   entityCreatorId: json['entity_creator_id'] as String?,
   entityId: json['entity_id'] as String,
   entityType: json['entity_type'] as String,
+  id: json['id'] as String?,
   labels: (json['labels'] as List<dynamic>?)?.map((e) => e as String).toList(),
   moderationPayload: json['moderation_payload'] == null
       ? null
@@ -54,6 +55,7 @@ Map<String, dynamic> _$ModerationFlagResponseToJson(
   'entity_creator_id': instance.entityCreatorId,
   'entity_id': instance.entityId,
   'entity_type': instance.entityType,
+  'id': instance.id,
   'labels': instance.labels,
   'moderation_payload': instance.moderationPayload?.toJson(),
   'reason': instance.reason,

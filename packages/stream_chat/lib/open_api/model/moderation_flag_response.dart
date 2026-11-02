@@ -24,6 +24,7 @@ class ModerationFlagResponse with _$ModerationFlagResponse {
     this.entityCreatorId,
     required this.entityId,
     required this.entityType,
+    this.id,
     this.labels,
     this.moderationPayload,
     this.reason,
@@ -61,6 +62,10 @@ class ModerationFlagResponse with _$ModerationFlagResponse {
   @override
   @JsonKey(name: 'entity_type')
   final String entityType;
+
+  @override
+  @JsonKey(name: 'id')
+  final String? id;
 
   @override
   @JsonKey(name: 'labels')

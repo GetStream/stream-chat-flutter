@@ -13,50 +13,6 @@ import '../models.dart';
 part 'channel_config_with_info.g.dart';
 part 'channel_config_with_info.freezed.dart';
 
-extension type const ChannelConfigWithInfoAutomod._(String _) implements String {
-  static const aI = ChannelConfigWithInfoAutomod._('AI');
-  static const disabled = ChannelConfigWithInfoAutomod._('disabled');
-  static const simple = ChannelConfigWithInfoAutomod._('simple');
-
-  factory ChannelConfigWithInfoAutomod.fromJson(String json) => ChannelConfigWithInfoAutomod._(json);
-
-  String toJson() => this;
-}
-
-extension type const ChannelConfigWithInfoAutomodBehavior._(String _) implements String {
-  static const block = ChannelConfigWithInfoAutomodBehavior._('block');
-  static const flag = ChannelConfigWithInfoAutomodBehavior._('flag');
-  static const shadowBlock = ChannelConfigWithInfoAutomodBehavior._('shadow_block');
-
-  factory ChannelConfigWithInfoAutomodBehavior.fromJson(String json) => ChannelConfigWithInfoAutomodBehavior._(json);
-
-  String toJson() => this;
-}
-
-extension type const ChannelConfigWithInfoBlocklistBehavior._(String _) implements String {
-  static const block = ChannelConfigWithInfoBlocklistBehavior._('block');
-  static const flag = ChannelConfigWithInfoBlocklistBehavior._('flag');
-  static const shadowBlock = ChannelConfigWithInfoBlocklistBehavior._('shadow_block');
-
-  factory ChannelConfigWithInfoBlocklistBehavior.fromJson(String json) =>
-      ChannelConfigWithInfoBlocklistBehavior._(json);
-
-  String toJson() => this;
-}
-
-extension type const ChannelConfigWithInfoPushLevel._(String _) implements String {
-  static const all = ChannelConfigWithInfoPushLevel._('all');
-  static const allMentions = ChannelConfigWithInfoPushLevel._('all_mentions');
-  static const directMentions = ChannelConfigWithInfoPushLevel._('direct_mentions');
-  @Deprecated('Use directMentions instead.')
-  static const mentions = ChannelConfigWithInfoPushLevel._('mentions');
-  static const none = ChannelConfigWithInfoPushLevel._('none');
-
-  factory ChannelConfigWithInfoPushLevel.fromJson(String json) => ChannelConfigWithInfoPushLevel._(json);
-
-  String toJson() => this;
-}
-
 @freezed
 @immutable
 @JsonSerializable()
@@ -92,6 +48,10 @@ class ChannelConfigWithInfo with _$ChannelConfigWithInfo {
     required this.readEvents,
     required this.reminders,
     required this.replies,
+    this.scheduledMessagesMaxLeadTimeSeconds,
+    this.scheduledMessagesMaxPerChannel,
+    this.scheduledMessagesMaxPerUser,
+    this.scheduledMessagesMinLeadTimeSeconds,
     required this.search,
     required this.sharedLocations,
     required this.skipLastMsgUpdateForSystemMsgs,
@@ -108,11 +68,11 @@ class ChannelConfigWithInfo with _$ChannelConfigWithInfo {
 
   @override
   @JsonKey(name: 'automod')
-  final ChannelConfigWithInfoAutomod automod;
+  final AutomodMode automod;
 
   @override
   @JsonKey(name: 'automod_behavior')
-  final ChannelConfigWithInfoAutomodBehavior automodBehavior;
+  final ChannelModerationBehavior automodBehavior;
 
   @override
   @JsonKey(name: 'automod_thresholds')
@@ -124,7 +84,7 @@ class ChannelConfigWithInfo with _$ChannelConfigWithInfo {
 
   @override
   @JsonKey(name: 'blocklist_behavior')
-  final ChannelConfigWithInfoBlocklistBehavior? blocklistBehavior;
+  final ChannelModerationBehavior? blocklistBehavior;
 
   @override
   @JsonKey(name: 'blocklists')
@@ -197,7 +157,7 @@ class ChannelConfigWithInfo with _$ChannelConfigWithInfo {
 
   @override
   @JsonKey(name: 'push_level')
-  final ChannelConfigWithInfoPushLevel? pushLevel;
+  final PushLevel? pushLevel;
 
   @override
   @JsonKey(name: 'push_notifications')
@@ -222,6 +182,22 @@ class ChannelConfigWithInfo with _$ChannelConfigWithInfo {
   @override
   @JsonKey(name: 'replies')
   final bool replies;
+
+  @override
+  @JsonKey(name: 'scheduled_messages_max_lead_time_seconds')
+  final int? scheduledMessagesMaxLeadTimeSeconds;
+
+  @override
+  @JsonKey(name: 'scheduled_messages_max_per_channel')
+  final int? scheduledMessagesMaxPerChannel;
+
+  @override
+  @JsonKey(name: 'scheduled_messages_max_per_user')
+  final int? scheduledMessagesMaxPerUser;
+
+  @override
+  @JsonKey(name: 'scheduled_messages_min_lead_time_seconds')
+  final int? scheduledMessagesMinLeadTimeSeconds;
 
   @override
   @JsonKey(name: 'search')

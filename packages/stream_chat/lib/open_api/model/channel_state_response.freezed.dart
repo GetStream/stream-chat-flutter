@@ -27,6 +27,7 @@ mixin _$ChannelStateResponse {
   List<MessageResponse> get pinnedMessages;
   ChannelPushPreferencesResponse? get pushPreferences;
   List<ReadStateResponse>? get read;
+  List<ScheduledMessageResponse>? get scheduledMessages;
   List<ThreadStateResponse> get threads;
   int? get watcherCount;
   List<UserResponse>? get watchers;
@@ -71,6 +72,10 @@ mixin _$ChannelStateResponse {
             ) &&
             (identical(other.pushPreferences, pushPreferences) || other.pushPreferences == pushPreferences) &&
             const DeepCollectionEquality().equals(other.read, read) &&
+            const DeepCollectionEquality().equals(
+              other.scheduledMessages,
+              scheduledMessages,
+            ) &&
             const DeepCollectionEquality().equals(other.threads, threads) &&
             (identical(other.watcherCount, watcherCount) || other.watcherCount == watcherCount) &&
             const DeepCollectionEquality().equals(other.watchers, watchers));
@@ -93,6 +98,7 @@ mixin _$ChannelStateResponse {
     const DeepCollectionEquality().hash(pinnedMessages),
     pushPreferences,
     const DeepCollectionEquality().hash(read),
+    const DeepCollectionEquality().hash(scheduledMessages),
     const DeepCollectionEquality().hash(threads),
     watcherCount,
     const DeepCollectionEquality().hash(watchers),
@@ -100,7 +106,7 @@ mixin _$ChannelStateResponse {
 
   @override
   String toString() {
-    return 'ChannelStateResponse(activeLiveLocations: $activeLiveLocations, channel: $channel, cooldownRemainingMs: $cooldownRemainingMs, draft: $draft, duration: $duration, hidden: $hidden, hideMessagesBefore: $hideMessagesBefore, members: $members, membership: $membership, messages: $messages, pendingMessages: $pendingMessages, pinnedMessages: $pinnedMessages, pushPreferences: $pushPreferences, read: $read, threads: $threads, watcherCount: $watcherCount, watchers: $watchers)';
+    return 'ChannelStateResponse(activeLiveLocations: $activeLiveLocations, channel: $channel, cooldownRemainingMs: $cooldownRemainingMs, draft: $draft, duration: $duration, hidden: $hidden, hideMessagesBefore: $hideMessagesBefore, members: $members, membership: $membership, messages: $messages, pendingMessages: $pendingMessages, pinnedMessages: $pinnedMessages, pushPreferences: $pushPreferences, read: $read, scheduledMessages: $scheduledMessages, threads: $threads, watcherCount: $watcherCount, watchers: $watchers)';
   }
 }
 
@@ -126,6 +132,7 @@ abstract mixin class $ChannelStateResponseCopyWith<$Res> {
     List<MessageResponse> pinnedMessages,
     ChannelPushPreferencesResponse? pushPreferences,
     List<ReadStateResponse>? read,
+    List<ScheduledMessageResponse>? scheduledMessages,
     List<ThreadStateResponse> threads,
     int? watcherCount,
     List<UserResponse>? watchers,
@@ -158,6 +165,7 @@ class _$ChannelStateResponseCopyWithImpl<$Res> implements $ChannelStateResponseC
     Object? pinnedMessages = null,
     Object? pushPreferences = freezed,
     Object? read = freezed,
+    Object? scheduledMessages = freezed,
     Object? threads = null,
     Object? watcherCount = freezed,
     Object? watchers = freezed,
@@ -220,6 +228,10 @@ class _$ChannelStateResponseCopyWithImpl<$Res> implements $ChannelStateResponseC
             ? _self.read
             : read // ignore: cast_nullable_to_non_nullable
                   as List<ReadStateResponse>?,
+        scheduledMessages: freezed == scheduledMessages
+            ? _self.scheduledMessages
+            : scheduledMessages // ignore: cast_nullable_to_non_nullable
+                  as List<ScheduledMessageResponse>?,
         threads: null == threads
             ? _self.threads
             : threads // ignore: cast_nullable_to_non_nullable

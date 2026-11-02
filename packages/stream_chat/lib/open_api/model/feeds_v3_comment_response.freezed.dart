@@ -36,7 +36,7 @@ mixin _$FeedsV3CommentResponse {
   Map<String, FeedsReactionGroupResponse>? get reactionGroups;
   int get replyCount;
   int get score;
-  String get status;
+  CommentStatus get status;
   String? get text;
   DateTime get updatedAt;
   int get upvoteCount;
@@ -172,7 +172,7 @@ abstract mixin class $FeedsV3CommentResponseCopyWith<$Res> {
     Map<String, FeedsReactionGroupResponse>? reactionGroups,
     int replyCount,
     int score,
-    String status,
+    CommentStatus status,
     String? text,
     DateTime updatedAt,
     int upvoteCount,
@@ -318,7 +318,7 @@ class _$FeedsV3CommentResponseCopyWithImpl<$Res> implements $FeedsV3CommentRespo
         status: null == status
             ? _self.status
             : status // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as CommentStatus,
         text: freezed == text
             ? _self.text
             : text // ignore: cast_nullable_to_non_nullable

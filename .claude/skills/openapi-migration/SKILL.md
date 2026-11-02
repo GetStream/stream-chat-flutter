@@ -181,9 +181,8 @@ them. The rules are the [domain-model rules](../../../openapi-migration/README.m
 README, and **its list of breaks is the only one**: a migration makes those breaks against v10 and no others.
 Anything else it would change about what the caller holds needs its own reason and the user's approval.
 
-Generated types are wire shapes — nullable wherever the spec is loose, with per-operation extension types instead
-of shared enums (`CreateDeviceRequestPushProvider` rather than one `PushProvider`) — which is why they never reach
-a public signature.
+Generated types are wire shapes — nullable wherever the spec is loose, with enums named by the spec rather than by
+the domain (`PushProviderName` rather than `PushProvider`) — which is why they never reach a public signature.
 
 **Per type, decide:**
 
@@ -596,7 +595,7 @@ separately — a read versus a set of writes — never on what happens to be eas
 ```
 packages/stream_chat/lib/open_api/
 ├── api.dart               # barrel
-├── models.dart            # barrel (also re-exports StreamApiError, StreamDateTimeConverter, WsEvent)
+├── models.dart            # barrel (also re-exports StreamApiError, StreamDateTimeConverter)
 ├── api/default_api.dart   # ONE retrofit interface — every operation lives here
 └── model/                 # every model the spec defines
 ```

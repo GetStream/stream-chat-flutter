@@ -20,6 +20,8 @@ class LLMConfig with _$LLMConfig {
   const LLMConfig({
     this.appContext,
     this.async,
+    this.contextCustomKeys,
+    this.customKeysContextDescription,
     required this.enabled,
     required this.rules,
     this.severityDescriptions,
@@ -32,6 +34,14 @@ class LLMConfig with _$LLMConfig {
   @override
   @JsonKey(name: 'async')
   final bool? async;
+
+  @override
+  @JsonKey(name: 'context_custom_keys')
+  final List<String>? contextCustomKeys;
+
+  @override
+  @JsonKey(name: 'custom_keys_context_description')
+  final String? customKeysContextDescription;
 
   @override
   @JsonKey(name: 'enabled')
