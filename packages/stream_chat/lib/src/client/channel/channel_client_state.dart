@@ -635,12 +635,27 @@ class ChannelClientState {
 
   /// Update channelState with updated information.
   void updateChannelState(ChannelState updatedState) {
-    final newMessages = messages.mergeSorted(
-      updatedState.messages,
+    final channel = _channelState.channel;
+    final newChannel = channel?.merge(updatedState.channel);
+    // An older truncation time can't bring back messages a later one removed.
+    final truncatedAt = [channel?.truncatedAt, newChannel?.truncatedAt].nonNulls.maxOrNull;
+    final isNewCutoff = truncatedAt != channel?.truncatedAt;
+
+    // The stored messages already passed the cutoff, so only the incoming ones
+    // are checked, unless the cutoff moved: a channel can hold many messages.
+    final incomingMessages = switch (updatedState.messages) {
+      final incoming when identical(incoming, _channelState.messages) => incoming,
+      final incoming => _truncateMessages(incoming, truncatedAt),
+    };
+
+    var newMessages = messages.mergeSorted(
+      incomingMessages,
       key: (message) => message.id,
       update: MessageMerging.mergeUpdate,
       compare: MessageMerging.sortByCreatedAt,
     );
+
+    if (isNewCutoff) newMessages = _truncateMessages(newMessages, truncatedAt)!;
 
     final watchers = _channelState.watchers ?? const <User>[];
     final newWatchers = watchers.merge(
@@ -660,13 +675,8 @@ class ChannelClientState {
       final pinned => MessageMerging.sortPinnedMessages(pinned),
     };
 
-    final channel = _channelState.channel;
-    final newChannel = channel?.merge(updatedState.channel);
-    // An older truncation time can't bring back messages a later one removed.
-    final truncatedAt = [channel?.truncatedAt, newChannel?.truncatedAt].nonNulls.maxOrNull;
-
     _channelState = _channelState.copyWith(
-      messages: _truncateMessages(newMessages, truncatedAt),
+      messages: newMessages,
       channel: newChannel?.copyWith(truncatedAt: truncatedAt),
       watchers: newWatchers.toList(),
       watcherCount: updatedState.watcherCount,
