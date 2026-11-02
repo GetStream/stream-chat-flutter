@@ -561,10 +561,7 @@ class ChannelClientState {
     final remaining = _truncateMessages(loaded, cutoff)!;
 
     final channel = channelState.channel;
-    final latestTruncatedAt = [
-      channel?.truncatedAt,
-      truncatedAt,
-    ].nonNulls.maxOrNull;
+    final latestTruncatedAt = [channel?.truncatedAt, truncatedAt].nonNulls.maxOrNull;
 
     // Removing messages from the start of an up-to-date list leaves every
     // message sent after the cutoff, which bounds the unread count.
