@@ -1045,6 +1045,35 @@ void main() {
     );
 
     testWidgets(
+      'Waits for older unread messages when new ones arrive without a last read message',
+      (tester) async {
+        final lastRead = DateTime(2026, 10, 28, 12);
+        Message messageAt(int minutes) => Message(
+          id: 'message$minutes',
+          createdAt: lastRead.add(Duration(minutes: minutes)),
+          user: User(id: 'otherUserId'),
+        );
+
+        // Three messages were unread when the channel opened; the oldest of
+        // them isn't loaded, and a fourth message arrived since.
+        final openedRead = Read(
+          user: User(id: 'testUserId'),
+          lastRead: lastRead,
+          unreadMessages: 3,
+        );
+        final messages = [messageAt(2), messageAt(3), messageAt(4)];
+
+        when(() => mockChannel.state.unreadCount).thenReturn(4);
+        when(() => mockChannel.state.messages).thenReturn(messages);
+        when(() => mockChannel.state.currentUserRead).thenReturn(openedRead.copyWith(unreadMessages: 4));
+
+        final streamChannel = await _pumpStreamChannel(tester, mockChannel, openAtFirstUnread: false);
+
+        expect(streamChannel.getFirstUnreadMessage(openedRead), isNull);
+      },
+    );
+
+    testWidgets(
       'Skips the messages of muted users without a last read message',
       (tester) async {
         final lastRead = DateTime(2026, 10, 28, 12);

@@ -532,8 +532,9 @@ class MessageListUnreadController {
     // no `lastReadMessageId`: the anchor can't resolve until the loaded
     // messages reach back to the last read date or include every unread
     // message, and there's no id to fall back on either. Everything loaded
-    // is unread, so head for the oldest message currently loaded — as far back as the boundary can be, and it pulls
-    // the next page in on arrival — rather than leaving the tap inert.
+    // is unread, so head for the oldest message currently loaded — as far
+    // back as the boundary can be, and it pulls the next page in on arrival
+    // — rather than leaving the tap inert.
     //
     // `_hasSeenFirstUnread` is deliberately not latched here: the real
     // boundary is further back than where this lands, so the pill stays up

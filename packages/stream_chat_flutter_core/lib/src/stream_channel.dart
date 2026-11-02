@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -808,7 +809,10 @@ class StreamChannelState extends State<StreamChannel> {
 
       final oldestLoadedAt = messages.first.createdAt;
       final reachesLastRead = _topPaginationEnded || !oldestLoadedAt.isAfter(lastRead);
-      final loadsAllUnread = unread.length >= userRead.unreadMessages;
+      // Messages that arrived after [userRead] also raise the live unread
+      // count, so they can't stand in for older unread messages not loaded yet.
+      final unreadCount = math.max(userRead.unreadMessages, channel.state?.unreadCount ?? 0);
+      final loadsAllUnread = unread.length >= unreadCount;
       if (!reachesLastRead && !loadsAllUnread) return null;
 
       return unread.firstOrNull;
