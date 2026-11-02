@@ -411,9 +411,10 @@ class ChannelStateMutations {
     _state.updateRead([updatedRead]);
   }
 
-  /// Removes the messages created before [createdBefore], applying the
-  /// truncation system [message] when provided. A [truncatedAt] becomes the
-  /// channel's truncation time.
+  /// Removes the messages created before [createdBefore].
+  ///
+  /// Applies the truncation system [message] when provided, and makes
+  /// [truncatedAt], when provided, the channel's truncation time.
   void onChannelTruncated({
     required DateTime createdBefore,
     DateTime? truncatedAt,
