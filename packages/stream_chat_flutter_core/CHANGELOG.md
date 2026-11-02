@@ -8,6 +8,10 @@
 
 - A subclass of `StreamMessageComposerController` that overrides `clearOGAttachment` must add the new `dismissed` parameter.
 
+🐞 Fixed
+
+- Fixed `StreamChannelState.getFirstUnreadMessage` returning no message when the current user's read state has unread messages but no last read message.
+
 ## 10.6.0
 
 ✅ Added
