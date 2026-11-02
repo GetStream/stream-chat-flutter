@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- Added `StreamChannelListController.includeActiveMemberCount`, which fills `Channel.activeMemberCount` on every page the controller loads.
 - Added `StreamMessageComposerController.skipEnrichUrl` and a `dismissed` parameter to `StreamMessageComposerController.clearOGAttachment`, to send a message without a link preview the user removed.
 
 🔄 Changed
