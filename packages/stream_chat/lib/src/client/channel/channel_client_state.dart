@@ -663,10 +663,7 @@ class ChannelClientState {
     final channel = _channelState.channel;
     final newChannel = channel?.merge(updatedState.channel);
     // An older truncation time can't bring back messages a later one removed.
-    final truncatedAt = [
-      channel?.truncatedAt,
-      newChannel?.truncatedAt,
-    ].nonNulls.maxOrNull;
+    final truncatedAt = [channel?.truncatedAt, newChannel?.truncatedAt].nonNulls.maxOrNull;
 
     _channelState = _channelState.copyWith(
       messages: _truncateMessages(newMessages, truncatedAt),
