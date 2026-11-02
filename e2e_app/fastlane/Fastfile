@@ -240,6 +240,43 @@ def run_time_limit(target, selected, files)
   [(15 + (2 * [tests, 1].max)) * 60, 45 * 60].min
 end
 
+# How long the app may take, once its APK is installed, to print anything. A healthy
+# run reports its first test within seconds; seen on CI, an app that installed but
+# never started a test would otherwise hold the run until its time limit.
+STARTUP_LIMIT = 4 * 60
+
+# Runs [cmd], whose output is copied to [log], and returns whether it succeeded. A run
+# whose app installs but prints nothing within STARTUP_LIMIT is stopped and fails,
+# after [on_stalled] is called.
+def run_watching_startup(cmd, log, on_stalled:)
+  pid = Process.spawn(cmd, pgroup: true)
+  installed_at = nil
+  loop do
+    _, status = Process.wait2(pid, Process::WNOHANG)
+    return status.success? if status
+
+    lines = File.exist?(log) ? File.readlines(log) : []
+    install = lines.rindex { |line| line.include?('Installing build/') }
+    # Started: only the run's time limit applies from here.
+    return Process.wait2(pid).last.success? if install && install < lines.size - 1
+
+    installed_at ||= Time.now if install
+    if installed_at && Time.now - installed_at >= STARTUP_LIMIT
+      on_stalled.call
+      # The whole group: flutter, the tee pipeline and the `timeout` guard.
+      Process.kill('TERM', -pid) rescue nil
+      begin
+        Timeout.timeout(30) { Process.wait(pid) }
+      rescue Timeout::Error
+        Process.kill('KILL', -pid) rescue nil
+        Process.wait(pid) rescue nil
+      end
+      return false
+    end
+    sleep(5)
+  end
+end
+
 def boot_simulator(udid:)
   return if `xcrun simctl list devices booted`.to_s.include?(udid)
   return unless `xcrun simctl list devices`.to_s.include?(udid)
@@ -499,12 +536,14 @@ lane :run_e2e_test do |options|
           # `timeout` signals its whole process group, so flutter and the tee pipeline go too.
           guard = timeout_bin.empty? ? '' : "#{timeout_bin} --kill-after=30 #{time_limit} "
           started_at = Time.now
-          ok = begin
-            sh("#{guard}bash -o pipefail -c #{Shellwords.escape(cmd)}")
-            true
-          rescue StandardError
-            false
-          end
+          ok = run_watching_startup(
+            "#{guard}bash -o pipefail -c #{Shellwords.escape(cmd)}",
+            attempt_log,
+            on_stalled: lambda {
+              UI.important("#{target} (attempt #{attempt}/#{retries + 1}): the app installed but no test " \
+                           "started within #{STARTUP_LIMIT / 60} min")
+            },
+          )
           if !ok && !guard.empty? && Time.now - started_at >= time_limit
             UI.important("#{target} (attempt #{attempt}/#{retries + 1}): killed after #{time_limit / 60} min " \
                          'with no exit from flutter test; the device may have died')

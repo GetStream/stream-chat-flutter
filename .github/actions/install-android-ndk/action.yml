@@ -1,0 +1,43 @@
+name: 'Install Android NDK'
+description: >-
+  Install the NDK and CMake that Flutter plugins with native code build with
+  (e.g. `jni`, used by `path_provider_android`), so Gradle doesn't download them
+  mid-build. Needs Flutter set up first.
+runs:
+  using: "composite"
+  steps:
+    - name: Install the NDK and CMake
+      shell: bash
+      run: |
+        # The NDK Flutter sets for plugins (`flutter.ndkVersion`), read from the
+        # installed Flutter so an upgrade keeps it in step.
+        ndk=$(grep -oP 'ndkVersion: String = "\K[0-9.]+' \
+          "$FLUTTER_ROOT/packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt")
+        if [ -z "$ndk" ]; then
+          echo "::error::Could not read flutter.ndkVersion from the Flutter SDK"
+          exit 1
+        fi
+
+        # The CMake version the Android Gradle Plugin builds native code with.
+        cmake=3.22.1
+        ndk_dir="$ANDROID_HOME/ndk/$ndk"
+        installed() {
+          [ -f "$ndk_dir/source.properties" ] && [ -x "$ANDROID_HOME/cmake/$cmake/bin/cmake" ]
+        }
+
+        # sdkmanager unpacks the download itself. Gradle's own NDK download can
+        # arrive corrupt ("Archive is not a ZIP archive"), and then every retry
+        # of the build reuses the broken copy.
+        for attempt in 1 2 3; do
+          yes | sdkmanager --install "ndk;$ndk" "cmake;$cmake" > /dev/null || true
+          installed && break
+          echo "::warning::Installing NDK $ndk and CMake $cmake failed (attempt $attempt); retrying"
+          rm -rf "$ndk_dir" "$ANDROID_HOME/cmake/$cmake" "$ANDROID_HOME/.temp"
+          sleep 15
+        done
+
+        if ! installed; then
+          echo "::error::Could not install NDK $ndk and CMake $cmake"
+          exit 1
+        fi
+        echo "Installed NDK $ndk and CMake $cmake"
