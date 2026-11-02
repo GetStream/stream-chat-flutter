@@ -2366,23 +2366,6 @@ void main() {
         expect(channel.state!.unreadCount, 3);
       });
 
-      test('a channel loaded with a truncatedAt leaves out the messages sent before it', () {
-        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
-        final loaded = Channel.fromState(
-          client,
-          ChannelState(
-            channel: ChannelModel(id: 'loaded', type: channelType, truncatedAt: truncatedAt),
-            messages: [
-              messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))),
-              messageAt('after', truncatedAt.add(const Duration(minutes: 1))),
-            ],
-          ),
-        );
-        addTearDown(loaded.dispose);
-
-        expect(loaded.state!.messages.map((m) => m.id), ['after']);
-      });
-
       test('a channel update with a newer truncatedAt drops the messages sent before it', () {
         final truncatedAt = DateTime.utc(2026, 10, 29, 12);
         channel.state!.updateMessage(messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))));

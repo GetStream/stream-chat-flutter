@@ -28,13 +28,8 @@ class ChannelClientState {
       ),
     );
 
-    final truncatedAt = channelState.channel?.truncatedAt;
     final seededState = channelState.copyWith(
-      messages: _truncateMessages(channelState.messages, truncatedAt),
-      pinnedMessages: _truncateMessages(
-        MessageMerging.sortPinnedMessages(channelState.pinnedMessages),
-        truncatedAt,
-      ),
+      pinnedMessages: MessageMerging.sortPinnedMessages(channelState.pinnedMessages),
     );
 
     _channelStateController = BehaviorSubject.seeded(seededState);
