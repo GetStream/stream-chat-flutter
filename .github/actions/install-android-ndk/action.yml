@@ -1,14 +1,14 @@
 name: 'Install Android NDK'
-description: >-
-  Install the NDK and CMake that Flutter plugins with native code build with
-  (e.g. `jni`, used by `path_provider_android`), so Gradle doesn't download them
-  mid-build. Needs Flutter set up first.
+description: 'Install the NDK and CMake that Flutter plugins build native code with'
 runs:
   using: "composite"
   steps:
     - name: Install the NDK and CMake
       shell: bash
       run: |
+        # Plugins with native code (e.g. `jni`, used by `path_provider_android`)
+        # otherwise make Gradle download these mid-build. Needs Flutter set up.
+        #
         # The NDK Flutter sets for plugins (`flutter.ndkVersion`), read from the
         # installed Flutter so an upgrade keeps it in step.
         ndk=$(grep -oP 'ndkVersion: String = "\K[0-9.]+' \
@@ -20,7 +20,7 @@ runs:
 
         # The CMake version the Android Gradle Plugin builds native code with.
         cmake=3.22.1
-        # Not on the runner's PATH.
+        # By full path, so the runner's own SDK is the one updated.
         sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
         if [ ! -x "$sdkmanager" ]; then
           echo "::error::sdkmanager not found at $sdkmanager"
@@ -43,10 +43,11 @@ runs:
             rm -rf "$ndk_dir" "$ANDROID_HOME/cmake/$cmake" "$ANDROID_HOME/.temp"
             sleep 15
           fi
-          yes | timeout 300 "$sdkmanager" --install "ndk;$ndk" "cmake;$cmake" > /dev/null || true
+          yes | timeout 300 "$sdkmanager" --install "ndk;$ndk" "cmake;$cmake" > "$RUNNER_TEMP/sdkmanager.log" 2>&1 || true
         done
 
         if ! installed; then
+          tail -n 30 "$RUNNER_TEMP/sdkmanager.log"
           echo "::error::Could not install NDK $ndk and CMake $cmake"
           exit 1
         fi

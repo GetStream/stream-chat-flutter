@@ -246,11 +246,11 @@ end
 # limit.
 STARTUP_LIMIT = 4 * 60
 
-# Runs [argv], whose output is copied to [log], and returns whether it succeeded. A run
-# whose app installs but prints nothing within STARTUP_LIMIT is stopped and fails,
-# after [on_stalled] is called, and so does one that can't be started. [argv] runs from the app folder, like `sh`, and without
-# a shell in between, so its process group is the one `timeout` creates and stopping
-# it reaches flutter too.
+# Runs [argv], whose output is copied to [log], and returns whether it succeeded.
+# A run whose app installs but prints nothing within STARTUP_LIMIT calls
+# [on_stalled], is stopped and fails; a run that can't be started fails too.
+# [argv] runs from the app folder with no shell in between, so its process group
+# is the one `timeout` leads and stopping it reaches flutter too.
 def run_watching_startup(argv, log, on_stalled:)
   pid =
     begin
@@ -548,7 +548,7 @@ lane :run_e2e_test do |options|
           ok = run_watching_startup(
             [*guard, 'bash', '-o', 'pipefail', '-c', cmd],
             attempt_log,
-            on_stalled: lambda {
+            on_stalled: -> {
               UI.important("#{target} (attempt #{attempt}/#{retries + 1}): the app installed but no test " \
                            "started within #{STARTUP_LIMIT / 60} min")
             },
