@@ -548,28 +548,49 @@ class ChannelClientState {
   /// Removes the messages, pinned messages and thread replies created before
   /// [truncatedAt], or before now when omitted.
   ///
-  /// Messages not sent yet are kept. The unread count is lowered to the
-  /// messages left when the loaded messages include every message after the
-  /// cutoff. To only empty the loaded messages, consider [clearMessages].
+  /// Messages not sent yet are kept, and a provided [truncatedAt] becomes the
+  /// channel's truncation time unless it has a later one. The unread count is
+  /// lowered to the messages left when the loaded messages include every
+  /// message after the cutoff. To only empty the loaded messages, consider
+  /// [clearMessages].
   void truncate({DateTime? truncatedAt}) {
     final cutoff = truncatedAt ?? clock.now();
 
-    final loaded = messages;
+    final channelState = _channelState;
+    final loaded = channelState.messages ?? const <Message>[];
     final remaining = _survivingTruncationAt(loaded, cutoff)!;
-    final pinnedMessages = _channelState.pinnedMessages;
-    _channelState = _channelState.copyWith(
+
+    final channel = channelState.channel;
+    final latestTruncatedAt = [channel?.truncatedAt, truncatedAt].nonNulls.maxOrNull;
+
+    // Written at once, so the state streams update a single time.
+    _channelState = channelState.copyWith(
+      channel: channel?.copyWith(truncatedAt: latestTruncatedAt),
       messages: remaining,
-      pinnedMessages: _survivingTruncationAt(pinnedMessages, cutoff),
+      pinnedMessages: _survivingTruncationAt(channelState.pinnedMessages, cutoff),
+      read: _readsCappedAfterTruncation(channelState.read, loaded, remaining),
     );
 
     _removeThreadRepliesCreatedBefore(cutoff);
+  }
 
-    // Removing messages from the start of an up-to-date list leaves every
-    // message sent after the cutoff, which bounds the unread count.
-    if (!isUpToDate || remaining.length == loaded.length) return;
+  // Lowers the current user's unread count to the messages left, when they
+  // are known: removing messages from the start of an up-to-date list leaves
+  // every message sent after the cutoff.
+  List<Read>? _readsCappedAfterTruncation(
+    List<Read>? reads,
+    List<Message> loaded,
+    List<Message> remaining,
+  ) {
+    if (!isUpToDate || remaining.length == loaded.length) return reads;
 
     final sent = remaining.where((it) => it.remoteCreatedAt != null).length;
-    if (unreadCount > sent) unreadCount = sent;
+    final currentUserId = _client.state.currentUser?.id;
+    return reads?.map((read) {
+      if (read.user.id != currentUserId) return read;
+      if (read.unreadMessages <= sent) return read;
+      return read.copyWith(unreadMessages: sent);
+    }).toList();
   }
 
   void _removeThreadRepliesCreatedBefore(DateTime createdBefore) {

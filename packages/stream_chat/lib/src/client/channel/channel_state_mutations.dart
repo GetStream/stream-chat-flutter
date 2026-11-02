@@ -415,22 +415,20 @@ class ChannelStateMutations {
   /// now when it has none, removing the older messages, pinned messages and
   /// thread replies.
   ///
-  /// Takes the [channel]'s truncation time, when it has one, and its last
-  /// message time. Applies the truncation system [message] when provided.
+  /// Takes the [channel]'s last message time, or applies the truncation system
+  /// [message] when provided, which moves it.
   void onChannelTruncated(ChannelModel channel, {Message? message}) {
-    final truncatedAt = channel.truncatedAt;
-    _state.truncate(truncatedAt: truncatedAt);
+    _state.truncate(truncatedAt: channel.truncatedAt);
+
+    if (message != null) return _state.updateMessage(message);
 
     final channelState = _state.channelState;
-    final updated = channelState.channel?.copyWith(
-      truncatedAt: truncatedAt,
-      lastMessageAt: channel.lastMessageAt,
-    );
-    _state.updateChannelState(channelState.copyWith(channel: updated));
+    final lastMessageAt = channel.lastMessageAt;
+    if (lastMessageAt == null) return;
+    if (lastMessageAt == channelState.channel?.lastMessageAt) return;
 
-    if (message != null) {
-      _state.updateMessage(message);
-    }
+    final updated = channelState.channel?.copyWith(lastMessageAt: lastMessageAt);
+    _state.updateChannelState(channelState.copyWith(channel: updated));
   }
 
   /// Merges the updated [channel] model and replaces the member list.

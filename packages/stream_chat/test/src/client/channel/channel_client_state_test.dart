@@ -2239,6 +2239,44 @@ void main() {
         expect(channel.state!.threads[parent.id]?.map((m) => m.id), ['new-reply']);
       });
 
+      test("truncate makes the truncatedAt the channel's truncation time", () {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+
+        channel.state!.truncate(truncatedAt: truncatedAt);
+
+        expect(channel.state!.channelState.channel?.truncatedAt, truncatedAt);
+      });
+
+      test('truncate keeps a later channel truncation time', () {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.truncate(truncatedAt: truncatedAt);
+
+        channel.state!.truncate(truncatedAt: truncatedAt.subtract(const Duration(days: 1)));
+
+        expect(channel.state!.channelState.channel?.truncatedAt, truncatedAt);
+      });
+
+      test('truncate without a truncatedAt leaves the channel truncation time alone', () {
+        channel.state!.truncate();
+
+        expect(channel.state!.channelState.channel?.truncatedAt, isNull);
+      });
+
+      test('truncate updates the channel state once', () async {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.updateMessage(messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))));
+        channel.state!.updateMessage(messageAt('after', truncatedAt.add(const Duration(minutes: 1))));
+        channel.state!.unreadCount = 5;
+        final updates = <ChannelState>[];
+        final subscription = channel.state!.channelStateStream.skip(1).listen(updates.add);
+        addTearDown(subscription.cancel);
+
+        channel.state!.truncate(truncatedAt: truncatedAt);
+        await Future.delayed(Duration.zero);
+
+        expect(updates, hasLength(1));
+      });
+
       test('truncate without a truncatedAt removes the messages sent before now', () {
         final now = DateTime.utc(2026, 10, 29, 12);
         channel.state!.updateMessage(messageAt('before', now.subtract(const Duration(minutes: 1))));

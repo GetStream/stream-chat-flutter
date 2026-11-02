@@ -751,26 +751,38 @@ void main() {
       ]);
     });
 
-    test("onChannelTruncated makes the channel's truncatedAt its truncation time", () {
+    test("onChannelTruncated truncates at the channel's truncatedAt", () {
       final truncatedAt = DateTime.utc(2026, 10, 29, 12);
       stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
 
       mutations.onChannelTruncated(ChannelModel(cid: 'messaging:test', truncatedAt: truncatedAt));
 
-      expect(capturedChannelState().channel?.truncatedAt, truncatedAt);
+      verify(() => state.truncate(truncatedAt: truncatedAt)).called(1);
     });
 
-    test('onChannelTruncated without a truncatedAt leaves the channel truncation time alone', () {
-      final earlier = DateTime.utc(2026, 10, 28, 12);
+    test('onChannelTruncated leaves the last message time to the system message', () {
+      stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
+      final lastMessageAt = DateTime.utc(2026, 10, 29, 13);
+
+      mutations.onChannelTruncated(
+        ChannelModel(cid: 'messaging:test', lastMessageAt: lastMessageAt),
+        message: Message(id: 'system-id'),
+      );
+
+      verifyNever(() => state.updateChannelState(any()));
+    });
+
+    test('onChannelTruncated skips an unchanged last message time', () {
+      final lastMessageAt = DateTime.utc(2026, 10, 29, 13);
       stubChannelState(
         ChannelState(
-          channel: ChannelModel(cid: 'messaging:test', truncatedAt: earlier),
+          channel: ChannelModel(cid: 'messaging:test', lastMessageAt: lastMessageAt),
         ),
       );
 
-      mutations.onChannelTruncated(ChannelModel(cid: 'messaging:test'));
+      mutations.onChannelTruncated(ChannelModel(cid: 'messaging:test', lastMessageAt: lastMessageAt));
 
-      expect(capturedChannelState().channel?.truncatedAt, earlier);
+      verifyNever(() => state.updateChannelState(any()));
     });
 
     test("onChannelTruncated takes the channel's last message time", () {
