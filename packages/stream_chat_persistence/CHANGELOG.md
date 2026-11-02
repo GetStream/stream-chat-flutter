@@ -3,6 +3,7 @@
 🐞 Fixed
 
 - Fixed stored messages from before a channel's truncation staying in the offline cache when the truncation event was missed.
+- Fixed truncating a channel removing the stored messages sent after its truncation time.
 
 ## 10.6.0
 

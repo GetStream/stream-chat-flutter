@@ -537,6 +537,16 @@ class ChannelClientState {
     return count;
   }
 
+  /// Removes the messages and pinned messages created before [createdBefore],
+  /// keeping the messages not sent yet.
+  @internal
+  void removeMessagesCreatedBefore(DateTime createdBefore) {
+    _channelState = _channelState.copyWith(
+      messages: _withoutTruncated(messages, createdBefore),
+      pinnedMessages: _withoutTruncated(_channelState.pinnedMessages, createdBefore),
+    );
+  }
+
   /// Delete all channel messages.
   void truncate() {
     _channelState = _channelState.copyWith(
@@ -590,12 +600,14 @@ class ChannelClientState {
       final pinned => MessageMerging.sortPinnedMessages(pinned),
     };
 
-    final newChannel = _channelState.channel?.merge(updatedState.channel);
-    final truncatedAt = newChannel?.truncatedAt;
+    final channel = _channelState.channel;
+    final newChannel = channel?.merge(updatedState.channel);
+    // An older truncation time can't bring back messages a later one removed.
+    final truncatedAt = [channel?.truncatedAt, newChannel?.truncatedAt].nonNulls.maxOrNull;
 
     _channelState = _channelState.copyWith(
       messages: _withoutTruncated(newMessages, truncatedAt),
-      channel: newChannel,
+      channel: newChannel?.copyWith(truncatedAt: truncatedAt),
       watchers: newWatchers.toList(),
       watcherCount: updatedState.watcherCount,
       members: updatedState.members,

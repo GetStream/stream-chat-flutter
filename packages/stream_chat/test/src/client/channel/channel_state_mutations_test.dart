@@ -740,21 +740,23 @@ void main() {
       final systemMessage = Message(id: 'system-id');
       stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
 
-      mutations.onChannelTruncated(truncatedAt: truncatedAt, message: systemMessage);
+      mutations.onChannelTruncated(createdBefore: truncatedAt, truncatedAt: truncatedAt, message: systemMessage);
 
       final truncated = isA<ChannelState>().having((it) => it.channel?.truncatedAt, 'truncatedAt', truncatedAt);
       verifyInOrder([
         () => state.updateChannelState(any(that: truncated)),
+        () => state.removeMessagesCreatedBefore(truncatedAt),
         () => state.updateMessage(systemMessage),
       ]);
     });
 
-    test('onChannelTruncated only truncates without a system message', () {
-      stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
+    test('onChannelTruncated leaves the channel truncation time alone without a truncatedAt', () {
+      final createdBefore = DateTime.utc(2026, 10, 29, 12);
 
-      mutations.onChannelTruncated(truncatedAt: DateTime.utc(2026, 10, 29, 12));
+      mutations.onChannelTruncated(createdBefore: createdBefore);
 
-      verify(() => state.updateChannelState(any())).called(1);
+      verify(() => state.removeMessagesCreatedBefore(createdBefore)).called(1);
+      verifyNever(() => state.updateChannelState(any()));
       verifyNever(() => state.updateMessage(any()));
     });
 

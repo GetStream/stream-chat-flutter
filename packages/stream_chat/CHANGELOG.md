@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added `ChatPersistenceClient.deleteMessagesCreatedBefore` for removing a channel's stored messages from before a given time.
+
 🔄 Changed
 
 - `Attachment.type` is now `url_preview` for every attachment scraped from a link in the message text, including a link to an image or file. Use `Attachment.rawType` to read the type it was created or received with.

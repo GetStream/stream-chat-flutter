@@ -367,10 +367,12 @@ class ChannelEventHandler {
 
   Future<void> _onChannelTruncated(Event event) async {
     final channel = event.channel!;
-    await _client.chatPersistenceClient?.deleteMessageByCid(channel.cid);
+    final createdBefore = channel.truncatedAt ?? event.createdAt;
+    await _client.chatPersistenceClient?.deleteMessagesCreatedBefore(channel.cid, createdBefore);
 
     _mutations.onChannelTruncated(
-      truncatedAt: channel.truncatedAt ?? event.createdAt,
+      createdBefore: createdBefore,
+      truncatedAt: channel.truncatedAt,
       message: event.message,
     );
   }

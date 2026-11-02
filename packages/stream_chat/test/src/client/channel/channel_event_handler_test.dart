@@ -51,6 +51,7 @@ void main() {
     registerFallbackValue(FakeEvent());
     registerFallbackValue(FakeDraft());
     registerFallbackValue(FakeReaction());
+    registerFallbackValue(DateTime(2026));
     registerFallbackValue(FakePoll());
     registerFallbackValue(FakePollVote());
     registerFallbackValue(FakeMember());
@@ -561,13 +562,13 @@ void main() {
   });
 
   group('channel events', () {
-    test('channel.truncated wipes persisted messages before mutating', () async {
+    test('channel.truncated removes the stored messages before mutating', () async {
       final persistentClient = MockStreamChatClientWithPersistence();
       when(() => channel.client).thenReturn(persistentClient);
       when(() => persistentClient.state).thenReturn(FakeClientState());
 
       final persistence = persistentClient.chatPersistenceClient;
-      when(() => persistence.deleteMessageByCid(any())).thenAnswer((_) async {});
+      when(() => persistence.deleteMessagesCreatedBefore(any(), any())).thenAnswer((_) async {});
 
       final systemMessage = Message(id: 'system-id');
       final event = Event(
@@ -580,8 +581,8 @@ void main() {
       await Future<void>.value();
 
       verifyInOrder([
-        () => persistence.deleteMessageByCid('messaging:test'),
-        () => mutations.onChannelTruncated(truncatedAt: event.createdAt, message: systemMessage),
+        () => persistence.deleteMessagesCreatedBefore('messaging:test', event.createdAt),
+        () => mutations.onChannelTruncated(createdBefore: event.createdAt, message: systemMessage),
       ]);
     });
 
@@ -595,7 +596,9 @@ void main() {
       handler.handleEvent(event);
       await Future<void>.value();
 
-      verify(() => mutations.onChannelTruncated(truncatedAt: truncatedAt)).called(1);
+      verify(
+        () => mutations.onChannelTruncated(createdBefore: truncatedAt, truncatedAt: truncatedAt),
+      ).called(1);
     });
 
     test('channel.updated delegates the channel model', () {

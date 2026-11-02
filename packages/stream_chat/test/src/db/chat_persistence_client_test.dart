@@ -209,6 +209,14 @@ void main() {
       persistenceClient.deletePinnedMessageByCid(messageId);
     });
 
+    test('deleteMessagesCreatedBefore removes every message of the channel by default', () async {
+      final client = _RecordingPersistenceClient();
+
+      await client.deleteMessagesCreatedBefore('test:cid', DateTime.utc(2026, 10, 29));
+
+      expect(client.deletedMessageCids, ['test:cid']);
+    });
+
     test('getChannelStateByCid', () async {
       const cid = 'test:cid';
       final channelState = await persistenceClient.getChannelStateByCid(cid);
@@ -293,4 +301,11 @@ void main() {
       persistenceClient.updateChannelStates([channelState]);
     });
   });
+}
+
+class _RecordingPersistenceClient extends TestPersistenceClient {
+  final deletedMessageCids = <String>[];
+
+  @override
+  Future<void> deleteMessageByCids(List<String> cids) async => deletedMessageCids.addAll(cids);
 }

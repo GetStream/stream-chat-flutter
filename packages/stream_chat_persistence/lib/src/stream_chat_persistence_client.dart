@@ -162,6 +162,16 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> deleteMessagesCreatedBefore(String cid, DateTime createdBefore) {
+    assert(_debugIsConnected, '');
+    _logger.info('deleteMessagesCreatedBefore');
+    return db!.transaction(() async {
+      await db!.messageDao.deleteMessagesCreatedBefore(cid, createdBefore);
+      await db!.pinnedMessageDao.deleteMessagesCreatedBefore(cid, createdBefore);
+    });
+  }
+
+  @override
   Future<void> deletePinnedMessageByCids(List<String> cids) {
     assert(_debugIsConnected, '');
     _logger.info('deletePinnedMessageByCids');
@@ -634,8 +644,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
         final truncatedAt = channel.truncatedAt;
         if (truncatedAt == null) continue;
 
-        await db!.messageDao.deleteMessagesCreatedBefore(channel.cid, truncatedAt);
-        await db!.pinnedMessageDao.deleteMessagesCreatedBefore(channel.cid, truncatedAt);
+        await deleteMessagesCreatedBefore(channel.cid, truncatedAt);
       }
     });
   }
