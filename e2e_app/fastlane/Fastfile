@@ -247,10 +247,11 @@ STARTUP_LIMIT = 4 * 60
 
 # Runs [argv], whose output is copied to [log], and returns whether it succeeded. A run
 # whose app installs but prints nothing within STARTUP_LIMIT is stopped and fails,
-# after [on_stalled] is called. [argv] runs without a shell in between, so its process
-# group is the one `timeout` creates and stopping it reaches flutter too.
+# after [on_stalled] is called. [argv] runs from the app folder, like `sh`, and without
+# a shell in between, so its process group is the one `timeout` creates and stopping
+# it reaches flutter too.
 def run_watching_startup(argv, log, on_stalled:)
-  pid = Process.spawn(*argv, pgroup: true)
+  pid = Process.spawn(*argv, pgroup: true, chdir: root_path)
   installed_at = nil
   loop do
     _, status = Process.wait2(pid, Process::WNOHANG)
