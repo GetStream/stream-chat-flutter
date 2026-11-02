@@ -544,15 +544,40 @@ class ChannelClientState {
     return count;
   }
 
-  /// Removes the messages and pinned messages created before [createdBefore],
-  /// keeping the messages not sent yet.
+  /// Removes the messages, pinned messages and thread replies created before
+  /// [createdBefore], keeping the messages not sent yet.
+  ///
+  /// Also lowers the unread count to the number of messages left, when the
+  /// loaded messages are known to include every message after
+  /// [createdBefore].
   @internal
-  void removeMessagesCreatedBefore(DateTime createdBefore) {
+  void truncateBefore(DateTime createdBefore) {
+    final loaded = messages;
+    final remaining = _withoutTruncated(loaded, createdBefore)!;
     final pinnedMessages = _channelState.pinnedMessages;
     _channelState = _channelState.copyWith(
-      messages: _withoutTruncated(messages, createdBefore),
+      messages: remaining,
       pinnedMessages: _withoutTruncated(pinnedMessages, createdBefore),
     );
+
+    _removeThreadRepliesCreatedBefore(createdBefore);
+
+    // Removing messages from the start of an up-to-date list leaves every
+    // message sent after the cutoff, which bounds the unread count.
+    if (!isUpToDate || remaining.length == loaded.length) return;
+
+    final sent = remaining.where((it) => it.remoteCreatedAt != null).length;
+    if (unreadCount > sent) unreadCount = sent;
+  }
+
+  void _removeThreadRepliesCreatedBefore(DateTime createdBefore) {
+    final threads = this.threads;
+    final trimmed = {
+      for (final MapEntry(:key, :value) in threads.entries) key: _withoutTruncated(value, createdBefore)!,
+    };
+
+    final changed = threads.keys.any((it) => !identical(threads[it], trimmed[it]));
+    if (changed) _threads = trimmed;
   }
 
   /// Delete all channel messages.

@@ -744,8 +744,8 @@ void main() {
 
       final truncated = isA<ChannelState>().having((it) => it.channel?.truncatedAt, 'truncatedAt', truncatedAt);
       verifyInOrder([
+        () => state.truncateBefore(truncatedAt),
         () => state.updateChannelState(any(that: truncated)),
-        () => state.removeMessagesCreatedBefore(truncatedAt),
         () => state.updateMessage(systemMessage),
       ]);
     });

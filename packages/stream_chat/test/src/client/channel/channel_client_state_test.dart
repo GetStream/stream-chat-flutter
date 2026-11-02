@@ -2178,6 +2178,62 @@ void main() {
         expect(channel.state!.pinnedMessages.map((m) => m.id), ['after']);
       });
 
+      test('${EventType.channelTruncated} lowers the unread count to the messages left', () async {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.updateMessage(messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))));
+        channel.state!.updateMessage(messageAt('after', truncatedAt.add(const Duration(minutes: 1))));
+        channel.state!.unreadCount = 5;
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.unreadCount, 1);
+      });
+
+      test('${EventType.channelTruncated} keeps the unread count when no loaded message was removed', () async {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.updateMessage(messageAt('after', truncatedAt.add(const Duration(minutes: 1))));
+        channel.state!.unreadCount = 5;
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.unreadCount, 5);
+      });
+
+      test('${EventType.channelTruncated} removes the thread replies sent before the truncation', () async {
+        when(() => persistenceClient.updateChannelThreads(any(), any())).thenAnswer((_) async {});
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        final parent = messageAt('parent', truncatedAt.subtract(const Duration(hours: 1)));
+        channel.state!.updateThreadInfo(parent.id, [
+          messageAt('old-reply', truncatedAt.subtract(const Duration(minutes: 1))).copyWith(parentId: parent.id),
+          messageAt('new-reply', truncatedAt.add(const Duration(minutes: 1))).copyWith(parentId: parent.id),
+        ]);
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.threads[parent.id]?.map((m) => m.id), ['new-reply']);
+      });
+
       test('a channel loaded with a truncatedAt leaves out the messages sent before it', () {
         final truncatedAt = DateTime.utc(2026, 10, 29, 12);
         final loaded = Channel.fromState(
