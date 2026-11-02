@@ -669,11 +669,14 @@ class ChannelClientState {
       key: (read) => read.user.id,
     );
 
-    final newPinnedMessages = switch (updatedState.pinnedMessages) {
-      // The stored list is already in pin order.
+    var newPinnedMessages = switch (updatedState.pinnedMessages) {
+      // The stored list is kept, already in pin order and past the cutoff.
+      null => _channelState.pinnedMessages,
       final pinned when identical(pinned, _channelState.pinnedMessages) => pinned,
-      final pinned => MessageMerging.sortPinnedMessages(pinned),
+      final pinned => _truncateMessages(MessageMerging.sortPinnedMessages(pinned), truncatedAt),
     };
+
+    if (isNewCutoff) newPinnedMessages = _truncateMessages(newPinnedMessages, truncatedAt);
 
     _channelState = _channelState.copyWith(
       messages: newMessages,
@@ -684,7 +687,7 @@ class ChannelClientState {
       membership: updatedState.membership,
       read: newReads.toList(),
       draft: updatedState.draft,
-      pinnedMessages: _truncateMessages(newPinnedMessages, truncatedAt),
+      pinnedMessages: newPinnedMessages,
       pendingMessages: updatedState.pendingMessages,
       pushPreferences: updatedState.pushPreferences,
       activeLiveLocations: updatedState.activeLiveLocations,

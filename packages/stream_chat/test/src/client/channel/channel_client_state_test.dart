@@ -2464,6 +2464,50 @@ void main() {
 
         expect(channel.state!.messages, isEmpty);
       });
+
+      test('a channel update with a newer truncatedAt drops the pinned messages sent before it', () {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        final pinnedAt = truncatedAt.add(const Duration(minutes: 5));
+        channel.state!.updateChannelState(
+          ChannelState(
+            pinnedMessages: [
+              messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))),
+              messageAt('after', truncatedAt.add(const Duration(minutes: 1))),
+            ].map((it) => it.copyWith(pinned: true, pinnedAt: pinnedAt)).toList(),
+          ),
+        );
+
+        channel.state!.updateChannelState(
+          ChannelState(
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+
+        expect(channel.state!.pinnedMessages.map((m) => m.id), ['after']);
+      });
+
+      test('a channel update with an older truncatedAt does not bring back older pinned messages', () {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.updateChannelState(
+          ChannelState(
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+        final between = messageAt('between', truncatedAt.subtract(const Duration(hours: 1)));
+
+        channel.state!.updateChannelState(
+          ChannelState(
+            channel: ChannelModel(
+              id: channelId,
+              type: channelType,
+              truncatedAt: truncatedAt.subtract(const Duration(days: 1)),
+            ),
+            pinnedMessages: [between.copyWith(pinned: true, pinnedAt: truncatedAt)],
+          ),
+        );
+
+        expect(channel.state!.pinnedMessages, isEmpty);
+      });
     });
 
     group('Member Events', () {
