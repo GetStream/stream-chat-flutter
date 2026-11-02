@@ -241,8 +241,8 @@ class StreamMessageItemProps extends Equatable {
   /// message belongs to the current user or another participant.
   /// On completion, [onReplyTap] is invoked with the message.
   ///
-  /// Swipe is disabled for deleted messages, messages in a failed state, and
-  /// in a channel that doesn't allow quoting.
+  /// Swipe is disabled for a message that is deleted, failed, or still being
+  /// sent, updated or deleted, and in a channel that doesn't allow quoting.
   ///
   /// Defaults to false.
   final bool swipeToReply;
@@ -730,13 +730,18 @@ class DefaultStreamMessageItem extends StatelessWidget {
 
     final onReplyTap = props.onReplyTap;
     if (!props.swipeToReply || onReplyTap == null) return result;
-    if (message.isDeleted || message.state.isFailed) return result;
 
     final channel = StreamChannel.maybeOf(context)?.channel;
-    if (channel != null && !channel.canQuoteMessage) return result;
+    final canQuote = channel?.canQuoteMessage ?? true;
+    final state = message.state;
+    final isDeleted = message.isDeleted || state.isDeleted;
+    final isPending = state.isOutgoing || state.isFailed;
 
+    // Disabled rather than removed, so the message isn't rebuilt from scratch
+    // when it finishes sending.
     return _SwipeToReplyWrapper(
       message: message,
+      enabled: canQuote && !isDeleted && !isPending,
       onReplyTap: onReplyTap,
       child: result,
     );
@@ -1134,11 +1139,13 @@ extension on Poll {
 class _SwipeToReplyWrapper extends StatelessWidget {
   const _SwipeToReplyWrapper({
     required this.message,
+    required this.enabled,
     required this.onReplyTap,
     required this.child,
   });
 
   final Message message;
+  final bool enabled;
   final void Function(Message) onReplyTap;
   final Widget child;
 
@@ -1148,7 +1155,7 @@ class _SwipeToReplyWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Swipeable(
       key: ValueKey('swipe-${message.id}'),
-      direction: SwipeDirection.startToEnd,
+      direction: enabled ? SwipeDirection.startToEnd : SwipeDirection.none,
       swipeThreshold: _swipeThreshold,
       onSwiped: (_) => onReplyTap(message),
       backgroundBuilder: (context, details) {
