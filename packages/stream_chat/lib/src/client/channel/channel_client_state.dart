@@ -30,8 +30,8 @@ class ChannelClientState {
 
     final truncatedAt = channelState.channel?.truncatedAt;
     final seededState = channelState.copyWith(
-      messages: _withoutTruncated(channelState.messages, truncatedAt),
-      pinnedMessages: _withoutTruncated(
+      messages: _survivingTruncationAt(channelState.messages, truncatedAt),
+      pinnedMessages: _survivingTruncationAt(
         MessageMerging.sortPinnedMessages(channelState.pinnedMessages),
         truncatedAt,
       ),
@@ -70,21 +70,21 @@ class ChannelClientState {
         .then((_) => retryFailedMessages());
   }
 
-  // Messages created before the channel was truncated no longer exist, even
-  // when they were still stored. Messages not sent yet are kept.
-  static List<Message>? _withoutTruncated(
+  // Keeps the messages created at or after [truncatedAt], and the messages not
+  // sent yet. Returns [messages] itself when every message survives.
+  static List<Message>? _survivingTruncationAt(
     List<Message>? messages,
     DateTime? truncatedAt,
   ) {
     if (messages == null || truncatedAt == null) return messages;
 
-    bool isTruncated(Message message) {
+    bool survives(Message message) {
       final createdAt = message.remoteCreatedAt;
-      return createdAt != null && createdAt.isBefore(truncatedAt);
+      return createdAt == null || !createdAt.isBefore(truncatedAt);
     }
 
-    if (!messages.any(isTruncated)) return messages;
-    return messages.whereNot(isTruncated).toList();
+    if (messages.every(survives)) return messages;
+    return messages.where(survives).toList();
   }
 
   final Channel _channel;
@@ -555,11 +555,11 @@ class ChannelClientState {
     final cutoff = truncatedAt ?? clock.now();
 
     final loaded = messages;
-    final remaining = _withoutTruncated(loaded, cutoff)!;
+    final remaining = _survivingTruncationAt(loaded, cutoff)!;
     final pinnedMessages = _channelState.pinnedMessages;
     _channelState = _channelState.copyWith(
       messages: remaining,
-      pinnedMessages: _withoutTruncated(pinnedMessages, cutoff),
+      pinnedMessages: _survivingTruncationAt(pinnedMessages, cutoff),
     );
 
     _removeThreadRepliesCreatedBefore(cutoff);
@@ -576,7 +576,7 @@ class ChannelClientState {
     final threads = this.threads;
     final trimmed = threads.map(
       (parentId, replies) {
-        final kept = _withoutTruncated(replies, createdBefore)!;
+        final kept = _survivingTruncationAt(replies, createdBefore)!;
         return MapEntry(parentId, kept);
       },
     );
@@ -651,7 +651,7 @@ class ChannelClientState {
     ].nonNulls.maxOrNull;
 
     _channelState = _channelState.copyWith(
-      messages: _withoutTruncated(newMessages, truncatedAt),
+      messages: _survivingTruncationAt(newMessages, truncatedAt),
       channel: newChannel?.copyWith(truncatedAt: truncatedAt),
       watchers: newWatchers.toList(),
       watcherCount: updatedState.watcherCount,
@@ -659,7 +659,7 @@ class ChannelClientState {
       membership: updatedState.membership,
       read: newReads.toList(),
       draft: updatedState.draft,
-      pinnedMessages: _withoutTruncated(newPinnedMessages, truncatedAt),
+      pinnedMessages: _survivingTruncationAt(newPinnedMessages, truncatedAt),
       pendingMessages: updatedState.pendingMessages,
       pushPreferences: updatedState.pushPreferences,
       activeLiveLocations: updatedState.activeLiveLocations,

@@ -374,10 +374,7 @@ class ChannelEventHandler {
       truncatedAt: truncatedAt,
     );
 
-    _mutations.onChannelTruncated(
-      truncatedAt: truncatedAt,
-      message: event.message,
-    );
+    _mutations.onChannelTruncated(channel, message: event.message);
   }
 
   void _onChannelUpdated(Event event) {
