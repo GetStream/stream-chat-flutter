@@ -13,18 +13,14 @@ import '../models.dart';
 part 'create_block_list_request.g.dart';
 part 'create_block_list_request.freezed.dart';
 
-extension type const CreateBlockListRequestType._(String _) implements String {
-  static const domain = CreateBlockListRequestType._('domain');
-  static const domainAllowlist = CreateBlockListRequestType._('domain_allowlist');
-  static const email = CreateBlockListRequestType._('email');
-  static const emailAllowlist = CreateBlockListRequestType._('email_allowlist');
-  static const regex = CreateBlockListRequestType._('regex');
-  static const word = CreateBlockListRequestType._('word');
-  static const wordAllowlist = CreateBlockListRequestType._('word_allowlist');
-
-  factory CreateBlockListRequestType.fromJson(String json) => CreateBlockListRequestType._(json);
-
-  String toJson() => this;
+extension type const CreateBlockListRequestType(String _) implements String {
+  static const domain = CreateBlockListRequestType('domain');
+  static const domainAllowlist = CreateBlockListRequestType('domain_allowlist');
+  static const email = CreateBlockListRequestType('email');
+  static const emailAllowlist = CreateBlockListRequestType('email_allowlist');
+  static const regex = CreateBlockListRequestType('regex');
+  static const word = CreateBlockListRequestType('word');
+  static const wordAllowlist = CreateBlockListRequestType('word_allowlist');
 }
 
 @freezed

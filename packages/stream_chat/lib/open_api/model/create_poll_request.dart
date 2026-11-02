@@ -13,15 +13,6 @@ import '../models.dart';
 part 'create_poll_request.g.dart';
 part 'create_poll_request.freezed.dart';
 
-extension type const CreatePollRequestVotingVisibility._(String _) implements String {
-  static const anonymous = CreatePollRequestVotingVisibility._('anonymous');
-  static const public = CreatePollRequestVotingVisibility._('public');
-
-  factory CreatePollRequestVotingVisibility.fromJson(String json) => CreatePollRequestVotingVisibility._(json);
-
-  String toJson() => this;
-}
-
 @freezed
 @immutable
 @JsonSerializable()
@@ -87,7 +78,7 @@ class CreatePollRequest with _$CreatePollRequest {
 
   @override
   @JsonKey(name: 'voting_visibility')
-  final CreatePollRequestVotingVisibility? votingVisibility;
+  final VotingVisibility? votingVisibility;
 
   Map<String, dynamic> toJson() => _$CreatePollRequestToJson(this);
 

@@ -17,7 +17,7 @@ mixin _$FeedsEnrichedCollectionResponse {
   Map<String, Object?> get custom;
   String get id;
   String get name;
-  String get status;
+  CollectionStatus get status;
   DateTime get updatedAt;
   String get userId;
 
@@ -75,7 +75,7 @@ abstract mixin class $FeedsEnrichedCollectionResponseCopyWith<$Res> {
     Map<String, Object?> custom,
     String id,
     String name,
-    String status,
+    CollectionStatus status,
     DateTime updatedAt,
     String userId,
   });
@@ -122,7 +122,7 @@ class _$FeedsEnrichedCollectionResponseCopyWithImpl<$Res> implements $FeedsEnric
         status: null == status
             ? _self.status
             : status // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as CollectionStatus,
         updatedAt: null == updatedAt
             ? _self.updatedAt
             : updatedAt // ignore: cast_nullable_to_non_nullable

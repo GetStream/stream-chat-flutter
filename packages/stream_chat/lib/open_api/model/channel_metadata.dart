@@ -56,7 +56,7 @@ class ChannelMetadata with _$ChannelMetadata {
 
   @override
   @JsonKey(name: 'push_level')
-  final String? pushLevel;
+  final PushLevel? pushLevel;
 
   @override
   @JsonKey(name: 'team')

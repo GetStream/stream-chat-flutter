@@ -13,16 +13,6 @@ import '../models.dart';
 part 'ban_action_request_payload.g.dart';
 part 'ban_action_request_payload.freezed.dart';
 
-extension type const BanActionRequestPayloadDeleteMessages._(String _) implements String {
-  static const hard = BanActionRequestPayloadDeleteMessages._('hard');
-  static const pruning = BanActionRequestPayloadDeleteMessages._('pruning');
-  static const soft = BanActionRequestPayloadDeleteMessages._('soft');
-
-  factory BanActionRequestPayloadDeleteMessages.fromJson(String json) => BanActionRequestPayloadDeleteMessages._(json);
-
-  String toJson() => this;
-}
-
 @freezed
 @immutable
 @JsonSerializable()
@@ -53,7 +43,7 @@ class BanActionRequestPayload with _$BanActionRequestPayload {
 
   @override
   @JsonKey(name: 'delete_messages')
-  final BanActionRequestPayloadDeleteMessages? deleteMessages;
+  final DeleteMessages? deleteMessages;
 
   @override
   @JsonKey(name: 'ip_ban')

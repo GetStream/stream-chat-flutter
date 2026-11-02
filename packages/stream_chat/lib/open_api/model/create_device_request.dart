@@ -13,17 +13,6 @@ import '../models.dart';
 part 'create_device_request.g.dart';
 part 'create_device_request.freezed.dart';
 
-extension type const CreateDeviceRequestPushProvider._(String _) implements String {
-  static const apn = CreateDeviceRequestPushProvider._('apn');
-  static const firebase = CreateDeviceRequestPushProvider._('firebase');
-  static const huawei = CreateDeviceRequestPushProvider._('huawei');
-  static const xiaomi = CreateDeviceRequestPushProvider._('xiaomi');
-
-  factory CreateDeviceRequestPushProvider.fromJson(String json) => CreateDeviceRequestPushProvider._(json);
-
-  String toJson() => this;
-}
-
 @freezed
 @immutable
 @JsonSerializable()
@@ -46,7 +35,7 @@ class CreateDeviceRequest with _$CreateDeviceRequest {
 
   @override
   @JsonKey(name: 'push_provider')
-  final CreateDeviceRequestPushProvider pushProvider;
+  final PushProviderName pushProvider;
 
   @override
   @JsonKey(name: 'push_provider_name')

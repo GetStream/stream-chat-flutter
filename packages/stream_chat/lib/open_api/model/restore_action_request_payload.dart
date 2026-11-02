@@ -19,11 +19,16 @@ part 'restore_action_request_payload.freezed.dart';
 class RestoreActionRequestPayload with _$RestoreActionRequestPayload {
   const RestoreActionRequestPayload({
     this.decisionReason,
+    this.reason,
   });
 
   @override
   @JsonKey(name: 'decision_reason')
   final String? decisionReason;
+
+  @override
+  @JsonKey(name: 'reason')
+  final String? reason;
 
   Map<String, dynamic> toJson() => _$RestoreActionRequestPayloadToJson(this);
 

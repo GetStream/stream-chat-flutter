@@ -13,36 +13,32 @@ import '../models.dart';
 part 'submit_action_request.g.dart';
 part 'submit_action_request.freezed.dart';
 
-extension type const SubmitActionRequestActionType._(String _) implements String {
-  static const ban = SubmitActionRequestActionType._('ban');
-  static const block = SubmitActionRequestActionType._('block');
-  static const bypass = SubmitActionRequestActionType._('bypass');
-  static const custom = SubmitActionRequestActionType._('custom');
-  static const deEscalate = SubmitActionRequestActionType._('de_escalate');
-  static const deleteActivity = SubmitActionRequestActionType._('delete_activity');
-  static const deleteComment = SubmitActionRequestActionType._('delete_comment');
-  static const deleteMessage = SubmitActionRequestActionType._('delete_message');
-  static const deletePoll = SubmitActionRequestActionType._('delete_poll');
-  static const deletePollAnswer = SubmitActionRequestActionType._('delete_poll_answer');
-  static const deletePollOption = SubmitActionRequestActionType._('delete_poll_option');
-  static const deleteReaction = SubmitActionRequestActionType._('delete_reaction');
-  static const deleteUser = SubmitActionRequestActionType._('delete_user');
-  static const deleteUserMessages = SubmitActionRequestActionType._('delete_user_messages');
-  static const endCall = SubmitActionRequestActionType._('end_call');
-  static const escalate = SubmitActionRequestActionType._('escalate');
-  static const flag = SubmitActionRequestActionType._('flag');
-  static const kickUser = SubmitActionRequestActionType._('kick_user');
-  static const markReviewed = SubmitActionRequestActionType._('mark_reviewed');
-  static const rejectAppeal = SubmitActionRequestActionType._('reject_appeal');
-  static const restore = SubmitActionRequestActionType._('restore');
-  static const shadowBlock = SubmitActionRequestActionType._('shadow_block');
-  static const unban = SubmitActionRequestActionType._('unban');
-  static const unblock = SubmitActionRequestActionType._('unblock');
-  static const unmask = SubmitActionRequestActionType._('unmask');
-
-  factory SubmitActionRequestActionType.fromJson(String json) => SubmitActionRequestActionType._(json);
-
-  String toJson() => this;
+extension type const SubmitActionRequestActionType(String _) implements String {
+  static const ban = SubmitActionRequestActionType('ban');
+  static const block = SubmitActionRequestActionType('block');
+  static const bypass = SubmitActionRequestActionType('bypass');
+  static const custom = SubmitActionRequestActionType('custom');
+  static const deEscalate = SubmitActionRequestActionType('de_escalate');
+  static const deleteActivity = SubmitActionRequestActionType('delete_activity');
+  static const deleteComment = SubmitActionRequestActionType('delete_comment');
+  static const deleteMessage = SubmitActionRequestActionType('delete_message');
+  static const deletePoll = SubmitActionRequestActionType('delete_poll');
+  static const deletePollAnswer = SubmitActionRequestActionType('delete_poll_answer');
+  static const deletePollOption = SubmitActionRequestActionType('delete_poll_option');
+  static const deleteReaction = SubmitActionRequestActionType('delete_reaction');
+  static const deleteUser = SubmitActionRequestActionType('delete_user');
+  static const deleteUserMessages = SubmitActionRequestActionType('delete_user_messages');
+  static const endCall = SubmitActionRequestActionType('end_call');
+  static const escalate = SubmitActionRequestActionType('escalate');
+  static const flag = SubmitActionRequestActionType('flag');
+  static const kickUser = SubmitActionRequestActionType('kick_user');
+  static const markReviewed = SubmitActionRequestActionType('mark_reviewed');
+  static const rejectAppeal = SubmitActionRequestActionType('reject_appeal');
+  static const restore = SubmitActionRequestActionType('restore');
+  static const shadowBlock = SubmitActionRequestActionType('shadow_block');
+  static const unban = SubmitActionRequestActionType('unban');
+  static const unblock = SubmitActionRequestActionType('unblock');
+  static const unmask = SubmitActionRequestActionType('unmask');
 }
 
 @freezed

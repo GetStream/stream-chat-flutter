@@ -20,6 +20,7 @@ class EnrichedReaction with _$EnrichedReaction {
   const EnrichedReaction({
     required this.activityId,
     this.childrenCounts,
+    this.createdAt,
     this.data,
     this.id,
     required this.kind,
@@ -27,6 +28,7 @@ class EnrichedReaction with _$EnrichedReaction {
     this.ownChildren,
     this.parent,
     this.targetFeeds,
+    this.updatedAt,
     this.user,
     required this.userId,
   });
@@ -38,6 +40,10 @@ class EnrichedReaction with _$EnrichedReaction {
   @override
   @JsonKey(name: 'children_counts')
   final Map<String, int>? childrenCounts;
+
+  @override
+  @JsonKey(name: 'created_at')
+  final String? createdAt;
 
   @override
   @JsonKey(name: 'data')
@@ -66,6 +72,10 @@ class EnrichedReaction with _$EnrichedReaction {
   @override
   @JsonKey(name: 'target_feeds')
   final List<String>? targetFeeds;
+
+  @override
+  @JsonKey(name: 'updated_at')
+  final String? updatedAt;
 
   @override
   @JsonKey(name: 'user')

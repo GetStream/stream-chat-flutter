@@ -3,20 +3,14 @@
 // coverage:ignore-file
 // ignore_for_file: unused_import, unnecessary_import, prefer_single_quotes, require_trailing_commas, unnecessary_raw_strings, public_member_api_docs, sort_constructors_first, provide_deprecation_message
 
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
-import 'package:stream_core/stream_core.dart' as core;
-
-import '../models.dart';
-
-part 'notification_channel_deleted_event.g.dart';
-part 'notification_channel_deleted_event.freezed.dart';
+part of 'events.dart';
 
 @freezed
 @immutable
 @JsonSerializable()
-class NotificationChannelDeletedEvent extends core.WsEvent with _$NotificationChannelDeletedEvent {
+class NotificationChannelDeletedEvent extends core.WsEvent
+    with _$NotificationChannelDeletedEvent
+    implements WSClientEvent, WSEvent {
   const NotificationChannelDeletedEvent({
     required this.channel,
     this.channelCustom,
@@ -102,6 +96,7 @@ class NotificationChannelDeletedEvent extends core.WsEvent with _$NotificationCh
   @JsonKey(name: 'unread_count')
   final int? unreadCount;
 
+  @override
   Map<String, dynamic> toJson() => _$NotificationChannelDeletedEventToJson(this);
 
   static NotificationChannelDeletedEvent fromJson(Map<String, dynamic> json) =>

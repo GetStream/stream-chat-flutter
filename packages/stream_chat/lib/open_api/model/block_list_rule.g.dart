@@ -7,13 +7,13 @@ part of 'block_list_rule.dart';
 // **************************************************************************
 
 BlockListRule _$BlockListRuleFromJson(Map<String, dynamic> json) => BlockListRule(
-  action: BlockListRuleAction.fromJson(json['action'] as String),
+  action: json['action'] as BlockListRuleAction,
   name: json['name'] as String,
   team: json['team'] as String,
 );
 
 Map<String, dynamic> _$BlockListRuleToJson(BlockListRule instance) => <String, dynamic>{
-  'action': instance.action.toJson(),
+  'action': instance.action,
   'name': instance.name,
   'team': instance.team,
 };

@@ -18,6 +18,8 @@ part 'rule_builder_condition.freezed.dart';
 @JsonSerializable()
 class RuleBuilderCondition with _$RuleBuilderCondition {
   const RuleBuilderCondition({
+    this.appChannelCountParams,
+    this.appMessageCountParams,
     this.callCustomPropertyParams,
     this.callTypeRuleParams,
     this.callViolationCountParams,
@@ -55,6 +57,14 @@ class RuleBuilderCondition with _$RuleBuilderCondition {
     this.videoContentParams,
     this.videoRuleParams,
   });
+
+  @override
+  @JsonKey(name: 'app_channel_count_params')
+  final AppChannelCountParameters? appChannelCountParams;
+
+  @override
+  @JsonKey(name: 'app_message_count_params')
+  final AppMessageCountParameters? appMessageCountParams;
 
   @override
   @JsonKey(name: 'call_custom_property_params')

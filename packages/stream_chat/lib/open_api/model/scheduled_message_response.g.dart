@@ -9,11 +9,16 @@ part of 'scheduled_message_response.dart';
 ScheduledMessageResponse _$ScheduledMessageResponseFromJson(
   Map<String, dynamic> json,
 ) => ScheduledMessageResponse(
+  channel: json['channel'] == null
+      ? null
+      : ScheduledMessageChannelResponse.fromJson(
+          json['channel'] as Map<String, dynamic>,
+        ),
   cid: json['cid'] as String,
   createdAt: const StreamDateTimeConverter().fromJson(
     json['created_at'] as Object,
   ),
-  failureReason: json['failure_reason'] as String?,
+  failureReason: json['failure_reason'] as ScheduledMessageFailureReason?,
   id: json['id'] as String,
   message: ScheduledMessageContentResponse.fromJson(
     json['message'] as Map<String, dynamic>,
@@ -21,7 +26,7 @@ ScheduledMessageResponse _$ScheduledMessageResponseFromJson(
   scheduledAt: const StreamDateTimeConverter().fromJson(
     json['scheduled_at'] as Object,
   ),
-  status: json['status'] as String,
+  status: json['status'] as ScheduledMessageStatus,
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
@@ -31,6 +36,7 @@ ScheduledMessageResponse _$ScheduledMessageResponseFromJson(
 Map<String, dynamic> _$ScheduledMessageResponseToJson(
   ScheduledMessageResponse instance,
 ) => <String, dynamic>{
+  'channel': instance.channel?.toJson(),
   'cid': instance.cid,
   'created_at': const StreamDateTimeConverter().toJson(instance.createdAt),
   'failure_reason': instance.failureReason,

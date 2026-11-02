@@ -3,20 +3,12 @@
 // coverage:ignore-file
 // ignore_for_file: unused_import, unnecessary_import, prefer_single_quotes, require_trailing_commas, unnecessary_raw_strings, public_member_api_docs, sort_constructors_first, provide_deprecation_message
 
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
-import 'package:stream_core/stream_core.dart' as core;
-
-import '../models.dart';
-
-part 'reaction_updated_event.g.dart';
-part 'reaction_updated_event.freezed.dart';
+part of 'events.dart';
 
 @freezed
 @immutable
 @JsonSerializable()
-class ReactionUpdatedEvent extends core.WsEvent with _$ReactionUpdatedEvent {
+class ReactionUpdatedEvent extends core.WsEvent with _$ReactionUpdatedEvent implements WSClientEvent, WSEvent {
   const ReactionUpdatedEvent({
     required this.channel,
     this.channelCustom,
@@ -102,6 +94,7 @@ class ReactionUpdatedEvent extends core.WsEvent with _$ReactionUpdatedEvent {
   @JsonKey(name: 'user')
   final UserResponseCommonFields? user;
 
+  @override
   Map<String, dynamic> toJson() => _$ReactionUpdatedEventToJson(this);
 
   static ReactionUpdatedEvent fromJson(Map<String, dynamic> json) => _$ReactionUpdatedEventFromJson(json);

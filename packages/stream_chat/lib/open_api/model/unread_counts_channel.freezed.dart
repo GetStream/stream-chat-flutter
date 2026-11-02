@@ -14,6 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UnreadCountsChannel {
   String get channelId;
+  bool get hasUnread;
   DateTime get lastRead;
   int get unreadCount;
 
@@ -33,16 +34,17 @@ mixin _$UnreadCountsChannel {
         (other.runtimeType == runtimeType &&
             other is UnreadCountsChannel &&
             (identical(other.channelId, channelId) || other.channelId == channelId) &&
+            (identical(other.hasUnread, hasUnread) || other.hasUnread == hasUnread) &&
             (identical(other.lastRead, lastRead) || other.lastRead == lastRead) &&
             (identical(other.unreadCount, unreadCount) || other.unreadCount == unreadCount));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, channelId, lastRead, unreadCount);
+  int get hashCode => Object.hash(runtimeType, channelId, hasUnread, lastRead, unreadCount);
 
   @override
   String toString() {
-    return 'UnreadCountsChannel(channelId: $channelId, lastRead: $lastRead, unreadCount: $unreadCount)';
+    return 'UnreadCountsChannel(channelId: $channelId, hasUnread: $hasUnread, lastRead: $lastRead, unreadCount: $unreadCount)';
   }
 }
 
@@ -53,7 +55,12 @@ abstract mixin class $UnreadCountsChannelCopyWith<$Res> {
     $Res Function(UnreadCountsChannel) _then,
   ) = _$UnreadCountsChannelCopyWithImpl;
   @useResult
-  $Res call({String channelId, DateTime lastRead, int unreadCount});
+  $Res call({
+    String channelId,
+    bool hasUnread,
+    DateTime lastRead,
+    int unreadCount,
+  });
 }
 
 /// @nodoc
@@ -69,6 +76,7 @@ class _$UnreadCountsChannelCopyWithImpl<$Res> implements $UnreadCountsChannelCop
   @override
   $Res call({
     Object? channelId = null,
+    Object? hasUnread = null,
     Object? lastRead = null,
     Object? unreadCount = null,
   }) {
@@ -78,6 +86,10 @@ class _$UnreadCountsChannelCopyWithImpl<$Res> implements $UnreadCountsChannelCop
             ? _self.channelId
             : channelId // ignore: cast_nullable_to_non_nullable
                   as String,
+        hasUnread: null == hasUnread
+            ? _self.hasUnread
+            : hasUnread // ignore: cast_nullable_to_non_nullable
+                  as bool,
         lastRead: null == lastRead
             ? _self.lastRead
             : lastRead // ignore: cast_nullable_to_non_nullable

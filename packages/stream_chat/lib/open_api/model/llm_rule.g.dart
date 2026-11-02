@@ -7,7 +7,7 @@ part of 'llm_rule.dart';
 // **************************************************************************
 
 LLMRule _$LLMRuleFromJson(Map<String, dynamic> json) => LLMRule(
-  action: LLMRuleAction.fromJson(json['action'] as String),
+  action: json['action'] as LLMRuleAction,
   description: json['description'] as String,
   label: json['label'] as String,
   severityRules: (json['severity_rules'] as List<dynamic>)
@@ -16,7 +16,7 @@ LLMRule _$LLMRuleFromJson(Map<String, dynamic> json) => LLMRule(
 );
 
 Map<String, dynamic> _$LLMRuleToJson(LLMRule instance) => <String, dynamic>{
-  'action': instance.action.toJson(),
+  'action': instance.action,
   'description': instance.description,
   'label': instance.label,
   'severity_rules': instance.severityRules.map((e) => e.toJson()).toList(),

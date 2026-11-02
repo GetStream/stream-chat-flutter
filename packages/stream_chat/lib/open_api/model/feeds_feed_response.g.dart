@@ -37,7 +37,7 @@ FeedsFeedResponse _$FeedsFeedResponseFromJson(Map<String, dynamic> json) => Feed
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,
   ),
-  visibility: json['visibility'] as String?,
+  visibility: json['visibility'] as FeedVisibility?,
 );
 
 Map<String, dynamic> _$FeedsFeedResponseToJson(FeedsFeedResponse instance) => <String, dynamic>{

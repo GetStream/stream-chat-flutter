@@ -3,20 +3,14 @@
 // coverage:ignore-file
 // ignore_for_file: unused_import, unnecessary_import, prefer_single_quotes, require_trailing_commas, unnecessary_raw_strings, public_member_api_docs, sort_constructors_first, provide_deprecation_message
 
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
-import 'package:stream_core/stream_core.dart' as core;
-
-import '../models.dart';
-
-part 'notification_removed_from_channel_event.g.dart';
-part 'notification_removed_from_channel_event.freezed.dart';
+part of 'events.dart';
 
 @freezed
 @immutable
 @JsonSerializable()
-class NotificationRemovedFromChannelEvent extends core.WsEvent with _$NotificationRemovedFromChannelEvent {
+class NotificationRemovedFromChannelEvent extends core.WsEvent
+    with _$NotificationRemovedFromChannelEvent
+    implements WSClientEvent, WSEvent {
   const NotificationRemovedFromChannelEvent({
     required this.channel,
     this.channelCustom,
@@ -92,6 +86,7 @@ class NotificationRemovedFromChannelEvent extends core.WsEvent with _$Notificati
   @JsonKey(name: 'user')
   final UserResponseCommonFields? user;
 
+  @override
   Map<String, dynamic> toJson() => _$NotificationRemovedFromChannelEventToJson(this);
 
   static NotificationRemovedFromChannelEvent fromJson(Map<String, dynamic> json) =>

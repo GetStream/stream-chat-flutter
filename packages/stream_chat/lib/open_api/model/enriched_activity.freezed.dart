@@ -23,6 +23,7 @@ mixin _$EnrichedActivity {
   Map<String, int>? get reactionCounts;
   double? get score;
   Data? get target;
+  String? get time;
   List<String>? get to;
   String? get verb;
 
@@ -59,6 +60,7 @@ mixin _$EnrichedActivity {
             ) &&
             (identical(other.score, score) || other.score == score) &&
             (identical(other.target, target) || other.target == target) &&
+            (identical(other.time, time) || other.time == time) &&
             const DeepCollectionEquality().equals(other.to, to) &&
             (identical(other.verb, verb) || other.verb == verb));
   }
@@ -76,13 +78,14 @@ mixin _$EnrichedActivity {
     const DeepCollectionEquality().hash(reactionCounts),
     score,
     target,
+    time,
     const DeepCollectionEquality().hash(to),
     verb,
   );
 
   @override
   String toString() {
-    return 'EnrichedActivity(actor: $actor, foreignId: $foreignId, id: $id, latestReactions: $latestReactions, object: $object, origin: $origin, ownReactions: $ownReactions, reactionCounts: $reactionCounts, score: $score, target: $target, to: $to, verb: $verb)';
+    return 'EnrichedActivity(actor: $actor, foreignId: $foreignId, id: $id, latestReactions: $latestReactions, object: $object, origin: $origin, ownReactions: $ownReactions, reactionCounts: $reactionCounts, score: $score, target: $target, time: $time, to: $to, verb: $verb)';
   }
 }
 
@@ -104,6 +107,7 @@ abstract mixin class $EnrichedActivityCopyWith<$Res> {
     Map<String, int>? reactionCounts,
     double? score,
     Data? target,
+    String? time,
     List<String>? to,
     String? verb,
   });
@@ -131,6 +135,7 @@ class _$EnrichedActivityCopyWithImpl<$Res> implements $EnrichedActivityCopyWith<
     Object? reactionCounts = freezed,
     Object? score = freezed,
     Object? target = freezed,
+    Object? time = freezed,
     Object? to = freezed,
     Object? verb = freezed,
   }) {
@@ -176,6 +181,10 @@ class _$EnrichedActivityCopyWithImpl<$Res> implements $EnrichedActivityCopyWith<
             ? _self.target
             : target // ignore: cast_nullable_to_non_nullable
                   as Data?,
+        time: freezed == time
+            ? _self.time
+            : time // ignore: cast_nullable_to_non_nullable
+                  as String?,
         to: freezed == to
             ? _self.to
             : to // ignore: cast_nullable_to_non_nullable

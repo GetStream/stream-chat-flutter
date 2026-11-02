@@ -13,13 +13,14 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$ScheduledMessageResponse {
+  ScheduledMessageChannelResponse? get channel;
   String get cid;
   DateTime get createdAt;
-  String? get failureReason;
+  ScheduledMessageFailureReason? get failureReason;
   String get id;
   ScheduledMessageContentResponse get message;
   DateTime get scheduledAt;
-  String get status;
+  ScheduledMessageStatus get status;
   DateTime get updatedAt;
   UserResponse get user;
 
@@ -38,6 +39,7 @@ mixin _$ScheduledMessageResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is ScheduledMessageResponse &&
+            (identical(other.channel, channel) || other.channel == channel) &&
             (identical(other.cid, cid) || other.cid == cid) &&
             (identical(other.createdAt, createdAt) || other.createdAt == createdAt) &&
             (identical(other.failureReason, failureReason) || other.failureReason == failureReason) &&
@@ -52,6 +54,7 @@ mixin _$ScheduledMessageResponse {
   @override
   int get hashCode => Object.hash(
     runtimeType,
+    channel,
     cid,
     createdAt,
     failureReason,
@@ -65,7 +68,7 @@ mixin _$ScheduledMessageResponse {
 
   @override
   String toString() {
-    return 'ScheduledMessageResponse(cid: $cid, createdAt: $createdAt, failureReason: $failureReason, id: $id, message: $message, scheduledAt: $scheduledAt, status: $status, updatedAt: $updatedAt, user: $user)';
+    return 'ScheduledMessageResponse(channel: $channel, cid: $cid, createdAt: $createdAt, failureReason: $failureReason, id: $id, message: $message, scheduledAt: $scheduledAt, status: $status, updatedAt: $updatedAt, user: $user)';
   }
 }
 
@@ -77,13 +80,14 @@ abstract mixin class $ScheduledMessageResponseCopyWith<$Res> {
   ) = _$ScheduledMessageResponseCopyWithImpl;
   @useResult
   $Res call({
+    ScheduledMessageChannelResponse? channel,
     String cid,
     DateTime createdAt,
-    String? failureReason,
+    ScheduledMessageFailureReason? failureReason,
     String id,
     ScheduledMessageContentResponse message,
     DateTime scheduledAt,
-    String status,
+    ScheduledMessageStatus status,
     DateTime updatedAt,
     UserResponse user,
   });
@@ -101,6 +105,7 @@ class _$ScheduledMessageResponseCopyWithImpl<$Res> implements $ScheduledMessageR
   @pragma('vm:prefer-inline')
   @override
   $Res call({
+    Object? channel = freezed,
     Object? cid = null,
     Object? createdAt = null,
     Object? failureReason = freezed,
@@ -113,6 +118,10 @@ class _$ScheduledMessageResponseCopyWithImpl<$Res> implements $ScheduledMessageR
   }) {
     return _then(
       ScheduledMessageResponse(
+        channel: freezed == channel
+            ? _self.channel
+            : channel // ignore: cast_nullable_to_non_nullable
+                  as ScheduledMessageChannelResponse?,
         cid: null == cid
             ? _self.cid
             : cid // ignore: cast_nullable_to_non_nullable
@@ -124,7 +133,7 @@ class _$ScheduledMessageResponseCopyWithImpl<$Res> implements $ScheduledMessageR
         failureReason: freezed == failureReason
             ? _self.failureReason
             : failureReason // ignore: cast_nullable_to_non_nullable
-                  as String?,
+                  as ScheduledMessageFailureReason?,
         id: null == id
             ? _self.id
             : id // ignore: cast_nullable_to_non_nullable
@@ -140,7 +149,7 @@ class _$ScheduledMessageResponseCopyWithImpl<$Res> implements $ScheduledMessageR
         status: null == status
             ? _self.status
             : status // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as ScheduledMessageStatus,
         updatedAt: null == updatedAt
             ? _self.updatedAt
             : updatedAt // ignore: cast_nullable_to_non_nullable

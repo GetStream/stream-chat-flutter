@@ -108,7 +108,7 @@ FeedsV3ActivityResponse _$FeedsV3ActivityResponseFromJson(
       FeedsReactionGroupResponse.fromJson(e as Map<String, dynamic>),
     ),
   ),
-  restrictReplies: json['restrict_replies'] as String,
+  restrictReplies: json['restrict_replies'] as RestrictReplies,
   score: (json['score'] as num).toDouble(),
   scoreVars: json['score_vars'] as Map<String, dynamic>?,
   searchData: json['search_data'] as Map<String, dynamic>,
@@ -120,7 +120,7 @@ FeedsV3ActivityResponse _$FeedsV3ActivityResponseFromJson(
     json['updated_at'] as Object,
   ),
   user: UserResponse.fromJson(json['user'] as Map<String, dynamic>),
-  visibility: json['visibility'] as String,
+  visibility: json['visibility'] as ActivityVisibility,
   visibilityTag: json['visibility_tag'] as String?,
 );
 

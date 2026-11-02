@@ -13,27 +13,18 @@ import '../models.dart';
 part 'velocity_filter_config_rule.g.dart';
 part 'velocity_filter_config_rule.freezed.dart';
 
-extension type const VelocityFilterConfigRuleAction._(String _) implements String {
-  static const ban = VelocityFilterConfigRuleAction._('ban');
-  static const flag = VelocityFilterConfigRuleAction._('flag');
-  static const remove = VelocityFilterConfigRuleAction._('remove');
-  static const shadow = VelocityFilterConfigRuleAction._('shadow');
-
-  factory VelocityFilterConfigRuleAction.fromJson(String json) => VelocityFilterConfigRuleAction._(json);
-
-  String toJson() => this;
+extension type const VelocityFilterConfigRuleAction(String _) implements String {
+  static const ban = VelocityFilterConfigRuleAction('ban');
+  static const flag = VelocityFilterConfigRuleAction('flag');
+  static const remove = VelocityFilterConfigRuleAction('remove');
+  static const shadow = VelocityFilterConfigRuleAction('shadow');
 }
 
-extension type const VelocityFilterConfigRuleCascadingAction._(String _) implements String {
-  static const ban = VelocityFilterConfigRuleCascadingAction._('ban');
-  static const flag = VelocityFilterConfigRuleCascadingAction._('flag');
-  static const remove = VelocityFilterConfigRuleCascadingAction._('remove');
-  static const shadow = VelocityFilterConfigRuleCascadingAction._('shadow');
-
-  factory VelocityFilterConfigRuleCascadingAction.fromJson(String json) =>
-      VelocityFilterConfigRuleCascadingAction._(json);
-
-  String toJson() => this;
+extension type const VelocityFilterConfigRuleCascadingAction(String _) implements String {
+  static const ban = VelocityFilterConfigRuleCascadingAction('ban');
+  static const flag = VelocityFilterConfigRuleCascadingAction('flag');
+  static const remove = VelocityFilterConfigRuleCascadingAction('remove');
+  static const shadow = VelocityFilterConfigRuleCascadingAction('shadow');
 }
 
 @freezed

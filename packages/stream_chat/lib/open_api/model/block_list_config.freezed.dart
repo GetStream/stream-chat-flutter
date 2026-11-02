@@ -15,6 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$BlockListConfig {
   bool? get async;
   bool get enabled;
+  bool? get explicitUrlsOnly;
   bool? get matchSubstring;
   List<BlockListRule> get rules;
 
@@ -34,6 +35,7 @@ mixin _$BlockListConfig {
             other is BlockListConfig &&
             (identical(other.async, async) || other.async == async) &&
             (identical(other.enabled, enabled) || other.enabled == enabled) &&
+            (identical(other.explicitUrlsOnly, explicitUrlsOnly) || other.explicitUrlsOnly == explicitUrlsOnly) &&
             (identical(other.matchSubstring, matchSubstring) || other.matchSubstring == matchSubstring) &&
             const DeepCollectionEquality().equals(other.rules, rules));
   }
@@ -43,13 +45,14 @@ mixin _$BlockListConfig {
     runtimeType,
     async,
     enabled,
+    explicitUrlsOnly,
     matchSubstring,
     const DeepCollectionEquality().hash(rules),
   );
 
   @override
   String toString() {
-    return 'BlockListConfig(async: $async, enabled: $enabled, matchSubstring: $matchSubstring, rules: $rules)';
+    return 'BlockListConfig(async: $async, enabled: $enabled, explicitUrlsOnly: $explicitUrlsOnly, matchSubstring: $matchSubstring, rules: $rules)';
   }
 }
 
@@ -63,6 +66,7 @@ abstract mixin class $BlockListConfigCopyWith<$Res> {
   $Res call({
     bool? async,
     bool enabled,
+    bool? explicitUrlsOnly,
     bool? matchSubstring,
     List<BlockListRule> rules,
   });
@@ -82,6 +86,7 @@ class _$BlockListConfigCopyWithImpl<$Res> implements $BlockListConfigCopyWith<$R
   $Res call({
     Object? async = freezed,
     Object? enabled = null,
+    Object? explicitUrlsOnly = freezed,
     Object? matchSubstring = freezed,
     Object? rules = null,
   }) {
@@ -95,6 +100,10 @@ class _$BlockListConfigCopyWithImpl<$Res> implements $BlockListConfigCopyWith<$R
             ? _self.enabled
             : enabled // ignore: cast_nullable_to_non_nullable
                   as bool,
+        explicitUrlsOnly: freezed == explicitUrlsOnly
+            ? _self.explicitUrlsOnly
+            : explicitUrlsOnly // ignore: cast_nullable_to_non_nullable
+                  as bool?,
         matchSubstring: freezed == matchSubstring
             ? _self.matchSubstring
             : matchSubstring // ignore: cast_nullable_to_non_nullable

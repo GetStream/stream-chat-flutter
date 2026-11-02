@@ -12,11 +12,7 @@ BanActionRequestPayload _$BanActionRequestPayloadFromJson(
   banFromFutureChannels: json['ban_from_future_channels'] as bool?,
   channelBanOnly: json['channel_ban_only'] as bool?,
   channelCid: json['channel_cid'] as String?,
-  deleteMessages: json['delete_messages'] == null
-      ? null
-      : BanActionRequestPayloadDeleteMessages.fromJson(
-          json['delete_messages'] as String,
-        ),
+  deleteMessages: json['delete_messages'] as DeleteMessages?,
   ipBan: json['ip_ban'] as bool?,
   reason: json['reason'] as String?,
   shadow: json['shadow'] as bool?,
@@ -30,7 +26,7 @@ Map<String, dynamic> _$BanActionRequestPayloadToJson(
   'ban_from_future_channels': instance.banFromFutureChannels,
   'channel_ban_only': instance.channelBanOnly,
   'channel_cid': instance.channelCid,
-  'delete_messages': instance.deleteMessages?.toJson(),
+  'delete_messages': instance.deleteMessages,
   'ip_ban': instance.ipBan,
   'reason': instance.reason,
   'shadow': instance.shadow,

@@ -9,9 +9,7 @@ part of 'submit_action_request.dart';
 SubmitActionRequest _$SubmitActionRequestFromJson(
   Map<String, dynamic> json,
 ) => SubmitActionRequest(
-  actionType: SubmitActionRequestActionType.fromJson(
-    json['action_type'] as String,
-  ),
+  actionType: json['action_type'] as SubmitActionRequestActionType,
   appealId: json['appeal_id'] as String?,
   ban: json['ban'] == null ? null : BanActionRequestPayload.fromJson(json['ban'] as Map<String, dynamic>),
   block: json['block'] == null
@@ -108,7 +106,7 @@ SubmitActionRequest _$SubmitActionRequestFromJson(
 Map<String, dynamic> _$SubmitActionRequestToJson(
   SubmitActionRequest instance,
 ) => <String, dynamic>{
-  'action_type': instance.actionType.toJson(),
+  'action_type': instance.actionType,
   'appeal_id': instance.appealId,
   'ban': instance.ban?.toJson(),
   'block': instance.block?.toJson(),
