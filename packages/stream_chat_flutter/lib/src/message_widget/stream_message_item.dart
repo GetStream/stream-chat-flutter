@@ -731,13 +731,16 @@ class DefaultStreamMessageItem extends StatelessWidget {
 
     final onReplyTap = props.onReplyTap;
     if (!props.swipeToReply || onReplyTap == null) return result;
-    if (message.isDeleted || message.state.isOutgoing || message.state.isFailed) return result;
 
     final channel = StreamChannel.maybeOf(context)?.channel;
-    if (channel != null && !channel.canQuoteMessage) return result;
+    final canQuote = channel?.canQuoteMessage ?? true;
+    final isSettled = !message.isDeleted && !message.state.isOutgoing && !message.state.isFailed;
 
+    // Kept in place and turned off, so the message keeps its state as it
+    // moves between states.
     return _SwipeToReplyWrapper(
       message: message,
+      enabled: canQuote && isSettled,
       onReplyTap: onReplyTap,
       child: result,
     );
@@ -1135,11 +1138,13 @@ extension on Poll {
 class _SwipeToReplyWrapper extends StatelessWidget {
   const _SwipeToReplyWrapper({
     required this.message,
+    required this.enabled,
     required this.onReplyTap,
     required this.child,
   });
 
   final Message message;
+  final bool enabled;
   final void Function(Message) onReplyTap;
   final Widget child;
 
@@ -1149,7 +1154,7 @@ class _SwipeToReplyWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Swipeable(
       key: ValueKey('swipe-${message.id}'),
-      direction: SwipeDirection.startToEnd,
+      direction: enabled ? SwipeDirection.startToEnd : SwipeDirection.none,
       swipeThreshold: _swipeThreshold,
       onSwiped: (_) => onReplyTap(message),
       backgroundBuilder: (context, details) {

@@ -34,6 +34,16 @@ void main() {
     expect(replies, isEmpty);
   });
 
+  testWidgets('StreamMessageItem keeps its state when a message finishes sending', (tester) async {
+    final row = find.descendant(of: find.byType(StreamMessageItem), matching: find.byType(Material)).first;
+    await _pumpMessageItem(tester, _message(state: MessageState.sending), onReplyTap: (_) {});
+    final sendingState = tester.state(row);
+
+    await _pumpMessageItem(tester, _message(), onReplyTap: (_) {});
+
+    expect(tester.state(row), same(sendingState));
+  });
+
   testWidgets('StreamMessageItem replies to a message swiped outside a channel', (tester) async {
     final message = _message();
     final replies = <Message>[];
