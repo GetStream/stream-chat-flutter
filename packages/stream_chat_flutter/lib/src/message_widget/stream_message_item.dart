@@ -241,8 +241,9 @@ class StreamMessageItemProps extends Equatable {
   /// message belongs to the current user or another participant.
   /// On completion, [onReplyTap] is invoked with the message.
   ///
-  /// Swipe is disabled for deleted messages, messages in a failed state, and
-  /// in a channel that doesn't allow quoting.
+  /// Swipe is disabled for deleted messages, messages still being sent,
+  /// updated or deleted, messages in a failed state, and in a channel that
+  /// doesn't allow quoting.
   ///
   /// Defaults to false.
   final bool swipeToReply;
@@ -730,7 +731,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
 
     final onReplyTap = props.onReplyTap;
     if (!props.swipeToReply || onReplyTap == null) return result;
-    if (message.isDeleted || message.state.isFailed) return result;
+    if (message.isDeleted || message.state.isOutgoing || message.state.isFailed) return result;
 
     final channel = StreamChannel.maybeOf(context)?.channel;
     if (channel != null && !channel.canQuoteMessage) return result;

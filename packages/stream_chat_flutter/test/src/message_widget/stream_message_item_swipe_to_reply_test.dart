@@ -25,6 +25,15 @@ void main() {
     expect(replies, isEmpty);
   });
 
+  testWidgets('StreamMessageItem ignores a swipe on a message still being sent', (tester) async {
+    final replies = <Message>[];
+    await _pumpMessageItem(tester, _message(state: MessageState.sending), onReplyTap: replies.add);
+
+    await _swipe(tester);
+
+    expect(replies, isEmpty);
+  });
+
   testWidgets('StreamMessageItem replies to a message swiped outside a channel', (tester) async {
     final message = _message();
     final replies = <Message>[];
@@ -36,13 +45,13 @@ void main() {
   });
 }
 
-Message _message() {
+Message _message({MessageState state = MessageState.sent}) {
   return Message(
     id: 'test-message',
     text: 'Are we still meeting tomorrow',
     createdAt: DateTime(2026, 8, 26, 15),
     user: User(id: 'han', name: 'Han Solo'),
-    state: MessageState.sent,
+    state: state,
   );
 }
 
