@@ -2366,12 +2366,12 @@ void main() {
         expect(channel.state!.unreadCount, 3);
       });
 
-      test('a channel update with a newer truncatedAt drops the messages sent before it', () {
+      test('a server update with a newer truncatedAt drops the messages sent before it', () {
         final truncatedAt = DateTime.utc(2026, 10, 29, 12);
         channel.state!.updateMessage(messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))));
         channel.state!.updateMessage(messageAt('after', truncatedAt.add(const Duration(minutes: 1))));
 
-        channel.state!.updateChannelState(
+        channel.state!.updateChannelStateFromServer(
           ChannelState(
             channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
           ),
@@ -2446,16 +2446,16 @@ void main() {
         expect(channel.state!.channelState.channel?.truncatedAt, truncatedAt);
       });
 
-      test('a channel update with an older truncatedAt does not bring back older messages', () {
+      test('a server update with an older truncatedAt does not bring back older messages', () {
         final truncatedAt = DateTime.utc(2026, 10, 29, 12);
         final olderTruncatedAt = truncatedAt.subtract(const Duration(days: 1));
-        channel.state!.updateChannelState(
+        channel.state!.updateChannelStateFromServer(
           ChannelState(
             channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
           ),
         );
 
-        channel.state!.updateChannelState(
+        channel.state!.updateChannelStateFromServer(
           ChannelState(
             channel: ChannelModel(id: channelId, type: channelType, truncatedAt: olderTruncatedAt),
             messages: [messageAt('between', truncatedAt.subtract(const Duration(hours: 1)))],
@@ -2465,10 +2465,10 @@ void main() {
         expect(channel.state!.messages, isEmpty);
       });
 
-      test('a channel update with a newer truncatedAt drops the pinned messages sent before it', () {
+      test('a server update with a newer truncatedAt drops the pinned messages sent before it', () {
         final truncatedAt = DateTime.utc(2026, 10, 29, 12);
         final pinnedAt = truncatedAt.add(const Duration(minutes: 5));
-        channel.state!.updateChannelState(
+        channel.state!.updateChannelStateFromServer(
           ChannelState(
             pinnedMessages: [
               messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))),
@@ -2477,7 +2477,7 @@ void main() {
           ),
         );
 
-        channel.state!.updateChannelState(
+        channel.state!.updateChannelStateFromServer(
           ChannelState(
             channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
           ),
@@ -2486,16 +2486,16 @@ void main() {
         expect(channel.state!.pinnedMessages.map((m) => m.id), ['after']);
       });
 
-      test('a channel update with an older truncatedAt does not bring back older pinned messages', () {
+      test('a server update with an older truncatedAt does not bring back older pinned messages', () {
         final truncatedAt = DateTime.utc(2026, 10, 29, 12);
-        channel.state!.updateChannelState(
+        channel.state!.updateChannelStateFromServer(
           ChannelState(
             channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
           ),
         );
         final between = messageAt('between', truncatedAt.subtract(const Duration(hours: 1)));
 
-        channel.state!.updateChannelState(
+        channel.state!.updateChannelStateFromServer(
           ChannelState(
             channel: ChannelModel(
               id: channelId,

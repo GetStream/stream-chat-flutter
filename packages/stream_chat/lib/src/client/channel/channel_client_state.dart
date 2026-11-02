@@ -65,19 +65,6 @@ class ChannelClientState {
         .then((_) => retryFailedMessages());
   }
 
-  // Whether the [message] was created before [truncatedAt]. Messages not sent
-  // yet never are.
-  static bool _isTruncated(Message message, DateTime truncatedAt) {
-    final createdAt = message.remoteCreatedAt;
-    return createdAt != null && createdAt.isBefore(truncatedAt);
-  }
-
-  // Whether any of the [messages] was created before [truncatedAt].
-  static bool _hasTruncated(List<Message>? messages, DateTime? truncatedAt) {
-    if (messages == null || truncatedAt == null) return false;
-    return messages.any((it) => _isTruncated(it, truncatedAt));
-  }
-
   // Returns the [messages] created at or after [truncatedAt], and the ones not
   // sent yet; [messages] itself when none is older.
   static List<Message>? _truncateMessages(
@@ -85,8 +72,14 @@ class ChannelClientState {
     DateTime? truncatedAt,
   ) {
     if (messages == null || truncatedAt == null) return messages;
-    if (!_hasTruncated(messages, truncatedAt)) return messages;
-    return messages.whereNot((it) => _isTruncated(it, truncatedAt)).toList();
+
+    bool survives(Message message) {
+      final createdAt = message.remoteCreatedAt;
+      return createdAt == null || !createdAt.isBefore(truncatedAt);
+    }
+
+    if (messages.every(survives)) return messages;
+    return messages.where(survives).toList();
   }
 
   final Channel _channel;
@@ -642,28 +635,12 @@ class ChannelClientState {
 
   /// Update channelState with updated information.
   void updateChannelState(ChannelState updatedState) {
-    final channel = _channelState.channel;
-    final newChannel = channel?.merge(updatedState.channel);
-    // An older truncation time can't bring back messages a later one removed.
-    final truncatedAt = [channel?.truncatedAt, newChannel?.truncatedAt].nonNulls.maxOrNull;
-    final isNewCutoff = truncatedAt != channel?.truncatedAt;
-
-    final incoming = updatedState.messages;
-    var newMessages = messages.mergeSorted(
-      incoming,
+    final newMessages = messages.mergeSorted(
+      updatedState.messages,
       key: (message) => message.id,
       update: MessageMerging.mergeUpdate,
       compare: MessageMerging.sortByCreatedAt,
     );
-
-    // The stored messages already passed the cutoff, so the merged list is
-    // checked only when the cutoff moved or an incoming message is older: a
-    // channel can hold many messages.
-    final isStored = identical(incoming, _channelState.messages);
-    final hasOlderIncoming = !isStored && _hasTruncated(incoming, truncatedAt);
-    if (isNewCutoff || hasOlderIncoming) {
-      newMessages = _truncateMessages(newMessages, truncatedAt)!;
-    }
 
     final watchers = _channelState.watchers ?? const <User>[];
     final newWatchers = watchers.merge(
@@ -677,19 +654,16 @@ class ChannelClientState {
       key: (read) => read.user.id,
     );
 
-    final storedPinned = _channelState.pinnedMessages;
-    var newPinnedMessages = switch (updatedState.pinnedMessages) {
-      // The stored list is kept, already in pin order.
-      null => storedPinned,
-      final pinned when identical(pinned, storedPinned) => pinned,
+    final newPinnedMessages = switch (updatedState.pinnedMessages) {
+      // The stored list is already in pin order.
+      final pinned when identical(pinned, _channelState.pinnedMessages) => pinned,
       final pinned => MessageMerging.sortPinnedMessages(pinned),
     };
 
-    // The stored list already passed the cutoff, unless the cutoff moved.
-    final isStoredPinned = identical(newPinnedMessages, storedPinned);
-    if (isNewCutoff || !isStoredPinned) {
-      newPinnedMessages = _truncateMessages(newPinnedMessages, truncatedAt);
-    }
+    final channel = _channelState.channel;
+    final newChannel = channel?.merge(updatedState.channel);
+    // An older truncation time can't bring back messages a later one removed.
+    final truncatedAt = [channel?.truncatedAt, newChannel?.truncatedAt].nonNulls.maxOrNull;
 
     _channelState = _channelState.copyWith(
       messages: newMessages,
@@ -717,10 +691,29 @@ class ChannelClientState {
   /// being overwritten by the remote payload; only delivery fields are
   /// still applied from it.
   ///
+  /// Also applies the channel's truncation time: a newer one truncates the
+  /// channel, and messages from before it are left out.
+  ///
   /// Call this instead of [updateChannelState] whenever [remoteState]
   /// genuinely comes from the network or offline storage.
   void updateChannelStateFromServer(ChannelState remoteState) {
-    updateChannelState(_preserveLocalUnreadState(remoteState));
+    final current = _channelState.channel?.truncatedAt;
+    final remote = remoteState.channel?.truncatedAt;
+
+    // A newer truncation removes the stored messages before it first, so the
+    // merge below can't keep them.
+    if (remote != null && (current == null || remote.isAfter(current))) {
+      truncate(truncatedAt: remote);
+    }
+
+    // A stale payload can still carry messages from before the cutoff.
+    final cutoff = _channelState.channel?.truncatedAt;
+    final state = remoteState.copyWith(
+      messages: _truncateMessages(remoteState.messages, cutoff),
+      pinnedMessages: _truncateMessages(remoteState.pinnedMessages, cutoff),
+    );
+
+    updateChannelState(_preserveLocalUnreadState(state));
   }
 
   /// Rewrites the current user's [Read] in [remoteState], if present, to
