@@ -11,7 +11,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12835',
     description: 'unread separator is shown when the participant sends messages while the user is away',
-    skip: 'https://linear.app/stream/issue/FLU-1098',
     body: (env) async {
       const unreadCount = 2;
 
@@ -41,7 +40,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12836',
     description: 'user scrolls to the first unread message',
-    skip: 'https://linear.app/stream/issue/FLU-1098',
     body: (env) async {
       const unreadCount = 25;
 
