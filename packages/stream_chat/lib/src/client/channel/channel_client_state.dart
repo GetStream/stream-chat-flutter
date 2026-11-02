@@ -71,10 +71,17 @@ class ChannelClientState {
 
   // Messages created before the channel was truncated no longer exist, even
   // when they were still stored. Messages not sent yet are kept.
-  static List<Message>? _withoutTruncated(List<Message>? messages, DateTime? truncatedAt) {
+  static List<Message>? _withoutTruncated(
+    List<Message>? messages,
+    DateTime? truncatedAt,
+  ) {
     if (messages == null || truncatedAt == null) return messages;
 
-    bool isTruncated(Message message) => message.remoteCreatedAt?.isBefore(truncatedAt) ?? false;
+    bool isTruncated(Message message) {
+      final createdAt = message.remoteCreatedAt;
+      return createdAt != null && createdAt.isBefore(truncatedAt);
+    }
+
     if (!messages.any(isTruncated)) return messages;
     return messages.whereNot(isTruncated).toList();
   }
@@ -541,9 +548,10 @@ class ChannelClientState {
   /// keeping the messages not sent yet.
   @internal
   void removeMessagesCreatedBefore(DateTime createdBefore) {
+    final pinnedMessages = _channelState.pinnedMessages;
     _channelState = _channelState.copyWith(
       messages: _withoutTruncated(messages, createdBefore),
-      pinnedMessages: _withoutTruncated(_channelState.pinnedMessages, createdBefore),
+      pinnedMessages: _withoutTruncated(pinnedMessages, createdBefore),
     );
   }
 
@@ -603,7 +611,10 @@ class ChannelClientState {
     final channel = _channelState.channel;
     final newChannel = channel?.merge(updatedState.channel);
     // An older truncation time can't bring back messages a later one removed.
-    final truncatedAt = [channel?.truncatedAt, newChannel?.truncatedAt].nonNulls.maxOrNull;
+    final truncatedAt = [
+      channel?.truncatedAt,
+      newChannel?.truncatedAt,
+    ].nonNulls.maxOrNull;
 
     _channelState = _channelState.copyWith(
       messages: _withoutTruncated(newMessages, truncatedAt),

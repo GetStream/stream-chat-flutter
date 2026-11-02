@@ -261,7 +261,10 @@ abstract class ChatPersistenceClient {
   /// [createdBefore].
   ///
   /// Removes every stored message of the channel unless overridden.
-  Future<void> deleteMessagesCreatedBefore(String cid, DateTime createdBefore) => deleteMessageByCid(cid);
+  Future<void> deleteMessagesCreatedBefore(
+    String cid,
+    DateTime createdBefore,
+  ) => deleteMessageByCid(cid);
 
   /// Remove a message by message [cids]
   Future<void> deleteMessageByCids(List<String> cids);

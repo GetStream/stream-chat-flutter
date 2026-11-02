@@ -421,8 +421,9 @@ class ChannelStateMutations {
     Message? message,
   }) {
     if (truncatedAt != null) {
-      final channel = _state.channelState.channel?.copyWith(truncatedAt: truncatedAt);
-      _state.updateChannelState(_state.channelState.copyWith(channel: channel));
+      final channelState = _state.channelState;
+      final channel = channelState.channel?.copyWith(truncatedAt: truncatedAt);
+      _state.updateChannelState(channelState.copyWith(channel: channel));
     }
 
     _state.removeMessagesCreatedBefore(createdBefore);
