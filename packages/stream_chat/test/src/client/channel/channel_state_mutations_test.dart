@@ -760,16 +760,19 @@ void main() {
       verify(() => state.truncate(truncatedAt: truncatedAt)).called(1);
     });
 
-    test('onChannelTruncated leaves the last message time to the system message', () {
+    test('onChannelTruncated takes the last message time before applying the system message', () {
       stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
-      final lastMessageAt = DateTime.utc(2026, 10, 29, 13);
+      final systemMessage = Message(id: 'system-id');
 
       mutations.onChannelTruncated(
-        ChannelModel(cid: 'messaging:test', lastMessageAt: lastMessageAt),
-        message: Message(id: 'system-id'),
+        ChannelModel(cid: 'messaging:test', lastMessageAt: DateTime.utc(2026, 10, 29, 13)),
+        message: systemMessage,
       );
 
-      verifyNever(() => state.updateChannelState(any()));
+      verifyInOrder([
+        () => state.updateChannelState(any()),
+        () => state.updateMessage(systemMessage),
+      ]);
     });
 
     test('onChannelTruncated skips an unchanged last message time', () {

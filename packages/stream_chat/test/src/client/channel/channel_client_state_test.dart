@@ -2239,6 +2239,47 @@ void main() {
         expect(channel.state!.threads[parent.id]?.map((m) => m.id), ['new-reply']);
       });
 
+      test("${EventType.channelTruncated} takes the channel's last message time", () async {
+        final lastMessageAt = DateTime.utc(2026, 10, 29, 11);
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType, lastMessageAt: lastMessageAt),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.channelState.channel?.lastMessageAt, lastMessageAt);
+      });
+
+      test('${EventType.channelTruncated} moves the last message time to the system message', () async {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        final systemMessage = Message(
+          id: 'system-message-id',
+          type: MessageType.system,
+          text: 'Channel truncated',
+          user: User(id: 'other-user'),
+          createdAt: truncatedAt.add(const Duration(microseconds: 1)),
+        );
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(
+              id: channelId,
+              type: channelType,
+              truncatedAt: truncatedAt,
+              lastMessageAt: truncatedAt.subtract(const Duration(hours: 1)),
+            ),
+            message: systemMessage,
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.channelState.channel?.lastMessageAt, systemMessage.createdAt);
+      });
+
       test("truncate makes the truncatedAt the channel's truncation time", () {
         final truncatedAt = DateTime.utc(2026, 10, 29, 12);
 

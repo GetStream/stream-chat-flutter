@@ -108,7 +108,7 @@ void main() {
   });
 
   test('truncateChannel without a truncatedAt removes the stored messages sent before now', () async {
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc();
     await client.updateChannelStates([
       ChannelState(
         channel: channel,
