@@ -643,13 +643,12 @@ class ChannelClientState {
 
     // The stored messages already passed the cutoff, so only the incoming ones
     // are checked, unless the cutoff moved: a channel can hold many messages.
-    final incomingMessages = switch (updatedState.messages) {
-      final incoming when identical(incoming, _channelState.messages) => incoming,
-      final incoming => _truncateMessages(incoming, truncatedAt),
-    };
+    final incoming = updatedState.messages;
+    final isStoredMessages = identical(incoming, _channelState.messages);
+    final checkIncoming = !isNewCutoff && !isStoredMessages;
 
     var newMessages = messages.mergeSorted(
-      incomingMessages,
+      checkIncoming ? _truncateMessages(incoming, truncatedAt) : incoming,
       key: (message) => message.id,
       update: MessageMerging.mergeUpdate,
       compare: MessageMerging.sortByCreatedAt,
@@ -669,14 +668,19 @@ class ChannelClientState {
       key: (read) => read.user.id,
     );
 
+    final storedPinned = _channelState.pinnedMessages;
     var newPinnedMessages = switch (updatedState.pinnedMessages) {
-      // The stored list is kept, already in pin order and past the cutoff.
-      null => _channelState.pinnedMessages,
-      final pinned when identical(pinned, _channelState.pinnedMessages) => pinned,
-      final pinned => _truncateMessages(MessageMerging.sortPinnedMessages(pinned), truncatedAt),
+      // The stored list is kept, already in pin order.
+      null => storedPinned,
+      final pinned when identical(pinned, storedPinned) => pinned,
+      final pinned => MessageMerging.sortPinnedMessages(pinned),
     };
 
-    if (isNewCutoff) newPinnedMessages = _truncateMessages(newPinnedMessages, truncatedAt);
+    // The stored list already passed the cutoff, unless the cutoff moved.
+    final isStoredPinned = identical(newPinnedMessages, storedPinned);
+    if (isNewCutoff || !isStoredPinned) {
+      newPinnedMessages = _truncateMessages(newPinnedMessages, truncatedAt);
+    }
 
     _channelState = _channelState.copyWith(
       messages: newMessages,
