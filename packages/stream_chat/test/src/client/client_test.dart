@@ -1678,10 +1678,24 @@ void main() {
               ChannelState(channel: ChannelModel(cid: 'test-type:test-id', activeMemberCount: 3)),
             ],
         );
+        clearInteractions(api.channel);
 
         final channels = await client.queryChannelsOnline(includeActiveMemberCount: true);
 
         expect(channels.single.activeMemberCount, 3);
+        verify(
+          () => api.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            includeActiveMemberCount: true,
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).called(1);
       });
 
       test(
