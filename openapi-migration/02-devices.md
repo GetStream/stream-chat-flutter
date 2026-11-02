@@ -25,9 +25,9 @@
 ## Decisions taken
 
 Revisited after landing: the group first adopted the generated `DeviceResponse`,
-`ListDevicesResponse` and `CreateDeviceRequestPushProvider` (since renamed `PushProviderName`) as
-public types. It now follows the
-[domain-model rules](README.md#domain-models), and the decisions below are the ones in force.
+`ListDevicesResponse` and `CreateDeviceRequestPushProvider` (now the shared `PushProviderName`)
+as public types. It now follows the [domain-model rules](README.md#domain-models), and the
+decisions below are the ones in force.
 
 - **`Device` stays our public type, in its v10 shape** (`id`, `pushProvider`), as a plain class with
   no JSON. The repository maps the generated `DeviceResponse` into it. The seven further fields the
@@ -37,12 +37,12 @@ public types. It now follows the
   and `devices`. An envelope rather than a bare list, so a field the server adds to the response can
   be exposed without changing the method's signature.
 - **`PushProvider` becomes an extension type over its wire string,** where v10 declared an enum, and
-  `Device.pushProvider` is typed with it rather than `String`. The server answers the provider as a
-  free-form string, so a device registered with a provider the SDK does not name still decodes, and a
-  provider added later is a new constant rather than a breaking enum value. The repository maps it to
-  the generated `PushProviderName` by its wire value. **This is the enum precedent for
-  every later group:** a generated request enum gets a hand-written public type, so the generator's
-  naming never reaches a signature.
+  `Device.pushProvider` is typed with it rather than `String`. The spec types the provider as
+  `PushProviderName`, but the server does not check the one it answers with, so a device registered
+  with a provider the SDK does not name still decodes, and a provider added later is a new constant
+  rather than a breaking enum value. The repository maps it to the generated `PushProviderName` by
+  its wire value. **This is the enum precedent for every later group:** a generated request enum
+  gets a hand-written public type, so the generator's naming never reaches a signature.
 - **The write calls answer nothing.** `addDevice` and `removeDevice` return `Result<void>`: the
   generated `DurationResponse` carries only a server-timing string no integrator acts on, and v10's
   `EmptyResponse` is a json_serializable, mutable envelope the domain-model rules retire. **The

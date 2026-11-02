@@ -22,7 +22,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
 | [09](09-users.md) | Users | 8 | 8 | ☐ |
 | [10](10-messages.md) | Messages & Search | 14 | 12 | ☐ |
-| [11](11-channels-and-members.md) | Channels, Members & Sync | 13 | 15 | ☐ |
+| [11](11-channels-and-members.md) | Channels, Members & Sync | 13 | 19 | ☐ |
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☑ |
 | [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
 | [14](14-banned-users.md) | Banned Users — split out of 08 | 1 | 1 | ☐ |
