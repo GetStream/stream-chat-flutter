@@ -10,8 +10,8 @@ import 'package:stream_core/stream_core.dart' as core;
 
 import '../models.dart';
 
-part 'fork_message_i_ds_request.g.dart';
-part 'fork_message_i_ds_request.freezed.dart';
+part 'fork_message_ids_request.g.dart';
+part 'fork_message_ids_request.freezed.dart';
 
 @freezed
 @immutable

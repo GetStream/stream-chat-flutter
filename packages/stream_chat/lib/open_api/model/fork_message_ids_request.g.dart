@@ -1,6 +1,6 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'fork_message_i_ds_request.dart';
+part of 'fork_message_ids_request.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator

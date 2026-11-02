@@ -3,7 +3,7 @@
 // Spec:      chat-clientside-api (API v240.1.0)
 // Source:    protocol @ openapi-v240.1.0
 // Checksum:  d23341c39a24576955265a1d03f7ae3e4e726d18ae6e1a094de742bb0e00f7c0
-// Generator: GetStream/chat @ v240.1.0-1-gc7f593f8f8
+// Generator: GetStream/chat @ v240.1.3-14-g88a43bb3e4
 
 // ignore_for_file: directives_ordering
 
