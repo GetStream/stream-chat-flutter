@@ -656,9 +656,9 @@ class StreamChatClient {
   /// Use [queryChannelsWithResult] if you also need the server-resolved
   /// [PredefinedFilter] spec.
   ///
-  /// If [includeActiveMemberCount] is true, each channel the server returns
-  /// carries its [ChannelModel.activeMemberCount]. Channels from the offline
-  /// cache keep the count they were stored with.
+  /// If [includeActiveMemberCount] is true, each channel loaded online carries
+  /// its [ChannelModel.activeMemberCount]. Channels from the offline cache keep
+  /// the count they were stored with.
   Stream<List<Channel>> queryChannels({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
@@ -697,9 +697,9 @@ class StreamChatClient {
   /// the online result. Concurrent identical online queries share a single
   /// request.
   ///
-  /// If [includeActiveMemberCount] is true, each channel the server returns
-  /// carries its [ChannelModel.activeMemberCount]. Channels from the offline
-  /// cache keep the count they were stored with.
+  /// If [includeActiveMemberCount] is true, each channel loaded online carries
+  /// its [ChannelModel.activeMemberCount]. Channels from the offline cache keep
+  /// the count they were stored with.
   Stream<QueryChannelsResult> queryChannelsWithResult({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,

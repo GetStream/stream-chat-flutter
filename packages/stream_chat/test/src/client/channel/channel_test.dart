@@ -5564,7 +5564,7 @@ void main() {
       expect(emitted, [3]);
     });
 
-    test('activeMemberCountStream emits the count a later query brings', () async {
+    test('activeMemberCountStream emits the new count when the channel state updates', () async {
       final channelState = _generateChannelState('test-channel-id', 'test-channel-type');
       final channel = Channel.fromState(
         client,
