@@ -20,6 +20,12 @@ runs:
 
         # The CMake version the Android Gradle Plugin builds native code with.
         cmake=3.22.1
+        # Not on the runner's PATH.
+        sdkmanager="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+        if [ ! -x "$sdkmanager" ]; then
+          echo "::error::sdkmanager not found at $sdkmanager"
+          exit 1
+        fi
         ndk_dir="$ANDROID_HOME/ndk/$ndk"
         installed() {
           [ -f "$ndk_dir/source.properties" ] && [ -x "$ANDROID_HOME/cmake/$cmake/bin/cmake" ]
@@ -29,7 +35,7 @@ runs:
         # arrive corrupt ("Archive is not a ZIP archive"), and then every retry
         # of the build reuses the broken copy.
         for attempt in 1 2 3; do
-          yes | sdkmanager --install "ndk;$ndk" "cmake;$cmake" > /dev/null || true
+          yes | "$sdkmanager" --install "ndk;$ndk" "cmake;$cmake" > /dev/null || true
           installed && break
           echo "::warning::Installing NDK $ndk and CMake $cmake failed (attempt $attempt); retrying"
           rm -rf "$ndk_dir" "$ANDROID_HOME/cmake/$cmake" "$ANDROID_HOME/.temp"
