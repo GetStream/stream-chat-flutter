@@ -1,5 +1,9 @@
 ## Upcoming
 
+✅ Added
+
+- Added `includeActiveMemberCount` to the channel queries, which fills the new `Channel.activeMemberCount`: the number of members who are neither deactivated nor deleted.
+
 🔄 Changed
 
 - `Attachment.type` is now `url_preview` for every attachment scraped from a link in the message text, including a link to an image or file. Use `Attachment.rawType` to read the type it was created or received with.

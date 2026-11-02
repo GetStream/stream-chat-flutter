@@ -24,6 +24,7 @@ ChannelModel _$ChannelModelFromJson(Map<String, dynamic> json) => ChannelModel(
   team: json['team'] as String?,
   cooldown: (json['cooldown'] as num?)?.toInt() ?? 0,
   messageCount: (json['message_count'] as num?)?.toInt(),
+  activeMemberCount: (json['active_member_count'] as num?)?.toInt(),
   filterTags: (json['filter_tags'] as List<dynamic>?)?.map((e) => e as String).toList(),
 );
 

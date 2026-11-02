@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- `Channel.activeMemberCount` is now kept in the local cache.
+
 ## 10.6.0
 
 ✅ Added

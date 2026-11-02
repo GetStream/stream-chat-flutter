@@ -41,6 +41,9 @@ class Channels extends Table {
   /// The count of messages in this channel
   IntColumn get messageCount => integer().nullable()();
 
+  /// The number of members whose users are neither deactivated nor deleted.
+  IntColumn get activeMemberCount => integer().nullable()();
+
   /// The id of the user that created this channel
   TextColumn get createdById => text().nullable()();
 

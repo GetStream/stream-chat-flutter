@@ -655,6 +655,9 @@ class StreamChatClient {
   ///
   /// Use [queryChannelsWithResult] if you also need the server-resolved
   /// [PredefinedFilter] spec.
+  ///
+  /// If [includeActiveMemberCount] is true, each returned channel carries its
+  /// [ChannelModel.activeMemberCount].
   Stream<List<Channel>> queryChannels({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
@@ -664,6 +667,7 @@ class StreamChatClient {
     bool state = true,
     bool watch = true,
     bool presence = false,
+    bool includeActiveMemberCount = false,
     int? memberLimit,
     int? messageLimit,
     PaginationParams paginationParams = const PaginationParams(),
@@ -677,6 +681,7 @@ class StreamChatClient {
     state: state,
     watch: watch,
     presence: presence,
+    includeActiveMemberCount: includeActiveMemberCount,
     memberLimit: memberLimit,
     messageLimit: messageLimit,
     paginationParams: paginationParams,
@@ -690,6 +695,9 @@ class StreamChatClient {
   /// Yields the offline-cached result first (when available), followed by
   /// the online result. Concurrent identical online queries share a single
   /// request.
+  ///
+  /// If [includeActiveMemberCount] is true, each returned channel carries its
+  /// [ChannelModel.activeMemberCount].
   Stream<QueryChannelsResult> queryChannelsWithResult({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
@@ -699,6 +707,7 @@ class StreamChatClient {
     bool state = true,
     bool watch = true,
     bool presence = false,
+    bool includeActiveMemberCount = false,
     int? memberLimit,
     int? messageLimit,
     PaginationParams paginationParams = const PaginationParams(),
@@ -718,6 +727,7 @@ class StreamChatClient {
       state,
       watch,
       presence,
+      includeActiveMemberCount,
       memberLimit,
       messageLimit,
       paginationParams,
@@ -758,6 +768,7 @@ class StreamChatClient {
               state: state,
               watch: watch,
               presence: presence,
+              includeActiveMemberCount: includeActiveMemberCount,
               memberLimit: memberLimit,
               messageLimit: messageLimit,
               paginationParams: paginationParams,
@@ -779,6 +790,9 @@ class StreamChatClient {
   }
 
   /// Requests channels with a given query from the API.
+  ///
+  /// If [includeActiveMemberCount] is true, each returned channel carries its
+  /// [ChannelModel.activeMemberCount].
   Future<List<Channel>> queryChannelsOnline({
     Filter? filter,
     SortOrder<ChannelState>? sort,
@@ -788,6 +802,7 @@ class StreamChatClient {
     bool state = true,
     bool watch = true,
     bool presence = false,
+    bool includeActiveMemberCount = false,
     int? memberLimit,
     int? messageLimit,
     bool waitForConnect = true,
@@ -802,6 +817,7 @@ class StreamChatClient {
       state: state,
       watch: watch,
       presence: presence,
+      includeActiveMemberCount: includeActiveMemberCount,
       memberLimit: memberLimit,
       messageLimit: messageLimit,
       waitForConnect: waitForConnect,
@@ -819,6 +835,7 @@ class StreamChatClient {
     bool state = true,
     bool watch = true,
     bool presence = false,
+    bool includeActiveMemberCount = false,
     int? memberLimit,
     int? messageLimit,
     bool waitForConnect = true,
@@ -852,6 +869,7 @@ class StreamChatClient {
       state: state,
       watch: watch,
       presence: presence,
+      includeActiveMemberCount: includeActiveMemberCount,
       memberLimit: memberLimit,
       paginationParams: paginationParams,
       messageLimit: switch ((messageLimit, persistenceEnabled)) {
