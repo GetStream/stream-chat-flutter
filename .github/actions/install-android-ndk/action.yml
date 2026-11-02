@@ -34,7 +34,8 @@ runs:
         # sdkmanager unpacks the download itself. Gradle's own NDK download can
         # arrive corrupt ("Archive is not a ZIP archive"), and then every retry
         # of the build reuses the broken copy.
-        # A stalled sdkmanager fails its attempt instead of holding the job.
+        # A stalled sdkmanager fails its attempt instead of holding the job; three
+        # 5-minute attempts stay inside the 30-minute build job.
         for attempt in 1 2 3; do
           installed && break
           if [ "$attempt" -gt 1 ]; then
@@ -42,7 +43,7 @@ runs:
             rm -rf "$ndk_dir" "$ANDROID_HOME/cmake/$cmake" "$ANDROID_HOME/.temp"
             sleep 15
           fi
-          yes | timeout 600 "$sdkmanager" --install "ndk;$ndk" "cmake;$cmake" > /dev/null || true
+          yes | timeout 300 "$sdkmanager" --install "ndk;$ndk" "cmake;$cmake" > /dev/null || true
         done
 
         if ! installed; then
