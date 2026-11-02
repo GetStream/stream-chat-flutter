@@ -271,6 +271,38 @@ void main() {
           ),
         );
       });
+
+      test('differs from a rule with another start', () {
+        expect(
+          preference,
+          isNot(
+            const PushPreference(
+              schedule: PushSchedule(
+                timezone: 'Europe/Amsterdam',
+                quietHours: [
+                  QuietHoursRule(start: '23:00', end: '07:00', days: [QuietHoursDay.friday]),
+                ],
+              ),
+            ),
+          ),
+        );
+      });
+
+      test('differs from a rule with another end', () {
+        expect(
+          preference,
+          isNot(
+            const PushPreference(
+              schedule: PushSchedule(
+                timezone: 'Europe/Amsterdam',
+                quietHours: [
+                  QuietHoursRule(start: '22:00', end: '08:00', days: [QuietHoursDay.friday]),
+                ],
+              ),
+            ),
+          ),
+        );
+      });
     });
   });
 
