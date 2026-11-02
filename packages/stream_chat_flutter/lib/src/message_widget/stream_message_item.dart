@@ -241,9 +241,8 @@ class StreamMessageItemProps extends Equatable {
   /// message belongs to the current user or another participant.
   /// On completion, [onReplyTap] is invoked with the message.
   ///
-  /// Swipe is disabled for deleted messages, messages still being sent,
-  /// updated or deleted, messages in a failed state, and in a channel that
-  /// doesn't allow quoting.
+  /// Swipe is disabled for a message that is deleted, failed, or still being
+  /// sent, updated or deleted, and in a channel that doesn't allow quoting.
   ///
   /// Defaults to false.
   final bool swipeToReply;
@@ -735,13 +734,14 @@ class DefaultStreamMessageItem extends StatelessWidget {
     final channel = StreamChannel.maybeOf(context)?.channel;
     final canQuote = channel?.canQuoteMessage ?? true;
     final state = message.state;
-    final isSettled = !message.isDeleted && !(state.isDeleted || state.isOutgoing || state.isFailed);
+    final isDeleted = message.isDeleted || state.isDeleted;
+    final isPending = state.isOutgoing || state.isFailed;
 
-    // Kept in place and turned off, so the message keeps its state as it
-    // moves between states.
+    // Disabled rather than removed, so the message isn't rebuilt from scratch
+    // when it finishes sending.
     return _SwipeToReplyWrapper(
       message: message,
-      enabled: canQuote && isSettled,
+      enabled: canQuote && !isDeleted && !isPending,
       onReplyTap: onReplyTap,
       child: result,
     );

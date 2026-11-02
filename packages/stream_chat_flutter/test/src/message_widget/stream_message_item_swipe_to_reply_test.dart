@@ -43,7 +43,7 @@ void main() {
     expect(replies, isEmpty);
   });
 
-  testWidgets('StreamMessageItem keeps its state when a message finishes sending', (tester) async {
+  testWidgets('StreamMessageItem is not rebuilt from scratch when a message finishes sending', (tester) async {
     final row = find.descendant(of: find.byType(StreamMessageItem), matching: find.byType(Material)).first;
     await _pumpMessageItem(tester, _message(state: MessageState.sending), onReplyTap: (_) {});
     final sendingState = tester.state(row);
