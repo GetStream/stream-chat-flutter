@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import 'paged_value_notifier.dart';
@@ -56,6 +57,16 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
   StreamSubscription<Event>? _eventSubscription;
 
   @override
+  set value(PagedValue<String, ScheduledMessage> newValue) {
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sortedBy((it) => it.scheduledAt),
+      ),
+    );
+  }
+
+  @override
   Future<void> doInitialLoad() async {
     try {
       final response = await client.queryScheduledMessages(
@@ -65,7 +76,7 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
       );
 
       value = PagedValue(
-        items: _sorted(response.scheduledMessages),
+        items: response.scheduledMessages,
         nextPageKey: response.next,
       );
 
@@ -92,10 +103,10 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
 
       final loadedIds = {for (final it in response.scheduledMessages) it.id};
       value = PagedValue(
-        items: _sorted([
+        items: [
           ...previousValue.items.where((it) => !loadedIds.contains(it.id)),
           ...response.scheduledMessages,
-        ]),
+        ],
         nextPageKey: response.next,
       );
     } on StreamChatError catch (error) {
@@ -148,7 +159,7 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
     if (existing != null && existing.updatedAt.isAfter(scheduledMessage.updatedAt)) return false;
 
     value = value.asSuccess.copyWith(
-      items: _sorted([...items.where((it) => it.id != scheduledMessage.id), scheduledMessage]),
+      items: [...items.where((it) => it.id != scheduledMessage.id), scheduledMessage],
     );
     return true;
   }
@@ -169,10 +180,6 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
   bool _matches(ScheduledMessage scheduledMessage) {
     if (cid != null && scheduledMessage.cid != cid) return false;
     return statuses?.contains(scheduledMessage.status) ?? true;
-  }
-
-  static List<ScheduledMessage> _sorted(List<ScheduledMessage> scheduledMessages) {
-    return [...scheduledMessages]..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
   }
 
   @override
