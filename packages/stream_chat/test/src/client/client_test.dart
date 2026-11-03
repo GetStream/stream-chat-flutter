@@ -4831,11 +4831,17 @@ void main() {
       );
     });
 
-    test('`.updateScheduledMessage` needs a message or a time', () {
-      expect(
-        () => client.updateScheduledMessage('scheduled-id'),
-        throwsArgumentError,
-      );
+    test('`.rescheduleMessage` moves only the time', () async {
+      final scheduledAt = DateTime.utc(2026, 11, 3, 9);
+      when(
+        () => api.scheduledMessages.updateScheduledMessage('scheduled-id', scheduledAt: scheduledAt),
+      ).thenAnswer((_) async => ScheduledMessageResponse());
+
+      await client.rescheduleMessage('scheduled-id', scheduledAt);
+
+      verify(
+        () => api.scheduledMessages.updateScheduledMessage('scheduled-id', scheduledAt: scheduledAt),
+      ).called(1);
     });
 
     group('a scheduled message the server no longer has', () {
@@ -4864,18 +4870,22 @@ void main() {
       });
 
       test('is removed from its channel when updating it fails', () async {
+        final edited = Message(id: 'scheduled-id', text: 'Good evening');
         when(
-          () => api.scheduledMessages.updateScheduledMessage(
-            'scheduled-id',
-            message: any(named: 'message'),
-            scheduledAt: any(named: 'scheduledAt'),
-          ),
+          () => api.scheduledMessages.updateScheduledMessage('scheduled-id', message: edited),
         ).thenAnswer((_) async => throw missing);
 
-        await expectLater(
-          client.updateScheduledMessage('scheduled-id', scheduledAt: DateTime.utc(2026, 11, 3, 9)),
-          throwsA(missing),
-        );
+        await expectLater(client.updateScheduledMessage('scheduled-id', edited), throwsA(missing));
+        expect(channel.state!.scheduledMessages, isEmpty);
+      });
+
+      test('is removed from its channel when rescheduling it fails', () async {
+        final scheduledAt = DateTime.utc(2026, 11, 3, 9);
+        when(
+          () => api.scheduledMessages.updateScheduledMessage('scheduled-id', scheduledAt: scheduledAt),
+        ).thenAnswer((_) async => throw missing);
+
+        await expectLater(client.rescheduleMessage('scheduled-id', scheduledAt), throwsA(missing));
         expect(channel.state!.scheduledMessages, isEmpty);
       });
 
