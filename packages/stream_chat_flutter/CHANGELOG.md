@@ -16,6 +16,7 @@
 
 🐞 Fixed
 
+- Fixed swiping a message starting a reply in a channel that doesn't allow quoting or while the message is still being sent.
 - Fixed a web address written without `https://`, such as `youtube.com`, not being tappable in a message.
 - Fixed a web address right after a quote or Chinese or Japanese text not being tappable in a message.
 - Fixed `StreamThreadPage` hiding the composer for a deleted parent message that already has replies, which can still be replied to.
@@ -42,6 +43,7 @@
 - Fixed icons in a quoted reply and in the composer's reply and edit previews showing at 16 pixels instead of 12.
 - Fixed "No messages yet" in the channel list showing in the secondary text color instead of the tertiary one.
 - Fixed the root message in a thread list preview showing in the app's default text color instead of the primary one.
+- Fixed some file sizes of 1 MB and up, such as 1.5 MB, showing rounded to a whole number, such as 2 MB.
 
 ## 10.6.0
 

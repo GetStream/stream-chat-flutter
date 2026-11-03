@@ -659,6 +659,10 @@ class StreamChatClient {
   ///
   /// If [includeScheduledMessages] is true, each returned channel carries the
   /// current user's [ChannelState.scheduledMessages].
+  ///
+  /// If [includeActiveMemberCount] is true, each channel loaded online carries
+  /// its [ChannelModel.activeMemberCount]. Channels from the offline cache keep
+  /// the count they were stored with.
   Stream<List<Channel>> queryChannels({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
@@ -669,6 +673,7 @@ class StreamChatClient {
     bool watch = true,
     bool presence = false,
     bool includeScheduledMessages = false,
+    bool includeActiveMemberCount = false,
     int? memberLimit,
     int? messageLimit,
     PaginationParams paginationParams = const PaginationParams(),
@@ -683,6 +688,7 @@ class StreamChatClient {
     watch: watch,
     presence: presence,
     includeScheduledMessages: includeScheduledMessages,
+    includeActiveMemberCount: includeActiveMemberCount,
     memberLimit: memberLimit,
     messageLimit: messageLimit,
     paginationParams: paginationParams,
@@ -699,6 +705,10 @@ class StreamChatClient {
   ///
   /// If [includeScheduledMessages] is true, each returned channel carries the
   /// current user's [ChannelState.scheduledMessages].
+  ///
+  /// If [includeActiveMemberCount] is true, each channel loaded online carries
+  /// its [ChannelModel.activeMemberCount]. Channels from the offline cache keep
+  /// the count they were stored with.
   Stream<QueryChannelsResult> queryChannelsWithResult({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
@@ -709,6 +719,7 @@ class StreamChatClient {
     bool watch = true,
     bool presence = false,
     bool includeScheduledMessages = false,
+    bool includeActiveMemberCount = false,
     int? memberLimit,
     int? messageLimit,
     PaginationParams paginationParams = const PaginationParams(),
@@ -729,6 +740,7 @@ class StreamChatClient {
       watch,
       presence,
       includeScheduledMessages,
+      includeActiveMemberCount,
       memberLimit,
       messageLimit,
       paginationParams,
@@ -770,6 +782,7 @@ class StreamChatClient {
               watch: watch,
               presence: presence,
               includeScheduledMessages: includeScheduledMessages,
+              includeActiveMemberCount: includeActiveMemberCount,
               memberLimit: memberLimit,
               messageLimit: messageLimit,
               paginationParams: paginationParams,
@@ -794,6 +807,9 @@ class StreamChatClient {
   ///
   /// If [includeScheduledMessages] is true, each returned channel carries the
   /// current user's [ChannelState.scheduledMessages].
+  ///
+  /// If [includeActiveMemberCount] is true, each returned channel carries its
+  /// [ChannelModel.activeMemberCount].
   Future<List<Channel>> queryChannelsOnline({
     Filter? filter,
     SortOrder<ChannelState>? sort,
@@ -804,6 +820,7 @@ class StreamChatClient {
     bool watch = true,
     bool presence = false,
     bool includeScheduledMessages = false,
+    bool includeActiveMemberCount = false,
     int? memberLimit,
     int? messageLimit,
     bool waitForConnect = true,
@@ -819,6 +836,7 @@ class StreamChatClient {
       watch: watch,
       presence: presence,
       includeScheduledMessages: includeScheduledMessages,
+      includeActiveMemberCount: includeActiveMemberCount,
       memberLimit: memberLimit,
       messageLimit: messageLimit,
       waitForConnect: waitForConnect,
@@ -837,6 +855,7 @@ class StreamChatClient {
     bool watch = true,
     bool presence = false,
     bool includeScheduledMessages = false,
+    bool includeActiveMemberCount = false,
     int? memberLimit,
     int? messageLimit,
     bool waitForConnect = true,
@@ -871,6 +890,7 @@ class StreamChatClient {
       watch: watch,
       presence: presence,
       includeScheduledMessages: includeScheduledMessages,
+      includeActiveMemberCount: includeActiveMemberCount,
       memberLimit: memberLimit,
       paginationParams: paginationParams,
       messageLimit: switch ((messageLimit, persistenceEnabled)) {

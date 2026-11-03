@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed German mute strings showing Dutch text, and the German "Mute user" action not switching to "unmute" for an already-muted user.
+
 ## 10.6.0
 
 - Updated `stream_chat_flutter` dependency to [`10.6.0`](https://pub.dev/packages/stream_chat_flutter/changelog).

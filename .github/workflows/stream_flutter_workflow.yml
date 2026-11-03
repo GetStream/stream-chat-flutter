@@ -182,6 +182,8 @@ jobs:
         if: matrix.platform == 'ios'
       - uses: ./.github/actions/cache-gradle
         if: matrix.platform == 'android'
+      - uses: ./.github/actions/install-android-ndk
+        if: matrix.platform == 'android'
       - name: "Install Tools"
         run: flutter pub global activate melos
       - name: "Bootstrap Workspace"
