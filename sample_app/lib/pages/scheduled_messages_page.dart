@@ -311,7 +311,7 @@ Future<void> _showActions(BuildContext context, ScheduledMessage scheduledMessag
 
       final edited = scheduledMessage.message.copyWith(text: text);
       await run(
-        () => client.updateScheduledMessage(scheduledMessage.id, message: edited),
+        () => client.updateScheduledMessage(scheduledMessage.id, edited),
         'Scheduled message updated',
       );
     case _Action.reschedule:
@@ -327,7 +327,7 @@ Future<void> _showActions(BuildContext context, ScheduledMessage scheduledMessag
 
       Future<void> reschedule() async {
         if (isFailed) return _scheduleAgain(client, scheduledMessage, time);
-        await client.updateScheduledMessage(scheduledMessage.id, scheduledAt: time);
+        await client.rescheduleMessage(scheduledMessage.id, time);
       }
 
       await run(reschedule, 'Message scheduled for ${formatScheduledTime(time, short: true)}');
