@@ -153,13 +153,17 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
   bool updateScheduledMessage(ScheduledMessage scheduledMessage) {
     if (!_matches(scheduledMessage)) return deleteScheduledMessage(scheduledMessage);
 
-    final items = currentItems;
-    final existing = items.where((it) => it.id == scheduledMessage.id).firstOrNull;
-    if (existing != null && existing.updatedAt.isAfter(scheduledMessage.updatedAt)) return false;
+    final items = [...currentItems];
+    final index = items.indexWhere((it) => it.id == scheduledMessage.id);
+    if (index == -1) {
+      items.add(scheduledMessage);
+    } else if (items[index].updatedAt.isAfter(scheduledMessage.updatedAt)) {
+      return false;
+    } else {
+      items[index] = scheduledMessage;
+    }
 
-    value = value.asSuccess.copyWith(
-      items: [...items.where((it) => it.id != scheduledMessage.id), scheduledMessage],
-    );
+    value = value.asSuccess.copyWith(items: items);
     return true;
   }
 
@@ -168,11 +172,10 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
   /// Returns `true` if it was listed.
   bool deleteScheduledMessage(ScheduledMessage scheduledMessage) {
     final items = currentItems;
-    if (!items.any((it) => it.id == scheduledMessage.id)) return false;
+    final index = items.indexWhere((it) => it.id == scheduledMessage.id);
+    if (index == -1) return false;
 
-    value = value.asSuccess.copyWith(
-      items: [...items.where((it) => it.id != scheduledMessage.id)],
-    );
+    value = value.asSuccess.copyWith(items: [...items]..removeAt(index));
     return true;
   }
 
