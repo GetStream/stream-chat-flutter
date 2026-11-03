@@ -433,7 +433,7 @@ class ChannelStateMutations {
   }
 
   /// Records whether the current user has [hidden] the channel.
-  void onChannelHiddenChanged({required bool hidden}) {
+  void onChannelVisibilityChanged({required bool hidden}) {
     final channel = _state.channelState.channel;
     if (channel == null) return;
 
