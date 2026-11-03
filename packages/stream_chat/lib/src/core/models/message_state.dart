@@ -22,7 +22,7 @@ extension MessageStateX on MessageState {
         skipEnrichUrl: state.skipEnrichUrl,
       ),
       MessageOutgoing(state: Updating()) => MessageState.updated,
-      MessageOutgoing(state: Deleting(:final scope)) => MessageState.deletingFailed(scope: scope),
+      MessageOutgoing(state: final Deleting state) => MessageState.deletingFailed(scope: state.scope),
       MessageInitial() || MessageCompleted() || MessageFailed() => this,
     };
   }
