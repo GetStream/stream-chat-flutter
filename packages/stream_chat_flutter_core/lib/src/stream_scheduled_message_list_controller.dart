@@ -175,7 +175,8 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
     final index = items.indexWhere((it) => it.id == scheduledMessage.id);
     if (index == -1) return false;
 
-    value = value.asSuccess.copyWith(items: [...items]..removeAt(index));
+    final updated = [...items]..removeAt(index);
+    value = value.asSuccess.copyWith(items: updated);
     return true;
   }
 
