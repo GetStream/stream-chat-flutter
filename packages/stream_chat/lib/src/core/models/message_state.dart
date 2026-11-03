@@ -8,11 +8,11 @@ part 'message_state.g.dart';
 
 /// Helper extension for [MessageState].
 extension MessageStateX on MessageState {
-  /// The state a message is left in when its request never finished, such as
-  /// one cut off by the app being closed.
+  /// The state a message is left in when its request never finished.
   ///
-  /// A send, update or delete becomes failed with the options it was made
-  /// with, so it can be retried. Any other state is returned as is.
+  /// A send, update or delete, such as one cut off by the app being closed,
+  /// becomes failed with the options it was made with, so it can be retried.
+  /// Any other state is returned as is.
   MessageState get settled {
     return switch (this) {
       MessageOutgoing(state: final Sending state) => .sendingFailed(

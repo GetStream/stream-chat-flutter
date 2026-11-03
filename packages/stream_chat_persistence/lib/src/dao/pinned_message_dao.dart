@@ -21,8 +21,9 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
 
   $UsersTable get _pinnedByUsers => alias(users, 'pinnedByUsers');
 
-  /// Marks the messages left sending, updating or deleting as failed, with
-  /// the options their requests were made with.
+  /// Marks the messages left sending, updating or deleting as failed.
+  ///
+  /// Each keeps the options its request was made with.
   Future<void> settleInterruptedRequests() async {
     final query = select(pinnedMessages)..where((tbl) => tbl.state.like('%"runtimeType":"outgoing"%'));
     final rows = await query.get();

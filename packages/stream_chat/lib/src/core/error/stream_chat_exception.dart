@@ -64,7 +64,7 @@ extension StreamChatExceptionRetries on StreamChatException {
   };
 }
 
-/// Recognizes the rejections of a message request that leave nothing to retry.
+/// Rejections of a message request that leave nothing to retry.
 @internal
 extension StreamChatExceptionMessageRejections on StreamChatException {
   /// Whether the server rejected a send because it already stored a message
