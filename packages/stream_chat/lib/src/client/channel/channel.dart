@@ -1132,7 +1132,8 @@ class Channel {
       return response;
     } catch (e) {
       if (e is StreamChatNetworkError && e.isMessageGoneError) {
-        _markMessageAsDeleted(message, scope: scope);
+        final deletedMessage = _markMessageAsDeleted(message, scope: scope);
+        if (scope.hard) _deleteMessageAttachments(deletedMessage);
         return EmptyResponse();
       }
 
