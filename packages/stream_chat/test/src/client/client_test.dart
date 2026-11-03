@@ -4374,6 +4374,23 @@ void main() {
       expect(client.persistenceEnabled, isTrue);
     });
 
+    test('openPersistenceConnection settles the interrupted requests once connected', () async {
+      final persistence = FakePersistenceClient();
+      client.chatPersistenceClient = persistence;
+
+      await client.openPersistenceConnection(user);
+
+      expect(persistence.settleCallCount, 1);
+    });
+
+    test('openPersistenceConnection still connects when settling the interrupted requests fails', () async {
+      client.chatPersistenceClient = _FailingSettlePersistenceClient();
+
+      await client.openPersistenceConnection(user);
+
+      expect(client.persistenceEnabled, isTrue);
+    });
+
     test(
       '''multiple call to openPersistenceConnection does not throws an error if already connected to the same user''',
       () async {
@@ -6125,4 +6142,9 @@ api.DeviceResponse _generatedDevice({required String id, required String pushPro
     createdAt: DateTime.utc(2024),
     userId: 'test-user-id',
   );
+}
+
+class _FailingSettlePersistenceClient extends MockPersistenceClient {
+  @override
+  Future<void> settleInterruptedRequests() => Future.error(StateError('Database is locked'));
 }

@@ -52,7 +52,7 @@ void main() {
       buildMessageScene(
         testMessage(
           user: currentUser,
-          state: MessageState.sending,
+          state: MessageState.sending(),
           attachments: [
             Attachment(type: AttachmentType.image, imageUrl: 'https://x/1.png'),
             Attachment(

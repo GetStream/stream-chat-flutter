@@ -54,6 +54,7 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
 
   // Track method calls for testing
   int connectCallCount = 0;
+  int settleCallCount = 0;
   int disconnectCallCount = 0;
   int flushCallCount = 0;
 
@@ -72,6 +73,9 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
     _isConnected = true;
     connectCallCount++;
   }
+
+  @override
+  Future<void> settleInterruptedRequests() async => settleCallCount++;
 
   @override
   Future<void> disconnect({bool flush = false}) async {

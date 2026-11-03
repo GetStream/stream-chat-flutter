@@ -315,7 +315,7 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.sending),
+                message.copyWith(state: MessageState.sending()),
                 matchMessageState: true,
               ),
             ],
@@ -366,7 +366,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(
+                    state: MessageState.sending(skipPush: true, skipEnrichUrl: false),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -421,7 +423,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(
+                    state: MessageState.sending(skipPush: true, skipEnrichUrl: true),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -476,7 +480,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(
+                    state: MessageState.sending(skipPush: false, skipEnrichUrl: true),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -529,7 +535,7 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(state: MessageState.sending()),
                   matchMessageState: true,
                 ),
               ],
@@ -636,7 +642,7 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.sending),
+                message.copyWith(state: MessageState.sending()),
                 matchMessageState: true,
               ),
             ],
@@ -729,7 +735,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.sending,
+                    state: MessageState.sending(),
                     attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.preparing()))],
                   ),
                   matchMessageState: true,
@@ -741,7 +747,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.sending,
+                    state: MessageState.sending(),
                     attachments: [...attachments]
                       ..[0] = attachments[0].copyWith(
                         uploadState: const UploadState.success(),
@@ -756,7 +762,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.sending,
+                    state: MessageState.sending(),
                     attachments: [...attachments]
                       ..[0] = attachments[0].copyWith(
                         uploadState: const UploadState.success(),
@@ -774,7 +780,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.sending,
+                    state: MessageState.sending(),
                     attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.success()))],
                   ),
                   matchMessageState: true,
@@ -1014,7 +1020,7 @@ void main() {
         channel.sendMessage(message).ignore();
         await first;
 
-        expect(channel.state!.messages.single.state, MessageState.sending);
+        expect(channel.state!.messages.single.state, MessageState.sending());
       });
 
       test(
@@ -1639,7 +1645,7 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
+                message.copyWith(state: MessageState.updating()),
                 matchMessageState: true,
               ),
             ],
@@ -1731,7 +1737,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.updating(),
                     attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.preparing()))],
                   ),
                   matchMessageState: true,
@@ -1743,7 +1749,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.updating(),
                     attachments: [...attachments]
                       ..[0] = attachments[0].copyWith(
                         uploadState: const UploadState.success(),
@@ -1758,7 +1764,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.updating(),
                     attachments: [...attachments]
                       ..[0] = attachments[0].copyWith(
                         uploadState: const UploadState.success(),
@@ -1776,7 +1782,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.updating(),
                     attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.success()))],
                   ),
                   matchMessageState: true,
@@ -1859,7 +1865,9 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
+                message.copyWith(
+                  state: MessageState.updating(skipPush: false, skipEnrichUrl: true),
+                ),
                 matchMessageState: true,
               ),
             ],
@@ -1907,7 +1915,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
+                  message.copyWith(
+                    state: MessageState.updating(skipPush: false, skipEnrichUrl: true),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -1960,7 +1970,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
+                  message.copyWith(
+                    state: MessageState.updating(skipPush: true, skipEnrichUrl: false),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -2009,7 +2021,9 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
+                message.copyWith(
+                  state: MessageState.updating(skipPush: true, skipEnrichUrl: true),
+                ),
                 matchMessageState: true,
               ),
             ],
@@ -2057,7 +2071,7 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
+                message.copyWith(state: MessageState.updating()),
                 matchMessageState: true,
               ),
             ],
@@ -2117,7 +2131,7 @@ void main() {
         channel.updateMessage(message).ignore();
         await first;
 
-        expect(channel.state!.messages.single.state, MessageState.updating);
+        expect(channel.state!.messages.single.state, MessageState.updating());
       });
     });
 
@@ -2198,7 +2212,7 @@ void main() {
           [
             isSameMessageAs(
               message.copyWith(
-                state: MessageState.updating,
+                state: MessageState.partialUpdating(set: set, unset: unset),
               ),
               matchText: true,
               matchMessageState: true,
@@ -2261,7 +2275,7 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updating,
+                  state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: false),
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -2326,7 +2340,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: true),
                   ),
                   matchText: true,
                   matchMessageState: true,
@@ -2396,7 +2410,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: false),
                   ),
                   matchText: true,
                   matchMessageState: true,
@@ -2461,7 +2475,7 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updating,
+                  state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: true),
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -2523,7 +2537,7 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updating,
+                  state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: false),
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -2599,6 +2613,82 @@ void main() {
         verify(() => client.deleteMessage(messageId)).called(1);
       });
 
+      test('marks a message that is already gone as deleted', () async {
+        const messageId = 'test-message-id';
+        final message = Message(
+          id: messageId,
+          createdAt: DateTime.now(),
+          state: MessageState.sent,
+        );
+        const errorMessage = 'DeleteMessage failed with error: "message with id test-message-id has been deleted"';
+        when(() => client.deleteMessage(messageId)).thenThrow(
+          apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+        );
+        channel.state?.addNewMessage(message);
+
+        final res = await channel.deleteMessage(message);
+
+        expect(res, isNotNull);
+        expect(channel.state?.messages.single.state, MessageState.softDeleted);
+      });
+
+      test('removes a hard-deleted message that is already gone', () async {
+        const messageId = 'test-message-id';
+        final message = Message(
+          id: messageId,
+          attachments: [
+            Attachment(type: 'image', imageUrl: 'test-image-url'),
+            Attachment(type: 'file', assetUrl: 'test-asset-url'),
+          ],
+          createdAt: DateTime.now(),
+          state: MessageState.sent,
+        );
+        const errorMessage = 'DeleteMessage failed with error: "message with id test-message-id doesn\'t exist"';
+        when(() => client.deleteMessage(messageId, hard: true)).thenThrow(
+          apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+        );
+        when(
+          () => client.deleteImage(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
+        when(
+          () => client.deleteFile(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
+        channel.state?.addNewMessage(message);
+
+        await channel.deleteMessage(message, hard: true);
+
+        expect(channel.state?.messages, isEmpty);
+      });
+
+      test('deletes the attachments of a hard-deleted message that is already gone', () async {
+        const messageId = 'test-message-id';
+        final message = Message(
+          id: messageId,
+          attachments: [
+            Attachment(type: 'image', imageUrl: 'test-image-url'),
+            Attachment(type: 'file', assetUrl: 'test-asset-url'),
+          ],
+          createdAt: DateTime.now(),
+          state: MessageState.sent,
+        );
+        const errorMessage = 'DeleteMessage failed with error: "message with id test-message-id doesn\'t exist"';
+        when(() => client.deleteMessage(messageId, hard: true)).thenThrow(
+          apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+        );
+        when(
+          () => client.deleteImage(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
+        when(
+          () => client.deleteFile(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
+        channel.state?.addNewMessage(message);
+
+        await channel.deleteMessage(message, hard: true);
+
+        verify(() => client.deleteImage('test-image-url', channelId, channelType)).called(1);
+        verify(() => client.deleteFile('test-asset-url', channelId, channelType)).called(1);
+      });
+
       test('should delete attachments for hard delete', () async {
         final attachments = List.generate(
           3,
@@ -2649,7 +2739,7 @@ void main() {
           final message = Message(
             id: messageId,
             text: 'Hello World!',
-            state: MessageState.sending,
+            state: MessageState.sending(),
           );
 
           expectLater(
@@ -2658,7 +2748,7 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(state: MessageState.sending()),
                   matchMessageState: true,
                 ),
               ],
@@ -2725,7 +2815,7 @@ void main() {
           final message = Message(
             id: messageId,
             text: 'Hello World!',
-            state: MessageState.sending,
+            state: MessageState.sending(),
           );
 
           expectLater(
@@ -2734,7 +2824,7 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(state: MessageState.sending()),
                   matchMessageState: true,
                 ),
               ],
@@ -2776,10 +2866,7 @@ void main() {
           channel.state?.messagesStream.skip(1),
           emitsInOrder([
             [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
-                matchMessageState: true,
-              ),
+              isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
             ],
             [
               isSameMessageAs(
@@ -2832,10 +2919,7 @@ void main() {
             channel.state?.messagesStream.skip(1),
             emitsInOrder([
               [
-                isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
-                  matchMessageState: true,
-                ),
+                isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
               ],
               [
                 isSameMessageAs(
@@ -2890,10 +2974,7 @@ void main() {
             channel.state?.messagesStream.skip(1),
             emitsInOrder([
               [
-                isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
-                  matchMessageState: true,
-                ),
+                isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
               ],
               [
                 isSameMessageAs(
@@ -2958,10 +3039,7 @@ void main() {
         channel.state?.messagesStream.skip(1),
         emitsInOrder([
           [
-            isSameMessageAs(
-              message.copyWith(state: MessageState.updating),
-              matchMessageState: true,
-            ),
+            isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
           ],
           [
             isSameMessageAs(

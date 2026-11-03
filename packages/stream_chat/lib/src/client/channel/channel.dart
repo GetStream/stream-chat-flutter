@@ -779,7 +779,7 @@ class Channel {
       localCreatedAt: DateTime.now(),
       user: _client.state.currentUser,
       quotedMessage: quotedMessage,
-      state: MessageState.sending,
+      state: .sending(skipPush: skipPush, skipEnrichUrl: skipEnrichUrl),
       attachments: message.attachments.map(
         (it) {
           if (it.uploadState.isSuccess) return it;
@@ -902,7 +902,7 @@ class Channel {
 
     // ignore: parameter_assignments
     message = message.copyWith(
-      state: MessageState.updating,
+      state: .updating(skipPush: skipPush, skipEnrichUrl: skipEnrichUrl),
       localUpdatedAt: DateTime.now(),
       attachments: message.attachments.map(
         (it) {
@@ -995,7 +995,7 @@ class Channel {
 
     // ignore: parameter_assignments
     message = message.copyWith(
-      state: MessageState.updating,
+      state: .partialUpdating(set: set, unset: unset, skipEnrichUrl: skipEnrichUrl),
       localUpdatedAt: DateTime.now(),
     );
 
@@ -1111,17 +1111,18 @@ class Channel {
         },
       );
 
-      final deletedMessage = message.copyWith(
-        deletedForMe: scope is DeleteForMe,
-        state: MessageState.deleted(scope: scope),
-      );
-
-      state?.deleteMessage(deletedMessage, hardDelete: scope.hard);
+      final deletedMessage = _markMessageAsDeleted(message, scope: scope);
       // If hard delete, also delete the uploaded attachments.
       if (scope.hard) _deleteMessageAttachments(deletedMessage);
 
       return response;
     } catch (e) {
+      if (e is StreamChatException && e.isMessageGoneError) {
+        final deletedMessage = _markMessageAsDeleted(message, scope: scope);
+        if (scope.hard) _deleteMessageAttachments(deletedMessage);
+        return EmptyResponse();
+      }
+
       final failedMessage = message.copyWith(
         // Update the message state to failed.
         state: MessageState.deletingFailed(scope: scope),
@@ -1135,6 +1136,19 @@ class Channel {
 
       rethrow;
     }
+  }
+
+  Message _markMessageAsDeleted(
+    Message message, {
+    required MessageDeleteScope scope,
+  }) {
+    final deletedMessage = message.copyWith(
+      deletedForMe: scope is DeleteForMe,
+      state: .deleted(scope: scope),
+    );
+
+    state?.deleteMessage(deletedMessage, hardDelete: scope.hard);
+    return deletedMessage;
   }
 
   // Deletes a local [message] that is not yet sent.

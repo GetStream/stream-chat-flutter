@@ -21,7 +21,7 @@ void main() {
       id: 'pending',
       text: 'pending',
       user: User(id: 'test-user'),
-      state: MessageState.sending,
+      state: MessageState.sending(),
     );
     await client.updateChannelStates([
       ChannelState(

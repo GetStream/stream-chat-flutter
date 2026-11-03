@@ -26,7 +26,7 @@ void main() {
       text: 'pending',
       user: User(id: 'test-user'),
       localCreatedAt: truncatedAt.add(const Duration(minutes: 2)),
-      state: MessageState.sending,
+      state: MessageState.sending(),
     );
     await client.updateChannelStates([
       ChannelState(

@@ -76,6 +76,9 @@ class MockPersistenceClient extends Mock implements ChatPersistenceClient {
   }
 
   @override
+  Future<void> settleInterruptedRequests() async {}
+
+  @override
   Future<void> disconnect({bool flush = false}) async {
     _userId = null;
     _isConnected = false;

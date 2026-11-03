@@ -21,6 +21,19 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
 
   $UsersTable get _pinnedByUsers => alias(users, 'pinnedByUsers');
 
+  /// Marks the messages left sending, updating or deleting as failed.
+  ///
+  /// Each keeps the options its request was made with.
+  Future<void> settleInterruptedRequests() async {
+    final query = select(messages)..where((tbl) => tbl.state.like('%"runtimeType":"outgoing"%'));
+    final rows = await query.get();
+    for (final row in rows) {
+      final state = MessageState.fromJson(jsonDecode(row.state)).settled;
+      final settled = MessagesCompanion(state: Value(jsonEncode(state)));
+      await (update(messages)..where((tbl) => tbl.id.equals(row.id))).write(settled);
+    }
+  }
+
   // Matches the messages created at or after their channel's last truncation,
   // and the messages not sent yet.
   Expression<bool> get _survivesTruncation {

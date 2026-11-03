@@ -2080,7 +2080,7 @@ void main() {
             id: 'pending',
             user: User(id: 'current-user'),
             text: 'Hello',
-            state: MessageState.sending,
+            state: MessageState.sending(),
           ),
         );
 

@@ -67,6 +67,16 @@ void main() {
       );
 
       test(
+        'isUpdating should return true if the message state is MessageOutgoing with PartialUpdating state',
+        () {
+          const messageState = MessageState.outgoing(
+            state: OutgoingState.partialUpdating(set: {'pinned': true}),
+          );
+          expect(messageState.isUpdating, true);
+        },
+      );
+
+      test(
         'isDeleting should return true if the message state is either isSoftDeleting or isHardDeleting',
         () {
           const messageState = MessageState.softDeleting;
@@ -240,20 +250,29 @@ void main() {
 
   group('Message State Classes', () {
     test(
-      'MessageState.sending should create a MessageOutgoing instance with Sending state',
+      'MessageState.sending() should create a MessageOutgoing instance with Sending state',
       () {
-        const messageState = MessageState.sending;
+        final messageState = MessageState.sending();
         expect(messageState, isA<MessageOutgoing>());
         expect((messageState as MessageOutgoing).state, isA<Sending>());
       },
     );
 
     test(
-      'MessageState.updating should create a MessageOutgoing instance with Updating state',
+      'MessageState.updating() should create a MessageOutgoing instance with Updating state',
       () {
-        const messageState = MessageState.updating;
+        final messageState = MessageState.updating();
         expect(messageState, isA<MessageOutgoing>());
         expect((messageState as MessageOutgoing).state, isA<Updating>());
+      },
+    );
+
+    test(
+      'MessageState.partialUpdating() should create a MessageOutgoing instance with PartialUpdating state',
+      () {
+        final messageState = MessageState.partialUpdating(set: {'pinned': true});
+        expect(messageState, isA<MessageOutgoing>());
+        expect((messageState as MessageOutgoing).state, isA<PartialUpdating>());
       },
     );
 
@@ -429,5 +448,38 @@ void main() {
         expect((failedState.scope as DeleteForMe).hard, false);
       },
     );
+  });
+
+  test('settled turns a send into a failed send with its options', () {
+    final state = MessageState.sending(skipPush: true, skipEnrichUrl: true);
+
+    expect(state.settled, MessageState.sendingFailed(skipPush: true, skipEnrichUrl: true));
+  });
+
+  test('settled turns an update into a failed update with its options', () {
+    final state = MessageState.updating(skipPush: true, skipEnrichUrl: true);
+
+    expect(state.settled, MessageState.updatingFailed(skipPush: true, skipEnrichUrl: true));
+  });
+
+  test('settled turns a partial update into a failed partial update with its changes', () {
+    final state = MessageState.partialUpdating(set: {'pinned': true}, unset: ['pin_expires'], skipEnrichUrl: true);
+
+    expect(
+      state.settled,
+      MessageState.partialUpdatingFailed(set: {'pinned': true}, unset: ['pin_expires'], skipEnrichUrl: true),
+    );
+  });
+
+  test('settled turns a delete into a failed delete for the same scope', () {
+    final state = MessageState.deleting(scope: const .deleteForMe());
+
+    expect(state.settled, MessageState.deletingFailed(scope: const .deleteForMe()));
+  });
+
+  test('settled keeps a state with no request in progress', () {
+    const state = MessageState.sent;
+
+    expect(state.settled, same(state));
   });
 }
