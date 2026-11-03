@@ -39,11 +39,13 @@ ChannelConfig _$ChannelConfigFromJson(Map<String, dynamic> json) => ChannelConfi
   sharedLocations: json['shared_locations'] as bool? ?? false,
   scheduledMessagesMaxPerChannel: (json['scheduled_messages_max_per_channel'] as num?)?.toInt(),
   scheduledMessagesMaxPerUser: (json['scheduled_messages_max_per_user'] as num?)?.toInt(),
-  scheduledMessagesMinLeadTime: _durationFromSeconds(
-    (json['scheduled_messages_min_lead_time_seconds'] as num?)?.toInt(),
+  scheduledMessagesMinLeadTime: _$JsonConverterFromJson<num, Duration>(
+    json['scheduled_messages_min_lead_time_seconds'],
+    const DurationInSecondsConverter().fromJson,
   ),
-  scheduledMessagesMaxLeadTime: _durationFromSeconds(
-    (json['scheduled_messages_max_lead_time_seconds'] as num?)?.toInt(),
+  scheduledMessagesMaxLeadTime: _$JsonConverterFromJson<num, Duration>(
+    json['scheduled_messages_max_lead_time_seconds'],
+    const DurationInSecondsConverter().fromJson,
   ),
 );
 
@@ -74,10 +76,22 @@ Map<String, dynamic> _$ChannelConfigToJson(ChannelConfig instance) => <String, d
   'shared_locations': instance.sharedLocations,
   'scheduled_messages_max_per_channel': instance.scheduledMessagesMaxPerChannel,
   'scheduled_messages_max_per_user': instance.scheduledMessagesMaxPerUser,
-  'scheduled_messages_min_lead_time_seconds': _durationToSeconds(
+  'scheduled_messages_min_lead_time_seconds': _$JsonConverterToJson<num, Duration>(
     instance.scheduledMessagesMinLeadTime,
+    const DurationInSecondsConverter().toJson,
   ),
-  'scheduled_messages_max_lead_time_seconds': _durationToSeconds(
+  'scheduled_messages_max_lead_time_seconds': _$JsonConverterToJson<num, Duration>(
     instance.scheduledMessagesMaxLeadTime,
+    const DurationInSecondsConverter().toJson,
   ),
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);

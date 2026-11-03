@@ -2456,23 +2456,35 @@ class StreamChatClient {
     );
   }
 
-  /// Replaces the scheduled message [id] with [message], moves it to
-  /// [scheduledAt], or both.
+  /// Replaces the scheduled message [id] with [message], and moves it to
+  /// [scheduledAt] when given.
   ///
   /// The [scheduledAt] is rounded up to a whole minute, at least a minute from
-  /// now; one in the past fails. Passing neither throws an [ArgumentError].
+  /// now; one in the past fails.
   Future<ScheduledMessageResponse> updateScheduledMessage(
-    String id, {
-    Message? message,
+    String id,
+    Message message, {
     DateTime? scheduledAt,
   }) {
-    if (message == null && scheduledAt == null) {
-      throw ArgumentError('Pass a message, a scheduledAt or both.');
-    }
-
     final response = _chatApi.scheduledMessages.updateScheduledMessage(
       id,
       message: message,
+      scheduledAt: scheduledAt,
+    );
+
+    return _removeScheduledMessageIfMissing(id, response);
+  }
+
+  /// Moves the scheduled message [id] to [scheduledAt], keeping its message.
+  ///
+  /// The [scheduledAt] is rounded up to a whole minute, at least a minute from
+  /// now; one in the past fails.
+  Future<ScheduledMessageResponse> rescheduleMessage(
+    String id,
+    DateTime scheduledAt,
+  ) {
+    final response = _chatApi.scheduledMessages.updateScheduledMessage(
+      id,
       scheduledAt: scheduledAt,
     );
 

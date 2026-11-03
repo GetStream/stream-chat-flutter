@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'chat_preferences.dart';
 import 'command.dart';
+import 'converters/duration_in_seconds_converter.dart';
 import 'push_level.dart';
 
 part 'channel_config.g.dart';
@@ -145,31 +146,19 @@ class ChannelConfig {
   /// How far ahead a scheduled message is sent, at least.
   ///
   /// A sooner time is moved to the first whole minute at least this far ahead.
+  ///
   /// Null when scheduled messages are not enabled.
-  @JsonKey(
-    name: 'scheduled_messages_min_lead_time_seconds',
-    fromJson: _durationFromSeconds,
-    toJson: _durationToSeconds,
-  )
+  @JsonKey(name: 'scheduled_messages_min_lead_time_seconds')
+  @DurationInSecondsConverter()
   final Duration? scheduledMessagesMinLeadTime;
 
   /// How far ahead a message can be scheduled, at most.
   ///
   /// Null when scheduled messages are not enabled.
-  @JsonKey(
-    name: 'scheduled_messages_max_lead_time_seconds',
-    fromJson: _durationFromSeconds,
-    toJson: _durationToSeconds,
-  )
+  @JsonKey(name: 'scheduled_messages_max_lead_time_seconds')
+  @DurationInSecondsConverter()
   final Duration? scheduledMessagesMaxLeadTime;
 
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ChannelConfigToJson(this);
 }
-
-Duration? _durationFromSeconds(int? seconds) {
-  if (seconds == null) return null;
-  return Duration(seconds: seconds);
-}
-
-int? _durationToSeconds(Duration? duration) => duration?.inSeconds;
