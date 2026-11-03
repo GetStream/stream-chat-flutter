@@ -29,7 +29,7 @@ class ChannelClientState {
 
     final seededState = channelState.copyWith(
       pinnedMessages: MessageMerging.sortPinnedMessages(channelState.pinnedMessages),
-      scheduledMessages: _mergeScheduledMessages(const [], channelState.scheduledMessages),
+      scheduledMessages: MessageMerging.sortScheduledMessages(channelState.scheduledMessages),
     );
 
     _channelStateController = BehaviorSubject.seeded(seededState);
@@ -368,18 +368,19 @@ class ChannelClientState {
   /// Replaces the scheduled messages with [scheduledMessages], keeping the
   /// copy already held of any that is newer.
   void updateScheduledMessages(List<ScheduledMessage> scheduledMessages) {
-    final updated = _mergeScheduledMessages(this.scheduledMessages, scheduledMessages);
+    final updated = MessageMerging.replaceScheduledMessages(
+      existing: this.scheduledMessages,
+      replacement: scheduledMessages,
+    );
     _channelState = _channelState.copyWith(scheduledMessages: updated);
   }
 
   /// Adds the [scheduledMessage], or replaces the one with its ID unless that
   /// one is newer.
   void updateScheduledMessage(ScheduledMessage scheduledMessage) {
-    final updated = scheduledMessages.sortedUpsert(
-      scheduledMessage,
-      key: _scheduledMessageId,
-      update: _newerScheduledMessage,
-      compare: _compareScheduledAt,
+    final updated = MessageMerging.mergeScheduledMessages(
+      existing: scheduledMessages,
+      toMerge: [scheduledMessage],
     );
     _channelState = _channelState.copyWith(scheduledMessages: updated);
   }
@@ -392,31 +393,6 @@ class ChannelClientState {
 
     final updated = [...current]..removeAt(index);
     _channelState = _channelState.copyWith(scheduledMessages: updated);
-  }
-
-  // The [incoming] scheduled messages, earliest first, each kept as its copy in
-  // [current] when that one is newer. Null [incoming] keeps [current] as is.
-  static List<ScheduledMessage>? _mergeScheduledMessages(
-    List<ScheduledMessage> current,
-    List<ScheduledMessage>? incoming,
-  ) {
-    if (incoming == null) return null;
-
-    final incomingIds = {for (final it in incoming) it.id};
-    final held = current.where((it) => incomingIds.contains(it.id));
-
-    final merged = incoming.merge(held, key: _scheduledMessageId, update: _newerScheduledMessage);
-    return merged.toList().sortedWith(_compareScheduledAt);
-  }
-
-  static String _scheduledMessageId(ScheduledMessage it) => it.id;
-
-  static ScheduledMessage _newerScheduledMessage(ScheduledMessage a, ScheduledMessage b) {
-    return a.updatedAt.isAfter(b.updatedAt) ? a : b;
-  }
-
-  static int _compareScheduledAt(ScheduledMessage a, ScheduledMessage b) {
-    return a.scheduledAt.compareTo(b.scheduledAt);
   }
 
   /// Channel draft.
@@ -665,7 +641,13 @@ class ChannelClientState {
       pendingMessages: updatedState.pendingMessages,
       pushPreferences: updatedState.pushPreferences,
       activeLiveLocations: updatedState.activeLiveLocations,
-      scheduledMessages: _mergeScheduledMessages(scheduledMessages, updatedState.scheduledMessages),
+      scheduledMessages: switch (updatedState.scheduledMessages) {
+        final incoming? => MessageMerging.replaceScheduledMessages(
+          existing: scheduledMessages,
+          replacement: incoming,
+        ),
+        null => null,
+      },
     );
   }
 

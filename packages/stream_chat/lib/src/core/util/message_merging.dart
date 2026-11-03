@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 
 import '../models/location.dart';
 import '../models/message.dart';
+import '../models/scheduled_message.dart';
 import 'list_extensions.dart';
 import 'message_predicates.dart';
 
@@ -41,6 +42,65 @@ class MessageMerging {
     if (bPinnedAt == null) return -1;
 
     return bPinnedAt.compareTo(aPinnedAt);
+  }
+
+  /// Orders scheduled messages by [ScheduledMessage.scheduledAt], earliest
+  /// first, the order of the scheduled message merge results.
+  static int sortByScheduledAt(ScheduledMessage a, ScheduledMessage b) {
+    return a.scheduledAt.compareTo(b.scheduledAt);
+  }
+
+  /// The `update` strategy for scheduled messages: keeps whichever of
+  /// [original] and [updated] was changed last, by
+  /// [ScheduledMessage.updatedAt].
+  static ScheduledMessage newerScheduledMessage(
+    ScheduledMessage original,
+    ScheduledMessage updated,
+  ) {
+    return original.updatedAt.isAfter(updated.updatedAt) ? original : updated;
+  }
+
+  /// Returns [scheduledMessages] ordered by [sortByScheduledAt].
+  ///
+  /// Returns [scheduledMessages] unchanged (same reference) when it is null or
+  /// already in order.
+  static List<ScheduledMessage>? sortScheduledMessages(List<ScheduledMessage>? scheduledMessages) {
+    if (scheduledMessages == null) return null;
+    if (scheduledMessages.isSorted(sortByScheduledAt)) return scheduledMessages;
+    return scheduledMessages.sortedWith(sortByScheduledAt);
+  }
+
+  /// Merges [toMerge] into the [existing] scheduled messages, keeping the
+  /// newer copy of each (see [newerScheduledMessage]).
+  ///
+  /// The result is ordered by [sortByScheduledAt], which [existing] must
+  /// already be sorted by.
+  static List<ScheduledMessage> mergeScheduledMessages({
+    required List<ScheduledMessage> existing,
+    required Iterable<ScheduledMessage> toMerge,
+  }) {
+    return existing.mergeSorted(
+      toMerge,
+      key: (it) => it.id,
+      compare: sortByScheduledAt,
+      update: newerScheduledMessage,
+    );
+  }
+
+  /// Replaces the [existing] scheduled messages with [replacement], keeping
+  /// the copy in [existing] of any that is newer (see
+  /// [newerScheduledMessage]).
+  ///
+  /// The result is ordered by [sortByScheduledAt], which [existing] must
+  /// already be sorted by.
+  static List<ScheduledMessage> replaceScheduledMessages({
+    required List<ScheduledMessage> existing,
+    required Iterable<ScheduledMessage> replacement,
+  }) {
+    final replacementIds = {for (final it in replacement) it.id};
+    final kept = [...existing.where((it) => replacementIds.contains(it.id))];
+
+    return mergeScheduledMessages(existing: kept, toMerge: replacement);
   }
 
   /// Merges the live locations carried by [toMerge] into [existing].
