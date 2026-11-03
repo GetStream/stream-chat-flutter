@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
@@ -302,7 +303,13 @@ void main() {
     });
 
     group('`.scheduleMessage`', () {
-      final scheduledAt = DateTime.now().add(const Duration(days: 1));
+      final now = DateTime.utc(2026, 10, 30, 12);
+      final scheduledAt = now.add(const Duration(days: 1));
+
+      // Schedules [message] at [time] with the clock fixed at [now].
+      Future<SendMessageResponse> schedule(Message message, DateTime time) {
+        return withClock(Clock.fixed(now), () => channel.scheduleMessage(message, time));
+      }
 
       ScheduledMessage scheduledMessageFor(Message message, {String cid = channelCid}) => ScheduledMessage(
         id: message.id,
@@ -325,7 +332,7 @@ void main() {
             ..scheduledMessage = scheduledMessageFor(message),
         );
 
-        final res = await channel.scheduleMessage(message, scheduledAt);
+        final res = await schedule(message, scheduledAt);
 
         expect(res.scheduledMessage?.id, message.id);
         expect(channel.state!.messages, isEmpty);
@@ -338,7 +345,7 @@ void main() {
           () => client.sendMessage(message, channelId, channelType, scheduledAt: scheduledAt),
         ).thenAnswer((_) async => SendMessageResponse()..message = message);
 
-        final res = await channel.scheduleMessage(message, scheduledAt);
+        final res = await schedule(message, scheduledAt);
 
         expect(res.scheduledMessage, isNull);
         expect(
@@ -349,9 +356,9 @@ void main() {
 
       test('refuses a time that is not in the future', () async {
         final message = Message(id: 'past-id', text: 'Good morning');
-        final past = DateTime.now().subtract(const Duration(minutes: 5));
+        final past = now.subtract(const Duration(minutes: 5));
 
-        await expectLater(channel.scheduleMessage(message, past), throwsArgumentError);
+        await expectLater(schedule(message, past), throwsArgumentError);
 
         verifyNever(
           () => client.sendMessage(any(), any(), any(), scheduledAt: any(named: 'scheduledAt')),
@@ -369,7 +376,7 @@ void main() {
           ],
         );
 
-        await expectLater(channel.scheduleMessage(message, scheduledAt), throwsArgumentError);
+        await expectLater(schedule(message, scheduledAt), throwsArgumentError);
 
         verifyNever(
           () => client.sendMessage(any(), any(), any(), scheduledAt: any(named: 'scheduledAt')),

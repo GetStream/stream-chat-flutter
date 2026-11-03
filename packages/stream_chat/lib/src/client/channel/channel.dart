@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
@@ -894,7 +895,7 @@ class Channel {
   }) async {
     _checkInitialized();
 
-    if (!scheduledAt.isAfter(DateTime.now())) {
+    if (!scheduledAt.isAfter(clock.now())) {
       throw ArgumentError.value(scheduledAt, 'scheduledAt', 'Must be in the future');
     }
 
