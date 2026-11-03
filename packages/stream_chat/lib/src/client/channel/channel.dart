@@ -3,6 +3,7 @@
 import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
@@ -894,7 +895,7 @@ class Channel {
   }) async {
     _checkInitialized();
 
-    if (!scheduledAt.isAfter(DateTime.now())) {
+    if (!scheduledAt.isAfter(clock.now())) {
       throw ArgumentError.value(scheduledAt, 'scheduledAt', 'Must be in the future');
     }
 
@@ -928,7 +929,10 @@ class Channel {
     _checkInitialized();
 
     // A user has at most 100 scheduled messages, so one page holds them all.
-    final response = await _client.queryScheduledMessages(cid: cid, limit: 100);
+    final response = await _client.queryScheduledMessages(
+      cid: cid,
+      pagination: const PaginationParams(limit: 100),
+    );
     final scheduledMessages = response.scheduledMessages;
 
     state?.updateScheduledMessages(scheduledMessages);

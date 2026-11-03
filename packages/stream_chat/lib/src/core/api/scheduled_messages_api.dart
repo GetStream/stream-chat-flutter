@@ -3,6 +3,7 @@ import 'dart:convert';
 import '../http/stream_http_client.dart';
 import '../models/message.dart';
 import '../models/scheduled_message.dart';
+import 'requests.dart';
 import 'responses.dart';
 
 /// Defines the api dedicated to scheduled messages operations
@@ -17,13 +18,13 @@ class ScheduledMessagesApi {
   /// [ScheduledMessage.scheduledAt].
   ///
   /// The page holds only messages in the channel [cid] when given, and only
-  /// messages with one of [statuses] when given. Pass [next] from a previous
-  /// page to get the page after it.
+  /// messages with one of [statuses] when given. The [pagination] sets the
+  /// page size, and its `next` cursor from a previous page gets the page after
+  /// it.
   Future<QueryScheduledMessagesResponse> queryScheduledMessages({
     String? cid,
     List<ScheduledMessageStatus>? statuses,
-    int? limit,
-    String? next,
+    PaginationParams? pagination,
   }) async {
     final response = await _client.post(
       '/scheduled_messages/query',
@@ -32,8 +33,7 @@ class ScheduledMessagesApi {
           if (cid != null) 'cid': cid,
           if (statuses != null) 'status': statuses,
         },
-        if (limit != null) 'limit': limit,
-        if (next != null) 'next': next,
+        if (pagination != null) ...pagination.toJson(),
       }),
     );
 

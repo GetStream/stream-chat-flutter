@@ -375,8 +375,12 @@ class ChannelClientState {
   /// Adds the [scheduledMessage], or replaces the one with its ID unless that
   /// one is newer.
   void updateScheduledMessage(ScheduledMessage scheduledMessage) {
-    final current = scheduledMessages;
-    final updated = _mergeScheduledMessages(current, [...current, scheduledMessage]);
+    final updated = scheduledMessages.sortedUpsert(
+      scheduledMessage,
+      key: _scheduledMessageId,
+      update: _newerScheduledMessage,
+      compare: _compareScheduledAt,
+    );
     _channelState = _channelState.copyWith(scheduledMessages: updated);
   }
 
@@ -398,16 +402,21 @@ class ChannelClientState {
   ) {
     if (incoming == null) return null;
 
-    final currentById = {for (final it in current) it.id: it};
-    final merged = {
-      for (final it in incoming)
-        it.id: switch (currentById[it.id]) {
-          final existing? when existing.updatedAt.isAfter(it.updatedAt) => existing,
-          _ => it,
-        },
-    };
+    final incomingIds = {for (final it in incoming) it.id};
+    final held = current.where((it) => incomingIds.contains(it.id));
 
-    return merged.values.toList()..sort((a, b) => a.scheduledAt.compareTo(b.scheduledAt));
+    final merged = incoming.merge(held, key: _scheduledMessageId, update: _newerScheduledMessage);
+    return merged.toList().sortedWith(_compareScheduledAt);
+  }
+
+  static String _scheduledMessageId(ScheduledMessage it) => it.id;
+
+  static ScheduledMessage _newerScheduledMessage(ScheduledMessage a, ScheduledMessage b) {
+    return a.updatedAt.isAfter(b.updatedAt) ? a : b;
+  }
+
+  static int _compareScheduledAt(ScheduledMessage a, ScheduledMessage b) {
+    return a.scheduledAt.compareTo(b.scheduledAt);
   }
 
   /// Channel draft.

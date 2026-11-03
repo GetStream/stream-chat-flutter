@@ -71,8 +71,7 @@ void main() {
       final res = await scheduledMessagesApi.queryScheduledMessages(
         cid: 'messaging:general',
         statuses: [ScheduledMessageStatus.scheduled, ScheduledMessageStatus.failed],
-        limit: 100,
-        next: 'cursor',
+        pagination: const PaginationParams(limit: 100, next: 'cursor'),
       );
 
       expect(res.scheduledMessages.single.id, 'scheduled-id');
