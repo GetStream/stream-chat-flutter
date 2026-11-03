@@ -1,5 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars, cascade_invocations, deprecated_member_use_from_same_package, avoid_redundant_argument_values
 
+import 'dart:async';
+
 import 'package:clock/clock.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -2267,6 +2269,76 @@ void main() {
         withClock(Clock.fixed(now), () => channel.state!.truncate());
 
         expect(channel.state!.messages.map((m) => m.id), ['after']);
+      });
+
+      test(
+        '${EventType.channelTruncated} without a truncatedAt cuts at the event time, not the device clock',
+        () async {
+          final eventTime = DateTime.utc(2026, 10, 29, 12);
+          channel.state!.updateMessage(messageAt('before', eventTime.subtract(const Duration(minutes: 1))));
+          channel.state!.updateMessage(messageAt('after', eventTime.add(const Duration(minutes: 1))));
+
+          await withClock(Clock.fixed(eventTime.add(const Duration(hours: 1))), () async {
+            client.addEvent(
+              Event(
+                cid: channel.cid,
+                type: EventType.channelTruncated,
+                channel: ChannelModel(id: channelId, type: channelType),
+                createdAt: eventTime,
+              ),
+            );
+            await Future.delayed(Duration.zero);
+          });
+
+          expect(channel.state!.messages.map((m) => m.id), ['after']);
+        },
+      );
+
+      test('${EventType.channelTruncated} without a truncatedAt leaves the channel truncation time alone', () async {
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType),
+            createdAt: DateTime.utc(2026, 10, 29, 12),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.channelState.channel?.truncatedAt, isNull);
+      });
+
+      test('updateThreadInfo leaves out the replies sent before the channel was truncated', () {
+        when(() => persistenceClient.updateChannelThreads(any(), any())).thenAnswer((_) async {});
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.truncate(truncatedAt: truncatedAt);
+
+        channel.state!.updateThreadInfo('parent', [
+          messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))).copyWith(parentId: 'parent'),
+          messageAt('after', truncatedAt.add(const Duration(minutes: 1))).copyWith(parentId: 'parent'),
+        ]);
+
+        expect(channel.state!.threads['parent']?.map((m) => m.id), ['after']);
+      });
+
+      test('stored thread replies loaded after a truncation leave out the ones sent before it', () async {
+        when(() => persistenceClient.updateChannelThreads(any(), any())).thenAnswer((_) async {});
+        final storedThreads = Completer<Map<String, List<Message>>>();
+        when(() => persistenceClient.getChannelThreads(any())).thenAnswer((_) => storedThreads.future);
+        final loading = Channel.fromState(client, _generateChannelState(channelId, channelType));
+        addTearDown(loading.dispose);
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+
+        loading.state!.truncate(truncatedAt: truncatedAt);
+        storedThreads.complete({
+          'parent': [
+            messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))).copyWith(parentId: 'parent'),
+            messageAt('after', truncatedAt.add(const Duration(minutes: 1))).copyWith(parentId: 'parent'),
+          ],
+        });
+        await Future.delayed(Duration.zero);
+
+        expect(loading.state!.threads['parent']?.map((m) => m.id), ['after']);
       });
 
       test('clearMessages removes the loaded messages', () {

@@ -1,5 +1,6 @@
 // ignore_for_file: cascade_invocations
 
+import 'package:clock/clock.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/client/channel/channel_event_handler.dart';
 import 'package:stream_chat/src/client/channel/channel_state_mutations.dart';
@@ -573,10 +574,11 @@ void main() {
       final persistence = persistentClient.chatPersistenceClient;
       when(() => persistence.truncateChannel(any(), truncatedAt: any(named: 'truncatedAt'))).thenAnswer((_) async {});
 
+      final truncatedAt = DateTime.utc(2026, 10, 29, 12);
       final systemMessage = Message(id: 'system-id');
       final event = Event(
         type: EventType.channelTruncated,
-        channel: ChannelModel(cid: 'messaging:test'),
+        channel: ChannelModel(cid: 'messaging:test', truncatedAt: truncatedAt),
         message: systemMessage,
       );
 
@@ -584,19 +586,43 @@ void main() {
       await Future<void>.value();
 
       verifyInOrder([
-        () => persistence.truncateChannel('messaging:test'),
-        () => mutations.onChannelTruncated(event.channel!, message: systemMessage),
+        () => persistence.truncateChannel('messaging:test', truncatedAt: truncatedAt),
+        () => mutations.onChannelTruncated(event.channel!, cutoff: truncatedAt, message: systemMessage),
       ]);
     });
 
-    test('channel.truncated delegates the truncated channel', () async {
-      final channelModel = ChannelModel(cid: 'messaging:test', truncatedAt: DateTime.utc(2026, 10, 29, 12));
+    test("channel.truncated cuts at the channel's truncatedAt", () async {
+      final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+      final channelModel = ChannelModel(cid: 'messaging:test', truncatedAt: truncatedAt);
       final event = Event(type: EventType.channelTruncated, channel: channelModel);
 
       handler.handleEvent(event);
       await Future<void>.value();
 
-      verify(() => mutations.onChannelTruncated(channelModel)).called(1);
+      verify(() => mutations.onChannelTruncated(channelModel, cutoff: truncatedAt)).called(1);
+    });
+
+    test('channel.truncated without a truncatedAt cuts at the event time, not the device clock', () async {
+      final persistentClient = MockStreamChatClientWithPersistence();
+      when(() => channel.client).thenReturn(persistentClient);
+      when(() => persistentClient.state).thenReturn(FakeClientState());
+
+      final persistence = persistentClient.chatPersistenceClient;
+      when(() => persistence.truncateChannel(any(), truncatedAt: any(named: 'truncatedAt'))).thenAnswer((_) async {});
+
+      final eventTime = DateTime.utc(2026, 10, 29, 12);
+      final channelModel = ChannelModel(cid: 'messaging:test');
+      final event = Event(type: EventType.channelTruncated, channel: channelModel, createdAt: eventTime);
+
+      await withClock(Clock.fixed(DateTime.utc(2026, 10, 29, 13)), () async {
+        handler.handleEvent(event);
+        await Future<void>.value();
+      });
+
+      verifyInOrder([
+        () => persistence.truncateChannel('messaging:test', truncatedAt: eventTime),
+        () => mutations.onChannelTruncated(channelModel, cutoff: eventTime),
+      ]);
     });
 
     test('channel.updated delegates the channel model', () {

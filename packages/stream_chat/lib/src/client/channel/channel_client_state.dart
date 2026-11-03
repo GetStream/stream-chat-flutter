@@ -56,7 +56,12 @@ class ChannelClientState {
         ?.getChannelThreads(_channel.cid!)
         .then((threads) {
           // Load all the threads for the channel from the offline storage.
-          if (threads.isNotEmpty) _threads = threads;
+          if (threads.isEmpty) return;
+          // A truncation can land while they load.
+          final truncatedAt = _channelState.channel?.truncatedAt;
+          _threads = threads.map(
+            (parentId, replies) => MapEntry(parentId, _truncateMessages(replies, truncatedAt)!),
+          );
         })
         .then((_) => retryFailedMessages());
   }
@@ -543,13 +548,22 @@ class ChannelClientState {
   /// Removes the messages, pinned messages and thread replies created before
   /// [truncatedAt], or before now when omitted.
   ///
-  /// Messages not sent yet are kept, a provided [truncatedAt] becomes the
-  /// channel's truncation time unless it has a later one, and the unread count
-  /// is lowered to the messages left. To only empty the loaded messages,
+  /// Messages not sent yet are kept, and a provided [truncatedAt] becomes the
+  /// channel's truncation time unless it has a later one. When the loaded
+  /// messages are the latest ones and some of them are removed, the unread
+  /// count is lowered to the messages left. To only empty the loaded messages,
   /// consider [clearMessages].
   void truncate({DateTime? truncatedAt}) {
-    final cutoff = truncatedAt ?? clock.now();
+    truncateBefore(truncatedAt ?? clock.now(), truncatedAt: truncatedAt);
+  }
 
+  /// Removes the messages, pinned messages and thread replies created before
+  /// [cutoff], as [truncate] does.
+  ///
+  /// A provided [truncatedAt] becomes the channel's truncation time unless it
+  /// has a later one; the [cutoff] itself is not recorded.
+  @internal
+  void truncateBefore(DateTime cutoff, {DateTime? truncatedAt}) {
     final channelState = _channelState;
     final loaded = channelState.messages ?? const <Message>[];
     final remaining = _truncateMessages(loaded, cutoff)!;
@@ -799,10 +813,14 @@ class ChannelClientState {
   void updateThreadInfo(String parentId, List<Message> messages) {
     final updatedThreads = {...threads};
 
+    // A stale response can still carry replies from before the cutoff.
+    final truncatedAt = _channelState.channel?.truncatedAt;
+    final replies = _truncateMessages(messages, truncatedAt)!;
+
     final threadMessages = updatedThreads[parentId] ?? <Message>[];
     final updatedThreadMessages = MessageMerging.mergeMessages(
       existing: threadMessages,
-      toMerge: messages.where((it) => it.id != parentId),
+      toMerge: replies.where((it) => it.id != parentId),
     );
 
     // Update the thread with the modified message list.

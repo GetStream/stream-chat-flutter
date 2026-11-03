@@ -1198,8 +1198,9 @@ StreamChatClient(apiKey, attachmentFileUploaderProvider: (dio) => MyUploader(dio
 
 **`ChannelClientState.truncate` truncates the channel.** It removes the messages, pinned messages and thread
 replies sent before `truncatedAt`, or before now when omitted, and keeps the ones sent after it and the ones not
-sent yet. It also lowers an unread count higher than the messages left. To only empty the loaded messages, as
-`truncate` did in v10, call `clearMessages`.
+sent yet. When the loaded messages are the latest ones and some of them are removed, it also lowers an unread
+count higher than the messages left. To only empty the loaded messages, as `truncate` did in v10, call
+`clearMessages`.
 
 ```dart
 // v10
