@@ -32,7 +32,11 @@ void main() {
 
   void stubQuery(List<ScheduledMessage> loaded, {List<ScheduledMessageStatus>? statuses}) {
     when(
-      () => client.queryScheduledMessages(cid: cid, statuses: statuses, limit: defaultScheduledMessagePagedLimit),
+      () => client.queryScheduledMessages(
+        cid: cid,
+        statuses: statuses,
+        pagination: const PaginationParams(limit: defaultScheduledMessagePagedLimit),
+      ),
     ).thenAnswer(
       (_) async => QueryScheduledMessagesResponse()
         ..scheduledMessages = loaded
@@ -133,7 +137,10 @@ void main() {
 
   test('shows the error when loading fails', () async {
     when(
-      () => client.queryScheduledMessages(cid: cid, limit: defaultScheduledMessagePagedLimit),
+      () => client.queryScheduledMessages(
+        cid: cid,
+        pagination: const PaginationParams(limit: defaultScheduledMessagePagedLimit),
+      ),
     ).thenThrow(const StreamChatError('offline'));
     final controller = StreamScheduledMessageListController(client: client, cid: cid);
     addTearDown(controller.dispose);
@@ -155,14 +162,20 @@ void main() {
 
   test('loads the next page, replacing listed copies', () async {
     when(
-      () => client.queryScheduledMessages(cid: cid, limit: defaultScheduledMessagePagedLimit),
+      () => client.queryScheduledMessages(
+        cid: cid,
+        pagination: const PaginationParams(limit: defaultScheduledMessagePagedLimit),
+      ),
     ).thenAnswer(
       (_) async => QueryScheduledMessagesResponse()
         ..scheduledMessages = [scheduledMessage('first'), scheduledMessage('both')]
         ..next = 'cursor',
     );
     when(
-      () => client.queryScheduledMessages(cid: cid, limit: defaultScheduledMessagePagedLimit, next: 'cursor'),
+      () => client.queryScheduledMessages(
+        cid: cid,
+        pagination: const PaginationParams(limit: defaultScheduledMessagePagedLimit, next: 'cursor'),
+      ),
     ).thenAnswer(
       (_) async => QueryScheduledMessagesResponse()
         ..scheduledMessages = [
@@ -185,7 +198,10 @@ void main() {
   test('keeps the list and shows the error when loading more fails', () async {
     final controller = await loadedController(loaded: [scheduledMessage('first')]);
     when(
-      () => client.queryScheduledMessages(cid: cid, limit: defaultScheduledMessagePagedLimit, next: 'cursor'),
+      () => client.queryScheduledMessages(
+        cid: cid,
+        pagination: const PaginationParams(limit: defaultScheduledMessagePagedLimit, next: 'cursor'),
+      ),
     ).thenThrow(const StreamChatError('offline'));
 
     await controller.loadMore('cursor');

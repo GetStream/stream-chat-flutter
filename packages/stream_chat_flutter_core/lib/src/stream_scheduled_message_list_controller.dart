@@ -72,7 +72,7 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
       final response = await client.queryScheduledMessages(
         cid: cid,
         statuses: statuses,
-        limit: limit,
+        pagination: PaginationParams(limit: limit),
       );
 
       value = PagedValue(
@@ -97,8 +97,7 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
       final response = await client.queryScheduledMessages(
         cid: cid,
         statuses: statuses,
-        limit: limit,
-        next: nextPageKey,
+        pagination: PaginationParams(limit: limit, next: nextPageKey),
       );
 
       final loadedIds = {for (final it in response.scheduledMessages) it.id};
