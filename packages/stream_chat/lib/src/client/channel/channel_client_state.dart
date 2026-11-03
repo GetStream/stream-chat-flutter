@@ -52,22 +52,23 @@ class ChannelClientState {
 
     _startSchedulingLocationExpiration();
 
-    _loadStoredThreads();
+    unawaited(_loadStoredThreads());
   }
 
   // Loads the threads of the channel from the offline storage, then retries
   // the failed messages.
-  void _loadStoredThreads() {
+  Future<void> _loadStoredThreads() async {
     final persistenceClient = _client.chatPersistenceClient;
-    persistenceClient
-        ?.getChannelThreads(_channel.cid!)
-        .then((threads) {
-          if (threads.isEmpty) return;
-          _threads = threads.map(
-            (parentId, replies) => MapEntry(parentId, _settleInterruptedRequests(replies)),
-          );
-        })
-        .then((_) => retryFailedMessages());
+    if (persistenceClient == null) return;
+
+    final threads = await persistenceClient.getChannelThreads(_channel.cid!);
+    if (threads.isNotEmpty) {
+      _threads = threads.map(
+        (parentId, replies) => MapEntry(parentId, _settleInterruptedRequests(replies)),
+      );
+    }
+
+    return retryFailedMessages();
   }
 
   // A message still being sent, updated or deleted when this state is created

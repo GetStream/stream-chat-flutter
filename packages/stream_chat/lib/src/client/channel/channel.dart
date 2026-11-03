@@ -779,7 +779,7 @@ class Channel {
       localCreatedAt: DateTime.now(),
       user: _client.state.currentUser,
       quotedMessage: quotedMessage,
-      state: MessageState.sending(
+      state: .sending(
         skipPush: skipPush,
         skipEnrichUrl: skipEnrichUrl,
       ),
@@ -905,7 +905,7 @@ class Channel {
 
     // ignore: parameter_assignments
     message = message.copyWith(
-      state: MessageState.updating(
+      state: .updating(
         skipPush: skipPush,
         skipEnrichUrl: skipEnrichUrl,
       ),
@@ -1001,7 +1001,7 @@ class Channel {
 
     // ignore: parameter_assignments
     message = message.copyWith(
-      state: MessageState.partialUpdating(
+      state: .partialUpdating(
         set: set,
         unset: unset,
         skipEnrichUrl: skipEnrichUrl,
@@ -1154,7 +1154,7 @@ class Channel {
   }) {
     final deletedMessage = message.copyWith(
       deletedForMe: scope is DeleteForMe,
-      state: MessageState.deleted(scope: scope),
+      state: .deleted(scope: scope),
     );
 
     state?.deleteMessage(deletedMessage, hardDelete: scope.hard);

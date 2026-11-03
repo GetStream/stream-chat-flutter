@@ -16,20 +16,20 @@ extension MessageStateX on MessageState {
   @internal
   MessageState get settled {
     return switch (this) {
-      MessageOutgoing(state: final Sending state) => MessageState.sendingFailed(
+      MessageOutgoing(state: final Sending state) => .sendingFailed(
         skipPush: state.skipPush,
         skipEnrichUrl: state.skipEnrichUrl,
       ),
-      MessageOutgoing(state: final Updating state) => MessageState.updatingFailed(
+      MessageOutgoing(state: final Updating state) => .updatingFailed(
         skipPush: state.skipPush,
         skipEnrichUrl: state.skipEnrichUrl,
       ),
-      MessageOutgoing(state: final PartialUpdating state) => MessageState.partialUpdatingFailed(
+      MessageOutgoing(state: final PartialUpdating state) => .partialUpdatingFailed(
         set: state.set,
         unset: state.unset,
         skipEnrichUrl: state.skipEnrichUrl,
       ),
-      MessageOutgoing(state: final Deleting state) => MessageState.deletingFailed(scope: state.scope),
+      MessageOutgoing(state: final Deleting state) => .deletingFailed(scope: state.scope),
       MessageInitial() || MessageCompleted() || MessageFailed() => this,
     };
   }

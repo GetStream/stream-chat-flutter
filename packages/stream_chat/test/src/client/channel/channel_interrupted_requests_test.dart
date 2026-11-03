@@ -10,7 +10,7 @@ void main() {
   setUpAll(() => registerFallbackValue(FakeMessage()));
 
   test('marks a message left sending as failed to send', () {
-    final channel = _channel(messages: [_message(state: MessageState.sending())]);
+    final channel = _channel(messages: [_message(state: .sending())]);
 
     expect(
       channel.state!.messages.single.state,
@@ -91,7 +91,7 @@ void main() {
 
   test('marks a message left deleting as failed to delete for the same scope', () {
     final channel = _channel(
-      messages: [_message(state: MessageState.deleting(scope: const MessageDeleteScope.deleteForMe()))],
+      messages: [_message(state: .deleting(scope: const .deleteForMe()))],
     );
 
     expect(
@@ -114,7 +114,7 @@ void main() {
       messages: [
         _message(id: 'sent'),
         _message(id: 'failed', state: failed),
-        _message(id: 'sending', state: MessageState.sending()),
+        _message(id: 'sending', state: .sending()),
       ],
     );
 
@@ -127,7 +127,7 @@ void main() {
     when(() => client.chatPersistenceClient.getChannelThreads(any())).thenAnswer((_) async => {});
     final channel = _channel(client: client);
 
-    channel.state!.updateMessage(_message(state: MessageState.sending()));
+    channel.state!.updateMessage(_message(state: .sending()));
     await pumpEventQueue();
 
     expect(channel.state!.messages.single.state, MessageState.sending());
@@ -136,7 +136,7 @@ void main() {
 
   test('sends a stored thread reply left sending again', () async {
     final client = MockStreamChatClientWithPersistence();
-    final reply = _message(id: 'reply', parentId: 'parent', state: MessageState.sending());
+    final reply = _message(id: 'reply', parentId: 'parent', state: .sending());
     when(() => client.chatPersistenceClient.getChannelThreads(any())).thenAnswer(
       (_) async => {
         'parent': [reply],
@@ -160,7 +160,7 @@ void main() {
 
     final channel = _channel(
       client: client,
-      messages: [_message(state: MessageState.sending())],
+      messages: [_message(state: .sending())],
     );
     await pumpEventQueue();
 
@@ -194,7 +194,7 @@ void main() {
 
     final channel = _channel(
       client: client,
-      messages: [_message(state: MessageState.deleting(scope: MessageDeleteScope.softDeleteForAll))],
+      messages: [_message(state: .deleting(scope: .softDeleteForAll))],
     );
     await pumpEventQueue();
 
@@ -231,7 +231,7 @@ void _stubSend(MockStreamChatClient client) {
     ),
   ).thenAnswer((invocation) async {
     final message = invocation.positionalArguments.first as Message;
-    return SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
+    return SendMessageResponse()..message = message.copyWith(state: .sent);
   });
 }
 
