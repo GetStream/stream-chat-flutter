@@ -360,14 +360,10 @@ class ChannelClientState {
     return stream.distinct(const ListEquality<ScheduledMessage>().equals);
   }
 
-  /// Replaces the scheduled messages with [scheduledMessages], keeping the
-  /// copy already held of any that is newer.
+  /// Replaces the scheduled messages with [scheduledMessages].
   void updateScheduledMessages(List<ScheduledMessage> scheduledMessages) {
-    final updated = MessageMerging.replaceScheduledMessages(
-      existing: this.scheduledMessages,
-      replacement: scheduledMessages,
-    );
-    _channelState = _channelState.copyWith(scheduledMessages: updated);
+    final sorted = MessageMerging.sortScheduledMessages(scheduledMessages);
+    _channelState = _channelState.copyWith(scheduledMessages: sorted);
   }
 
   /// Adds the [scheduledMessage], or replaces the one with its ID unless that
@@ -633,6 +629,12 @@ class ChannelClientState {
       final pinned => MessageMerging.sortPinnedMessages(pinned),
     };
 
+    final newScheduledMessages = switch (updatedState.scheduledMessages) {
+      // The stored list is already in schedule order.
+      final scheduled when identical(scheduled, _channelState.scheduledMessages) => scheduled,
+      final scheduled => MessageMerging.sortScheduledMessages(scheduled),
+    };
+
     _channelState = _channelState.copyWith(
       messages: newMessages,
       channel: _channelState.channel?.merge(updatedState.channel),
@@ -646,13 +648,7 @@ class ChannelClientState {
       pendingMessages: updatedState.pendingMessages,
       pushPreferences: updatedState.pushPreferences,
       activeLiveLocations: updatedState.activeLiveLocations,
-      scheduledMessages: switch (updatedState.scheduledMessages) {
-        final incoming? => MessageMerging.replaceScheduledMessages(
-          existing: scheduledMessages,
-          replacement: incoming,
-        ),
-        null => null,
-      },
+      scheduledMessages: newScheduledMessages,
     );
   }
 

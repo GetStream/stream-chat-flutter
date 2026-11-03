@@ -99,25 +99,24 @@ void main() {
         expect(channel.state!.scheduledMessages.single.id, 'kept');
       });
 
-      test('keep a newer copy when an update carries an older one', () {
+      test('are replaced by a loaded list, earliest first', () {
+        channel.state!.updateScheduledMessage(scheduledMessage('gone'));
+
+        channel.state!.updateScheduledMessages([
+          scheduledMessage('later', scheduledAt: DateTime.utc(2026, 11, 3)),
+          scheduledMessage('sooner', scheduledAt: DateTime.utc(2026, 11, 1)),
+        ]);
+
+        expect(channel.state!.scheduledMessages.map((it) => it.id), ['sooner', 'later']);
+      });
+
+      test('keep a newer copy when an event carries an older one', () {
         final edited = scheduledMessage('edited', text: 'Good evening', updatedAt: DateTime.utc(2026, 10, 30));
         channel.state!.updateScheduledMessage(edited);
 
-        channel.state!.updateChannelStateFromServer(stateWith([scheduledMessage('edited')]));
+        channel.state!.updateScheduledMessage(scheduledMessage('edited'));
 
         expect(channel.state!.scheduledMessages, [edited]);
-      });
-
-      test('are replaced by a loaded list, keeping a newer copy', () {
-        final edited = scheduledMessage('edited', text: 'Good evening', updatedAt: DateTime.utc(2026, 10, 30));
-        channel.state!
-          ..updateScheduledMessage(scheduledMessage('gone'))
-          ..updateScheduledMessage(edited);
-
-        channel.state!.updateScheduledMessages([scheduledMessage('edited'), scheduledMessage('new')]);
-
-        expect(channel.state!.scheduledMessages.map((it) => it.id), unorderedEquals(['edited', 'new']));
-        expect(channel.state!.scheduledMessages.firstWhere((it) => it.id == 'edited'), edited);
       });
 
       test('follow the scheduled message events of the channel', () async {

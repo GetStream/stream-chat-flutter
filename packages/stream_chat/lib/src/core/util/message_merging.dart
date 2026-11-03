@@ -87,22 +87,6 @@ class MessageMerging {
     );
   }
 
-  /// Replaces the [existing] scheduled messages with [replacement], keeping
-  /// the copy in [existing] of any that is newer (see
-  /// [newerScheduledMessage]).
-  ///
-  /// The result is ordered by [sortByScheduledAt], which [existing] must
-  /// already be sorted by.
-  static List<ScheduledMessage> replaceScheduledMessages({
-    required List<ScheduledMessage> existing,
-    required Iterable<ScheduledMessage> replacement,
-  }) {
-    final replacementIds = {for (final it in replacement) it.id};
-    final kept = [...existing.where((it) => replacementIds.contains(it.id))];
-
-    return mergeScheduledMessages(existing: kept, toMerge: replacement);
-  }
-
   /// Merges the live locations carried by [toMerge] into [existing].
   ///
   /// Locations are keyed by (userId, channelCid, createdByDeviceId); an
