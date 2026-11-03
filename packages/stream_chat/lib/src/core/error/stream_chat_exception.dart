@@ -64,7 +64,7 @@ extension StreamChatExceptionRetries on StreamChatException {
   };
 }
 
-/// Whether a rejected message request had already taken effect.
+/// Recognizes the rejections of a message request that leave nothing to retry.
 @internal
 extension StreamChatExceptionMessageRejections on StreamChatException {
   /// Whether the server rejected a send because it already stored a message
@@ -79,8 +79,10 @@ extension StreamChatExceptionMessageRejections on StreamChatException {
 
   /// Whether the server rejected a request because the message no longer
   /// exists, such as one already deleted.
-  bool get isMessageGoneError => switch (this) {
-    StreamApiException(statusCode: 404, code: StreamErrorCode.notFound) => true,
-    _ => false,
-  };
+  bool get isMessageGoneError {
+    final exception = this;
+    if (exception is! StreamApiException) return false;
+    if (exception.statusCode != 404) return false;
+    return exception.code == StreamErrorCode.notFound;
+  }
 }

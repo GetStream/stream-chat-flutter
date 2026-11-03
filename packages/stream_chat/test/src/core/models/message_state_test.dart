@@ -67,6 +67,16 @@ void main() {
       );
 
       test(
+        'isUpdating should return true if the message state is MessageOutgoing with PartialUpdating state',
+        () {
+          const messageState = MessageState.outgoing(
+            state: OutgoingState.partialUpdating(set: {'pinned': true}),
+          );
+          expect(messageState.isUpdating, true);
+        },
+      );
+
+      test(
         'isDeleting should return true if the message state is either isSoftDeleting or isHardDeleting',
         () {
           const messageState = MessageState.softDeleting;
@@ -263,7 +273,6 @@ void main() {
         final messageState = MessageState.partialUpdating(set: {'pinned': true});
         expect(messageState, isA<MessageOutgoing>());
         expect((messageState as MessageOutgoing).state, isA<PartialUpdating>());
-        expect(messageState.isUpdating, isTrue);
       },
     );
 

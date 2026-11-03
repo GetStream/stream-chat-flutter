@@ -2632,7 +2632,7 @@ void main() {
         expect(channel.state?.messages.single.state, MessageState.softDeleted);
       });
 
-      test('removes a hard-deleted message that is already gone and its attachments', () async {
+      test('removes a hard-deleted message that is already gone', () async {
         const messageId = 'test-message-id';
         final message = Message(
           id: messageId,
@@ -2658,6 +2658,33 @@ void main() {
         await channel.deleteMessage(message, hard: true);
 
         expect(channel.state?.messages, isEmpty);
+      });
+
+      test('deletes the attachments of a hard-deleted message that is already gone', () async {
+        const messageId = 'test-message-id';
+        final message = Message(
+          id: messageId,
+          attachments: [
+            Attachment(type: 'image', imageUrl: 'test-image-url'),
+            Attachment(type: 'file', assetUrl: 'test-asset-url'),
+          ],
+          createdAt: DateTime.now(),
+          state: MessageState.sent,
+        );
+        const errorMessage = 'DeleteMessage failed with error: "message with id test-message-id doesn\'t exist"';
+        when(() => client.deleteMessage(messageId, hard: true)).thenThrow(
+          apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+        );
+        when(
+          () => client.deleteImage(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
+        when(
+          () => client.deleteFile(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
+        channel.state?.addNewMessage(message);
+
+        await channel.deleteMessage(message, hard: true);
+
         verify(() => client.deleteImage('test-image-url', channelId, channelType)).called(1);
         verify(() => client.deleteFile('test-asset-url', channelId, channelType)).called(1);
       });
