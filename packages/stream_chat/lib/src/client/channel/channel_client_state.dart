@@ -543,11 +543,10 @@ class ChannelClientState {
   /// Removes the messages, pinned messages and thread replies created before
   /// [truncatedAt], or before now when omitted.
   ///
-  /// Messages not sent yet are kept, and a provided [truncatedAt] becomes the
-  /// channel's truncation time unless it has a later one. The unread count is
-  /// lowered to the messages left when the loaded messages include every
-  /// message after the cutoff. To only empty the loaded messages, consider
-  /// [clearMessages].
+  /// Messages not sent yet are kept, a provided [truncatedAt] becomes the
+  /// channel's truncation time unless it has a later one, and the unread count
+  /// is lowered to the messages left. To only empty the loaded messages,
+  /// consider [clearMessages].
   void truncate({DateTime? truncatedAt}) {
     final cutoff = truncatedAt ?? clock.now();
 

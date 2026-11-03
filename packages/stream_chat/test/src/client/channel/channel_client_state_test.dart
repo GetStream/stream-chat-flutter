@@ -2051,7 +2051,7 @@ void main() {
         return message;
       }
 
-      test('${EventType.channelTruncated} removes the messages created before the event', () async {
+      test('${EventType.channelTruncated} without a truncatedAt removes the messages sent before now', () async {
         seedMessage('truncated-message-1');
         seedMessage('truncated-message-2');
         expect(channel.state!.messages, hasLength(2));
@@ -2394,14 +2394,14 @@ void main() {
             ),
           );
           await Future.delayed(Duration.zero);
-          channel.state!.updateChannelState(ChannelState(messages: [before]));
+          channel.state!.updateChannelStateFromServer(ChannelState(messages: [before]));
 
           expect(channel.state!.messages.map((m) => m.id), ['before']);
         },
       );
 
       test(
-        '${EventType.channelTruncated} without a truncatedAt removes the pinned messages created before it',
+        '${EventType.channelTruncated} without a truncatedAt removes the pinned messages sent before now',
         () async {
           final pinnedAt = DateTime.now().subtract(const Duration(seconds: 30));
           channel.state!.updateChannelState(

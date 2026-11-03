@@ -16,7 +16,7 @@
 🐞 Fixed
 
 - Fixed truncating a channel also removing the messages sent after its truncation time, and messages not sent yet.
-- Fixed truncating a channel keeping its thread replies from before the truncation, and an unread count higher than the messages left.
+- Fixed truncating a channel keeping its thread replies from before the truncation, an unread count higher than the messages left, and its old last message time.
 - Fixed messages from before a channel's truncation coming back when the truncation event was missed.
 - Fixed the connection getting stuck while connecting, and requests never completing, when the token provider throws while refreshing an expired token.
 - Fixed sending, updating and deleting a message not retrying when the server answers with a timeout (408), a rate limit (429) or a server error (5xx).
