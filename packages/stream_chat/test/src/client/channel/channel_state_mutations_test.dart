@@ -735,20 +735,96 @@ void main() {
 
   group('channel', () {
     test('onChannelTruncated truncates before applying the system message', () {
+      final truncatedAt = DateTime.utc(2026, 10, 29, 12);
       final systemMessage = Message(id: 'system-id');
+      stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
 
-      mutations.onChannelTruncated(message: systemMessage);
+      mutations.onChannelTruncated(
+        ChannelModel(cid: 'messaging:test', truncatedAt: truncatedAt),
+        cutoff: truncatedAt,
+        message: systemMessage,
+      );
 
       verifyInOrder([
-        () => state.truncate(),
+        () => state.truncateBefore(truncatedAt, truncatedAt: truncatedAt),
         () => state.updateMessage(systemMessage),
       ]);
     });
 
-    test('onChannelTruncated only truncates without a system message', () {
-      mutations.onChannelTruncated();
+    test("onChannelTruncated truncates at the channel's truncatedAt", () {
+      final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+      stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
 
-      verify(() => state.truncate()).called(1);
+      mutations.onChannelTruncated(
+        ChannelModel(cid: 'messaging:test', truncatedAt: truncatedAt),
+        cutoff: truncatedAt,
+      );
+
+      verify(() => state.truncateBefore(truncatedAt, truncatedAt: truncatedAt)).called(1);
+    });
+
+    test('onChannelTruncated cuts at the cutoff without recording it as the truncation time', () {
+      final cutoff = DateTime.utc(2026, 10, 29, 12);
+      stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
+
+      mutations.onChannelTruncated(ChannelModel(cid: 'messaging:test'), cutoff: cutoff);
+
+      verify(() => state.truncateBefore(cutoff)).called(1);
+    });
+
+    test('onChannelTruncated takes the last message time before applying the system message', () {
+      stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
+      final systemMessage = Message(id: 'system-id');
+
+      mutations.onChannelTruncated(
+        ChannelModel(cid: 'messaging:test', lastMessageAt: DateTime.utc(2026, 10, 29, 13)),
+        cutoff: DateTime.utc(2026, 10, 29, 12),
+        message: systemMessage,
+      );
+
+      verifyInOrder([
+        () => state.updateChannelState(any()),
+        () => state.updateMessage(systemMessage),
+      ]);
+    });
+
+    test('onChannelTruncated skips an unchanged last message time', () {
+      final lastMessageAt = DateTime.utc(2026, 10, 29, 13);
+      stubChannelState(
+        ChannelState(
+          channel: ChannelModel(cid: 'messaging:test', lastMessageAt: lastMessageAt),
+        ),
+      );
+
+      mutations.onChannelTruncated(
+        ChannelModel(cid: 'messaging:test', lastMessageAt: lastMessageAt),
+        cutoff: DateTime.utc(2026, 10, 29, 12),
+      );
+
+      verifyNever(() => state.updateChannelState(any()));
+    });
+
+    test("onChannelTruncated takes the channel's last message time", () {
+      final lastMessageAt = DateTime.utc(2026, 10, 29, 13);
+      stubChannelState(
+        ChannelState(
+          channel: ChannelModel(cid: 'messaging:test', lastMessageAt: DateTime.utc(2026, 10, 29, 11)),
+        ),
+      );
+
+      mutations.onChannelTruncated(
+        ChannelModel(cid: 'messaging:test', lastMessageAt: lastMessageAt),
+        cutoff: DateTime.utc(2026, 10, 29, 12),
+      );
+
+      expect(capturedChannelState().channel?.lastMessageAt, lastMessageAt);
+    });
+
+    test('onChannelTruncated applies no message without a system message', () {
+      stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
+
+      mutations.onChannelTruncated(ChannelModel(cid: 'messaging:test'), cutoff: DateTime.utc(2026, 10, 29, 12));
+
       verifyNever(() => state.updateMessage(any()));
     });
 

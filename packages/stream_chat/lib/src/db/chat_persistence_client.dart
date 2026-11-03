@@ -262,6 +262,12 @@ abstract class ChatPersistenceClient {
   /// loads, when no request can still be running.
   Future<void> settleInterruptedRequests();
 
+  /// Removes the stored messages and pinned messages of the channel with
+  /// [cid] created before [truncatedAt], or before now when omitted.
+  ///
+  /// Messages not sent yet are kept.
+  Future<void> truncateChannel(String cid, {DateTime? truncatedAt});
+
   /// Remove a message by message [cids]
   Future<void> deleteMessageByCids(List<String> cids);
 

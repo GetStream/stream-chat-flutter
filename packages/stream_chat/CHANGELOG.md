@@ -119,6 +119,8 @@
 - An entry of `ChannelModel.custom` or `Member.custom` named like one of the model's own fields stays in `custom` and leaves the field alone, and `toJson` leaves it out.
 - `rawType` is removed from `MessageType`, `AttachmentType`, `PushLevel`, `ChatPreferenceLevel`, `ChatLevel`, `CallLevel` and `RoleType`, as are `ModerationAction.action` and `ChannelCapability.capability`; use the value itself instead.
 
+- `ChannelClientState.truncate` now truncates the channel at an optional `truncatedAt` instead of emptying the loaded messages; use `clearMessages` for that.
+- A custom `ChatPersistenceClient` must implement `truncateChannel`, which removes a channel's stored messages from before a given time.
 - `MessageState.sending` and `MessageState.updating` are factories that take the request's `skipPush` and `skipEnrichUrl`; add `()` where you used the constants.
 - A partial update, such as pinning a message, is in the new `OutgoingState.partialUpdating` state while it runs; `isUpdating` still covers it.
 - `OutgoingState`'s `when`, `whenOrNull` and `maybeWhen` pass the request's options to `sending` and `updating` and take a `partialUpdating` callback, and its `map`, `mapOrNull` and `maybeMap` take one too.
@@ -126,6 +128,9 @@
 
 🐞 Fixed
 
+- Truncating a channel no longer removes the messages sent after its truncation time, or messages not sent yet.
+- Truncating a channel now also removes its thread replies from before the truncation, lowers an unread count higher than the messages left, and updates its last message time.
+- Messages from before a channel's truncation no longer come back when the truncation event was missed.
 - A message no longer stays sending, updating or deleting forever when the app is closed before its request finishes; the interrupted request is retried.
 - Deleting a message that was already deleted no longer fails and offers a retry that can never succeed.
 
@@ -151,6 +156,7 @@
 
 ✅ Added
 
+- Added `ChannelClientState.clearMessages`, which empties the loaded messages.
 - Added `MessageState.settled`, the failed state a message is left in when its request never finished.
 - Log records from the HTTP and token layers now reach the configured handler.
 - Added `MessageSearchSortField.relevance`, which sorts a message search by match quality.

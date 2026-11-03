@@ -45,6 +45,7 @@ dependencies:
   uuid: ^4.5.3
 
 dev_dependencies:
+  benchmark_harness: ^2.4.0
   build_runner: ^2.15.0
   freezed: ^3.0.0
   json_serializable: ^6.13.2
