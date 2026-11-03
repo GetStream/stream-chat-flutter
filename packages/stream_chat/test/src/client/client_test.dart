@@ -4677,11 +4677,11 @@ void main() {
       verifyNoMoreInteractions(api.message);
     });
 
-    test('`.queryScheduledMessages` asks for 100 messages by default', () async {
+    test('`.queryScheduledMessages` asks for the default page', () async {
       when(
         () => api.scheduledMessages.queryScheduledMessages(
           cid: 'messaging:general',
-          limit: 100,
+          pagination: const PaginationParams(),
         ),
       ).thenAnswer(
         (_) async => QueryScheduledMessagesResponse()
@@ -4694,7 +4694,7 @@ void main() {
       verify(
         () => api.scheduledMessages.queryScheduledMessages(
           cid: 'messaging:general',
-          limit: 100,
+          pagination: const PaginationParams(),
         ),
       ).called(1);
     });

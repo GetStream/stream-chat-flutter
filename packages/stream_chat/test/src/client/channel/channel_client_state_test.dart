@@ -136,7 +136,7 @@ void main() {
 
       test('are loaded again when the connection recovers', () async {
         when(
-          () => client.queryScheduledMessages(cid: cid, limit: 100),
+          () => client.queryScheduledMessages(cid: cid, pagination: const PaginationParams(limit: 100)),
         ).thenAnswer(
           (_) async => QueryScheduledMessagesResponse()
             ..scheduledMessages = [scheduledMessage('missed')]
@@ -155,7 +155,7 @@ void main() {
         client.addEvent(Event(type: EventType.connectionRecovered));
         await Future<void>.delayed(Duration.zero);
 
-        verifyNever(() => client.queryScheduledMessages(cid: cid, limit: 100));
+        verifyNever(() => client.queryScheduledMessages(cid: cid, pagination: const PaginationParams(limit: 100)));
       });
     });
 
