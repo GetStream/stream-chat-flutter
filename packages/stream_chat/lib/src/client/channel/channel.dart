@@ -2271,7 +2271,7 @@ class Channel {
         // Otherwise, we update the existing state with the new channel state.
         //
         // But, before updating the state, we check if we are querying around a
-        // message, If we are, we have to clear the loaded messages to avoid
+        // message. If we are, we have to clear the loaded messages to avoid
         // potential gaps in the message sequence.
         final isQueryingAround = switch (messagesPagination) {
           PaginationParams(idAround: _?) => true,
