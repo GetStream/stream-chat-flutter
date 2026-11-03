@@ -2464,6 +2464,33 @@ void main() {
         verify(() => client.deleteMessage(messageId)).called(1);
       });
 
+      test('marks a message that is already gone as deleted', () async {
+        const messageId = 'test-message-id';
+        final message = Message(
+          id: messageId,
+          createdAt: DateTime.now(),
+          state: MessageState.sent,
+        );
+        const errorMessage = 'DeleteMessage failed with error: "message with id test-message-id has been deleted"';
+        when(() => client.deleteMessage(messageId)).thenThrow(
+          StreamChatNetworkError.raw(
+            code: ChatErrorCode.doesNotExist.code,
+            statusCode: 404,
+            message: errorMessage,
+            data: ErrorResponse()
+              ..code = ChatErrorCode.doesNotExist.code
+              ..message = errorMessage
+              ..statusCode = 404,
+          ),
+        );
+        channel.state?.addNewMessage(message);
+
+        final res = await channel.deleteMessage(message);
+
+        expect(res, isNotNull);
+        expect(channel.state?.messages.single.state, MessageState.softDeleted);
+      });
+
       test('should delete attachments for hard delete', () async {
         final attachments = List.generate(
           3,
