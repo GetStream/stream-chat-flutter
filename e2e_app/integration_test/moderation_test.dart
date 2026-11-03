@@ -170,7 +170,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12791',
     description: 'user blocks the participant in a direct message channel',
-    skip: 'https://linear.app/stream/issue/FLU-1085',
     body: (env) async {
       step('GIVEN a direct message channel with the participant exists');
       await env.backendRobot.generateChannels(channelsCount: 1, messagesCount: 2, withDirectMessageChannel: true);
@@ -189,7 +188,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12792',
     description: 'direct message channel disappears when the user blocks the participant',
-    skip: 'https://linear.app/stream/issue/FLU-1085',
     body: (env) async {
       step('GIVEN a direct message channel with the participant exists');
       await env.backendRobot.generateChannels(channelsCount: 1, messagesCount: 2, withDirectMessageChannel: true);
