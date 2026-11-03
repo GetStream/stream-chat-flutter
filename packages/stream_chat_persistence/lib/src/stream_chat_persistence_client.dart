@@ -640,7 +640,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
       await super.updateChannelStates(channelStates);
 
       // Clears messages left over from a truncation this client never heard
-      // about.
+      // about: saving only writes rows, it never removes stored ones.
       for (final channel in channelStates.map((it) => it.channel).nonNulls) {
         final truncatedAt = channel.truncatedAt;
         if (truncatedAt == null) continue;
