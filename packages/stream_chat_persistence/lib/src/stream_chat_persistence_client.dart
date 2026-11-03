@@ -135,6 +135,16 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> settleInterruptedRequests() {
+    assert(_debugIsConnected, '');
+    _logger.v(() => 'settleInterruptedRequests');
+    return db!.transaction(() async {
+      await db!.messageDao.settleInterruptedRequests();
+      await db!.pinnedMessageDao.settleInterruptedRequests();
+    });
+  }
+
+  @override
   Future<void> deleteMessageByCids(List<String> cids) {
     assert(_debugIsConnected, '');
     _logger.v(() => 'deleteMessageByCids');

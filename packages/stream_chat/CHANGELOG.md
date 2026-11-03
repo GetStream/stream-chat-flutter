@@ -122,6 +122,7 @@
 - `MessageState.sending` and `MessageState.updating` are factories that take the request's `skipPush` and `skipEnrichUrl`; add `()` where you used the constants.
 - A partial update, such as pinning a message, is in the new `OutgoingState.partialUpdating` state while it runs; `isUpdating` still covers it.
 - `OutgoingState`'s `when`, `whenOrNull` and `maybeWhen` pass the request's options to `sending` and `updating` and take a `partialUpdating` callback, and its `map`, `mapOrNull` and `maybeMap` take one too.
+- A custom `ChatPersistenceClient` must implement `settleInterruptedRequests`, which marks the stored messages left sending, updating or deleting as failed.
 
 🐞 Fixed
 
@@ -150,6 +151,7 @@
 
 ✅ Added
 
+- Added `MessageState.settled`, the failed state a message is left in when its request never finished.
 - Log records from the HTTP and token layers now reach the configured handler.
 - Added `MessageSearchSortField.relevance`, which sorts a message search by match quality.
 - Added `MessageReminderSortField.messageId`, the field the API breaks reminder ties on.

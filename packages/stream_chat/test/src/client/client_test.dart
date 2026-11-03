@@ -4374,6 +4374,15 @@ void main() {
       expect(client.persistenceEnabled, isTrue);
     });
 
+    test('openPersistenceConnection settles the interrupted requests once connected', () async {
+      final persistence = FakePersistenceClient();
+      client.chatPersistenceClient = persistence;
+
+      await client.openPersistenceConnection(user);
+
+      expect(persistence.settleCallCount, 1);
+    });
+
     test(
       '''multiple call to openPersistenceConnection does not throws an error if already connected to the same user''',
       () async {

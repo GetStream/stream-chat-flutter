@@ -16,6 +16,7 @@
 
 - A cached channel query given no sort came back in whatever order the lookup returned; it now applies `ChannelSort.defaultSort`, the ordering the API would have.
 - A member's `banExpires` is now kept in the local cache.
+- A message left sending, updating or deleting when the app was closed no longer comes back from the local cache still in progress; it comes back failed, so it is retried.
 
 ## Upcoming
 

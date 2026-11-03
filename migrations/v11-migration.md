@@ -297,6 +297,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `ChannelModel.custom` / `Member.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
 | `MessageType.rawType` / `AttachmentType.rawType` / `PushLevel.rawType` / `ChatPreferenceLevel.rawType` / `ChatLevel.rawType` / `CallLevel.rawType` / `RoleType.rawType`, `ModerationAction.action`, `ChannelCapability.capability` | the value itself | `removed` | Each is a `String`, so use it directly: `message.type.rawType` becomes `message.type` |
 | `MessageState.sending` / `MessageState.updating` (constants) | `MessageState.sending()` / `MessageState.updating()` | `retyped` | Factories taking `skipPush` and `skipEnrichUrl`; no longer usable in a `const` expression |
+| — | `ChatPersistenceClient.settleInterruptedRequests()` | `added` | Abstract: a custom persistence client must implement it |
 | — | `OutgoingState.partialUpdating` / `MessageState.partialUpdating(...)` | `added` | The state of a partial update, such as a pin, while it runs. An exhaustive `switch` over `OutgoingState` needs the new case |
 | `OutgoingState.when(sending: () => …, updating: () => …)` | `when(sending: (skipPush, skipEnrichUrl) => …, updating: (skipPush, skipEnrichUrl) => …, partialUpdating: (set, unset, skipEnrichUrl) => …)` | `retyped` | Also `whenOrNull` and `maybeWhen`; `map`, `mapOrNull` and `maybeMap` take a `partialUpdating` callback |
 | _(more added per feature as PRs land)_ | | | |
@@ -1214,6 +1215,10 @@ message is in `OutgoingState.partialUpdating`, carrying the update's `set`, `uns
 `updating`. `isUpdating` is true for both. An exhaustive `switch` over `OutgoingState` needs the new case, and the
 `when` and `map` helpers take a `partialUpdating` callback.
 
+**A custom `ChatPersistenceClient` implements `settleInterruptedRequests`.** The client calls it once connected,
+before any channel loads, to mark the stored messages left sending, updating or deleting as failed, keeping the
+options their requests were made with. `MessageState.settled` gives the failed state for each.
+
 > **Why:** each request in progress now keeps what is needed to send it again, mirroring its failed state, so a
 > send, edit or delete interrupted by the app closing is retried as it was made.
 
@@ -1240,6 +1245,7 @@ Work top to bottom; each item is independently verifiable.
 - [ ] If you use `stream_chat_persistence`, expect one cold start after upgrading — see [Offline Cache](#offline-cache)
 - [ ] Add `()` to `MessageState.sending` and `MessageState.updating`, and handle `OutgoingState.partialUpdating` in exhaustive
       `switch`es — see [Message States](#message-states)
+- [ ] If you implement `ChatPersistenceClient`, implement `settleInterruptedRequests` — see [Message States](#message-states)
 - [ ] Run `dart analyze` and your test suite; the analyzer finds most of the mechanical work for you
 
 ---

@@ -21,6 +21,18 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
 
   $UsersTable get _pinnedByUsers => alias(users, 'pinnedByUsers');
 
+  /// Marks the messages left sending, updating or deleting as failed, with
+  /// the options their requests were made with.
+  Future<void> settleInterruptedRequests() async {
+    final query = select(pinnedMessages)..where((tbl) => tbl.state.like('%"runtimeType":"outgoing"%'));
+    final rows = await query.get();
+    for (final row in rows) {
+      final state = MessageState.fromJson(jsonDecode(row.state)).settled;
+      final settled = PinnedMessagesCompanion(state: Value(jsonEncode(state)));
+      await (update(pinnedMessages)..where((tbl) => tbl.id.equals(row.id))).write(settled);
+    }
+  }
+
   /// Removes all the messages by matching [PinnedMessages.id] in [messageIds]
   ///
   /// This will automatically delete the following linked records

@@ -44,6 +44,9 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<void> deletePinnedMessageByCids(List<String> cids) => Future.value();
 
   @override
+  Future<void> settleInterruptedRequests() => Future.value();
+
+  @override
   Future<void> deletePinnedMessageByIds(List<String> messageIds) => Future.value();
 
   @override

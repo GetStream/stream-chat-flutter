@@ -608,7 +608,10 @@ class StreamChatClient {
     }
 
     // Connect the persistence client to the userId.
-    return client.connect(user.id);
+    await client.connect(user.id);
+    // No request can be running before the user is connected, so a stored
+    // message still in progress belongs to one that never finished.
+    await client.settleInterruptedRequests();
   }
 
   /// Disconnects the [chatPersistenceClient] from the current user.
