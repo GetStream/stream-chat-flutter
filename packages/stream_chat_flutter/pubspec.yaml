@@ -22,7 +22,7 @@ environment:
   flutter: ">=3.44.0"
 
 dependencies:
-  cached_network_image: ^3.4.1
+  cached_network_image: ">=3.4.1 <5.0.0"
   chewie: ^1.13.1
   clock: ^1.1.2
   collection: ^1.19.1
