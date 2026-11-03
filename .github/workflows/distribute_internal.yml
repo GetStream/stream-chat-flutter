@@ -73,6 +73,8 @@ jobs:
 
       - uses: ./.github/actions/setup-flutter
 
+      - uses: ./.github/actions/install-android-ndk
+
       - name: "Install Tools"
         run: flutter pub global activate melos
 
