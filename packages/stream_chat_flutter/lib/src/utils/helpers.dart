@@ -277,47 +277,16 @@ String fileSize(dynamic size, [int round = 2]) {
     return '$_size B';
   }
 
-  if (_size < divider * divider && _size % divider == 0) {
-    return '${(_size / divider).toStringAsFixed(0)} KB';
+  const units = ['KB', 'MB', 'GB', 'TB', 'PB'];
+  var value = _size / divider;
+  var unit = 0;
+  while (value >= divider && unit < units.length - 1) {
+    value /= divider;
+    unit++;
   }
 
-  if (_size < divider * divider) {
-    return '${(_size / divider).toStringAsFixed(round)} KB';
-  }
-
-  if (_size < divider * divider * divider && _size % divider == 0) {
-    return '${(_size / (divider * divider)).toStringAsFixed(0)} MB';
-  }
-
-  if (_size < divider * divider * divider) {
-    return '${(_size / divider / divider).toStringAsFixed(round)} MB';
-  }
-
-  if (_size < divider * divider * divider * divider && _size % divider == 0) {
-    return '${(_size / (divider * divider * divider)).toStringAsFixed(0)} GB';
-  }
-
-  if (_size < divider * divider * divider * divider) {
-    return '${(_size / divider / divider / divider).toStringAsFixed(round)} GB';
-  }
-
-  if (_size < divider * divider * divider * divider * divider && _size % divider == 0) {
-    final num r = _size / divider / divider / divider / divider;
-    return '${r.toStringAsFixed(0)} TB';
-  }
-
-  if (_size < divider * divider * divider * divider * divider) {
-    final num r = _size / divider / divider / divider / divider;
-    return '${r.toStringAsFixed(round)} TB';
-  }
-
-  if (_size < divider * divider * divider * divider * divider * divider && _size % divider == 0) {
-    final num r = _size / divider / divider / divider / divider / divider;
-    return '${r.toStringAsFixed(0)} PB';
-  } else {
-    final num r = _size / divider / divider / divider / divider / divider;
-    return '${r.toStringAsFixed(round)} PB';
-  }
+  final digits = value % 1 == 0 ? 0 : round;
+  return '${value.toStringAsFixed(digits)} ${units[unit]}';
 }
 
 /// Wraps attachment widget with custom shape

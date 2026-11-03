@@ -33,6 +33,7 @@ class ChannelModel {
     bool? hidden,
     DateTime? truncatedAt,
     this.messageCount,
+    this.activeMemberCount,
     this.filterTags,
   }) : assert(
          (cid != null && cid.contains(':')) || (id != null && type != null),
@@ -169,6 +170,14 @@ class ChannelModel {
   @JsonKey(includeToJson: false)
   final int? messageCount;
 
+  /// The number of members whose users are neither deactivated nor deleted.
+  ///
+  /// Null until a channel query made with `includeActiveMemberCount` loads this
+  /// channel. Once set, it keeps its last value until another such query
+  /// refreshes it.
+  @JsonKey(includeToJson: false)
+  final int? activeMemberCount;
+
   /// List of filter tags applied to the channel.
   ///
   /// This is generally used for querying filtered channels based on tags.
@@ -194,6 +203,7 @@ class ChannelModel {
     'team',
     'cooldown',
     'message_count',
+    'active_member_count',
     'filter_tags',
   ];
 
@@ -224,6 +234,7 @@ class ChannelModel {
     bool? hidden,
     DateTime? truncatedAt,
     int? messageCount,
+    int? activeMemberCount,
     List<String>? filterTags,
   }) => ChannelModel(
     id: id ?? this.id,
@@ -252,6 +263,7 @@ class ChannelModel {
             : DateTime.parse(extraData?['truncated_at'] as String)) ??
         this.truncatedAt,
     messageCount: messageCount ?? this.messageCount,
+    activeMemberCount: activeMemberCount ?? this.activeMemberCount,
     filterTags: filterTags ?? this.filterTags,
   );
 
@@ -280,6 +292,7 @@ class ChannelModel {
       hidden: other.hidden,
       truncatedAt: other.truncatedAt,
       messageCount: other.messageCount,
+      activeMemberCount: other.activeMemberCount ?? activeMemberCount,
       filterTags: other.filterTags,
     );
   }
