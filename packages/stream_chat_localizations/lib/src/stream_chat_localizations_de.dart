@@ -434,7 +434,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get sendMessagePermissionError => 'Sie sind nicht berechtigt Nachrichten zu senden';
 
   @override
-  String get couldNotReadBytesFromFileError => 'Kan bytes niet uit bestand lezen.';
+  String get couldNotReadBytesFromFileError => 'Bytes konnten nicht aus der Datei gelesen werden.';
 
   @override
   String get downloadLabel => 'Downloaden';
@@ -442,42 +442,43 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   @override
   String toggleMuteUnmuteAction({required bool isMuted}) {
     if (isMuted) {
-      return 'UNMUTE';
+      return 'STUMMSCHALTUNG AUFHEBEN';
     } else {
-      return 'STOM';
+      return 'STUMMSCHALTEN';
     }
   }
 
   @override
   String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
     if (isMuted) {
-      return 'Weet je zeker dat je het dempen van deze groep wilt opheffen?';
+      return 'Sind Sie sicher, dass Sie die Stummschaltung dieser Gruppe aufheben wollen?';
     } else {
-      return 'Weet je zeker dat je deze groep wilt dempen?';
+      return 'Sind Sie sicher, dass Sie diese Gruppe stummschalten wollen?';
     }
   }
 
   @override
   String toggleMuteUnmuteGroupText({required bool isMuted}) {
     if (isMuted) {
-      return 'Dempen groep opheffen';
+      return 'Stummschaltung der Gruppe aufheben';
     } else {
-      return 'Groep dempen';
+      return 'Gruppe stummschalten';
     }
   }
 
   @override
   String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
     if (isMuted) {
-      return '''Weet je zeker dat je het dempen van deze gebruiker wilt opheffen?''';
+      return 'Sind Sie sicher, dass Sie die Stummschaltung dieses Benutzers aufheben wollen?';
     } else {
-      return 'Weet u zeker dat u deze gebruiker wilt dempen?';
+      return 'Sind Sie sicher, dass Sie diesen Benutzer stummschalten wollen?';
     }
   }
 
   @override
   String toggleMuteUnmuteUserText({required bool isMuted}) {
-    return 'Gebruiker dempen';
+    if (isMuted) return 'Stummschaltung aufheben';
+    return 'Benutzer stummschalten';
   }
 
   @override

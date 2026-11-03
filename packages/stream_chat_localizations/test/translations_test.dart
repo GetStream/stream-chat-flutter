@@ -573,6 +573,44 @@ void main() {
   }
 
   for (final language in kStreamChatSupportedLanguages) {
+    test('mute and block toggles return different text for each state in $language', () async {
+      final localizations = await GlobalStreamChatLocalizations.delegate.load(Locale(language));
+
+      // Each toggle labels an action that flips state, so its two strings must differ.
+      final toggles = {
+        'toggleMuteUnmuteAction': (
+          localizations.toggleMuteUnmuteAction(isMuted: true),
+          localizations.toggleMuteUnmuteAction(isMuted: false),
+        ),
+        'toggleMuteUnmuteGroupQuestion': (
+          localizations.toggleMuteUnmuteGroupQuestion(isMuted: true),
+          localizations.toggleMuteUnmuteGroupQuestion(isMuted: false),
+        ),
+        'toggleMuteUnmuteGroupText': (
+          localizations.toggleMuteUnmuteGroupText(isMuted: true),
+          localizations.toggleMuteUnmuteGroupText(isMuted: false),
+        ),
+        'toggleMuteUnmuteUserQuestion': (
+          localizations.toggleMuteUnmuteUserQuestion(isMuted: true),
+          localizations.toggleMuteUnmuteUserQuestion(isMuted: false),
+        ),
+        'toggleMuteUnmuteUserText': (
+          localizations.toggleMuteUnmuteUserText(isMuted: true),
+          localizations.toggleMuteUnmuteUserText(isMuted: false),
+        ),
+        'toggleBlockUnblockUserText': (
+          localizations.toggleBlockUnblockUserText(isBlocked: true),
+          localizations.toggleBlockUnblockUserText(isBlocked: false),
+        ),
+      };
+
+      for (final MapEntry(key: name, value: (on, off)) in toggles.entries) {
+        expect(on, isNot(off), reason: '$name should differ between its two states');
+      }
+    });
+  }
+
+  for (final language in kStreamChatSupportedLanguages) {
     test('every translation language has a display name in $language', () async {
       final localizations = await GlobalStreamChatLocalizations.delegate.load(Locale(language));
       expectEveryLanguageNamed(localizations.translatedFromLanguageText, locale: language);

@@ -69,6 +69,8 @@ jobs:
 
       - uses: ./.github/actions/setup-flutter
 
+      - uses: ./.github/actions/install-android-ndk
+
       - uses: ./.github/actions/setup-ruby
 
       - name: Distribute to S3

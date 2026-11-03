@@ -2,12 +2,17 @@
 
 ✅ Added
 
+- Added `StreamChannelListController.includeActiveMemberCount`, which fills `Channel.activeMemberCount` on every page the controller loads.
 - Added `StreamScheduledMessageListController` and `StreamScheduledMessageListEventHandler`, a paged list of the current user's scheduled messages that stays current as they are scheduled, edited, sent or deleted.
 - Added `StreamMessageComposerController.skipEnrichUrl` and a `dismissed` parameter to `StreamMessageComposerController.clearOGAttachment`, to send a message without a link preview the user removed.
 
 🔄 Changed
 
 - A subclass of `StreamMessageComposerController` that overrides `clearOGAttachment` must add the new `dismissed` parameter.
+
+🐞 Fixed
+
+- Fixed `StreamChannelState.getFirstUnreadMessage` returning no message when the current user's read state has unread messages but no last read message.
 
 ## 10.6.0
 
