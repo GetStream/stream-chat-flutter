@@ -2639,7 +2639,7 @@ class ClientState {
     _eventsSubscription?.add(
       _client.on(EventType.channelHidden).listen((event) async {
         final eventChannel = event.channel!;
-        _deactivateChannel(eventChannel.cid);
+        _unlistChannel(eventChannel.cid);
         await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
       }),
     );
@@ -2648,7 +2648,7 @@ class ClientState {
   void _listenChannelVisible() {
     _eventsSubscription?.add(
       _client.on(EventType.channelVisible).listen((event) {
-        if (event.channel?.cid case final cid?) _reactivateChannel(cid);
+        if (event.channel?.cid case final cid?) _relistChannel(cid);
       }),
     );
   }
@@ -2703,7 +2703,7 @@ class ClientState {
             final isCurrentUser = event.user!.id == currentUser!.id;
             if (isCurrentUser && event.channel != null) {
               final eventChannel = event.channel!;
-              _deactivateChannel(eventChannel.cid);
+              _unlistChannel(eventChannel.cid);
               await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
             }
           }),
@@ -2909,30 +2909,30 @@ class ClientState {
   /// The channels in memory as a stream, leaving out the ones the current user
   /// hid or was removed from.
   Stream<Map<String, Channel>> get channelsStream {
-    return _channelsController.stream.map(_activeChannels);
+    return _channelsController.stream.map(_listedChannels);
   }
 
   /// The channels in memory, leaving out the ones the current user hid or was
   /// removed from.
-  Map<String, Channel> get channels => _activeChannels(_channelsController.value);
+  Map<String, Channel> get channels => _listedChannels(_channelsController.value);
 
   @internal
   set channels(Map<String, Channel> newChannels) {
-    _inactiveCids.clear();
+    _unlistedCids.clear();
     _channelsController.safeAdd(newChannels);
   }
 
   /// Adds a list of channels to the current list of cached channels
   @internal
   void addChannels(Map<String, Channel> channelMap) {
-    _inactiveCids.removeAll(channelMap.keys);
+    _unlistedCids.removeAll(channelMap.keys);
     _channelsController.safeAdd({..._channelsController.value, ...channelMap});
   }
 
   /// Removes the channel from the cached list of [channels]
   @internal
   void removeChannel(String channelCid) {
-    _inactiveCids.remove(channelCid);
+    _unlistedCids.remove(channelCid);
     if (!_channelsController.value.containsKey(channelCid)) return;
     _channelsController.safeAdd({..._channelsController.value}..remove(channelCid));
   }
@@ -2942,28 +2942,28 @@ class ClientState {
   Channel? _channelFor(String cid) => _channelsController.value[cid];
 
   // Leaves the channel out of [channels] without disposing it, so code still
-  // holding it can keep using it. Watching it, a channels query returning it,
-  // or a channel.visible event brings it back.
-  void _deactivateChannel(String cid) {
+  // holding it keeps working. Watching it, a channels query returning it, or a
+  // channel.visible event lists it again.
+  void _unlistChannel(String cid) {
     if (!_channelsController.value.containsKey(cid)) return;
-    if (!_inactiveCids.add(cid)) return;
+    if (!_unlistedCids.add(cid)) return;
 
     _channelsController.safeAdd(_channelsController.value);
   }
 
-  // Puts a channel left out by [_deactivateChannel] back into [channels].
-  void _reactivateChannel(String cid) {
-    if (!_inactiveCids.remove(cid)) return;
+  // Puts a channel left out by [_unlistChannel] back into [channels].
+  void _relistChannel(String cid) {
+    if (!_unlistedCids.remove(cid)) return;
 
     _channelsController.safeAdd(_channelsController.value);
   }
 
-  Map<String, Channel> _activeChannels(Map<String, Channel> channels) {
-    if (_inactiveCids.isEmpty) return channels;
+  Map<String, Channel> _listedChannels(Map<String, Channel> channels) {
+    if (_unlistedCids.isEmpty) return channels;
 
     return Map.unmodifiable({
       for (final MapEntry(:key, :value) in channels.entries)
-        if (!_inactiveCids.contains(key)) key: value,
+        if (!_unlistedCids.contains(key)) key: value,
     });
   }
 
@@ -2994,8 +2994,9 @@ class ClientState {
 
   // Every live channel, including the ones left out of [channels].
   final _channelsController = ImmutableMapBehaviorSubject<String, Channel>.seeded(const {});
-  // The channels the current user hid or was removed from.
-  final _inactiveCids = <String>{};
+  // The channels the current user hid or was removed from, left out of
+  // [channels] until they are listed again.
+  final _unlistedCids = <String>{};
   final _currentUserController = BehaviorSubject<OwnUser?>();
   final _usersController = ImmutableMapBehaviorSubject<String, User>.seeded(const {});
   final _unreadChannelsController = BehaviorSubject<int>.seeded(0);
