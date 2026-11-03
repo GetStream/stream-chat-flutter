@@ -241,7 +241,8 @@ class StreamMessageItemProps extends Equatable {
   /// message belongs to the current user or another participant.
   /// On completion, [onReplyTap] is invoked with the message.
   ///
-  /// Swipe is disabled for deleted messages and messages in a failed state.
+  /// Swipe is disabled for a message that is deleted, failed, or still being
+  /// sent, updated or deleted, and in a channel that doesn't allow quoting.
   ///
   /// Defaults to false.
   final bool swipeToReply;
@@ -670,7 +671,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       ),
     );
 
-    Widget result = Material(
+    final result = Material(
       animateColor: true,
       color: effectiveBackgroundColor,
       child: PlatformWidgetBuilder(
@@ -727,15 +728,23 @@ class DefaultStreamMessageItem extends StatelessWidget {
       ),
     );
 
-    if (props.swipeToReply && props.onReplyTap != null && !message.isDeleted && !message.state.isFailed) {
-      result = _SwipeToReplyWrapper(
-        message: message,
-        onReplyTap: props.onReplyTap!,
-        child: result,
-      );
-    }
+    final onReplyTap = props.onReplyTap;
+    if (!props.swipeToReply || onReplyTap == null) return result;
 
-    return result;
+    final channel = StreamChannel.maybeOf(context)?.channel;
+    final canQuote = channel?.canQuoteMessage ?? true;
+    final state = message.state;
+    final isDeleted = message.isDeleted || state.isDeleted;
+    final isPending = state.isOutgoing || state.isFailed;
+
+    // Disabled rather than removed, so the message isn't rebuilt from scratch
+    // when it finishes sending.
+    return _SwipeToReplyWrapper(
+      message: message,
+      enabled: canQuote && !isDeleted && !isPending,
+      onReplyTap: onReplyTap,
+      child: result,
+    );
   }
 
   // Builds the action list for a bounced (moderation-error) message.
@@ -1130,11 +1139,13 @@ extension on Poll {
 class _SwipeToReplyWrapper extends StatelessWidget {
   const _SwipeToReplyWrapper({
     required this.message,
+    required this.enabled,
     required this.onReplyTap,
     required this.child,
   });
 
   final Message message;
+  final bool enabled;
   final void Function(Message) onReplyTap;
   final Widget child;
 
@@ -1144,7 +1155,7 @@ class _SwipeToReplyWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Swipeable(
       key: ValueKey('swipe-${message.id}'),
-      direction: SwipeDirection.startToEnd,
+      direction: enabled ? SwipeDirection.startToEnd : SwipeDirection.none,
       swipeThreshold: _swipeThreshold,
       onSwiped: (_) => onReplyTap(message),
       backgroundBuilder: (context, details) {
@@ -1354,6 +1365,7 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
             context,
             isMessageRead: data.readsOf(message: message).isNotEmpty,
             isMessageDelivered: data.deliveriesOf(message: message).isNotEmpty,
+            canUseReadReceipts: channel?.canUseReadReceipts ?? true,
           ),
         ].join(', '),
       ),
@@ -1381,15 +1393,20 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
     BuildContext context, {
     required bool isMessageRead,
     required bool isMessageDelivered,
+    required bool canUseReadReceipts,
   }) {
     final translations = context.translations;
+    final progress = attachmentUploadProgressLabel(translations, widget.message);
+    if (progress != null) return progress;
 
-    return attachmentUploadProgressLabel(translations, widget.message) ??
-        MessageDeliveryStatus.of(
-          widget.message,
-          isMessageRead: isMessageRead,
-          isMessageDelivered: isMessageDelivered,
-        ).label(translations);
+    final status = MessageDeliveryStatus.of(
+      widget.message,
+      isMessageRead: isMessageRead,
+      isMessageDelivered: isMessageDelivered,
+    );
+    if (status == .sent && !canUseReadReceipts) return null;
+
+    return status.label(translations);
   }
 
   // Composes the screen-reader announcement for the whole row: who sent the

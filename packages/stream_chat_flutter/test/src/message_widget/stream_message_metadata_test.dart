@@ -10,10 +10,16 @@ void main() {
   final currentUser = OwnUser(id: 'me', name: 'Luke Skywalker');
   final otherUser = User(id: 'han', name: 'Han Solo');
 
-  Widget wrap(Widget body) {
+  Widget wrap(Widget body, {bool readEvents = true}) {
     final client = MockClient();
     final clientState = MockClientState();
-    final channel = MockChannel();
+    final channel = MockChannel(
+      ownCapabilities: [
+        ChannelCapability.sendMessage,
+        ChannelCapability.uploadFile,
+        if (readEvents) ChannelCapability.readEvents,
+      ],
+    );
     final channelState = MockChannelState();
 
     when(() => client.state).thenReturn(clientState);
@@ -178,6 +184,25 @@ void main() {
       expect(labelsOf(tester), contains('Han Solo'));
 
       handle.dispose();
+    });
+  });
+
+  group('in a channel without read events', () {
+    testWidgets('hides the status of a sent message', (tester) async {
+      await tester.pumpWidget(wrap(StreamMessageFooter(message: message()), readEvents: false));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamTimestamp), findsOneWidget);
+      expect(find.byType(StreamSendingIndicator), findsNothing);
+    });
+
+    testWidgets('keeps the clock of a message still sending', (tester) async {
+      final sending = message().copyWith(state: MessageState.sending);
+
+      await tester.pumpWidget(wrap(StreamMessageFooter(message: sending), readEvents: false));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamSendingIndicator), findsOneWidget);
     });
   });
 

@@ -213,6 +213,42 @@ void main() {
     },
   );
 
+  test('`onError` rejects with the original error when refreshing the token fails', () async {
+    const path = 'test-request-path';
+    final options = RequestOptions(path: path);
+    const code = ChatErrorCode.tokenExpired;
+    final errorResponse = ErrorResponse()
+      ..code = code.code
+      ..message = code.message;
+    final response = Response(
+      requestOptions: options,
+      data: errorResponse.toJson(),
+    );
+    final err = DioException(requestOptions: options, response: response);
+    final handler = ErrorInterceptorHandler();
+
+    when(() => tokenManager.isStatic).thenReturn(false);
+    when(() => tokenManager.loadToken(refresh: true)).thenThrow(Exception('token provider is down'));
+
+    authInterceptor.onError(err, handler);
+
+    Object? caught;
+    try {
+      await handler.future.timeout(const Duration(seconds: 5));
+    } catch (e) {
+      caught = e;
+    }
+
+    // need to cast it as the type is private in dio
+    final error = (caught as dynamic)?.data;
+    expect(error, isA<DioException>());
+    expect(
+      StreamChatNetworkError.fromDioException(error as DioException).errorCode,
+      code,
+    );
+    verifyNever(() => client.fetch(options));
+  });
+
   test(
     '`onError` should reject with error if error is not a `tokenExpired error`',
     () async {

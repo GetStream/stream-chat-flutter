@@ -154,7 +154,13 @@ void main() {
     }) async {
       final client = MockClient();
       final clientState = MockClientState();
-      final channel = MockChannel();
+      final channel = MockChannel(
+        ownCapabilities: const [
+          ChannelCapability.sendMessage,
+          ChannelCapability.uploadFile,
+          ChannelCapability.readEvents,
+        ],
+      );
       final channelState = MockChannelState();
 
       when(() => client.state).thenReturn(clientState);

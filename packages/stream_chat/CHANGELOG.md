@@ -1,5 +1,10 @@
 ## Upcoming
 
+✅ Added
+
+- Added quiet hours to push preferences, set and cleared through `PushPreferenceInput` and reported on `PushPreference.schedule`.
+- Added `includeActiveMemberCount` to the channel queries, which fills the new `Channel.activeMemberCount`: the number of members who are neither deactivated nor deleted.
+
 🔄 Changed
 
 - `ChannelState.copyWith(membership: null)` now clears the membership instead of keeping it, as it already did for `draft`.
@@ -14,6 +19,7 @@
 
 🐞 Fixed
 
+- Fixed the connection getting stuck while connecting, and requests never completing, when the token provider throws while refreshing an expired token.
 - Fixed sending, updating and deleting a message not retrying when the server answers with a timeout (408), a rate limit (429) or a server error (5xx).
 - Fixed hard-deleting an unread message not lowering the channel's unread count.
 - Fixed a draft saved or deleted while offline not being kept.

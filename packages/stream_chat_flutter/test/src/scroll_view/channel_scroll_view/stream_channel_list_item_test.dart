@@ -463,6 +463,27 @@ void main() {
       );
     });
 
+    MockChannel ownMessageChannel({
+      required List<ChannelCapability> ownCapabilities,
+      MessageState messageState = MessageState.sent,
+    }) {
+      final channel = MockChannel(id: 'c', type: 'messaging', ownCapabilities: ownCapabilities);
+      final state = MockChannelState();
+      final messages = StreamController<List<Message>>.broadcast();
+      addTearDown(messages.close);
+      wireChannel(
+        channel: channel,
+        state: state,
+        controller: messages,
+        isUpToDate: () => true,
+        cid: 'messaging:c',
+      );
+
+      final own = Message(id: 'mc', text: 'hello', user: currentUser, state: messageState);
+      when(() => state.messages).thenReturn([own]);
+      return channel;
+    }
+
     Future<void> pumpSubtitle(WidgetTester tester, Channel channel) {
       return tester.pumpWidget(
         MaterialApp(
@@ -597,6 +618,39 @@ void main() {
         expect(find.text(emptyText), findsOneWidget);
       },
     );
+
+    testWidgets('shows the delivery status of an own message', (tester) async {
+      final channel = ownMessageChannel(
+        ownCapabilities: const [ChannelCapability.sendMessage, ChannelCapability.readEvents],
+      );
+
+      await pumpSubtitle(tester, channel);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamSendingIndicator), findsOneWidget);
+    });
+
+    testWidgets('shows no delivery status in a channel without read events', (tester) async {
+      final channel = ownMessageChannel(ownCapabilities: const [ChannelCapability.sendMessage]);
+
+      await pumpSubtitle(tester, channel);
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('hello', findRichText: true), findsOneWidget);
+      expect(find.byType(StreamSendingIndicator), findsNothing);
+    });
+
+    testWidgets('keeps the clock of a message still sending in a channel without read events', (tester) async {
+      final channel = ownMessageChannel(
+        ownCapabilities: const [ChannelCapability.sendMessage],
+        messageState: MessageState.sending,
+      );
+
+      await pumpSubtitle(tester, channel);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StreamSendingIndicator), findsOneWidget);
+    });
   });
 
   group('StreamChannelListTile a11y', () {

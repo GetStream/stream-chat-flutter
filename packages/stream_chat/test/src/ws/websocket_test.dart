@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -506,6 +507,118 @@ void main() {
       addTearDown(timer.cancel);
     },
   );
+
+  test('a token provider that fails during a refresh does not stall reconnecting', () async {
+    final user = OwnUser(id: 'test-user');
+
+    var providerCalls = 0;
+    final providerTokenManager = TokenManager();
+    await providerTokenManager.setTokenOrProvider(
+      user.id,
+      provider: (userId) async {
+        providerCalls += 1;
+        // The refresh after the token expires fails.
+        if (providerCalls == 2) throw Exception('token provider is down');
+        return Token.development(userId).rawValue;
+      },
+    );
+
+    var channelsOpened = 0;
+    final providerWebSocket = WebSocket(
+      apiKey: 'api-key',
+      baseUrl: 'ws://<local-ip>:8800',
+      tokenManager: providerTokenManager,
+      webSocketChannelProvider: (_, {protocols}) {
+        channelsOpened += 1;
+        return webSocketChannel;
+      },
+    );
+    addTearDown(providerWebSocket.disconnect);
+
+    final timer = Timer(const Duration(milliseconds: 300), () {
+      final event = Event(type: EventType.healthCheck, connectionId: 'connection-id', me: user);
+      webSocketSink.add(json.encode(event));
+    });
+    addTearDown(timer.cancel);
+
+    await providerWebSocket.connect(user);
+    expect(channelsOpened, 1);
+
+    final tokenExpired = ErrorResponse()
+      ..code = ChatErrorCode.tokenExpired.code
+      ..message = 'Token expired';
+    webSocketSink.add(json.encode({'error': tokenExpired}));
+
+    // The failed refresh still leads to another connection attempt, which
+    // fetches a new token instead of reusing the expired one.
+    await Future.doWhile(() async {
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+      return channelsOpened < 2;
+    }).timeout(const Duration(seconds: 15));
+
+    expect(providerCalls, 3);
+  });
+
+  for (final refreshFails in [true, false]) {
+    final outcome = refreshFails ? 'fails' : 'succeeds';
+    test('a token refresh that $outcome after `disconnect` does not reconnect', () async {
+      final user = OwnUser(id: 'test-user');
+
+      final refresh = Completer<String>();
+      var providerCalls = 0;
+      var channelsOpened = 0;
+      final providerTokenManager = TokenManager();
+      await providerTokenManager.setTokenOrProvider(
+        user.id,
+        provider: (userId) async {
+          providerCalls += 1;
+          if (providerCalls == 2) return refresh.future;
+          return Token.development(userId).rawValue;
+        },
+      );
+
+      final providerWebSocket = WebSocket(
+        apiKey: 'api-key',
+        baseUrl: 'ws://<local-ip>:8800',
+        tokenManager: providerTokenManager,
+        webSocketChannelProvider: (_, {protocols}) {
+          channelsOpened += 1;
+          return webSocketChannel;
+        },
+      );
+      addTearDown(providerWebSocket.disconnect);
+
+      final timer = Timer(const Duration(milliseconds: 300), () {
+        final event = Event(type: EventType.healthCheck, connectionId: 'connection-id', me: user);
+        webSocketSink.add(json.encode(event));
+      });
+      addTearDown(timer.cancel);
+
+      await providerWebSocket.connect(user);
+
+      final tokenExpired = ErrorResponse()
+        ..code = ChatErrorCode.tokenExpired.code
+        ..message = 'Token expired';
+      webSocketSink.add(json.encode({'error': tokenExpired}));
+
+      // Wait for the reconnect to start refreshing the token.
+      await Future.doWhile(() async {
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        return providerCalls < 2;
+      }).timeout(const Duration(seconds: 15));
+
+      providerWebSocket.disconnect();
+      if (refreshFails) {
+        refresh.completeError(Exception('token provider is down'));
+      } else {
+        refresh.complete(Token.development(user.id).rawValue);
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 100));
+
+      expect(providerWebSocket.connectionStatus, ConnectionStatus.disconnected);
+      expect(channelsOpened, 1);
+    });
+  }
 
   test('`disconnect` successfully disconnects the current user', () async {
     final user = OwnUser(id: 'test-user');

@@ -16,6 +16,7 @@
 
 🐞 Fixed
 
+- Fixed swiping a message starting a reply in a channel that doesn't allow quoting or while the message is still being sent.
 - Fixed the channel page crashing after its channel is hidden or the user is removed from it, for example by blocking the other member of a direct message.
 - Fixed a web address written without `https://`, such as `youtube.com`, not being tappable in a message.
 - Fixed a web address right after a quote or Chinese or Japanese text not being tappable in a message.
@@ -30,6 +31,8 @@
 - Fixed the poll creator showing the reorder handle and remove button when there is only one option.
 - Fixed a link that points straight to an image showing as a plain image instead of a link preview, and appearing twice in the message composer.
 - Fixed the keyboard closing when removing the link preview in the message composer.
+- Fixed messages and their channel list preview showing a "sent" checkmark in channels without read events.
+- Fixed tapping a quote of a thread reply in the channel not opening the thread, and a thread opened at one of its replies not scrolling to it.
 - Fixed `StreamMessageComposer` always sending the default `skipEnrichUrl`, so the server could add a link preview the user removed, or a second one next to the attached preview.
 - Fixed the composer's command and mention suggestions staying open after tapping outside the composer, such as on the message list.
 - Fixed "Message deleted" in a quoted reply showing in a muted gray instead of the reply's text color.
@@ -41,6 +44,7 @@
 - Fixed icons in a quoted reply and in the composer's reply and edit previews showing at 16 pixels instead of 12.
 - Fixed "No messages yet" in the channel list showing in the secondary text color instead of the tertiary one.
 - Fixed the root message in a thread list preview showing in the app's default text color instead of the primary one.
+- Fixed some file sizes of 1 MB and up, such as 1.5 MB, showing rounded to a whole number, such as 2 MB.
 
 ## 10.6.0
 
