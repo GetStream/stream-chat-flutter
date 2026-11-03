@@ -779,10 +779,7 @@ class Channel {
       localCreatedAt: DateTime.now(),
       user: _client.state.currentUser,
       quotedMessage: quotedMessage,
-      state: .sending(
-        skipPush: skipPush,
-        skipEnrichUrl: skipEnrichUrl,
-      ),
+      state: .sending(skipPush: skipPush, skipEnrichUrl: skipEnrichUrl),
       attachments: message.attachments.map(
         (it) {
           if (it.uploadState.isSuccess) return it;
@@ -905,10 +902,7 @@ class Channel {
 
     // ignore: parameter_assignments
     message = message.copyWith(
-      state: .updating(
-        skipPush: skipPush,
-        skipEnrichUrl: skipEnrichUrl,
-      ),
+      state: .updating(skipPush: skipPush, skipEnrichUrl: skipEnrichUrl),
       localUpdatedAt: DateTime.now(),
       attachments: message.attachments.map(
         (it) {
@@ -1001,11 +995,7 @@ class Channel {
 
     // ignore: parameter_assignments
     message = message.copyWith(
-      state: .partialUpdating(
-        set: set,
-        unset: unset,
-        skipEnrichUrl: skipEnrichUrl,
-      ),
+      state: .partialUpdating(set: set, unset: unset, skipEnrichUrl: skipEnrichUrl),
       localUpdatedAt: DateTime.now(),
     );
 
