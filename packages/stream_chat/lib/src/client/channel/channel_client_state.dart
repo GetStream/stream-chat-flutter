@@ -50,12 +50,7 @@ class ChannelClientState {
     _subscriptions
       ..add(_channel.on().listen(handler.handleEvent))
       // Events missed while offline can leave loaded scheduled messages stale.
-      ..add(
-        _client.on(EventType.connectionRecovered).listen((_) {
-          if (_channelState.scheduledMessages == null) return;
-          _channel.queryScheduledMessages().ignore();
-        }),
-      );
+      ..add(_client.on(EventType.connectionRecovered).listen((_) => _reloadScheduledMessages()));
 
     _startCleaningStaleTypingEvents();
 
@@ -393,6 +388,16 @@ class ChannelClientState {
 
     final updated = [...current]..removeAt(index);
     _channelState = _channelState.copyWith(scheduledMessages: updated);
+  }
+
+  Future<void> _reloadScheduledMessages() async {
+    if (_channelState.scheduledMessages == null) return;
+
+    try {
+      await _channel.queryScheduledMessages();
+    } catch (error, stackTrace) {
+      _client.logger.warning('Failed to reload the scheduled messages', error, stackTrace);
+    }
   }
 
   /// Channel draft.

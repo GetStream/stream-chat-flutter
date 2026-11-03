@@ -37,6 +37,14 @@ ChannelConfig _$ChannelConfigFromJson(Map<String, dynamic> json) => ChannelConfi
   markMessagesPending: json['mark_messages_pending'] as bool? ?? false,
   deliveryEvents: json['delivery_events'] as bool? ?? false,
   sharedLocations: json['shared_locations'] as bool? ?? false,
+  scheduledMessagesMaxPerChannel: (json['scheduled_messages_max_per_channel'] as num?)?.toInt(),
+  scheduledMessagesMaxPerUser: (json['scheduled_messages_max_per_user'] as num?)?.toInt(),
+  scheduledMessagesMinLeadTime: _durationFromSeconds(
+    (json['scheduled_messages_min_lead_time_seconds'] as num?)?.toInt(),
+  ),
+  scheduledMessagesMaxLeadTime: _durationFromSeconds(
+    (json['scheduled_messages_max_lead_time_seconds'] as num?)?.toInt(),
+  ),
 );
 
 Map<String, dynamic> _$ChannelConfigToJson(ChannelConfig instance) => <String, dynamic>{
@@ -64,4 +72,12 @@ Map<String, dynamic> _$ChannelConfigToJson(ChannelConfig instance) => <String, d
   'mark_messages_pending': instance.markMessagesPending,
   'delivery_events': instance.deliveryEvents,
   'shared_locations': instance.sharedLocations,
+  'scheduled_messages_max_per_channel': instance.scheduledMessagesMaxPerChannel,
+  'scheduled_messages_max_per_user': instance.scheduledMessagesMaxPerUser,
+  'scheduled_messages_min_lead_time_seconds': _durationToSeconds(
+    instance.scheduledMessagesMinLeadTime,
+  ),
+  'scheduled_messages_max_lead_time_seconds': _durationToSeconds(
+    instance.scheduledMessagesMaxLeadTime,
+  ),
 };

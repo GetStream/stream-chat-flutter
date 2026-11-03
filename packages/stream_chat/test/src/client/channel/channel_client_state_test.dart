@@ -150,6 +150,18 @@ void main() {
         expect(channel.state!.scheduledMessages.single.id, 'missed');
       });
 
+      test('stay as they were when loading them on recovery fails', () async {
+        when(
+          () => client.queryScheduledMessages(cid: cid),
+        ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
+        channel.state!.updateChannelStateFromServer(stateWith([scheduledMessage('kept')]));
+
+        client.addEvent(Event(type: EventType.connectionRecovered));
+        await Future<void>.delayed(Duration.zero);
+
+        expect(channel.state!.scheduledMessages.single.id, 'kept');
+      });
+
       test('are not loaded on recovery when they never were', () async {
         clearInteractions(client);
         client.addEvent(Event(type: EventType.connectionRecovered));
