@@ -283,6 +283,36 @@ void main() {
       expect(error.isMessageAlreadyExistsError, isFalse);
     });
 
+    test('`.isMessageGoneError` should return true for a message that no longer exists', () {
+      const message = 'DeleteMessage failed with error: "message with id abc has been deleted"';
+      final error = StreamChatNetworkError.raw(
+        code: ChatErrorCode.doesNotExist.code,
+        statusCode: 404,
+        message: message,
+        data: ErrorResponse()
+          ..code = ChatErrorCode.doesNotExist.code
+          ..message = message
+          ..statusCode = 404,
+      );
+
+      expect(error.isMessageGoneError, isTrue);
+    });
+
+    test('`.isMessageGoneError` should return false for another rejection', () {
+      const message = 'DeleteMessage failed with error: "not allowed"';
+      final error = StreamChatNetworkError.raw(
+        code: ChatErrorCode.notAllowed.code,
+        statusCode: 403,
+        message: message,
+        data: ErrorResponse()
+          ..code = ChatErrorCode.notAllowed.code
+          ..message = message
+          ..statusCode = 403,
+      );
+
+      expect(error.isMessageGoneError, isFalse);
+    });
+
     test('`.toString`', () {
       const errorCode = ChatErrorCode.tokenExpired;
       final error = StreamChatNetworkError(errorCode);

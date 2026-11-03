@@ -1120,17 +1120,19 @@ class Channel {
         },
       );
 
-      final deletedMessage = message.copyWith(
-        deletedForMe: scope is DeleteForMe,
-        state: MessageState.deleted(scope: scope),
-      );
-
-      state?.deleteMessage(deletedMessage, hardDelete: scope.hard);
+      final deletedMessage = _markMessageAsDeleted(message, scope: scope);
       // If hard delete, also delete the attachments from the server.
       if (scope.hard) _deleteMessageAttachments(deletedMessage);
 
       return response;
     } catch (e) {
+      // The message is already gone, such as after a delete that went through
+      // before the app was closed.
+      if (e is StreamChatNetworkError && e.isMessageGoneError) {
+        _markMessageAsDeleted(message, scope: scope);
+        return EmptyResponse();
+      }
+
       final failedMessage = message.copyWith(
         // Update the message state to failed.
         state: MessageState.deletingFailed(scope: scope),
@@ -1144,6 +1146,19 @@ class Channel {
 
       rethrow;
     }
+  }
+
+  Message _markMessageAsDeleted(
+    Message message, {
+    required MessageDeleteScope scope,
+  }) {
+    final deletedMessage = message.copyWith(
+      deletedForMe: scope is DeleteForMe,
+      state: MessageState.deleted(scope: scope),
+    );
+
+    state?.deleteMessage(deletedMessage, hardDelete: scope.hard);
+    return deletedMessage;
   }
 
   // Deletes a local [message] that is not yet sent to the server.

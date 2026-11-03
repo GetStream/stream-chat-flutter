@@ -184,6 +184,13 @@ class StreamChatNetworkError extends StreamChatError {
     return message.contains('already exists');
   }
 
+  /// Whether the server rejected a request because the message no longer
+  /// exists, such as one already deleted.
+  @internal
+  bool get isMessageGoneError {
+    return statusCode == 404 && errorCode == ChatErrorCode.doesNotExist;
+  }
+
   @override
   List<Object?> get props => [...super.props, code, statusCode, type];
 

@@ -28,7 +28,7 @@ class ChannelClientState {
     );
 
     final seededState = channelState.copyWith(
-      messages: _failInterruptedRequests(channelState.messages),
+      messages: _settleInterruptedRequests(channelState.messages),
       pinnedMessages: MessageMerging.sortPinnedMessages(channelState.pinnedMessages),
     );
 
@@ -62,7 +62,7 @@ class ChannelClientState {
           // Load all the threads for the channel from the offline storage.
           if (threads.isEmpty) return;
           _threads = threads.map(
-            (parentId, replies) => MapEntry(parentId, _failInterruptedRequests(replies)!),
+            (parentId, replies) => MapEntry(parentId, _settleInterruptedRequests(replies)!),
           );
         })
         .then((_) => retryFailedMessages());
@@ -73,7 +73,7 @@ class ChannelClientState {
   // when the app was closed. A send or delete is marked failed so it gets
   // retried. An update can't be retried as it was made, so it is settled and
   // the server's copy replaces it.
-  static List<Message>? _failInterruptedRequests(List<Message>? messages) {
+  static List<Message>? _settleInterruptedRequests(List<Message>? messages) {
     if (messages == null || !messages.any((it) => it.state.isOutgoing)) return messages;
 
     return [
@@ -86,7 +86,7 @@ class ChannelClientState {
           MessageOutgoing(state: Deleting(:final scope)) => message.copyWith(
             state: MessageState.deletingFailed(scope: scope),
           ),
-          _ => message,
+          MessageInitial() || MessageCompleted() || MessageFailed() => message,
         },
     ];
   }
