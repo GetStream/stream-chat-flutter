@@ -387,10 +387,11 @@ class ChannelClientState {
   /// Removes the scheduled message [id].
   void removeScheduledMessage(String id) {
     final current = scheduledMessages;
-    if (!current.any((it) => it.id == id)) return;
+    final index = current.indexWhere((it) => it.id == id);
+    if (index == -1) return;
 
     _channelState = _channelState.copyWith(
-      scheduledMessages: [...current.where((it) => it.id != id)],
+      scheduledMessages: [...current]..removeAt(index),
     );
   }
 
