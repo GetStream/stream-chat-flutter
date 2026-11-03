@@ -248,6 +248,9 @@ sealed class MessageState with _$MessageState {
   // region Factory Constructors for Common States
 
   /// Sending state when the message is being sent.
+  ///
+  /// The `skipPush` and `skipEnrichUrl` options of the send are kept, so the
+  /// send can be made again with them.
   factory MessageState.sending({
     bool skipPush = false,
     bool skipEnrichUrl = false,
@@ -261,6 +264,9 @@ sealed class MessageState with _$MessageState {
   }
 
   /// Updating state when the message is being updated.
+  ///
+  /// The `skipPush` and `skipEnrichUrl` options of the update are kept, so the
+  /// update can be made again with them.
   factory MessageState.updating({
     bool skipPush = false,
     bool skipEnrichUrl = false,
@@ -274,6 +280,9 @@ sealed class MessageState with _$MessageState {
   }
 
   /// Partial updating state when the message is being partially updated.
+  ///
+  /// The `set`, `unset` and `skipEnrichUrl` arguments of the update are kept,
+  /// so the update can be made again with them.
   factory MessageState.partialUpdating({
     Map<String, Object?>? set,
     List<String>? unset,
