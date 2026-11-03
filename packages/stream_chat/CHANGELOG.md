@@ -119,7 +119,14 @@
 - An entry of `ChannelModel.custom` or `Member.custom` named like one of the model's own fields stays in `custom` and leaves the field alone, and `toJson` leaves it out.
 - `rawType` is removed from `MessageType`, `AttachmentType`, `PushLevel`, `ChatPreferenceLevel`, `ChatLevel`, `CallLevel` and `RoleType`, as are `ModerationAction.action` and `ChannelCapability.capability`; use the value itself instead.
 
+- `MessageState.sending` and `MessageState.updating` are factories that take the request's `skipPush` and `skipEnrichUrl`; add `()` where you used the constants.
+- A partial update, such as pinning a message, is in the new `OutgoingState.partialUpdating` state while it runs; `isUpdating` still covers it.
+- `OutgoingState`'s `when`, `whenOrNull` and `maybeWhen` pass the request's options to `sending` and `updating` and take a `partialUpdating` callback, and its `map`, `mapOrNull` and `maybeMap` take one too.
+
 🐞 Fixed
+
+- A message no longer stays sending, updating or deleting forever when the app is closed before its request finishes; the interrupted request is retried.
+- Deleting a message that was already deleted no longer fails and offers a retry that can never succeed.
 
 - `connectGuestUser` no longer copies the user's online status, ban, unread counts, devices and push preferences into the created guest's `extraData`.
 - `Channel.custom` no longer returns the data the channel was created with once the channel's custom data is empty.

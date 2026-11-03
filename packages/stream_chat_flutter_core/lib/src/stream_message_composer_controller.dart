@@ -333,7 +333,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
     _messageBeforeEdit ??= this.message;
     _messageBeingEdited = message;
 
-    this.message = message.copyWith(state: MessageState.updating);
+    this.message = message.copyWith(state: MessageState.updating());
   }
 
   /// Cancels the active edit and restores the composer to the content it

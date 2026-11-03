@@ -99,7 +99,7 @@ void main() {
           body: Center(
             child: StreamSendingIndicator(
               message: Message(
-                state: MessageState.sending,
+                state: MessageState.sending(),
               ),
             ),
           ),
@@ -278,7 +278,7 @@ void main() {
     testWidgets('applies to the sending indicator', (tester) async {
       final icon = await pumpIndicator(
         tester,
-        message: Message(state: MessageState.sending),
+        message: Message(state: MessageState.sending()),
         color: override,
       );
 

@@ -64,9 +64,9 @@ extension StreamChatExceptionRetries on StreamChatException {
   };
 }
 
-/// Whether a failed send was a message the server already stored.
+/// Whether a rejected message request had already taken effect.
 @internal
-extension StreamChatExceptionDuplicateMessage on StreamChatException {
+extension StreamChatExceptionMessageRejections on StreamChatException {
   /// Whether the server rejected a send because it already stored a message
   /// with the same id.
   bool get isMessageAlreadyExistsError {
@@ -76,4 +76,11 @@ extension StreamChatExceptionDuplicateMessage on StreamChatException {
     if (!exception.message.contains('a message with ID')) return false;
     return exception.message.contains('already exists');
   }
+
+  /// Whether the server rejected a request because the message no longer
+  /// exists, such as one already deleted.
+  bool get isMessageGoneError => switch (this) {
+    StreamApiException(statusCode: 404, code: StreamErrorCode.notFound) => true,
+    _ => false,
+  };
 }

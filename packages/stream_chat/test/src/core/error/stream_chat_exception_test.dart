@@ -174,4 +174,26 @@ void main() {
       expect(error.isMessageAlreadyExistsError, isFalse);
     });
   });
+
+  group('isMessageGoneError', () {
+    test('is true for a message that no longer exists', () {
+      const error = StreamApiException(
+        message: 'DeleteMessage failed with error: "message with id abc has been deleted"',
+        statusCode: 404,
+        code: StreamErrorCode.notFound,
+      );
+
+      expect(error.isMessageGoneError, isTrue);
+    });
+
+    test('is false for another rejection', () {
+      const error = StreamApiException(
+        message: 'DeleteMessage failed with error: "not allowed"',
+        statusCode: 403,
+        code: StreamErrorCode.notAllowed,
+      );
+
+      expect(error.isMessageGoneError, isFalse);
+    });
+  });
 }

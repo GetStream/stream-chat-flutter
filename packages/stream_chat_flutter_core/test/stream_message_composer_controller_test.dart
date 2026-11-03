@@ -745,7 +745,7 @@ void main() {
       final existingMessage = Message(
         id: 'msg-1',
         text: 'Existing text',
-        state: MessageState.updating,
+        state: MessageState.updating(),
       );
 
       expect(
@@ -761,7 +761,7 @@ void main() {
       expect(editController.messageBeingEdited, isNull);
     });
 
-    test('editMessage sets state to MessageState.updating', () {
+    test('editMessage sets state to MessageState.updating()', () {
       final existingMessage = Message(id: 'msg-1', text: 'Original text');
       controller.editMessage(existingMessage);
 
@@ -1118,7 +1118,7 @@ void main() {
         // ignores it and always constructs with MessageState.initial().
         final controller = restore({
           'message': Message(text: 'Hi').toJson(),
-          'message_state': MessageState.sending.toJson(),
+          'message_state': MessageState.sending().toJson(),
         });
 
         expect(controller.message.state.isInitial, isTrue);
@@ -1132,7 +1132,7 @@ void main() {
           'message': messageBeingEdited
               .copyWith(
                 text: 'Edited text',
-                state: MessageState.updating,
+                state: MessageState.updating(),
               )
               .toJson(),
           'message_being_edited': messageBeingEdited.toJson(),
@@ -1152,7 +1152,7 @@ void main() {
           'message': messageBeingEdited
               .copyWith(
                 text: 'Edited text',
-                state: MessageState.updating,
+                state: MessageState.updating(),
               )
               .toJson(),
           'message_being_edited': messageBeingEdited.toJson(),

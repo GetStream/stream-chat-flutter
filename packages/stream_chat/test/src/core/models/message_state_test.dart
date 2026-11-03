@@ -240,20 +240,30 @@ void main() {
 
   group('Message State Classes', () {
     test(
-      'MessageState.sending should create a MessageOutgoing instance with Sending state',
+      'MessageState.sending() should create a MessageOutgoing instance with Sending state',
       () {
-        const messageState = MessageState.sending;
+        final messageState = MessageState.sending();
         expect(messageState, isA<MessageOutgoing>());
         expect((messageState as MessageOutgoing).state, isA<Sending>());
       },
     );
 
     test(
-      'MessageState.updating should create a MessageOutgoing instance with Updating state',
+      'MessageState.updating() should create a MessageOutgoing instance with Updating state',
       () {
-        const messageState = MessageState.updating;
+        final messageState = MessageState.updating();
         expect(messageState, isA<MessageOutgoing>());
         expect((messageState as MessageOutgoing).state, isA<Updating>());
+      },
+    );
+
+    test(
+      'MessageState.partialUpdating() should create a MessageOutgoing instance with PartialUpdating state',
+      () {
+        final messageState = MessageState.partialUpdating(set: {'pinned': true});
+        expect(messageState, isA<MessageOutgoing>());
+        expect((messageState as MessageOutgoing).state, isA<PartialUpdating>());
+        expect(messageState.isUpdating, isTrue);
       },
     );
 
