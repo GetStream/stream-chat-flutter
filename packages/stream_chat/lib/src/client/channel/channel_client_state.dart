@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
@@ -58,6 +59,23 @@ class ChannelClientState {
           if (threads.isNotEmpty) _threads = threads;
         })
         .then((_) => retryFailedMessages());
+  }
+
+  // Returns the [messages] created at or after [truncatedAt], and the ones not
+  // sent yet; [messages] itself when none is older.
+  static List<Message>? _truncateMessages(
+    List<Message>? messages,
+    DateTime? truncatedAt,
+  ) {
+    if (messages == null || truncatedAt == null) return messages;
+
+    bool survives(Message message) {
+      final createdAt = message.remoteCreatedAt;
+      return createdAt == null || !createdAt.isBefore(truncatedAt);
+    }
+
+    if (messages.every(survives)) return messages;
+    return messages.where(survives).toList();
   }
 
   final Channel _channel;
@@ -522,11 +540,77 @@ class ChannelClientState {
     return count;
   }
 
-  /// Delete all channel messages.
-  void truncate() {
-    _channelState = _channelState.copyWith(
-      messages: [],
+  /// Removes the messages, pinned messages and thread replies created before
+  /// [truncatedAt], or before now when omitted.
+  ///
+  /// Messages not sent yet are kept, a provided [truncatedAt] becomes the
+  /// channel's truncation time unless it has a later one, and the unread count
+  /// is lowered to the messages left. To only empty the loaded messages,
+  /// consider [clearMessages].
+  void truncate({DateTime? truncatedAt}) {
+    final cutoff = truncatedAt ?? clock.now();
+
+    final channelState = _channelState;
+    final loaded = channelState.messages ?? const <Message>[];
+    final remaining = _truncateMessages(loaded, cutoff)!;
+
+    final channel = channelState.channel;
+    final latestTruncatedAt = [channel?.truncatedAt, truncatedAt].nonNulls.maxOrNull;
+
+    // Removing messages from the start of an up-to-date list leaves every
+    // message sent after the cutoff, which bounds the unread count.
+    final knowsMessagesLeft = isUpToDate && remaining.length < loaded.length;
+    final sentLeft = remaining.where((it) => it.remoteCreatedAt != null);
+    final unreadCap = knowsMessagesLeft ? sentLeft.length : null;
+
+    // Writes the state directly: the message merge in [updateChannelState]
+    // would undo the removal. One write also updates the state streams once.
+    _channelState = channelState.copyWith(
+      channel: channel?.copyWith(truncatedAt: latestTruncatedAt),
+      messages: remaining,
+      pinnedMessages: _truncateMessages(channelState.pinnedMessages, cutoff),
+      read: _capUnreadCount(channelState.read, at: unreadCap),
     );
+
+    _truncateThreads(cutoff);
+  }
+
+  // Returns [reads] with the current user's unread count lowered to [at], or
+  // unchanged when [at] is null.
+  List<Read>? _capUnreadCount(List<Read>? reads, {required int? at}) {
+    if (at == null) return reads;
+
+    final currentUserId = _client.state.currentUser?.id;
+    return reads?.map((read) {
+      if (read.user.id != currentUserId) return read;
+      if (read.unreadMessages <= at) return read;
+      return read.copyWith(unreadMessages: at);
+    }).toList();
+  }
+
+  // Removes the thread replies created before [truncatedAt].
+  void _truncateThreads(DateTime truncatedAt) {
+    final threads = this.threads;
+    final truncated = threads.map(
+      (parentId, replies) {
+        final kept = _truncateMessages(replies, truncatedAt)!;
+        return MapEntry(parentId, kept);
+      },
+    );
+
+    bool isChanged(String parentId) {
+      return !identical(threads[parentId], truncated[parentId]);
+    }
+
+    if (threads.keys.any(isChanged)) _threads = truncated;
+  }
+
+  /// Removes the loaded messages, so a different range of them can be loaded.
+  ///
+  /// Pinned messages, thread replies and the unread count are left as they
+  /// are.
+  void clearMessages() {
+    _channelState = _channelState.copyWith(messages: []);
   }
 
   /// Drops the oldest messages, keeping at most [maxMessages].
@@ -575,9 +659,14 @@ class ChannelClientState {
       final pinned => MessageMerging.sortPinnedMessages(pinned),
     };
 
+    final channel = _channelState.channel;
+    final newChannel = channel?.merge(updatedState.channel);
+    // An older truncation time can't bring back messages a later one removed.
+    final truncatedAt = [channel?.truncatedAt, newChannel?.truncatedAt].nonNulls.maxOrNull;
+
     _channelState = _channelState.copyWith(
       messages: newMessages,
-      channel: _channelState.channel?.merge(updatedState.channel),
+      channel: newChannel?.copyWith(truncatedAt: truncatedAt),
       watchers: newWatchers,
       watcherCount: updatedState.watcherCount,
       members: updatedState.members,
@@ -601,10 +690,29 @@ class ChannelClientState {
   /// being overwritten by the remote payload; only delivery fields are
   /// still applied from it.
   ///
+  /// Also applies the channel's truncation time: a newer one truncates the
+  /// channel, and messages from before it are left out.
+  ///
   /// Call this instead of [updateChannelState] whenever [remoteState]
   /// genuinely comes from the network or offline storage.
   void updateChannelStateFromServer(ChannelState remoteState) {
-    updateChannelState(_preserveLocalUnreadState(remoteState));
+    final current = _channelState.channel?.truncatedAt;
+    final remote = remoteState.channel?.truncatedAt;
+
+    // A newer truncation removes the stored messages before it first, so the
+    // merge below can't keep them.
+    if (remote != null && (current == null || remote.isAfter(current))) {
+      truncate(truncatedAt: remote);
+    }
+
+    // A stale payload can still carry messages from before the cutoff.
+    final cutoff = _channelState.channel?.truncatedAt;
+    final state = remoteState.copyWith(
+      messages: _truncateMessages(remoteState.messages, cutoff),
+      pinnedMessages: _truncateMessages(remoteState.pinnedMessages, cutoff),
+    );
+
+    updateChannelState(_preserveLocalUnreadState(state));
   }
 
   /// Rewrites the current user's [Read] in [remoteState], if present, to

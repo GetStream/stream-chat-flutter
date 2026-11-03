@@ -255,6 +255,12 @@ abstract class ChatPersistenceClient {
   /// Remove a pinned message by channel [cid]
   Future<void> deletePinnedMessageByCid(String cid) async => deletePinnedMessageByCids([cid]);
 
+  /// Removes the stored messages and pinned messages of the channel with
+  /// [cid] created before [truncatedAt], or before now when omitted.
+  ///
+  /// Messages not sent yet are kept.
+  Future<void> truncateChannel(String cid, {DateTime? truncatedAt});
+
   /// Remove a message by message [cids]
   Future<void> deleteMessageByCids(List<String> cids);
 

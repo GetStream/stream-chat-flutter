@@ -830,7 +830,7 @@ class StreamChannelState extends State<StreamChannel> {
 
   /// Reloads the channel with latest messages, replacing the loaded window.
   Future<void> reloadChannel() {
-    channel.state?.truncate();
+    channel.state?.clearMessages();
     return _queryAtMessage();
   }
 
