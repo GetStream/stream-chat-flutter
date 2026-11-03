@@ -49,7 +49,9 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
       (delete(pinnedMessages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
 
   /// Removes the pinned messages of the channel with [cid] created before
-  /// [createdBefore], keeping the ones not sent yet.
+  /// [createdBefore].
+  ///
+  /// Messages not sent yet are kept.
   Future<void> deleteMessagesCreatedBefore(
     String cid,
     DateTime createdBefore,

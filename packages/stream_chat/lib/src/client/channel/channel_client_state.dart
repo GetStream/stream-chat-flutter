@@ -549,10 +549,12 @@ class ChannelClientState {
   /// [truncatedAt], or before now when omitted.
   ///
   /// Messages not sent yet are kept, and a provided [truncatedAt] becomes the
-  /// channel's truncation time unless it has a later one. When the loaded
-  /// messages are the latest ones and some of them are removed, the unread
-  /// count is lowered to the messages left. To only empty the loaded messages,
-  /// consider [clearMessages].
+  /// channel's truncation time unless it has a later one.
+  ///
+  /// When the loaded messages are the latest ones and some of them are
+  /// removed, the unread count is lowered to the messages left.
+  ///
+  /// To only empty the loaded messages, consider [clearMessages].
   void truncate({DateTime? truncatedAt}) {
     truncateBefore(truncatedAt ?? clock.now(), truncatedAt: truncatedAt);
   }

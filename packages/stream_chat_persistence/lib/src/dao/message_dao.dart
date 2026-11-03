@@ -49,7 +49,9 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
       (delete(messages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
 
   /// Removes the messages of the channel with [cid] created before
-  /// [createdBefore], keeping the ones not sent yet.
+  /// [createdBefore].
+  ///
+  /// Messages not sent yet are kept.
   Future<void> deleteMessagesCreatedBefore(
     String cid,
     DateTime createdBefore,
