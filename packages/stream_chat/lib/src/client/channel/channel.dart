@@ -787,7 +787,12 @@ class Channel {
       localCreatedAt: DateTime.now(),
       user: _client.state.currentUser,
       quotedMessage: quotedMessage,
-      state: MessageState.sending,
+      state: MessageState.outgoing(
+        state: OutgoingState.sending(
+          skipPush: skipPush,
+          skipEnrichUrl: skipEnrichUrl,
+        ),
+      ),
       attachments: message.attachments.map(
         (it) {
           if (it.uploadState.isSuccess) return it;

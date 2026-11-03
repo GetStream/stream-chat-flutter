@@ -427,15 +427,21 @@ $OutgoingStateCopyWith(OutgoingState _, $Res Function(OutgoingState) __);
 @JsonSerializable()
 
 class Sending implements OutgoingState {
-  const Sending({final  String? $type}): $type = $type ?? 'sending';
+  const Sending({this.skipPush = false, this.skipEnrichUrl = false, final  String? $type}): $type = $type ?? 'sending';
   factory Sending.fromJson(Map<String, dynamic> json) => _$SendingFromJson(json);
 
-
+@JsonKey() final  bool skipPush;
+@JsonKey() final  bool skipEnrichUrl;
 
 @JsonKey(name: 'runtimeType')
 final String $type;
 
 
+/// Create a copy of OutgoingState
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$SendingCopyWith<Sending> get copyWith => _$SendingCopyWithImpl<Sending>(this, _$identity);
 
 @override
 Map<String, dynamic> toJson() {
@@ -444,23 +450,53 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Sending);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Sending&&(identical(other.skipPush, skipPush) || other.skipPush == skipPush)&&(identical(other.skipEnrichUrl, skipEnrichUrl) || other.skipEnrichUrl == skipEnrichUrl));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,skipPush,skipEnrichUrl);
 
 @override
 String toString() {
-  return 'OutgoingState.sending()';
+  return 'OutgoingState.sending(skipPush: $skipPush, skipEnrichUrl: $skipEnrichUrl)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class $SendingCopyWith<$Res> implements $OutgoingStateCopyWith<$Res> {
+  factory $SendingCopyWith(Sending value, $Res Function(Sending) _then) = _$SendingCopyWithImpl;
+@useResult
+$Res call({
+ bool skipPush, bool skipEnrichUrl
+});
 
 
+
+
+}
+/// @nodoc
+class _$SendingCopyWithImpl<$Res>
+    implements $SendingCopyWith<$Res> {
+  _$SendingCopyWithImpl(this._self, this._then);
+
+  final Sending _self;
+  final $Res Function(Sending) _then;
+
+/// Create a copy of OutgoingState
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? skipPush = null,Object? skipEnrichUrl = null,}) {
+  return _then(Sending(
+skipPush: null == skipPush ? _self.skipPush : skipPush // ignore: cast_nullable_to_non_nullable
+as bool,skipEnrichUrl: null == skipEnrichUrl ? _self.skipEnrichUrl : skipEnrichUrl // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
 
 /// @nodoc
 @JsonSerializable()

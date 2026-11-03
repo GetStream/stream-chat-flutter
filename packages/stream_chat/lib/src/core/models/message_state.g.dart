@@ -45,9 +45,15 @@ Map<String, dynamic> _$MessageFailedToJson(MessageFailed instance) => <String, d
   'runtimeType': instance.$type,
 };
 
-Sending _$SendingFromJson(Map<String, dynamic> json) => Sending($type: json['runtimeType'] as String?);
+Sending _$SendingFromJson(Map<String, dynamic> json) => Sending(
+  skipPush: json['skip_push'] as bool? ?? false,
+  skipEnrichUrl: json['skip_enrich_url'] as bool? ?? false,
+  $type: json['runtimeType'] as String?,
+);
 
 Map<String, dynamic> _$SendingToJson(Sending instance) => <String, dynamic>{
+  'skip_push': instance.skipPush,
+  'skip_enrich_url': instance.skipEnrichUrl,
   'runtimeType': instance.$type,
 };
 

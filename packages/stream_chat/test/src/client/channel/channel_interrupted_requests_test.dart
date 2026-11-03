@@ -128,6 +128,25 @@ void main() {
     verify(() => client.sendMessage(any(), channel.id!, channel.type)).called(1);
   });
 
+  test('sends a message left sending again with its push and link preview options', () async {
+    final client = MockStreamChatClientWithPersistence();
+    when(() => client.chatPersistenceClient.getChannelThreads(any())).thenAnswer((_) async => {});
+    _stubSend(client);
+    const sending = MessageState.outgoing(
+      state: OutgoingState.sending(skipPush: true, skipEnrichUrl: true),
+    );
+
+    final channel = _channel(
+      client: client,
+      messages: [_message(state: sending)],
+    );
+    await pumpEventQueue();
+
+    verify(
+      () => client.sendMessage(any(), channel.id!, channel.type, skipPush: true, skipEnrichUrl: true),
+    ).called(1);
+  });
+
   test('marks a message left deleting as deleted when it is already gone', () async {
     final client = MockStreamChatClientWithPersistence();
     when(() => client.chatPersistenceClient.getChannelThreads(any())).thenAnswer((_) async => {});

@@ -345,7 +345,11 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(
+                    state: const MessageState.outgoing(
+                      state: OutgoingState.sending(skipPush: true, skipEnrichUrl: false),
+                    ),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -400,7 +404,11 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(
+                    state: const MessageState.outgoing(
+                      state: OutgoingState.sending(skipPush: true, skipEnrichUrl: true),
+                    ),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -455,7 +463,11 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(
+                    state: const MessageState.outgoing(
+                      state: OutgoingState.sending(skipPush: false, skipEnrichUrl: true),
+                    ),
+                  ),
                   matchMessageState: true,
                 ),
               ],

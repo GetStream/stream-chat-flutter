@@ -8,6 +8,25 @@ part 'message_state.g.dart';
 
 /// Helper extension for [MessageState].
 extension MessageStateX on MessageState {
+  /// The state to restore this message in when its request never finished,
+  /// such as one cut off by the app being closed.
+  ///
+  /// A send or delete becomes failed, so it can be retried. An update can't
+  /// be retried as it was made, so it becomes updated. Any other state is
+  /// returned as is.
+  @internal
+  MessageState get settled {
+    return switch (this) {
+      MessageOutgoing(state: final Sending state) => MessageState.sendingFailed(
+        skipPush: state.skipPush,
+        skipEnrichUrl: state.skipEnrichUrl,
+      ),
+      MessageOutgoing(state: Updating()) => MessageState.updated,
+      MessageOutgoing(state: Deleting(:final scope)) => MessageState.deletingFailed(scope: scope),
+      MessageInitial() || MessageCompleted() || MessageFailed() => this,
+    };
+  }
+
   /// Returns true if the message is in initial state.
   bool get isInitial => this is MessageInitial;
 
@@ -374,7 +393,10 @@ sealed class MessageState with _$MessageState {
 @freezed
 sealed class OutgoingState with _$OutgoingState {
   /// Sending state when the message is being sent.
-  const factory OutgoingState.sending() = Sending;
+  const factory OutgoingState.sending({
+    @Default(false) bool skipPush,
+    @Default(false) bool skipEnrichUrl,
+  }) = Sending;
 
   /// Updating state when the message is being updated.
   const factory OutgoingState.updating() = Updating;

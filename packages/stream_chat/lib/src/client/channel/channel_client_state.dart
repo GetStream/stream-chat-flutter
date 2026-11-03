@@ -68,26 +68,15 @@ class ChannelClientState {
         .then((_) => retryFailedMessages());
   }
 
-  // A message that was still being sent, updated or deleted when this state
-  // was created belongs to a request that never finished, such as one cut off
-  // when the app was closed. A send or delete is marked failed so it gets
-  // retried. An update can't be retried as it was made, so it is settled and
-  // the server's copy replaces it.
+  // A message still being sent, updated or deleted when this state is created
+  // belongs to a request that never finished, as nothing in this channel can
+  // be in flight yet.
   static List<Message>? _settleInterruptedRequests(List<Message>? messages) {
     if (messages == null || !messages.any((it) => it.state.isOutgoing)) return messages;
 
     return [
       for (final message in messages)
-        switch (message.state) {
-          MessageOutgoing(state: Sending()) => message.copyWith(
-            state: MessageState.sendingFailed(skipPush: false, skipEnrichUrl: false),
-          ),
-          MessageOutgoing(state: Updating()) => message.copyWith(state: MessageState.updated),
-          MessageOutgoing(state: Deleting(:final scope)) => message.copyWith(
-            state: MessageState.deletingFailed(scope: scope),
-          ),
-          MessageInitial() || MessageCompleted() || MessageFailed() => message,
-        },
+        if (message.state.isOutgoing) message.copyWith(state: message.state.settled) else message,
     ];
   }
 
