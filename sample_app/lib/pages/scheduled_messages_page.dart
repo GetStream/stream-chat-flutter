@@ -321,6 +321,7 @@ Future<void> _showActions(BuildContext context, ScheduledMessage scheduledMessag
         label: 'Scheduled for ${formatScheduledTime(scheduledMessage.scheduledAt)}',
         message: scheduledMessage.message,
         initial: isFailed ? null : scheduledMessage.scheduledAt.toLocal(),
+        maxLeadTime: client.state.channels[scheduledMessage.cid]?.config?.scheduledMessagesMaxLeadTime,
       );
       if (time == null) return;
 

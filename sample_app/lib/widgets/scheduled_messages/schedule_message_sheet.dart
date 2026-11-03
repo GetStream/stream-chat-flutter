@@ -2,25 +2,29 @@ import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-/// The longest a message can be scheduled ahead.
-const _maxLeadTime = Duration(days: 120);
-
-/// The shortest a message can be scheduled ahead.
-const _minLeadTime = Duration(minutes: 1);
+// How far ahead a message can be scheduled when the channel doesn't say.
+const _defaultMaxLeadTime = Duration(days: 120);
 
 /// Shows the quick choices for when to send [message] to [recipient]: two
 /// times tomorrow, Monday morning, or a custom time.
+///
+/// A custom time can be at most [maxLeadTime] ahead, 120 days by default.
 ///
 /// Resolves to the chosen time, or null if the user closes the sheet.
 Future<DateTime?> showScheduleMessageSheet(
   BuildContext context, {
   required Message message,
   required String recipient,
+  Duration? maxLeadTime,
 }) {
   return showStreamSheet<DateTime>(
     context: context,
     isDismissible: true,
-    builder: (_, _) => _ScheduleOptionsSheet(message: message, recipient: recipient),
+    builder: (_, _) => _ScheduleOptionsSheet(
+      message: message,
+      recipient: recipient,
+      maxLeadTime: maxLeadTime ?? _defaultMaxLeadTime,
+    ),
   );
 }
 
@@ -28,7 +32,8 @@ Future<DateTime?> showScheduleMessageSheet(
 ///
 /// The [title] heads the sheet and the [label] sits above the message, so the
 /// same sheet serves both scheduling and rescheduling. It starts at [initial],
-/// or an hour from now.
+/// or an hour from now, and allows a time at most [maxLeadTime] ahead, 120
+/// days by default.
 ///
 /// Resolves to the chosen time, or null if the user closes the sheet.
 Future<DateTime?> showScheduleTimeSheet(
@@ -37,6 +42,7 @@ Future<DateTime?> showScheduleTimeSheet(
   required String label,
   required Message message,
   DateTime? initial,
+  Duration? maxLeadTime,
 }) {
   return showStreamSheet<DateTime>(
     context: context,
@@ -46,6 +52,7 @@ Future<DateTime?> showScheduleTimeSheet(
       label: label,
       message: message,
       initial: initial ?? clock.now().add(const Duration(hours: 1)),
+      maxLeadTime: maxLeadTime ?? _defaultMaxLeadTime,
     ),
   );
 }
@@ -75,8 +82,7 @@ String describeScheduleError(Object error, {required String fallback}) {
 
   return switch (error.code) {
     114 => 'Scheduled messages are turned off for this app',
-    115 => 'Pick a time at least a minute from now',
-    116 => 'Pick a time within the next ${_maxLeadTime.inDays} days',
+    116 => 'Pick an earlier time',
     117 => 'This channel has too many scheduled messages',
     118 => 'You have too many scheduled messages',
     120 || 121 => 'This message is already being sent',
@@ -107,10 +113,15 @@ String _gmtLabel(Duration offset) {
 }
 
 class _ScheduleOptionsSheet extends StatelessWidget {
-  const _ScheduleOptionsSheet({required this.message, required this.recipient});
+  const _ScheduleOptionsSheet({
+    required this.message,
+    required this.recipient,
+    required this.maxLeadTime,
+  });
 
   final Message message;
   final String recipient;
+  final Duration maxLeadTime;
 
   @override
   Widget build(BuildContext context) {
@@ -152,6 +163,7 @@ class _ScheduleOptionsSheet extends StatelessWidget {
                   title: 'Schedule message',
                   label: 'Message to $recipient',
                   message: message,
+                  maxLeadTime: maxLeadTime,
                 );
                 if (time != null) navigator.pop(time);
               },
@@ -169,12 +181,14 @@ class _ScheduleTimeSheet extends StatefulWidget {
     required this.label,
     required this.message,
     required this.initial,
+    required this.maxLeadTime,
   });
 
   final String title;
   final String label;
   final Message message;
   final DateTime initial;
+  final Duration maxLeadTime;
 
   @override
   State<_ScheduleTimeSheet> createState() => _ScheduleTimeSheetState();
@@ -183,12 +197,14 @@ class _ScheduleTimeSheet extends StatefulWidget {
 class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
   late DateTime _time = widget.initial;
 
-  bool get _isTooSoon => _time.isBefore(clock.now().add(_minLeadTime));
-  bool get _isTooFar => _time.isAfter(clock.now().add(_maxLeadTime));
+  // A time sooner than the channel's minimum lead time is moved later when
+  // scheduled, so only a time that has passed is refused.
+  bool get _isPast => !_time.isAfter(clock.now());
+  bool get _isTooFar => _time.isAfter(clock.now().add(widget.maxLeadTime));
 
-  String? get _problem => switch ((_isTooSoon, _isTooFar)) {
-    (true, _) => 'Pick a time at least a minute from now',
-    (_, true) => 'Pick a time within the next ${_maxLeadTime.inDays} days',
+  String? get _problem => switch ((_isPast, _isTooFar)) {
+    (true, _) => 'Pick a time in the future',
+    (_, true) => 'Pick a time within the next ${widget.maxLeadTime.inDays} days',
     _ => null,
   };
 
@@ -198,7 +214,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
       context: context,
       initialDate: _time,
       firstDate: now,
-      lastDate: now.add(_maxLeadTime),
+      lastDate: now.add(widget.maxLeadTime),
       builder: _withPickerTheme,
     );
     if (date == null) return;

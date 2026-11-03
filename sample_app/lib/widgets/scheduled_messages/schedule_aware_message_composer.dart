@@ -54,7 +54,12 @@ Future<void> _scheduleMessage(
   }
 
   final recipient = channelDisplayName(channel) ?? 'channel';
-  final time = await showScheduleMessageSheet(context, message: message, recipient: recipient);
+  final time = await showScheduleMessageSheet(
+    context,
+    message: message,
+    recipient: recipient,
+    maxLeadTime: channel.config?.scheduledMessagesMaxLeadTime,
+  );
   if (time == null || !context.mounted) return;
 
   controller.reset();
@@ -80,6 +85,9 @@ Future<void> _scheduleMessage(
       ),
     );
   } catch (error) {
+    // Brings the message back unless something new was typed meanwhile.
+    if (context.mounted && controller.text.isEmpty) controller.message = message;
+
     messenger.show(
       StreamSnackbar(
         message: Text(describeScheduleError(error, fallback: "Couldn't schedule the message")),
