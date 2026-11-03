@@ -62,8 +62,10 @@ import '../core/models/reaction.dart';
 import '../core/models/request/message_delivery.dart';
 import '../core/models/response/add_user_group_members_response.dart';
 import '../core/models/response/app_settings_response.dart';
+import '../core/models/response/block_user_response.dart';
 import '../core/models/response/create_user_group_response.dart';
 import '../core/models/response/delete_channel_response.dart';
+import '../core/models/response/get_blocked_users_response.dart';
 import '../core/models/response/get_unread_count_response.dart';
 import '../core/models/response/get_user_group_response.dart';
 import '../core/models/response/hide_channel_response.dart';
@@ -81,12 +83,14 @@ import '../core/models/response/remove_user_group_members_response.dart';
 import '../core/models/response/search_roles_response.dart';
 import '../core/models/response/search_user_groups_response.dart';
 import '../core/models/response/show_channel_response.dart';
+import '../core/models/response/unblock_user_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
 import '../core/models/response/update_user_group_response.dart';
 import '../core/models/role_type.dart';
 import '../core/models/thread.dart';
 import '../core/models/user.dart';
+import '../core/models/user_block.dart';
 import '../core/util/event_controller.dart';
 import '../core/util/extension.dart';
 import '../core/util/immutable_collection_subjects.dart';
@@ -1836,64 +1840,54 @@ class StreamChatClient {
 
   final _userBlockLock = Lock();
 
-  /// Blocks a user with the provided [userId].
-  Future<UserBlockResponse> blockUser(String userId) async {
-    try {
-      final response = await _userBlockLock.synchronized(
-        () => _chatApi.user.blockUser(userId),
-      );
-
-      final blockedUserId = response.blockedUserId;
-      final currentBlockedUserIds = [...?state.currentUser?.blockedUserIds];
-      if (!currentBlockedUserIds.contains(blockedUserId)) {
-        // Add the new blocked user to the blocked user list.
-        state.blockedUserIds = [...currentBlockedUserIds, blockedUserId];
-      }
-
-      return response;
-    } catch (e, stk) {
-      logger.e(() => 'Error blocking user', error: e, stackTrace: stk);
-      rethrow;
-    }
+  /// Blocks [userId] for the current user.
+  ///
+  /// On success, the blocked user's id is added to [OwnUser.blockedUserIds] on
+  /// [ClientState.currentUser]. A failure leaves it unchanged.
+  Future<Result<BlockUserResponse>> blockUser(String userId) async {
+    final result = await _userBlockLock.synchronized(() => _usersRepository.blockUser(userId));
+    return result
+        .onSuccess((response) => _addBlockedUserId(response.blockedUserId))
+        .onFailure((e, stk) => logger.e(() => 'Error blocking user', error: e, stackTrace: stk));
   }
 
-  /// Unblocks a previously blocked user with the provided [userId].
-  Future<EmptyResponse> unblockUser(String userId) async {
-    try {
-      final response = await _userBlockLock.synchronized(
-        () => _chatApi.user.unblockUser(userId),
-      );
-
-      final unblockedUserId = userId;
-      final currentBlockedUserIds = [...?state.currentUser?.blockedUserIds];
-      if (currentBlockedUserIds.contains(unblockedUserId)) {
-        // Remove the unblocked user from the blocked user list.
-        state.blockedUserIds = currentBlockedUserIds..remove(unblockedUserId);
-      }
-
-      return response;
-    } catch (e, stk) {
-      logger.e(() => 'Error unblocking user', error: e, stackTrace: stk);
-      rethrow;
-    }
+  void _addBlockedUserId(String userId) {
+    final blockedUserIds = [...?state.currentUser?.blockedUserIds];
+    if (blockedUserIds.contains(userId)) return;
+    state.blockedUserIds = [...blockedUserIds, userId];
   }
 
-  /// Retrieves a list of all users that the current user has blocked.
-  Future<BlockedUsersResponse> queryBlockedUsers() async {
-    try {
-      final response = await _userBlockLock.synchronized(
-        () => _chatApi.user.queryBlockedUsers(),
-      );
+  /// Unblocks [userId] for the current user.
+  ///
+  /// On success, [userId] is removed from [OwnUser.blockedUserIds] on
+  /// [ClientState.currentUser]. A failure leaves it unchanged.
+  Future<Result<UnblockUserResponse>> unblockUser(String userId) async {
+    final result = await _userBlockLock.synchronized(() => _usersRepository.unblockUser(userId));
+    return result
+        .onSuccess((_) => _removeBlockedUserId(userId))
+        .onFailure((e, stk) => logger.e(() => 'Error unblocking user', error: e, stackTrace: stk));
+  }
 
-      // Update the blocked user IDs with the latest data.
-      final blockedUserIds = response.blocks.map((it) => it.blockedUserId);
-      state.blockedUserIds = [...blockedUserIds.nonNulls];
+  void _removeBlockedUserId(String userId) {
+    final blockedUserIds = [...?state.currentUser?.blockedUserIds];
+    if (!blockedUserIds.remove(userId)) return;
+    state.blockedUserIds = blockedUserIds;
+  }
 
-      return response;
-    } catch (e, stk) {
-      logger.e(() => 'Error querying blocked users', error: e, stackTrace: stk);
-      rethrow;
-    }
+  /// Gets the users the current user has blocked.
+  ///
+  /// On success, [OwnUser.blockedUserIds] on [ClientState.currentUser] is
+  /// replaced with the ids of the returned users. A failure leaves it
+  /// unchanged.
+  Future<Result<GetBlockedUsersResponse>> getBlockedUsers() async {
+    final result = await _userBlockLock.synchronized(_usersRepository.getBlockedUsers);
+    return result
+        .onSuccess((response) => _replaceBlockedUserIds(response.blocks))
+        .onFailure((e, stk) => logger.e(() => 'Error getting blocked users', error: e, stackTrace: stk));
+  }
+
+  void _replaceBlockedUserIds(List<UserBlock> blocks) {
+    state.blockedUserIds = [for (final block in blocks) block.blockedUserId];
   }
 
   /// Gets how many unread messages and threads the current user has.
