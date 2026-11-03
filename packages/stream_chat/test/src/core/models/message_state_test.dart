@@ -450,38 +450,36 @@ void main() {
     );
   });
 
-  group('settled', () {
-    test('turns a send into a failed send with its options', () {
-      final state = MessageState.sending(skipPush: true, skipEnrichUrl: true);
+  test('settled turns a send into a failed send with its options', () {
+    final state = MessageState.sending(skipPush: true, skipEnrichUrl: true);
 
-      expect(state.settled, MessageState.sendingFailed(skipPush: true, skipEnrichUrl: true));
-    });
+    expect(state.settled, MessageState.sendingFailed(skipPush: true, skipEnrichUrl: true));
+  });
 
-    test('turns an update into a failed update with its options', () {
-      final state = MessageState.updating(skipPush: true, skipEnrichUrl: true);
+  test('settled turns an update into a failed update with its options', () {
+    final state = MessageState.updating(skipPush: true, skipEnrichUrl: true);
 
-      expect(state.settled, MessageState.updatingFailed(skipPush: true, skipEnrichUrl: true));
-    });
+    expect(state.settled, MessageState.updatingFailed(skipPush: true, skipEnrichUrl: true));
+  });
 
-    test('turns a partial update into a failed partial update with its changes', () {
-      final state = MessageState.partialUpdating(set: {'pinned': true}, unset: ['pin_expires'], skipEnrichUrl: true);
+  test('settled turns a partial update into a failed partial update with its changes', () {
+    final state = MessageState.partialUpdating(set: {'pinned': true}, unset: ['pin_expires'], skipEnrichUrl: true);
 
-      expect(
-        state.settled,
-        MessageState.partialUpdatingFailed(set: {'pinned': true}, unset: ['pin_expires'], skipEnrichUrl: true),
-      );
-    });
+    expect(
+      state.settled,
+      MessageState.partialUpdatingFailed(set: {'pinned': true}, unset: ['pin_expires'], skipEnrichUrl: true),
+    );
+  });
 
-    test('turns a delete into a failed delete for the same scope', () {
-      final state = MessageState.deleting(scope: const .deleteForMe());
+  test('settled turns a delete into a failed delete for the same scope', () {
+    final state = MessageState.deleting(scope: const .deleteForMe());
 
-      expect(state.settled, MessageState.deletingFailed(scope: const .deleteForMe()));
-    });
+    expect(state.settled, MessageState.deletingFailed(scope: const .deleteForMe()));
+  });
 
-    test('keeps a state with no request in progress', () {
-      const state = MessageState.sent;
+  test('settled keeps a state with no request in progress', () {
+    const state = MessageState.sent;
 
-      expect(state.settled, same(state));
-    });
+    expect(state.settled, same(state));
   });
 }
