@@ -7,7 +7,8 @@ const allureResultMarker = 'ALLURE-RESULT::';
 const allureAttachmentMarker = 'ALLURE-ATTACH::';
 
 /// Lightweight per-test outcome marker, emitted once per test as
-/// `E2E-TEST::<status>::<base64(name)>`. The Fastlane lane parses these to
+/// `E2E-TEST::<status>::<base64(name)>`, and as `E2E-TEST::started::…` when the
+/// test starts. The Fastlane lane parses these to
 /// retry **only** the tests that failed in an attempt (rather than re-running
 /// the whole file); the name is base64-encoded to survive any characters in
 /// the test description. Separate from [allureResultMarker] (which carries the
@@ -110,6 +111,9 @@ class Allure {
         for (final entry in labels.entries) {'name': entry.key, 'value': entry.value},
       ],
     );
+
+    // Lets the Fastlane lane tell a test that runs long from an app that never started one.
+    print('${allureTestStatusMarker}started::${base64.encode(utf8.encode(name))}');
   }
 
   /// Records a BDD step marker. The statements that run after this call, up to

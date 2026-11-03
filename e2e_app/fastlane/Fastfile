@@ -240,17 +240,17 @@ def run_time_limit(target, selected, files)
   [(15 + (2 * [tests, 1].max)) * 60, 45 * 60].min
 end
 
-# How long the app may take, once its APK starts installing, to report its first
-# test. A healthy run installs and reports its first test within seconds; seen on CI, an app
-# that installed but never started a test would otherwise hold the run until its time
-# limit.
+# How long the app may take, once its APK starts installing, to start its first
+# test. A healthy run installs and starts its first test within seconds; seen on CI,
+# an app that installed but never started a test would otherwise hold the run until
+# its time limit.
 STARTUP_LIMIT = 4 * 60
 
-# Printed by the app as its tests run.
+# Printed by the app as each test starts and ends.
 TEST_REPORTED = /ALLURE-(RESULT|ATTACH)::|E2E-TEST::/
 
 # Runs [argv], whose output is copied to [log], and returns whether it succeeded.
-# A run whose app installs but reports no test within STARTUP_LIMIT calls
+# A run whose app installs but starts no test within STARTUP_LIMIT calls
 # [on_stalled], is stopped and fails; a run that can't be started fails too.
 # [argv] runs from the app folder with no shell in between, so its process group
 # is the one `timeout` leads and stopping it reaches flutter too.
@@ -270,7 +270,7 @@ def run_watching_startup(argv, log, on_stalled:)
     lines = File.exist?(log) ? File.readlines(log) : []
     install = lines.rindex { |line| line.include?('Installing build/') }
     reported = install && lines.drop(install + 1).any? { |line| line.match?(TEST_REPORTED) }
-    # A test reported: only the run's time limit applies from here.
+    # A test started: only the run's time limit applies from here.
     return Process.wait2(pid).last.success? if reported
 
     installed_at ||= Time.now if install
