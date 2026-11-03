@@ -390,9 +390,8 @@ class ChannelClientState {
     final index = current.indexWhere((it) => it.id == id);
     if (index == -1) return;
 
-    _channelState = _channelState.copyWith(
-      scheduledMessages: [...current]..removeAt(index),
-    );
+    final updated = [...current]..removeAt(index);
+    _channelState = _channelState.copyWith(scheduledMessages: updated);
   }
 
   // The [incoming] scheduled messages, earliest first, each kept as its copy in
