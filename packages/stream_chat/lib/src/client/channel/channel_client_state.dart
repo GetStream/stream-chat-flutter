@@ -23,8 +23,9 @@ class ChannelClientState {
     // staying under the `SCh:RetryQueue` prefix for filtering.
     _retryQueue = RetryQueue(channel: _channel, tag: 'SCh:RetryQueue:${_channel.cid}');
 
+    final messages = channelState.messages;
     final seededState = channelState.copyWith(
-      messages: _settleInterruptedRequests(channelState.messages),
+      messages: messages == null ? null : _settleInterruptedRequests(messages),
       pinnedMessages: MessageMerging.sortPinnedMessages(channelState.pinnedMessages),
     );
 
@@ -51,14 +52,19 @@ class ChannelClientState {
 
     _startSchedulingLocationExpiration();
 
+    _loadStoredThreads();
+  }
+
+  // Loads the threads of the channel from the offline storage, then retries
+  // the failed messages.
+  void _loadStoredThreads() {
     final persistenceClient = _client.chatPersistenceClient;
     persistenceClient
         ?.getChannelThreads(_channel.cid!)
         .then((threads) {
-          // Load all the threads for the channel from the offline storage.
           if (threads.isEmpty) return;
           _threads = threads.map(
-            (parentId, replies) => MapEntry(parentId, _settleInterruptedRequests(replies)!),
+            (parentId, replies) => MapEntry(parentId, _settleInterruptedRequests(replies)),
           );
         })
         .then((_) => retryFailedMessages());
@@ -67,8 +73,8 @@ class ChannelClientState {
   // A message still being sent, updated or deleted when this state is created
   // belongs to a request that never finished, as nothing in this channel can
   // be in flight yet.
-  static List<Message>? _settleInterruptedRequests(List<Message>? messages) {
-    if (messages == null || !messages.any((it) => it.state.isOutgoing)) return messages;
+  static List<Message> _settleInterruptedRequests(List<Message> messages) {
+    if (!messages.any((it) => it.state.isOutgoing)) return messages;
 
     return [
       for (final message in messages)
