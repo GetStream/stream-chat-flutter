@@ -2450,16 +2450,19 @@ class StreamChatClient {
       throw ArgumentError('Pass a message, a scheduledAt or both.');
     }
 
-    return _chatApi.scheduledMessages.updateScheduledMessage(
+    final response = _chatApi.scheduledMessages.updateScheduledMessage(
       id,
       message: message,
       scheduledAt: scheduledAt,
     );
+
+    return _removeScheduledMessageIfMissing(id, response);
   }
 
   /// Deletes the scheduled message [id] before it is sent.
   Future<ScheduledMessageResponse> deleteScheduledMessage(String id) {
-    return _chatApi.scheduledMessages.deleteScheduledMessage(id);
+    final response = _chatApi.scheduledMessages.deleteScheduledMessage(id);
+    return _removeScheduledMessageIfMissing(id, response);
   }
 
   /// Sends the scheduled message [id] right away.
@@ -2467,7 +2470,27 @@ class StreamChatClient {
   /// The returned scheduled message can still be waiting to go out. An
   /// [EventType.scheduledMessageSent] event follows once it has been sent.
   Future<ScheduledMessageResponse> sendScheduledMessageNow(String id) {
-    return _chatApi.scheduledMessages.sendScheduledMessageNow(id);
+    final response = _chatApi.scheduledMessages.sendScheduledMessageNow(id);
+    return _removeScheduledMessageIfMissing(id, response);
+  }
+
+  // A scheduled message the server no longer has was sent or deleted while
+  // its event was missed, so the channels holding it drop it.
+  Future<ScheduledMessageResponse> _removeScheduledMessageIfMissing(
+    String id,
+    Future<ScheduledMessageResponse> response,
+  ) async {
+    try {
+      return await response;
+    } on StreamChatNetworkError catch (error) {
+      if (error.statusCode == 404) {
+        for (final channel in state.channels.values) {
+          channel.state?.removeScheduledMessage(id);
+        }
+      }
+
+      rethrow;
+    }
   }
 
   /// Lists user groups with cursor-based pagination.

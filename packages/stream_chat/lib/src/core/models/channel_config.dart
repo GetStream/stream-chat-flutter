@@ -34,6 +34,10 @@ class ChannelConfig {
     this.markMessagesPending = false,
     this.deliveryEvents = false,
     this.sharedLocations = false,
+    this.scheduledMessagesMaxPerChannel,
+    this.scheduledMessagesMaxPerUser,
+    this.scheduledMessagesMinLeadTime,
+    this.scheduledMessagesMaxLeadTime,
   }) : createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
@@ -126,6 +130,46 @@ class ChannelConfig {
   /// True if shared locations are enabled for this channel.
   final bool sharedLocations;
 
+  /// The most scheduled messages, scheduled or sending, the current user can
+  /// have in this channel.
+  ///
+  /// Null when scheduled messages are not enabled.
+  final int? scheduledMessagesMaxPerChannel;
+
+  /// The most scheduled messages, scheduled or sending, the current user can
+  /// have across all channels.
+  ///
+  /// Null when scheduled messages are not enabled.
+  final int? scheduledMessagesMaxPerUser;
+
+  /// How far ahead a scheduled message is sent, at least.
+  ///
+  /// A sooner time is moved to the first whole minute at least this far ahead.
+  /// Null when scheduled messages are not enabled.
+  @JsonKey(
+    name: 'scheduled_messages_min_lead_time_seconds',
+    fromJson: _durationFromSeconds,
+    toJson: _durationToSeconds,
+  )
+  final Duration? scheduledMessagesMinLeadTime;
+
+  /// How far ahead a message can be scheduled, at most.
+  ///
+  /// Null when scheduled messages are not enabled.
+  @JsonKey(
+    name: 'scheduled_messages_max_lead_time_seconds',
+    fromJson: _durationFromSeconds,
+    toJson: _durationToSeconds,
+  )
+  final Duration? scheduledMessagesMaxLeadTime;
+
   /// Serialize to json
   Map<String, dynamic> toJson() => _$ChannelConfigToJson(this);
 }
+
+Duration? _durationFromSeconds(int? seconds) {
+  if (seconds == null) return null;
+  return Duration(seconds: seconds);
+}
+
+int? _durationToSeconds(Duration? duration) => duration?.inSeconds;

@@ -15,6 +15,7 @@ void main() {
         {
           'text': 'Good morning @Bob',
           'parent_id': 'parent-id',
+          'show_in_channel': true,
           'mentioned_users': ['bob'],
           'custom': {'mood': 'happy'},
         },
@@ -47,6 +48,7 @@ void main() {
       expect(message.user?.id, 'alice');
       expect(message.text, 'Good morning @Bob');
       expect(message.parentId, 'parent-id');
+      expect(message.showInChannel, isTrue);
     });
 
     test('turns mentioned user IDs into users', () {

@@ -354,6 +354,34 @@ void main() {
         );
       });
 
+      test('keeps a scheduled thread reply out of the thread', () async {
+        final reply = Message(id: 'reply-id', text: 'Good morning', parentId: 'parent-id', showInChannel: true);
+        when(
+          () => client.sendMessage(reply, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer(
+          (_) async => SendMessageResponse()
+            ..message = reply
+            ..scheduledMessage = scheduledMessageFor(reply),
+        );
+
+        await schedule(reply, scheduledAt);
+
+        expect(channel.state!.threads['parent-id'], isNull);
+        expect(channel.state!.scheduledMessages.single.message.parentId, 'parent-id');
+      });
+
+      test('adds a thread reply to its thread when it was sent right away', () async {
+        final reply = Message(id: 'reply-id', text: 'Good morning', parentId: 'parent-id');
+        when(
+          () => client.sendMessage(reply, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer((_) async => SendMessageResponse()..message = reply);
+
+        await schedule(reply, scheduledAt);
+
+        expect(channel.state!.threads['parent-id']?.single.id, 'reply-id');
+        expect(channel.state!.scheduledMessages, isEmpty);
+      });
+
       test('refuses a time that is not in the future', () async {
         final message = Message(id: 'past-id', text: 'Good morning');
         final past = now.subtract(const Duration(minutes: 5));

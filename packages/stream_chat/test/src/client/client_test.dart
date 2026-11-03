@@ -4713,6 +4713,76 @@ void main() {
       );
     });
 
+    group('a scheduled message the server no longer has', () {
+      const cid = 'messaging:general';
+      final missing = StreamChatNetworkError(ChatErrorCode.doesNotExist, statusCode: 404);
+      late Channel channel;
+
+      setUp(() {
+        final scheduled = ScheduledMessage(
+          id: 'scheduled-id',
+          cid: cid,
+          user: User(id: 'test-user-id'),
+          message: Message(id: 'scheduled-id', text: 'Good morning'),
+          scheduledAt: DateTime.utc(2026, 11, 2, 9),
+          status: ScheduledMessageStatus.scheduled,
+          createdAt: DateTime.utc(2026, 10, 29),
+          updatedAt: DateTime.utc(2026, 10, 29),
+        );
+        final state = ChannelState(
+          channel: ChannelModel(cid: cid),
+          scheduledMessages: [scheduled],
+        );
+
+        channel = Channel.fromState(client, state);
+        client.state.addChannels({cid: channel});
+      });
+
+      test('is removed from its channel when updating it fails', () async {
+        when(
+          () => api.scheduledMessages.updateScheduledMessage(
+            'scheduled-id',
+            message: any(named: 'message'),
+            scheduledAt: any(named: 'scheduledAt'),
+          ),
+        ).thenAnswer((_) async => throw missing);
+
+        await expectLater(
+          client.updateScheduledMessage('scheduled-id', scheduledAt: DateTime.utc(2026, 11, 3, 9)),
+          throwsA(missing),
+        );
+        expect(channel.state!.scheduledMessages, isEmpty);
+      });
+
+      test('is removed from its channel when deleting it fails', () async {
+        when(
+          () => api.scheduledMessages.deleteScheduledMessage('scheduled-id'),
+        ).thenAnswer((_) async => throw missing);
+
+        await expectLater(client.deleteScheduledMessage('scheduled-id'), throwsA(missing));
+        expect(channel.state!.scheduledMessages, isEmpty);
+      });
+
+      test('is removed from its channel when sending it now fails', () async {
+        when(
+          () => api.scheduledMessages.sendScheduledMessageNow('scheduled-id'),
+        ).thenAnswer((_) async => throw missing);
+
+        await expectLater(client.sendScheduledMessageNow('scheduled-id'), throwsA(missing));
+        expect(channel.state!.scheduledMessages, isEmpty);
+      });
+
+      test('stays in its channel when the request fails otherwise', () async {
+        final error = StreamChatNetworkError(ChatErrorCode.inputError, statusCode: 400);
+        when(
+          () => api.scheduledMessages.sendScheduledMessageNow('scheduled-id'),
+        ).thenAnswer((_) async => throw error);
+
+        await expectLater(client.sendScheduledMessageNow('scheduled-id'), throwsA(error));
+        expect(channel.state!.scheduledMessages.single.id, 'scheduled-id');
+      });
+    });
+
     test('`.queryDrafts`', () async {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
