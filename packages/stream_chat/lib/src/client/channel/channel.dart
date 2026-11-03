@@ -928,11 +928,9 @@ class Channel {
   Future<List<ScheduledMessage>> queryScheduledMessages() async {
     _checkInitialized();
 
-    // A user has at most 100 scheduled messages, so one page holds them all.
-    final response = await _client.queryScheduledMessages(
-      cid: cid,
-      pagination: const PaginationParams(limit: 100),
-    );
+    // A user has at most 100 scheduled messages, so the default page of 100
+    // holds them all.
+    final response = await _client.queryScheduledMessages(cid: cid);
     final scheduledMessages = response.scheduledMessages;
 
     state?.updateScheduledMessages(scheduledMessages);

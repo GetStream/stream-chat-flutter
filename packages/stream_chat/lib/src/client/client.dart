@@ -2412,12 +2412,12 @@ class StreamChatClient {
   /// messages with one of [statuses] when given. Only
   /// [ScheduledMessageStatus.scheduled], [ScheduledMessageStatus.sending] and
   /// [ScheduledMessageStatus.failed] messages are listed, so other [statuses]
-  /// fail. The [pagination] sets the page size, and its `next` cursor from a
-  /// previous page gets the page after it.
+  /// fail. The [pagination] sets the page size, 100 by default, and its `next`
+  /// cursor from a previous page gets the page after it.
   Future<QueryScheduledMessagesResponse> queryScheduledMessages({
     String? cid,
     List<ScheduledMessageStatus>? statuses,
-    PaginationParams pagination = const PaginationParams(),
+    PaginationParams pagination = const PaginationParams(limit: 100),
   }) {
     const listedStatuses = {
       ScheduledMessageStatus.scheduled,
