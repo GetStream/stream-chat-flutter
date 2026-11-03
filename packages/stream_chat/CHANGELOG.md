@@ -119,7 +119,14 @@
 - An entry of `ChannelModel.custom` or `Member.custom` named like one of the model's own fields stays in `custom` and leaves the field alone, and `toJson` leaves it out.
 - `rawType` is removed from `MessageType`, `AttachmentType`, `PushLevel`, `ChatPreferenceLevel`, `ChatLevel`, `CallLevel` and `RoleType`, as are `ModerationAction.action` and `ChannelCapability.capability`; use the value itself instead.
 
+- `ChannelClientState.truncate` now truncates the channel at an optional `truncatedAt` instead of emptying the loaded messages; use `clearMessages` for that.
+- A custom `ChatPersistenceClient` must implement `truncateChannel`, which removes a channel's stored messages from before a given time.
+
 🐞 Fixed
+
+- Truncating a channel no longer removes the messages sent after its truncation time, or messages not sent yet.
+- Truncating a channel now also removes its thread replies from before the truncation, lowers an unread count higher than the messages left, and updates its last message time.
+- Messages from before a channel's truncation no longer come back when the truncation event was missed.
 
 - `connectGuestUser` no longer copies the user's online status, ban, unread counts, devices and push preferences into the created guest's `extraData`.
 - `Channel.custom` no longer returns the data the channel was created with once the channel's custom data is empty.
@@ -143,6 +150,7 @@
 
 ✅ Added
 
+- Added `ChannelClientState.clearMessages`, which empties the loaded messages.
 - Log records from the HTTP and token layers now reach the configured handler.
 - Added `MessageSearchSortField.relevance`, which sorts a message search by match quality.
 - Added `MessageReminderSortField.messageId`, the field the API breaks reminder ties on.

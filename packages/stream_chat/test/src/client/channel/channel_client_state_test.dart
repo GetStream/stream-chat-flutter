@@ -1,5 +1,8 @@
 // ignore_for_file: lines_longer_than_80_chars, cascade_invocations, deprecated_member_use_from_same_package, avoid_redundant_argument_values
 
+import 'dart:async';
+
+import 'package:clock/clock.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
@@ -16,6 +19,7 @@ void main() {
       registerFallbackValue(FakeMessage());
       registerFallbackValue(FakeAttachmentFile());
       registerFallbackValue(FakeEvent());
+      registerFallbackValue(DateTime(2026));
 
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
@@ -1964,7 +1968,9 @@ void main() {
       setUp(() {
         persistenceClient = MockPersistenceClient();
         when(() => client.chatPersistenceClient).thenReturn(persistenceClient);
-        when(() => persistenceClient.deleteMessageByCid(any())).thenAnswer((_) async {});
+        when(
+          () => persistenceClient.truncateChannel(any(), truncatedAt: any(named: 'truncatedAt')),
+        ).thenAnswer((_) async {});
         when(() => persistenceClient.getChannelThreads(any())).thenAnswer((_) async => {});
 
         final channelState = _generateChannelState(channelId, channelType);
@@ -1988,7 +1994,7 @@ void main() {
         return message;
       }
 
-      test('${EventType.channelTruncated} clears messages and wipes persistence', () async {
+      test('${EventType.channelTruncated} without a truncatedAt removes the messages sent before now', () async {
         seedMessage('truncated-message-1');
         seedMessage('truncated-message-2');
         expect(channel.state!.messages, hasLength(2));
@@ -2003,7 +2009,20 @@ void main() {
         await Future.delayed(Duration.zero);
 
         expect(channel.state!.messages, isEmpty);
-        verify(() => persistenceClient.deleteMessageByCid(channel.cid!)).called(1);
+      });
+
+      test('${EventType.channelTruncated} removes the stored messages created before the truncation', () async {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        verify(() => persistenceClient.truncateChannel(channel.cid!, truncatedAt: truncatedAt)).called(1);
       });
 
       test('${EventType.notificationChannelTruncated} keeps the event system message', () async {
@@ -2026,6 +2045,481 @@ void main() {
         await Future.delayed(Duration.zero);
 
         expect(channel.state!.messages.map((m) => m.id), ['system-message-id']);
+      });
+
+      Message messageAt(String id, DateTime createdAt) {
+        return Message(
+          id: id,
+          user: User(id: 'other-user'),
+          text: id,
+          createdAt: createdAt,
+        );
+      }
+
+      test('${EventType.channelTruncated} keeps the messages sent after the channel was truncated', () async {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.updateMessage(messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))));
+        channel.state!.updateMessage(messageAt('after', truncatedAt.add(const Duration(minutes: 1))));
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.messages.map((m) => m.id), ['after']);
+      });
+
+      test('${EventType.channelTruncated} keeps a message that is not sent yet', () async {
+        seedMessage('truncated-message');
+        channel.state!.updateMessage(
+          Message(
+            id: 'pending',
+            user: User(id: 'current-user'),
+            text: 'Hello',
+            state: MessageState.sending,
+          ),
+        );
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.messages.map((m) => m.id), ['pending']);
+      });
+
+      test('${EventType.channelTruncated} removes the pinned messages sent before the truncation', () async {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        final pinnedAt = truncatedAt.add(const Duration(minutes: 2));
+        channel.state!.updateChannelState(
+          ChannelState(
+            pinnedMessages: [
+              messageAt(
+                'before',
+                truncatedAt.subtract(const Duration(minutes: 1)),
+              ).copyWith(pinned: true, pinnedAt: pinnedAt),
+              messageAt(
+                'after',
+                truncatedAt.add(const Duration(minutes: 1)),
+              ).copyWith(pinned: true, pinnedAt: pinnedAt),
+            ],
+          ),
+        );
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.pinnedMessages.map((m) => m.id), ['after']);
+      });
+
+      test('${EventType.channelTruncated} lowers the unread count to the messages left', () async {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.updateMessage(messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))));
+        channel.state!.updateMessage(messageAt('after', truncatedAt.add(const Duration(minutes: 1))));
+        channel.state!.unreadCount = 5;
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.unreadCount, 1);
+      });
+
+      test('${EventType.channelTruncated} keeps the unread count when no loaded message was removed', () async {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.updateMessage(messageAt('after', truncatedAt.add(const Duration(minutes: 1))));
+        channel.state!.unreadCount = 5;
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.unreadCount, 5);
+      });
+
+      test('${EventType.channelTruncated} removes the thread replies sent before the truncation', () async {
+        when(() => persistenceClient.updateChannelThreads(any(), any())).thenAnswer((_) async {});
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        final parent = messageAt('parent', truncatedAt.subtract(const Duration(hours: 1)));
+        channel.state!.updateThreadInfo(parent.id, [
+          messageAt('old-reply', truncatedAt.subtract(const Duration(minutes: 1))).copyWith(parentId: parent.id),
+          messageAt('new-reply', truncatedAt.add(const Duration(minutes: 1))).copyWith(parentId: parent.id),
+        ]);
+
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.threads[parent.id]?.map((m) => m.id), ['new-reply']);
+      });
+
+      test("${EventType.channelTruncated} takes the channel's last message time", () async {
+        final lastMessageAt = DateTime.utc(2026, 10, 29, 11);
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType, lastMessageAt: lastMessageAt),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.channelState.channel?.lastMessageAt, lastMessageAt);
+      });
+
+      test('${EventType.channelTruncated} moves the last message time to the system message', () async {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        final systemMessage = Message(
+          id: 'system-message-id',
+          type: MessageType.system,
+          text: 'Channel truncated',
+          user: User(id: 'other-user'),
+          createdAt: truncatedAt.add(const Duration(microseconds: 1)),
+        );
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(
+              id: channelId,
+              type: channelType,
+              truncatedAt: truncatedAt,
+              lastMessageAt: truncatedAt.subtract(const Duration(hours: 1)),
+            ),
+            message: systemMessage,
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.channelState.channel?.lastMessageAt, systemMessage.createdAt);
+      });
+
+      test("truncate makes the truncatedAt the channel's truncation time", () {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+
+        channel.state!.truncate(truncatedAt: truncatedAt);
+
+        expect(channel.state!.channelState.channel?.truncatedAt, truncatedAt);
+      });
+
+      test('truncate keeps a later channel truncation time', () {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.truncate(truncatedAt: truncatedAt);
+
+        channel.state!.truncate(truncatedAt: truncatedAt.subtract(const Duration(days: 1)));
+
+        expect(channel.state!.channelState.channel?.truncatedAt, truncatedAt);
+      });
+
+      test('truncate without a truncatedAt leaves the channel truncation time alone', () {
+        channel.state!.truncate();
+
+        expect(channel.state!.channelState.channel?.truncatedAt, isNull);
+      });
+
+      test('truncate updates the channel state once', () async {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.updateMessage(messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))));
+        channel.state!.updateMessage(messageAt('after', truncatedAt.add(const Duration(minutes: 1))));
+        channel.state!.unreadCount = 5;
+        final updates = <ChannelState>[];
+        final subscription = channel.state!.channelStateStream.skip(1).listen(updates.add);
+        addTearDown(subscription.cancel);
+
+        channel.state!.truncate(truncatedAt: truncatedAt);
+        await Future.delayed(Duration.zero);
+
+        expect(updates, hasLength(1));
+      });
+
+      test('truncate without a truncatedAt removes the messages sent before now', () {
+        final now = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.updateMessage(messageAt('before', now.subtract(const Duration(minutes: 1))));
+        channel.state!.updateMessage(messageAt('after', now.add(const Duration(minutes: 1))));
+
+        withClock(Clock.fixed(now), () => channel.state!.truncate());
+
+        expect(channel.state!.messages.map((m) => m.id), ['after']);
+      });
+
+      test(
+        '${EventType.channelTruncated} without a truncatedAt cuts at the event time, not the device clock',
+        () async {
+          final eventTime = DateTime.utc(2026, 10, 29, 12);
+          channel.state!.updateMessage(messageAt('before', eventTime.subtract(const Duration(minutes: 1))));
+          channel.state!.updateMessage(messageAt('after', eventTime.add(const Duration(minutes: 1))));
+
+          await withClock(Clock.fixed(eventTime.add(const Duration(hours: 1))), () async {
+            client.addEvent(
+              Event(
+                cid: channel.cid,
+                type: EventType.channelTruncated,
+                channel: ChannelModel(id: channelId, type: channelType),
+                createdAt: eventTime,
+              ),
+            );
+            await Future.delayed(Duration.zero);
+          });
+
+          expect(channel.state!.messages.map((m) => m.id), ['after']);
+        },
+      );
+
+      test('${EventType.channelTruncated} without a truncatedAt leaves the channel truncation time alone', () async {
+        client.addEvent(
+          Event(
+            cid: channel.cid,
+            type: EventType.channelTruncated,
+            channel: ChannelModel(id: channelId, type: channelType),
+            createdAt: DateTime.utc(2026, 10, 29, 12),
+          ),
+        );
+        await Future.delayed(Duration.zero);
+
+        expect(channel.state!.channelState.channel?.truncatedAt, isNull);
+      });
+
+      test('updateThreadInfo leaves out the replies sent before the channel was truncated', () {
+        when(() => persistenceClient.updateChannelThreads(any(), any())).thenAnswer((_) async {});
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.truncate(truncatedAt: truncatedAt);
+
+        channel.state!.updateThreadInfo('parent', [
+          messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))).copyWith(parentId: 'parent'),
+          messageAt('after', truncatedAt.add(const Duration(minutes: 1))).copyWith(parentId: 'parent'),
+        ]);
+
+        expect(channel.state!.threads['parent']?.map((m) => m.id), ['after']);
+      });
+
+      test('stored thread replies loaded after a truncation leave out the ones sent before it', () async {
+        when(() => persistenceClient.updateChannelThreads(any(), any())).thenAnswer((_) async {});
+        final storedThreads = Completer<Map<String, List<Message>>>();
+        when(() => persistenceClient.getChannelThreads(any())).thenAnswer((_) => storedThreads.future);
+        final loading = Channel.fromState(client, _generateChannelState(channelId, channelType));
+        addTearDown(loading.dispose);
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+
+        loading.state!.truncate(truncatedAt: truncatedAt);
+        storedThreads.complete({
+          'parent': [
+            messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))).copyWith(parentId: 'parent'),
+            messageAt('after', truncatedAt.add(const Duration(minutes: 1))).copyWith(parentId: 'parent'),
+          ],
+        });
+        await Future.delayed(Duration.zero);
+
+        expect(loading.state!.threads['parent']?.map((m) => m.id), ['after']);
+      });
+
+      test('clearMessages removes the loaded messages', () {
+        seedMessage('loaded');
+
+        channel.state!.clearMessages();
+
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test('clearMessages keeps the pinned messages', () {
+        final pinned = messageAt('pinned', DateTime.utc(2026, 10, 29, 12));
+        channel.state!.updateChannelState(
+          ChannelState(pinnedMessages: [pinned.copyWith(pinned: true, pinnedAt: pinned.createdAt)]),
+        );
+
+        channel.state!.clearMessages();
+
+        expect(channel.state!.pinnedMessages.map((m) => m.id), ['pinned']);
+      });
+
+      test('clearMessages keeps the thread replies', () {
+        when(() => persistenceClient.updateChannelThreads(any(), any())).thenAnswer((_) async {});
+        final reply = messageAt('reply', DateTime.utc(2026, 10, 29, 12)).copyWith(parentId: 'parent');
+        channel.state!.updateThreadInfo('parent', [reply]);
+
+        channel.state!.clearMessages();
+
+        expect(channel.state!.threads['parent']?.map((m) => m.id), ['reply']);
+      });
+
+      test('clearMessages keeps the unread count', () {
+        seedMessage('loaded');
+        channel.state!.unreadCount = 3;
+
+        channel.state!.clearMessages();
+
+        expect(channel.state!.unreadCount, 3);
+      });
+
+      test('a server update with a newer truncatedAt drops the messages sent before it', () {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.updateMessage(messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))));
+        channel.state!.updateMessage(messageAt('after', truncatedAt.add(const Duration(minutes: 1))));
+
+        channel.state!.updateChannelStateFromServer(
+          ChannelState(
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+
+        expect(channel.state!.messages.map((m) => m.id), ['after']);
+      });
+
+      test(
+        '${EventType.channelTruncated} without a truncatedAt lets a later query bring back older messages',
+        () async {
+          final before = messageAt('before', DateTime.now().subtract(const Duration(minutes: 1)));
+          channel.state!.updateMessage(before);
+
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.channelTruncated,
+              channel: ChannelModel(id: channelId, type: channelType),
+            ),
+          );
+          await Future.delayed(Duration.zero);
+          channel.state!.updateChannelStateFromServer(ChannelState(messages: [before]));
+
+          expect(channel.state!.messages.map((m) => m.id), ['before']);
+        },
+      );
+
+      test(
+        '${EventType.channelTruncated} without a truncatedAt removes the pinned messages sent before now',
+        () async {
+          final pinnedAt = DateTime.now().subtract(const Duration(seconds: 30));
+          channel.state!.updateChannelState(
+            ChannelState(
+              pinnedMessages: [
+                messageAt(
+                  'before',
+                  DateTime.now().subtract(const Duration(minutes: 1)),
+                ).copyWith(pinned: true, pinnedAt: pinnedAt),
+              ],
+            ),
+          );
+
+          client.addEvent(
+            Event(
+              cid: channel.cid,
+              type: EventType.channelTruncated,
+              channel: ChannelModel(id: channelId, type: channelType),
+            ),
+          );
+          await Future.delayed(Duration.zero);
+
+          expect(channel.state!.pinnedMessages, isEmpty);
+        },
+      );
+
+      test('a channel update with an older truncatedAt keeps the later one', () {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        final olderTruncatedAt = truncatedAt.subtract(const Duration(days: 1));
+        channel.state!.updateChannelState(
+          ChannelState(
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+
+        channel.state!.updateChannelState(
+          ChannelState(
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: olderTruncatedAt),
+          ),
+        );
+
+        expect(channel.state!.channelState.channel?.truncatedAt, truncatedAt);
+      });
+
+      test('a server update with an older truncatedAt does not bring back older messages', () {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        final olderTruncatedAt = truncatedAt.subtract(const Duration(days: 1));
+        channel.state!.updateChannelStateFromServer(
+          ChannelState(
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+
+        channel.state!.updateChannelStateFromServer(
+          ChannelState(
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: olderTruncatedAt),
+            messages: [messageAt('between', truncatedAt.subtract(const Duration(hours: 1)))],
+          ),
+        );
+
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test('a server update with a newer truncatedAt drops the pinned messages sent before it', () {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        final pinnedAt = truncatedAt.add(const Duration(minutes: 5));
+        channel.state!.updateChannelStateFromServer(
+          ChannelState(
+            pinnedMessages: [
+              messageAt('before', truncatedAt.subtract(const Duration(minutes: 1))),
+              messageAt('after', truncatedAt.add(const Duration(minutes: 1))),
+            ].map((it) => it.copyWith(pinned: true, pinnedAt: pinnedAt)).toList(),
+          ),
+        );
+
+        channel.state!.updateChannelStateFromServer(
+          ChannelState(
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+
+        expect(channel.state!.pinnedMessages.map((m) => m.id), ['after']);
+      });
+
+      test('a server update with an older truncatedAt does not bring back older pinned messages', () {
+        final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+        channel.state!.updateChannelStateFromServer(
+          ChannelState(
+            channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
+          ),
+        );
+        final between = messageAt('between', truncatedAt.subtract(const Duration(hours: 1)));
+
+        channel.state!.updateChannelStateFromServer(
+          ChannelState(
+            channel: ChannelModel(
+              id: channelId,
+              type: channelType,
+              truncatedAt: truncatedAt.subtract(const Duration(days: 1)),
+            ),
+            pinnedMessages: [between.copyWith(pinned: true, pinnedAt: truncatedAt)],
+          ),
+        );
+
+        expect(channel.state!.pinnedMessages, isEmpty);
       });
     });
 

@@ -416,10 +416,26 @@ class ChannelStateMutations {
     _state.updateRead([updatedRead]);
   }
 
-  /// Clears the channel messages, applying the truncation system [message]
-  /// when provided.
-  void onChannelTruncated({Message? message}) {
-    _state.truncate();
+  /// Truncates the channel at [cutoff], removing the older messages, pinned
+  /// messages and thread replies.
+  ///
+  /// Also takes the [channel]'s truncation and last message times, and applies
+  /// the truncation system [message] when provided.
+  void onChannelTruncated(
+    ChannelModel channel, {
+    required DateTime cutoff,
+    Message? message,
+  }) {
+    _state.truncateBefore(cutoff, truncatedAt: channel.truncatedAt);
+
+    final channelState = _state.channelState;
+    final current = channelState.channel;
+    final lastMessageAt = channel.lastMessageAt;
+    if (lastMessageAt != null && lastMessageAt != current?.lastMessageAt) {
+      final updated = current?.copyWith(lastMessageAt: lastMessageAt);
+      _state.updateChannelState(channelState.copyWith(channel: updated));
+    }
+
     if (message != null) {
       _state.updateMessage(message);
     }

@@ -139,6 +139,7 @@ command:
     # List of all the dev_dependencies used in the project.
     dev_dependencies:
       alchemist: ^0.14.0
+      benchmark_harness: ^2.4.0
       build_runner: ^2.15.0
       emojis: ^0.9.9
       substring_highlight: ^1.0.33

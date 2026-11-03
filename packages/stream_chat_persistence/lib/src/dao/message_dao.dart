@@ -21,6 +21,19 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
 
   $UsersTable get _pinnedByUsers => alias(users, 'pinnedByUsers');
 
+  // Matches the messages created at or after their channel's last truncation,
+  // and the messages not sent yet.
+  Expression<bool> get _survivesTruncation {
+    final truncatedLater = select(_db.channels)
+      ..where((channel) {
+        final createdAt = messages.remoteCreatedAt;
+        final sameChannel = channel.cid.equalsExp(messages.channelCid);
+        final isLater = channel.truncatedAt.isBiggerThan(createdAt);
+        return sameChannel & isLater;
+      });
+    return notExistsQuery(truncatedLater);
+  }
+
   /// Removes all the messages by matching [Messages.id] in [messageIds]
   ///
   /// This will automatically delete the following linked records
@@ -34,6 +47,21 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
   /// 1. Message Reactions
   Future<void> deleteMessageByCids(List<String> cids) async =>
       (delete(messages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
+
+  /// Removes the messages of the channel with [cid] created before
+  /// [createdBefore], keeping the ones not sent yet.
+  Future<void> deleteMessagesCreatedBefore(
+    String cid,
+    DateTime createdBefore,
+  ) {
+    final query = delete(messages)
+      ..where((tbl) {
+        final inChannel = tbl.channelCid.equals(cid);
+        final isOlder = tbl.remoteCreatedAt.isSmallerThanValue(createdBefore);
+        return inChannel & isOlder;
+      });
+    return query.go();
+  }
 
   /// Hydrates `rows` into `Message`s using batched lookups for related
   /// entities. Reactions, polls, and (optionally) quoted messages and drafts
@@ -280,6 +308,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
               ])
               ..where(messages.channelCid.equals(cid))
               ..where(messages.parentId.isNotNull())
+              ..where(_survivesTruncation)
               ..orderBy([OrderingTerm.asc(messages.createdAt.julianday)]))
             .get();
     return _messagesFromJoinRows(rows);
@@ -332,6 +361,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
             ),
           ])
           ..where(messages.parentId.equals(parentId))
+          ..where(_survivesTruncation)
           ..orderBy(orderBy);
 
     // Cursor predicates compare the full `(createdAt, id)` tuple — the same
@@ -423,6 +453,7 @@ class MessageDao extends DatabaseAccessor<DriftChatDatabase> with _$MessageDaoMi
           ])
           ..where(messages.channelCid.equals(cid))
           ..where(messages.parentId.isNull() | messages.showInChannel.equals(true))
+          ..where(_survivesTruncation)
           ..orderBy(orderBy);
 
     // Cursor predicates compare the full `(createdAt, id)` tuple — the same
