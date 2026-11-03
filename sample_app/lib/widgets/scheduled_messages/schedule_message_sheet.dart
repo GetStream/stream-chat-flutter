@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -44,7 +45,7 @@ Future<DateTime?> showScheduleTimeSheet(
       title: title,
       label: label,
       message: message,
-      initial: initial ?? DateTime.now().add(const Duration(hours: 1)),
+      initial: initial ?? clock.now().add(const Duration(hours: 1)),
     ),
   );
 }
@@ -56,7 +57,7 @@ Future<DateTime?> showScheduleTimeSheet(
 /// "Fri at 09:00".
 String formatScheduledTime(DateTime time, {bool short = false}) {
   final local = time.toLocal();
-  final withinWeek = local.difference(DateTime.now()) < const Duration(days: 6);
+  final withinWeek = local.difference(clock.now()) < const Duration(days: 6);
   final day = switch (short) {
     true when withinWeek => 'EEE',
     true => 'MMM d',
@@ -116,7 +117,7 @@ class _ScheduleOptionsSheet extends StatelessWidget {
     final icons = context.streamIcons;
     final spacing = context.streamSpacing;
 
-    final now = DateTime.now();
+    final now = clock.now();
     final tomorrow = DateTime(now.year, now.month, now.day + 1);
     final daysToMonday = (DateTime.monday - now.weekday) % 7;
     final monday = DateTime(now.year, now.month, now.day + (daysToMonday == 0 ? 7 : daysToMonday));
@@ -182,8 +183,8 @@ class _ScheduleTimeSheet extends StatefulWidget {
 class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
   late DateTime _time = widget.initial;
 
-  bool get _isTooSoon => _time.isBefore(DateTime.now().add(_minLeadTime));
-  bool get _isTooFar => _time.isAfter(DateTime.now().add(_maxLeadTime));
+  bool get _isTooSoon => _time.isBefore(clock.now().add(_minLeadTime));
+  bool get _isTooFar => _time.isAfter(clock.now().add(_maxLeadTime));
 
   String? get _problem => switch ((_isTooSoon, _isTooFar)) {
     (true, _) => 'Pick a time at least a minute from now',
@@ -192,7 +193,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
   };
 
   Future<void> _pickDate() async {
-    final now = DateTime.now();
+    final now = clock.now();
     final date = await showDatePicker(
       context: context,
       initialDate: _time,
