@@ -76,11 +76,13 @@ class ChannelClientState {
   // be in flight yet.
   static List<Message> _settleInterruptedRequests(List<Message> messages) {
     if (!messages.any((it) => it.state.isOutgoing)) return messages;
+    return messages.map(_settleInterruptedRequest).toList();
+  }
 
-    return [
-      for (final message in messages)
-        if (message.state.isOutgoing) message.copyWith(state: message.state.settled) else message,
-    ];
+  static Message _settleInterruptedRequest(Message message) {
+    final state = message.state;
+    if (!state.isOutgoing) return message;
+    return message.copyWith(state: state.settled);
   }
 
   final Channel _channel;
