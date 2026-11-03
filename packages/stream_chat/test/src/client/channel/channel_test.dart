@@ -386,7 +386,7 @@ void main() {
       test('`.queryScheduledMessages` loads them into the channel state', () async {
         final loaded = scheduledMessageFor(Message(id: 'loaded'));
         when(
-          () => client.queryScheduledMessages(cid: channelCid, pagination: const PaginationParams(limit: 100)),
+          () => client.queryScheduledMessages(cid: channelCid),
         ).thenAnswer(
           (_) async => QueryScheduledMessagesResponse()
             ..scheduledMessages = [loaded]
