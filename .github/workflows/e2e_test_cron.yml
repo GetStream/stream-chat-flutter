@@ -54,6 +54,8 @@ jobs:
 
       - uses: ./.github/actions/setup-flutter
 
+      - uses: ./.github/actions/install-android-ndk
+
       - uses: ./.github/actions/enable-kvm
 
       # The emulator, Gradle and flutter test together can briefly need more than the runner's
