@@ -11,9 +11,8 @@ extension MessageStateX on MessageState {
   /// The state to restore this message in when its request never finished,
   /// such as one cut off by the app being closed.
   ///
-  /// A send or delete becomes failed, so it can be retried. An update can't
-  /// be retried as it was made, so it becomes updated. Any other state is
-  /// returned as is.
+  /// A send, update or delete becomes failed with the options it was made
+  /// with, so it can be retried. Any other state is returned as is.
   @internal
   MessageState get settled {
     return switch (this) {
@@ -21,7 +20,16 @@ extension MessageStateX on MessageState {
         skipPush: state.skipPush,
         skipEnrichUrl: state.skipEnrichUrl,
       ),
-      MessageOutgoing(state: Updating()) => MessageState.updated,
+      MessageOutgoing(state: final Updating state) when state.set == null && state.unset == null =>
+        MessageState.updatingFailed(
+          skipPush: state.skipPush,
+          skipEnrichUrl: state.skipEnrichUrl,
+        ),
+      MessageOutgoing(state: final Updating state) => MessageState.partialUpdatingFailed(
+        set: state.set,
+        unset: state.unset,
+        skipEnrichUrl: state.skipEnrichUrl,
+      ),
       MessageOutgoing(state: final Deleting state) => MessageState.deletingFailed(scope: state.scope),
       MessageInitial() || MessageCompleted() || MessageFailed() => this,
     };
@@ -399,7 +407,14 @@ sealed class OutgoingState with _$OutgoingState {
   }) = Sending;
 
   /// Updating state when the message is being updated.
-  const factory OutgoingState.updating() = Updating;
+  ///
+  /// A partial update has a [Updating.set] or [Updating.unset].
+  const factory OutgoingState.updating({
+    @Default(false) bool skipPush,
+    @Default(false) bool skipEnrichUrl,
+    Map<String, Object?>? set,
+    List<String>? unset,
+  }) = Updating;
 
   /// Deleting state when the message is being deleted.
   const factory OutgoingState.deleting({

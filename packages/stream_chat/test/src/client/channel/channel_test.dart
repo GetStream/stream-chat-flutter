@@ -1728,7 +1728,11 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
+                message.copyWith(
+                  state: const MessageState.outgoing(
+                    state: OutgoingState.updating(skipPush: false, skipEnrichUrl: true),
+                  ),
+                ),
                 matchMessageState: true,
               ),
             ],
@@ -1779,7 +1783,11 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
+                  message.copyWith(
+                    state: const MessageState.outgoing(
+                      state: OutgoingState.updating(skipPush: false, skipEnrichUrl: true),
+                    ),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -1835,7 +1843,11 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
+                  message.copyWith(
+                    state: const MessageState.outgoing(
+                      state: OutgoingState.updating(skipPush: true, skipEnrichUrl: false),
+                    ),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -1884,7 +1896,11 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
+                message.copyWith(
+                  state: const MessageState.outgoing(
+                    state: OutgoingState.updating(skipPush: true, skipEnrichUrl: true),
+                  ),
+                ),
                 matchMessageState: true,
               ),
             ],
@@ -2069,7 +2085,9 @@ void main() {
           [
             isSameMessageAs(
               message.copyWith(
-                state: MessageState.updating,
+                state: const MessageState.outgoing(
+                  state: OutgoingState.updating(set: set, unset: unset),
+                ),
               ),
               matchText: true,
               matchMessageState: true,
@@ -2132,7 +2150,9 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updating,
+                  state: const MessageState.outgoing(
+                    state: OutgoingState.updating(set: set, unset: unset, skipEnrichUrl: false),
+                  ),
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -2200,7 +2220,9 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: const MessageState.outgoing(
+                      state: OutgoingState.updating(set: set, unset: unset, skipEnrichUrl: true),
+                    ),
                   ),
                   matchText: true,
                   matchMessageState: true,
@@ -2273,7 +2295,9 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: const MessageState.outgoing(
+                      state: OutgoingState.updating(set: set, unset: unset, skipEnrichUrl: false),
+                    ),
                   ),
                   matchText: true,
                   matchMessageState: true,
@@ -2338,7 +2362,9 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updating,
+                  state: const MessageState.outgoing(
+                    state: OutgoingState.updating(set: set, unset: unset, skipEnrichUrl: true),
+                  ),
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -2400,7 +2426,9 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updating,
+                  state: const MessageState.outgoing(
+                    state: OutgoingState.updating(set: set, unset: unset, skipEnrichUrl: false),
+                  ),
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -2714,10 +2742,7 @@ void main() {
           channel.state?.messagesStream.skip(1),
           emitsInOrder([
             [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
-                matchMessageState: true,
-              ),
+              isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
             ],
             [
               isSameMessageAs(
@@ -2770,10 +2795,7 @@ void main() {
             channel.state?.messagesStream.skip(1),
             emitsInOrder([
               [
-                isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
-                  matchMessageState: true,
-                ),
+                isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
               ],
               [
                 isSameMessageAs(
@@ -2828,10 +2850,7 @@ void main() {
             channel.state?.messagesStream.skip(1),
             emitsInOrder([
               [
-                isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
-                  matchMessageState: true,
-                ),
+                isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
               ],
               [
                 isSameMessageAs(
@@ -2896,10 +2915,7 @@ void main() {
         channel.state?.messagesStream.skip(1),
         emitsInOrder([
           [
-            isSameMessageAs(
-              message.copyWith(state: MessageState.updating),
-              matchMessageState: true,
-            ),
+            isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
           ],
           [
             isSameMessageAs(

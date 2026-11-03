@@ -915,7 +915,12 @@ class Channel {
 
     // ignore: parameter_assignments
     message = message.copyWith(
-      state: MessageState.updating,
+      state: MessageState.outgoing(
+        state: OutgoingState.updating(
+          skipPush: skipPush,
+          skipEnrichUrl: skipEnrichUrl,
+        ),
+      ),
       localUpdatedAt: DateTime.now(),
       attachments: message.attachments.map(
         (it) {
@@ -1008,7 +1013,13 @@ class Channel {
 
     // ignore: parameter_assignments
     message = message.copyWith(
-      state: MessageState.updating,
+      state: MessageState.outgoing(
+        state: OutgoingState.updating(
+          set: set,
+          unset: unset,
+          skipEnrichUrl: skipEnrichUrl,
+        ),
+      ),
       localUpdatedAt: DateTime.now(),
     );
 

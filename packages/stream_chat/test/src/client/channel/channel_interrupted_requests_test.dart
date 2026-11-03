@@ -17,34 +17,78 @@ void main() {
     );
   });
 
-  test('settles a message left updating, so it no longer shows as in progress', () {
-    final channel = _channel(messages: [_message(state: MessageState.updating)]);
+  test('marks a message left updating as failed to update with its options', () {
+    const updating = MessageState.outgoing(
+      state: OutgoingState.updating(skipPush: true, skipEnrichUrl: true),
+    );
 
-    expect(channel.state!.messages.single.state, MessageState.updated);
+    final channel = _channel(messages: [_message(state: updating)]);
+
+    expect(
+      channel.state!.messages.single.state,
+      MessageState.updatingFailed(skipPush: true, skipEnrichUrl: true),
+    );
   });
 
-  test('does not send a message left updating again', () async {
+  test('updates a message left updating again with its options', () async {
     final client = MockStreamChatClientWithPersistence();
     when(() => client.chatPersistenceClient.getChannelThreads(any())).thenAnswer((_) async => {});
-
-    _channel(
-      client: client,
-      messages: [_message(state: MessageState.updating)],
-    );
-    await pumpEventQueue();
-
-    verifyNever(
+    when(
       () => client.updateMessage(
         any(),
         skipPush: any(named: 'skipPush'),
         skipEnrichUrl: any(named: 'skipEnrichUrl'),
       ),
+    ).thenAnswer((invocation) async {
+      final message = invocation.positionalArguments.first as Message;
+      return UpdateMessageResponse()..message = message;
+    });
+    const updating = MessageState.outgoing(
+      state: OutgoingState.updating(skipPush: true, skipEnrichUrl: true),
     );
-    verifyNever(
+
+    _channel(
+      client: client,
+      messages: [_message(state: updating)],
+    );
+    await pumpEventQueue();
+
+    verify(() => client.updateMessage(any(), skipPush: true, skipEnrichUrl: true)).called(1);
+  });
+
+  test('updates a message left partially updating again as a partial update', () async {
+    final client = MockStreamChatClientWithPersistence();
+    when(() => client.chatPersistenceClient.getChannelThreads(any())).thenAnswer((_) async => {});
+    when(
       () => client.partialUpdateMessage(
         any(),
         set: any(named: 'set'),
         unset: any(named: 'unset'),
+        skipEnrichUrl: any(named: 'skipEnrichUrl'),
+      ),
+    ).thenAnswer((_) async => UpdateMessageResponse()..message = _message());
+    const updating = MessageState.outgoing(
+      state: OutgoingState.updating(set: {'pinned': true}, unset: ['pin_expires'], skipEnrichUrl: true),
+    );
+
+    _channel(
+      client: client,
+      messages: [_message(state: updating)],
+    );
+    await pumpEventQueue();
+
+    verify(
+      () => client.partialUpdateMessage(
+        'message',
+        set: {'pinned': true},
+        unset: ['pin_expires'],
+        skipEnrichUrl: true,
+      ),
+    ).called(1);
+    verifyNever(
+      () => client.updateMessage(
+        any(),
+        skipPush: any(named: 'skipPush'),
         skipEnrichUrl: any(named: 'skipEnrichUrl'),
       ),
     );

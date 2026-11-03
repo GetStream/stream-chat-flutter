@@ -57,9 +57,19 @@ Map<String, dynamic> _$SendingToJson(Sending instance) => <String, dynamic>{
   'runtimeType': instance.$type,
 };
 
-Updating _$UpdatingFromJson(Map<String, dynamic> json) => Updating($type: json['runtimeType'] as String?);
+Updating _$UpdatingFromJson(Map<String, dynamic> json) => Updating(
+  skipPush: json['skip_push'] as bool? ?? false,
+  skipEnrichUrl: json['skip_enrich_url'] as bool? ?? false,
+  set: json['set'] as Map<String, dynamic>?,
+  unset: (json['unset'] as List<dynamic>?)?.map((e) => e as String).toList(),
+  $type: json['runtimeType'] as String?,
+);
 
 Map<String, dynamic> _$UpdatingToJson(Updating instance) => <String, dynamic>{
+  'skip_push': instance.skipPush,
+  'skip_enrich_url': instance.skipEnrichUrl,
+  'set': instance.set,
+  'unset': instance.unset,
   'runtimeType': instance.$type,
 };
 

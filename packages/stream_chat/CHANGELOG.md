@@ -7,7 +7,7 @@
 
 🐞 Fixed
 
-- Fixed a message stuck sending, updating or deleting forever when the app was closed before the request finished; an interrupted send or delete is retried, and an interrupted edit is discarded.
+- Fixed a message stuck sending, updating or deleting forever when the app was closed before the request finished; an interrupted send, edit or delete is retried.
 - Fixed deleting a message that was already deleted failing and offering a retry that could never succeed.
 - Fixed the connection getting stuck while connecting, and requests never completing, when the token provider throws while refreshing an expired token.
 - Fixed sending, updating and deleting a message not retrying when the server answers with a timeout (408), a rate limit (429) or a server error (5xx).
