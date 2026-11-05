@@ -46,7 +46,7 @@ jobs:
     needs: conventional_pr_title # Trigger after the [conventional_pr_title] completes
     runs-on: ubuntu-latest
     steps:
-      - uses: GetStream/verify-semantic-changelog-update@566b49e5ce5f180280336053428f7e2338a4d496 # main
+      - uses: GetStream/verify-semantic-changelog-update@v1.1.0
         with:
           scopes: |
             {
@@ -65,4 +65,4 @@ jobs:
   changelog_placement:
     runs-on: ubuntu-latest
     steps:
-      - uses: GetStream/verify-semantic-changelog-update/placement@566b49e5ce5f180280336053428f7e2338a4d496 # main
+      - uses: GetStream/verify-semantic-changelog-update/placement@v1.1.0
