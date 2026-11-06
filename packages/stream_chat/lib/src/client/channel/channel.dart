@@ -933,29 +933,6 @@ class Channel {
     return response;
   }
 
-  /// Loads the current user's scheduled messages in this channel.
-  ///
-  /// [ChannelClientState.scheduledMessages] then lists them, and they are
-  /// returned.
-  Future<List<ScheduledMessage>> queryScheduledMessages() async {
-    _checkInitialized();
-
-    final scheduledMessages = <ScheduledMessage>[];
-    String? next;
-    do {
-      final response = await _client.queryScheduledMessages(
-        cid: cid,
-        pagination: PaginationParams(limit: 100, next: next),
-      );
-
-      scheduledMessages.addAll(response.scheduledMessages);
-      next = response.next;
-    } while (next != null && next.isNotEmpty);
-
-    state?.updateScheduledMessages(scheduledMessages);
-    return scheduledMessages;
-  }
-
   Message _markMessageAsSent(Message message) {
     if (state == null) return message.copyWith(state: MessageState.sent);
 

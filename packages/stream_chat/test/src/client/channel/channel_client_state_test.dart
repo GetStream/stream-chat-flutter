@@ -101,13 +101,15 @@ void main() {
         expect(channel.state!.scheduledMessages.single.id, 'kept');
       });
 
-      test('are replaced by a loaded list, earliest first', () {
+      test('are replaced by a channel update that carries them, earliest first', () {
         channel.state!.updateScheduledMessage(scheduledMessage('gone'));
 
-        channel.state!.updateScheduledMessages([
-          scheduledMessage('later', scheduledAt: DateTime.utc(2026, 11, 3)),
-          scheduledMessage('sooner', scheduledAt: DateTime.utc(2026, 11, 1)),
-        ]);
+        channel.state!.updateChannelStateFromServer(
+          stateWith([
+            scheduledMessage('later', scheduledAt: DateTime.utc(2026, 11, 3)),
+            scheduledMessage('sooner', scheduledAt: DateTime.utc(2026, 11, 1)),
+          ]),
+        );
 
         expect(channel.state!.scheduledMessages.map((it) => it.id), ['sooner', 'later']);
       });
@@ -122,13 +124,15 @@ void main() {
       });
 
       test('list failed ones last, the rest by time and then by ID', () {
-        channel.state!.updateScheduledMessages([
-          scheduledMessage('failed', scheduledAt: DateTime.utc(2026, 11, 1), status: ScheduledMessageStatus.failed),
-          scheduledMessage('c', scheduledAt: DateTime.utc(2026, 11, 2, 9), createdAt: DateTime.utc(2026, 10, 29)),
-          scheduledMessage('d', scheduledAt: DateTime.utc(2026, 11, 2, 9), createdAt: DateTime.utc(2026, 10, 28)),
-          scheduledMessage('b', scheduledAt: DateTime.utc(2026, 11, 2, 9), createdAt: DateTime.utc(2026, 10, 29)),
-          scheduledMessage('later', scheduledAt: DateTime.utc(2026, 11, 3)),
-        ]);
+        channel.state!.updateChannelStateFromServer(
+          stateWith([
+            scheduledMessage('failed', scheduledAt: DateTime.utc(2026, 11, 1), status: ScheduledMessageStatus.failed),
+            scheduledMessage('c', scheduledAt: DateTime.utc(2026, 11, 2, 9), createdAt: DateTime.utc(2026, 10, 29)),
+            scheduledMessage('d', scheduledAt: DateTime.utc(2026, 11, 2, 9), createdAt: DateTime.utc(2026, 10, 28)),
+            scheduledMessage('b', scheduledAt: DateTime.utc(2026, 11, 2, 9), createdAt: DateTime.utc(2026, 10, 29)),
+            scheduledMessage('later', scheduledAt: DateTime.utc(2026, 11, 3)),
+          ]),
+        );
 
         expect(channel.state!.scheduledMessages.map((it) => it.id), ['b', 'c', 'd', 'later', 'failed']);
       });
@@ -145,42 +149,6 @@ void main() {
         );
         await Future<void>.delayed(Duration.zero);
         expect(channel.state!.scheduledMessages, isEmpty);
-      });
-
-      test('are loaded again when the connection recovers', () async {
-        when(
-          () => client.queryScheduledMessages(cid: cid),
-        ).thenAnswer(
-          (_) async => QueryScheduledMessagesResponse()
-            ..scheduledMessages = [scheduledMessage('missed')]
-            ..next = null,
-        );
-        channel.state!.updateChannelStateFromServer(stateWith([]));
-
-        client.addEvent(Event(type: EventType.connectionRecovered));
-        await Future<void>.delayed(Duration.zero);
-
-        expect(channel.state!.scheduledMessages.single.id, 'missed');
-      });
-
-      test('stay as they were when loading them on recovery fails', () async {
-        when(
-          () => client.queryScheduledMessages(cid: cid),
-        ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
-        channel.state!.updateChannelStateFromServer(stateWith([scheduledMessage('kept')]));
-
-        client.addEvent(Event(type: EventType.connectionRecovered));
-        await Future<void>.delayed(Duration.zero);
-
-        expect(channel.state!.scheduledMessages.single.id, 'kept');
-      });
-
-      test('are not loaded on recovery when they never were', () async {
-        clearInteractions(client);
-        client.addEvent(Event(type: EventType.connectionRecovered));
-        await Future<void>.delayed(Duration.zero);
-
-        verifyNever(() => client.queryScheduledMessages(cid: cid));
       });
     });
 

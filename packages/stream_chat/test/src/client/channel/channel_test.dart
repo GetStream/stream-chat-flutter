@@ -382,52 +382,6 @@ void main() {
         expect(channel.state!.threads['parent-id']?.single.id, 'reply-id');
         expect(channel.state!.scheduledMessages, isEmpty);
       });
-
-      test('`.queryScheduledMessages` lists them in the channel state', () async {
-        final loaded = scheduledMessageFor(Message(id: 'loaded'));
-        when(
-          () => client.queryScheduledMessages(
-            cid: channelCid,
-            pagination: any(named: 'pagination'),
-          ),
-        ).thenAnswer(
-          (_) async => QueryScheduledMessagesResponse()
-            ..scheduledMessages = [loaded]
-            ..next = null,
-        );
-
-        final result = await channel.queryScheduledMessages();
-
-        expect(result, [loaded]);
-        expect(channel.state!.scheduledMessages, [loaded]);
-      });
-
-      test('`.queryScheduledMessages` loads every page', () async {
-        final first = scheduledMessageFor(Message(id: 'first'));
-        final second = scheduledMessageFor(Message(id: 'second'));
-        when(
-          () => client.queryScheduledMessages(cid: channelCid, pagination: const PaginationParams(limit: 100)),
-        ).thenAnswer(
-          (_) async => QueryScheduledMessagesResponse()
-            ..scheduledMessages = [first]
-            ..next = 'page-2',
-        );
-        when(
-          () => client.queryScheduledMessages(
-            cid: channelCid,
-            pagination: const PaginationParams(limit: 100, next: 'page-2'),
-          ),
-        ).thenAnswer(
-          (_) async => QueryScheduledMessagesResponse()
-            ..scheduledMessages = [second]
-            ..next = null,
-        );
-
-        final result = await channel.queryScheduledMessages();
-
-        expect(result.map((it) => it.id), ['first', 'second']);
-        expect(channel.state!.scheduledMessages.map((it) => it.id), ['first', 'second']);
-      });
     });
 
     group('`.sendMessage`', () {

@@ -47,10 +47,7 @@ class ChannelClientState {
       deleteMessagesFromUser: _deleteMessagesFromUser,
     );
     final handler = ChannelEventHandler(channel: _channel, mutations: mutations);
-    _subscriptions
-      ..add(_channel.on().listen(handler.handleEvent))
-      // Events missed while offline can leave loaded scheduled messages stale.
-      ..add(_client.on(EventType.connectionRecovered).listen((_) => _reloadScheduledMessages()));
+    _subscriptions.add(_channel.on().listen(handler.handleEvent));
 
     _startCleaningStaleTypingEvents();
 
@@ -351,10 +348,9 @@ class ChannelClientState {
   /// Ordered by [ScheduledMessage.compareByListOrder], thread replies
   /// included.
   ///
-  /// Empty until loaded with [Channel.queryScheduledMessages] or a channel
-  /// query with `includeScheduledMessages`. From then on it lists each of them
-  /// as of its latest change until it is sent or deleted, and they are loaded
-  /// again when the connection recovers.
+  /// Empty until a channel query with `includeScheduledMessages` loads them.
+  /// From then on it lists each of them as of its latest change until it is
+  /// sent or deleted.
   List<ScheduledMessage> get scheduledMessages => _channelState.scheduledMessages ?? const [];
 
   /// The [scheduledMessages] as they change.
@@ -363,15 +359,6 @@ class ChannelClientState {
   Stream<List<ScheduledMessage>> get scheduledMessagesStream {
     final stream = channelStateStream.map((cs) => cs.scheduledMessages ?? const <ScheduledMessage>[]);
     return stream.distinct(const ListEquality<ScheduledMessage>().equals);
-  }
-
-  /// Sets the scheduled messages to [scheduledMessages].
-  ///
-  /// [scheduledMessages] then lists them, ordered by
-  /// [ScheduledMessage.compareByListOrder].
-  void updateScheduledMessages(List<ScheduledMessage> scheduledMessages) {
-    final sorted = MessageMerging.sortScheduledMessages(scheduledMessages);
-    _channelState = _channelState.copyWith(scheduledMessages: sorted);
   }
 
   /// Adds or updates [scheduledMessage].
@@ -393,16 +380,6 @@ class ChannelClientState {
 
     final updated = [...current]..removeAt(index);
     _channelState = _channelState.copyWith(scheduledMessages: updated);
-  }
-
-  Future<void> _reloadScheduledMessages() async {
-    if (_channelState.scheduledMessages == null) return;
-
-    try {
-      await _channel.queryScheduledMessages();
-    } catch (error, stackTrace) {
-      _client.logger.warning('Failed to reload the scheduled messages', error, stackTrace);
-    }
   }
 
   /// Channel draft.
