@@ -5,6 +5,10 @@ on:
       - opened
       - edited
       - synchronize
+      # [changelog_placement] can be waived with the `changelog-override`
+      # label, so it has to re-run when labels change.
+      - labeled
+      - unlabeled
     branches:
       - master
       - v9
@@ -42,7 +46,7 @@ jobs:
     needs: conventional_pr_title # Trigger after the [conventional_pr_title] completes
     runs-on: ubuntu-latest
     steps:
-      - uses: GetStream/verify-semantic-changelog-update@main
+      - uses: GetStream/verify-semantic-changelog-update@v1.1.0
         with:
           scopes: |
             {
@@ -54,3 +58,11 @@ jobs:
             }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # [semantic_changelog_update] checks that a changelog was updated at all; this
+  # checks that the entries went under `## Upcoming` rather than into a section
+  # for a version that is already published.
+  changelog_placement:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: GetStream/verify-semantic-changelog-update/placement@v1.1.0
