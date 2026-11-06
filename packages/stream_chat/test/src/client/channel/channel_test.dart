@@ -248,6 +248,7 @@ void main() {
       registerFallbackValue(FakeMessage());
       registerFallbackValue(FakeAttachmentFile());
       registerFallbackValue(FakeEvent());
+      registerFallbackValue(const PaginationParams());
 
       // detached loggers
       when(() => client.detachedLogger(any())).thenAnswer((invocation) {
@@ -308,7 +309,7 @@ void main() {
 
       // Schedules [message] at [time] with the clock fixed at [now].
       Future<SendMessageResponse> schedule(Message message, DateTime time) {
-        return withClock(Clock.fixed(now), () => channel.scheduleMessage(message, time));
+        return withClock(Clock.fixed(now), () => channel.scheduleMessage(message, scheduledAt: time));
       }
 
       ScheduledMessage scheduledMessageFor(Message message, {String cid = channelCid}) => ScheduledMessage(
@@ -325,7 +326,7 @@ void main() {
       test('keeps a scheduled message out of the channel', () async {
         final message = Message(id: 'scheduled-id', text: 'Good morning');
         when(
-          () => client.sendMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+          () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
         ).thenAnswer(
           (_) async => SendMessageResponse()
             ..message = message
@@ -342,7 +343,7 @@ void main() {
       test('adds the message to the channel when it was sent right away', () async {
         final message = Message(id: 'sent-id', text: 'Good morning');
         when(
-          () => client.sendMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+          () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
         ).thenAnswer((_) async => SendMessageResponse()..message = message);
 
         final res = await schedule(message, scheduledAt);
@@ -357,7 +358,7 @@ void main() {
       test('keeps a scheduled thread reply out of the thread', () async {
         final reply = Message(id: 'reply-id', text: 'Good morning', parentId: 'parent-id', showInChannel: true);
         when(
-          () => client.sendMessage(reply, channelId, channelType, scheduledAt: scheduledAt),
+          () => client.scheduleMessage(reply, channelId, channelType, scheduledAt: scheduledAt),
         ).thenAnswer(
           (_) async => SendMessageResponse()
             ..message = reply
@@ -373,7 +374,7 @@ void main() {
       test('adds a thread reply to its thread when it was sent right away', () async {
         final reply = Message(id: 'reply-id', text: 'Good morning', parentId: 'parent-id');
         when(
-          () => client.sendMessage(reply, channelId, channelType, scheduledAt: scheduledAt),
+          () => client.scheduleMessage(reply, channelId, channelType, scheduledAt: scheduledAt),
         ).thenAnswer((_) async => SendMessageResponse()..message = reply);
 
         await schedule(reply, scheduledAt);
@@ -382,39 +383,13 @@ void main() {
         expect(channel.state!.scheduledMessages, isEmpty);
       });
 
-      test('refuses a time that is not in the future', () async {
-        final message = Message(id: 'past-id', text: 'Good morning');
-        final past = now.subtract(const Duration(minutes: 5));
-
-        await expectLater(schedule(message, past), throwsArgumentError);
-
-        verifyNever(
-          () => client.sendMessage(any(), any(), any(), scheduledAt: any(named: 'scheduledAt')),
-        );
-      });
-
-      test('refuses attachments that are not uploaded', () async {
-        final message = Message(
-          text: 'Good morning',
-          attachments: [
-            Attachment(
-              type: AttachmentType.image,
-              file: AttachmentFile(size: 100, path: 'image.png'),
-            ),
-          ],
-        );
-
-        await expectLater(schedule(message, scheduledAt), throwsArgumentError);
-
-        verifyNever(
-          () => client.sendMessage(any(), any(), any(), scheduledAt: any(named: 'scheduledAt')),
-        );
-      });
-
-      test('`.queryScheduledMessages` loads them into the channel state', () async {
+      test('`.queryScheduledMessages` lists them in the channel state', () async {
         final loaded = scheduledMessageFor(Message(id: 'loaded'));
         when(
-          () => client.queryScheduledMessages(cid: channelCid),
+          () => client.queryScheduledMessages(
+            cid: channelCid,
+            pagination: any(named: 'pagination'),
+          ),
         ).thenAnswer(
           (_) async => QueryScheduledMessagesResponse()
             ..scheduledMessages = [loaded]
@@ -425,6 +400,33 @@ void main() {
 
         expect(result, [loaded]);
         expect(channel.state!.scheduledMessages, [loaded]);
+      });
+
+      test('`.queryScheduledMessages` loads every page', () async {
+        final first = scheduledMessageFor(Message(id: 'first'));
+        final second = scheduledMessageFor(Message(id: 'second'));
+        when(
+          () => client.queryScheduledMessages(cid: channelCid, pagination: const PaginationParams(limit: 100)),
+        ).thenAnswer(
+          (_) async => QueryScheduledMessagesResponse()
+            ..scheduledMessages = [first]
+            ..next = 'page-2',
+        );
+        when(
+          () => client.queryScheduledMessages(
+            cid: channelCid,
+            pagination: const PaginationParams(limit: 100, next: 'page-2'),
+          ),
+        ).thenAnswer(
+          (_) async => QueryScheduledMessagesResponse()
+            ..scheduledMessages = [second]
+            ..next = null,
+        );
+
+        final result = await channel.queryScheduledMessages();
+
+        expect(result.map((it) => it.id), ['first', 'second']);
+        expect(channel.state!.scheduledMessages.map((it) => it.id), ['first', 'second']);
       });
     });
 

@@ -49,5 +49,4 @@ Map<String, dynamic> _$ChannelStateToJson(
   'pending_messages': instance.pendingMessages?.map((e) => e.toJson()).toList(),
   'push_preferences': instance.pushPreferences?.toJson(),
   'active_live_locations': instance.activeLiveLocations?.map((e) => e.toJson()).toList(),
-  'scheduled_messages': instance.scheduledMessages?.map((e) => e.toJson()).toList(),
 };

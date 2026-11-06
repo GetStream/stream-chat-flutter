@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -4824,6 +4825,55 @@ void main() {
       ).called(1);
     });
 
+    group('`.scheduleMessage`', () {
+      final now = DateTime.utc(2026, 10, 30, 12);
+      final scheduledAt = now.add(const Duration(days: 1));
+
+      Future<SendMessageResponse> schedule(Message message, DateTime time) {
+        return withClock(
+          Clock.fixed(now),
+          () => client.scheduleMessage(message, 'general', 'messaging', scheduledAt: time),
+        );
+      }
+
+      test('schedules the message at the given time', () async {
+        final message = Message(id: 'scheduled-id', text: 'Good morning');
+        when(
+          () => api.scheduledMessages.scheduleMessage('general', 'messaging', message, scheduledAt),
+        ).thenAnswer((_) async => SendMessageResponse()..message = message);
+
+        await schedule(message, scheduledAt);
+
+        verify(
+          () => api.scheduledMessages.scheduleMessage('general', 'messaging', message, scheduledAt),
+        ).called(1);
+      });
+
+      test('refuses a time that is not in the future', () async {
+        clearInteractions(api.scheduledMessages);
+        final past = now.subtract(const Duration(minutes: 5));
+
+        await expectLater(schedule(Message(text: 'Good morning'), past), throwsArgumentError);
+        verifyZeroInteractions(api.scheduledMessages);
+      });
+
+      test('refuses attachments that are not uploaded', () async {
+        clearInteractions(api.scheduledMessages);
+        final message = Message(
+          text: 'Good morning',
+          attachments: [
+            Attachment(
+              type: AttachmentType.image,
+              file: AttachmentFile(size: 100, path: 'image.png'),
+            ),
+          ],
+        );
+
+        await expectLater(schedule(message, scheduledAt), throwsArgumentError);
+        verifyZeroInteractions(api.scheduledMessages);
+      });
+    });
+
     test('`.queryScheduledMessages` refuses statuses that are never listed', () {
       expect(
         () => client.queryScheduledMessages(statuses: [ScheduledMessageStatus.sent]),
@@ -4837,7 +4887,7 @@ void main() {
         () => api.scheduledMessages.updateScheduledMessage('scheduled-id', scheduledAt: scheduledAt),
       ).thenAnswer((_) async => ScheduledMessageResponse());
 
-      await client.rescheduleMessage('scheduled-id', scheduledAt);
+      await client.rescheduleMessage('scheduled-id', scheduledAt: scheduledAt);
 
       verify(
         () => api.scheduledMessages.updateScheduledMessage('scheduled-id', scheduledAt: scheduledAt),
@@ -4885,7 +4935,7 @@ void main() {
           () => api.scheduledMessages.updateScheduledMessage('scheduled-id', scheduledAt: scheduledAt),
         ).thenAnswer((_) async => throw missing);
 
-        await expectLater(client.rescheduleMessage('scheduled-id', scheduledAt), throwsA(missing));
+        await expectLater(client.rescheduleMessage('scheduled-id', scheduledAt: scheduledAt), throwsA(missing));
         expect(channel.state!.scheduledMessages, isEmpty);
       });
 
@@ -4906,6 +4956,21 @@ void main() {
         await expectLater(client.sendScheduledMessageNow('scheduled-id'), throwsA(missing));
         expect(channel.state!.scheduledMessages, isEmpty);
       });
+
+      for (final (refusal, code) in [
+        ('already sent', 123),
+        ('deleted', 124),
+      ]) {
+        test('is removed from its channel when refused as $refusal', () async {
+          final error = StreamChatNetworkError.raw(code: code, message: 'Refused', statusCode: 400);
+          when(
+            () => api.scheduledMessages.sendScheduledMessageNow('scheduled-id'),
+          ).thenAnswer((_) async => throw error);
+
+          await expectLater(client.sendScheduledMessageNow('scheduled-id'), throwsA(error));
+          expect(channel.state!.scheduledMessages, isEmpty);
+        });
+      }
 
       test('stays in its channel when the request fails otherwise', () async {
         final error = StreamChatNetworkError(ChatErrorCode.inputError, statusCode: 400);

@@ -6,21 +6,51 @@ import '../models/scheduled_message.dart';
 import 'requests.dart';
 import 'responses.dart';
 
-/// Defines the api dedicated to scheduled messages operations
+/// The API for scheduled message requests.
 class ScheduledMessagesApi {
-  /// Initialize a new scheduled messages api
+  /// Creates a scheduled messages API.
   const ScheduledMessagesApi(this._client);
 
   final StreamHttpClient _client;
 
-  /// Returns a page of the current user's scheduled messages, scheduled and
-  /// sending ones first, then failed ones, each by
-  /// [ScheduledMessage.scheduledAt].
+  /// Schedules [message] to be sent at [scheduledAt].
   ///
-  /// The page holds only messages in the channel [cid] when given, and only
-  /// messages with one of [statuses] when given. The [pagination] sets the
-  /// page size, and its `next` cursor from a previous page gets the page after
-  /// it.
+  /// The message goes to the channel [channelId] of [channelType].
+  ///
+  /// If [scheduledAt] has passed by the time the message is scheduled, the
+  /// message is sent right away and [SendMessageResponse.scheduledMessage] is
+  /// null.
+  Future<SendMessageResponse> scheduleMessage(
+    String channelId,
+    String channelType,
+    Message message,
+    DateTime scheduledAt, {
+    bool skipPush = false,
+    bool skipEnrichUrl = false,
+  }) async {
+    final response = await _client.post(
+      '/channels/$channelType/$channelId/message',
+      data: {
+        'message': message,
+        'skip_push': skipPush,
+        'skip_enrich_url': skipEnrichUrl,
+        'scheduled_at': scheduledAt.toUtc().toIso8601String(),
+      },
+    );
+
+    return SendMessageResponse.fromJson(response.data);
+  }
+
+  /// Queries a page of the current user's scheduled messages.
+  ///
+  /// The page lists the scheduled and sending ones first, then the failed ones,
+  /// each by [ScheduledMessage.scheduledAt].
+  ///
+  /// If [cid] is given, the page lists only the ones in that channel. If
+  /// [statuses] is given, it lists only the ones with one of those statuses.
+  ///
+  /// The [pagination] sets the page size, and its `next` cursor from a previous
+  /// page gets the page after it.
   Future<QueryScheduledMessagesResponse> queryScheduledMessages({
     String? cid,
     List<ScheduledMessageStatus>? statuses,
@@ -40,8 +70,10 @@ class ScheduledMessagesApi {
     return QueryScheduledMessagesResponse.fromJson(response.data);
   }
 
-  /// Replaces the scheduled message [id] with [message], moves it to
-  /// [scheduledAt], or both.
+  /// Changes the scheduled message [id].
+  ///
+  /// Its message is replaced with [message] and its time moved to
+  /// [scheduledAt], whichever of them are given.
   Future<ScheduledMessageResponse> updateScheduledMessage(
     String id, {
     Message? message,
@@ -50,13 +82,7 @@ class ScheduledMessagesApi {
     final response = await _client.patch(
       '/scheduled_messages/$id',
       data: jsonEncode({
-        if (message != null)
-          'message': {
-            ...message.toJson(),
-            // Every mentioned user is kept, whether or not the text mentions
-            // them by name.
-            'mentioned_users': [for (final user in message.mentionedUsers) user.id],
-          },
+        if (message != null) 'message': message,
         if (scheduledAt != null) 'scheduled_at': scheduledAt.toUtc().toIso8601String(),
       }),
     );

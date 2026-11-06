@@ -183,8 +183,7 @@ class EventType {
   /// Event sent when a scheduled message of the current user is sent.
   static const String scheduledMessageSent = 'scheduled_message.sent';
 
-  /// Event sent when a scheduled message of the current user could not be
-  /// sent.
+  /// Event sent when a scheduled message of the current user fails.
   static const String scheduledMessageFailed = 'scheduled_message.failed';
 
   /// Event sent when a new shared location is created.

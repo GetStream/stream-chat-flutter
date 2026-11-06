@@ -44,19 +44,20 @@ class MessageMerging {
     return bPinnedAt.compareTo(aPinnedAt);
   }
 
-  /// Orders scheduled messages by [ScheduledMessage.scheduledAt], earliest
-  /// first, the order of the scheduled message merge results.
+  /// Orders scheduled messages by [ScheduledMessage.compareByListOrder].
   static int sortByScheduledAt(ScheduledMessage a, ScheduledMessage b) {
-    return a.scheduledAt.compareTo(b.scheduledAt);
+    return ScheduledMessage.compareByListOrder(a, b);
   }
 
-  /// The `update` strategy for scheduled messages: keeps whichever of
-  /// [original] and [updated] was changed last, by
-  /// [ScheduledMessage.updatedAt].
+  /// The newer of [original] and [updated], by [ScheduledMessage.updatedAt].
+  ///
+  /// A copy from the server always wins over one from this device.
   static ScheduledMessage newerScheduledMessage(
     ScheduledMessage original,
     ScheduledMessage updated,
   ) {
+    if (original.remoteUpdatedAt == null) return updated;
+    if (updated.remoteUpdatedAt == null) return original;
     return original.updatedAt.isAfter(updated.updatedAt) ? original : updated;
   }
 
@@ -70,8 +71,9 @@ class MessageMerging {
     return scheduledMessages.sortedWith(sortByScheduledAt);
   }
 
-  /// Merges [toMerge] into the [existing] scheduled messages, keeping the
-  /// newer copy of each (see [newerScheduledMessage]).
+  /// Merges [toMerge] into the [existing] scheduled messages.
+  ///
+  /// Of two with the same ID, the one [newerScheduledMessage] picks is used.
   ///
   /// The result is ordered by [sortByScheduledAt], which [existing] must
   /// already be sorted by.

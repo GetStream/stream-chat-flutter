@@ -19,7 +19,7 @@ void main() {
     'id': 'scheduled-id',
     'cid': 'messaging:general',
     'user': {'id': 'alice'},
-    'message': {'text': 'Good morning', 'custom': <String, dynamic>{}},
+    'message': {'text': 'Good morning'},
     'scheduled_at': '2026-11-02T09:00:00.000Z',
     'status': 'scheduled',
     'created_at': '2026-10-29T10:00:00.000Z',
@@ -34,6 +34,43 @@ void main() {
   });
 
   tearDown(() => reset(client));
+
+  group('scheduleMessage', () {
+    const path = '/channels/messaging/general/message';
+    final message = Message(id: 'scheduled-id', text: 'Good morning');
+
+    test('sends the message with the time in UTC', () async {
+      when(
+        () => client.post(
+          path,
+          data: {
+            'message': message,
+            'skip_push': false,
+            'skip_enrich_url': false,
+            'scheduled_at': '2026-11-02T09:00:00.000Z',
+          },
+        ),
+      ).thenAnswer(
+        (_) async => successResponse(
+          path,
+          data: {
+            'message': message.toJson(),
+            'scheduled_message': scheduledMessageJson,
+          },
+        ),
+      );
+
+      final response = await scheduledMessagesApi.scheduleMessage(
+        'general',
+        'messaging',
+        message,
+        DateTime.utc(2026, 11, 2, 9).toLocal(),
+      );
+
+      expect(response.scheduledMessage?.id, 'scheduled-id');
+      expect(response.scheduledMessage?.scheduledAt, DateTime.utc(2026, 11, 2, 9));
+    });
+  });
 
   group('queryScheduledMessages', () {
     const path = '/scheduled_messages/query';
@@ -90,10 +127,7 @@ void main() {
       );
       final scheduledAt = DateTime.utc(2026, 11, 2, 18);
       final payload = jsonEncode({
-        'message': {
-          ...message.toJson(),
-          'mentioned_users': ['bob'],
-        },
+        'message': message.toJson(),
         'scheduled_at': '2026-11-02T18:00:00.000Z',
       });
       when(() => client.patch(path, data: payload)).thenAnswer(

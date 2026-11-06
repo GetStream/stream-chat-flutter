@@ -181,10 +181,11 @@ class Event {
   /// The message reminder sent with the event.
   final MessageReminder? reminder;
 
-  /// The scheduled message sent with the event.
+  /// The scheduled message this event is about.
   ///
   /// On [EventType.scheduledMessageSent], [messageId] is the ID of the sent
   /// message.
+  @JsonKey(includeToJson: false)
   final ScheduledMessage? scheduledMessage;
 
   /// Push notification preferences for the current user.

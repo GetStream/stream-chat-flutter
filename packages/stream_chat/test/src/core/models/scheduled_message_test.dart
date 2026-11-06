@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -13,11 +14,11 @@ void main() {
     'message':
         message ??
         {
-          'text': 'Good morning @Bob',
+          'text': 'Good morning @bob',
           'parent_id': 'parent-id',
           'show_in_channel': true,
           'mentioned_users': ['bob'],
-          'custom': {'mood': 'happy'},
+          'mood': 'happy',
         },
     'scheduled_at': '2026-11-02T09:00:00.000Z',
     'status': status,
@@ -46,9 +47,16 @@ void main() {
 
       expect(message.id, 'scheduled-id');
       expect(message.user?.id, 'alice');
-      expect(message.text, 'Good morning @Bob');
+      expect(message.text, 'Good morning @bob');
       expect(message.parentId, 'parent-id');
       expect(message.showInChannel, isTrue);
+    });
+
+    test('dates the message by when it is sent and last changed', () {
+      final message = ScheduledMessage.fromJson(scheduledMessageJson()).message;
+
+      expect(message.createdAt, DateTime.utc(2026, 11, 2, 9));
+      expect(message.updatedAt, DateTime.utc(2026, 10, 29, 10, 5));
     });
 
     test('turns mentioned user IDs into users', () {
@@ -57,10 +65,25 @@ void main() {
       expect(message.mentionedUsers.map((user) => user.id), ['bob']);
     });
 
-    test('reads nested custom data as extra data', () {
+    test('reads custom data as extra data', () {
       final message = ScheduledMessage.fromJson(scheduledMessageJson()).message;
 
       expect(message.extraData, {'mood': 'happy'});
+    });
+
+    test('keeps a custom field named custom as it is', () {
+      final json = scheduledMessageJson(
+        message: {
+          'text': 'Good morning',
+          'custom': {'mood': 'happy'},
+        },
+      );
+
+      final message = ScheduledMessage.fromJson(json).message;
+
+      expect(message.extraData, {
+        'custom': {'mood': 'happy'},
+      });
     });
 
     test('keeps a status it does not name', () {
@@ -77,15 +100,80 @@ void main() {
       'channel': const {'cid': 'messaging:general', 'type': 'messaging', 'id': 'general', 'name': 'Renamed'},
     });
 
-    expect(ScheduledMessage.fromJson(scheduledMessageJson()), scheduledMessage);
     expect(renamed, isNot(scheduledMessage));
   });
 
-  test('ScheduledMessage survives a JSON round trip', () {
+  test('ScheduledMessage reads the same JSON the same way twice', () {
+    final first = ScheduledMessage.fromJson(scheduledMessageJson());
+    final second = ScheduledMessage.fromJson(scheduledMessageJson());
+
+    expect(second, first);
+    expect(second.message, first.message);
+  });
+
+  test('ScheduledMessage takes its dates from the server', () {
     final scheduledMessage = ScheduledMessage.fromJson(scheduledMessageJson());
 
-    final restored = ScheduledMessage.fromJson(scheduledMessage.toJson());
+    expect(scheduledMessage.remoteCreatedAt, DateTime.utc(2026, 10, 29, 10));
+    expect(scheduledMessage.remoteUpdatedAt, DateTime.utc(2026, 10, 29, 10, 5));
+    expect(scheduledMessage.localCreatedAt, isNull);
+    expect(scheduledMessage.localUpdatedAt, isNull);
+  });
 
-    expect(restored, scheduledMessage);
+  test('ScheduledMessage without server dates is dated on this device', () {
+    final scheduledMessage = ScheduledMessage(
+      cid: 'messaging:general',
+      user: User(id: 'alice'),
+      message: Message(id: 'message-id', text: 'Good morning'),
+      scheduledAt: DateTime.utc(2026, 11, 2, 9),
+      status: ScheduledMessageStatus.scheduled,
+      localCreatedAt: DateTime.utc(2026, 10, 29, 10),
+      localUpdatedAt: DateTime.utc(2026, 10, 29, 10, 5),
+    );
+
+    expect(scheduledMessage.id, 'message-id');
+    expect(scheduledMessage.createdAt, DateTime.utc(2026, 10, 29, 10));
+    expect(scheduledMessage.updatedAt, DateTime.utc(2026, 10, 29, 10, 5));
+  });
+
+  group('ScheduledMessage.compareByListOrder', () {
+    ScheduledMessage scheduled(
+      String id, {
+      required DateTime scheduledAt,
+      DateTime? createdAt,
+      ScheduledMessageStatus status = ScheduledMessageStatus.scheduled,
+    }) => ScheduledMessage(
+      id: id,
+      cid: 'messaging:general',
+      user: User(id: 'alice'),
+      message: Message(id: id, text: 'Good morning'),
+      scheduledAt: scheduledAt,
+      status: status,
+      createdAt: createdAt ?? DateTime.utc(2026, 10, 29),
+      updatedAt: DateTime.utc(2026, 10, 29),
+    );
+
+    List<String> ordered(List<ScheduledMessage> messages) {
+      return [for (final it in messages.sorted(ScheduledMessage.compareByListOrder)) it.id];
+    }
+
+    test('puts a failed message after a later scheduled one', () {
+      final failed = scheduled(
+        'failed',
+        scheduledAt: DateTime.utc(2026, 11, 1),
+        status: ScheduledMessageStatus.failed,
+      );
+      final later = scheduled('later', scheduledAt: DateTime.utc(2026, 11, 3));
+
+      expect(ordered([failed, later]), ['later', 'failed']);
+    });
+
+    test('orders ones due at the same time by ID', () {
+      final due = DateTime.utc(2026, 11, 2, 9);
+      final b = scheduled('b', scheduledAt: due, createdAt: DateTime.utc(2026, 10, 28));
+      final a = scheduled('a', scheduledAt: due, createdAt: DateTime.utc(2026, 10, 29));
+
+      expect(ordered([b, a]), ['a', 'b']);
+    });
   });
 }

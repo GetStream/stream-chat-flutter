@@ -105,7 +105,6 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
   'last_read_message_id': ?instance.lastReadMessageId,
   'draft': ?instance.draft?.toJson(),
   'reminder': ?instance.reminder?.toJson(),
-  'scheduled_message': ?instance.scheduledMessage?.toJson(),
   'push_preference': ?instance.pushPreference?.toJson(),
   'channel_push_preference': ?instance.channelPushPreference?.toJson(),
   'channel_member_count': ?instance.channelMemberCount,

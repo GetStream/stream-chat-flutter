@@ -346,28 +346,37 @@ class ChannelClientState {
   Stream<List<Location>> get activeLiveLocationsStream =>
       channelStateStream.map((cs) => cs.activeLiveLocations ?? <Location>[]).distinct(const ListEquality().equals);
 
-  /// The current user's scheduled messages in this channel that are not sent
-  /// yet, earliest first.
+  /// The current user's unsent scheduled messages in this channel.
+  ///
+  /// Ordered by [ScheduledMessage.compareByListOrder], thread replies
+  /// included.
   ///
   /// Empty until loaded with [Channel.queryScheduledMessages] or a channel
-  /// query with `includeScheduledMessages`. Once loaded, they are kept current
-  /// and loaded again when the connection recovers.
+  /// query with `includeScheduledMessages`. From then on it lists each of them
+  /// as of its latest change until it is sent or deleted, and they are loaded
+  /// again when the connection recovers.
   List<ScheduledMessage> get scheduledMessages => _channelState.scheduledMessages ?? const [];
 
-  /// The [scheduledMessages] as a stream.
+  /// The [scheduledMessages] as they change.
+  ///
+  /// Emits the current value on listen, then a new value each time they change.
   Stream<List<ScheduledMessage>> get scheduledMessagesStream {
     final stream = channelStateStream.map((cs) => cs.scheduledMessages ?? const <ScheduledMessage>[]);
     return stream.distinct(const ListEquality<ScheduledMessage>().equals);
   }
 
-  /// Replaces the scheduled messages with [scheduledMessages].
+  /// Sets the scheduled messages to [scheduledMessages].
+  ///
+  /// [scheduledMessages] then lists them, ordered by
+  /// [ScheduledMessage.compareByListOrder].
   void updateScheduledMessages(List<ScheduledMessage> scheduledMessages) {
     final sorted = MessageMerging.sortScheduledMessages(scheduledMessages);
     _channelState = _channelState.copyWith(scheduledMessages: sorted);
   }
 
-  /// Adds the [scheduledMessage], or replaces the one with its ID unless that
-  /// one is newer.
+  /// Adds or updates [scheduledMessage].
+  ///
+  /// It takes the place of the one with its ID, unless that one changed later.
   void updateScheduledMessage(ScheduledMessage scheduledMessage) {
     final updated = MessageMerging.mergeScheduledMessages(
       existing: scheduledMessages,
