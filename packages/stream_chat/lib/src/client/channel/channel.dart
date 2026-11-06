@@ -2271,7 +2271,9 @@ class Channel {
 
     try {
       // With preferOffline, the channel state is read from the offline storage
-      // first. That storage has no scheduled messages.
+      // first.
+      // TODO: Drop the includeScheduledMessages check once the offline storage
+      //  keeps scheduled messages.
       if (preferOffline && !watch && !includeScheduledMessages && cid != null) {
         final persistenceClient = _client.chatPersistenceClient;
         if (persistenceClient != null) {
