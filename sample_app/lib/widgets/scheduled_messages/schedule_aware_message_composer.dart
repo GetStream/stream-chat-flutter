@@ -116,30 +116,15 @@ void _openScheduledMessages(BuildContext context, Channel channel) {
   );
 }
 
-class _ScheduledMessagesPill extends StatefulWidget {
+class _ScheduledMessagesPill extends StatelessWidget {
   const _ScheduledMessagesPill({required this.channel, required this.isFloating});
 
   final Channel channel;
   final bool isFloating;
 
   @override
-  State<_ScheduledMessagesPill> createState() => _ScheduledMessagesPillState();
-}
-
-class _ScheduledMessagesPillState extends State<_ScheduledMessagesPill> {
-  late final _state = widget.channel.state!;
-
-  @override
-  void initState() {
-    super.initState();
-    // The channel keeps its scheduled messages current once loaded, so they
-    // are loaded the first time only.
-    if (_state.channelState.scheduledMessages != null) return;
-    widget.channel.queryScheduledMessages().ignore();
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final state = channel.state!;
     final icons = context.streamIcons;
     final spacing = context.streamSpacing;
     final radius = context.streamRadius;
@@ -147,8 +132,8 @@ class _ScheduledMessagesPillState extends State<_ScheduledMessagesPill> {
     final colorScheme = context.streamColorScheme;
 
     return StreamBuilder(
-      stream: _state.scheduledMessagesStream,
-      initialData: _state.scheduledMessages,
+      stream: state.scheduledMessagesStream,
+      initialData: state.scheduledMessages,
       builder: (context, snapshot) {
         final count = snapshot.data?.length ?? 0;
         if (count == 0) return const SizedBox.shrink();
@@ -157,14 +142,14 @@ class _ScheduledMessagesPillState extends State<_ScheduledMessagesPill> {
           padding: EdgeInsets.fromLTRB(spacing.sm, spacing.xs, spacing.sm, 0),
           child: Material(
             color: colorScheme.backgroundElevation1,
-            elevation: widget.isFloating ? context.streamElevation.level2 : 0,
+            elevation: isFloating ? context.streamElevation.level2 : 0,
             shape: RoundedSuperellipseBorder(
               borderRadius: .all(radius.max),
               side: BorderSide(color: colorScheme.borderDefault),
             ),
             clipBehavior: .antiAlias,
             child: InkWell(
-              onTap: () => _openScheduledMessages(context, widget.channel),
+              onTap: () => _openScheduledMessages(context, channel),
               child: Padding(
                 padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
                 child: Row(
