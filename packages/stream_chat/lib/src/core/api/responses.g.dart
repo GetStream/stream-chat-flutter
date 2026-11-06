@@ -391,9 +391,25 @@ ScheduleMessageResponse _$ScheduleMessageResponseFromJson(
           json['scheduled_message'] as Map<String, dynamic>,
         );
 
-ScheduledMessageResponse _$ScheduledMessageResponseFromJson(
+UpdateScheduledMessageResponse _$UpdateScheduledMessageResponseFromJson(
   Map<String, dynamic> json,
-) => ScheduledMessageResponse()
+) => UpdateScheduledMessageResponse()
+  ..duration = json['duration'] as String?
+  ..scheduledMessage = ScheduledMessage.fromJson(
+    json['scheduled_message'] as Map<String, dynamic>,
+  );
+
+DeleteScheduledMessageResponse _$DeleteScheduledMessageResponseFromJson(
+  Map<String, dynamic> json,
+) => DeleteScheduledMessageResponse()
+  ..duration = json['duration'] as String?
+  ..scheduledMessage = ScheduledMessage.fromJson(
+    json['scheduled_message'] as Map<String, dynamic>,
+  );
+
+SendScheduledMessageNowResponse _$SendScheduledMessageNowResponseFromJson(
+  Map<String, dynamic> json,
+) => SendScheduledMessageNowResponse()
   ..duration = json['duration'] as String?
   ..scheduledMessage = ScheduledMessage.fromJson(
     json['scheduled_message'] as Map<String, dynamic>,

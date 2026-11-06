@@ -2520,7 +2520,7 @@ class StreamChatClient {
   /// Throws a [StreamChatNetworkError] if the request fails, for example with
   /// [ScheduledMessageErrorReason.scheduledAtTooSoon] for a [scheduledAt] that
   /// is not in the future, and even when the scheduled message is already gone.
-  Future<ScheduledMessageResponse> updateScheduledMessage(
+  Future<UpdateScheduledMessageResponse> updateScheduledMessage(
     ScheduledMessage scheduledMessage,
     Message message, {
     DateTime? scheduledAt,
@@ -2548,7 +2548,7 @@ class StreamChatClient {
   /// Throws a [StreamChatNetworkError] if the request fails, for example with
   /// [ScheduledMessageErrorReason.scheduledAtTooSoon] for a [scheduledAt] that
   /// is not in the future, and even when the scheduled message is already gone.
-  Future<ScheduledMessageResponse> rescheduleMessage(
+  Future<UpdateScheduledMessageResponse> rescheduleMessage(
     ScheduledMessage scheduledMessage, {
     required DateTime scheduledAt,
   }) {
@@ -2571,7 +2571,7 @@ class StreamChatClient {
   ///
   /// Throws a [StreamChatNetworkError] if the request fails, even when the
   /// scheduled message is already gone.
-  Future<ScheduledMessageResponse> deleteScheduledMessage(ScheduledMessage scheduledMessage) {
+  Future<DeleteScheduledMessageResponse> deleteScheduledMessage(ScheduledMessage scheduledMessage) {
     final response = _chatApi.scheduledMessages.deleteScheduledMessage(scheduledMessage.id);
     return _removeScheduledMessageIfMissing(scheduledMessage, response);
   }
@@ -2587,16 +2587,16 @@ class StreamChatClient {
   ///
   /// Throws a [StreamChatNetworkError] if the request fails, even when the
   /// scheduled message is already gone.
-  Future<ScheduledMessageResponse> sendScheduledMessageNow(ScheduledMessage scheduledMessage) {
+  Future<SendScheduledMessageNowResponse> sendScheduledMessageNow(ScheduledMessage scheduledMessage) {
     final response = _chatApi.scheduledMessages.sendScheduledMessageNow(scheduledMessage.id);
     return _removeScheduledMessageIfMissing(scheduledMessage, response);
   }
 
   // Reports a scheduled message that no longer exists, or was already sent or
   // deleted, as deleted: its own event may have been missed.
-  Future<ScheduledMessageResponse> _removeScheduledMessageIfMissing(
+  Future<T> _removeScheduledMessageIfMissing<T>(
     ScheduledMessage scheduledMessage,
-    Future<ScheduledMessageResponse> response,
+    Future<T> response,
   ) async {
     try {
       return await response;

@@ -74,7 +74,7 @@ class ScheduledMessagesApi {
   ///
   /// Its message is replaced with [message] and its time moved to
   /// [scheduledAt], whichever of them are given.
-  Future<ScheduledMessageResponse> updateScheduledMessage(
+  Future<UpdateScheduledMessageResponse> updateScheduledMessage(
     String id, {
     Message? message,
     DateTime? scheduledAt,
@@ -87,20 +87,20 @@ class ScheduledMessagesApi {
       }),
     );
 
-    return ScheduledMessageResponse.fromJson(response.data);
+    return UpdateScheduledMessageResponse.fromJson(response.data);
   }
 
   /// Deletes the scheduled message [id] before it is sent.
-  Future<ScheduledMessageResponse> deleteScheduledMessage(String id) async {
+  Future<DeleteScheduledMessageResponse> deleteScheduledMessage(String id) async {
     final response = await _client.delete('/scheduled_messages/$id');
 
-    return ScheduledMessageResponse.fromJson(response.data);
+    return DeleteScheduledMessageResponse.fromJson(response.data);
   }
 
   /// Sends the scheduled message [id] right away.
-  Future<ScheduledMessageResponse> sendScheduledMessageNow(String id) async {
+  Future<SendScheduledMessageNowResponse> sendScheduledMessageNow(String id) async {
     final response = await _client.post('/scheduled_messages/$id/send_now');
 
-    return ScheduledMessageResponse.fromJson(response.data);
+    return SendScheduledMessageNowResponse.fromJson(response.data);
   }
 }

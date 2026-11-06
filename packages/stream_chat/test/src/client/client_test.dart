@@ -4894,7 +4894,7 @@ void main() {
       final scheduledAt = DateTime.utc(2026, 11, 3, 9);
       when(
         () => api.scheduledMessages.updateScheduledMessage('scheduled-id', scheduledAt: scheduledAt),
-      ).thenAnswer((_) async => ScheduledMessageResponse());
+      ).thenAnswer((_) async => UpdateScheduledMessageResponse());
 
       await client.rescheduleMessage(scheduledMessage, scheduledAt: scheduledAt);
 
