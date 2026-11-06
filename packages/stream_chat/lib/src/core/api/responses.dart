@@ -777,14 +777,36 @@ class ScheduleMessageResponse extends MessageResponse {
   static ScheduleMessageResponse fromJson(Map<String, dynamic> json) => _$ScheduleMessageResponseFromJson(json);
 }
 
-/// Model response for the API calls that change a [ScheduledMessage].
-@JsonSerializable(createToJson: false)
-class ScheduledMessageResponse extends _BaseResponse {
-  /// The scheduled message after the change.
+// The scheduled message shared by the responses of the calls that change one.
+class _ScheduledMessageBaseResponse extends _BaseResponse {
+  /// The scheduled message after the call.
   late ScheduledMessage scheduledMessage;
+}
 
+/// Model response for the [StreamChatClient.updateScheduledMessage] and
+/// [StreamChatClient.rescheduleMessage] API calls.
+@JsonSerializable(createToJson: false)
+class UpdateScheduledMessageResponse extends _ScheduledMessageBaseResponse {
   /// Creates a new instance from [json].
-  static ScheduledMessageResponse fromJson(Map<String, dynamic> json) => _$ScheduledMessageResponseFromJson(json);
+  static UpdateScheduledMessageResponse fromJson(Map<String, dynamic> json) =>
+      _$UpdateScheduledMessageResponseFromJson(json);
+}
+
+/// Model response for the [StreamChatClient.deleteScheduledMessage] API call.
+@JsonSerializable(createToJson: false)
+class DeleteScheduledMessageResponse extends _ScheduledMessageBaseResponse {
+  /// Creates a new instance from [json].
+  static DeleteScheduledMessageResponse fromJson(Map<String, dynamic> json) =>
+      _$DeleteScheduledMessageResponseFromJson(json);
+}
+
+/// Model response for the [StreamChatClient.sendScheduledMessageNow] API
+/// call.
+@JsonSerializable(createToJson: false)
+class SendScheduledMessageNowResponse extends _ScheduledMessageBaseResponse {
+  /// Creates a new instance from [json].
+  static SendScheduledMessageNowResponse fromJson(Map<String, dynamic> json) =>
+      _$SendScheduledMessageNowResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.getUnreadCount] api call
