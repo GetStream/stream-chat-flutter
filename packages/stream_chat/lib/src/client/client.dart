@@ -2475,11 +2475,11 @@ class StreamChatClient {
   /// The [scheduledAt] is rounded up to a whole minute, at least
   /// [ChannelConfig.scheduledMessagesMinLeadTime] from now. If it has passed by
   /// the time the message is scheduled, the message is sent right away and
-  /// [SendMessageResponse.scheduledMessage] is null.
+  /// [ScheduleMessageResponse.scheduledMessage] is null.
   ///
   /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
   /// attachment of [message] is not uploaded yet.
-  Future<SendMessageResponse> scheduleMessage(
+  Future<ScheduleMessageResponse> scheduleMessage(
     Message message,
     String channelId,
     String channelType, {
@@ -2505,7 +2505,7 @@ class StreamChatClient {
     );
   }
 
-  /// Edits the scheduled message [id].
+  /// Edits [scheduledMessage].
   ///
   /// Its message is replaced with [message]. If [scheduledAt] is given, it is
   /// moved to that time, rounded up to a whole minute, at least
@@ -2514,26 +2514,27 @@ class StreamChatClient {
   /// A failed scheduled message can't be edited, only deleted.
   ///
   /// If the scheduled message no longer exists, or was already sent or deleted,
+  /// an [EventType.scheduledMessageDeleted] event reports it, so
   /// [ChannelClientState.scheduledMessages] stops listing it.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails, for example with
   /// [ScheduledMessageErrorReason.scheduledAtTooSoon] for a [scheduledAt] that
   /// is not in the future, and even when the scheduled message is already gone.
   Future<ScheduledMessageResponse> updateScheduledMessage(
-    String id,
+    ScheduledMessage scheduledMessage,
     Message message, {
     DateTime? scheduledAt,
   }) {
     final response = _chatApi.scheduledMessages.updateScheduledMessage(
-      id,
+      scheduledMessage.id,
       message: message,
       scheduledAt: scheduledAt,
     );
 
-    return _removeScheduledMessageIfMissing(id, response);
+    return _removeScheduledMessageIfMissing(scheduledMessage, response);
   }
 
-  /// Moves the scheduled message [id] to [scheduledAt].
+  /// Moves [scheduledMessage] to [scheduledAt].
   ///
   /// Its message stays as it is. The [scheduledAt] is rounded up to a whole
   /// minute, at least [ChannelConfig.scheduledMessagesMinLeadTime] from now.
@@ -2541,67 +2542,73 @@ class StreamChatClient {
   /// A failed scheduled message can't be rescheduled, only deleted.
   ///
   /// If the scheduled message no longer exists, or was already sent or deleted,
+  /// an [EventType.scheduledMessageDeleted] event reports it, so
   /// [ChannelClientState.scheduledMessages] stops listing it.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails, for example with
   /// [ScheduledMessageErrorReason.scheduledAtTooSoon] for a [scheduledAt] that
   /// is not in the future, and even when the scheduled message is already gone.
   Future<ScheduledMessageResponse> rescheduleMessage(
-    String id, {
+    ScheduledMessage scheduledMessage, {
     required DateTime scheduledAt,
   }) {
     final response = _chatApi.scheduledMessages.updateScheduledMessage(
-      id,
+      scheduledMessage.id,
       scheduledAt: scheduledAt,
     );
 
-    return _removeScheduledMessageIfMissing(id, response);
+    return _removeScheduledMessageIfMissing(scheduledMessage, response);
   }
 
-  /// Deletes the scheduled message [id] before it is sent.
+  /// Deletes [scheduledMessage] before it is sent.
   ///
   /// Deleting is the only change a failed scheduled message allows.
   ///
   /// [ChannelClientState.scheduledMessages] stops listing it once it is
-  /// deleted, and also when the request finds that it no longer exists or was
-  /// already sent or deleted.
+  /// deleted. If it no longer exists, or was already sent or deleted, an
+  /// [EventType.scheduledMessageDeleted] event reports it, so it stops being
+  /// listed too.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails, even when the
   /// scheduled message is already gone.
-  Future<ScheduledMessageResponse> deleteScheduledMessage(String id) {
-    final response = _chatApi.scheduledMessages.deleteScheduledMessage(id);
-    return _removeScheduledMessageIfMissing(id, response);
+  Future<ScheduledMessageResponse> deleteScheduledMessage(ScheduledMessage scheduledMessage) {
+    final response = _chatApi.scheduledMessages.deleteScheduledMessage(scheduledMessage.id);
+    return _removeScheduledMessageIfMissing(scheduledMessage, response);
   }
 
-  /// Sends the scheduled message [id] right away.
+  /// Sends [scheduledMessage] right away.
   ///
   /// The returned scheduled message can still be waiting to go out. An
   /// [EventType.scheduledMessageSent] event follows once it has been sent.
   ///
   /// If the scheduled message no longer exists, or was already sent or deleted,
+  /// an [EventType.scheduledMessageDeleted] event reports it, so
   /// [ChannelClientState.scheduledMessages] stops listing it.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails, even when the
   /// scheduled message is already gone.
-  Future<ScheduledMessageResponse> sendScheduledMessageNow(String id) {
-    final response = _chatApi.scheduledMessages.sendScheduledMessageNow(id);
-    return _removeScheduledMessageIfMissing(id, response);
+  Future<ScheduledMessageResponse> sendScheduledMessageNow(ScheduledMessage scheduledMessage) {
+    final response = _chatApi.scheduledMessages.sendScheduledMessageNow(scheduledMessage.id);
+    return _removeScheduledMessageIfMissing(scheduledMessage, response);
   }
 
-  // A scheduled message that no longer exists, or was already sent or
-  // deleted, is removed from the channels that list it: its event may have
-  // been missed.
+  // Reports a scheduled message that no longer exists, or was already sent or
+  // deleted, as deleted: its own event may have been missed.
   Future<ScheduledMessageResponse> _removeScheduledMessageIfMissing(
-    String id,
+    ScheduledMessage scheduledMessage,
     Future<ScheduledMessageResponse> response,
   ) async {
     try {
       return await response;
     } on StreamChatNetworkError catch (error) {
       if (error.isScheduledMessageGoneError) {
-        for (final channel in state.channels.values) {
-          channel.state?.removeScheduledMessage(id);
-        }
+        final scheduledMessageDeletedEvent = Event(
+          type: EventType.scheduledMessageDeleted,
+          cid: scheduledMessage.cid,
+          scheduledMessage: scheduledMessage,
+        );
+
+        handleEvent(scheduledMessageDeletedEvent);
       }
 
       rethrow;

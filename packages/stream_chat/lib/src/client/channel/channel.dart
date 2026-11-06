@@ -900,13 +900,13 @@ class Channel {
   /// The [scheduledAt] is rounded up to a whole minute, at least
   /// [ChannelConfig.scheduledMessagesMinLeadTime] from now. If it has passed by
   /// the time the message is scheduled, the message is sent right away and
-  /// [SendMessageResponse.scheduledMessage] is null.
+  /// [ScheduleMessageResponse.scheduledMessage] is null.
   ///
   /// Also stops the current user's typing.
   ///
   /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
   /// attachment of [message] is not uploaded yet.
-  Future<SendMessageResponse> scheduleMessage(
+  Future<ScheduleMessageResponse> scheduleMessage(
     Message message, {
     required DateTime scheduledAt,
     bool skipPush = false,

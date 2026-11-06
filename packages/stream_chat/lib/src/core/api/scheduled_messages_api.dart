@@ -18,9 +18,9 @@ class ScheduledMessagesApi {
   /// The message goes to the channel [channelId] of [channelType].
   ///
   /// If [scheduledAt] has passed by the time the message is scheduled, the
-  /// message is sent right away and [SendMessageResponse.scheduledMessage] is
+  /// message is sent right away and [ScheduleMessageResponse.scheduledMessage] is
   /// null.
-  Future<SendMessageResponse> scheduleMessage(
+  Future<ScheduleMessageResponse> scheduleMessage(
     String channelId,
     String channelType,
     Message message,
@@ -38,7 +38,7 @@ class ScheduledMessagesApi {
       },
     );
 
-    return SendMessageResponse.fromJson(response.data);
+    return ScheduleMessageResponse.fromJson(response.data);
   }
 
   /// Queries a page of the current user's scheduled messages.

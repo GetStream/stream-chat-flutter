@@ -308,7 +308,7 @@ void main() {
       final scheduledAt = now.add(const Duration(days: 1));
 
       // Schedules [message] at [time] with the clock fixed at [now].
-      Future<SendMessageResponse> schedule(Message message, DateTime time) {
+      Future<ScheduleMessageResponse> schedule(Message message, DateTime time) {
         return withClock(Clock.fixed(now), () => channel.scheduleMessage(message, scheduledAt: time));
       }
 
@@ -328,7 +328,7 @@ void main() {
         when(
           () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
         ).thenAnswer(
-          (_) async => SendMessageResponse()
+          (_) async => ScheduleMessageResponse()
             ..message = message
             ..scheduledMessage = scheduledMessageFor(message),
         );
@@ -344,7 +344,7 @@ void main() {
         final message = Message(id: 'sent-id', text: 'Good morning');
         when(
           () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
-        ).thenAnswer((_) async => SendMessageResponse()..message = message);
+        ).thenAnswer((_) async => ScheduleMessageResponse()..message = message);
 
         final res = await schedule(message, scheduledAt);
 
@@ -360,7 +360,7 @@ void main() {
         when(
           () => client.scheduleMessage(reply, channelId, channelType, scheduledAt: scheduledAt),
         ).thenAnswer(
-          (_) async => SendMessageResponse()
+          (_) async => ScheduleMessageResponse()
             ..message = reply
             ..scheduledMessage = scheduledMessageFor(reply),
         );
@@ -375,7 +375,7 @@ void main() {
         final reply = Message(id: 'reply-id', text: 'Good morning', parentId: 'parent-id');
         when(
           () => client.scheduleMessage(reply, channelId, channelType, scheduledAt: scheduledAt),
-        ).thenAnswer((_) async => SendMessageResponse()..message = reply);
+        ).thenAnswer((_) async => ScheduleMessageResponse()..message = reply);
 
         await schedule(reply, scheduledAt);
 

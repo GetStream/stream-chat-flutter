@@ -129,12 +129,7 @@ UpdateMessageResponse _$UpdateMessageResponseFromJson(
 
 SendMessageResponse _$SendMessageResponseFromJson(Map<String, dynamic> json) => SendMessageResponse()
   ..duration = json['duration'] as String?
-  ..message = Message.fromJson(json['message'] as Map<String, dynamic>)
-  ..scheduledMessage = json['scheduled_message'] == null
-      ? null
-      : ScheduledMessage.fromJson(
-          json['scheduled_message'] as Map<String, dynamic>,
-        );
+  ..message = Message.fromJson(json['message'] as Map<String, dynamic>);
 
 GetMessageResponse _$GetMessageResponseFromJson(Map<String, dynamic> json) => GetMessageResponse()
   ..duration = json['duration'] as String?
@@ -384,6 +379,17 @@ QueryScheduledMessagesResponse _$QueryScheduledMessagesResponseFromJson(
           .toList() ??
       []
   ..next = json['next'] as String?;
+
+ScheduleMessageResponse _$ScheduleMessageResponseFromJson(
+  Map<String, dynamic> json,
+) => ScheduleMessageResponse()
+  ..duration = json['duration'] as String?
+  ..message = Message.fromJson(json['message'] as Map<String, dynamic>)
+  ..scheduledMessage = json['scheduled_message'] == null
+      ? null
+      : ScheduledMessage.fromJson(
+          json['scheduled_message'] as Map<String, dynamic>,
+        );
 
 ScheduledMessageResponse _$ScheduledMessageResponseFromJson(
   Map<String, dynamic> json,

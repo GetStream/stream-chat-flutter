@@ -262,12 +262,6 @@ class UpdateMessageResponse extends MessageResponse {
 /// Model response for [Channel.sendMessage] api call
 @JsonSerializable(createToJson: false)
 class SendMessageResponse extends MessageResponse {
-  /// The scheduled message created instead of sending the message.
-  ///
-  /// Null when the message was sent. When set, [message] is a preview of what
-  /// will be sent and is not in the channel yet.
-  ScheduledMessage? scheduledMessage;
-
   /// Create a new instance from a json
   static SendMessageResponse fromJson(Map<String, dynamic> json) => _$SendMessageResponseFromJson(json);
 }
@@ -768,6 +762,19 @@ class QueryScheduledMessagesResponse extends _BaseResponse {
   /// Creates a new instance from [json].
   static QueryScheduledMessagesResponse fromJson(Map<String, dynamic> json) =>
       _$QueryScheduledMessagesResponseFromJson(json);
+}
+
+/// Model response for the [StreamChatClient.scheduleMessage] API call.
+@JsonSerializable(createToJson: false)
+class ScheduleMessageResponse extends MessageResponse {
+  /// The scheduled message created.
+  ///
+  /// Null when the message was sent right away. When set, [message] is a
+  /// preview of what will be sent and is not in the channel yet.
+  ScheduledMessage? scheduledMessage;
+
+  /// Creates a new instance from [json].
+  static ScheduleMessageResponse fromJson(Map<String, dynamic> json) => _$ScheduleMessageResponseFromJson(json);
 }
 
 /// Model response for the API calls that change a [ScheduledMessage].
