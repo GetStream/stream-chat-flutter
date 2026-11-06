@@ -111,29 +111,18 @@ void main() {
     expect(second.message, first.message);
   });
 
-  test('ScheduledMessage takes its dates from the server', () {
-    final scheduledMessage = ScheduledMessage.fromJson(scheduledMessageJson());
-
-    expect(scheduledMessage.remoteCreatedAt, DateTime.utc(2026, 10, 29, 10));
-    expect(scheduledMessage.remoteUpdatedAt, DateTime.utc(2026, 10, 29, 10, 5));
-    expect(scheduledMessage.localCreatedAt, isNull);
-    expect(scheduledMessage.localUpdatedAt, isNull);
-  });
-
-  test('ScheduledMessage without server dates is dated on this device', () {
+  test('ScheduledMessage takes the ID of its message by default', () {
     final scheduledMessage = ScheduledMessage(
       cid: 'messaging:general',
       user: User(id: 'alice'),
       message: Message(id: 'message-id', text: 'Good morning'),
       scheduledAt: DateTime.utc(2026, 11, 2, 9),
       status: ScheduledMessageStatus.scheduled,
-      localCreatedAt: DateTime.utc(2026, 10, 29, 10),
-      localUpdatedAt: DateTime.utc(2026, 10, 29, 10, 5),
+      createdAt: DateTime.utc(2026, 10, 29, 10),
+      updatedAt: DateTime.utc(2026, 10, 29, 10, 5),
     );
 
     expect(scheduledMessage.id, 'message-id');
-    expect(scheduledMessage.createdAt, DateTime.utc(2026, 10, 29, 10));
-    expect(scheduledMessage.updatedAt, DateTime.utc(2026, 10, 29, 10, 5));
   });
 
   group('ScheduledMessage.compareByListOrder', () {

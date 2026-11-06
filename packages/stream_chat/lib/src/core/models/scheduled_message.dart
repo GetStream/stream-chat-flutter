@@ -36,13 +36,9 @@ class ScheduledMessage extends Equatable {
     required this.scheduledAt,
     required this.status,
     this.failureReason,
-    DateTime? createdAt,
-    this.localCreatedAt,
-    DateTime? updatedAt,
-    this.localUpdatedAt,
-  }) : id = id ?? message.id,
-       remoteCreatedAt = createdAt,
-       remoteUpdatedAt = updatedAt;
+    required this.createdAt,
+    required this.updatedAt,
+  }) : id = id ?? message.id;
 
   /// Creates a scheduled message from [json].
   factory ScheduledMessage.fromJson(Map<String, dynamic> json) {
@@ -99,32 +95,10 @@ class ScheduledMessage extends Equatable {
   final ScheduledMessageFailureReason? failureReason;
 
   /// The time this message was scheduled.
-  ///
-  /// The server's time once it has one, otherwise [localCreatedAt]. If both
-  /// are null, the current time.
-  DateTime get createdAt => remoteCreatedAt ?? localCreatedAt ?? DateTime.now();
-
-  /// The time this message was scheduled on this device.
-  @JsonKey(includeFromJson: false)
-  final DateTime? localCreatedAt;
-
-  /// The time the server scheduled this message.
-  @JsonKey(includeFromJson: false)
-  final DateTime? remoteCreatedAt;
+  final DateTime createdAt;
 
   /// The time this scheduled message last changed.
-  ///
-  /// The server's time once it has one, otherwise [localUpdatedAt]. If both
-  /// are null, [createdAt].
-  DateTime get updatedAt => remoteUpdatedAt ?? localUpdatedAt ?? createdAt;
-
-  /// The time this scheduled message last changed on this device.
-  @JsonKey(includeFromJson: false)
-  final DateTime? localUpdatedAt;
-
-  /// The time this scheduled message last changed on the server.
-  @JsonKey(includeFromJson: false)
-  final DateTime? remoteUpdatedAt;
+  final DateTime updatedAt;
 
   /// Orders scheduled messages the way they are listed.
   ///
@@ -152,9 +126,7 @@ class ScheduledMessage extends Equatable {
     ScheduledMessageStatus? status,
     ScheduledMessageFailureReason? failureReason,
     DateTime? createdAt,
-    DateTime? localCreatedAt,
     DateTime? updatedAt,
-    DateTime? localUpdatedAt,
   }) {
     return ScheduledMessage(
       id: id ?? this.id,
@@ -165,10 +137,8 @@ class ScheduledMessage extends Equatable {
       scheduledAt: scheduledAt ?? this.scheduledAt,
       status: status ?? this.status,
       failureReason: failureReason ?? this.failureReason,
-      createdAt: createdAt ?? remoteCreatedAt,
-      localCreatedAt: localCreatedAt ?? this.localCreatedAt,
-      updatedAt: updatedAt ?? remoteUpdatedAt,
-      localUpdatedAt: localUpdatedAt ?? this.localUpdatedAt,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
     );
   }
 
@@ -184,10 +154,8 @@ class ScheduledMessage extends Equatable {
     scheduledAt,
     status,
     failureReason,
-    localCreatedAt,
-    remoteCreatedAt,
-    localUpdatedAt,
-    remoteUpdatedAt,
+    createdAt,
+    updatedAt,
   ];
 }
 
