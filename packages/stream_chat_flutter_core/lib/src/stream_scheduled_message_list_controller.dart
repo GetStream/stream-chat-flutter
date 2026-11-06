@@ -9,17 +9,17 @@ import 'stream_scheduled_message_list_event_handler.dart';
 /// The default number of scheduled messages to load per page.
 const defaultScheduledMessagePagedLimit = 100;
 
-/// A controller for a paged list of the current user's scheduled messages
-/// that are not sent yet, earliest first.
+/// A controller paging through the current user's unsent scheduled messages.
 ///
-/// Once loaded, the list stays current as messages are scheduled, edited,
-/// sent or deleted anywhere in the app, and it is loaded again when the
-/// connection recovers.
+/// The messages are ordered by [ScheduledMessage.compareByListOrder]. Once
+/// loaded, the list stays current as messages are scheduled, edited, sent or
+/// deleted anywhere in the app, and it is loaded again when the connection
+/// recovers.
 class StreamScheduledMessageListController extends PagedValueNotifier<String, ScheduledMessage> {
-  /// Creates a controller for the scheduled messages in the channel [cid], or
-  /// in every channel when it is null.
+  /// Creates a controller for the current user's scheduled messages.
   ///
-  /// When [statuses] is given, only messages with one of them are listed.
+  /// If [cid] is given, only the ones in that channel are listed. If
+  /// [statuses] is given, only the ones with one of those statuses are.
   StreamScheduledMessageListController({
     required this.client,
     StreamScheduledMessageListEventHandler? eventHandler,
@@ -42,7 +42,7 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
   /// The client used to load the scheduled messages.
   final StreamChatClient client;
 
-  // The handlers that keep the list current as events arrive.
+  // The handlers that update the list as events arrive.
   final StreamScheduledMessageListEventHandler _eventHandler;
 
   /// The channel the listed messages are in, or null for every channel.
@@ -61,7 +61,7 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
     super.value = newValue.maybeMap(
       orElse: () => newValue,
       (success) => success.copyWith(
-        items: success.items.sortedBy((it) => it.scheduledAt),
+        items: success.items.sorted(ScheduledMessage.compareByListOrder),
       ),
     );
   }
@@ -91,8 +91,8 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
 
   @override
   Future<void> loadMore(String nextPageKey) async {
-    final previousValue = value.asSuccess;
-
+    // The current value is read after each request: events can update the
+    // items while it runs.
     try {
       final response = await client.queryScheduledMessages(
         cid: cid,
@@ -103,15 +103,15 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
       final loadedIds = {for (final it in response.scheduledMessages) it.id};
       value = PagedValue(
         items: [
-          ...previousValue.items.where((it) => !loadedIds.contains(it.id)),
+          ...currentItems.where((it) => !loadedIds.contains(it.id)),
           ...response.scheduledMessages,
         ],
         nextPageKey: response.next,
       );
     } on StreamChatError catch (error) {
-      value = previousValue.copyWith(error: error);
+      value = value.asSuccess.copyWith(error: error);
     } catch (error) {
-      value = previousValue.copyWith(error: StreamChatError(error.toString()));
+      value = value.asSuccess.copyWith(error: StreamChatError(error.toString()));
     }
   }
 
@@ -145,11 +145,13 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
     });
   }
 
-  /// Adds [scheduledMessage] to the list, or replaces the one with its ID
-  /// unless that one is newer.
+  /// Adds or updates [scheduledMessage] in the list.
   ///
-  /// A scheduled message outside the channel or statuses this controller
-  /// lists is removed instead. Returns `true` if the list changed.
+  /// It takes the place of the one with its ID, unless that one changed later.
+  /// One outside the channel or statuses this controller lists is removed
+  /// instead.
+  ///
+  /// Returns `true` if the list changed.
   bool updateScheduledMessage(ScheduledMessage scheduledMessage) {
     if (!_matches(scheduledMessage)) return deleteScheduledMessage(scheduledMessage);
 
@@ -157,7 +159,7 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
     final index = items.indexWhere((it) => it.id == scheduledMessage.id);
     if (index == -1) {
       items.add(scheduledMessage);
-    } else if (items[index].updatedAt.isAfter(scheduledMessage.updatedAt)) {
+    } else if (!identical(_newer(items[index], scheduledMessage), scheduledMessage)) {
       return false;
     } else {
       items[index] = scheduledMessage;
@@ -178,6 +180,14 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
     final updated = [...items]..removeAt(index);
     value = value.asSuccess.copyWith(items: updated);
     return true;
+  }
+
+  // An older copy can arrive after a newer one; the newer one is kept. A copy
+  // from the server always wins over one from this device.
+  static ScheduledMessage _newer(ScheduledMessage original, ScheduledMessage updated) {
+    if (original.remoteUpdatedAt == null) return updated;
+    if (updated.remoteUpdatedAt == null) return original;
+    return original.updatedAt.isAfter(updated.updatedAt) ? original : updated;
   }
 
   bool _matches(ScheduledMessage scheduledMessage) {

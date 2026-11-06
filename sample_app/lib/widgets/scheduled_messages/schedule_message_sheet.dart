@@ -5,10 +5,10 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 // How far ahead a message can be scheduled when the channel doesn't say.
 const _defaultMaxLeadTime = Duration(days: 120);
 
-/// Shows the quick choices for when to send [message] to [recipient]: two
-/// times tomorrow, Monday morning, or a custom time.
+/// Shows the quick choices for when to send [message] to [recipient].
 ///
-/// A custom time can be at most [maxLeadTime] ahead, 120 days by default.
+/// The choices are two times tomorrow, Monday morning, or a custom time. A
+/// custom time can be at most [maxLeadTime] ahead, 120 days by default.
 ///
 /// Resolves to the chosen time, or null if the user closes the sheet.
 Future<DateTime?> showScheduleMessageSheet(
@@ -31,9 +31,10 @@ Future<DateTime?> showScheduleMessageSheet(
 /// Shows a sheet to pick the date and time [message] is sent at.
 ///
 /// The [title] heads the sheet and the [label] sits above the message, so the
-/// same sheet serves both scheduling and rescheduling. It starts at [initial],
-/// or an hour from now, and allows a time at most [maxLeadTime] ahead, 120
-/// days by default.
+/// same sheet serves both scheduling and rescheduling.
+///
+/// It starts at [initial], or an hour from now, and allows a time at most
+/// [maxLeadTime] ahead, 120 days by default.
 ///
 /// Resolves to the chosen time, or null if the user closes the sheet.
 Future<DateTime?> showScheduleTimeSheet(
@@ -57,11 +58,10 @@ Future<DateTime?> showScheduleTimeSheet(
   );
 }
 
-/// Formats [time] the way the scheduled messages screens show it, such as
-/// "Fri, Oct 23 at 09:00".
+/// Formats [time] the way the scheduled messages screens show it.
 ///
-/// A [short] one leaves out the date within the coming week, such as
-/// "Fri at 09:00".
+/// For example, "Fri, Oct 23 at 09:00". A [short] one leaves out the date
+/// within the coming week, such as "Fri at 09:00".
 String formatScheduledTime(DateTime time, {bool short = false}) {
   final local = time.toLocal();
   final withinWeek = local.difference(clock.now()) < const Duration(days: 6);
@@ -75,25 +75,30 @@ String formatScheduledTime(DateTime time, {bool short = false}) {
   return '${jiffy.format(pattern: day)} at ${jiffy.format(pattern: 'HH:mm')}';
 }
 
-/// Describes why scheduling or changing a scheduled message failed with
-/// [error], or returns [fallback] when there is nothing more specific to say.
+/// Describes why scheduling or changing a scheduled message failed.
+///
+/// Returns [fallback] when [error] has nothing more specific to say.
 String describeScheduleError(Object error, {required String fallback}) {
   if (error is! StreamChatNetworkError) return fallback;
 
-  return switch (error.code) {
-    114 => 'Scheduled messages are turned off for this app',
-    116 => 'Pick an earlier time',
-    117 => 'This channel has too many scheduled messages',
-    118 => 'You have too many scheduled messages',
-    120 || 121 => 'This message is already being sent',
-    122 => 'This message just changed. Try again',
-    123 => 'This message was already sent',
-    124 => 'This message was deleted',
+  return switch (error.scheduledMessageErrorReason) {
+    .scheduledMessagesDisabled => 'Scheduled messages are turned off for this app',
+    .scheduledAtTooSoon => 'Pick a time in the future',
+    .scheduledAtTooFar => 'Pick an earlier time',
+    .scheduledLimitChannel => 'This channel has too many scheduled messages',
+    .scheduledLimitUser => 'You have too many scheduled messages',
+    .scheduledMessageNotEditable => 'This message failed to send and can only be deleted',
+    .scheduledMessageSending => 'This message is already being sent',
+    .scheduledMessageConflict => 'This message just changed. Try again',
+    .scheduledMessageAlreadySent => 'This message was already sent',
+    .scheduledMessageCanceled => 'This message was deleted',
     _ => fallback,
   };
 }
 
-/// The name of [channel], or of its other members when it has none.
+/// The name of [channel].
+///
+/// A channel without a name of its own is named after its other members.
 String? channelDisplayName(Channel channel) {
   // A loaded channel keeps its members on its state, not on its model.
   final state = channel.state;

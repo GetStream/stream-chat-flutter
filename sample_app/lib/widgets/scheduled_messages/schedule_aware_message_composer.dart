@@ -6,8 +6,10 @@ import '../../pages/scheduled_messages_page.dart';
 import '../location/location_aware_message_composer.dart';
 import 'schedule_message_sheet.dart';
 
-/// Builds the composer, letting a long press on send schedule the message
-/// when scheduling is available on the surrounding channel.
+/// Builds the composer, with a long press on send to schedule the message.
+///
+/// Scheduling is offered only when the sample app config enables it and the
+/// surrounding channel allows it.
 ///
 /// The channel's pending scheduled messages are counted above the composer.
 Widget scheduleAwareMessageComposer(BuildContext context, MessageComposerProps props) {
@@ -53,6 +55,17 @@ Future<void> _scheduleMessage(
     return;
   }
 
+  // A text starting with / is a command in a channel that has commands, and
+  // commands can't be scheduled. A picked command is sent at the text's start.
+  final hasCommands = channel.config?.commands.isNotEmpty ?? false;
+  final isCommand = (message.command?.isNotEmpty ?? false) || (message.text?.startsWith('/') ?? false);
+  if (hasCommands && isCommand) {
+    messenger.show(
+      StreamSnackbar(message: const Text("Commands can't be scheduled"), variant: .error),
+    );
+    return;
+  }
+
   final recipient = channelDisplayName(channel) ?? 'channel';
   final time = await showScheduleMessageSheet(
     context,
@@ -65,7 +78,7 @@ Future<void> _scheduleMessage(
   controller.reset();
 
   try {
-    final response = await channel.scheduleMessage(message, time);
+    final response = await channel.scheduleMessage(message, scheduledAt: time);
 
     final scheduledMessage = response.scheduledMessage;
     if (scheduledMessage == null) {

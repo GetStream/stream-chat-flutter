@@ -211,8 +211,9 @@ class SampleAppConfigData {
   /// Whether reminder actions appear in the message context menu.
   final bool enableReminderActions;
 
-  /// Whether messages can be scheduled from the composer, with a tab listing
-  /// the scheduled ones.
+  /// Whether messages can be scheduled from the composer.
+  ///
+  /// A tab then lists the scheduled ones.
   final bool enableScheduledMessages;
 
   /// Whether the "Delete for Me" action appears in the message context menu.

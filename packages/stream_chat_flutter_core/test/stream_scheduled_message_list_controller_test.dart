@@ -14,6 +14,7 @@ void main() {
     String id, {
     String cid = cid,
     DateTime? scheduledAt,
+    DateTime? createdAt,
     DateTime? updatedAt,
     ScheduledMessageStatus status = ScheduledMessageStatus.scheduled,
   }) => ScheduledMessage(
@@ -23,8 +24,19 @@ void main() {
     message: Message(id: id, text: 'Good morning', user: user),
     scheduledAt: scheduledAt ?? DateTime.utc(2026, 11, 2, 9),
     status: status,
-    createdAt: DateTime.utc(2026, 10, 29),
+    createdAt: createdAt ?? DateTime.utc(2026, 10, 29),
     updatedAt: updatedAt ?? DateTime.utc(2026, 10, 29),
+  );
+
+  // A copy dated on this device only, changed at [updatedAt].
+  ScheduledMessage localCopy(String id, {required DateTime updatedAt}) => ScheduledMessage(
+    cid: cid,
+    user: user,
+    message: Message(id: id, text: 'Good morning', user: user),
+    scheduledAt: DateTime.utc(2026, 11, 2, 9),
+    status: ScheduledMessageStatus.scheduled,
+    localCreatedAt: updatedAt,
+    localUpdatedAt: updatedAt,
   );
 
   late MockClient client;
@@ -86,6 +98,40 @@ void main() {
     );
 
     expect(ids(controller), ['sooner', 'later']);
+  });
+
+  // The channel state lists the same messages in the same order.
+  test('lists failed ones last, the rest by time and then by ID', () async {
+    final controller = await loadedController(
+      loaded: [
+        scheduledMessage('failed', scheduledAt: DateTime.utc(2026, 11, 1), status: ScheduledMessageStatus.failed),
+        scheduledMessage('c', scheduledAt: DateTime.utc(2026, 11, 2, 9), createdAt: DateTime.utc(2026, 10, 29)),
+        scheduledMessage('d', scheduledAt: DateTime.utc(2026, 11, 2, 9), createdAt: DateTime.utc(2026, 10, 28)),
+        scheduledMessage('b', scheduledAt: DateTime.utc(2026, 11, 2, 9), createdAt: DateTime.utc(2026, 10, 29)),
+        scheduledMessage('later', scheduledAt: DateTime.utc(2026, 11, 3)),
+      ],
+    );
+
+    expect(ids(controller), ['b', 'c', 'd', 'later', 'failed']);
+  });
+
+  test('takes the server copy in place of one dated on this device, even when dated earlier', () async {
+    final controller = await loadedController();
+    controller.updateScheduledMessage(localCopy('a', updatedAt: DateTime.utc(2026, 10, 31)));
+    final server = scheduledMessage('a', updatedAt: DateTime.utc(2026, 10, 29));
+
+    controller.updateScheduledMessage(server);
+
+    expect(controller.value.asSuccess.items, [server]);
+  });
+
+  test('keeps the server copy when one dated on this device arrives, even when dated later', () async {
+    final server = scheduledMessage('a', updatedAt: DateTime.utc(2026, 10, 29));
+    final controller = await loadedController(loaded: [server]);
+
+    controller.updateScheduledMessage(localCopy('a', updatedAt: DateTime.utc(2026, 10, 31)));
+
+    expect(controller.value.asSuccess.items, [server]);
   });
 
   test('adds a message scheduled in its channel', () async {
@@ -193,6 +239,28 @@ void main() {
     expect(ids(controller), unorderedEquals(['first', 'both', 'second']));
     expect(ids(controller).last, 'second');
     expect(controller.value.asSuccess.nextPageKey, isNull);
+  });
+
+  test('keeps a message scheduled while the next page loads', () async {
+    final controller = await loadedController(loaded: [scheduledMessage('first')]);
+    final nextPage = Completer<QueryScheduledMessagesResponse>();
+    when(
+      () => client.queryScheduledMessages(
+        cid: cid,
+        pagination: const PaginationParams(limit: defaultScheduledMessagePagedLimit, next: 'cursor'),
+      ),
+    ).thenAnswer((_) => nextPage.future);
+
+    final loading = controller.loadMore('cursor');
+    await emit(EventType.scheduledMessageCreated, scheduledMessage('meanwhile'));
+    nextPage.complete(
+      QueryScheduledMessagesResponse()
+        ..scheduledMessages = [scheduledMessage('second', scheduledAt: DateTime.utc(2026, 11, 3))]
+        ..next = null,
+    );
+    await loading;
+
+    expect(ids(controller), unorderedEquals(['first', 'meanwhile', 'second']));
   });
 
   test('keeps the list and shows the error when loading more fails', () async {
