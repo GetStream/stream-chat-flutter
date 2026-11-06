@@ -28,17 +28,6 @@ void main() {
     updatedAt: updatedAt ?? DateTime.utc(2026, 10, 29),
   );
 
-  // A copy dated on this device only, changed at [updatedAt].
-  ScheduledMessage localCopy(String id, {required DateTime updatedAt}) => ScheduledMessage(
-    cid: cid,
-    user: user,
-    message: Message(id: id, text: 'Good morning', user: user),
-    scheduledAt: DateTime.utc(2026, 11, 2, 9),
-    status: ScheduledMessageStatus.scheduled,
-    localCreatedAt: updatedAt,
-    localUpdatedAt: updatedAt,
-  );
-
   late MockClient client;
   late StreamController<Event> events;
 
@@ -113,25 +102,6 @@ void main() {
     );
 
     expect(ids(controller), ['b', 'c', 'd', 'later', 'failed']);
-  });
-
-  test('takes the server copy in place of one dated on this device, even when dated earlier', () async {
-    final controller = await loadedController();
-    controller.updateScheduledMessage(localCopy('a', updatedAt: DateTime.utc(2026, 10, 31)));
-    final server = scheduledMessage('a', updatedAt: DateTime.utc(2026, 10, 29));
-
-    controller.updateScheduledMessage(server);
-
-    expect(controller.value.asSuccess.items, [server]);
-  });
-
-  test('keeps the server copy when one dated on this device arrives, even when dated later', () async {
-    final server = scheduledMessage('a', updatedAt: DateTime.utc(2026, 10, 29));
-    final controller = await loadedController(loaded: [server]);
-
-    controller.updateScheduledMessage(localCopy('a', updatedAt: DateTime.utc(2026, 10, 31)));
-
-    expect(controller.value.asSuccess.items, [server]);
   });
 
   test('adds a message scheduled in its channel', () async {

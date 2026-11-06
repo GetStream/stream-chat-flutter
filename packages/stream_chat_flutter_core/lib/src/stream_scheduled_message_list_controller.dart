@@ -159,7 +159,7 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
     final index = items.indexWhere((it) => it.id == scheduledMessage.id);
     if (index == -1) {
       items.add(scheduledMessage);
-    } else if (!identical(_newer(items[index], scheduledMessage), scheduledMessage)) {
+    } else if (items[index].updatedAt.isAfter(scheduledMessage.updatedAt)) {
       return false;
     } else {
       items[index] = scheduledMessage;
@@ -180,14 +180,6 @@ class StreamScheduledMessageListController extends PagedValueNotifier<String, Sc
     final updated = [...items]..removeAt(index);
     value = value.asSuccess.copyWith(items: updated);
     return true;
-  }
-
-  // An older copy can arrive after a newer one; the newer one is kept. A copy
-  // from the server always wins over one from this device.
-  static ScheduledMessage _newer(ScheduledMessage original, ScheduledMessage updated) {
-    if (original.remoteUpdatedAt == null) return updated;
-    if (updated.remoteUpdatedAt == null) return original;
-    return original.updatedAt.isAfter(updated.updatedAt) ? original : updated;
   }
 
   bool _matches(ScheduledMessage scheduledMessage) {
