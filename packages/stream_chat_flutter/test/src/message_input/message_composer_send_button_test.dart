@@ -98,6 +98,55 @@ void main() {
 
     verify(() => channel.sendMessage(any())).called(1);
   });
+
+  testWidgets('offers a long press for a new message', (tester) async {
+    final controller = _controller()..text = 'Hello';
+
+    await _pumpTrailing(tester, controller: controller, onSendLongPress: () {});
+
+    expect(_sendButton(tester).props.onLongPress, isNotNull);
+  });
+
+  testWidgets('offers no long press while editing', (tester) async {
+    final controller = _controller()
+      ..editMessage(
+        Message(
+          id: 'message-id',
+          text: 'Hello',
+          createdAt: DateTime.utc(2026, 10, 29),
+        ),
+      );
+
+    await _pumpTrailing(tester, controller: controller, onSendLongPress: () {});
+
+    expect(_sendButton(tester).props.onPressed, isNotNull);
+    expect(_sendButton(tester).props.onLongPress, isNull);
+  });
+
+  testWidgets('hands the controller to onSendLongPress without sending', (tester) async {
+    final originalRecordPlatform = RecordPlatform.instance;
+    RecordPlatform.instance = FakeRecordPlatform();
+    addTearDown(() => RecordPlatform.instance = originalRecordPlatform);
+    final controller = _controller();
+    StreamMessageComposerController? longPressed;
+
+    final channel = await _pumpComposer(
+      tester,
+      composer: StreamMessageComposer(
+        messageComposerController: controller,
+        enableVoiceRecording: false,
+        onSendLongPress: (it) => longPressed = it,
+      ),
+    );
+    await tester.enterText(find.byType(EditableText), 'Hello');
+    await tester.pump();
+    await tester.longPress(find.byKey(const ValueKey('send_key')));
+    await tester.pump();
+
+    expect(longPressed, same(controller));
+    expect(controller.text, 'Hello');
+    verifyNever(() => channel.sendMessage(any()));
+  });
 }
 
 StreamMessageComposerController _controller({
@@ -112,6 +161,7 @@ Future<void> _pumpTrailing(
   WidgetTester tester, {
   required StreamMessageComposerController controller,
   bool withMicrophone = false,
+  VoidCallback? onSendLongPress,
 }) {
   final voiceRecordingCallback = switch (withMicrophone) {
     true => VoiceRecordingCallback(
@@ -129,6 +179,7 @@ Future<void> _pumpTrailing(
           props: MessageComposerComponentProps(
             controller: controller,
             onSendPressed: () {},
+            onSendLongPress: onSendLongPress,
             voiceRecordingCallback: voiceRecordingCallback,
             audioRecorderState: const RecordStateIdle(),
           ),

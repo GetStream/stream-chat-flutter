@@ -18,6 +18,7 @@ import '../widgets/split_view.dart';
 import 'draft_list_page.dart';
 import 'push_preferences_screen.dart';
 import 'reminders_page.dart';
+import 'scheduled_messages_page.dart';
 import 'thread_list_page.dart';
 
 class ChannelListPage extends StatefulWidget {
@@ -83,6 +84,15 @@ class _ChannelListPageState extends State<ChannelListPage> {
         ),
         page: const RemindersPage(),
         enabled: config.enableReminderActions,
+      ),
+      _TabDef(
+        navItem: StreamBottomNavBarItem(
+          icon: Icon(icons.clock),
+          selectedIcon: Icon(icons.clock),
+          label: 'Scheduled',
+        ),
+        page: const ScheduledMessagesPage(),
+        enabled: config.enableScheduledMessages,
       ),
     ];
 

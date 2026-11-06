@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../auth/auth_controller.dart';
+import '../config/sample_app_config.dart';
 import '../routes/routes.dart';
 import '../utils/app_config.dart';
 import 'channel_detail_sheet.dart';
@@ -62,6 +63,7 @@ class _ChannelList extends State<ChannelList> {
       predefinedFilter: predefinedFilter,
       filterValues: predefinedFilter == null ? null : {'user_id': userId},
       limit: 30,
+      includeScheduledMessages: context.sampleAppConfig.enableScheduledMessages,
     );
   }
 
@@ -351,7 +353,9 @@ class _ChannelListSearch extends StatelessWidget {
               id: messageResponse.channel!.id,
             );
             if (channel.state == null) {
-              await channel.watch();
+              await channel.watch(
+                includeScheduledMessages: context.sampleAppConfig.enableScheduledMessages,
+              );
             }
             router.goNamed(
               Routes.CHANNEL_PAGE.name,

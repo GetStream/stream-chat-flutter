@@ -1,0 +1,307 @@
+import 'dart:async';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
+
+import 'mocks.dart';
+
+void main() {
+  const cid = 'messaging:general';
+  final user = User(id: 'testUserId');
+
+  ScheduledMessage scheduledMessage(
+    String id, {
+    String cid = cid,
+    DateTime? scheduledAt,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    ScheduledMessageStatus status = ScheduledMessageStatus.scheduled,
+  }) => ScheduledMessage(
+    id: id,
+    cid: cid,
+    user: user,
+    message: Message(id: id, text: 'Good morning', user: user),
+    scheduledAt: scheduledAt ?? DateTime.utc(2026, 11, 2, 9),
+    status: status,
+    createdAt: createdAt ?? DateTime.utc(2026, 10, 29),
+    updatedAt: updatedAt ?? DateTime.utc(2026, 10, 29),
+  );
+
+  late MockClient client;
+  late StreamController<Event> events;
+
+  void stubQuery(List<ScheduledMessage> loaded, {List<ScheduledMessageStatus>? statuses}) {
+    when(
+      () => client.queryScheduledMessages(
+        cid: cid,
+        statuses: statuses,
+        pagination: const PaginationParams(limit: defaultScheduledMessagePagedLimit),
+      ),
+    ).thenAnswer(
+      (_) async => QueryScheduledMessagesResponse()
+        ..scheduledMessages = loaded
+        ..next = null,
+    );
+  }
+
+  Future<StreamScheduledMessageListController> loadedController({
+    List<ScheduledMessage> loaded = const [],
+    List<ScheduledMessageStatus>? statuses,
+    StreamScheduledMessageListEventHandler? eventHandler,
+  }) async {
+    stubQuery(loaded, statuses: statuses);
+    final controller = StreamScheduledMessageListController(
+      client: client,
+      cid: cid,
+      statuses: statuses,
+      eventHandler: eventHandler,
+    );
+    addTearDown(controller.dispose);
+    await controller.doInitialLoad();
+    return controller;
+  }
+
+  Future<void> emit(String type, [ScheduledMessage? scheduledMessage]) async {
+    events.add(Event(type: type, scheduledMessage: scheduledMessage));
+    await pumpEventQueue();
+  }
+
+  List<String> ids(StreamScheduledMessageListController controller) {
+    return [for (final it in controller.value.asSuccess.items) it.id];
+  }
+
+  setUp(() {
+    client = MockClient();
+    events = StreamController.broadcast();
+    addTearDown(events.close);
+    when(() => client.on()).thenAnswer((_) => events.stream);
+  });
+
+  test('lists the loaded scheduled messages earliest first', () async {
+    final controller = await loadedController(
+      loaded: [
+        scheduledMessage('later', scheduledAt: DateTime.utc(2026, 11, 3)),
+        scheduledMessage('sooner', scheduledAt: DateTime.utc(2026, 11, 1)),
+      ],
+    );
+
+    expect(ids(controller), ['sooner', 'later']);
+  });
+
+  // The channel state lists the same messages in the same order.
+  test('lists failed ones last, the rest by time and then by ID', () async {
+    final controller = await loadedController(
+      loaded: [
+        scheduledMessage('failed', scheduledAt: DateTime.utc(2026, 11, 1), status: ScheduledMessageStatus.failed),
+        scheduledMessage('c', scheduledAt: DateTime.utc(2026, 11, 2, 9), createdAt: DateTime.utc(2026, 10, 29)),
+        scheduledMessage('d', scheduledAt: DateTime.utc(2026, 11, 2, 9), createdAt: DateTime.utc(2026, 10, 28)),
+        scheduledMessage('b', scheduledAt: DateTime.utc(2026, 11, 2, 9), createdAt: DateTime.utc(2026, 10, 29)),
+        scheduledMessage('later', scheduledAt: DateTime.utc(2026, 11, 3)),
+      ],
+    );
+
+    expect(ids(controller), ['b', 'c', 'd', 'later', 'failed']);
+  });
+
+  test('adds a message scheduled in its channel', () async {
+    final controller = await loadedController();
+
+    await emit(EventType.scheduledMessageCreated, scheduledMessage('new'));
+
+    expect(ids(controller), ['new']);
+  });
+
+  test('ignores a message scheduled in another channel', () async {
+    final controller = await loadedController();
+
+    await emit(EventType.scheduledMessageCreated, scheduledMessage('other', cid: 'messaging:other'));
+
+    expect(ids(controller), isEmpty);
+  });
+
+  test('removes a sent message', () async {
+    final controller = await loadedController(loaded: [scheduledMessage('sent')]);
+
+    await emit(EventType.scheduledMessageSent, scheduledMessage('sent'));
+
+    expect(ids(controller), isEmpty);
+  });
+
+  test('keeps a newer copy when an older update arrives', () async {
+    final edited = scheduledMessage('edited', updatedAt: DateTime.utc(2026, 10, 30));
+    final controller = await loadedController(loaded: [edited]);
+
+    await emit(EventType.scheduledMessageUpdated, scheduledMessage('edited'));
+
+    expect(controller.value.asSuccess.items, [edited]);
+  });
+
+  test('removes a message whose status leaves the listed ones', () async {
+    final controller = await loadedController(
+      loaded: [scheduledMessage('failing')],
+      statuses: [ScheduledMessageStatus.scheduled],
+    );
+
+    await emit(
+      EventType.scheduledMessageFailed,
+      scheduledMessage('failing', status: ScheduledMessageStatus.failed, updatedAt: DateTime.utc(2026, 10, 30)),
+    );
+
+    expect(ids(controller), isEmpty);
+  });
+
+  test('shows the error when loading fails', () async {
+    when(
+      () => client.queryScheduledMessages(
+        cid: cid,
+        pagination: const PaginationParams(limit: defaultScheduledMessagePagedLimit),
+      ),
+    ).thenThrow(const StreamChatError('offline'));
+    final controller = StreamScheduledMessageListController(client: client, cid: cid);
+    addTearDown(controller.dispose);
+
+    await controller.doInitialLoad();
+
+    final error = controller.value.whenOrNull(null, error: (error) => error);
+    expect(error?.message, 'offline');
+  });
+
+  test('loads again when the connection recovers', () async {
+    final controller = await loadedController(loaded: [scheduledMessage('first')]);
+
+    stubQuery([scheduledMessage('missed')]);
+    await emit(EventType.connectionRecovered);
+
+    expect(ids(controller), ['missed']);
+  });
+
+  test('loads the next page, replacing listed copies', () async {
+    when(
+      () => client.queryScheduledMessages(
+        cid: cid,
+        pagination: const PaginationParams(limit: defaultScheduledMessagePagedLimit),
+      ),
+    ).thenAnswer(
+      (_) async => QueryScheduledMessagesResponse()
+        ..scheduledMessages = [scheduledMessage('first'), scheduledMessage('both')]
+        ..next = 'cursor',
+    );
+    when(
+      () => client.queryScheduledMessages(
+        cid: cid,
+        pagination: const PaginationParams(limit: defaultScheduledMessagePagedLimit, next: 'cursor'),
+      ),
+    ).thenAnswer(
+      (_) async => QueryScheduledMessagesResponse()
+        ..scheduledMessages = [
+          scheduledMessage('both'),
+          scheduledMessage('second', scheduledAt: DateTime.utc(2026, 11, 3)),
+        ]
+        ..next = null,
+    );
+    final controller = StreamScheduledMessageListController(client: client, cid: cid);
+    addTearDown(controller.dispose);
+    await controller.doInitialLoad();
+
+    await controller.loadMore('cursor');
+
+    expect(ids(controller), unorderedEquals(['first', 'both', 'second']));
+    expect(ids(controller).last, 'second');
+    expect(controller.value.asSuccess.nextPageKey, isNull);
+  });
+
+  test('keeps a message scheduled while the next page loads', () async {
+    final controller = await loadedController(loaded: [scheduledMessage('first')]);
+    final nextPage = Completer<QueryScheduledMessagesResponse>();
+    when(
+      () => client.queryScheduledMessages(
+        cid: cid,
+        pagination: const PaginationParams(limit: defaultScheduledMessagePagedLimit, next: 'cursor'),
+      ),
+    ).thenAnswer((_) => nextPage.future);
+
+    final loading = controller.loadMore('cursor');
+    await emit(EventType.scheduledMessageCreated, scheduledMessage('meanwhile'));
+    nextPage.complete(
+      QueryScheduledMessagesResponse()
+        ..scheduledMessages = [scheduledMessage('second', scheduledAt: DateTime.utc(2026, 11, 3))]
+        ..next = null,
+    );
+    await loading;
+
+    expect(ids(controller), unorderedEquals(['first', 'meanwhile', 'second']));
+  });
+
+  test('keeps the list and shows the error when loading more fails', () async {
+    final controller = await loadedController(loaded: [scheduledMessage('first')]);
+    when(
+      () => client.queryScheduledMessages(
+        cid: cid,
+        pagination: const PaginationParams(limit: defaultScheduledMessagePagedLimit, next: 'cursor'),
+      ),
+    ).thenThrow(const StreamChatError('offline'));
+
+    await controller.loadMore('cursor');
+
+    expect(ids(controller), ['first']);
+    expect(controller.value.asSuccess.error?.message, 'offline');
+  });
+
+  test('starts from a given value', () {
+    final controller = StreamScheduledMessageListController.fromValue(
+      PagedValue(items: [scheduledMessage('given')]),
+      client: client,
+    );
+    addTearDown(controller.dispose);
+
+    expect(ids(controller), ['given']);
+  });
+
+  test('updates an edited message', () async {
+    final controller = await loadedController(loaded: [scheduledMessage('edited')]);
+    final edited = scheduledMessage(
+      'edited',
+      scheduledAt: DateTime.utc(2026, 11, 5),
+      updatedAt: DateTime.utc(2026, 10, 30),
+    );
+
+    await emit(EventType.scheduledMessageUpdated, edited);
+
+    expect(controller.value.asSuccess.items, [edited]);
+  });
+
+  test('removes a deleted message', () async {
+    final controller = await loadedController(loaded: [scheduledMessage('deleted')]);
+
+    await emit(EventType.scheduledMessageDeleted, scheduledMessage('deleted'));
+
+    expect(ids(controller), isEmpty);
+  });
+
+  test('leaves an event to the event listener that handles it', () async {
+    final controller = await loadedController();
+    controller.eventListener = (event) => event.type == EventType.scheduledMessageCreated;
+
+    await emit(EventType.scheduledMessageCreated, scheduledMessage('handled'));
+
+    expect(ids(controller), isEmpty);
+  });
+
+  test('uses a custom event handler', () async {
+    final handler = _IgnoreCreatedHandler();
+    final controller = await loadedController(eventHandler: handler);
+
+    await emit(EventType.scheduledMessageCreated, scheduledMessage('ignored'));
+
+    expect(ids(controller), isEmpty);
+    expect(handler.ignored, 1);
+  });
+}
+
+class _IgnoreCreatedHandler extends StreamScheduledMessageListEventHandler {
+  int ignored = 0;
+
+  @override
+  void onScheduledMessageCreated(Event event, StreamScheduledMessageListController controller) => ignored++;
+}

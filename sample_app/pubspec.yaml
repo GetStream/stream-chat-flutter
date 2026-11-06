@@ -22,6 +22,7 @@ environment:
 dependencies:
   app_badge_plus: ^1.3.2
   avatar_glow: ^3.0.0
+  clock: ^1.1.2
   collection: ^1.19.1
   dynamic_color: ^1.8.1
   firebase_core: ^4.0.0
@@ -66,5 +67,5 @@ dependency_overrides:
   stream_core:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 74a65f0d9730f91236f467c7cb18580cbfdc582a
+      ref: 9c8779f27d1a7fc96f30b5baa6794d72b2b76757
       path: packages/stream_core
