@@ -50,14 +50,10 @@ class MessageMerging {
   }
 
   /// The newer of [original] and [updated], by [ScheduledMessage.updatedAt].
-  ///
-  /// A copy from the server always wins over one from this device.
   static ScheduledMessage newerScheduledMessage(
     ScheduledMessage original,
     ScheduledMessage updated,
   ) {
-    if (original.remoteUpdatedAt == null) return updated;
-    if (updated.remoteUpdatedAt == null) return original;
     return original.updatedAt.isAfter(updated.updatedAt) ? original : updated;
   }
 
