@@ -99,8 +99,7 @@ class ChannelState implements ComparableFieldProvider {
   /// The current user's unsent scheduled messages in the channel.
   ///
   /// An empty list when there are none. Null when the channel was loaded
-  /// without asking for them, or when they could not all be loaded; consider
-  /// [Channel.queryScheduledMessages] then.
+  /// without asking for them, or when they could not all be loaded.
   @JsonKey(includeToJson: false)
   final List<ScheduledMessage>? scheduledMessages;
 
