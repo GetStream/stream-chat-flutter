@@ -456,7 +456,7 @@ Future<void> _showActions(BuildContext context, ScheduledMessage scheduledMessag
           mentionedUsers: mentionedUsers,
           quotedMessage: quotedMessage,
         );
-        await client.updateScheduledMessage(scheduledMessage.id, edited);
+        await client.updateScheduledMessage(scheduledMessage, edited);
       }
 
       await run(edit, 'Scheduled message updated');
@@ -473,12 +473,12 @@ Future<void> _showActions(BuildContext context, ScheduledMessage scheduledMessag
 
       Future<void> reschedule() async {
         if (isFailed) return _scheduleAgain(client, scheduledMessage, time);
-        await client.rescheduleMessage(scheduledMessage.id, scheduledAt: time);
+        await client.rescheduleMessage(scheduledMessage, scheduledAt: time);
       }
 
       await run(reschedule, 'Message scheduled for ${formatScheduledTime(time, short: true)}');
     case _Action.sendNow:
-      await run(() => client.sendScheduledMessageNow(scheduledMessage.id), 'Sending message');
+      await run(() => client.sendScheduledMessageNow(scheduledMessage), 'Sending message');
     case _Action.delete:
       if (!context.mounted) return;
       final confirmed = await showStreamDialog<bool>(
@@ -494,7 +494,7 @@ Future<void> _showActions(BuildContext context, ScheduledMessage scheduledMessag
         ),
       );
       if (confirmed != true) return;
-      await run(() => client.deleteScheduledMessage(scheduledMessage.id), 'Scheduled message deleted');
+      await run(() => client.deleteScheduledMessage(scheduledMessage), 'Scheduled message deleted');
   }
 }
 
@@ -514,7 +514,7 @@ Future<void> _scheduleAgain(StreamChatClient client, ScheduledMessage scheduledM
 
   final ChannelModel(:id, :type) = ChannelModel(cid: scheduledMessage.cid);
   await client.scheduleMessage(message, id, type, scheduledAt: time);
-  await client.deleteScheduledMessage(scheduledMessage.id);
+  await client.deleteScheduledMessage(scheduledMessage);
 }
 
 // A scheduled message's mentioned users can have only their IDs set. With
