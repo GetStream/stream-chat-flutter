@@ -2,6 +2,7 @@
 
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
@@ -202,6 +203,37 @@ void main() {
     tearDown(() {
       channel.dispose();
     });
+
+    test('`.query` skips the offline cache when scheduled messages are asked for', () async {
+      when(
+        () => client.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: any(named: 'channelData'),
+          includeScheduledMessages: true,
+        ),
+      ).thenAnswer((_) async => _generateChannelState(channelId, channelType));
+      when(() => client.channelDeliveryReporter.submitForDelivery(any())).thenAnswer((_) async {});
+      await pumpEventQueue();
+      clearInteractions(client.chatPersistenceClient);
+
+      await channel.query(preferOffline: true, includeScheduledMessages: true);
+
+      verifyNever(
+        () => client.chatPersistenceClient.getChannelStateByCid(
+          channelCid,
+          messagePagination: any(named: 'messagePagination'),
+        ),
+      );
+      verify(
+        () => client.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: any(named: 'channelData'),
+          includeScheduledMessages: true,
+        ),
+      ).called(1);
+    });
   });
 
   group('Initialized Channel', () {
@@ -216,6 +248,7 @@ void main() {
       registerFallbackValue(FakeMessage());
       registerFallbackValue(FakeAttachmentFile());
       registerFallbackValue(FakeEvent());
+      registerFallbackValue(const PaginationParams());
 
       // detached loggers
       when(() => client.detachedLogger(any())).thenAnswer((invocation) {
@@ -268,6 +301,87 @@ void main() {
 
     test('should throw if trying to set `name`', () {
       expect(() => channel.name = 'New name', throwsA(isA<StateError>()));
+    });
+
+    group('`.scheduleMessage`', () {
+      final now = DateTime.utc(2026, 10, 30, 12);
+      final scheduledAt = now.add(const Duration(days: 1));
+
+      // Schedules [message] at [time] with the clock fixed at [now].
+      Future<ScheduleMessageResponse> schedule(Message message, DateTime time) {
+        return withClock(Clock.fixed(now), () => channel.scheduleMessage(message, scheduledAt: time));
+      }
+
+      ScheduledMessage scheduledMessageFor(Message message, {String cid = channelCid}) => ScheduledMessage(
+        id: message.id,
+        cid: cid,
+        user: client.state.currentUser!,
+        message: message,
+        scheduledAt: scheduledAt,
+        status: ScheduledMessageStatus.scheduled,
+        createdAt: DateTime.utc(2026, 10, 29),
+        updatedAt: DateTime.utc(2026, 10, 29),
+      );
+
+      test('keeps a scheduled message out of the channel', () async {
+        final message = Message(id: 'scheduled-id', text: 'Good morning');
+        when(
+          () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer(
+          (_) async => ScheduleMessageResponse()
+            ..message = message
+            ..scheduledMessage = scheduledMessageFor(message),
+        );
+
+        final res = await schedule(message, scheduledAt);
+
+        expect(res.scheduledMessage?.id, message.id);
+        expect(channel.state!.messages, isEmpty);
+        expect(channel.state!.scheduledMessages.single.id, message.id);
+      });
+
+      test('adds the message to the channel when it was sent right away', () async {
+        final message = Message(id: 'sent-id', text: 'Good morning');
+        when(
+          () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer((_) async => ScheduleMessageResponse()..message = message);
+
+        final res = await schedule(message, scheduledAt);
+
+        expect(res.scheduledMessage, isNull);
+        expect(
+          channel.state!.messages.single,
+          isSameMessageAs(message.copyWith(state: MessageState.sent), matchMessageState: true),
+        );
+      });
+
+      test('keeps a scheduled thread reply out of the thread', () async {
+        final reply = Message(id: 'reply-id', text: 'Good morning', parentId: 'parent-id', showInChannel: true);
+        when(
+          () => client.scheduleMessage(reply, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer(
+          (_) async => ScheduleMessageResponse()
+            ..message = reply
+            ..scheduledMessage = scheduledMessageFor(reply),
+        );
+
+        await schedule(reply, scheduledAt);
+
+        expect(channel.state!.threads['parent-id'], isNull);
+        expect(channel.state!.scheduledMessages.single.message.parentId, 'parent-id');
+      });
+
+      test('adds a thread reply to its thread when it was sent right away', () async {
+        final reply = Message(id: 'reply-id', text: 'Good morning', parentId: 'parent-id');
+        when(
+          () => client.scheduleMessage(reply, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer((_) async => ScheduleMessageResponse()..message = reply);
+
+        await schedule(reply, scheduledAt);
+
+        expect(channel.state!.threads['parent-id']?.single.id, 'reply-id');
+        expect(channel.state!.scheduledMessages, isEmpty);
+      });
     });
 
     group('`.sendMessage`', () {

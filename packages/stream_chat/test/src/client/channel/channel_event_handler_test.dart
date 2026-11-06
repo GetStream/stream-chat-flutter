@@ -15,6 +15,8 @@ class MockChannelStateMutations extends Mock implements ChannelStateMutations {}
 
 class FakeDraft extends Fake implements Draft {}
 
+class FakeScheduledMessage extends Fake implements ScheduledMessage {}
+
 class FakeReaction extends Fake implements Reaction {}
 
 class FakePoll extends Fake implements Poll {}
@@ -50,6 +52,7 @@ void main() {
     registerFallbackValue(FakeUser());
     registerFallbackValue(FakeEvent());
     registerFallbackValue(FakeDraft());
+    registerFallbackValue(FakeScheduledMessage());
     registerFallbackValue(FakeReaction());
     registerFallbackValue(FakePoll());
     registerFallbackValue(FakePollVote());
@@ -254,6 +257,45 @@ void main() {
       handler.handleEvent(Event(type: EventType.messageUpdated));
 
       verifyNever(() => mutations.onMessageUpdated(any()));
+    });
+  });
+
+  group('scheduled message events', () {
+    final scheduledMessage = ScheduledMessage(
+      id: 'scheduled-id',
+      cid: 'messaging:test',
+      user: User(id: currentUserId),
+      message: Message(id: 'scheduled-id', text: 'Good morning'),
+      scheduledAt: DateTime.utc(2026, 11, 2, 9),
+      status: ScheduledMessageStatus.scheduled,
+      createdAt: DateTime.utc(2026, 10, 29),
+      updatedAt: DateTime.utc(2026, 10, 29),
+    );
+
+    for (final type in [
+      EventType.scheduledMessageCreated,
+      EventType.scheduledMessageUpdated,
+      EventType.scheduledMessageFailed,
+    ]) {
+      test('$type delegates the scheduled message as updated', () {
+        handler.handleEvent(Event(type: type, scheduledMessage: scheduledMessage));
+
+        verify(() => mutations.onScheduledMessageUpdated(scheduledMessage)).called(1);
+      });
+    }
+
+    for (final type in [EventType.scheduledMessageSent, EventType.scheduledMessageDeleted]) {
+      test('$type delegates the scheduled message as removed', () {
+        handler.handleEvent(Event(type: type, scheduledMessage: scheduledMessage));
+
+        verify(() => mutations.onScheduledMessageRemoved(scheduledMessage)).called(1);
+      });
+    }
+
+    test('ignores events without a scheduled message', () {
+      handler.handleEvent(Event(type: EventType.scheduledMessageCreated));
+
+      verifyNever(() => mutations.onScheduledMessageUpdated(any()));
     });
   });
 

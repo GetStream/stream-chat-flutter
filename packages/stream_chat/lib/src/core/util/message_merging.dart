@@ -2,6 +2,7 @@ import 'package:collection/collection.dart';
 
 import '../models/location.dart';
 import '../models/message.dart';
+import '../models/scheduled_message.dart';
 import 'list_extensions.dart';
 import 'message_predicates.dart';
 
@@ -41,6 +42,47 @@ class MessageMerging {
     if (bPinnedAt == null) return -1;
 
     return bPinnedAt.compareTo(aPinnedAt);
+  }
+
+  /// Orders scheduled messages by [ScheduledMessage.compareByListOrder].
+  static int sortByScheduledAt(ScheduledMessage a, ScheduledMessage b) {
+    return ScheduledMessage.compareByListOrder(a, b);
+  }
+
+  /// The newer of [original] and [updated], by [ScheduledMessage.updatedAt].
+  static ScheduledMessage newerScheduledMessage(
+    ScheduledMessage original,
+    ScheduledMessage updated,
+  ) {
+    return original.updatedAt.isAfter(updated.updatedAt) ? original : updated;
+  }
+
+  /// Returns [scheduledMessages] ordered by [sortByScheduledAt].
+  ///
+  /// Returns [scheduledMessages] unchanged (same reference) when it is null or
+  /// already in order.
+  static List<ScheduledMessage>? sortScheduledMessages(List<ScheduledMessage>? scheduledMessages) {
+    if (scheduledMessages == null) return null;
+    if (scheduledMessages.isSorted(sortByScheduledAt)) return scheduledMessages;
+    return scheduledMessages.sortedWith(sortByScheduledAt);
+  }
+
+  /// Merges [toMerge] into the [existing] scheduled messages.
+  ///
+  /// Of two with the same ID, the one [newerScheduledMessage] picks is used.
+  ///
+  /// The result is ordered by [sortByScheduledAt], which [existing] must
+  /// already be sorted by.
+  static List<ScheduledMessage> mergeScheduledMessages({
+    required List<ScheduledMessage> existing,
+    required Iterable<ScheduledMessage> toMerge,
+  }) {
+    return existing.mergeSorted(
+      toMerge,
+      key: (it) => it.id,
+      compare: sortByScheduledAt,
+      update: newerScheduledMessage,
+    );
   }
 
   /// Merges the live locations carried by [toMerge] into [existing].

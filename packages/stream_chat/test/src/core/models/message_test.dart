@@ -56,6 +56,21 @@ void main() {
       expect(message.channelRole, 'channel_member');
     });
 
+    test('parses mentioned users given as IDs', () {
+      final message = Message.fromJson(const {
+        'text': 'Hi @bob @carol',
+        'mentioned_users': ['bob', 'carol'],
+      });
+
+      expect(message.mentionedUsers.map((it) => it.id), ['bob', 'carol']);
+    });
+
+    test('has no mentioned users when the field is missing', () {
+      final message = Message.fromJson(const {'text': 'Hi'});
+
+      expect(message.mentionedUsers, isEmpty);
+    });
+
     test('should serialize to json correctly', () {
       final message = Message(
         id: '4637f7e4-a06b-42db-ba5a-8d8270dd926f',

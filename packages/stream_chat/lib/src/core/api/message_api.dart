@@ -17,7 +17,7 @@ class MessageApi {
 
   final StreamHttpClient _client;
 
-  /// Sends the [message] to the given [channelId] of given [channelType]
+  /// Sends the [message] to the given [channelId] of given [channelType].
   Future<SendMessageResponse> sendMessage(
     String channelId,
     String channelType,
