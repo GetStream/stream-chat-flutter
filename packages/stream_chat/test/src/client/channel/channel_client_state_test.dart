@@ -51,17 +51,30 @@ void main() {
       ScheduledMessage scheduledMessage(
         String id, {
         DateTime? scheduledAt,
+        DateTime? createdAt,
         DateTime? updatedAt,
         String text = 'Good morning',
+        ScheduledMessageStatus status = ScheduledMessageStatus.scheduled,
       }) => ScheduledMessage(
         id: id,
         cid: cid,
         user: User(id: 'test-user-id'),
         message: Message(id: id, text: text),
         scheduledAt: scheduledAt ?? DateTime.utc(2026, 11, 2, 9),
-        status: ScheduledMessageStatus.scheduled,
-        createdAt: DateTime.utc(2026, 10, 29),
+        status: status,
+        createdAt: createdAt ?? DateTime.utc(2026, 10, 29),
         updatedAt: updatedAt ?? DateTime.utc(2026, 10, 29),
+      );
+
+      // A copy dated on this device only, changed at [updatedAt].
+      ScheduledMessage localCopy(String id, {required DateTime updatedAt}) => ScheduledMessage(
+        cid: cid,
+        user: User(id: 'test-user-id'),
+        message: Message(id: id, text: 'Good morning'),
+        scheduledAt: DateTime.utc(2026, 11, 2, 9),
+        status: ScheduledMessageStatus.scheduled,
+        localCreatedAt: updatedAt,
+        localUpdatedAt: updatedAt,
       );
 
       ChannelState stateWith(List<ScheduledMessage>? scheduledMessages) {
@@ -117,6 +130,36 @@ void main() {
         channel.state!.updateScheduledMessage(scheduledMessage('edited'));
 
         expect(channel.state!.scheduledMessages, [edited]);
+      });
+
+      test('list failed ones last, the rest by time and then by ID', () {
+        channel.state!.updateScheduledMessages([
+          scheduledMessage('failed', scheduledAt: DateTime.utc(2026, 11, 1), status: ScheduledMessageStatus.failed),
+          scheduledMessage('c', scheduledAt: DateTime.utc(2026, 11, 2, 9), createdAt: DateTime.utc(2026, 10, 29)),
+          scheduledMessage('d', scheduledAt: DateTime.utc(2026, 11, 2, 9), createdAt: DateTime.utc(2026, 10, 28)),
+          scheduledMessage('b', scheduledAt: DateTime.utc(2026, 11, 2, 9), createdAt: DateTime.utc(2026, 10, 29)),
+          scheduledMessage('later', scheduledAt: DateTime.utc(2026, 11, 3)),
+        ]);
+
+        expect(channel.state!.scheduledMessages.map((it) => it.id), ['b', 'c', 'd', 'later', 'failed']);
+      });
+
+      test('take the server copy in place of one dated on this device, even when dated earlier', () {
+        channel.state!.updateScheduledMessage(localCopy('a', updatedAt: DateTime.utc(2026, 10, 31)));
+        final server = scheduledMessage('a', updatedAt: DateTime.utc(2026, 10, 29));
+
+        channel.state!.updateScheduledMessage(server);
+
+        expect(channel.state!.scheduledMessages, [server]);
+      });
+
+      test('keep the server copy when one dated on this device arrives, even when dated later', () {
+        final server = scheduledMessage('a', updatedAt: DateTime.utc(2026, 10, 29));
+        channel.state!.updateScheduledMessage(server);
+
+        channel.state!.updateScheduledMessage(localCopy('a', updatedAt: DateTime.utc(2026, 10, 31)));
+
+        expect(channel.state!.scheduledMessages, [server]);
       });
 
       test('follow the scheduled message events of the channel', () async {

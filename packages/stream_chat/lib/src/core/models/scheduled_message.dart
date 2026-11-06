@@ -1,3 +1,9 @@
+/// @docImport '../../client/channel/channel_client_state.dart';
+/// @docImport '../../client/client.dart';
+/// @docImport '../../event_type.dart';
+/// @docImport 'event.dart';
+library;
+
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
@@ -10,13 +16,19 @@ part 'scheduled_message.g.dart';
 /// A message that is sent to its channel at [scheduledAt].
 ///
 /// Until then, only its author sees it, and it can be edited, rescheduled,
-/// sent right away or deleted. Once sent, it arrives in the channel as a
-/// normal message with an ID of its own.
-@JsonSerializable()
+/// sent right away or deleted. Once sent, it is a normal message in the
+/// channel, with an ID of its own.
+///
+/// Obtained from [ChannelClientState.scheduledMessages],
+/// [StreamChatClient.queryScheduledMessages] or
+/// [StreamChatClient.scheduleMessage].
+@JsonSerializable(createToJson: false)
 class ScheduledMessage extends Equatable {
   /// Creates a scheduled [message] for the channel [cid].
-  const ScheduledMessage({
-    required this.id,
+  ///
+  /// The [id] defaults to the ID of [message].
+  ScheduledMessage({
+    String? id,
     required this.cid,
     this.channel,
     required this.user,
@@ -24,62 +36,110 @@ class ScheduledMessage extends Equatable {
     required this.scheduledAt,
     required this.status,
     this.failureReason,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+    DateTime? createdAt,
+    this.localCreatedAt,
+    DateTime? updatedAt,
+    this.localUpdatedAt,
+  }) : id = id ?? message.id,
+       remoteCreatedAt = createdAt,
+       remoteUpdatedAt = updatedAt;
 
   /// Creates a scheduled message from [json].
   factory ScheduledMessage.fromJson(Map<String, dynamic> json) {
     final scheduled = _$ScheduledMessageFromJson(json);
-    final content = json['message'] as Map<String, dynamic>? ?? const {};
 
-    return scheduled.copyWith(
-      message: _messageFromContent(content, id: scheduled.id, user: scheduled.user),
+    // The message takes its ID, author and dates from the scheduled message.
+    final message = scheduled.message.copyWith(
+      id: scheduled.id,
+      user: scheduled.user,
+      createdAt: scheduled.scheduledAt,
+      updatedAt: scheduled.updatedAt,
     );
+
+    return scheduled.copyWith(message: message);
   }
 
-  /// The ID of the scheduled message.
+  /// The ID of this scheduled message.
   ///
-  /// It is not the ID of the message once sent.
+  /// The sent message gets an ID of its own, given by [Event.messageId] on
+  /// [EventType.scheduledMessageSent].
   final String id;
 
-  /// The CID of the channel the message is sent to.
+  /// The ID of the channel this message is sent to, in the form `type:id`.
   final String cid;
 
-  /// A summary of the channel the message is sent to.
+  /// A summary of the channel this message is sent to.
   ///
   /// Only set on scheduled messages returned by
   /// [StreamChatClient.queryScheduledMessages].
   final ChannelModel? channel;
 
-  /// The user the message is sent as.
+  /// The user this message is sent as.
   final User user;
 
   /// The message as it will be sent.
   ///
   /// Its [Message.id] is [id], not the ID the message is sent with.
-  @JsonKey(fromJson: _messagePlaceholder, toJson: _messageToContent)
+  ///
+  /// Its [Message.mentionedUsers] can have only their [User.id] set. Consider
+  /// resolving them, for example from [ClientState.users], before editing it.
+  ///
+  /// Its quoted message is identified by [Message.quotedMessageId] only.
   final Message message;
 
-  /// When the message is sent.
+  /// The time this message is sent at.
   final DateTime scheduledAt;
 
-  /// Where the scheduled message is in its lifecycle.
+  /// The stage of this scheduled message's lifecycle.
   final ScheduledMessageStatus status;
 
-  /// Why the message could not be sent.
+  /// The reason this message could not be sent.
   ///
   /// Only set when [status] is [ScheduledMessageStatus.failed].
   final ScheduledMessageFailureReason? failureReason;
 
-  /// When the message was scheduled.
-  final DateTime createdAt;
+  /// The time this message was scheduled.
+  ///
+  /// The server's time once it has one, otherwise [localCreatedAt]. If both
+  /// are null, the current time.
+  DateTime get createdAt => remoteCreatedAt ?? localCreatedAt ?? DateTime.now();
 
-  /// When the scheduled message last changed.
-  final DateTime updatedAt;
+  /// The time this message was scheduled on this device.
+  @JsonKey(includeFromJson: false)
+  final DateTime? localCreatedAt;
 
-  /// Serializes this scheduled message to JSON.
-  Map<String, dynamic> toJson() => _$ScheduledMessageToJson(this);
+  /// The time the server scheduled this message.
+  @JsonKey(includeFromJson: false)
+  final DateTime? remoteCreatedAt;
+
+  /// The time this scheduled message last changed.
+  ///
+  /// The server's time once it has one, otherwise [localUpdatedAt]. If both
+  /// are null, [createdAt].
+  DateTime get updatedAt => remoteUpdatedAt ?? localUpdatedAt ?? createdAt;
+
+  /// The time this scheduled message last changed on this device.
+  @JsonKey(includeFromJson: false)
+  final DateTime? localUpdatedAt;
+
+  /// The time this scheduled message last changed on the server.
+  @JsonKey(includeFromJson: false)
+  final DateTime? remoteUpdatedAt;
+
+  /// Orders scheduled messages the way they are listed.
+  ///
+  /// Failed ones come after all others. Within each group they go by
+  /// [scheduledAt], earliest first, then by [id].
+  static int compareByListOrder(ScheduledMessage a, ScheduledMessage b) {
+    final isAFailed = a.status == ScheduledMessageStatus.failed;
+    final isBFailed = b.status == ScheduledMessageStatus.failed;
+    if (isAFailed != isBFailed) return isAFailed ? 1 : -1;
+
+    final byScheduledAt = a.scheduledAt.compareTo(b.scheduledAt);
+    if (byScheduledAt != 0) return byScheduledAt;
+
+    return a.id.compareTo(b.id);
+  }
 
   /// Returns a copy of this scheduled message with the given fields replaced.
   ScheduledMessage copyWith({
@@ -92,7 +152,9 @@ class ScheduledMessage extends Equatable {
     ScheduledMessageStatus? status,
     ScheduledMessageFailureReason? failureReason,
     DateTime? createdAt,
+    DateTime? localCreatedAt,
     DateTime? updatedAt,
+    DateTime? localUpdatedAt,
   }) {
     return ScheduledMessage(
       id: id ?? this.id,
@@ -103,8 +165,10 @@ class ScheduledMessage extends Equatable {
       scheduledAt: scheduledAt ?? this.scheduledAt,
       status: status ?? this.status,
       failureReason: failureReason ?? this.failureReason,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
+      createdAt: createdAt ?? remoteCreatedAt,
+      localCreatedAt: localCreatedAt ?? this.localCreatedAt,
+      updatedAt: updatedAt ?? remoteUpdatedAt,
+      localUpdatedAt: localUpdatedAt ?? this.localUpdatedAt,
     );
   }
 
@@ -120,45 +184,14 @@ class ScheduledMessage extends Equatable {
     scheduledAt,
     status,
     failureReason,
-    createdAt,
-    updatedAt,
+    localCreatedAt,
+    remoteCreatedAt,
+    localUpdatedAt,
+    remoteUpdatedAt,
   ];
 }
 
-// The message is built in ScheduledMessage.fromJson, once the scheduled ID and
-// user it takes are known.
-Message _messagePlaceholder(Object? _) => Message();
-
-// Keeps every mentioned user as an ID, whether or not the text mentions them by
-// name.
-Map<String, dynamic> _messageToContent(Message message) => {
-  ...message.toJson(),
-  'mentioned_users': [for (final user in message.mentionedUsers) user.id],
-};
-
-// Builds a message from a scheduled message's content: mentioned users arrive
-// as IDs and custom data is nested under `custom`.
-Message _messageFromContent(
-  Map<String, dynamic> content, {
-  required String id,
-  required User user,
-}) {
-  final fields = {...content};
-  final custom = fields.remove('custom') as Map<String, dynamic>? ?? const {};
-  final mentionedUserIds = fields['mentioned_users'] as List<dynamic>? ?? const [];
-
-  return Message.fromJson({
-    ...custom,
-    ...fields,
-    'id': id,
-    'user': user.toJson(),
-    'mentioned_users': [
-      for (final userId in mentionedUserIds) {'id': userId},
-    ],
-  });
-}
-
-/// Where a [ScheduledMessage] is in its lifecycle.
+/// The stage of a [ScheduledMessage]'s lifecycle.
 ///
 /// A status without a constant here can still be named by wrapping its value:
 /// `ScheduledMessageStatus('paused')`.
@@ -166,12 +199,16 @@ extension type const ScheduledMessageStatus(String _) implements String {
   /// Waiting for its time.
   static const scheduled = ScheduledMessageStatus('scheduled');
 
-  /// Being sent, including while a failed attempt waits to be retried.
+  /// Being sent.
+  ///
+  /// It stays so while a failed attempt waits to be retried.
   ///
   /// It cannot be edited, sent now or deleted until it is sent or fails.
   static const sending = ScheduledMessageStatus('sending');
 
-  /// Could not be sent; see [ScheduledMessage.failureReason].
+  /// Could not be sent.
+  ///
+  /// The reason is [ScheduledMessage.failureReason].
   ///
   /// It can only be deleted.
   static const failed = ScheduledMessageStatus('failed');
@@ -183,7 +220,7 @@ extension type const ScheduledMessageStatus(String _) implements String {
   static const sent = ScheduledMessageStatus('sent');
 }
 
-/// Why a [ScheduledMessage] could not be sent.
+/// The reason a [ScheduledMessage] could not be sent.
 ///
 /// A reason without a constant here can still be named by wrapping its value:
 /// `ScheduledMessageFailureReason('rate_limited')`.

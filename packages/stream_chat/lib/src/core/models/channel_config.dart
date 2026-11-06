@@ -1,3 +1,6 @@
+/// @docImport '../error/stream_chat_error.dart';
+library;
+
 import 'package:json_annotation/json_annotation.dart';
 import 'chat_preferences.dart';
 import 'command.dart';
@@ -131,19 +134,21 @@ class ChannelConfig {
   /// True if shared locations are enabled for this channel.
   final bool sharedLocations;
 
-  /// The most scheduled messages, scheduled or sending, the current user can
-  /// have in this channel.
+  /// The limit on the current user's scheduled messages in each channel.
+  ///
+  /// Only scheduled and sending ones count toward it.
   ///
   /// Null when scheduled messages are not enabled.
   final int? scheduledMessagesMaxPerChannel;
 
-  /// The most scheduled messages, scheduled or sending, the current user can
-  /// have across all channels.
+  /// The limit on the current user's scheduled messages across all channels.
+  ///
+  /// Only scheduled and sending ones count toward it.
   ///
   /// Null when scheduled messages are not enabled.
   final int? scheduledMessagesMaxPerUser;
 
-  /// How far ahead a scheduled message is sent, at least.
+  /// The least time ahead of now a message is scheduled for.
   ///
   /// A sooner time is moved to the first whole minute at least this far ahead.
   ///
@@ -152,7 +157,10 @@ class ChannelConfig {
   @DurationInSecondsConverter()
   final Duration? scheduledMessagesMinLeadTime;
 
-  /// How far ahead a message can be scheduled, at most.
+  /// The most time ahead of now a message can be scheduled for.
+  ///
+  /// A later time is refused with
+  /// [ScheduledMessageErrorReason.scheduledAtTooFar].
   ///
   /// Null when scheduled messages are not enabled.
   @JsonKey(name: 'scheduled_messages_max_lead_time_seconds')

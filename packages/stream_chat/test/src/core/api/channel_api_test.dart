@@ -183,17 +183,16 @@ void main() {
 
   test('queryChannel asks for the scheduled messages and reads them', () async {
     const path = '/channels/messaging/general/query';
-    final user = User(id: 'test-user-id');
-    final scheduledMessage = ScheduledMessage(
-      id: 'scheduled-id',
-      cid: 'messaging:general',
-      user: user,
-      message: Message(id: 'scheduled-id', text: 'Good morning', user: user),
-      scheduledAt: DateTime.utc(2026, 11, 2, 9),
-      status: ScheduledMessageStatus.scheduled,
-      createdAt: DateTime.utc(2026, 10, 29),
-      updatedAt: DateTime.utc(2026, 10, 29),
-    );
+    const scheduledMessage = {
+      'id': 'scheduled-id',
+      'cid': 'messaging:general',
+      'user': {'id': 'test-user-id'},
+      'message': {'text': 'Good morning'},
+      'scheduled_at': '2026-11-02T09:00:00.000Z',
+      'status': 'scheduled',
+      'created_at': '2026-10-29T00:00:00.000Z',
+      'updated_at': '2026-10-29T00:00:00.000Z',
+    };
 
     when(
       () => client.post(
@@ -210,7 +209,7 @@ void main() {
         path,
         data: {
           'channel': {'cid': 'messaging:general'},
-          'scheduled_messages': [scheduledMessage.toJson()],
+          'scheduled_messages': [scheduledMessage],
         },
       ),
     );
@@ -221,7 +220,7 @@ void main() {
       includeScheduledMessages: true,
     );
 
-    expect(res.scheduledMessages?.single.id, scheduledMessage.id);
+    expect(res.scheduledMessages?.single.id, 'scheduled-id');
 
     verify(() => client.post(path, data: any(named: 'data'))).called(1);
   });

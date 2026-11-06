@@ -343,5 +343,41 @@ void main() {
 
       expect(error, isNot(error2));
     });
+
+    group('.scheduledMessageErrorReason', () {
+      const reasons = {
+        114: ScheduledMessageErrorReason.scheduledMessagesDisabled,
+        115: ScheduledMessageErrorReason.scheduledAtTooSoon,
+        116: ScheduledMessageErrorReason.scheduledAtTooFar,
+        117: ScheduledMessageErrorReason.scheduledLimitChannel,
+        118: ScheduledMessageErrorReason.scheduledLimitUser,
+        119: ScheduledMessageErrorReason.scheduledMessageIdTaken,
+        120: ScheduledMessageErrorReason.scheduledMessageNotEditable,
+        121: ScheduledMessageErrorReason.scheduledMessageSending,
+        122: ScheduledMessageErrorReason.scheduledMessageConflict,
+        123: ScheduledMessageErrorReason.scheduledMessageAlreadySent,
+        124: ScheduledMessageErrorReason.scheduledMessageCanceled,
+      };
+
+      for (final MapEntry(key: code, value: reason) in reasons.entries) {
+        test('is $reason for code $code', () {
+          final error = StreamChatNetworkError.raw(code: code, message: 'Refused', statusCode: 400);
+
+          expect(error.scheduledMessageErrorReason, reason);
+        });
+      }
+
+      test('is null when the message does not exist', () {
+        final error = StreamChatNetworkError(ChatErrorCode.doesNotExist, statusCode: 404);
+
+        expect(error.scheduledMessageErrorReason, isNull);
+      });
+
+      test('is null for an error about something else', () {
+        final error = StreamChatNetworkError(ChatErrorCode.inputError, statusCode: 400);
+
+        expect(error.scheduledMessageErrorReason, isNull);
+      });
+    });
   });
 }

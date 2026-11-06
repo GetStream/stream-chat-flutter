@@ -89,7 +89,7 @@ class StreamChatApi {
   RemindersApi get reminders => _reminders ??= RemindersApi(_client);
   RemindersApi? _reminders;
 
-  /// Api dedicated to scheduled messages operations
+  /// API dedicated to scheduled message operations.
   ScheduledMessagesApi get scheduledMessages => _scheduledMessages ??= ScheduledMessagesApi(_client);
   ScheduledMessagesApi? _scheduledMessages;
 

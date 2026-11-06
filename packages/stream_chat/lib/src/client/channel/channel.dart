@@ -3,7 +3,6 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
@@ -895,41 +894,34 @@ class Channel {
 
   /// Schedules [message] to be sent to this channel at [scheduledAt].
   ///
-  /// Also stops the current user's typing.
+  /// Until it is sent, the message is not among this channel's messages.
+  /// [ChannelClientState.scheduledMessages] lists it instead.
   ///
-  /// The message is kept out of the channel until it is sent, and joins
-  /// [ChannelClientState.scheduledMessages] instead. The [scheduledAt] is rounded up to a whole
-  /// minute, at least a minute from now. If it has passed by the time the
-  /// request arrives, the message is sent right away and
+  /// The [scheduledAt] is rounded up to a whole minute, at least
+  /// [ChannelConfig.scheduledMessagesMinLeadTime] from now. If it has passed by
+  /// the time the message is scheduled, the message is sent right away and
   /// [SendMessageResponse.scheduledMessage] is null.
   ///
-  /// A [scheduledAt] that is not in the future, or an attachment that is not
-  /// uploaded yet, throws an [ArgumentError].
+  /// Also stops the current user's typing.
+  ///
+  /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
+  /// attachment of [message] is not uploaded yet.
   Future<SendMessageResponse> scheduleMessage(
-    Message message,
-    DateTime scheduledAt, {
+    Message message, {
+    required DateTime scheduledAt,
     bool skipPush = false,
     bool skipEnrichUrl = false,
   }) async {
     _checkInitialized();
-
-    if (!scheduledAt.isAfter(clock.now())) {
-      throw ArgumentError.value(scheduledAt, 'scheduledAt', 'Must be in the future');
-    }
-
-    if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
-      throw ArgumentError.value(message, 'message', 'Attachments must be uploaded before scheduling');
-    }
-
     _keyStrokeHandler.cancel();
 
-    final response = await _client.sendMessage(
+    final response = await _client.scheduleMessage(
       message,
       id!,
       type,
+      scheduledAt: scheduledAt,
       skipPush: skipPush,
       skipEnrichUrl: skipEnrichUrl,
-      scheduledAt: scheduledAt,
     );
 
     if (response.scheduledMessage case final scheduledMessage?) {
@@ -941,15 +933,24 @@ class Channel {
     return response;
   }
 
-  /// Loads the current user's scheduled messages in this channel into
-  /// [ChannelClientState.scheduledMessages], and returns them.
+  /// Loads the current user's scheduled messages in this channel.
+  ///
+  /// [ChannelClientState.scheduledMessages] then lists them, and they are
+  /// returned.
   Future<List<ScheduledMessage>> queryScheduledMessages() async {
     _checkInitialized();
 
-    // A user has at most 100 scheduled messages, so the default page of 100
-    // holds them all.
-    final response = await _client.queryScheduledMessages(cid: cid);
-    final scheduledMessages = response.scheduledMessages;
+    final scheduledMessages = <ScheduledMessage>[];
+    String? next;
+    do {
+      final response = await _client.queryScheduledMessages(
+        cid: cid,
+        pagination: PaginationParams(limit: 100, next: next),
+      );
+
+      scheduledMessages.addAll(response.scheduledMessages);
+      next = response.next;
+    } while (next != null && next.isNotEmpty);
 
     state?.updateScheduledMessages(scheduledMessages);
     return scheduledMessages;
@@ -2156,8 +2157,9 @@ class Channel {
 
   /// Loads the initial channel state and watches for changes.
   ///
-  /// If [includeScheduledMessages] is true, the current user's
-  /// [ChannelClientState.scheduledMessages] in this channel are loaded too.
+  /// If [includeScheduledMessages] is true, the current user's scheduled
+  /// messages in this channel are loaded too.
+  /// [ChannelClientState.scheduledMessages] then lists their current ones.
   Future<ChannelState> watch({
     bool presence = false,
     PaginationParams? messagesPagination,
@@ -2260,13 +2262,16 @@ class Channel {
   /// Creates a new channel.
   Future<ChannelState> create() => query(state: false);
 
-  /// Query the API, get messages, members or other channel fields.
+  /// Queries this channel's messages, members and other fields.
   ///
-  /// Set [preferOffline] to true to avoid the API call if the data is already
-  /// in the offline storage.
+  /// If [preferOffline] is true, the channel state is read from the offline
+  /// storage when it has messages for this channel, without an API call.
   ///
-  /// If [includeScheduledMessages] is true, the current user's
-  /// [ChannelClientState.scheduledMessages] in this channel are loaded too.
+  /// If [includeScheduledMessages] is true, the current user's scheduled
+  /// messages in this channel are loaded too.
+  /// [ChannelClientState.scheduledMessages] then lists their current ones.
+  /// Scheduled messages are not stored offline, so [preferOffline] has no
+  /// effect then.
   Future<ChannelState> query({
     bool state = true,
     bool watch = false,
@@ -2288,8 +2293,8 @@ class Channel {
     ChannelState? channelState;
 
     try {
-      // If we prefer offline, we first try to get the channel state from the
-      // offline storage, which has no scheduled messages.
+      // With preferOffline, the channel state is read from the offline storage
+      // first. That storage has no scheduled messages.
       if (preferOffline && !watch && !includeScheduledMessages && cid != null) {
         final persistenceClient = _client.chatPersistenceClient;
         if (persistenceClient != null) {

@@ -1,3 +1,6 @@
+/// @docImport '../../client/channel/channel.dart';
+library;
+
 import 'package:json_annotation/json_annotation.dart';
 import 'channel_model.dart';
 import 'comparable_field.dart';
@@ -93,11 +96,12 @@ class ChannelState implements ComparableFieldProvider {
   /// The list of active live locations in the channel.
   final List<Location>? activeLiveLocations;
 
-  /// The current user's scheduled messages in the channel that are not sent
-  /// yet.
+  /// The current user's unsent scheduled messages in the channel.
   ///
-  /// Null when the channel was loaded without asking for them, or when there
-  /// were too many to include.
+  /// An empty list when there are none. Null when the channel was loaded
+  /// without asking for them, or when they could not all be loaded; consider
+  /// [Channel.queryScheduledMessages] then.
+  @JsonKey(includeToJson: false)
   final List<ScheduledMessage>? scheduledMessages;
 
   /// Create a new instance from a json
