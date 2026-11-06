@@ -4829,7 +4829,7 @@ void main() {
       final now = DateTime.utc(2026, 10, 30, 12);
       final scheduledAt = now.add(const Duration(days: 1));
 
-      Future<SendMessageResponse> schedule(Message message, DateTime time) {
+      Future<ScheduleMessageResponse> schedule(Message message, DateTime time) {
         return withClock(
           Clock.fixed(now),
           () => client.scheduleMessage(message, 'general', 'messaging', scheduledAt: time),
@@ -4840,7 +4840,7 @@ void main() {
         final message = Message(id: 'scheduled-id', text: 'Good morning');
         when(
           () => api.scheduledMessages.scheduleMessage('general', 'messaging', message, scheduledAt),
-        ).thenAnswer((_) async => SendMessageResponse()..message = message);
+        ).thenAnswer((_) async => ScheduleMessageResponse()..message = message);
 
         await schedule(message, scheduledAt);
 
@@ -4882,12 +4882,21 @@ void main() {
     });
 
     test('`.rescheduleMessage` moves only the time', () async {
+      final scheduledMessage = ScheduledMessage(
+        cid: 'messaging:general',
+        user: User(id: 'test-user-id'),
+        message: Message(id: 'scheduled-id', text: 'Good morning'),
+        scheduledAt: DateTime.utc(2026, 11, 2, 9),
+        status: ScheduledMessageStatus.scheduled,
+        createdAt: DateTime.utc(2026, 10, 29),
+        updatedAt: DateTime.utc(2026, 10, 29),
+      );
       final scheduledAt = DateTime.utc(2026, 11, 3, 9);
       when(
         () => api.scheduledMessages.updateScheduledMessage('scheduled-id', scheduledAt: scheduledAt),
       ).thenAnswer((_) async => ScheduledMessageResponse());
 
-      await client.rescheduleMessage('scheduled-id', scheduledAt: scheduledAt);
+      await client.rescheduleMessage(scheduledMessage, scheduledAt: scheduledAt);
 
       verify(
         () => api.scheduledMessages.updateScheduledMessage('scheduled-id', scheduledAt: scheduledAt),
@@ -4897,19 +4906,18 @@ void main() {
     group('a scheduled message the server no longer has', () {
       const cid = 'messaging:general';
       final missing = StreamChatNetworkError(ChatErrorCode.doesNotExist, statusCode: 404);
+      final scheduled = ScheduledMessage(
+        cid: cid,
+        user: User(id: 'test-user-id'),
+        message: Message(id: 'scheduled-id', text: 'Good morning'),
+        scheduledAt: DateTime.utc(2026, 11, 2, 9),
+        status: ScheduledMessageStatus.scheduled,
+        createdAt: DateTime.utc(2026, 10, 29),
+        updatedAt: DateTime.utc(2026, 10, 29),
+      );
       late Channel channel;
 
       setUp(() {
-        final scheduled = ScheduledMessage(
-          id: 'scheduled-id',
-          cid: cid,
-          user: User(id: 'test-user-id'),
-          message: Message(id: 'scheduled-id', text: 'Good morning'),
-          scheduledAt: DateTime.utc(2026, 11, 2, 9),
-          status: ScheduledMessageStatus.scheduled,
-          createdAt: DateTime.utc(2026, 10, 29),
-          updatedAt: DateTime.utc(2026, 10, 29),
-        );
         final state = ChannelState(
           channel: ChannelModel(cid: cid),
           scheduledMessages: [scheduled],
@@ -4925,7 +4933,8 @@ void main() {
           () => api.scheduledMessages.updateScheduledMessage('scheduled-id', message: edited),
         ).thenAnswer((_) async => throw missing);
 
-        await expectLater(client.updateScheduledMessage('scheduled-id', edited), throwsA(missing));
+        await expectLater(client.updateScheduledMessage(scheduled, edited), throwsA(missing));
+        await Future<void>.delayed(Duration.zero);
         expect(channel.state!.scheduledMessages, isEmpty);
       });
 
@@ -4935,7 +4944,8 @@ void main() {
           () => api.scheduledMessages.updateScheduledMessage('scheduled-id', scheduledAt: scheduledAt),
         ).thenAnswer((_) async => throw missing);
 
-        await expectLater(client.rescheduleMessage('scheduled-id', scheduledAt: scheduledAt), throwsA(missing));
+        await expectLater(client.rescheduleMessage(scheduled, scheduledAt: scheduledAt), throwsA(missing));
+        await Future<void>.delayed(Duration.zero);
         expect(channel.state!.scheduledMessages, isEmpty);
       });
 
@@ -4944,7 +4954,8 @@ void main() {
           () => api.scheduledMessages.deleteScheduledMessage('scheduled-id'),
         ).thenAnswer((_) async => throw missing);
 
-        await expectLater(client.deleteScheduledMessage('scheduled-id'), throwsA(missing));
+        await expectLater(client.deleteScheduledMessage(scheduled), throwsA(missing));
+        await Future<void>.delayed(Duration.zero);
         expect(channel.state!.scheduledMessages, isEmpty);
       });
 
@@ -4953,7 +4964,8 @@ void main() {
           () => api.scheduledMessages.sendScheduledMessageNow('scheduled-id'),
         ).thenAnswer((_) async => throw missing);
 
-        await expectLater(client.sendScheduledMessageNow('scheduled-id'), throwsA(missing));
+        await expectLater(client.sendScheduledMessageNow(scheduled), throwsA(missing));
+        await Future<void>.delayed(Duration.zero);
         expect(channel.state!.scheduledMessages, isEmpty);
       });
 
@@ -4967,10 +4979,25 @@ void main() {
             () => api.scheduledMessages.sendScheduledMessageNow('scheduled-id'),
           ).thenAnswer((_) async => throw error);
 
-          await expectLater(client.sendScheduledMessageNow('scheduled-id'), throwsA(error));
+          await expectLater(client.sendScheduledMessageNow(scheduled), throwsA(error));
+          await Future<void>.delayed(Duration.zero);
           expect(channel.state!.scheduledMessages, isEmpty);
         });
       }
+
+      test('is reported as deleted even when no channel lists it', () async {
+        final elsewhere = scheduled.copyWith(cid: 'messaging:elsewhere');
+        when(
+          () => api.scheduledMessages.deleteScheduledMessage('scheduled-id'),
+        ).thenAnswer((_) async => throw missing);
+        final deleted = client.on(EventType.scheduledMessageDeleted).first;
+
+        await expectLater(client.deleteScheduledMessage(elsewhere), throwsA(missing));
+
+        final event = await deleted;
+        expect(event.cid, 'messaging:elsewhere');
+        expect(event.scheduledMessage, elsewhere);
+      });
 
       test('stays in its channel when the request fails otherwise', () async {
         final error = StreamChatNetworkError(ChatErrorCode.inputError, statusCode: 400);
@@ -4978,7 +5005,8 @@ void main() {
           () => api.scheduledMessages.sendScheduledMessageNow('scheduled-id'),
         ).thenAnswer((_) async => throw error);
 
-        await expectLater(client.sendScheduledMessageNow('scheduled-id'), throwsA(error));
+        await expectLater(client.sendScheduledMessageNow(scheduled), throwsA(error));
+        await Future<void>.delayed(Duration.zero);
         expect(channel.state!.scheduledMessages.single.id, 'scheduled-id');
       });
     });
