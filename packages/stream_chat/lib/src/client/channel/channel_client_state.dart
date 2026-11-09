@@ -10,6 +10,7 @@ import '../../core/util/message_predicates.dart';
 import '../../core/util/utils.dart';
 import '../live_location_expiration_scheduler.dart';
 import '../retry_queue.dart';
+import '../scheduled_messages/scheduled_message_manager.dart';
 import 'channel_event_handler.dart';
 import 'channel_state_mutations.dart';
 

@@ -72,7 +72,7 @@ class ScheduledMessageListStateNotifier {
   ///
   /// The ones still being scheduled, or whose request failed, are kept.
   void onLoadScheduledMessages(List<ScheduledMessage> scheduledMessages) {
-    final local = _scheduledMessages.where(_isLocal);
+    final local = _scheduledMessages.where((it) => it.isLocal);
     final merged = _merged(local, scheduledMessages);
 
     _emit(
@@ -98,7 +98,7 @@ class ScheduledMessageListStateNotifier {
   void onChannelsQueried(List<ChannelScheduledMessages> channels) {
     final cids = {for (final it in channels) it.cid};
     final kept = _scheduledMessages.where(
-      (it) => !cids.contains(it.cid) || _isLocal(it),
+      (it) => !cids.contains(it.cid) || it.isLocal,
     );
 
     final queried = channels.expand((it) => it.scheduledMessages);
@@ -175,15 +175,17 @@ class ScheduledMessageListStateNotifier {
     return scheduledMessages.toList().sortedWith(_byScheduledAt);
   }
 
-  // Whether it is still being scheduled, or scheduling it failed and can be
-  // retried.
-  static bool _isLocal(ScheduledMessage it) {
-    if (it.status == .preparingToSchedule) return true;
-    return it.failureReason?.isRetriable ?? false;
-  }
-
   void _emit(ScheduledMessageListState next) {
     if (next == state) return;
     _state.safeAdd(next);
+  }
+}
+
+extension on ScheduledMessage {
+  // Whether it is still being scheduled, or scheduling it failed and can be
+  // retried.
+  bool get isLocal {
+    if (status == .preparingToSchedule) return true;
+    return failureReason?.isRetriable ?? false;
   }
 }
