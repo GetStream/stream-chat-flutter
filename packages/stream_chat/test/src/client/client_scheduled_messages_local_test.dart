@@ -377,6 +377,15 @@ void main() {
     expect(client.state.scheduledMessages, isEmpty);
   });
 
+  test('deleting one whose request failed, and the server never got, returns it canceled', () async {
+    final failed = await scheduleUnreachable(Message(id: 'a', text: 'Good morning'));
+    when(() => api.scheduledMessages.deleteScheduledMessage('a')).thenAnswer((_) async => throw missingError);
+
+    final response = await client.deleteScheduledMessage(failed);
+
+    expect(response.scheduledMessage.status, ScheduledMessageStatus.canceled);
+  });
+
   test('deleteScheduledMessage keeps one whose request failed when the server fails', () async {
     final failed = await scheduleUnreachable(Message(id: 'a', text: 'Good morning'));
     final serverError = StreamChatNetworkError(ChatErrorCode.internalSystemError, statusCode: 500);
@@ -397,6 +406,24 @@ void main() {
 
     verify(() => api.scheduledMessages.deleteScheduledMessage('a')).called(1);
   });
+
+  test(
+    "scheduleMessage leaves the next user's list alone when the user disconnects before the server answers",
+    () async {
+      final message = Message(id: 'a', text: 'Good morning');
+      final answer = Completer<ScheduleMessageResponse>();
+      stubSchedule(message, () => answer.future);
+      final request = schedule(message);
+      await settle();
+
+      await client.disconnectUser();
+      await client.connectUser(testUser, testToken);
+      answer.complete(scheduled(message, fakeScheduledMessage('a', scheduledAt: scheduledAt)));
+      await request;
+
+      expect(client.state.scheduledMessages, isEmpty);
+    },
+  );
 
   test('scheduleMessage schedules one the server refused again with the same ID', () async {
     final message = Message(id: 'a', text: 'Good morning');

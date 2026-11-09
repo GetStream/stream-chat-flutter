@@ -49,7 +49,7 @@ class ScheduledMessageManager {
   // Whether the complete list was loaded when the connection was lost.
   var _wasLoadedBeforeConnectionLost = false;
 
-  // Bumped by clear, so a query that started before it is not applied.
+  // Bumped by clear, so a request that started before it is not applied.
   var _generation = 0;
 
   /// The scheduled messages, and whether the complete list is loaded.
@@ -166,6 +166,8 @@ class ScheduledMessageManager {
       );
     }
 
+    final generation = _generation;
+
     // Listed right away, unless there is no user to list it for.
     final user = _client.state.currentUser;
     final now = clock.now();
@@ -182,7 +184,9 @@ class ScheduledMessageManager {
       ),
     };
 
-    if (local != null) _emitEvent(EventType.scheduledMessageCreated, local);
+    if (local != null) {
+      _emitEvent(EventType.scheduledMessageCreated, local, generation);
+    }
 
     try {
       final response = await _api.scheduleMessage(
@@ -194,11 +198,11 @@ class ScheduledMessageManager {
         skipEnrichUrl: skipEnrichUrl,
       );
 
-      if (response.scheduledMessage case final scheduledMessage?) {
-        _emitEvent(EventType.scheduledMessageCreated, scheduledMessage);
+      if (response.scheduledMessage case final created?) {
+        _emitEvent(EventType.scheduledMessageCreated, created, generation);
       } else if (local != null) {
         // Its time had passed, so it was sent right away.
-        _emitEvent(EventType.scheduledMessageSent, _sent(local));
+        _emitEvent(EventType.scheduledMessageSent, _sent(local), generation);
       }
 
       return response;
@@ -207,12 +211,13 @@ class ScheduledMessageManager {
 
       // Already sent: on a retry, the first attempt reached the server.
       if (error.scheduledMessageErrorReason == .scheduledMessageAlreadySent) {
-        _emitEvent(EventType.scheduledMessageSent, _sent(local));
+        _emitEvent(EventType.scheduledMessageSent, _sent(local), generation);
         rethrow;
       }
 
       if (!error.isRetriable) {
-        _emitEvent(EventType.scheduledMessageDeleted, _canceled(local));
+        final canceled = _canceled(local);
+        _emitEvent(EventType.scheduledMessageDeleted, canceled, generation);
         rethrow;
       }
 
@@ -222,11 +227,12 @@ class ScheduledMessageManager {
         localUpdatedAt: clock.now(),
       );
 
-      _emitEvent(EventType.scheduledMessageUpdated, failed);
+      _emitEvent(EventType.scheduledMessageUpdated, failed, generation);
       rethrow;
     } catch (_) {
       if (local != null) {
-        _emitEvent(EventType.scheduledMessageDeleted, _canceled(local));
+        final canceled = _canceled(local);
+        _emitEvent(EventType.scheduledMessageDeleted, canceled, generation);
       }
 
       rethrow;
@@ -270,13 +276,26 @@ class ScheduledMessageManager {
   /// scheduled message is already gone. If it is, an
   /// [EventType.scheduledMessageDeleted] event reports it, so [state] stops
   /// listing it.
+  ///
+  /// Throws an [ArgumentError] if an attachment of [message] is not uploaded
+  /// yet.
   Future<UpdateScheduledMessageResponse> updateMessage(
     ScheduledMessage scheduledMessage,
     Message message, {
     DateTime? scheduledAt,
   }) async {
+    if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
+      throw ArgumentError.value(
+        message,
+        'message',
+        'Attachments must be uploaded before updating',
+      );
+    }
+
+    final generation = _generation;
     final response = await _request(
       scheduledMessage,
+      generation,
       () => _api.updateScheduledMessage(
         scheduledMessage.id,
         message: message,
@@ -284,7 +303,8 @@ class ScheduledMessageManager {
       ),
     );
 
-    _emitEvent(EventType.scheduledMessageUpdated, response.scheduledMessage);
+    final updated = response.scheduledMessage;
+    _emitEvent(EventType.scheduledMessageUpdated, updated, generation);
     return response;
   }
 
@@ -300,15 +320,18 @@ class ScheduledMessageManager {
     ScheduledMessage scheduledMessage, {
     required DateTime scheduledAt,
   }) async {
+    final generation = _generation;
     final response = await _request(
       scheduledMessage,
+      generation,
       () => _api.updateScheduledMessage(
         scheduledMessage.id,
         scheduledAt: scheduledAt,
       ),
     );
 
-    _emitEvent(EventType.scheduledMessageUpdated, response.scheduledMessage);
+    final updated = response.scheduledMessage;
+    _emitEvent(EventType.scheduledMessageUpdated, updated, generation);
     return response;
   }
 
@@ -321,12 +344,15 @@ class ScheduledMessageManager {
   Future<SendScheduledMessageNowResponse> sendMessageNow(
     ScheduledMessage scheduledMessage,
   ) async {
+    final generation = _generation;
     final response = await _request(
       scheduledMessage,
+      generation,
       () => _api.sendScheduledMessageNow(scheduledMessage.id),
     );
 
-    _emitEvent(EventType.scheduledMessageUpdated, response.scheduledMessage);
+    final updated = response.scheduledMessage;
+    _emitEvent(EventType.scheduledMessageUpdated, updated, generation);
     return response;
   }
 
@@ -343,28 +369,31 @@ class ScheduledMessageManager {
   Future<DeleteScheduledMessageResponse> deleteMessage(
     ScheduledMessage scheduledMessage,
   ) async {
+    final generation = _generation;
     if (scheduledMessage.failureReason?.isRetriable ?? false) {
       try {
         final id = scheduledMessage.id;
         final response = await _api.deleteScheduledMessage(id);
         final deleted = response.scheduledMessage;
-        _emitEvent(EventType.scheduledMessageDeleted, deleted);
+        _emitEvent(EventType.scheduledMessageDeleted, deleted, generation);
         return response;
       } on StreamChatNetworkError catch (error) {
         if (error.statusCode != 404) rethrow;
 
         final canceled = _canceled(scheduledMessage);
-        _emitEvent(EventType.scheduledMessageDeleted, canceled);
-        return DeleteScheduledMessageResponse()..scheduledMessage = scheduledMessage;
+        _emitEvent(EventType.scheduledMessageDeleted, canceled, generation);
+        return DeleteScheduledMessageResponse()..scheduledMessage = canceled;
       }
     }
 
     final response = await _request(
       scheduledMessage,
+      generation,
       () => _api.deleteScheduledMessage(scheduledMessage.id),
     );
 
-    _emitEvent(EventType.scheduledMessageDeleted, response.scheduledMessage);
+    final deleted = response.scheduledMessage;
+    _emitEvent(EventType.scheduledMessageDeleted, deleted, generation);
     return response;
   }
 
@@ -425,6 +454,7 @@ class ScheduledMessageManager {
   // reported deleted: its own event may have been missed.
   Future<T> _request<T>(
     ScheduledMessage scheduledMessage,
+    int generation,
     Future<T> Function() request,
   ) async {
     try {
@@ -432,7 +462,7 @@ class ScheduledMessageManager {
     } on StreamChatNetworkError catch (error) {
       if (error.statusCode == 404) {
         final canceled = _canceled(scheduledMessage);
-        _emitEvent(EventType.scheduledMessageDeleted, canceled);
+        _emitEvent(EventType.scheduledMessageDeleted, canceled, generation);
       }
 
       rethrow;
@@ -455,7 +485,15 @@ class ScheduledMessageManager {
     );
   }
 
-  void _emitEvent(String type, ScheduledMessage scheduledMessage) {
+  // Reports [scheduledMessage] as an event of [type], unless the user changed
+  // since the request that produced it started.
+  void _emitEvent(
+    String type,
+    ScheduledMessage scheduledMessage,
+    int generation,
+  ) {
+    if (generation != _generation) return;
+
     final event = Event(
       type: type,
       cid: scheduledMessage.cid,

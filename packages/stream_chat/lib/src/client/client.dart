@@ -2580,6 +2580,9 @@ class StreamChatClient {
   /// the scheduled message is already gone, or with
   /// [ScheduledMessageErrorReason.scheduledAtTooSoon] for a [scheduledAt] that
   /// is not in the future.
+  ///
+  /// Throws an [ArgumentError] if an attachment of [message] is not uploaded
+  /// yet.
   Future<UpdateScheduledMessageResponse> updateScheduledMessage(
     ScheduledMessage scheduledMessage,
     Message message, {

@@ -97,6 +97,50 @@ void main() {
     expect(client.state.scheduledMessages, [updated]);
   });
 
+  test('updateScheduledMessage reports nothing when the user disconnects before the server answers', () async {
+    await hold([a]);
+    final edited = Message(id: 'a', text: 'Good evening');
+    final answer = Completer<UpdateScheduledMessageResponse>();
+    when(
+      () => api.scheduledMessages.updateScheduledMessage('a', message: edited),
+    ).thenAnswer((_) => answer.future);
+    final updates = <Event>[];
+    final subscription = client.on(EventType.scheduledMessageUpdated).listen(updates.add);
+    addTearDown(subscription.cancel);
+    final request = client.updateScheduledMessage(a, edited);
+
+    await client.disconnectUser();
+    await client.connectUser(testUser, testToken);
+    answer.complete(fakeUpdate(fakeScheduledMessage('a', text: 'Good evening')));
+    await request;
+    await settle();
+
+    expect(updates, isEmpty);
+  });
+
+  test('updateScheduledMessage refuses an attachment that is not uploaded', () async {
+    final edited = Message(
+      id: 'a',
+      text: 'Good evening',
+      attachments: [
+        Attachment(
+          type: AttachmentType.image,
+          file: AttachmentFile(size: 100, path: 'image.png'),
+        ),
+      ],
+    );
+
+    await expectLater(client.updateScheduledMessage(a, edited), throwsA(isA<ArgumentError>()));
+
+    verifyNever(
+      () => api.scheduledMessages.updateScheduledMessage(
+        any(),
+        message: any(named: 'message'),
+        scheduledAt: any(named: 'scheduledAt'),
+      ),
+    );
+  });
+
   test('deleteScheduledMessage drops it', () async {
     await hold([a]);
     when(
