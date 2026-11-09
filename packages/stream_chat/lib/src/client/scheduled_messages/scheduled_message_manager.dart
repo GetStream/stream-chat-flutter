@@ -58,10 +58,49 @@ class ScheduledMessageManager {
   /// The [state], emitted on listen and again each time it changes.
   Stream<ScheduledMessageListState> get stream => _stateNotifier.stream;
 
+  /// The scheduled messages in the channel [cid], without its thread replies.
+  List<ScheduledMessage> channelMessages(String cid) {
+    return _scoped(_inChannel(cid));
+  }
+
+  /// The scheduled replies in the thread of the message [parentId].
+  List<ScheduledMessage> threadReplies(String parentId) {
+    return _scoped(_inThread(parentId));
+  }
+
+  /// The [threadReplies], emitted on listen and again each time they change.
+  Stream<List<ScheduledMessage>> threadRepliesStream(String parentId) {
+    return _scopedStream(_inThread(parentId));
+  }
+
+  static bool Function(ScheduledMessage) _inChannel(String cid) {
+    return (it) => it.cid == cid && it.message.parentId == null;
+  }
+
+  static bool Function(ScheduledMessage) _inThread(String parentId) {
+    return (it) => it.message.parentId == parentId;
+  }
+
+  List<ScheduledMessage> _scoped(bool Function(ScheduledMessage) test) {
+    return state.scheduledMessages.where(test).toList();
+  }
+
+  Stream<List<ScheduledMessage>> _scopedStream(
+    bool Function(ScheduledMessage) test,
+  ) {
+    final scoped = stream.map(
+      (it) => it.scheduledMessages.where(test).toList(),
+    );
+
+    return scoped.distinct(const ListEquality().equals);
+  }
+
   /// Queries the page of the scheduled messages that [query] describes.
   ///
   /// The page is added to [ScheduledMessageListState.scheduledMessages];
   /// nothing is removed.
+  ///
+  /// Throws a [StreamChatNetworkError] if the request fails.
   Future<QueryScheduledMessagesResponse> queryMessages(
     ScheduledMessagesQuery query,
   ) async {
@@ -78,11 +117,11 @@ class ScheduledMessageManager {
   /// Loads the complete list, which then replaces
   /// [ScheduledMessageListState.scheduledMessages].
   ///
-  /// The ones not on the server yet are kept. If a page fails, the ones
-  /// before it are added, nothing is removed, and the error is rethrown.
-  /// Asking again while it runs shares the load.
+  /// The ones still being scheduled, or whose request failed, are kept. If a
+  /// page fails, the ones before it are added, nothing is removed, and the
+  /// error is rethrown. Calling this again while it runs shares the load.
   ///
-  /// Returns the scheduled messages listed once it is loaded.
+  /// Returns the [state] once the list is loaded.
   Future<ScheduledMessageListState> loadMessages() {
     return _loadCache.run('all', () async {
       final generation = _generation;
@@ -114,6 +153,8 @@ class ScheduledMessageManager {
   /// retried, it stays listed as failed with
   /// [ScheduledMessageFailureReason.requestFailed]; any other failure removes
   /// it.
+  ///
+  /// Throws a [StreamChatNetworkError] if the request fails.
   ///
   /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
   /// attachment of [message] is not uploaded yet. A message to send right
@@ -221,7 +262,10 @@ class ScheduledMessageManager {
       _emitEvent(EventType.scheduledMessageUpdated, failed);
       rethrow;
     } catch (_) {
-      if (local != null) _emitEvent(EventType.scheduledMessageDeleted, _canceled(local));
+      if (local != null) {
+        _emitEvent(EventType.scheduledMessageDeleted, _canceled(local));
+      }
+
       rethrow;
     }
   }
@@ -235,7 +279,8 @@ class ScheduledMessageManager {
   ///
   /// Its [ScheduledMessage.failureReason] must be retriable.
   ///
-  /// Throws an [ArgumentError] if an attachment of its message is not uploaded.
+  /// Throws a [StreamChatNetworkError] if the request fails, or an
+  /// [ArgumentError] if an attachment of its message is not uploaded.
   Future<ScheduleMessageResponse> retryMessage(
     ScheduledMessage scheduledMessage,
   ) {
@@ -258,7 +303,10 @@ class ScheduledMessageManager {
   /// Its message is replaced with [message], and it is moved to [scheduledAt]
   /// if given.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails.
+  /// Throws a [StreamChatNetworkError] if the request fails, even when the
+  /// scheduled message is already gone. If it is, an
+  /// [EventType.scheduledMessageDeleted] event reports it, so [state] stops
+  /// listing it.
   Future<UpdateScheduledMessageResponse> updateMessage(
     ScheduledMessage scheduledMessage,
     Message message, {
@@ -281,7 +329,10 @@ class ScheduledMessageManager {
   ///
   /// Its message stays as it is.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails.
+  /// Throws a [StreamChatNetworkError] if the request fails, even when the
+  /// scheduled message is already gone. If it is, an
+  /// [EventType.scheduledMessageDeleted] event reports it, so [state] stops
+  /// listing it.
   Future<UpdateScheduledMessageResponse> rescheduleMessage(
     ScheduledMessage scheduledMessage, {
     required DateTime scheduledAt,
@@ -300,7 +351,10 @@ class ScheduledMessageManager {
 
   /// Sends [scheduledMessage] right away.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails.
+  /// Throws a [StreamChatNetworkError] if the request fails, even when the
+  /// scheduled message is already gone. If it is, an
+  /// [EventType.scheduledMessageDeleted] event reports it, so [state] stops
+  /// listing it.
   Future<SendScheduledMessageNowResponse> sendMessageNow(
     ScheduledMessage scheduledMessage,
   ) async {
@@ -315,24 +369,29 @@ class ScheduledMessageManager {
 
   /// Deletes [scheduledMessage].
   ///
-  /// One whose request failed in a way that can be retried is removed without
-  /// a request.
+  /// One whose request failed in a way that can be retried is deleted even if
+  /// scheduling it never went through. If it no longer exists, an
+  /// [EventType.scheduledMessageDeleted] event reports it, so [state] stops
+  /// listing it.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails.
+  /// Throws a [StreamChatNetworkError] if the request fails, which leaves it
+  /// listed unless it is already gone. Deleting one already gone throws too,
+  /// unless its own request had failed.
   Future<DeleteScheduledMessageResponse> deleteMessage(
     ScheduledMessage scheduledMessage,
   ) async {
-    // Its request may have reached the server before failing, so it is
-    // deleted there too; one the server never got is simply gone.
     if (scheduledMessage.failureReason?.isRetriable ?? false) {
       try {
-        final response = await _api.deleteScheduledMessage(scheduledMessage.id);
-        _emitEvent(EventType.scheduledMessageDeleted, response.scheduledMessage);
+        final id = scheduledMessage.id;
+        final response = await _api.deleteScheduledMessage(id);
+        final deleted = response.scheduledMessage;
+        _emitEvent(EventType.scheduledMessageDeleted, deleted);
         return response;
       } on StreamChatNetworkError catch (error) {
         if (error.statusCode != 404) rethrow;
 
-        _emitEvent(EventType.scheduledMessageDeleted, _canceled(scheduledMessage));
+        final canceled = _canceled(scheduledMessage);
+        _emitEvent(EventType.scheduledMessageDeleted, canceled);
         return DeleteScheduledMessageResponse()..scheduledMessage = scheduledMessage;
       }
     }
@@ -350,7 +409,7 @@ class ScheduledMessageManager {
   /// the [ChannelState.scheduledMessages] listed for it in [channelStates].
   ///
   /// A channel whose state has no [ChannelState.scheduledMessages] is left as
-  /// it is. The ones not on the server yet are kept.
+  /// it is. The ones still being scheduled, or whose request failed, are kept.
   @internal
   void onChannelsQueried(List<ChannelState> channelStates) {
     final channels = <ChannelScheduledMessages>[];
@@ -409,21 +468,28 @@ class ScheduledMessageManager {
       return await request();
     } on StreamChatNetworkError catch (error) {
       if (error.statusCode == 404) {
-        _emitEvent(EventType.scheduledMessageDeleted, _canceled(scheduledMessage));
+        final canceled = _canceled(scheduledMessage);
+        _emitEvent(EventType.scheduledMessageDeleted, canceled);
       }
 
       rethrow;
     }
   }
 
-  // [scheduledMessage] as the server reports it once sent.
+  // [scheduledMessage], marked sent.
   ScheduledMessage _sent(ScheduledMessage scheduledMessage) {
-    return scheduledMessage.copyWith(status: .sent, localUpdatedAt: clock.now());
+    return scheduledMessage.copyWith(
+      status: .sent,
+      localUpdatedAt: clock.now(),
+    );
   }
 
-  // [scheduledMessage] as the server reports it once deleted.
+  // [scheduledMessage], marked canceled.
   ScheduledMessage _canceled(ScheduledMessage scheduledMessage) {
-    return scheduledMessage.copyWith(status: .canceled, localUpdatedAt: clock.now());
+    return scheduledMessage.copyWith(
+      status: .canceled,
+      localUpdatedAt: clock.now(),
+    );
   }
 
   void _emitEvent(String type, ScheduledMessage scheduledMessage) {
@@ -450,46 +516,5 @@ class ScheduledMessageManager {
   Future<void> dispose() async {
     await _eventsSubscription.cancel();
     await _stateNotifier.dispose();
-  }
-}
-
-/// Views of a [ScheduledMessageManager]'s scheduled messages in one channel
-/// or thread.
-extension ScheduledMessageManagerScope on ScheduledMessageManager {
-  /// The scheduled messages in the channel [cid], without its thread replies.
-  List<ScheduledMessage> channelMessages(String cid) {
-    return _scoped(_inChannel(cid));
-  }
-
-  /// The scheduled replies in the thread of the message [parentId].
-  List<ScheduledMessage> threadReplies(String parentId) {
-    return _scoped(_inThread(parentId));
-  }
-
-  /// The [threadReplies], emitted on listen and again each time they change.
-  Stream<List<ScheduledMessage>> threadRepliesStream(String parentId) {
-    return _scopedStream(_inThread(parentId));
-  }
-
-  static bool Function(ScheduledMessage) _inChannel(String cid) {
-    return (it) => it.cid == cid && it.message.parentId == null;
-  }
-
-  static bool Function(ScheduledMessage) _inThread(String parentId) {
-    return (it) => it.message.parentId == parentId;
-  }
-
-  List<ScheduledMessage> _scoped(bool Function(ScheduledMessage) test) {
-    return state.scheduledMessages.where(test).toList();
-  }
-
-  Stream<List<ScheduledMessage>> _scopedStream(
-    bool Function(ScheduledMessage) test,
-  ) {
-    final scoped = stream.map(
-      (it) => it.scheduledMessages.where(test).toList(),
-    );
-
-    return scoped.distinct(const ListEquality().equals);
   }
 }

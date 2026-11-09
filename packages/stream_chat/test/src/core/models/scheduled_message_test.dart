@@ -26,78 +26,87 @@ void main() {
     'updated_at': '2026-10-29T10:05:00.000Z',
   };
 
-  group('ScheduledMessage.fromJson', () {
-    test('reads the schedule', () {
-      final scheduledMessage = ScheduledMessage.fromJson(scheduledMessageJson());
+  test('ScheduledMessage.fromJson reads the schedule', () {
+    final scheduledMessage = ScheduledMessage.fromJson(scheduledMessageJson());
 
-      expect(scheduledMessage.id, 'scheduled-id');
-      expect(scheduledMessage.cid, 'messaging:general');
-      expect(scheduledMessage.channel?.name, 'General');
-      expect(scheduledMessage.user.id, 'alice');
-      expect(scheduledMessage.scheduledAt, DateTime.utc(2026, 11, 2, 9));
-      expect(scheduledMessage.status, ScheduledMessageStatus.failed);
-      expect(scheduledMessage.failureReason, ScheduledMessageFailureReason.channelFrozen);
-      expect(scheduledMessage.createdAt, DateTime.utc(2026, 10, 29, 10));
-      expect(scheduledMessage.updatedAt, DateTime.utc(2026, 10, 29, 10, 5));
-    });
+    expect(scheduledMessage.id, 'scheduled-id');
+    expect(scheduledMessage.cid, 'messaging:general');
+    expect(scheduledMessage.channel?.name, 'General');
+    expect(scheduledMessage.user.id, 'alice');
+    expect(scheduledMessage.scheduledAt, DateTime.utc(2026, 11, 2, 9));
+    expect(scheduledMessage.status, ScheduledMessageStatus.failed);
+    expect(scheduledMessage.failureReason, ScheduledMessageFailureReason.channelFrozen);
+    expect(scheduledMessage.createdAt, DateTime.utc(2026, 10, 29, 10));
+    expect(scheduledMessage.updatedAt, DateTime.utc(2026, 10, 29, 10, 5));
+  });
 
-    test('builds the message with the scheduled ID and user', () {
-      final message = ScheduledMessage.fromJson(scheduledMessageJson()).message;
+  test('ScheduledMessage.fromJson builds the message with the scheduled ID and user', () {
+    final message = ScheduledMessage.fromJson(scheduledMessageJson()).message;
 
-      expect(message.id, 'scheduled-id');
-      expect(message.user?.id, 'alice');
-      expect(message.text, 'Good morning @bob');
-      expect(message.parentId, 'parent-id');
-      expect(message.showInChannel, isTrue);
-    });
+    expect(message.id, 'scheduled-id');
+    expect(message.user?.id, 'alice');
+  });
 
-    test('dates the message by when it is sent and last changed', () {
-      final message = ScheduledMessage.fromJson(scheduledMessageJson()).message;
+  test('ScheduledMessage.fromJson reads the message', () {
+    final message = ScheduledMessage.fromJson(scheduledMessageJson()).message;
 
-      expect(message.createdAt, DateTime.utc(2026, 11, 2, 9));
-      expect(message.updatedAt, DateTime.utc(2026, 10, 29, 10, 5));
-    });
+    expect(message.text, 'Good morning @bob');
+    expect(message.parentId, 'parent-id');
+    expect(message.showInChannel, isTrue);
+  });
 
-    test('turns mentioned user IDs into users', () {
-      final message = ScheduledMessage.fromJson(scheduledMessageJson()).message;
+  test('ScheduledMessage.fromJson dates the message by when it is sent and last changed', () {
+    final message = ScheduledMessage.fromJson(scheduledMessageJson()).message;
 
-      expect(message.mentionedUsers.map((user) => user.id), ['bob']);
-    });
+    expect(message.createdAt, DateTime.utc(2026, 11, 2, 9));
+    expect(message.updatedAt, DateTime.utc(2026, 10, 29, 10, 5));
+  });
 
-    test('reads custom data as extra data', () {
-      final message = ScheduledMessage.fromJson(scheduledMessageJson()).message;
+  test('ScheduledMessage.fromJson turns mentioned user IDs into users', () {
+    final message = ScheduledMessage.fromJson(scheduledMessageJson()).message;
 
-      expect(message.extraData, {'mood': 'happy'});
-    });
+    expect(message.mentionedUsers.map((user) => user.id), ['bob']);
+  });
 
-    test('keeps a custom field named custom as it is', () {
-      final json = scheduledMessageJson(
-        message: {
-          'text': 'Good morning',
-          'custom': {'mood': 'happy'},
-        },
-      );
+  test('ScheduledMessage.fromJson reads custom data as extra data', () {
+    final message = ScheduledMessage.fromJson(scheduledMessageJson()).message;
 
-      final message = ScheduledMessage.fromJson(json).message;
+    expect(message.extraData, {'mood': 'happy'});
+  });
 
-      expect(message.extraData, {
+  test('ScheduledMessage.fromJson keeps a custom field named custom as it is', () {
+    final json = scheduledMessageJson(
+      message: {
+        'text': 'Good morning',
         'custom': {'mood': 'happy'},
-      });
-    });
+      },
+    );
 
-    test('keeps a status it does not name', () {
-      final scheduledMessage = ScheduledMessage.fromJson(scheduledMessageJson(status: 'paused'));
+    final message = ScheduledMessage.fromJson(json).message;
 
-      expect(scheduledMessage.status, const ScheduledMessageStatus('paused'));
+    expect(message.extraData, {
+      'custom': {'mood': 'happy'},
     });
   });
 
+  test('ScheduledMessage.fromJson keeps a status it does not name', () {
+    final scheduledMessage = ScheduledMessage.fromJson(scheduledMessageJson(status: 'paused'));
+
+    expect(scheduledMessage.status, const ScheduledMessageStatus('paused'));
+  });
+
   test('ScheduledMessage tells apart a renamed channel', () {
-    final scheduledMessage = ScheduledMessage.fromJson(scheduledMessageJson());
-    final renamed = ScheduledMessage.fromJson({
-      ...scheduledMessageJson(),
-      'channel': const {'cid': 'messaging:general', 'type': 'messaging', 'id': 'general', 'name': 'Renamed'},
-    });
+    ScheduledMessage inChannel(String name) => ScheduledMessage(
+      cid: 'messaging:general',
+      channel: ChannelModel(cid: 'messaging:general', extraData: {'name': name}),
+      user: User(id: 'alice'),
+      message: Message(id: 'scheduled-id', text: 'Good morning'),
+      scheduledAt: DateTime.utc(2026, 11, 2, 9),
+      status: ScheduledMessageStatus.scheduled,
+    );
+
+    final scheduledMessage = inChannel('General');
+    final renamed = inChannel('Renamed');
 
     expect(renamed, isNot(scheduledMessage));
   });
@@ -119,6 +128,18 @@ void main() {
     expect(scheduledMessage.localUpdatedAt, isNull);
   });
 
+  test('ScheduledMessage takes the ID of its message when given none', () {
+    final scheduledMessage = ScheduledMessage(
+      cid: 'messaging:general',
+      user: User(id: 'alice'),
+      message: Message(id: 'message-id', text: 'Good morning'),
+      scheduledAt: DateTime.utc(2026, 11, 2, 9),
+      status: ScheduledMessageStatus.preparingToSchedule,
+    );
+
+    expect(scheduledMessage.id, 'message-id');
+  });
+
   test('ScheduledMessage not on the server yet is dated on this device', () {
     final scheduledMessage = ScheduledMessage(
       cid: 'messaging:general',
@@ -130,7 +151,6 @@ void main() {
       localUpdatedAt: DateTime.utc(2026, 10, 29, 10, 5),
     );
 
-    expect(scheduledMessage.id, 'message-id');
     expect(scheduledMessage.createdAt, DateTime.utc(2026, 10, 29, 10));
     expect(scheduledMessage.updatedAt, DateTime.utc(2026, 10, 29, 10, 5));
   });

@@ -181,7 +181,33 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('queryChannel asks for the scheduled messages and reads them', () async {
+  test('queryChannel asks for the scheduled messages', () async {
+    const path = '/channels/messaging/general/query';
+    const payload = {
+      'state': true,
+      'watch': false,
+      'presence': false,
+      'include_scheduled_messages': true,
+    };
+    when(() => client.post(path, data: payload)).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'channel': {'cid': 'messaging:general'},
+        },
+      ),
+    );
+
+    await channelApi.queryChannel(
+      'messaging',
+      channelId: 'general',
+      includeScheduledMessages: true,
+    );
+
+    verify(() => client.post(path, data: payload)).called(1);
+  });
+
+  test('queryChannel reads the scheduled messages', () async {
     const path = '/channels/messaging/general/query';
     const scheduledMessage = {
       'id': 'scheduled-id',
@@ -193,18 +219,7 @@ void main() {
       'created_at': '2026-10-29T00:00:00.000Z',
       'updated_at': '2026-10-29T00:00:00.000Z',
     };
-
-    when(
-      () => client.post(
-        path,
-        data: {
-          'state': true,
-          'watch': false,
-          'presence': false,
-          'include_scheduled_messages': true,
-        },
-      ),
-    ).thenAnswer(
+    when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
       (_) async => successResponse(
         path,
         data: {
@@ -221,7 +236,6 @@ void main() {
     );
 
     expect(res.scheduledMessages?.single.id, 'scheduled-id');
-
     verify(() => client.post(path, data: any(named: 'data'))).called(1);
   });
 

@@ -1,6 +1,3 @@
-// ignore_for_file: avoid_redundant_argument_values
-
-import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -9,54 +6,15 @@ import 'scheduled_messages_harness.dart';
 void main() {
   useScheduledMessageClient();
 
-  void stubQueryChannel(ChannelState channelState) {
-    when(
-      () => api.channel.queryChannel(
-        'messaging',
-        channelId: 'general',
-        channelData: any(named: 'channelData'),
-        state: any(named: 'state'),
-        watch: any(named: 'watch'),
-        presence: any(named: 'presence'),
-        messagesPagination: any(named: 'messagesPagination'),
-        membersPagination: any(named: 'membersPagination'),
-        watchersPagination: any(named: 'watchersPagination'),
-        includeScheduledMessages: any(named: 'includeScheduledMessages'),
-      ),
-    ).thenAnswer((_) async => channelState);
-  }
-
-  void stubQueryChannels(List<ChannelState> channelStates) {
-    when(
-      () => api.channel.queryChannels(
-        filter: any(named: 'filter'),
-        state: any(named: 'state'),
-        watch: any(named: 'watch'),
-        presence: any(named: 'presence'),
-        includeScheduledMessages: any(named: 'includeScheduledMessages'),
-        paginationParams: any(named: 'paginationParams'),
-      ),
-    ).thenAnswer((_) async => QueryChannelsResponse()..channels = channelStates);
-  }
-
-  final elsewhere = fakeScheduledMessage('there', cid: 'messaging:other', scheduledAt: DateTime.utc(2026, 11, 3));
   final local = fakeScheduledMessage('local', status: ScheduledMessageStatus.preparingToSchedule);
 
-  ChannelState carrying(List<ScheduledMessage> scheduledMessages) {
-    return ChannelState(
-      channel: ChannelModel(cid: testCid),
-      scheduledMessages: scheduledMessages,
-    );
-  }
-
-  test("a channel's first query fills them for that channel and keeps the ones not on the server yet", () async {
+  test("a channel's first query fills its state, keeping the ones not on the server yet", () async {
     await hold([fakeScheduledMessage('gone'), local, elsewhere]);
     stubQueryChannel(carrying([fakeScheduledMessage('fresh')]));
     final channel = client.channel('messaging', id: 'general');
 
     await channel.query(includeScheduledMessages: true);
 
-    expect(idsOf(client.state.scheduledMessages), ['fresh', 'local', 'there']);
     expect(idsOf(channel.state!.scheduledMessages), ['fresh', 'local']);
   });
 
@@ -101,15 +59,28 @@ void main() {
         carrying([fakeScheduledMessage('fresh')]),
       ]);
 
-      final [channel] = await client.queryChannelsOnline(
+      await client.queryChannelsOnline(
         filter: Filter.equal('cid', testCid),
         includeScheduledMessages: true,
       );
 
       expect(idsOf(client.state.scheduledMessages), ['fresh', 'local', 'there']);
-      expect(idsOf(channel.state!.scheduledMessages), ['fresh', 'local']);
     },
   );
+
+  test('a channel list query fills the state of each channel it loads', () async {
+    await hold([fakeScheduledMessage('gone'), local, elsewhere]);
+    stubQueryChannels([
+      carrying([fakeScheduledMessage('fresh')]),
+    ]);
+
+    final [channel] = await client.queryChannelsOnline(
+      filter: Filter.equal('cid', testCid),
+      includeScheduledMessages: true,
+    );
+
+    expect(idsOf(channel.state!.scheduledMessages), ['fresh', 'local']);
+  });
 
   test('a channel list query lists the ones of all its channels at once', () async {
     stubQueryChannels([
@@ -152,17 +123,16 @@ void main() {
     expect(idsOf(channel.state!.scheduledMessages), ['held']);
   });
 
-  test('leaves out the replies in its threads', () async {
+  test("a channel's scheduledMessages leaves out the replies in its threads", () async {
     final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: testCid)));
     addTearDown(channel.dispose);
 
     await hold([fakeScheduledMessage('here'), fakeScheduledMessage('reply', parentId: 'parent')]);
 
     expect(idsOf(channel.state!.scheduledMessages), ['here']);
-    expect(idsOf(client.state.scheduledMessages), ['here', 'reply']);
   });
 
-  test('lists the replies in one of its threads', () async {
+  test("a channel's scheduledThreadReplies lists the replies in one of its threads", () async {
     final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: testCid)));
     addTearDown(channel.dispose);
 
@@ -175,7 +145,16 @@ void main() {
     expect(idsOf(channel.state!.scheduledThreadReplies('parent')), ['reply']);
   });
 
-  test('an event updates the channel state', () async {
+  test("a scheduledMessageCreated event adds it to the channel's state", () async {
+    final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: testCid)));
+    addTearDown(channel.dispose);
+
+    await receive(EventType.scheduledMessageCreated, fakeScheduledMessage('new'));
+
+    expect(idsOf(channel.state!.channelState.scheduledMessages), ['new']);
+  });
+
+  test("a scheduledMessageCreated event emits the channel's state with it", () async {
     final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: testCid)));
     addTearDown(channel.dispose);
     final emitted = <List<String>>[];
@@ -186,7 +165,6 @@ void main() {
 
     await receive(EventType.scheduledMessageCreated, fakeScheduledMessage('new'));
 
-    expect(idsOf(channel.state!.channelState.scheduledMessages), ['new']);
     expect(emitted.last, ['new']);
   });
 
@@ -225,7 +203,7 @@ void main() {
     ]);
   });
 
-  test("a channel state update keeps the client's scheduled messages", () async {
+  test('updating the channel state with a stale copy does not bring back a sent scheduled message', () async {
     final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: testCid)));
     addTearDown(channel.dispose);
     await hold([fakeScheduledMessage('sent')]);
@@ -238,7 +216,7 @@ void main() {
     expect(client.state.scheduledMessages, isEmpty);
   });
 
-  test('one in another channel leaves the channel state as it is', () async {
+  test('a scheduledMessageCreated event in another channel leaves the channel state as it is', () async {
     final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: testCid)));
     addTearDown(channel.dispose);
     final before = channel.state!.channelState;
@@ -277,4 +255,12 @@ void main() {
 
     expect(idsOf(client.state.scheduledMessages), ['there']);
   });
+}
+
+// A channel state for [testCid] carrying [scheduledMessages].
+ChannelState carrying(List<ScheduledMessage> scheduledMessages) {
+  return ChannelState(
+    channel: ChannelModel(cid: testCid),
+    scheduledMessages: scheduledMessages,
+  );
 }

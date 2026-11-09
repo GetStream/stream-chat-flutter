@@ -16,7 +16,7 @@ void main() {
     expect(config.scheduledMessagesMaxLeadTime, const Duration(days: 120));
   });
 
-  test('has no scheduled message limits when scheduled messages are off', () {
+  test('has no scheduled message limits when none are given', () {
     final config = ChannelConfig.fromJson({});
 
     expect(config.scheduledMessagesMaxPerChannel, isNull);

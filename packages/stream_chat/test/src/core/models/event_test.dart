@@ -54,7 +54,7 @@ void main() {
           'id': 'scheduled-id',
           'cid': 'messaging:general',
           'user': {'id': 'alice'},
-          'message': {'text': 'Good morning', 'custom': <String, dynamic>{}},
+          'message': {'text': 'Good morning'},
           'scheduled_at': '2026-11-02T09:00:00.000Z',
           'status': 'sent',
           'created_at': '2026-10-29T10:00:00.000Z',
@@ -65,6 +65,22 @@ void main() {
       expect(event.messageId, 'sent-message-id');
       expect(event.scheduledMessage?.id, 'scheduled-id');
       expect(event.scheduledMessage?.status, ScheduledMessageStatus.sent);
+    });
+
+    test('should not keep a scheduled message in extra data', () {
+      final event = Event.fromJson({
+        'type': EventType.scheduledMessageSent,
+        'cid': 'messaging:general',
+        'scheduled_message': {
+          'id': 'scheduled-id',
+          'cid': 'messaging:general',
+          'user': {'id': 'alice'},
+          'message': {'text': 'Good morning'},
+          'scheduled_at': '2026-11-02T09:00:00.000Z',
+          'status': 'sent',
+        },
+      });
+
       expect(event.extraData, isNot(contains('scheduled_message')));
     });
 

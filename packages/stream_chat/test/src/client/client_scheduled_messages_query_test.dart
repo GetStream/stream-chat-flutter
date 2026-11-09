@@ -11,9 +11,7 @@ import 'scheduled_messages_harness.dart';
 void main() {
   useScheduledMessageClient();
 
-  final offline = StreamChatNetworkError.raw(code: -1, message: 'No connection');
-
-  test('passes the channel, statuses, limit and cursor on', () async {
+  test('queryScheduledMessages passes the channel, statuses, limit and cursor on', () async {
     stubQuery(fakePage([]));
     const query = ScheduledMessagesQuery(
       cid: testCid,
@@ -41,7 +39,7 @@ void main() {
     expect(idsOf(client.state.scheduledMessages), ['sooner', 'later']);
   });
 
-  test('loadScheduledMessages asked for again starts from the first page', () async {
+  test('loadScheduledMessages after one that failed starts again from the first page', () async {
     await hold([fakeScheduledMessage('gone')]);
     stubPage(null, () async => fakePage([fakeScheduledMessage('first')], next: 'page-2'));
     stubPage('page-2', () async => throw offline);
@@ -68,14 +66,14 @@ void main() {
     ).called(1);
   });
 
-  test('they are no longer all loaded once the connection is lost', () async {
+  test('hasLoadedAll becomes false once the connection is lost', () async {
     client.handleEvent(Event(type: EventType.connectionChanged, online: false));
     await settle();
 
     expect(client.state.scheduledMessageListState.hasLoadedAll, isFalse);
   });
 
-  test('loads them all again when the connection recovers', () async {
+  test('a recovered connection loads them all again when they were all loaded', () async {
     stubPage(null, () async => fakePage([fakeScheduledMessage('missed')], next: 'page-2'));
     stubPage('page-2', () async => fakePage([fakeScheduledMessage('last', scheduledAt: DateTime.utc(2026, 11, 3))]));
 
@@ -89,7 +87,6 @@ void main() {
   });
 
   test('a reload that failed is tried again on the next recovery', () async {
-    stubQuery(fakePage([fakeScheduledMessage('missed')]));
     stubPage(null, () async => throw offline);
     client
       ..handleEvent(Event(type: EventType.connectionChanged, online: false))
@@ -147,11 +144,13 @@ void main() {
     expect(client.state.scheduledMessageListState.hasLoadedAll, isTrue);
     expect(idsOf(client.state.scheduledMessages), ['new-user']);
     verifyNever(
-      () => api.scheduledMessages.queryScheduledMessages(const ScheduledMessagesQuery(limit: 100, next: 'page-2')),
+      () => api.scheduledMessages.queryScheduledMessages(
+        const ScheduledMessagesQuery(limit: loadPageSize, next: 'page-2'),
+      ),
     );
   });
 
-  test('a page that arrives after the user switched is not applied', () async {
+  test('queryScheduledMessages does not apply a page that arrives after the user switched', () async {
     final page = Completer<QueryScheduledMessagesResponse>();
     when(
       () => api.scheduledMessages.queryScheduledMessages(any()),
@@ -166,7 +165,7 @@ void main() {
     expect(client.state.scheduledMessages, isEmpty);
   });
 
-  test('lists the ones due at the same time by ID', () async {
+  test('scheduledMessages lists the ones due at the same time by ID', () async {
     final due = DateTime.utc(2026, 11, 2, 9);
 
     await hold([
@@ -178,7 +177,7 @@ void main() {
     expect(idsOf(client.state.scheduledMessages), ['a', 'b', 'c']);
   });
 
-  test('disconnecting unloads them', () async {
+  test('disconnectUser unloads them', () async {
     await hold([fakeScheduledMessage('a')]);
 
     await client.disconnectUser();
@@ -187,7 +186,7 @@ void main() {
     expect(client.state.scheduledMessageListState.hasLoadedAll, isFalse);
   });
 
-  test('a stream listened to before a user switch keeps following them', () async {
+  test('scheduledMessagesStream listened to before a user switch keeps following them', () async {
     final emitted = <List<String>>[];
     final subscription = client.state.scheduledMessagesStream.listen((it) => emitted.add(idsOf(it)));
     addTearDown(subscription.cancel);

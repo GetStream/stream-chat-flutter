@@ -1,5 +1,6 @@
-import 'core/models/event.dart';
-import 'core/models/scheduled_message.dart';
+/// @docImport 'core/models/event.dart';
+/// @docImport 'core/models/scheduled_message.dart';
+library;
 
 /// This class defines some basic event types
 class EventType {
@@ -190,7 +191,8 @@ class EventType {
   /// Event sent when the current user deletes a scheduled message.
   ///
   /// The client also sends one with [Event.isLocal] true when it finds a
-  /// scheduled message deleted or gone, or the server refuses to schedule it.
+  /// scheduled message deleted or gone, or scheduling it fails in a way that
+  /// cannot be retried.
   static const String scheduledMessageDeleted = 'scheduled_message.deleted';
 
   /// Event sent when a scheduled message of the current user is sent.

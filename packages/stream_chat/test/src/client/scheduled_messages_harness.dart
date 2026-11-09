@@ -12,6 +12,24 @@ const testCid = 'messaging:general';
 final testUser = User(id: 'test-user-id');
 final testToken = Token.development(testUser.id).rawValue;
 final missingError = StreamChatNetworkError(ChatErrorCode.doesNotExist, statusCode: 404);
+final offline = StreamChatNetworkError.raw(code: -1, message: 'No connection');
+
+// The codes of the errors that refuse a scheduled message request because the
+// message is being sent, was already sent, or was deleted.
+const scheduledMessageSendingCode = 121;
+const scheduledMessageAlreadySentCode = 123;
+const scheduledMessageCanceledCode = 124;
+
+// The number of scheduled messages the client asks for per page when it loads
+// all of them.
+const loadPageSize = 100;
+
+// A scheduled message in a channel other than [testCid].
+final elsewhere = fakeScheduledMessage(
+  'there',
+  cid: 'messaging:other',
+  scheduledAt: DateTime.utc(2026, 11, 3),
+);
 
 ScheduledMessage fakeScheduledMessage(
   String id, {
@@ -52,7 +70,6 @@ SendScheduledMessageNowResponse fakeSendNow(ScheduledMessage message) {
   return SendScheduledMessageNowResponse()..scheduledMessage = message;
 }
 
-// The IDs of [messages].
 List<String> idsOf(List<ScheduledMessage>? messages) => [for (final it in messages ?? const []) it.id];
 
 late FakeChatApi api;
@@ -76,13 +93,12 @@ void useScheduledMessageClient({bool loaded = true}) {
     when(() => api.general.getAppSettings()).thenAnswer(
       (_) async => GetAppSettingsResponse()..app = const AppSettings(name: 'test'),
     );
+    addTearDown(client.dispose);
     await client.connectUser(testUser, testToken);
     // The connection recovers once connected, before anything is loaded.
     await settle();
     if (loaded) await loadAllScheduledMessages();
   });
-
-  tearDown(() => client.dispose());
 }
 
 // Loads an empty list, so the scheduled messages count as all loaded.
@@ -115,9 +131,41 @@ void stubQuery(QueryScheduledMessagesResponse response) {
 // Answers a query for the page after [next] with [answer]; null is the first.
 void stubPage(String? next, Future<QueryScheduledMessagesResponse> Function() answer) {
   when(
-    () => api.scheduledMessages.queryScheduledMessages(ScheduledMessagesQuery(limit: 100, next: next)),
+    () => api.scheduledMessages.queryScheduledMessages(ScheduledMessagesQuery(limit: loadPageSize, next: next)),
   ).thenAnswer((_) => answer());
 }
 
 // Pumps the events the client emits for its own changes.
 Future<void> settle() => pumpEventQueue();
+
+// Answers every query of the channel [testCid] with [channelState].
+void stubQueryChannel(ChannelState channelState) {
+  when(
+    () => api.channel.queryChannel(
+      'messaging',
+      channelId: 'general',
+      channelData: any(named: 'channelData'),
+      state: any(named: 'state'),
+      watch: any(named: 'watch'),
+      presence: any(named: 'presence'),
+      messagesPagination: any(named: 'messagesPagination'),
+      membersPagination: any(named: 'membersPagination'),
+      watchersPagination: any(named: 'watchersPagination'),
+      includeScheduledMessages: any(named: 'includeScheduledMessages'),
+    ),
+  ).thenAnswer((_) async => channelState);
+}
+
+// Answers every channel list query with [channelStates].
+void stubQueryChannels(List<ChannelState> channelStates) {
+  when(
+    () => api.channel.queryChannels(
+      filter: any(named: 'filter'),
+      state: any(named: 'state'),
+      watch: any(named: 'watch'),
+      presence: any(named: 'presence'),
+      includeScheduledMessages: any(named: 'includeScheduledMessages'),
+      paginationParams: any(named: 'paginationParams'),
+    ),
+  ).thenAnswer((_) async => QueryChannelsResponse()..channels = channelStates);
+}

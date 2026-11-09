@@ -4,11 +4,11 @@
 
 - Added quiet hours to push preferences, set and cleared through `PushPreferenceInput` and reported on `PushPreference.schedule`.
 - Added `includeActiveMemberCount` to the channel queries, which fills the new `Channel.activeMemberCount`: the number of members who are neither deactivated nor deleted.
-- Added scheduled messages: `Channel.scheduleMessage` sends a message later, and `ClientState.scheduledMessageListState` lists the current user's unsent ones and whether all of them are loaded. `StreamChatClient.queryScheduledMessages` pages through them with a `ScheduledMessagesQuery`.
+- Added scheduled messages: schedule one with `Channel.scheduleMessage` and read the current user's unsent ones from `ClientState.scheduledMessageListState`.
 
 🔄 Changed
 
-- A subclass or fake that overrides `Channel.query`, `Channel.watch`, `StreamChatClient.queryChannel`, `queryChannels`, `queryChannelsWithResult` or `queryChannelsOnline` must add the new `includeScheduledMessages` parameter.
+- Overrides of the channel query methods on `Channel` and `StreamChatClient` must add the new `includeScheduledMessages` parameter.
 - `Attachment.type` is now `url_preview` for every attachment scraped from a link in the message text, including a link to an image or file. Use `Attachment.rawType` to read the type it was created or received with.
 - `Attachment.toJson` keeps the original `type` of an attachment scraped from a link, such as `video` or `image`, instead of writing `url_preview`.
 

@@ -152,8 +152,9 @@ class User extends Equatable implements ComparableFieldProvider {
 
   /// Creates users from [json], whose entries are user objects or user IDs.
   @internal
-  static List<User> fromIdsOrJson(List<dynamic>? json) => [
-    for (final user in json ?? const []) user is String ? User(id: user) : User.fromJson(user as Map<String, dynamic>),
+  static List<User> fromIdsOrJson(List<Object?>? json) => [
+    for (final user in json ?? const [])
+      if (user is String) User(id: user) else User.fromJson(user as Map<String, dynamic>),
   ];
 
   /// Serialize to json.

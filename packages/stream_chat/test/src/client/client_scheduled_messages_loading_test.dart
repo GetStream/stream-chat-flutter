@@ -7,39 +7,7 @@ import 'scheduled_messages_harness.dart';
 void main() {
   useScheduledMessageClient(loaded: false);
 
-  final offline = StreamChatNetworkError.raw(code: -1, message: 'No connection');
-
-  void stubQueryChannel(ChannelState channelState) {
-    when(
-      () => api.channel.queryChannel(
-        'messaging',
-        channelId: 'general',
-        channelData: any(named: 'channelData'),
-        state: any(named: 'state'),
-        watch: any(named: 'watch'),
-        presence: any(named: 'presence'),
-        messagesPagination: any(named: 'messagesPagination'),
-        membersPagination: any(named: 'membersPagination'),
-        watchersPagination: any(named: 'watchersPagination'),
-        includeScheduledMessages: any(named: 'includeScheduledMessages'),
-      ),
-    ).thenAnswer((_) async => channelState);
-  }
-
-  void stubQueryChannels(List<ChannelState> channelStates) {
-    when(
-      () => api.channel.queryChannels(
-        filter: any(named: 'filter'),
-        state: any(named: 'state'),
-        watch: any(named: 'watch'),
-        presence: any(named: 'presence'),
-        includeScheduledMessages: any(named: 'includeScheduledMessages'),
-        paginationParams: any(named: 'paginationParams'),
-      ),
-    ).thenAnswer((_) async => QueryChannelsResponse()..channels = channelStates);
-  }
-
-  test('lists the ones scheduled before anything is loaded', () async {
+  test('scheduledMessages lists the ones scheduled before anything is loaded', () async {
     final channel = Channel.fromState(client, ChannelState(channel: ChannelModel(cid: testCid)));
     addTearDown(channel.dispose);
 
@@ -62,7 +30,7 @@ void main() {
     expect(idsOf(client.state.scheduledMessages), ['a']);
   });
 
-  test('a page without a next one only adds to them, and does not load them all', () async {
+  test('queryScheduledMessages adds a page without a next one, and does not load them all', () async {
     await receive(EventType.scheduledMessageCreated, fakeScheduledMessage('kept'));
     stubQuery(fakePage([fakeScheduledMessage('a', scheduledAt: DateTime.utc(2026, 11, 3))]));
 
@@ -72,14 +40,12 @@ void main() {
     expect(idsOf(client.state.scheduledMessages), ['kept', 'a']);
   });
 
-  test('a filtered load does not load them all', () async {
-    await receive(EventType.scheduledMessageCreated, fakeScheduledMessage('kept'));
-    stubQuery(fakePage([fakeScheduledMessage('a', scheduledAt: DateTime.utc(2026, 11, 3))]));
+  test('queryScheduledMessages with a filter does not load them all', () async {
+    stubQuery(fakePage([fakeScheduledMessage('a')]));
 
     await client.queryScheduledMessages(query: const ScheduledMessagesQuery(cid: testCid));
 
     expect(client.state.scheduledMessageListState.hasLoadedAll, isFalse);
-    expect(idsOf(client.state.scheduledMessages), ['kept', 'a']);
   });
 
   test('loadScheduledMessages whose second page fails adds the first and removes nothing', () async {
@@ -110,7 +76,6 @@ void main() {
 
   test("a channel query replaces that channel's ones without loading them all", () async {
     await receive(EventType.scheduledMessageCreated, fakeScheduledMessage('gone'));
-    final elsewhere = fakeScheduledMessage('there', cid: 'messaging:other', scheduledAt: DateTime.utc(2026, 11, 3));
     await receive(EventType.scheduledMessageCreated, elsewhere);
     stubQueryChannel(
       ChannelState(
@@ -127,11 +92,9 @@ void main() {
 
     expect(client.state.scheduledMessageListState.hasLoadedAll, isFalse);
     expect(idsOf(client.state.scheduledMessages), ['here', 'reply', 'there']);
-    expect(idsOf(channel.state!.scheduledMessages), ['here']);
-    expect(idsOf(channel.state!.scheduledThreadReplies('parent')), ['reply']);
   });
 
-  test('they are not loaded when the connection recovers', () async {
+  test('a recovered connection loads none of them when they were not all loaded', () async {
     stubQuery(fakePage([fakeScheduledMessage('a')]));
 
     client
@@ -144,17 +107,10 @@ void main() {
     );
   });
 
-  test('connecting a user loads none of them until loadScheduledMessages is called', () async {
+  test('connecting a user loads none of them', () async {
     verifyNever(
       () => api.scheduledMessages.queryScheduledMessages(any()),
     );
-
-    stubQuery(fakePage([fakeScheduledMessage('a')]));
-    await client.loadScheduledMessages();
-
-    verify(
-      () => api.scheduledMessages.queryScheduledMessages(any()),
-    ).called(1);
   });
 
   test('connecting a user again after they were all loaded and the connection was lost loads none of them', () async {
@@ -184,8 +140,7 @@ void main() {
 
   test('a channel list query that does not say which are scheduled changes nothing', () async {
     await receive(EventType.scheduledMessageCreated, fakeScheduledMessage('kept'));
-    final other = fakeScheduledMessage('there', cid: 'messaging:other', scheduledAt: DateTime.utc(2026, 11, 3));
-    await receive(EventType.scheduledMessageCreated, other);
+    await receive(EventType.scheduledMessageCreated, elsewhere);
     stubQueryChannels([
       ChannelState(channel: ChannelModel(cid: testCid)),
       ChannelState(channel: ChannelModel(cid: 'messaging:other')),

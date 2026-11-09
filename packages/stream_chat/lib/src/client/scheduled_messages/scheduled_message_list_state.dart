@@ -1,3 +1,6 @@
+/// @docImport '../client.dart';
+library;
+
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
@@ -6,7 +9,7 @@ import '../../core/models/scheduled_message.dart';
 import '../../core/util/extension.dart';
 import '../../core/util/list_extensions.dart';
 
-/// The scheduled messages a query returned for the channel [cid].
+/// The scheduled messages a query returned for the channel `cid`.
 typedef ChannelScheduledMessages = ({
   String cid,
   List<ScheduledMessage> scheduledMessages,
@@ -26,11 +29,12 @@ final class ScheduledMessageListState extends Equatable {
   /// Failed ones last, each group earliest first.
   final List<ScheduledMessage> scheduledMessages;
 
-  /// Whether [scheduledMessages] lists all of them.
+  /// Whether [scheduledMessages] lists all of the current user's scheduled
+  /// messages.
   ///
   /// It becomes true once [StreamChatClient.loadScheduledMessages] completes,
-  /// and false when the connection is lost. If it was true then, they are all
-  /// loaded again when the connection recovers.
+  /// and false when the connection is lost. If it was true when the connection
+  /// was lost, all of them are loaded again once it recovers.
   final bool hasLoadedAll;
 
   /// Returns a copy with the given fields replaced.
@@ -56,7 +60,9 @@ class ScheduledMessageListStateNotifier {
   ScheduledMessageListState get state => _state.value;
   final _state = BehaviorSubject.seeded(const ScheduledMessageListState());
 
-  /// The [state] as a stream.
+  /// The [state] as it changes.
+  ///
+  /// Emits the current value on listen, then a new value each time it changes.
   Stream<ScheduledMessageListState> get stream => _state.stream;
 
   List<ScheduledMessage> get _scheduledMessages => state.scheduledMessages;
@@ -64,9 +70,9 @@ class ScheduledMessageListStateNotifier {
   /// Replaces the scheduled messages with [scheduledMessages], the complete
   /// list, which is then loaded.
   ///
-  /// The ones not on the server yet are kept.
+  /// The ones still being scheduled, or whose request failed, are kept.
   void onLoadScheduledMessages(List<ScheduledMessage> scheduledMessages) {
-    final local = _scheduledMessages.where((it) => it.isLocal);
+    final local = _scheduledMessages.where(_isLocal);
     final merged = _merged(local, scheduledMessages);
 
     _emit(
@@ -88,11 +94,11 @@ class ScheduledMessageListStateNotifier {
   /// Replaces the scheduled messages in each of [channels] with the ones the
   /// query returned for it.
   ///
-  /// The ones not on the server yet are kept.
+  /// The ones still being scheduled, or whose request failed, are kept.
   void onChannelsQueried(List<ChannelScheduledMessages> channels) {
     final cids = {for (final it in channels) it.cid};
     final kept = _scheduledMessages.where(
-      (it) => !cids.contains(it.cid) || it.isLocal,
+      (it) => !cids.contains(it.cid) || _isLocal(it),
     );
 
     final queried = channels.expand((it) => it.scheduledMessages);
@@ -169,17 +175,15 @@ class ScheduledMessageListStateNotifier {
     return scheduledMessages.toList().sortedWith(_byScheduledAt);
   }
 
+  // Whether it is still being scheduled, or scheduling it failed and can be
+  // retried.
+  static bool _isLocal(ScheduledMessage it) {
+    if (it.status == .preparingToSchedule) return true;
+    return it.failureReason?.isRetriable ?? false;
+  }
+
   void _emit(ScheduledMessageListState next) {
     if (next == state) return;
     _state.safeAdd(next);
-  }
-}
-
-extension on ScheduledMessage {
-  // Whether the server does not have it yet: it is still being scheduled, or
-  // scheduling it failed and can be retried.
-  bool get isLocal {
-    if (status == .preparingToSchedule) return true;
-    return failureReason?.isRetriable ?? false;
   }
 }

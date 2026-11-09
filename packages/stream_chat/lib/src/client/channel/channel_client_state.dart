@@ -10,7 +10,6 @@ import '../../core/util/message_predicates.dart';
 import '../../core/util/utils.dart';
 import '../live_location_expiration_scheduler.dart';
 import '../retry_queue.dart';
-import '../scheduled_messages/scheduled_message_manager.dart';
 import 'channel_event_handler.dart';
 import 'channel_state_mutations.dart';
 
@@ -377,7 +376,10 @@ class ChannelClientState {
   /// Emits the current value on listen, then a new value each time they
   /// change. Like [scheduledMessages], it lists the ones known on this device.
   Stream<List<ScheduledMessage>> get scheduledMessagesStream {
-    final scheduledMessages = channelStateStream.map((cs) => cs.scheduledMessages ?? <ScheduledMessage>[]);
+    final scheduledMessages = channelStateStream.map(
+      (cs) => cs.scheduledMessages ?? <ScheduledMessage>[],
+    );
+
     return scheduledMessages.distinct(const ListEquality().equals);
   }
 

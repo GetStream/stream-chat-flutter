@@ -47,7 +47,6 @@ final class ScheduledMessage extends Equatable {
   factory ScheduledMessage.fromJson(Map<String, dynamic> json) {
     final scheduled = _$ScheduledMessageFromJson(json);
 
-    // The message takes its ID, author and dates from the scheduled message.
     final message = scheduled.message.copyWith(
       id: scheduled.id,
       user: scheduled.user,
@@ -215,8 +214,6 @@ extension type const ScheduledMessageStatus(String _) implements String {
 /// `ScheduledMessageFailureReason('rate_limited')`.
 extension type const ScheduledMessageFailureReason(String _) implements String {
   /// The request to schedule it failed in a way that can be retried.
-  ///
-  /// Scheduling it again can succeed.
   static const requestFailed = ScheduledMessageFailureReason('request_failed');
 
   /// The user is banned from the channel.

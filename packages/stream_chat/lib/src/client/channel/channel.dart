@@ -906,6 +906,10 @@ class Channel {
   ///
   /// Also stops the current user's typing.
   ///
+  /// Throws a [StreamChatNetworkError] if the request fails. If it fails in a
+  /// way that can be retried, the message stays listed as failed with
+  /// [ScheduledMessageFailureReason.requestFailed].
+  ///
   /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
   /// attachment of [message] is not uploaded yet. A message to send right
   /// away goes through [sendMessage].
@@ -926,23 +930,6 @@ class Channel {
       skipPush: skipPush,
       skipEnrichUrl: skipEnrichUrl,
     );
-  }
-
-  /// Schedules [scheduledMessage] again, after its request failed in a way
-  /// that can be retried.
-  ///
-  /// It keeps its ID, so it is never scheduled twice. If its
-  /// [ScheduledMessage.scheduledAt] has passed, it is sent right away: it is
-  /// no longer listed, it arrives in its channel like any other message, and
-  /// [ScheduleMessageResponse.scheduledMessage] is null. Its
-  /// [ScheduledMessage.failureReason] must be
-  /// [ScheduledMessageFailureReason.requestFailed].
-  Future<ScheduleMessageResponse> retryScheduledMessage(
-    ScheduledMessage scheduledMessage,
-  ) {
-    _checkInitialized();
-
-    return _client.retryScheduledMessage(scheduledMessage);
   }
 
   Message _markMessageAsSent(Message message) {

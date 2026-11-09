@@ -63,7 +63,21 @@ void main() {
     ]);
   });
 
-  test('updateScheduledMessage sends the message and time, and lists the result', () async {
+  test('updateScheduledMessage sends the message and time', () async {
+    final edited = Message(id: 'a', text: 'Good evening');
+    final scheduledAt = DateTime.utc(2026, 11, 3, 9);
+    when(
+      () => api.scheduledMessages.updateScheduledMessage('a', message: edited, scheduledAt: scheduledAt),
+    ).thenAnswer((_) async => fakeUpdate(a));
+
+    await client.updateScheduledMessage(a, edited, scheduledAt: scheduledAt);
+
+    verify(
+      () => api.scheduledMessages.updateScheduledMessage('a', message: edited, scheduledAt: scheduledAt),
+    ).called(1);
+  });
+
+  test('updateScheduledMessage lists the result', () async {
     await hold([a]);
     final edited = Message(id: 'a', text: 'Good evening');
     final scheduledAt = DateTime.utc(2026, 11, 3, 9);
@@ -80,9 +94,6 @@ void main() {
     await client.updateScheduledMessage(a, edited, scheduledAt: scheduledAt);
     await settle();
 
-    verify(
-      () => api.scheduledMessages.updateScheduledMessage('a', message: edited, scheduledAt: scheduledAt),
-    ).called(1);
     expect(client.state.scheduledMessages, [updated]);
   });
 
@@ -155,13 +166,26 @@ void main() {
       final event = await deleted;
       expect(event.scheduledMessage?.id, 'a');
       expect(event.scheduledMessage?.status, ScheduledMessageStatus.canceled);
+    });
+
+    test('$name stops listing one that no longer exists', () async {
+      await hold([a]);
+      stub(api, missingError);
+
+      await expectLater(request(client), throwsA(missingError));
+      await settle();
+
       expect(client.state.scheduledMessages, isEmpty);
     });
   }
 
   test('a request refused while the message is being sent keeps it', () async {
     await hold([a]);
-    final error = StreamChatNetworkError.raw(code: 121, message: 'Sending', statusCode: 409);
+    final error = StreamChatNetworkError.raw(
+      code: scheduledMessageSendingCode,
+      message: 'Sending',
+      statusCode: 409,
+    );
     when(() => api.scheduledMessages.sendScheduledMessageNow('a')).thenAnswer((_) async => throw error);
 
     await expectLater(client.sendScheduledMessageNow(a), throwsA(error));

@@ -1,9 +1,8 @@
 import 'package:json_annotation/json_annotation.dart';
 
-/// A [JsonConverter] for the API's durations given in whole seconds.
+/// A [JsonConverter] for durations given in seconds.
 ///
-/// [fromJson] accepts any number and drops a fraction of a second; [toJson]
-/// writes whole seconds.
+/// [fromJson] drops a fraction of a second; [toJson] writes whole seconds.
 class DurationInSecondsConverter implements JsonConverter<Duration, num> {
   /// Creates a new [DurationInSecondsConverter].
   const DurationInSecondsConverter();

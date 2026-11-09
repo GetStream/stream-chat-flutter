@@ -1,5 +1,4 @@
 /// @docImport '../../client/channel/channel_client_state.dart';
-/// @docImport '../../client/client.dart';
 library;
 
 import 'package:json_annotation/json_annotation.dart';
@@ -99,8 +98,9 @@ class ChannelState implements ComparableFieldProvider {
 
   /// The current user's unsent scheduled messages in the channel.
   ///
-  /// Null when the query did not ask for them, or the response did not include
-  /// them. A channel query result includes thread replies;
+  /// Null when the query did not ask for them.
+  ///
+  /// A channel query result includes thread replies.
   /// [ChannelClientState.channelState] leaves them out and lists the current
   /// user's scheduled messages in the channel on this device.
   @JsonKey(includeToJson: false)

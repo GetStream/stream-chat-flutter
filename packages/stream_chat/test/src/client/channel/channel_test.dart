@@ -219,7 +219,6 @@ void main() {
       ).thenAnswer((_) async => cached);
       when(() => client.channelDeliveryReporter.submitForDelivery(any())).thenAnswer((_) async {});
       await pumpEventQueue();
-      clearInteractions(client.chatPersistenceClient);
 
       final channelState = await channel.query(preferOffline: true, includeScheduledMessages: true);
 
@@ -359,7 +358,7 @@ void main() {
         expect(channel.state!.messages, isEmpty);
 
         client.addEvent(Event(type: EventType.messageNew, cid: channel.cid, message: message));
-        await Future.delayed(Duration.zero);
+        await pumpEventQueue();
 
         expect(channel.state!.messages.single.id, 'sent-id');
       });

@@ -31,135 +31,151 @@ void main() {
 
   setUp(() {
     scheduledMessagesApi = ScheduledMessagesApi(client);
+    addTearDown(() => reset(client));
   });
 
-  tearDown(() => reset(client));
-
-  group('scheduleMessage', () {
+  test('scheduleMessage sends the message with the time in UTC', () async {
     const path = '/channels/messaging/general/message';
     final message = Message(id: 'scheduled-id', text: 'Good morning');
+    final payload = {
+      'message': message,
+      'skip_push': false,
+      'skip_enrich_url': false,
+      'scheduled_at': '2026-11-02T09:00:00.000Z',
+    };
+    when(() => client.post(path, data: payload)).thenAnswer(
+      (_) async => successResponse(path, data: {'message': message.toJson()}),
+    );
 
-    test('sends the message with the time in UTC', () async {
-      when(
-        () => client.post(
-          path,
-          data: {
-            'message': message,
-            'skip_push': false,
-            'skip_enrich_url': false,
-            'scheduled_at': '2026-11-02T09:00:00.000Z',
-          },
-        ),
-      ).thenAnswer(
-        (_) async => successResponse(
-          path,
-          data: {
-            'message': message.toJson(),
-            'scheduled_message': scheduledMessageJson,
-          },
-        ),
-      );
+    await scheduledMessagesApi.scheduleMessage(
+      'general',
+      'messaging',
+      message,
+      DateTime.utc(2026, 11, 2, 9).toLocal(),
+    );
 
-      final response = await scheduledMessagesApi.scheduleMessage(
-        'general',
-        'messaging',
-        message,
-        DateTime.utc(2026, 11, 2, 9).toLocal(),
-      );
-
-      expect(response.scheduledMessage?.id, 'scheduled-id');
-      expect(response.scheduledMessage?.scheduledAt, DateTime.utc(2026, 11, 2, 9));
-    });
+    verify(() => client.post(path, data: payload)).called(1);
   });
 
-  group('queryScheduledMessages', () {
-    const path = '/scheduled_messages/query';
-
-    test('sends an empty filter when nothing narrows the page', () async {
-      final payload = jsonEncode({'filter': <String, dynamic>{}});
-      when(() => client.post(path, data: payload)).thenAnswer(
-        (_) async => successResponse(path, data: {'scheduled_messages': <Object>[]}),
-      );
-
-      await scheduledMessagesApi.queryScheduledMessages(const ScheduledMessagesQuery());
-
-      verify(() => client.post(path, data: payload)).called(1);
-    });
-
-    test('sends the channel and statuses as a plain filter', () async {
-      final payload = jsonEncode({
-        'filter': {
-          'cid': 'messaging:general',
-          'status': ['scheduled', 'failed'],
+  test('scheduleMessage reads the scheduled message', () async {
+    const path = '/channels/messaging/general/message';
+    final message = Message(id: 'scheduled-id', text: 'Good morning');
+    when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'message': message.toJson(),
+          'scheduled_message': scheduledMessageJson,
         },
-        'limit': 100,
-        'next': 'cursor',
-      });
-      when(() => client.post(path, data: payload)).thenAnswer(
-        (_) async => successResponse(
-          path,
-          data: {
-            'scheduled_messages': [scheduledMessageJson],
-            'next': 'next-cursor',
-          },
-        ),
-      );
+      ),
+    );
 
-      final res = await scheduledMessagesApi.queryScheduledMessages(
-        const ScheduledMessagesQuery(
-          cid: 'messaging:general',
-          statuses: [ScheduledMessageStatus.scheduled, ScheduledMessageStatus.failed],
-          limit: 100,
-          next: 'cursor',
-        ),
-      );
+    final response = await scheduledMessagesApi.scheduleMessage(
+      'general',
+      'messaging',
+      message,
+      DateTime.utc(2026, 11, 2, 9),
+    );
 
-      expect(res.scheduledMessages.single.id, 'scheduled-id');
-      expect(res.next, 'next-cursor');
-    });
+    expect(response.scheduledMessage?.id, 'scheduled-id');
+    expect(response.scheduledMessage?.scheduledAt, DateTime.utc(2026, 11, 2, 9));
   });
 
-  group('updateScheduledMessage', () {
+  test('queryScheduledMessages sends an empty filter when nothing narrows the page', () async {
+    const path = '/scheduled_messages/query';
+    final payload = jsonEncode({'filter': <String, dynamic>{}});
+    when(() => client.post(path, data: payload)).thenAnswer(
+      (_) async => successResponse(path, data: {'scheduled_messages': <Object>[]}),
+    );
+
+    await scheduledMessagesApi.queryScheduledMessages(const ScheduledMessagesQuery());
+
+    verify(() => client.post(path, data: payload)).called(1);
+  });
+
+  test('queryScheduledMessages sends the channel and statuses as a plain filter', () async {
+    const path = '/scheduled_messages/query';
+    final payload = jsonEncode({
+      'filter': {
+        'cid': 'messaging:general',
+        'status': ['scheduled', 'failed'],
+      },
+      'limit': 100,
+      'next': 'cursor',
+    });
+    when(() => client.post(path, data: payload)).thenAnswer(
+      (_) async => successResponse(path, data: {'scheduled_messages': <Object>[]}),
+    );
+
+    await scheduledMessagesApi.queryScheduledMessages(
+      const ScheduledMessagesQuery(
+        cid: 'messaging:general',
+        statuses: [ScheduledMessageStatus.scheduled, ScheduledMessageStatus.failed],
+        limit: 100,
+        next: 'cursor',
+      ),
+    );
+
+    verify(() => client.post(path, data: payload)).called(1);
+  });
+
+  test('queryScheduledMessages reads the page and the next cursor', () async {
+    const path = '/scheduled_messages/query';
+    when(() => client.post(path, data: any(named: 'data'))).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'scheduled_messages': [scheduledMessageJson],
+          'next': 'next-cursor',
+        },
+      ),
+    );
+
+    final res = await scheduledMessagesApi.queryScheduledMessages(const ScheduledMessagesQuery());
+
+    expect(res.scheduledMessages.single.id, 'scheduled-id');
+    expect(res.next, 'next-cursor');
+  });
+
+  test('updateScheduledMessage sends the new message and time in UTC', () async {
     const path = '/scheduled_messages/scheduled-id';
-
-    test('sends the new message and time in UTC', () async {
-      final message = Message(
-        id: 'scheduled-id',
-        text: 'Good evening @Bob',
-        mentionedUsers: [User(id: 'bob')],
-      );
-      final scheduledAt = DateTime.utc(2026, 11, 2, 18);
-      final payload = jsonEncode({
-        'message': message.toJson(),
-        'scheduled_at': '2026-11-02T18:00:00.000Z',
-      });
-      when(() => client.patch(path, data: payload)).thenAnswer(
-        (_) async => successResponse(path, data: {'scheduled_message': scheduledMessageJson}),
-      );
-
-      final res = await scheduledMessagesApi.updateScheduledMessage(
-        'scheduled-id',
-        message: message,
-        scheduledAt: scheduledAt,
-      );
-
-      expect(res.scheduledMessage.id, 'scheduled-id');
-      verify(() => client.patch(path, data: payload)).called(1);
+    final message = Message(
+      id: 'scheduled-id',
+      text: 'Good evening @Bob',
+      mentionedUsers: [User(id: 'bob')],
+    );
+    final scheduledAt = DateTime.utc(2026, 11, 2, 18);
+    final payload = jsonEncode({
+      'message': message.toJson(),
+      'scheduled_at': '2026-11-02T18:00:00.000Z',
     });
+    when(() => client.patch(path, data: payload)).thenAnswer(
+      (_) async => successResponse(path, data: {'scheduled_message': scheduledMessageJson}),
+    );
 
-    test('sends only the time when rescheduling', () async {
-      final payload = jsonEncode({'scheduled_at': '2026-11-02T18:00:00.000Z'});
-      when(() => client.patch(path, data: payload)).thenAnswer(
-        (_) async => successResponse(path, data: {'scheduled_message': scheduledMessageJson}),
-      );
+    final res = await scheduledMessagesApi.updateScheduledMessage(
+      'scheduled-id',
+      message: message,
+      scheduledAt: scheduledAt,
+    );
 
-      await scheduledMessagesApi.updateScheduledMessage(
-        'scheduled-id',
-        scheduledAt: DateTime.utc(2026, 11, 2, 18),
-      );
+    expect(res.scheduledMessage.id, 'scheduled-id');
+    verify(() => client.patch(path, data: payload)).called(1);
+  });
 
-      verify(() => client.patch(path, data: payload)).called(1);
-    });
+  test('updateScheduledMessage sends only the time when rescheduling', () async {
+    const path = '/scheduled_messages/scheduled-id';
+    final payload = jsonEncode({'scheduled_at': '2026-11-02T18:00:00.000Z'});
+    when(() => client.patch(path, data: payload)).thenAnswer(
+      (_) async => successResponse(path, data: {'scheduled_message': scheduledMessageJson}),
+    );
+
+    await scheduledMessagesApi.updateScheduledMessage(
+      'scheduled-id',
+      scheduledAt: DateTime.utc(2026, 11, 2, 18),
+    );
+
+    verify(() => client.patch(path, data: payload)).called(1);
   });
 
   test('deleteScheduledMessage returns the canceled message', () async {

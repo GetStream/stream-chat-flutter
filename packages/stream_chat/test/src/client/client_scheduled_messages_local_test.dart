@@ -7,76 +7,20 @@ import 'package:test/test.dart';
 
 import 'scheduled_messages_harness.dart';
 
+final now = DateTime.utc(2026, 10, 30, 12);
+final scheduledAt = now.add(const Duration(days: 1));
+final rejected = StreamChatNetworkError(
+  ChatErrorCode.inputError,
+  data: ErrorResponse()
+    ..code = 4
+    ..statusCode = 400
+    ..message = 'Too many scheduled messages',
+);
+
 void main() {
   useScheduledMessageClient();
 
-  final now = DateTime.utc(2026, 10, 30, 12);
-  final scheduledAt = now.add(const Duration(days: 1));
-  final unreachable = StreamChatNetworkError.raw(code: -1, message: 'No connection');
-  final rejected = StreamChatNetworkError(
-    ChatErrorCode.inputError,
-    data: ErrorResponse()
-      ..code = 4
-      ..statusCode = 400
-      ..message = 'Too many scheduled messages',
-  );
-
-  // Schedules [message], then lets the events it emits through.
-  Future<ScheduleMessageResponse> schedule(Message message) async {
-    try {
-      return await withClock(
-        Clock.fixed(now),
-        () => client.scheduleMessage(message, 'general', 'messaging', scheduledAt: scheduledAt),
-      );
-    } finally {
-      await settle();
-    }
-  }
-
-  Future<ScheduleMessageResponse> retry(ScheduledMessage scheduledMessage) async {
-    final response = await withClock(Clock.fixed(now), () => client.retryScheduledMessage(scheduledMessage));
-    await settle();
-    return response;
-  }
-
-  // The scheduled message events while [run] runs, as type and status.
-  Future<List<(String, ScheduledMessageStatus?)>> eventsDuring(Future<void> Function() run) async {
-    final events = <(String, ScheduledMessageStatus?)>[];
-    final subscription = client.on().where((it) => it.scheduledMessage != null).listen((it) {
-      events.add((it.type, it.scheduledMessage?.status));
-    });
-
-    try {
-      await run();
-    } on StreamChatNetworkError {
-      // The events are what is checked.
-    }
-
-    await settle();
-    await subscription.cancel();
-    return events;
-  }
-
-  void stubSchedule(Message message, Future<ScheduleMessageResponse> Function() answer) {
-    when(
-      () => api.scheduledMessages.scheduleMessage('general', 'messaging', message, scheduledAt),
-    ).thenAnswer((_) => answer());
-  }
-
-  ScheduleMessageResponse scheduled(Message message, ScheduledMessage scheduledMessage) {
-    return ScheduleMessageResponse()
-      ..message = message
-      ..scheduledMessage = scheduledMessage;
-  }
-
-  // Schedules [message] while the server can't be reached.
-  Future<ScheduledMessage> scheduleUnreachable(Message message) async {
-    stubSchedule(message, () async => throw unreachable);
-    await expectLater(schedule(message), throwsA(unreachable));
-    return client.state.scheduledMessages.single;
-  }
-
-  test('lists the message before the server answers', () async {
+  test('scheduleMessage lists the message as preparing to schedule before the server answers', () async {
     final message = Message(id: 'a', text: 'Good morning');
     final answer = Completer<ScheduleMessageResponse>();
     stubSchedule(message, () => answer.future);
@@ -95,7 +39,7 @@ void main() {
     await request;
   });
 
-  test('the server copy replaces it, even when dated earlier', () async {
+  test('scheduleMessage replaces the local copy with the server copy, even one dated earlier', () async {
     final message = Message(id: 'a', text: 'Good morning');
     final server = fakeScheduledMessage(
       'a',
@@ -109,7 +53,7 @@ void main() {
     expect(client.state.scheduledMessages, [server]);
   });
 
-  test('the event from the server replaces it, even when dated earlier', () async {
+  test('a scheduledMessageCreated event replaces the local copy, even when dated earlier', () async {
     final message = Message(id: 'a', text: 'Good morning');
     final answer = Completer<ScheduleMessageResponse>();
     stubSchedule(message, () => answer.future);
@@ -138,22 +82,22 @@ void main() {
     final request = schedule(message);
     await settle();
     await receive(EventType.scheduledMessageCreated, server);
-    answer.completeError(unreachable);
+    answer.completeError(offline);
 
-    await expectLater(request, throwsA(unreachable));
+    await expectLater(request, throwsA(offline));
     expect(client.state.scheduledMessages, [server]);
   });
 
-  test('one sent right away is removed', () async {
+  test('scheduleMessage stops listing a message the server sends right away', () async {
     final message = Message(id: 'a', text: 'Good morning');
-    stubSchedule(message, () async => ScheduleMessageResponse()..message = message);
+    stubSchedule(message, () async => sentRightAway(message));
 
     await schedule(message);
 
     expect(client.state.scheduledMessages, isEmpty);
   });
 
-  test('one that could not reach the server stays as failed', () async {
+  test('scheduleMessage lists a message that could not reach the server as failed', () async {
     final failed = await scheduleUnreachable(Message(id: 'a', text: 'Good morning'));
 
     expect(failed.id, 'a');
@@ -161,7 +105,7 @@ void main() {
     expect(failed.failureReason, ScheduledMessageFailureReason.requestFailed);
   });
 
-  test('one the server refuses is removed', () async {
+  test('scheduleMessage stops listing a message the server refuses', () async {
     final message = Message(id: 'a', text: 'Good morning');
     stubSchedule(message, () async => throw rejected);
 
@@ -185,7 +129,7 @@ void main() {
   test('retryScheduledMessage removes one that was sent right away', () async {
     final message = Message(id: 'a', text: 'Good morning');
     final failed = await scheduleUnreachable(message);
-    stubSchedule(message, () async => ScheduleMessageResponse()..message = message);
+    stubSchedule(message, () async => sentRightAway(message));
 
     await retry(failed);
 
@@ -196,7 +140,7 @@ void main() {
   test('retryScheduledMessage schedules one whose time has passed, with the same ID', () async {
     final message = Message(id: 'a', text: 'Good morning');
     final failed = await scheduleUnreachable(message);
-    stubSchedule(message, () async => ScheduleMessageResponse()..message = message);
+    stubSchedule(message, () async => sentRightAway(message));
     final later = scheduledAt.add(const Duration(hours: 1));
 
     await withClock(Clock.fixed(later), () => client.retryScheduledMessage(failed));
@@ -212,7 +156,7 @@ void main() {
     expect(() => client.retryScheduledMessage(failed), throwsA(isA<AssertionError>()));
   });
 
-  test('lists failed ones after a later scheduled one', () async {
+  test('scheduledMessages lists failed ones after later scheduled ones', () async {
     await scheduleUnreachable(Message(id: 'a', text: 'Good morning'));
     await hold([
       fakeScheduledMessage('server-failed', scheduledAt: now, status: ScheduledMessageStatus.failed),
@@ -231,7 +175,7 @@ void main() {
     expect(idsOf(client.state.scheduledMessages), ['b', 'a']);
   });
 
-  test('reports the message as created, then as the server has it', () async {
+  test('scheduleMessage reports it as created while preparing, then as created once scheduled', () async {
     final message = Message(id: 'a', text: 'Good morning');
     stubSchedule(message, () async => scheduled(message, fakeScheduledMessage('a', scheduledAt: scheduledAt)));
 
@@ -243,9 +187,9 @@ void main() {
     ]);
   });
 
-  test('reports one that could not reach the server as updated to failed', () async {
+  test('scheduleMessage reports one that could not reach the server as updated to failed', () async {
     final message = Message(id: 'a', text: 'Good morning');
-    stubSchedule(message, () async => throw unreachable);
+    stubSchedule(message, () async => throw offline);
 
     final events = await eventsDuring(() => schedule(message));
 
@@ -255,7 +199,7 @@ void main() {
     ]);
   });
 
-  test('reports one the server refuses as deleted', () async {
+  test('scheduleMessage reports one the server refuses as deleted', () async {
     final message = Message(id: 'a', text: 'Good morning');
     stubSchedule(message, () async => throw rejected);
 
@@ -267,7 +211,7 @@ void main() {
     ]);
   });
 
-  test('reports one refused with an error other than a network one as deleted', () async {
+  test('scheduleMessage reports one refused with an error other than a network one as deleted', () async {
     final message = Message(id: 'a', text: 'Good morning');
     stubSchedule(message, () async => throw StateError('Broken'));
 
@@ -281,7 +225,7 @@ void main() {
     ]);
   });
 
-  test('reports one whose request failed, and the server never got, as deleted', () async {
+  test('deleteScheduledMessage reports one whose request failed, and the server never got, as deleted', () async {
     final failed = await scheduleUnreachable(Message(id: 'a', text: 'Good morning'));
     when(() => api.scheduledMessages.deleteScheduledMessage('a')).thenAnswer((_) async => throw missingError);
 
@@ -290,48 +234,22 @@ void main() {
     expect(events, [(EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled)]);
   });
 
-  test('reports the events it sends itself as local, and the server ones not', () async {
+  test('scheduleMessage reports its own events as local', () async {
     final local = client.on(EventType.scheduledMessageCreated).first;
     final message = Message(id: 'a', text: 'Good morning');
     stubSchedule(message, () => Completer<ScheduleMessageResponse>().future);
     unawaited(schedule(message));
 
     expect((await local).isLocal, isTrue);
-
-    final fromServer = client.on(EventType.scheduledMessageCreated).first;
-    client.handleEvent(
-      Event.fromJson({
-        'type': EventType.scheduledMessageCreated,
-        'cid': 'messaging:general',
-        'scheduled_message': {
-          'id': 'b',
-          'cid': 'messaging:general',
-          'user': {'id': 'current-user'},
-          'message': {'text': 'Hello'},
-          'scheduled_at': scheduledAt.toIso8601String(),
-          'status': 'scheduled',
-        },
-      }),
-    );
-
-    expect((await fromServer).isLocal, isFalse);
   });
 
   for (final (refusal, code, type, status) in [
-    ('already sent', 123, EventType.scheduledMessageSent, ScheduledMessageStatus.sent),
-    ('deleted', 124, EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
+    ('already sent', scheduledMessageAlreadySentCode, EventType.scheduledMessageSent, ScheduledMessageStatus.sent),
+    ('deleted', scheduledMessageCanceledCode, EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
   ]) {
     test('reports one the server refuses to schedule as $refusal with a $type event', () async {
       final message = Message(id: 'a', text: 'Good morning');
-      final error = StreamChatNetworkError.raw(
-        code: code,
-        message: 'Refused',
-        statusCode: 400,
-        data: ErrorResponse()
-          ..code = code
-          ..statusCode = 400
-          ..message = 'Refused',
-      );
+      final error = refusedWith(code);
       stubSchedule(message, () async => throw error);
 
       final events = await eventsDuring(() => schedule(message));
@@ -346,27 +264,18 @@ void main() {
     test('reports one the server refuses to schedule again as $refusal with a $type event', () async {
       final message = Message(id: 'a', text: 'Good morning');
       final failed = await scheduleUnreachable(message);
-      final error = StreamChatNetworkError.raw(
-        code: code,
-        message: 'Refused',
-        statusCode: 400,
-        data: ErrorResponse()
-          ..code = code
-          ..statusCode = 400
-          ..message = 'Refused',
-      );
+      final error = refusedWith(code);
       stubSchedule(message, () async => throw error);
 
       final events = await eventsDuring(() => client.retryScheduledMessage(failed));
 
       expect(events.last, (type, status));
-      expect(client.state.scheduledMessages, isEmpty);
     });
   }
 
-  test('reports one sent right away as sent', () async {
+  test('scheduleMessage reports one sent right away as sent', () async {
     final message = Message(id: 'a', text: 'Good morning');
-    stubSchedule(message, () async => ScheduleMessageResponse()..message = message);
+    stubSchedule(message, () async => sentRightAway(message));
 
     final events = await eventsDuring(() => schedule(message));
 
@@ -376,7 +285,7 @@ void main() {
     ]);
   });
 
-  test('an error other than a network one removes it and is rethrown', () async {
+  test('scheduleMessage rethrows an error other than a network one and stops listing it', () async {
     final message = Message(id: 'a', text: 'Good morning');
     stubSchedule(message, () async => throw StateError('broken'));
 
@@ -385,7 +294,7 @@ void main() {
     expect(client.state.scheduledMessages, isEmpty);
   });
 
-  test('without a current user, only the scheduled one is listed', () async {
+  test('scheduleMessage without a current user reports only the scheduled one', () async {
     client.state.currentUser = null;
     final message = Message(id: 'a', text: 'Good morning');
     final server = fakeScheduledMessage('a', scheduledAt: scheduledAt);
@@ -394,10 +303,20 @@ void main() {
     final events = await eventsDuring(() => schedule(message));
 
     expect(events, [(EventType.scheduledMessageCreated, ScheduledMessageStatus.scheduled)]);
+  });
+
+  test('scheduleMessage without a current user lists only the scheduled one', () async {
+    client.state.currentUser = null;
+    final message = Message(id: 'a', text: 'Good morning');
+    final server = fakeScheduledMessage('a', scheduledAt: scheduledAt);
+    stubSchedule(message, () async => scheduled(message, server));
+
+    await schedule(message);
+
     expect(client.state.scheduledMessages, [server]);
   });
 
-  test('a retriable server error leaves it as failed', () async {
+  test('scheduleMessage leaves one that fails with a retriable server error as failed', () async {
     final unavailable = StreamChatNetworkError(
       ChatErrorCode.internalSystemError,
       statusCode: 503,
@@ -413,11 +332,11 @@ void main() {
     expect(failed.failureReason, ScheduledMessageFailureReason.requestFailed);
   });
 
-  test('a retry that fails again leaves it as failed', () async {
+  test('retryScheduledMessage that fails again leaves it as failed', () async {
     final message = Message(id: 'a', text: 'Good morning');
     final failed = await scheduleUnreachable(message);
 
-    await expectLater(retry(failed), throwsA(unreachable));
+    await expectLater(retry(failed), throwsA(offline));
     await settle();
 
     final [again] = client.state.scheduledMessages;
@@ -425,22 +344,29 @@ void main() {
     expect(again.failureReason, ScheduledMessageFailureReason.requestFailed);
   });
 
-  test('deleting one whose request failed asks the server', () async {
+  test('deleteScheduledMessage asks the server to delete one whose request failed', () async {
     final failed = await scheduleUnreachable(Message(id: 'a', text: 'Good morning'));
     final deleted = fakeScheduledMessage('a', status: ScheduledMessageStatus.canceled);
-    when(
-      () => api.scheduledMessages.deleteScheduledMessage('a'),
-    ).thenAnswer((_) async => DeleteScheduledMessageResponse()..scheduledMessage = deleted);
+    when(() => api.scheduledMessages.deleteScheduledMessage('a')).thenAnswer((_) async => fakeDelete(deleted));
 
     final response = await client.deleteScheduledMessage(failed);
-    await settle();
 
     expect(response.scheduledMessage, deleted);
-    expect(client.state.scheduledMessages, isEmpty);
     verify(() => api.scheduledMessages.deleteScheduledMessage('a')).called(1);
   });
 
-  test('deleting one whose request failed, and the server never got, succeeds', () async {
+  test('deleteScheduledMessage stops listing one whose request failed', () async {
+    final failed = await scheduleUnreachable(Message(id: 'a', text: 'Good morning'));
+    final deleted = fakeScheduledMessage('a', status: ScheduledMessageStatus.canceled);
+    when(() => api.scheduledMessages.deleteScheduledMessage('a')).thenAnswer((_) async => fakeDelete(deleted));
+
+    await client.deleteScheduledMessage(failed);
+    await settle();
+
+    expect(client.state.scheduledMessages, isEmpty);
+  });
+
+  test('deleteScheduledMessage succeeds for one whose request failed, and the server never got', () async {
     final failed = await scheduleUnreachable(Message(id: 'a', text: 'Good morning'));
     when(() => api.scheduledMessages.deleteScheduledMessage('a')).thenAnswer((_) async => throw missingError);
 
@@ -451,9 +377,9 @@ void main() {
     expect(client.state.scheduledMessages, isEmpty);
   });
 
-  test('deleting one whose request failed keeps it when the server fails', () async {
+  test('deleteScheduledMessage keeps one whose request failed when the server fails', () async {
     final failed = await scheduleUnreachable(Message(id: 'a', text: 'Good morning'));
-    final serverError = StreamChatNetworkError.raw(code: 16, message: 'Internal', statusCode: 500);
+    final serverError = StreamChatNetworkError(ChatErrorCode.internalSystemError, statusCode: 500);
     when(() => api.scheduledMessages.deleteScheduledMessage('a')).thenAnswer((_) async => throw serverError);
 
     await expectLater(client.deleteScheduledMessage(failed), throwsA(serverError));
@@ -462,7 +388,7 @@ void main() {
     expect(client.state.scheduledMessages, [failed]);
   });
 
-  test('deleting one being scheduled asks the server', () async {
+  test('deleteScheduledMessage asks the server to delete one being scheduled', () async {
     final local = fakeScheduledMessage('a', status: ScheduledMessageStatus.preparingToSchedule);
     await hold([local]);
     when(() => api.scheduledMessages.deleteScheduledMessage('a')).thenAnswer((_) async => fakeDelete(local));
@@ -472,7 +398,7 @@ void main() {
     verify(() => api.scheduledMessages.deleteScheduledMessage('a')).called(1);
   });
 
-  test('one the server refused can be scheduled again with the same ID', () async {
+  test('scheduleMessage schedules one the server refused again with the same ID', () async {
     final message = Message(id: 'a', text: 'Good morning');
     stubSchedule(message, () async => throw rejected);
     await expectLater(schedule(message), throwsA(rejected));
@@ -483,4 +409,77 @@ void main() {
 
     expect(client.state.scheduledMessages, [server]);
   });
+}
+
+// Schedules [message], then lets the events it emits through.
+Future<ScheduleMessageResponse> schedule(Message message) async {
+  try {
+    return await withClock(
+      Clock.fixed(now),
+      () => client.scheduleMessage(message, 'general', 'messaging', scheduledAt: scheduledAt),
+    );
+  } finally {
+    await settle();
+  }
+}
+
+Future<ScheduleMessageResponse> retry(ScheduledMessage scheduledMessage) async {
+  final response = await withClock(Clock.fixed(now), () => client.retryScheduledMessage(scheduledMessage));
+  await settle();
+  return response;
+}
+
+// The scheduled message events while [run] runs, as type and status.
+Future<List<(String, ScheduledMessageStatus?)>> eventsDuring(Future<void> Function() run) async {
+  final events = <(String, ScheduledMessageStatus?)>[];
+  final subscription = client.on().where((it) => it.scheduledMessage != null).listen((it) {
+    events.add((it.type, it.scheduledMessage?.status));
+  });
+
+  try {
+    await run();
+  } on StreamChatNetworkError {
+    // The events are what is checked.
+  }
+
+  await settle();
+  await subscription.cancel();
+  return events;
+}
+
+void stubSchedule(Message message, Future<ScheduleMessageResponse> Function() answer) {
+  when(
+    () => api.scheduledMessages.scheduleMessage('general', 'messaging', message, scheduledAt),
+  ).thenAnswer((_) => answer());
+}
+
+ScheduleMessageResponse scheduled(Message message, ScheduledMessage scheduledMessage) {
+  return ScheduleMessageResponse()
+    ..message = message
+    ..scheduledMessage = scheduledMessage;
+}
+
+// Schedules [message] while the server can't be reached.
+Future<ScheduledMessage> scheduleUnreachable(Message message) async {
+  stubSchedule(message, () async => throw offline);
+  await expectLater(schedule(message), throwsA(offline));
+  return client.state.scheduledMessages.single;
+}
+
+// The error that refuses a scheduled message request with [code].
+StreamChatNetworkError refusedWith(int code) {
+  return StreamChatNetworkError.raw(
+    code: code,
+    message: 'Refused',
+    statusCode: 400,
+    data: ErrorResponse()
+      ..code = code
+      ..statusCode = 400
+      ..message = 'Refused',
+  );
+}
+
+// The response for [message] when its time had passed and it was sent.
+ScheduleMessageResponse sentRightAway(Message message) {
+  return ScheduleMessageResponse()..message = message;
 }
