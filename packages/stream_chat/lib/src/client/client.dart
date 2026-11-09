@@ -1,5 +1,11 @@
+/// @docImport '../core/models/channel_config.dart';
+/// @docImport '../core/models/channel_model.dart';
+/// @docImport '../core/models/predefined_filter.dart';
+library;
+
 import 'dart:async';
 
+import 'package:collection/collection.dart';
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
@@ -40,6 +46,7 @@ import '../core/models/poll_vote.dart';
 import '../core/models/push_preference.dart';
 import '../core/models/reaction.dart';
 import '../core/models/role.dart';
+import '../core/models/scheduled_message.dart';
 import '../core/models/thread.dart';
 import '../core/models/user.dart';
 import '../core/util/event_controller.dart';
@@ -59,6 +66,7 @@ import 'event_resolvers.dart' as event_resolvers;
 import 'live_location_expiration_scheduler.dart';
 import 'query_channels_result.dart';
 import 'retry_policy.dart';
+import 'scheduled_messages/scheduled_message_manager.dart';
 import 'sync_manager.dart';
 
 /// Handler function used for logging records. Function requires a single
@@ -153,10 +161,19 @@ class StreamChatClient {
       },
     );
 
+    _scheduledMessageManager = ScheduledMessageManager(
+      this,
+      logger: detachedLogger('⏰'),
+    );
+
     state = ClientState(this);
   }
 
   late final StreamChatApi _chatApi;
+
+  /// The API the client requests through.
+  @internal
+  StreamChatApi get chatApi => _chatApi;
   late final WebSocket _ws;
 
   /// This client state
@@ -295,6 +312,11 @@ class StreamChatClient {
   final LogHandlerFunction logHandlerFunction;
 
   StreamSubscription<List<ConnectionStatus>>? _connectionStatusSubscription;
+
+  /// The current user's scheduled messages and their requests.
+  @internal
+  ScheduledMessageManager get scheduledMessageManager => _scheduledMessageManager;
+  late final ScheduledMessageManager _scheduledMessageManager;
 
   /// Manages delivery receipt reporting for channel messages.
   ///
@@ -653,12 +675,17 @@ class StreamChatClient {
   /// identifier (optionally interpolated with [filterValues] and [sortValues])
   /// can be supplied.
   ///
-  /// Use [queryChannelsWithResult] if you also need the server-resolved
-  /// [PredefinedFilter] spec.
+  /// [queryChannelsWithResult] also yields the [PredefinedFilter] spec that a
+  /// predefined filter stands for.
   ///
-  /// If [includeActiveMemberCount] is true, each channel loaded online carries
-  /// its [ChannelModel.activeMemberCount]. Channels from the offline cache keep
-  /// the count they were stored with.
+  /// If [includeScheduledMessages] is true, the current user's scheduled
+  /// messages in each channel loaded online are loaded too.
+  /// [ClientState.scheduledMessages] then lists each such channel's current
+  /// ones, thread replies included.
+  ///
+  /// If [includeActiveMemberCount] is true, each channel loaded online has its
+  /// [ChannelModel.activeMemberCount] set. A channel from the offline cache has
+  /// the count it was stored with.
   Stream<List<Channel>> queryChannels({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
@@ -668,6 +695,7 @@ class StreamChatClient {
     bool state = true,
     bool watch = true,
     bool presence = false,
+    bool includeScheduledMessages = false,
     bool includeActiveMemberCount = false,
     int? memberLimit,
     int? messageLimit,
@@ -682,6 +710,7 @@ class StreamChatClient {
     state: state,
     watch: watch,
     presence: presence,
+    includeScheduledMessages: includeScheduledMessages,
     includeActiveMemberCount: includeActiveMemberCount,
     memberLimit: memberLimit,
     messageLimit: messageLimit,
@@ -689,17 +718,23 @@ class StreamChatClient {
     waitForConnect: waitForConnect,
   ).map((result) => result.channels);
 
-  /// Requests channels with a given query, yielding a [QueryChannelsResult]
-  /// that carries both the live channel list and the server-resolved
-  /// [PredefinedFilter] spec (when one is associated with the query).
+  /// Requests channels with a given query, as a [QueryChannelsResult].
+  ///
+  /// The result has the live channel list and, when the query uses a predefined
+  /// filter, the [PredefinedFilter] spec that filter stands for.
   ///
   /// Yields the offline-cached result first (when available), followed by
   /// the online result. Concurrent identical online queries share a single
   /// request.
   ///
-  /// If [includeActiveMemberCount] is true, each channel loaded online carries
-  /// its [ChannelModel.activeMemberCount]. Channels from the offline cache keep
-  /// the count they were stored with.
+  /// If [includeScheduledMessages] is true, the current user's scheduled
+  /// messages in each channel loaded online are loaded too.
+  /// [ClientState.scheduledMessages] then lists each such channel's current
+  /// ones, thread replies included.
+  ///
+  /// If [includeActiveMemberCount] is true, each channel loaded online has its
+  /// [ChannelModel.activeMemberCount] set. A channel from the offline cache has
+  /// the count it was stored with.
   Stream<QueryChannelsResult> queryChannelsWithResult({
     Filter? filter,
     SortOrder<ChannelState>? channelStateSort,
@@ -709,6 +744,7 @@ class StreamChatClient {
     bool state = true,
     bool watch = true,
     bool presence = false,
+    bool includeScheduledMessages = false,
     bool includeActiveMemberCount = false,
     int? memberLimit,
     int? messageLimit,
@@ -729,6 +765,7 @@ class StreamChatClient {
       state,
       watch,
       presence,
+      includeScheduledMessages,
       includeActiveMemberCount,
       memberLimit,
       messageLimit,
@@ -770,6 +807,7 @@ class StreamChatClient {
               state: state,
               watch: watch,
               presence: presence,
+              includeScheduledMessages: includeScheduledMessages,
               includeActiveMemberCount: includeActiveMemberCount,
               memberLimit: memberLimit,
               messageLimit: messageLimit,
@@ -793,8 +831,13 @@ class StreamChatClient {
 
   /// Requests channels with a given query from the API.
   ///
-  /// If [includeActiveMemberCount] is true, each returned channel carries its
-  /// [ChannelModel.activeMemberCount].
+  /// If [includeScheduledMessages] is true, the current user's scheduled
+  /// messages in each returned channel are loaded too.
+  /// [ClientState.scheduledMessages] then lists each such channel's current
+  /// ones, thread replies included.
+  ///
+  /// If [includeActiveMemberCount] is true, each returned channel has its
+  /// [ChannelModel.activeMemberCount] set.
   Future<List<Channel>> queryChannelsOnline({
     Filter? filter,
     SortOrder<ChannelState>? sort,
@@ -804,6 +847,7 @@ class StreamChatClient {
     bool state = true,
     bool watch = true,
     bool presence = false,
+    bool includeScheduledMessages = false,
     bool includeActiveMemberCount = false,
     int? memberLimit,
     int? messageLimit,
@@ -819,6 +863,7 @@ class StreamChatClient {
       state: state,
       watch: watch,
       presence: presence,
+      includeScheduledMessages: includeScheduledMessages,
       includeActiveMemberCount: includeActiveMemberCount,
       memberLimit: memberLimit,
       messageLimit: messageLimit,
@@ -837,6 +882,7 @@ class StreamChatClient {
     bool state = true,
     bool watch = true,
     bool presence = false,
+    bool includeScheduledMessages = false,
     bool includeActiveMemberCount = false,
     int? memberLimit,
     int? messageLimit,
@@ -871,6 +917,7 @@ class StreamChatClient {
       state: state,
       watch: watch,
       presence: presence,
+      includeScheduledMessages: includeScheduledMessages,
       includeActiveMemberCount: includeActiveMemberCount,
       memberLimit: memberLimit,
       paginationParams: paginationParams,
@@ -896,6 +943,7 @@ class StreamChatClient {
     }
 
     final channels = res.channels;
+    _scheduledMessageManager.onChannelsQueried(channels);
 
     final users = channels.expand((it) => it.members ?? <Member>[]).map((it) => it.user).toList(growable: false);
 
@@ -1349,8 +1397,13 @@ class StreamChatClient {
     channelData: channelData,
   );
 
-  /// Query the API, get messages, members or other channel fields
-  /// Creates the channel first if not yet created
+  /// Queries a channel's messages, members and other fields.
+  ///
+  /// Creates the channel first if it does not exist yet.
+  ///
+  /// If [includeScheduledMessages] is true, the current user's scheduled
+  /// messages in the channel are loaded too. [ClientState.scheduledMessages]
+  /// then lists the channel's current ones, thread replies included.
   Future<ChannelState> queryChannel(
     String channelType, {
     bool state = true,
@@ -1361,17 +1414,24 @@ class StreamChatClient {
     PaginationParams? messagesPagination,
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
-  }) => _chatApi.channel.queryChannel(
-    channelType,
-    channelId: channelId,
-    channelData: channelData,
-    state: state,
-    watch: watch,
-    presence: presence,
-    messagesPagination: messagesPagination,
-    membersPagination: membersPagination,
-    watchersPagination: watchersPagination,
-  );
+    bool includeScheduledMessages = false,
+  }) async {
+    final channelState = await _chatApi.channel.queryChannel(
+      channelType,
+      channelId: channelId,
+      channelData: channelData,
+      state: state,
+      watch: watch,
+      presence: presence,
+      messagesPagination: messagesPagination,
+      membersPagination: membersPagination,
+      watchersPagination: watchersPagination,
+      includeScheduledMessages: includeScheduledMessages,
+    );
+
+    _scheduledMessageManager.onChannelsQueried([channelState]);
+    return channelState;
+  }
 
   /// Query channel members
   Future<QueryMembersResponse> queryMembers(
@@ -2393,6 +2453,190 @@ class StreamChatClient {
     return _chatApi.reminders.deleteReminder(messageId);
   }
 
+  /// Queries a page of the current user's scheduled messages.
+  ///
+  /// The page lists the scheduled and sending ones first, then the failed ones,
+  /// each by [ScheduledMessage.scheduledAt].
+  ///
+  /// If [cid] is given, the page lists only the ones in that channel. If
+  /// [statuses] is given, it lists only the ones with one of those statuses:
+  /// [ScheduledMessageStatus.scheduled], [ScheduledMessageStatus.sending] or
+  /// [ScheduledMessageStatus.failed].
+  ///
+  /// The [pagination] sets the page size, from 1 to 100. Its
+  /// [PaginationParams.next] cursor, taken from
+  /// [QueryScheduledMessagesResponse.next] of a previous page, gets the page
+  /// after it.
+  ///
+  /// The page is added to [ClientState.scheduledMessages]; nothing is taken
+  /// away. [loadScheduledMessages] loads all of them.
+  ///
+  /// Throws a [StreamChatNetworkError] if the request fails.
+  Future<QueryScheduledMessagesResponse> queryScheduledMessages({
+    String? cid,
+    List<ScheduledMessageStatus>? statuses,
+    PaginationParams? pagination,
+  }) {
+    return _scheduledMessageManager.queryMessages(
+      cid: cid,
+      statuses: statuses,
+      pagination: pagination,
+    );
+  }
+
+  /// Loads all of the current user's scheduled messages.
+  ///
+  /// [ClientState.scheduledMessages] then lists all of them, and
+  /// [ClientState.hasLoadedAllScheduledMessages] is true. The ones not on the
+  /// server yet are kept.
+  ///
+  /// Asking again while they load returns the same result.
+  ///
+  /// Returns the scheduled messages [ClientState.scheduledMessages] then lists.
+  ///
+  /// Throws a [StreamChatNetworkError] if a request fails. The ones loaded
+  /// before it are listed, and none is taken away.
+  Future<List<ScheduledMessage>> loadScheduledMessages() {
+    return _scheduledMessageManager.loadMessages();
+  }
+
+  /// Schedules [message] to be sent at [scheduledAt].
+  ///
+  /// The message goes to the channel [channelId] of [channelType]. Until it is
+  /// sent, it is not among the channel's messages, and
+  /// [ClientState.scheduledMessages] lists it instead.
+  ///
+  /// The [scheduledAt] is rounded up to a whole minute, at least
+  /// [ChannelConfig.scheduledMessagesMinLeadTime] from now. If it has passed by
+  /// the time the message is scheduled, the message is sent right away and
+  /// [ScheduleMessageResponse.scheduledMessage] is null.
+  ///
+  /// [ClientState.scheduledMessages] lists it right away as
+  /// [ScheduledMessageStatus.preparingToSchedule]. If the request fails in a
+  /// way that can be retried, it stays there as failed with
+  /// [ScheduledMessageFailureReason.requestFailed], to retry with
+  /// [retryScheduledMessage] or delete with [deleteScheduledMessage]. Each of
+  /// these changes is also reported as an event.
+  ///
+  /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
+  /// attachment of [message] is not uploaded yet.
+  Future<ScheduleMessageResponse> scheduleMessage(
+    Message message,
+    String channelId,
+    String channelType, {
+    required DateTime scheduledAt,
+    bool skipPush = false,
+    bool skipEnrichUrl = false,
+  }) {
+    return _scheduledMessageManager.scheduleMessage(
+      message,
+      channelId,
+      channelType,
+      scheduledAt: scheduledAt,
+      skipPush: skipPush,
+      skipEnrichUrl: skipEnrichUrl,
+    );
+  }
+
+  /// Schedules [scheduledMessage] again, after its request failed in a way
+  /// that can be retried.
+  ///
+  /// It keeps its ID, so it is never scheduled twice. If its
+  /// [ScheduledMessage.scheduledAt] has passed, it is sent right away and
+  /// [ScheduleMessageResponse.scheduledMessage] is null. Its
+  /// [ScheduledMessage.failureReason] must be
+  /// [ScheduledMessageFailureReason.requestFailed].
+  Future<ScheduleMessageResponse> retryScheduledMessage(
+    ScheduledMessage scheduledMessage,
+  ) {
+    return _scheduledMessageManager.retryMessage(scheduledMessage);
+  }
+
+  /// Edits [scheduledMessage].
+  ///
+  /// Its message is replaced with [message]. If [scheduledAt] is given, it is
+  /// moved to that time, rounded up to a whole minute, at least
+  /// [ChannelConfig.scheduledMessagesMinLeadTime] from now.
+  ///
+  /// A failed scheduled message can't be edited, only deleted.
+  ///
+  /// If the scheduled message no longer exists, or was already sent or deleted,
+  /// an [EventType.scheduledMessageDeleted] event reports it, so
+  /// [ClientState.scheduledMessages] stops listing it.
+  ///
+  /// Throws a [StreamChatNetworkError] if the request fails, for example with
+  /// [ScheduledMessageErrorReason.scheduledAtTooSoon] for a [scheduledAt] that
+  /// is not in the future, and even when the scheduled message is already gone.
+  Future<UpdateScheduledMessageResponse> updateScheduledMessage(
+    ScheduledMessage scheduledMessage,
+    Message message, {
+    DateTime? scheduledAt,
+  }) {
+    return _scheduledMessageManager.updateMessage(
+      scheduledMessage,
+      message,
+      scheduledAt: scheduledAt,
+    );
+  }
+
+  /// Moves [scheduledMessage] to [scheduledAt].
+  ///
+  /// Its message stays as it is. The [scheduledAt] is rounded up to a whole
+  /// minute, at least [ChannelConfig.scheduledMessagesMinLeadTime] from now.
+  ///
+  /// A failed scheduled message can't be rescheduled, only deleted.
+  ///
+  /// If the scheduled message no longer exists, or was already sent or deleted,
+  /// an [EventType.scheduledMessageDeleted] event reports it, so
+  /// [ClientState.scheduledMessages] stops listing it.
+  ///
+  /// Throws a [StreamChatNetworkError] if the request fails, for example with
+  /// [ScheduledMessageErrorReason.scheduledAtTooSoon] for a [scheduledAt] that
+  /// is not in the future, and even when the scheduled message is already gone.
+  Future<UpdateScheduledMessageResponse> rescheduleMessage(
+    ScheduledMessage scheduledMessage, {
+    required DateTime scheduledAt,
+  }) {
+    return _scheduledMessageManager.rescheduleMessage(
+      scheduledMessage,
+      scheduledAt: scheduledAt,
+    );
+  }
+
+  /// Deletes [scheduledMessage] before it is sent.
+  ///
+  /// Deleting is the only change a failed scheduled message allows.
+  ///
+  /// [ClientState.scheduledMessages] stops listing it once it is deleted. If
+  /// it no longer exists, or was already sent or deleted, an
+  /// [EventType.scheduledMessageDeleted] event reports it, so it stops being
+  /// listed too.
+  ///
+  /// Throws a [StreamChatNetworkError] if the request fails, even when the
+  /// scheduled message is already gone.
+  Future<DeleteScheduledMessageResponse> deleteScheduledMessage(
+    ScheduledMessage scheduledMessage,
+  ) {
+    return _scheduledMessageManager.deleteMessage(scheduledMessage);
+  }
+
+  /// Sends [scheduledMessage] right away.
+  ///
+  /// The returned scheduled message can still be waiting to go out. An
+  /// [EventType.scheduledMessageSent] event follows once it has been sent.
+  ///
+  /// If the scheduled message no longer exists, or was already sent or deleted,
+  /// an [EventType.scheduledMessageDeleted] event reports it, so
+  /// [ClientState.scheduledMessages] stops listing it.
+  ///
+  /// Throws a [StreamChatNetworkError] if the request fails, even when the
+  /// scheduled message is already gone.
+  Future<SendScheduledMessageNowResponse> sendScheduledMessageNow(
+    ScheduledMessage scheduledMessage,
+  ) {
+    return _scheduledMessageManager.sendMessageNow(scheduledMessage);
+  }
+
   /// Lists user groups with cursor-based pagination.
   Future<ListUserGroupsResponse> listUserGroups({
     int? limit,
@@ -2524,6 +2768,7 @@ class StreamChatClient {
     // resetting state.
     state.dispose();
     state = ClientState(this);
+    _scheduledMessageManager.clear();
 
     // clearing app settings cache.
     _appSettingsManager.clear();
@@ -2543,6 +2788,7 @@ class StreamChatClient {
     await disconnectUser();
     await _ws.dispose();
     await _eventController.close();
+    await _scheduledMessageManager.dispose();
     await _connectionStatusSubscription?.cancel();
   }
 }
@@ -2894,6 +3140,37 @@ class ClientState {
 
   /// The current total unread messages count as a stream
   Stream<int> get totalUnreadCountStream => _totalUnreadCountController.stream.distinct();
+
+  /// The current user's unsent scheduled messages.
+  ///
+  /// Failed ones last, each group earliest first, thread replies included.
+  ///
+  /// It lists the ones scheduled, loaded or changed on this device, each as of
+  /// its latest change until it is sent or deleted. It is complete when
+  /// [hasLoadedAllScheduledMessages] is true.
+  List<ScheduledMessage> get scheduledMessages => _client._scheduledMessageManager.state.scheduledMessages;
+
+  /// The [scheduledMessages] as they change.
+  ///
+  /// Emits the current value on listen, then a new value each time they change.
+  Stream<List<ScheduledMessage>> get scheduledMessagesStream {
+    final scheduledMessages = _client._scheduledMessageManager.stream.map((it) => it.scheduledMessages);
+    return scheduledMessages.distinct(const ListEquality().equals);
+  }
+
+  /// Whether [scheduledMessages] lists all of them.
+  ///
+  /// It becomes true once [StreamChatClient.loadScheduledMessages] completes,
+  /// and false when the connection is lost. If it was true then, they are all
+  /// loaded again when the connection recovers.
+  bool get hasLoadedAllScheduledMessages => _client._scheduledMessageManager.state.hasLoadedAll;
+
+  /// The [hasLoadedAllScheduledMessages] as it changes.
+  ///
+  /// Emits the current value on listen, then a new value each time it changes.
+  Stream<bool> get hasLoadedAllScheduledMessagesStream {
+    return _client._scheduledMessageManager.stream.map((it) => it.hasLoadedAll).distinct();
+  }
 
   /// The current list of channels in memory as a stream
   Stream<Map<String, Channel>> get channelsStream => _channelsController.stream;

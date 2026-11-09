@@ -181,6 +181,71 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
+  test('queryChannel asks for the scheduled messages and reads them', () async {
+    const path = '/channels/messaging/general/query';
+    const scheduledMessage = {
+      'id': 'scheduled-id',
+      'cid': 'messaging:general',
+      'user': {'id': 'test-user-id'},
+      'message': {'text': 'Good morning'},
+      'scheduled_at': '2026-11-02T09:00:00.000Z',
+      'status': 'scheduled',
+      'created_at': '2026-10-29T00:00:00.000Z',
+      'updated_at': '2026-10-29T00:00:00.000Z',
+    };
+
+    when(
+      () => client.post(
+        path,
+        data: {
+          'state': true,
+          'watch': false,
+          'presence': false,
+          'include_scheduled_messages': true,
+        },
+      ),
+    ).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'channel': {'cid': 'messaging:general'},
+          'scheduled_messages': [scheduledMessage],
+        },
+      ),
+    );
+
+    final res = await channelApi.queryChannel(
+      'messaging',
+      channelId: 'general',
+      includeScheduledMessages: true,
+    );
+
+    expect(res.scheduledMessages?.single.id, 'scheduled-id');
+
+    verify(() => client.post(path, data: any(named: 'data'))).called(1);
+  });
+
+  test('queryChannels asks for the scheduled messages', () async {
+    const path = '/channels';
+    final payload = jsonEncode({
+      'state': true,
+      'watch': true,
+      'presence': false,
+      'include_scheduled_messages': true,
+      ...const PaginationParams().toJson(),
+    });
+
+    when(
+      () => client.get(path, queryParameters: {'payload': payload}),
+    ).thenAnswer(
+      (_) async => successResponse(path, data: {'channels': <Object>[]}),
+    );
+
+    await channelApi.queryChannels(includeScheduledMessages: true);
+
+    verify(() => client.get(path, queryParameters: {'payload': payload})).called(1);
+  });
+
   test('queryChannels with predefined filter', () async {
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';

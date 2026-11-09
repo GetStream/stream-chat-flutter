@@ -1,3 +1,7 @@
+/// @docImport '../../client/channel/channel_client_state.dart';
+/// @docImport '../../client/client.dart';
+library;
+
 import 'package:json_annotation/json_annotation.dart';
 import 'channel_model.dart';
 import 'comparable_field.dart';
@@ -7,6 +11,7 @@ import 'member.dart';
 import 'message.dart';
 import 'push_preference.dart';
 import 'read.dart';
+import 'scheduled_message.dart';
 import 'user.dart';
 
 part 'channel_state.g.dart';
@@ -34,6 +39,7 @@ class ChannelState implements ComparableFieldProvider {
     this.pendingMessages,
     this.pushPreferences,
     this.activeLiveLocations,
+    this.scheduledMessages,
   });
 
   /// The channel to which this state belongs
@@ -91,6 +97,15 @@ class ChannelState implements ComparableFieldProvider {
   /// The list of active live locations in the channel.
   final List<Location>? activeLiveLocations;
 
+  /// The current user's unsent scheduled messages in the channel.
+  ///
+  /// Null when the query did not ask for them, or the response did not include
+  /// them. A channel query result includes thread replies;
+  /// [ChannelClientState.channelState] leaves them out and lists the current
+  /// user's scheduled messages in the channel on this device.
+  @JsonKey(includeToJson: false)
+  final List<ScheduledMessage>? scheduledMessages;
+
   /// Create a new instance from a json
   static ChannelState fromJson(Map<String, dynamic> json) => _$ChannelStateFromJson(json);
 
@@ -111,6 +126,7 @@ class ChannelState implements ComparableFieldProvider {
     List<Message>? pendingMessages,
     ChannelPushPreference? pushPreferences,
     List<Location>? activeLiveLocations,
+    List<ScheduledMessage>? scheduledMessages,
   }) => ChannelState(
     channel: channel ?? this.channel,
     messages: messages ?? this.messages,
@@ -124,6 +140,7 @@ class ChannelState implements ComparableFieldProvider {
     pendingMessages: pendingMessages ?? this.pendingMessages,
     pushPreferences: pushPreferences ?? this.pushPreferences,
     activeLiveLocations: activeLiveLocations ?? this.activeLiveLocations,
+    scheduledMessages: scheduledMessages ?? this.scheduledMessages,
   );
 
   @override
