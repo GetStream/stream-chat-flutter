@@ -361,16 +361,21 @@ class ChannelClientState {
   Stream<List<Location>> get activeLiveLocationsStream =>
       channelStateStream.map((cs) => cs.activeLiveLocations ?? <Location>[]).distinct(const ListEquality().equals);
 
-  /// The current user's unsent scheduled messages in this channel on this
-  /// device, failed ones last, each group earliest first.
+  /// The current user's unsent scheduled messages in this channel known on
+  /// this device, failed ones last, each group earliest first.
   ///
   /// Scheduled replies in this channel's threads are in
   /// [scheduledThreadReplies] instead.
   ///
-  /// A channel query with `includeScheduledMessages` loads all of them.
+  /// It is complete when [ScheduledMessageListState.hasLoadedAll] of
+  /// [ClientState.scheduledMessageListState] is true. A channel query with
+  /// `includeScheduledMessages` refreshes it for this channel.
   List<ScheduledMessage> get scheduledMessages => _channelState.scheduledMessages ?? <ScheduledMessage>[];
 
   /// The [scheduledMessages] as a stream.
+  ///
+  /// Emits the current value on listen, then a new value each time they
+  /// change. Like [scheduledMessages], it lists the ones known on this device.
   Stream<List<ScheduledMessage>> get scheduledMessagesStream {
     final scheduledMessages = channelStateStream.map((cs) => cs.scheduledMessages ?? <ScheduledMessage>[]);
     return scheduledMessages.distinct(const ListEquality().equals);

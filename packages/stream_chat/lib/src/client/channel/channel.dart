@@ -900,23 +900,25 @@ class Channel {
   ///
   /// The [scheduledAt] is rounded up to a whole minute, at least
   /// [ChannelConfig.scheduledMessagesMinLeadTime] from now. If it has passed by
-  /// the time the message is scheduled, the message is sent right away and
+  /// the time the message is scheduled, the message is sent right away: it is
+  /// no longer listed, it arrives in this channel like any other message, and
   /// [ScheduleMessageResponse.scheduledMessage] is null.
   ///
   /// Also stops the current user's typing.
   ///
   /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
-  /// attachment of [message] is not uploaded yet.
+  /// attachment of [message] is not uploaded yet. A message to send right
+  /// away goes through [sendMessage].
   Future<ScheduleMessageResponse> scheduleMessage(
     Message message, {
     required DateTime scheduledAt,
     bool skipPush = false,
     bool skipEnrichUrl = false,
-  }) async {
+  }) {
     _checkInitialized();
     _keyStrokeHandler.cancel();
 
-    final response = await _client.scheduleMessage(
+    return _client.scheduleMessage(
       message,
       id!,
       type,
@@ -924,39 +926,23 @@ class Channel {
       skipPush: skipPush,
       skipEnrichUrl: skipEnrichUrl,
     );
-
-    return _onScheduled(response);
   }
 
   /// Schedules [scheduledMessage] again, after its request failed in a way
   /// that can be retried.
   ///
   /// It keeps its ID, so it is never scheduled twice. If its
-  /// [ScheduledMessage.scheduledAt] has passed, it is sent right away and
+  /// [ScheduledMessage.scheduledAt] has passed, it is sent right away: it is
+  /// no longer listed, it arrives in its channel like any other message, and
   /// [ScheduleMessageResponse.scheduledMessage] is null. Its
   /// [ScheduledMessage.failureReason] must be
   /// [ScheduledMessageFailureReason.requestFailed].
   Future<ScheduleMessageResponse> retryScheduledMessage(
     ScheduledMessage scheduledMessage,
-  ) async {
-    assert(
-      scheduledMessage.cid == cid,
-      'The scheduled message must belong to this channel.',
-    );
-
+  ) {
     _checkInitialized();
 
-    final response = await _client.retryScheduledMessage(scheduledMessage);
-    return _onScheduled(response);
-  }
-
-  // Adds the message to this channel when it was sent right away.
-  ScheduleMessageResponse _onScheduled(ScheduleMessageResponse response) {
-    if (response.scheduledMessage == null) {
-      state?.updateMessage(response.message.copyWith(state: MessageState.sent));
-    }
-
-    return response;
+    return _client.retryScheduledMessage(scheduledMessage);
   }
 
   Message _markMessageAsSent(Message message) {
@@ -2270,10 +2256,10 @@ class Channel {
   /// If [preferOffline] is true, the channel state is read from the offline
   /// storage when it has messages for this channel, without an API call.
   ///
-  /// If [includeScheduledMessages] is true, the current user's scheduled
-  /// messages in this channel are loaded too. [ClientState.scheduledMessages]
-  /// then lists this channel's current ones, thread replies included. Scheduled
-  /// messages are not stored offline, so [preferOffline] has no effect then.
+  /// If [includeScheduledMessages] is true and the state comes from the API,
+  /// the current user's scheduled messages in this channel are loaded too.
+  /// [ClientState.scheduledMessages] then lists this channel's current ones,
+  /// thread replies included.
   Future<ChannelState> query({
     bool state = true,
     bool watch = false,
@@ -2295,9 +2281,9 @@ class Channel {
     ChannelState? channelState;
 
     try {
-      // With preferOffline, the channel state is read from the offline storage
-      // first. That storage has no scheduled messages.
-      if (preferOffline && !watch && !includeScheduledMessages && cid != null) {
+      // If we prefer offline, we first try to get the channel state from the
+      // offline storage.
+      if (preferOffline && !watch && cid != null) {
         final persistenceClient = _client.chatPersistenceClient;
         if (persistenceClient != null) {
           final cachedState = await persistenceClient.getChannelStateByCid(

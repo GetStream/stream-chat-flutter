@@ -152,22 +152,11 @@ void main() {
 
       await expectLater(request(client), throwsA(missingError));
 
-      expect((await deleted).scheduledMessage?.id, 'a');
+      final event = await deleted;
+      expect(event.scheduledMessage?.id, 'a');
+      expect(event.scheduledMessage?.status, ScheduledMessageStatus.canceled);
       expect(client.state.scheduledMessages, isEmpty);
     });
-
-    for (final (refusal, code) in [('already sent', 123), ('deleted', 124)]) {
-      test('$name drops one refused as $refusal', () async {
-        await hold([a]);
-        final error = StreamChatNetworkError.raw(code: code, message: 'Refused', statusCode: 400);
-        stub(api, error);
-
-        await expectLater(request(client), throwsA(error));
-        await settle();
-
-        expect(client.state.scheduledMessages, isEmpty);
-      });
-    }
   }
 
   test('a request refused while the message is being sent keeps it', () async {
@@ -205,7 +194,10 @@ void main() {
   test('scheduleMessage refuses a time that is not in the future', () async {
     final past = now.subtract(const Duration(minutes: 5));
 
-    await expectLater(schedule(Message(text: 'Good morning'), past), throwsArgumentError);
+    await expectLater(
+      schedule(Message(text: 'Good morning'), past),
+      throwsA(isA<ArgumentError>().having((it) => it.message, 'message', contains('sendMessage'))),
+    );
   });
 
   test('scheduleMessage refuses attachments that are not uploaded', () async {

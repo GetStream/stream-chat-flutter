@@ -64,6 +64,7 @@ void useScheduledMessageClient({bool loaded = true}) {
   setUpAll(() {
     registerFallbackValue(FakeMessage());
     registerFallbackValue(const PaginationParams());
+    registerFallbackValue(const ScheduledMessagesQuery());
     registerFallbackValue(<ScheduledMessageStatus>[]);
     registerFallbackValue(DateTime.utc(2026));
     registerFallbackValue(<String, Object?>{});
@@ -107,22 +108,14 @@ Future<void> hold(List<ScheduledMessage> messages) async {
 // Answers every query with [response].
 void stubQuery(QueryScheduledMessagesResponse response) {
   when(
-    () => api.scheduledMessages.queryScheduledMessages(
-      cid: any(named: 'cid'),
-      statuses: any(named: 'statuses'),
-      pagination: any(named: 'pagination'),
-    ),
+    () => api.scheduledMessages.queryScheduledMessages(any()),
   ).thenAnswer((_) async => response);
 }
 
 // Answers a query for the page after [next] with [answer]; null is the first.
 void stubPage(String? next, Future<QueryScheduledMessagesResponse> Function() answer) {
   when(
-    () => api.scheduledMessages.queryScheduledMessages(
-      cid: any(named: 'cid'),
-      statuses: any(named: 'statuses'),
-      pagination: PaginationParams(limit: 100, next: next),
-    ),
+    () => api.scheduledMessages.queryScheduledMessages(ScheduledMessagesQuery(limit: 100, next: next)),
   ).thenAnswer((_) => answer());
 }
 

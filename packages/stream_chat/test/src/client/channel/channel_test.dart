@@ -203,35 +203,35 @@ void main() {
       channel.dispose();
     });
 
-    test('`.query` skips the offline cache when scheduled messages are asked for', () async {
+    test('`.query` reads the offline cache even when scheduled messages are asked for', () async {
+      final cached =
+          _generateChannelState(
+            channelId,
+            channelType,
+          ).copyWith(
+            messages: [Message(id: 'cached', text: 'From the cache')],
+          );
       when(
-        () => client.queryChannel(
-          channelType,
-          channelId: channelId,
-          channelData: any(named: 'channelData'),
-          includeScheduledMessages: true,
-        ),
-      ).thenAnswer((_) async => _generateChannelState(channelId, channelType));
-      when(() => client.channelDeliveryReporter.submitForDelivery(any())).thenAnswer((_) async {});
-      await pumpEventQueue();
-      clearInteractions(client.chatPersistenceClient);
-
-      await channel.query(preferOffline: true, includeScheduledMessages: true);
-
-      verifyNever(
         () => client.chatPersistenceClient.getChannelStateByCid(
           channelCid,
           messagePagination: any(named: 'messagePagination'),
         ),
-      );
-      verify(
+      ).thenAnswer((_) async => cached);
+      when(() => client.channelDeliveryReporter.submitForDelivery(any())).thenAnswer((_) async {});
+      await pumpEventQueue();
+      clearInteractions(client.chatPersistenceClient);
+
+      final channelState = await channel.query(preferOffline: true, includeScheduledMessages: true);
+
+      expect(channelState, same(cached));
+      verifyNever(
         () => client.queryChannel(
           channelType,
           channelId: channelId,
           channelData: any(named: 'channelData'),
-          includeScheduledMessages: true,
+          includeScheduledMessages: any(named: 'includeScheduledMessages'),
         ),
-      ).called(1);
+      );
     });
   });
 
@@ -347,7 +347,7 @@ void main() {
         expect(channel.state!.messages, isEmpty);
       });
 
-      test('adds the message to the channel when it was sent right away', () async {
+      test('leaves a message sent right away to arrive through its message.new event', () async {
         final message = Message(id: 'sent-id', text: 'Good morning');
         when(
           () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
@@ -356,21 +356,12 @@ void main() {
         final res = await channel.scheduleMessage(message, scheduledAt: scheduledAt);
 
         expect(res.scheduledMessage, isNull);
-        expect(
-          channel.state!.messages.single,
-          isSameMessageAs(message.copyWith(state: MessageState.sent), matchMessageState: true),
-        );
-      });
+        expect(channel.state!.messages, isEmpty);
 
-      test('adds a thread reply to its thread when it was sent right away', () async {
-        final reply = Message(id: 'reply-id', text: 'Good morning', parentId: 'parent-id');
-        when(
-          () => client.scheduleMessage(reply, channelId, channelType, scheduledAt: scheduledAt),
-        ).thenAnswer((_) async => ScheduleMessageResponse()..message = reply);
+        client.addEvent(Event(type: EventType.messageNew, cid: channel.cid, message: message));
+        await Future.delayed(Duration.zero);
 
-        await channel.scheduleMessage(reply, scheduledAt: scheduledAt);
-
-        expect(channel.state!.threads['parent-id']?.single.id, 'reply-id');
+        expect(channel.state!.messages.single.id, 'sent-id');
       });
     });
 

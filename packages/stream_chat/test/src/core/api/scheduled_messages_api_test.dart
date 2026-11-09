@@ -81,7 +81,7 @@ void main() {
         (_) async => successResponse(path, data: {'scheduled_messages': <Object>[]}),
       );
 
-      await scheduledMessagesApi.queryScheduledMessages();
+      await scheduledMessagesApi.queryScheduledMessages(const ScheduledMessagesQuery());
 
       verify(() => client.post(path, data: payload)).called(1);
     });
@@ -106,9 +106,12 @@ void main() {
       );
 
       final res = await scheduledMessagesApi.queryScheduledMessages(
-        cid: 'messaging:general',
-        statuses: [ScheduledMessageStatus.scheduled, ScheduledMessageStatus.failed],
-        pagination: const PaginationParams(limit: 100, next: 'cursor'),
+        const ScheduledMessagesQuery(
+          cid: 'messaging:general',
+          statuses: [ScheduledMessageStatus.scheduled, ScheduledMessageStatus.failed],
+          limit: 100,
+          next: 'cursor',
+        ),
       );
 
       expect(res.scheduledMessages.single.id, 'scheduled-id');

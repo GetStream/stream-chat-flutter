@@ -4,7 +4,7 @@
 
 - Added quiet hours to push preferences, set and cleared through `PushPreferenceInput` and reported on `PushPreference.schedule`.
 - Added `includeActiveMemberCount` to the channel queries, which fills the new `Channel.activeMemberCount`: the number of members who are neither deactivated nor deleted.
-- Added scheduled messages: `Channel.scheduleMessage` sends a message later, and `ClientState.scheduledMessages` lists the current user's unsent ones.
+- Added scheduled messages: `Channel.scheduleMessage` sends a message later, and `ClientState.scheduledMessageListState` lists the current user's unsent ones and whether all of them are loaded. `StreamChatClient.queryScheduledMessages` pages through them with a `ScheduledMessagesQuery`.
 
 🔄 Changed
 

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../core/models/scheduled_message.dart';
@@ -11,8 +12,9 @@ typedef ChannelScheduledMessages = ({
   List<ScheduledMessage> scheduledMessages,
 });
 
-/// The current user's scheduled messages.
-class ScheduledMessageListState extends Equatable {
+/// The current user's scheduled messages, and whether all of them are loaded.
+@immutable
+final class ScheduledMessageListState extends Equatable {
   /// Creates a state listing [scheduledMessages].
   const ScheduledMessageListState({
     this.scheduledMessages = const [],
@@ -24,7 +26,11 @@ class ScheduledMessageListState extends Equatable {
   /// Failed ones last, each group earliest first.
   final List<ScheduledMessage> scheduledMessages;
 
-  /// Whether the complete list is loaded.
+  /// Whether [scheduledMessages] lists all of them.
+  ///
+  /// It becomes true once [StreamChatClient.loadScheduledMessages] completes,
+  /// and false when the connection is lost. If it was true then, they are all
+  /// loaded again when the connection recovers.
   final bool hasLoadedAll;
 
   /// Returns a copy with the given fields replaced.

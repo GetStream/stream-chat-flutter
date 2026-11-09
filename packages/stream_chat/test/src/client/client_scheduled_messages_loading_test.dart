@@ -46,7 +46,7 @@ void main() {
     await receive(EventType.scheduledMessageCreated, fakeScheduledMessage('new'));
     await receive(EventType.scheduledMessageCreated, fakeScheduledMessage('reply', parentId: 'parent'));
 
-    expect(client.state.hasLoadedAllScheduledMessages, isFalse);
+    expect(client.state.scheduledMessageListState.hasLoadedAll, isFalse);
     expect(idsOf(client.state.scheduledMessages), ['new', 'reply']);
     expect(idsOf(channel.state!.scheduledMessages), ['new']);
     expect(idsOf(channel.state!.scheduledThreadReplies('parent')), ['reply']);
@@ -58,7 +58,7 @@ void main() {
 
     await client.loadScheduledMessages();
 
-    expect(client.state.hasLoadedAllScheduledMessages, isTrue);
+    expect(client.state.scheduledMessageListState.hasLoadedAll, isTrue);
     expect(idsOf(client.state.scheduledMessages), ['a']);
   });
 
@@ -68,7 +68,7 @@ void main() {
 
     await client.queryScheduledMessages();
 
-    expect(client.state.hasLoadedAllScheduledMessages, isFalse);
+    expect(client.state.scheduledMessageListState.hasLoadedAll, isFalse);
     expect(idsOf(client.state.scheduledMessages), ['kept', 'a']);
   });
 
@@ -76,9 +76,9 @@ void main() {
     await receive(EventType.scheduledMessageCreated, fakeScheduledMessage('kept'));
     stubQuery(fakePage([fakeScheduledMessage('a', scheduledAt: DateTime.utc(2026, 11, 3))]));
 
-    await client.queryScheduledMessages(cid: testCid);
+    await client.queryScheduledMessages(query: const ScheduledMessagesQuery(cid: testCid));
 
-    expect(client.state.hasLoadedAllScheduledMessages, isFalse);
+    expect(client.state.scheduledMessageListState.hasLoadedAll, isFalse);
     expect(idsOf(client.state.scheduledMessages), ['kept', 'a']);
   });
 
@@ -90,13 +90,13 @@ void main() {
 
     await expectLater(client.loadScheduledMessages(), throwsA(offline));
 
-    expect(client.state.hasLoadedAllScheduledMessages, isFalse);
+    expect(client.state.scheduledMessageListState.hasLoadedAll, isFalse);
     expect(idsOf(client.state.scheduledMessages), ['kept', 'first']);
   });
 
-  test('hasLoadedAllScheduledMessagesStream emits on listen and again only when it changes', () async {
-    final emitted = <bool>[];
-    final subscription = client.state.hasLoadedAllScheduledMessagesStream.listen(emitted.add);
+  test('scheduledMessageListStateStream emits on listen and again each time the state changes', () async {
+    final emitted = <ScheduledMessageListState>[];
+    final subscription = client.state.scheduledMessageListStateStream.listen(emitted.add);
     addTearDown(subscription.cancel);
     stubQuery(fakePage([fakeScheduledMessage('a')]));
 
@@ -104,7 +104,8 @@ void main() {
     await receive(EventType.scheduledMessageCreated, fakeScheduledMessage('b'));
     await settle();
 
-    expect(emitted, [false, true]);
+    expect([for (final it in emitted) it.hasLoadedAll], [false, false, true, true]);
+    expect(idsOf(emitted.last.scheduledMessages), ['a', 'b']);
   });
 
   test("a channel query replaces that channel's ones without loading them all", () async {
@@ -124,7 +125,7 @@ void main() {
 
     await channel.query(includeScheduledMessages: true);
 
-    expect(client.state.hasLoadedAllScheduledMessages, isFalse);
+    expect(client.state.scheduledMessageListState.hasLoadedAll, isFalse);
     expect(idsOf(client.state.scheduledMessages), ['here', 'reply', 'there']);
     expect(idsOf(channel.state!.scheduledMessages), ['here']);
     expect(idsOf(channel.state!.scheduledThreadReplies('parent')), ['reply']);
@@ -139,32 +140,20 @@ void main() {
     await settle();
 
     verifyNever(
-      () => api.scheduledMessages.queryScheduledMessages(
-        cid: any(named: 'cid'),
-        statuses: any(named: 'statuses'),
-        pagination: any(named: 'pagination'),
-      ),
+      () => api.scheduledMessages.queryScheduledMessages(any()),
     );
   });
 
   test('connecting a user loads none of them until loadScheduledMessages is called', () async {
     verifyNever(
-      () => api.scheduledMessages.queryScheduledMessages(
-        cid: any(named: 'cid'),
-        statuses: any(named: 'statuses'),
-        pagination: any(named: 'pagination'),
-      ),
+      () => api.scheduledMessages.queryScheduledMessages(any()),
     );
 
     stubQuery(fakePage([fakeScheduledMessage('a')]));
     await client.loadScheduledMessages();
 
     verify(
-      () => api.scheduledMessages.queryScheduledMessages(
-        cid: any(named: 'cid'),
-        statuses: any(named: 'statuses'),
-        pagination: any(named: 'pagination'),
-      ),
+      () => api.scheduledMessages.queryScheduledMessages(any()),
     ).called(1);
   });
 
@@ -177,13 +166,9 @@ void main() {
     await client.connectUser(testUser, testToken);
     await settle();
 
-    expect(client.state.hasLoadedAllScheduledMessages, isFalse);
+    expect(client.state.scheduledMessageListState.hasLoadedAll, isFalse);
     verifyNever(
-      () => api.scheduledMessages.queryScheduledMessages(
-        cid: any(named: 'cid'),
-        statuses: any(named: 'statuses'),
-        pagination: any(named: 'pagination'),
-      ),
+      () => api.scheduledMessages.queryScheduledMessages(any()),
     );
   });
 
@@ -194,7 +179,7 @@ void main() {
     await client.queryChannel('messaging', channelId: 'general', includeScheduledMessages: true);
 
     expect(idsOf(client.state.scheduledMessages), ['kept']);
-    expect(client.state.hasLoadedAllScheduledMessages, isFalse);
+    expect(client.state.scheduledMessageListState.hasLoadedAll, isFalse);
   });
 
   test('a channel list query that does not say which are scheduled changes nothing', () async {
@@ -212,7 +197,7 @@ void main() {
     );
 
     expect(idsOf(client.state.scheduledMessages), ['kept', 'there']);
-    expect(client.state.hasLoadedAllScheduledMessages, isFalse);
+    expect(client.state.scheduledMessageListState.hasLoadedAll, isFalse);
   });
 
   test("a channel's state lists the client's scheduled messages in that channel as they change", () async {

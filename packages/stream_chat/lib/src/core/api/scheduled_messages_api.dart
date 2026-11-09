@@ -1,9 +1,8 @@
 import 'dart:convert';
 
+import '../../client/scheduled_messages/scheduled_messages_query.dart';
 import '../http/stream_http_client.dart';
 import '../models/message.dart';
-import '../models/scheduled_message.dart';
-import 'requests.dart';
 import 'responses.dart';
 
 /// The API for scheduled message requests.
@@ -41,21 +40,12 @@ class ScheduledMessagesApi {
     return ScheduleMessageResponse.fromJson(response.data);
   }
 
-  /// Queries a page of the current user's scheduled messages.
-  ///
-  /// The page lists the scheduled and sending ones first, then the failed ones,
-  /// each by [ScheduledMessage.scheduledAt].
-  ///
-  /// If [cid] is given, the page lists only the ones in that channel. If
-  /// [statuses] is given, it lists only the ones with one of those statuses.
-  ///
-  /// The [pagination] sets the page size, and its `next` cursor from a previous
-  /// page gets the page after it.
-  Future<QueryScheduledMessagesResponse> queryScheduledMessages({
-    String? cid,
-    List<ScheduledMessageStatus>? statuses,
-    PaginationParams? pagination,
-  }) async {
+  /// Queries the page of the current user's scheduled messages that [query]
+  /// describes.
+  Future<QueryScheduledMessagesResponse> queryScheduledMessages(
+    ScheduledMessagesQuery query,
+  ) async {
+    final ScheduledMessagesQuery(:cid, :statuses, :limit, :next) = query;
     final response = await _client.post(
       '/scheduled_messages/query',
       data: jsonEncode({
@@ -63,7 +53,8 @@ class ScheduledMessagesApi {
           if (cid != null) 'cid': cid,
           if (statuses != null) 'status': statuses,
         },
-        if (pagination != null) ...pagination.toJson(),
+        if (limit != null) 'limit': limit,
+        if (next != null) 'next': next,
       }),
     );
 
