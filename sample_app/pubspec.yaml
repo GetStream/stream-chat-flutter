@@ -1,7 +1,7 @@
 name: sample_app
 description: A new Flutter project.
 publish_to: "none"
-version: 10.6.0
+version: 10.7.0
 
 # Note: The environment configuration and dependency versions are managed by Melos.
 #
@@ -44,9 +44,9 @@ dependencies:
   marionette_flutter: ^0.6.0
   path_provider_android: ">=2.2.5 <2.3.0"
   rxdart: ^0.28.0
-  stream_chat_flutter: ^10.6.0
-  stream_chat_localizations: ^10.6.0
-  stream_chat_persistence: ^10.6.0
+  stream_chat_flutter: ^10.7.0
+  stream_chat_localizations: ^10.7.0
+  stream_chat_persistence: ^10.7.0
   streaming_shared_preferences: ^2.0.0
   video_player: ^2.11.1
   yaml: ^3.1.2
@@ -59,12 +59,3 @@ flutter:
   assets:
     - assets/
     - pubspec.lock
-
-dependency_overrides:
-  # stream_core_flutter at its git ref needs a stream_core newer than the
-  # published one, so stream_core comes from the same ref.
-  stream_core:
-    git:
-      url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 74a65f0d9730f91236f467c7cb18580cbfdc582a
-      path: packages/stream_core
