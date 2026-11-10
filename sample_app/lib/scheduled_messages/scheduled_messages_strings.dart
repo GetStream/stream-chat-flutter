@@ -20,6 +20,7 @@ abstract final class ScheduledMessagesStrings {
   static const viewAll = 'View all';
   static const scheduleFailed = "Couldn't schedule the message";
   static const commandsNotSchedulable = "Commands can't be scheduled";
+  static const attachmentsNotSchedulable = "Messages with attachments can't be scheduled yet";
   static const fallbackRecipient = 'channel';
   static const tomorrowMorning = 'Tomorrow at 09:00';
   static const tomorrowAfternoon = 'Tomorrow at 13:00';
@@ -42,6 +43,11 @@ abstract final class ScheduledMessagesStrings {
   static String deleteDescription(String name) => "This message to $name won't be sent. This can't be undone.";
 
   static String messageTo(String name) => 'Message to $name';
+
+  static String scheduledCount(int count) {
+    if (count == 1) return '1 scheduled message';
+    return '$count scheduled messages';
+  }
 
   static String pickWithinDays(int days) => 'Pick a time within the next $days days';
 

@@ -1,8 +1,8 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 
-import '../../../stream_chat_flutter.dart';
-import '../../utils/network_error_text.dart';
+import '../../stream_chat_flutter.dart';
+import '../utils/network_error_text.dart';
 import 'stream_scheduled_message_list_skeleton_loading.dart';
 
 /// Default separator builder for [StreamScheduledMessageListView].
@@ -41,8 +41,9 @@ typedef StreamScheduledMessageListViewIndexedWidgetBuilder =
 /// ```
 ///
 /// See also:
-/// * [StreamScheduledMessageListItem], which renders each scheduled message.
-/// * [showStreamScheduledMessageActions], which shows the actions on one.
+///
+///  * [StreamScheduledMessageListItem], which renders each scheduled message.
+///  * [showStreamScheduledMessageActions], which shows the actions on one.
 /// {@endtemplate}
 class StreamScheduledMessageListView extends StatefulWidget {
   /// {@macro streamScheduledMessageListView}
@@ -81,9 +82,8 @@ class StreamScheduledMessageListView extends StatefulWidget {
 
   /// The ID of the message whose thread's scheduled replies are listed.
   ///
-  /// When set, only the replies in that thread are listed, whatever the
-  /// [cid]. When null and [cid] is set, the replies in the channel's threads
-  /// are left out.
+  /// When set, only the replies in that thread are listed. When null and
+  /// [cid] is set, the replies in the channel's threads are left out.
   final String? parentId;
 
   /// A builder that is called to build items in the [ListView].
@@ -107,11 +107,7 @@ class StreamScheduledMessageListView extends StatefulWidget {
   /// Called when the user long-presses on a scheduled message.
   final void Function(ScheduledMessage)? onScheduledMessageLongPress;
 
-  /// {@template flutter.widgets.scroll_view.scrollDirection}
-  /// The axis along which the scroll view scrolls.
-  ///
-  /// Defaults to [Axis.vertical].
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.scroll_view.scrollDirection}
   final Axis scrollDirection;
 
   /// The amount of space by which to inset the children.
@@ -133,12 +129,6 @@ class StreamScheduledMessageListView extends StatefulWidget {
 
   /// Whether to wrap each child in a [RepaintBoundary].
   ///
-  /// Typically, children in a scrolling container are wrapped in repaint
-  /// boundaries so that they do not need to be repainted as the list scrolls.
-  /// If the children are easy to repaint (e.g., solid color blocks or a short
-  /// snippet of text), it might be more efficient to not add a repaint boundary
-  /// and simply repaint the children during scrolling.
-  ///
   /// Defaults to true.
   final bool addRepaintBoundaries;
 
@@ -157,111 +147,19 @@ class StreamScheduledMessageListView extends StatefulWidget {
   ///    provide semantic indexes.
   final bool addSemanticIndexes;
 
-  /// {@template flutter.widgets.scroll_view.reverse}
-  /// Whether the scroll view scrolls in the reading direction.
-  ///
-  /// For example, if [scrollDirection] is [Axis.vertical], then the scroll view
-  /// scrolls from top to bottom when [reverse] is false and from bottom to top
-  /// when [reverse] is true.
-  ///
-  /// Defaults to false.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.scroll_view.reverse}
   final bool reverse;
 
-  /// {@template flutter.widgets.scroll_view.controller}
-  /// An object that can be used to control the position to which this scroll
-  /// view is scrolled.
-  ///
-  /// Must be null if [primary] is true.
-  ///
-  /// A [ScrollController] serves several purposes. It can be used to control
-  /// the initial scroll position (see [ScrollController.initialScrollOffset]).
-  /// It can be used to control whether the scroll view should automatically
-  /// save and restore its scroll position in the [PageStorage] (see
-  /// [ScrollController.keepScrollOffset]). It can be used to read the current
-  /// scroll position (see [ScrollController.offset]), or change it (see
-  /// [ScrollController.animateTo]).
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.scroll_view.controller}
   final ScrollController? scrollController;
 
-  /// {@template flutter.widgets.scroll_view.primary}
-  /// Whether this is the primary scroll view associated with the parent
-  /// [PrimaryScrollController].
-  ///
-  /// When this is true, the scroll view is scrollable even if it does not have
-  /// sufficient content to actually scroll. Otherwise, by default the user can
-  /// only scroll the view if it has sufficient content. See [physics].
-  ///
-  /// Also when true, the scroll view is used for default [ScrollAction]s. If a
-  /// ScrollAction is not handled by an otherwise focused part of the
-  /// application, the ScrollAction will be evaluated using this scroll view,
-  /// for example, when executing [Shortcuts] key events like page up and down.
-  ///
-  /// On iOS, this also identifies the scroll view that will scroll to top in
-  /// response to a tap in the status bar.
-  /// {@endtemplate}
-  ///
-  /// Defaults to true when [scrollController] is null.
+  /// {@macro flutter.widgets.scroll_view.primary}
   final bool? primary;
 
-  /// {@template flutter.widgets.scroll_view.shrinkWrap}
-  /// Whether the extent of the scroll view in the [scrollDirection] should be
-  /// determined by the contents being viewed.
-  ///
-  /// If the scroll view does not shrink wrap, then the scroll view will expand
-  /// to the maximum allowed size in the [scrollDirection]. If the scroll view
-  /// has unbounded constraints in the [scrollDirection], then [shrinkWrap] must
-  /// be true.
-  ///
-  /// Shrink wrapping the content of the scroll view is significantly more
-  /// expensive than expanding to the maximum allowed size because the content
-  /// can expand and contract during scrolling, which means the size of the
-  /// scroll view needs to be recomputed whenever the scroll position changes.
-  ///
-  /// Defaults to false.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.scroll_view.shrinkWrap}
   final bool shrinkWrap;
 
-  /// {@template flutter.widgets.scroll_view.physics}
-  /// How the scroll view should respond to user input.
-  ///
-  /// For example, determines how the scroll view continues to animate after the
-  /// user stops dragging the scroll view.
-  ///
-  /// Defaults to matching platform conventions. Furthermore, if [primary] is
-  /// false, then the user cannot scroll if there is insufficient content to
-  /// scroll, while if [primary] is true, they can always attempt to scroll.
-  ///
-  /// To force the scroll view to always be scrollable even if there is
-  /// insufficient content, as if [primary] was true but without necessarily
-  /// setting it to true, provide an [AlwaysScrollableScrollPhysics] physics
-  /// object, as in:
-  ///
-  /// ```dart
-  ///   physics: const AlwaysScrollableScrollPhysics(),
-  /// ```
-  ///
-  /// To force the scroll view to use the default platform conventions and not
-  /// be scrollable if there is insufficient content, regardless of the value of
-  /// [primary], provide an explicit [ScrollPhysics] object, as in:
-  ///
-  /// ```dart
-  ///   physics: const ScrollPhysics(),
-  /// ```
-  ///
-  /// The physics can be changed dynamically (by providing a new object in a
-  /// subsequent build), but new physics will only take effect if the _class_ of
-  /// the provided object changes. Merely constructing a new instance with a
-  /// different configuration is insufficient to cause the physics to be
-  /// reapplied. (This is because the final object used is generated
-  /// dynamically, which can be relatively expensive, and it would be
-  /// inefficient to speculatively create this object each frame to see if the
-  /// physics should be updated.)
-  /// {@endtemplate}
-  ///
-  /// If an explicit [ScrollBehavior] is provided to [scrollBehavior], the
-  /// [ScrollPhysics] provided by that behavior will take precedence after
-  /// [physics].
+  /// {@macro flutter.widgets.scroll_view.physics}
   final ScrollPhysics? physics;
 
   /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
@@ -270,10 +168,7 @@ class StreamScheduledMessageListView extends StatefulWidget {
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
 
-  /// {@template flutter.widgets.scroll_view.keyboardDismissBehavior}
-  /// [ScrollViewKeyboardDismissBehavior] the defines how this [ScrollView] will
-  /// dismiss the keyboard automatically.
-  /// {@endtemplate}
+  /// {@macro flutter.widgets.scroll_view.keyboardDismissBehavior}
   final ScrollViewKeyboardDismissBehavior keyboardDismissBehavior;
 
   /// {@macro flutter.widgets.scrollable.restorationId}
@@ -352,7 +247,8 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
       stream: client.state.scheduledMessageListStateStream,
       initialData: client.state.scheduledMessageListState,
       builder: (context, state) {
-        final scheduledMessages = state.scheduledMessages.where(_isListed).toList();
+        final listed = state.scheduledMessages.where(_isListed);
+        final scheduledMessages = listed.toList();
         if (scheduledMessages.isEmpty) return _buildPlaceholder(context);
 
         return ListView.separated(
@@ -373,18 +269,28 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
           cacheExtent: widget.cacheExtent,
           clipBehavior: widget.clipBehavior,
           itemCount: scheduledMessages.length,
-          separatorBuilder: (context, index) => widget.separatorBuilder(context, scheduledMessages, index),
+          separatorBuilder: (context, index) {
+            return widget.separatorBuilder(context, scheduledMessages, index);
+          },
           itemBuilder: (context, index) {
             final scheduledMessage = scheduledMessages[index];
             final onTap = widget.onScheduledMessageTap;
             final onLongPress = widget.onScheduledMessageLongPress;
             final item = StreamScheduledMessageListItem(
               scheduledMessage: scheduledMessage,
-              onTap: onTap == null ? null : () => onTap(scheduledMessage),
-              onLongPress: onLongPress == null ? null : () => onLongPress(scheduledMessage),
+              onTap: switch (onTap) {
+                final onTap? => () => onTap(scheduledMessage),
+                null => null,
+              },
+              onLongPress: switch (onLongPress) {
+                final onLongPress? => () => onLongPress(scheduledMessage),
+                null => null,
+              },
             );
 
-            return widget.itemBuilder?.call(context, scheduledMessages, index, item) ?? item;
+            final itemBuilder = widget.itemBuilder;
+            if (itemBuilder == null) return item;
+            return itemBuilder(context, scheduledMessages, index, item);
           },
         );
       },
@@ -394,14 +300,19 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
   // The loading, error or empty state shown while there is no row to list.
   Widget _buildPlaceholder(BuildContext context) {
     if (_isLoading) {
-      if (widget.loadingBuilder?.call(context) case final loading?) return loading;
+      final loading = widget.loadingBuilder?.call(context);
+      if (loading != null) return loading;
+
       return Center(
-        child: StreamScheduledMessageListSkeletonLoading(padding: widget.padding),
+        child: StreamScheduledMessageListSkeletonLoading(
+          padding: widget.padding,
+        ),
       );
     }
 
     if (_error case final error?) {
-      if (widget.errorBuilder?.call(context, error) case final custom?) return custom;
+      final custom = widget.errorBuilder?.call(context, error);
+      if (custom != null) return custom;
 
       final translations = context.translations;
       final text = resolveNetworkErrorText(
@@ -428,10 +339,9 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
   }
 }
 
-/// A widget that is used to display a separator between
-/// [StreamScheduledMessageListItem] items.
+/// The divider between [StreamScheduledMessageListItem]s.
 class StreamScheduledMessageListSeparator extends StatelessWidget {
-  /// Creates a new instance of [StreamScheduledMessageListSeparator].
+  /// Creates a scheduled message list separator.
   const StreamScheduledMessageListSeparator({super.key});
 
   @override

@@ -930,8 +930,8 @@ Attenzione: il limite massimo di $limit file è stato superato.
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => 'Invio non riuscito. Riprova',
-      .internalError => 'Si è verificato un errore. Riprova',
+      .requestFailed => 'Invio non riuscito. Riprova.',
+      .internalError => 'Si è verificato un errore. Riprova.',
       .channelDeleted => 'Questo canale è stato eliminato',
       .userDeleted => 'Il tuo account è stato eliminato',
       .channelFrozen => 'Questo canale è congelato',
@@ -944,7 +944,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
       .invalidMessage when isQuoteDeleted =>
         'Il messaggio citato è stato eliminato. Modificalo per rimuovere la citazione.',
       .invalidMessage => "Il messaggio non rispetta più i limiti dell'app. Modificalo.",
-      _ => 'Si è verificato un errore. Riprova',
+      _ => 'Si è verificato un errore. Riprova.',
     };
   }
 
@@ -1080,7 +1080,7 @@ class _AccessibilityTranslationsIt extends AccessibilityTranslations {
 
   @override
   String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
-    final date = formatDateTime(scheduledAt);
+    final date = formatDateTime(scheduledAt.toLocal());
     return 'Programmato per il $date';
   }
 

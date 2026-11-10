@@ -901,8 +901,8 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => 'Kunne ikke sende. Prøv igjen',
-      .internalError => 'Noe gikk galt. Prøv igjen',
+      .requestFailed => 'Kunne ikke sende. Prøv igjen.',
+      .internalError => 'Noe gikk galt. Prøv igjen.',
       .channelDeleted => 'Denne kanalen ble slettet',
       .userDeleted => 'Kontoen din ble slettet',
       .channelFrozen => 'Denne kanalen er frosset',
@@ -915,7 +915,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
       .invalidMessage when isQuoteDeleted =>
         'Den siterte meldingen ble slettet. Rediger meldingen for å fjerne sitatet.',
       .invalidMessage => 'Meldingen oppfyller ikke lenger appens grenser. Rediger den.',
-      _ => 'Noe gikk galt. Prøv igjen',
+      _ => 'Noe gikk galt. Prøv igjen.',
     };
   }
 
@@ -1051,7 +1051,7 @@ class _AccessibilityTranslationsNo extends AccessibilityTranslations {
 
   @override
   String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
-    final date = formatDateTime(scheduledAt);
+    final date = formatDateTime(scheduledAt.toLocal());
     return 'Planlagt til $date';
   }
 

@@ -18,13 +18,15 @@ import 'scheduled_messages_screen.dart';
 Widget scheduleAwareMessageComposer(BuildContext context, MessageComposerProps props) {
   final channel = StreamChannel.maybeOf(context)?.channel;
 
-  final schedulingEnabled =
-      channel != null &&
-      channel.state != null &&
-      context.sampleAppConfig.enableScheduledMessages &&
-      channel.canScheduleMessage;
-
-  if (!schedulingEnabled) return locationAwareMessageComposer(context, props);
+  if (channel == null || channel.state == null) {
+    return locationAwareMessageComposer(context, props);
+  }
+  if (!context.sampleAppConfig.enableScheduledMessages) {
+    return locationAwareMessageComposer(context, props);
+  }
+  if (!channel.canScheduleMessage) {
+    return locationAwareMessageComposer(context, props);
+  }
 
   final surfaceStyle = StreamMessageComposer.resolveSurfaceStyle(context, surfaceStyle: props.surfaceStyle);
   final parentId = props.messageComposerController?.message.parentId;
@@ -59,7 +61,7 @@ Future<void> _scheduleMessage(
 
   if (message.attachments.isNotEmpty) {
     messenger.show(
-      StreamSnackbar(message: const Text("Messages with attachments can't be scheduled yet"), variant: .error),
+      StreamSnackbar(message: const Text(ScheduledMessagesStrings.attachmentsNotSchedulable), variant: .error),
     );
     return;
   }
@@ -112,8 +114,7 @@ Future<void> _scheduleMessage(
       ),
     );
   } catch (error) {
-    // One that could not reach the server stays in the scheduled messages, to
-    // retry from there.
+    // A retriable failure stays in the scheduled messages, to retry from there.
     if (error is StreamChatNetworkError && error.isRetriable) {
       if (!context.mounted) return;
       messenger.show(
@@ -229,7 +230,7 @@ class _ScheduledMessagesPillState extends State<_ScheduledMessagesPill> {
                     Icon(icons.clock, size: 20, color: colorScheme.accentPrimary),
                     Expanded(
                       child: Text(
-                        count == 1 ? '1 scheduled message' : '$count scheduled messages',
+                        ScheduledMessagesStrings.scheduledCount(count),
                         style: textTheme.captionEmphasis,
                       ),
                     ),

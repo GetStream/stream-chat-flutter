@@ -414,7 +414,7 @@ void main() {
       expect(localizations.notifyChannelText, isNotNull);
       expect(localizations.notifyHereText, isNotNull);
       expect(localizations.notifyRoleText('admin'), isNotNull);
-      // Scheduled messages
+      // Scheduled messages.
       final scheduledAt = DateTime.utc(2026, 10, 21, 8);
       final localScheduledAt = scheduledAt.toLocal();
       final sendAt = localizations.scheduledMessageSendAtText(scheduledAt: scheduledAt);
@@ -423,7 +423,7 @@ void main() {
       expect(localizations.scheduledMessageSendingLabel, isNotNull);
       expect(localizations.scheduledMessageUploadingLabel, isNotNull);
       expect(localizations.scheduledThreadReplyPrefixText, isNotNull);
-      // known and unknown quoted author
+      // A known and an unknown quoted author.
       expect(localizations.scheduledQuoteReplyPrefixText(name: 'Maya'), contains('Maya'));
       expect(localizations.scheduledQuoteReplyPrefixText(), isNotNull);
       for (final reason in [
@@ -459,7 +459,7 @@ void main() {
       // Accessibility translations
       final a11y = localizations.accessibility;
       expect(a11y, isNotNull);
-      // Scheduled messages
+      // Scheduled messages.
       expect(
         a11y.scheduledMessageSendAtLabel(scheduledAt: localScheduledAt),
         contains(a11y.formatDateTime(localScheduledAt)),

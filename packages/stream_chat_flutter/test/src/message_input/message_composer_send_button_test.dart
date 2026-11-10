@@ -123,14 +123,12 @@ void main() {
     expect(_sendButton(tester).props.onLongPress, isNull);
   });
 
-  testWidgets('hands the controller to onSendLongPress without sending', (tester) async {
-    final originalRecordPlatform = RecordPlatform.instance;
-    RecordPlatform.instance = FakeRecordPlatform();
-    addTearDown(() => RecordPlatform.instance = originalRecordPlatform);
+  testWidgets('hands the controller to onSendLongPress', (tester) async {
+    _useFakeRecordPlatform();
     final controller = _controller();
     StreamMessageComposerController? longPressed;
 
-    final channel = await _pumpComposer(
+    await _pumpComposer(
       tester,
       composer: StreamMessageComposer(
         messageComposerController: controller,
@@ -144,9 +142,35 @@ void main() {
     await tester.pump();
 
     expect(longPressed, same(controller));
+  });
+
+  testWidgets("doesn't send the message on a long press", (tester) async {
+    _useFakeRecordPlatform();
+    final controller = _controller();
+
+    final channel = await _pumpComposer(
+      tester,
+      composer: StreamMessageComposer(
+        messageComposerController: controller,
+        enableVoiceRecording: false,
+        onSendLongPress: (context, details) {},
+      ),
+    );
+    await tester.enterText(find.byType(EditableText), 'Hello');
+    await tester.pump();
+    await tester.longPress(find.byKey(const ValueKey('send_key')));
+    await tester.pump();
+
     expect(controller.text, 'Hello');
     verifyNever(() => channel.sendMessage(any()));
   });
+}
+
+// Replaces the recording platform with a fake for the rest of the test.
+void _useFakeRecordPlatform() {
+  final originalRecordPlatform = RecordPlatform.instance;
+  RecordPlatform.instance = FakeRecordPlatform();
+  addTearDown(() => RecordPlatform.instance = originalRecordPlatform);
 }
 
 StreamMessageComposerController _controller({

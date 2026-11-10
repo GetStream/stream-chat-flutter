@@ -59,21 +59,6 @@ class ScheduledMessagesPage extends StatelessWidget {
         cid: cid,
         parentId: parentId,
         physics: const AlwaysScrollableScrollPhysics(),
-        itemBuilder: (context, scheduledMessages, index, defaultWidget) {
-          final scheduledMessage = scheduledMessages[index];
-
-          // A message being scheduled or sent has nothing to act on yet.
-          final isInFlight = switch (scheduledMessage.status) {
-            .preparingToSchedule || .sending => true,
-            _ => false,
-          };
-          if (!isInFlight) return defaultWidget;
-
-          return StreamScheduledMessageListItem(
-            scheduledMessage: scheduledMessage,
-            selected: defaultWidget.props.selected,
-          );
-        },
         onScheduledMessageTap: (scheduledMessage) {
           _openScheduledMessageActions(context, scheduledMessage);
         },
@@ -82,8 +67,6 @@ class ScheduledMessagesPage extends StatelessWidget {
   }
 }
 
-// Opens the actions sheet on [scheduledMessage] and dispatches on the user's
-// selection.
 Future<void> _openScheduledMessageActions(
   BuildContext context,
   ScheduledMessage scheduledMessage,
@@ -97,8 +80,6 @@ Future<void> _openScheduledMessageActions(
   return _onScheduledMessageAction(context, action).ignore();
 }
 
-// Switches on a [ScheduledMessageAction] and dispatches to the per-action
-// handler.
 Future<void> _onScheduledMessageAction(
   BuildContext context,
   ScheduledMessageAction action,
@@ -339,7 +320,11 @@ class _EditSheet extends StatefulWidget {
 }
 
 class _EditSheetState extends State<_EditSheet> {
-  late final _controller = TextEditingController(text: widget.text)..addListener(() => setState(() {}));
+  late final _controller = TextEditingController(text: widget.text)
+    ..addListener(() {
+      // The text changed, which enables or disables the save button.
+      setState(() {});
+    });
 
   @override
   void dispose() {

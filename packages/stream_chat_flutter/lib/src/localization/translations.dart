@@ -850,8 +850,10 @@ abstract class Translations {
   /// [name] is the quoted message's author, or null when it is not known.
   String scheduledQuoteReplyPrefixText({String? name});
 
-  /// Why a scheduled message could not be sent, such as "This channel is
-  /// frozen".
+  /// Why a scheduled message that failed with [reason] could not be sent, such
+  /// as "This channel is frozen".
+  ///
+  /// A null or unrecognized [reason] gives a generic text.
   ///
   /// [isQuoteDeleted] tells whether the message quotes one that was deleted,
   /// which explains a [ScheduledMessageFailureReason.invalidMessage].
@@ -1797,8 +1799,8 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => "Couldn't send. Try again",
-      .internalError => 'Something went wrong. Try again',
+      .requestFailed => "Couldn't send. Try again.",
+      .internalError => 'Something went wrong. Try again.',
       .channelDeleted => 'This channel was deleted',
       .userDeleted => 'Your account was deleted',
       .channelFrozen => 'This channel is frozen',
@@ -1810,7 +1812,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
       .pendingNotSupported => 'This channel now needs approval. Schedule it again.',
       .invalidMessage when isQuoteDeleted => 'The quoted message was deleted. Edit it to remove the quote.',
       .invalidMessage => "The message no longer meets the app's limits. Edit it.",
-      _ => 'Something went wrong. Try again',
+      _ => 'Something went wrong. Try again.',
     };
   }
 
@@ -1821,13 +1823,13 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get loadingScheduledMessagesError => "Couldn't load scheduled messages";
 
   @override
-  String get editAndRescheduleLabel => 'Edit & reschedule';
+  String get editAndRescheduleLabel => 'Edit & Reschedule';
 
   @override
   String get rescheduleLabel => 'Reschedule';
 
   @override
-  String get sendNowLabel => 'Send now';
+  String get sendNowLabel => 'Send Now';
 }
 
 // Display name for each language code Stream Chat's translation API

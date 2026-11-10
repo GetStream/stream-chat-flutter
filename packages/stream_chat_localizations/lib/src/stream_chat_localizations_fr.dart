@@ -905,7 +905,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get scheduledMessageSendingLabel => 'Envoi en cours…';
 
   @override
-  String get scheduledMessageUploadingLabel => 'Transfert en cours…';
+  String get scheduledMessageUploadingLabel => 'Téléversement en cours…';
 
   @override
   String get scheduledThreadReplyPrefixText => 'Réponse dans le fil : ';
@@ -922,8 +922,8 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => "Échec de l'envoi. Réessayez",
-      .internalError => 'Une erreur est survenue. Réessayez',
+      .requestFailed => "Échec de l'envoi. Réessayez.",
+      .internalError => 'Une erreur est survenue. Réessayez.',
       .channelDeleted => 'Ce canal a été supprimé',
       .userDeleted => 'Votre compte a été supprimé',
       .channelFrozen => 'Ce canal est gelé',
@@ -935,7 +935,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
       .pendingNotSupported => 'Ce canal nécessite désormais une approbation. Programmez-le à nouveau.',
       .invalidMessage when isQuoteDeleted => 'Le message cité a été supprimé. Modifiez-le pour retirer la citation.',
       .invalidMessage => "Le message ne respecte plus les limites de l'application. Modifiez-le.",
-      _ => 'Une erreur est survenue. Réessayez',
+      _ => 'Une erreur est survenue. Réessayez.',
     };
   }
 
@@ -1071,7 +1071,7 @@ class _AccessibilityTranslationsFr extends AccessibilityTranslations {
 
   @override
   String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
-    final date = formatDateTime(scheduledAt);
+    final date = formatDateTime(scheduledAt.toLocal());
     return 'Programmé pour le $date';
   }
 

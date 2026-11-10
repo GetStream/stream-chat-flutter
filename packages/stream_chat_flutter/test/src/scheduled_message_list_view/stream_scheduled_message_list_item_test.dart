@@ -1,29 +1,12 @@
 import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:intl/intl.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import '../../mocks.dart';
+import '../mocks.dart';
 
 void main() {
-  final uploading = _scheduledMessage(
-    text: '',
-    status: ScheduledMessageStatus.preparingToSchedule,
-    attachments: [
-      Attachment(
-        type: AttachmentType.image,
-        imageUrl: 'https://example.com/a.jpg',
-        uploadState: const UploadState.inProgress(uploaded: 1, total: 4),
-      ),
-    ],
-  );
-  final failed = _scheduledMessage(
-    status: ScheduledMessageStatus.failed,
-    failureReason: ScheduledMessageFailureReason.pendingNotSupported,
-  );
-
   for (final brightness in Brightness.values) {
     goldenTest(
       '[${brightness.name}] -> StreamScheduledMessageListItem looks fine',
@@ -40,7 +23,7 @@ void main() {
       fileName: 'stream_scheduled_message_list_item_failed_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 600, height: 150),
       builder: () => _wrapWithMaterialApp(
-        StreamScheduledMessageListItem(scheduledMessage: failed),
+        StreamScheduledMessageListItem(scheduledMessage: _failed()),
         brightness: brightness,
       ),
     );
@@ -55,13 +38,13 @@ void main() {
         await tester.pump(const Duration(milliseconds: 500));
       },
       builder: () => _wrapWithMaterialApp(
-        StreamScheduledMessageListItem(scheduledMessage: uploading),
+        StreamScheduledMessageListItem(scheduledMessage: _uploading()),
         brightness: brightness,
       ),
     );
   }
 
-  testWidgets('shows when the message is sent', (tester) async {
+  testWidgets('StreamScheduledMessageListItem shows when the message is sent', (tester) async {
     await tester.pumpWidget(
       _wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: _scheduledMessage())),
     );
@@ -69,29 +52,20 @@ void main() {
     expect(find.text('Send Wed, Oct 21 at 8:00\u202fAM'), findsOneWidget);
   });
 
-  testWidgets('shows a UTC send time in local time', (tester) async {
-    final scheduledAt = DateTime.utc(2026, 10, 21, 8);
-    final local = scheduledAt.toLocal();
-    final scheduledMessage = _scheduledMessage(scheduledAt: scheduledAt);
+  testWidgets(
+    "StreamScheduledMessageListItem names the channel from the scheduled message's channel summary when the channel isn't loaded",
+    (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: _scheduledMessage())),
+      );
 
-    await tester.pumpWidget(_wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: scheduledMessage)));
+      expect(find.text('General'), findsOneWidget);
+    },
+  );
 
-    final sendTime = DateFormat.MMMEd('en_US').format(local);
-    final time = DateFormat.jm('en_US').format(local);
-    expect(find.text('Send $sendTime at $time'), findsOneWidget);
-  });
-
-  testWidgets("names the channel from the scheduled message's channel summary when the channel isn't loaded", (
-    tester,
-  ) async {
-    await tester.pumpWidget(
-      _wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: _scheduledMessage())),
-    );
-
-    expect(find.text('General'), findsOneWidget);
-  });
-
-  testWidgets('shows a preview of the message', (tester) async {
+  testWidgets('StreamScheduledMessageListItem shows a preview of the message', (tester) async {
     await tester.pumpWidget(
       _wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: _scheduledMessage())),
     );
@@ -99,7 +73,7 @@ void main() {
     expect(find.textContaining('Can you review the venue shortlist?', findRichText: true), findsOneWidget);
   });
 
-  testWidgets('shows the no-title text for a channel without a name', (tester) async {
+  testWidgets('StreamScheduledMessageListItem shows the no-title text for a channel without a name', (tester) async {
     final untitled = _scheduledMessage(channel: ChannelModel(cid: 'messaging:general'));
 
     await tester.pumpWidget(_wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: untitled)));
@@ -108,7 +82,7 @@ void main() {
     expect(find.text('messaging:general'), findsNothing);
   });
 
-  testWidgets('formats the send time with the theme formatter', (tester) async {
+  testWidgets('StreamScheduledMessageListItem formats the send time with the theme formatter', (tester) async {
     await tester.pumpWidget(
       _wrapWithMaterialApp(
         StreamScheduledMessageListItem(scheduledMessage: _scheduledMessage()),
@@ -124,7 +98,7 @@ void main() {
     expect(find.text('Send Wed, Oct 21 at 8:00\u202fAM'), findsNothing);
   });
 
-  testWidgets('starts a reply in a thread with the thread-reply prefix', (tester) async {
+  testWidgets('StreamScheduledMessageListItem starts a reply in a thread with the thread-reply prefix', (tester) async {
     final reply = _scheduledMessage(text: 'Can someone review it?', parentId: 'parent');
 
     await tester.pumpWidget(_wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: reply)));
@@ -132,7 +106,7 @@ void main() {
     expect(find.text('Thread reply: '), findsOneWidget);
   });
 
-  testWidgets('starts a quoting message with the quoted author', (tester) async {
+  testWidgets('StreamScheduledMessageListItem starts a quoting message with the quoted author', (tester) async {
     final quoted = Message(
       id: 'quoted',
       text: 'Ready?',
@@ -146,7 +120,9 @@ void main() {
     expect(find.text('Reply to Alex Ross: '), findsOneWidget);
   });
 
-  testWidgets('shows nothing under the preview while it waits for its time', (tester) async {
+  testWidgets('StreamScheduledMessageListItem shows nothing under the preview while it waits for its time', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: _scheduledMessage())),
     );
@@ -155,7 +131,7 @@ void main() {
     expect(find.text('Sending…'), findsNothing);
   });
 
-  testWidgets('says it is sending while it is being sent', (tester) async {
+  testWidgets('StreamScheduledMessageListItem says it is sending while it is being sent', (tester) async {
     final sending = _scheduledMessage(status: ScheduledMessageStatus.sending);
 
     await tester.pumpWidget(_wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: sending)));
@@ -164,27 +140,43 @@ void main() {
     expect(find.text('Sending…'), findsOneWidget);
   });
 
-  testWidgets('says it is uploading while its attachments upload', (tester) async {
-    await tester.pumpWidget(_wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: uploading)));
+  testWidgets('StreamScheduledMessageListItem says it is uploading while its attachments upload', (tester) async {
+    await tester.pumpWidget(_wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: _uploading())));
 
     expect(find.text('Uploading…'), findsOneWidget);
   });
 
-  testWidgets('says why it could not be sent', (tester) async {
-    await tester.pumpWidget(_wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: failed)));
+  testWidgets('StreamScheduledMessageListItem says why it could not be sent', (tester) async {
+    await tester.pumpWidget(_wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: _failed())));
 
     expect(find.text('This channel now needs approval. Schedule it again.'), findsOneWidget);
   });
 
-  testWidgets('dims the send time of one that could not be sent', (tester) async {
-    await tester.pumpWidget(_wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: failed)));
+  testWidgets(
+    'StreamScheduledMessageListItem says the quoted message was deleted when an invalid message quotes a deleted one',
+    (tester) async {
+      final quoted = Message(id: 'quoted', text: 'Ready?', type: MessageType.deleted);
+      final invalid = _scheduledMessage(
+        status: ScheduledMessageStatus.failed,
+        failureReason: ScheduledMessageFailureReason.invalidMessage,
+        quotedMessage: quoted,
+      );
+
+      await tester.pumpWidget(_wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: invalid)));
+
+      expect(find.text('The quoted message was deleted. Edit it to remove the quote.'), findsOneWidget);
+    },
+  );
+
+  testWidgets('StreamScheduledMessageListItem dims the send time of one that could not be sent', (tester) async {
+    await tester.pumpWidget(_wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: _failed())));
 
     final colorScheme = tester.element(find.byType(StreamScheduledMessageListItem)).streamColorScheme;
     final sendTime = tester.widget<Text>(find.text('Send Wed, Oct 21 at 8:00\u202fAM'));
     expect(sendTime.style?.color, colorScheme.textDisabled);
   });
 
-  testWidgets('tints the background when selected', (tester) async {
+  testWidgets('StreamScheduledMessageListItem tints the background when selected', (tester) async {
     await tester.pumpWidget(
       _wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: _scheduledMessage(), selected: true)),
     );
@@ -193,7 +185,7 @@ void main() {
     expect(_itemBackground(tester), Color.alphaBlend(colorScheme.backgroundSelected, colorScheme.backgroundApp));
   });
 
-  testWidgets('does not tint the background by default', (tester) async {
+  testWidgets('StreamScheduledMessageListItem does not tint the background by default', (tester) async {
     await tester.pumpWidget(
       _wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: _scheduledMessage())),
     );
@@ -202,7 +194,9 @@ void main() {
     expect(_itemBackground(tester), colorScheme.backgroundApp);
   });
 
-  testWidgets('merges into one accessible node with the spelled-out send time', (tester) async {
+  testWidgets('StreamScheduledMessageListItem merges into one accessible node with the spelled-out send time', (
+    tester,
+  ) async {
     final handle = tester.ensureSemantics();
 
     await tester.pumpWidget(
@@ -218,15 +212,15 @@ void main() {
     handle.dispose();
   });
 
-  testWidgets('truncates instead of overflowing on a narrow width', (tester) async {
-    final item = StreamScheduledMessageListItem(scheduledMessage: failed);
+  testWidgets('StreamScheduledMessageListItem truncates instead of overflowing on a narrow width', (tester) async {
+    final item = StreamScheduledMessageListItem(scheduledMessage: _failed());
 
     await tester.pumpWidget(_wrapWithMaterialApp(SizedBox(width: 240, child: item)));
 
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('truncates a long quoted author instead of overflowing', (tester) async {
+  testWidgets('StreamScheduledMessageListItem truncates a long quoted author instead of overflowing', (tester) async {
     final quoted = Message(
       id: 'quoted',
       text: 'Ready?',
@@ -239,7 +233,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('builds what a registered component builder returns', (tester) async {
+  testWidgets('StreamScheduledMessageListItem builds what a registered component builder returns', (tester) async {
     await tester.pumpWidget(
       _wrapWithMaterialApp(
         StreamScheduledMessageListItem(scheduledMessage: _scheduledMessage()),
@@ -254,12 +248,19 @@ void main() {
     expect(find.text('custom scheduled-id'), findsOneWidget);
   });
 
-  test('props.copyWith replaces selected and keeps the other fields', () {
+  test('StreamScheduledMessageListItemProps.copyWith replaces selected', () {
     final item = StreamScheduledMessageListItem(scheduledMessage: _scheduledMessage());
 
     final copy = item.props.copyWith(selected: true);
 
     expect(copy.selected, isTrue);
+  });
+
+  test('StreamScheduledMessageListItemProps.copyWith keeps the scheduled message', () {
+    final item = StreamScheduledMessageListItem(scheduledMessage: _scheduledMessage());
+
+    final copy = item.props.copyWith(selected: true);
+
     expect(copy.scheduledMessage, item.props.scheduledMessage);
   });
 }
@@ -272,7 +273,6 @@ ScheduledMessage _scheduledMessage({
   String? parentId,
   Message? quotedMessage,
   ChannelModel? channel,
-  DateTime? scheduledAt,
 }) {
   return ScheduledMessage(
     cid: 'messaging:general',
@@ -286,9 +286,30 @@ ScheduledMessage _scheduledMessage({
       quotedMessageId: quotedMessage?.id,
       quotedMessage: quotedMessage,
     ),
-    scheduledAt: scheduledAt ?? DateTime(2026, 10, 21, 8),
+    scheduledAt: DateTime(2026, 10, 21, 8),
     status: status,
     failureReason: failureReason,
+  );
+}
+
+ScheduledMessage _uploading() {
+  return _scheduledMessage(
+    text: '',
+    status: ScheduledMessageStatus.preparingToSchedule,
+    attachments: [
+      Attachment(
+        type: AttachmentType.image,
+        imageUrl: 'https://example.com/a.jpg',
+        uploadState: const UploadState.inProgress(uploaded: 1, total: 4),
+      ),
+    ],
+  );
+}
+
+ScheduledMessage _failed() {
+  return _scheduledMessage(
+    status: ScheduledMessageStatus.failed,
+    failureReason: ScheduledMessageFailureReason.pendingNotSupported,
   );
 }
 

@@ -6,6 +6,10 @@
 - Added `showStreamScheduledMessageActions`, a sheet of the actions on a scheduled message.
 - Added `onSendLongPress` to `StreamMessageComposer` and `StreamChatMessageInput`, called when the send button is long-pressed with a new message, for example to schedule it.
 
+🔄 Changed
+
+- A class that `implements Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` provides them.
+
 ## 10.7.0
 
 ✅ Added

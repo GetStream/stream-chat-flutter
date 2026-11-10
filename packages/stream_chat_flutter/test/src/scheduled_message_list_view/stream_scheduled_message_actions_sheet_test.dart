@@ -6,21 +6,27 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import '../mocks.dart';
 
 void main() {
-  testWidgets('offers edit, reschedule, send now and delete on a scheduled message', (tester) async {
+  testWidgets('showStreamScheduledMessageActions offers edit, reschedule, send now and delete on a scheduled message', (
+    tester,
+  ) async {
     await _showActions(tester, _scheduledMessage());
 
-    expect(_rowLabels(tester), ['Edit Message', 'Reschedule', 'Send now', 'Delete']);
+    expect(_rowLabels(tester), ['Edit Message', 'Reschedule', 'Send Now', 'Delete']);
   });
 
-  testWidgets('offers edit and reschedule, and delete, on a failed message', (tester) async {
+  testWidgets('showStreamScheduledMessageActions offers edit and reschedule, and delete, on a failed message', (
+    tester,
+  ) async {
     final failed = _scheduledMessage(status: .failed, failureReason: .requestFailed);
 
     await _showActions(tester, failed);
 
-    expect(_rowLabels(tester), ['Edit & reschedule', 'Delete']);
+    expect(_rowLabels(tester), ['Edit & Reschedule', 'Delete']);
   });
 
-  testWidgets('offers copy and delete on a message whose channel was deleted', (tester) async {
+  testWidgets('showStreamScheduledMessageActions offers copy and delete on a message whose channel was deleted', (
+    tester,
+  ) async {
     final failed = _scheduledMessage(status: .failed, failureReason: .channelDeleted);
 
     await _showActions(tester, failed);
@@ -28,15 +34,20 @@ void main() {
     expect(_rowLabels(tester), ['Copy Message', 'Delete']);
   });
 
-  testWidgets('offers only delete on a message without text whose channel was deleted', (tester) async {
-    final failed = _scheduledMessage(text: '', status: .failed, failureReason: .channelDeleted);
+  testWidgets(
+    'showStreamScheduledMessageActions offers only delete on a message without text whose channel was deleted',
+    (tester) async {
+      final failed = _scheduledMessage(text: '', status: .failed, failureReason: .channelDeleted);
 
-    await _showActions(tester, failed);
+      await _showActions(tester, failed);
 
-    expect(_rowLabels(tester), ['Delete']);
-  });
+      expect(_rowLabels(tester), ['Delete']);
+    },
+  );
 
-  testWidgets('offers copy and delete on a message in an unknown status', (tester) async {
+  testWidgets('showStreamScheduledMessageActions offers copy and delete on a message in an unknown status', (
+    tester,
+  ) async {
     await _showActions(tester, _scheduledMessage(status: const ScheduledMessageStatus('paused')));
 
     expect(_rowLabels(tester), ['Copy Message', 'Delete']);
@@ -48,7 +59,9 @@ void main() {
     ScheduledMessageStatus.sent,
     ScheduledMessageStatus.canceled,
   ]) {
-    testWidgets('shows no sheet and resolves null for a message that is $status', (tester) async {
+    testWidgets('showStreamScheduledMessageActions shows no sheet and resolves null for a message that is $status', (
+      tester,
+    ) async {
       final results = await _showActions(tester, _scheduledMessage(status: status));
 
       expect(find.byType(StreamListTile), findsNothing);
@@ -56,7 +69,7 @@ void main() {
     });
   }
 
-  testWidgets('paints the delete row with the error color', (tester) async {
+  testWidgets('showStreamScheduledMessageActions paints the delete row with the error color', (tester) async {
     await _showActions(tester, _scheduledMessage());
 
     final colorScheme = tester.element(find.byType(StreamListTile).first).streamColorScheme;
@@ -64,7 +77,7 @@ void main() {
     expect(_labelColor(tester, 'Edit Message'), isNot(colorScheme.accentError));
   });
 
-  testWidgets('shows the rows added by actionsBuilder', (tester) async {
+  testWidgets('showStreamScheduledMessageActions shows the rows added by actionsBuilder', (tester) async {
     await _showActions(
       tester,
       _scheduledMessage(),
@@ -74,10 +87,12 @@ void main() {
       ],
     );
 
-    expect(_rowLabels(tester), ['Edit Message', 'Reschedule', 'Send now', 'Delete', 'Pin']);
+    expect(_rowLabels(tester), ['Edit Message', 'Reschedule', 'Send Now', 'Delete', 'Pin']);
   });
 
-  testWidgets('resolves null when a row added by actionsBuilder is tapped', (tester) async {
+  testWidgets('showStreamScheduledMessageActions resolves null when a row added by actionsBuilder is tapped', (
+    tester,
+  ) async {
     final results = await _showActions(
       tester,
       _scheduledMessage(),
@@ -92,7 +107,7 @@ void main() {
     expect(results, [null]);
   });
 
-  testWidgets('resolves null when the sheet is dismissed', (tester) async {
+  testWidgets('showStreamScheduledMessageActions resolves null when the sheet is dismissed', (tester) async {
     final results = await _showActions(tester, _scheduledMessage());
 
     await tester.tapAt(const Offset(10, 10));
@@ -105,10 +120,12 @@ void main() {
   for (final (label, actionType) in [
     ('Edit Message', EditScheduledMessage),
     ('Reschedule', RescheduleMessage),
-    ('Send now', SendScheduledMessageNow),
+    ('Send Now', SendScheduledMessageNow),
     ('Delete', DeleteScheduledMessage),
   ]) {
-    testWidgets('resolves $actionType carrying the message when "$label" is tapped', (tester) async {
+    testWidgets('showStreamScheduledMessageActions resolves $actionType carrying the message when "$label" is tapped', (
+      tester,
+    ) async {
       final scheduledMessage = _scheduledMessage();
       final results = await _showActions(tester, scheduledMessage);
 
@@ -121,18 +138,22 @@ void main() {
     });
   }
 
-  testWidgets('resolves EditAndRescheduleMessage carrying the message when tapped', (tester) async {
+  testWidgets('showStreamScheduledMessageActions resolves EditAndRescheduleMessage carrying the message when tapped', (
+    tester,
+  ) async {
     final failed = _scheduledMessage(status: .failed, failureReason: .requestFailed);
     final results = await _showActions(tester, failed);
 
-    await tester.tap(find.text('Edit & reschedule'));
+    await tester.tap(find.text('Edit & Reschedule'));
     await tester.pumpAndSettle();
 
     expect(results.single, isA<EditAndRescheduleMessage>());
     expect(results.single?.scheduledMessage, failed);
   });
 
-  testWidgets('resolves CopyScheduledMessageText carrying the message when tapped', (tester) async {
+  testWidgets('showStreamScheduledMessageActions resolves CopyScheduledMessageText carrying the message when tapped', (
+    tester,
+  ) async {
     final failed = _scheduledMessage(status: .failed, failureReason: .channelDeleted);
     final results = await _showActions(tester, failed);
 

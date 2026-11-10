@@ -273,6 +273,6 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
   /// prefix.
   final StreamMessagePreviewTextThemeData messagePreviewTextTheme;
 
-  /// The scheduled message list item theme for this theme.
+  /// The default styles of every [StreamScheduledMessageListItem].
   final StreamScheduledMessageListItemThemeData scheduledMessageListItemTheme;
 }

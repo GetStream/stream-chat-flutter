@@ -1,4 +1,3 @@
-import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
@@ -54,7 +53,7 @@ Future<DateTime?> showScheduleTimeSheet(
       title: title,
       label: label,
       message: message,
-      initial: initial ?? clock.now().add(const Duration(hours: 1)),
+      initial: initial ?? DateTime.now().add(const Duration(hours: 1)),
       maxLeadTime: maxLeadTime ?? _defaultMaxLeadTime,
     ),
   );
@@ -86,7 +85,7 @@ class _ScheduleOptionsSheet extends StatelessWidget {
     final icons = context.streamIcons;
     final spacing = context.streamSpacing;
 
-    final now = clock.now();
+    final now = DateTime.now();
     final tomorrow = DateTime(now.year, now.month, now.day + 1);
     final daysToMonday = (DateTime.monday - now.weekday) % 7;
     final monday = DateTime(now.year, now.month, now.day + (daysToMonday == 0 ? 7 : daysToMonday));
@@ -157,8 +156,8 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
 
   // A time sooner than the channel's minimum lead time is moved later when
   // scheduled, so only a time that has passed is refused.
-  bool get _isPast => !_time.isAfter(clock.now());
-  bool get _isTooFar => _time.isAfter(clock.now().add(widget.maxLeadTime));
+  bool get _isPast => !_time.isAfter(DateTime.now());
+  bool get _isTooFar => _time.isAfter(DateTime.now().add(widget.maxLeadTime));
 
   String? get _problem => switch ((_isPast, _isTooFar)) {
     (true, _) => ScheduledMessagesStrings.pickFutureTime,
@@ -167,7 +166,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
   };
 
   Future<void> _pickDate() async {
-    final now = clock.now();
+    final now = DateTime.now();
     final date = await showDatePicker(
       context: context,
       initialDate: _time,

@@ -938,8 +938,8 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => "Couldn't send. Try again",
-      .internalError => 'Something went wrong. Try again',
+      .requestFailed => "Couldn't send. Try again.",
+      .internalError => 'Something went wrong. Try again.',
       .channelDeleted => 'This channel was deleted',
       .userDeleted => 'Your account was deleted',
       .channelFrozen => 'This channel is frozen',
@@ -951,7 +951,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
       .pendingNotSupported => 'This channel now needs approval. Schedule it again.',
       .invalidMessage when isQuoteDeleted => 'The quoted message was deleted. Edit it to remove the quote.',
       .invalidMessage => "The message no longer meets the app's limits. Edit it.",
-      _ => 'Something went wrong. Try again',
+      _ => 'Something went wrong. Try again.',
     };
   }
 
@@ -962,13 +962,13 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get loadingScheduledMessagesError => "Couldn't load scheduled messages";
 
   @override
-  String get editAndRescheduleLabel => 'Edit & reschedule';
+  String get editAndRescheduleLabel => 'Edit & Reschedule';
 
   @override
   String get rescheduleLabel => 'Reschedule';
 
   @override
-  String get sendNowLabel => 'Send now';
+  String get sendNowLabel => 'Send Now';
 }
 
 void main() async {

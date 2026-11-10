@@ -901,20 +901,20 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => '보내지 못했습니다. 다시 시도하세요',
-      .internalError => '문제가 발생했습니다. 다시 시도하세요',
+      .requestFailed => '보내지 못했습니다. 다시 시도하세요.',
+      .internalError => '문제가 발생했습니다. 다시 시도하세요.',
       .channelDeleted => '이 채널은 삭제되었습니다',
       .userDeleted => '계정이 삭제되었습니다',
       .channelFrozen => '이 채널은 동결되었습니다',
       .banned => '이 채널에서는 메시지를 보낼 수 없습니다',
       .noPermission => '더 이상 여기에 게시할 수 없습니다',
-      .moderationBlocked => '검토에 의해 차단됨',
+      .moderationBlocked => '조정 정책에 의해 차단됨',
       .hookRejected => '앱에서 거부됨',
       .expired => '전송되지 않음: 서비스가 지연되었습니다',
       .pendingNotSupported => '이제 이 채널은 승인이 필요합니다. 다시 예약하세요.',
       .invalidMessage when isQuoteDeleted => '인용한 메시지가 삭제되었습니다. 인용을 제거하려면 메시지를 수정하세요.',
       .invalidMessage => '메시지가 더 이상 앱의 제한을 충족하지 않습니다. 수정하세요.',
-      _ => '문제가 발생했습니다. 다시 시도하세요',
+      _ => '문제가 발생했습니다. 다시 시도하세요.',
     };
   }
 
@@ -1047,7 +1047,7 @@ class _AccessibilityTranslationsKo extends AccessibilityTranslations {
 
   @override
   String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
-    final date = formatDateTime(scheduledAt);
+    final date = formatDateTime(scheduledAt.toLocal());
     return '$date에 예약됨';
   }
 

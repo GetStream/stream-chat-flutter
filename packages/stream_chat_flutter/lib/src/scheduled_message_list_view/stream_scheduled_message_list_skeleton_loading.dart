@@ -2,11 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:stream_core_flutter/chat.dart';
 
 /// A shimmer loading placeholder for the scheduled message list view.
-///
-/// Displays a skeleton UI with shimmer animation using
-/// [StreamSkeletonLoading] and [StreamSkeletonBox] from the core package.
 class StreamScheduledMessageListSkeletonLoading extends StatelessWidget {
-  /// Creates a new instance of [StreamScheduledMessageListSkeletonLoading].
+  /// Creates a scheduled message list loading placeholder.
   const StreamScheduledMessageListSkeletonLoading({
     super.key,
     this.itemCount = 6,
@@ -31,8 +28,12 @@ class StreamScheduledMessageListSkeletonLoading extends StatelessWidget {
         padding: padding,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: itemCount,
-        separatorBuilder: (context, index) => Divider(height: 1, color: colorScheme.borderSubtle),
-        itemBuilder: (context, index) => const _StreamScheduledMessageListItemSkeleton(),
+        separatorBuilder: (context, index) {
+          return Divider(height: 1, color: colorScheme.borderSubtle);
+        },
+        itemBuilder: (context, index) {
+          return const _StreamScheduledMessageListItemSkeleton();
+        },
       ),
     );
   }
@@ -53,22 +54,30 @@ class _StreamScheduledMessageListItemSkeleton extends StatelessWidget {
         bottom: false,
         minimum: EdgeInsets.all(spacing.md),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: .start,
           spacing: spacing.xs,
           children: [
             StreamSkeletonBox(width: 120, height: 12, borderRadius: barRadius),
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: .start,
               spacing: spacing.sm,
               children: [
                 const StreamSkeletonBox.circular(radius: 24),
                 Expanded(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: .start,
                     spacing: spacing.xs,
                     children: [
-                      StreamSkeletonBox(width: 96, height: 12, borderRadius: barRadius),
-                      StreamSkeletonBox(width: 260, height: 16, borderRadius: barRadius),
+                      StreamSkeletonBox(
+                        width: 96,
+                        height: 12,
+                        borderRadius: barRadius,
+                      ),
+                      StreamSkeletonBox(
+                        width: 260,
+                        height: 16,
+                        borderRadius: barRadius,
+                      ),
                     ],
                   ),
                 ),

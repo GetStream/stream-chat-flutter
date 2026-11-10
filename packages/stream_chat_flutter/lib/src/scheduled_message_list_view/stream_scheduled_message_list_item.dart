@@ -1,26 +1,39 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
-import '../../../stream_chat_flutter.dart';
+import '../../stream_chat_flutter.dart';
 
-/// Displays a [ScheduledMessage] in a list of scheduled messages.
+/// A row that shows a [ScheduledMessage] in a list of scheduled messages.
 ///
 /// It shows when the message is sent, the channel it is sent to, a preview of
 /// the message, and whether it is being sent or why it could not be.
 ///
-/// This widget delegates rendering to either a custom builder registered via
-/// [StreamComponentFactory], or [DefaultStreamScheduledMessageListItem] when
-/// no custom builder is provided. Register a custom builder through
-/// `streamChatComponentBuilders(scheduledMessageListItem: ...)` to fully
-/// replace the default rendering while still receiving the same
-/// [StreamScheduledMessageListItemProps].
+/// This widget renders [DefaultStreamScheduledMessageListItem] unless a custom
+/// builder is registered through
+/// `streamChatComponentBuilders(scheduledMessageListItem: ...)`, which then
+/// receives the same [StreamScheduledMessageListItemProps].
+///
+/// {@tool snippet}
+///
+/// A row that opens the actions on its scheduled message when tapped:
+///
+/// ```dart
+/// StreamScheduledMessageListItem(
+///   scheduledMessage: scheduledMessage,
+///   onTap: () => showStreamScheduledMessageActions(
+///     context,
+///     scheduledMessage: scheduledMessage,
+///   ),
+/// )
+/// ```
+/// {@end-tool}
 ///
 /// See also:
 ///
 ///  * [StreamScheduledMessageListItemProps], which holds every configurable
 ///    property.
-///  * [DefaultStreamScheduledMessageListItem], the default implementation used
-///    when no custom builder is registered.
+///  * [DefaultStreamScheduledMessageListItem], which is rendered when no
+///    custom builder is registered.
 ///  * [StreamScheduledMessageListView], which lists these items.
 class StreamScheduledMessageListItem extends StatelessWidget {
   /// Creates a list item for the given [scheduledMessage].
@@ -38,7 +51,10 @@ class StreamScheduledMessageListItem extends StatelessWidget {
        );
 
   /// Creates a list item from pre-built [props].
-  const StreamScheduledMessageListItem.fromProps({super.key, required this.props});
+  const StreamScheduledMessageListItem.fromProps({
+    super.key,
+    required this.props,
+  });
 
   /// The properties that configure this list item.
   final StreamScheduledMessageListItemProps props;
@@ -56,7 +72,7 @@ class StreamScheduledMessageListItem extends StatelessWidget {
 /// See also:
 ///
 ///  * [StreamScheduledMessageListItem], which uses these properties.
-///  * [DefaultStreamScheduledMessageListItem], the default implementation.
+///  * [DefaultStreamScheduledMessageListItem], which renders them by default.
 class StreamScheduledMessageListItemProps {
   /// Creates properties for a scheduled message list item.
   const StreamScheduledMessageListItemProps({
@@ -130,8 +146,13 @@ class DefaultStreamScheduledMessageListItem extends StatelessWidget {
         data: StreamListTileThemeData(
           contentPadding: effectivePadding,
           backgroundColor: .resolveWith((states) {
-            if (!states.contains(WidgetState.selected)) return effectiveBackgroundColor;
-            return .alphaBlend(colorScheme.backgroundSelected, effectiveBackgroundColor);
+            final isSelected = states.contains(WidgetState.selected);
+            if (!isSelected) return effectiveBackgroundColor;
+
+            return .alphaBlend(
+              colorScheme.backgroundSelected,
+              effectiveBackgroundColor,
+            );
           }),
         ),
         child: StreamListTileContainer(
@@ -178,15 +199,20 @@ class _ScheduledMessageBody extends StatelessWidget {
     final channel = streamChat.client.state.channels[scheduledMessage.cid];
     final channelState = channel?.state;
     final loadedChannel = channelState != null ? channel : null;
+    final summary = scheduledMessage.channel;
 
     // A loaded channel keeps its members on its state, not on its model.
-    final loadedModel = channelState?.channelState.channel?.copyWith(members: channelState.members);
-    final summaryName = switch (scheduledMessage.channel?.name) {
+    final loadedModel = channelState?.channelState.channel?.copyWith(
+      members: channelState.members,
+    );
+    final loadedName = loadedModel?.formatName(
+      currentUser: streamChat.currentUser,
+    );
+    final summaryName = switch (summary?.name) {
       final name? when name.trim().isNotEmpty => name,
       _ => null,
     };
-    final channelName =
-        loadedModel?.formatName(currentUser: streamChat.currentUser) ?? summaryName ?? context.translations.noTitleText;
+    final channelName = loadedName ?? summaryName ?? context.translations.noTitleText;
 
     return Row(
       crossAxisAlignment: .start,
@@ -195,7 +221,7 @@ class _ScheduledMessageBody extends StatelessWidget {
         switch (loadedChannel) {
           final loaded? => StreamChannelAvatar(channel: loaded, size: .xl),
           null => StreamAvatar(
-            imageUrl: scheduledMessage.channel?.extraData['image'].safeCast<String>(),
+            imageUrl: summary?.extraData['image'].safeCast<String>(),
             size: .xl,
             placeholder: (context) => Icon(context.streamIcons.users),
           ),
@@ -221,7 +247,9 @@ class _ScheduledMessageBody extends StatelessWidget {
                       style: effectivePreviewStyle,
                       maxLines: 1,
                       overflow: .ellipsis,
-                      child: ScheduledMessagePreview(scheduledMessage: scheduledMessage),
+                      child: ScheduledMessagePreview(
+                        scheduledMessage: scheduledMessage,
+                      ),
                     ),
                   ],
                 ),
@@ -259,14 +287,14 @@ class ScheduledMessageSendTime extends StatelessWidget {
 
   /// The style of the send time.
   ///
-  /// When null, uses the effective style resolved from the theme and
-  /// defaults.
+  /// Defaults to [StreamScheduledMessageListItemThemeData.sendTimeStyle], or
+  /// [StreamScheduledMessageListItemThemeData.failedSendTimeStyle] when
+  /// [isFailed].
   final TextStyle? style;
 
   /// The formatter of the send time.
   ///
-  /// When null, uses the effective formatter resolved from the theme and
-  /// defaults.
+  /// Defaults to [StreamScheduledMessageListItemThemeData.sendTimeFormatter].
   final DateFormatter? formatter;
 
   @override
@@ -275,14 +303,15 @@ class ScheduledMessageSendTime extends StatelessWidget {
     final defaults = _StreamScheduledMessageListItemThemeDefaults(context);
     final a11y = context.translations.accessibility;
 
-    final effectiveStyle = switch (isFailed) {
-      true => style ?? theme.failedSendTimeStyle ?? defaults.failedSendTimeStyle,
-      false => style ?? theme.sendTimeStyle ?? defaults.sendTimeStyle,
+    final themeStyle = switch (isFailed) {
+      true => theme.failedSendTimeStyle ?? defaults.failedSendTimeStyle,
+      false => theme.sendTimeStyle ?? defaults.sendTimeStyle,
     };
+    final effectiveStyle = style ?? themeStyle;
     final effectiveFormatter = formatter ?? theme.sendTimeFormatter ?? defaults.sendTimeFormatter;
 
     return Semantics(
-      label: a11y.scheduledMessageSendAtLabel(scheduledAt: scheduledAt.toLocal()),
+      label: a11y.scheduledMessageSendAtLabel(scheduledAt: scheduledAt),
       excludeSemantics: true,
       child: Text(
         effectiveFormatter(context, scheduledAt),
@@ -312,8 +341,7 @@ class ScheduledMessagePreview extends StatelessWidget {
 
   /// The theme for styling parts of the preview differently from the rest.
   ///
-  /// When null, uses the effective theme resolved from the theme and
-  /// defaults.
+  /// Defaults to [StreamScheduledMessageListItemThemeData.previewTextTheme].
   final StreamMessagePreviewTextThemeData? textTheme;
 
   @override
@@ -323,8 +351,11 @@ class ScheduledMessagePreview extends StatelessWidget {
     final defaults = _StreamScheduledMessageListItemThemeDefaults(context);
     final message = scheduledMessage.message;
 
-    final baseTextTheme = defaults.previewTextTheme.merge(StreamMessagePreviewTextTheme.of(context));
-    final effectiveTextTheme = baseTextTheme.merge(textTheme ?? theme.previewTextTheme);
+    final ambientTextTheme = StreamMessagePreviewTextTheme.of(context);
+    final baseTextTheme = defaults.previewTextTheme.merge(ambientTextTheme);
+    final effectiveTextTheme = baseTextTheme.merge(
+      textTheme ?? theme.previewTextTheme,
+    );
 
     final prefix = switch (message) {
       Message(parentId: _?) => translations.scheduledThreadReplyPrefixText,
@@ -368,14 +399,12 @@ class ScheduledMessageStatusLine extends StatelessWidget {
 
   /// The style of the state of a message being sent.
   ///
-  /// When null, uses the effective style resolved from the theme and
-  /// defaults.
+  /// Defaults to [StreamScheduledMessageListItemThemeData.statusStyle].
   final TextStyle? style;
 
   /// The style of why a message could not be sent.
   ///
-  /// When null, uses the effective style resolved from the theme and
-  /// defaults.
+  /// Defaults to [StreamScheduledMessageListItemThemeData.failedStatusStyle].
   final TextStyle? failedStyle;
 
   @override
@@ -387,7 +416,8 @@ class ScheduledMessageStatusLine extends StatelessWidget {
 
     switch (scheduledMessage.status) {
       case .failed:
-        final effectiveStyle = failedStyle ?? theme.failedStatusStyle ?? defaults.failedStatusStyle;
+        final themeStyle = theme.failedStatusStyle ?? defaults.failedStatusStyle;
+        final effectiveStyle = failedStyle ?? themeStyle;
         final quoted = _quotedMessage(context, scheduledMessage);
         final reason = translations.scheduledMessageFailedText(
           reason: scheduledMessage.failureReason,
@@ -400,7 +430,11 @@ class ScheduledMessageStatusLine extends StatelessWidget {
           children: [
             Padding(
               padding: EdgeInsets.symmetric(vertical: spacing.xxxs),
-              child: Icon(context.streamIcons.exclamationTriangleFill, size: 16, color: effectiveStyle.color),
+              child: Icon(
+                context.streamIcons.exclamationTriangleFill,
+                size: 16,
+                color: effectiveStyle.color,
+              ),
             ),
             Expanded(child: Text(reason, style: effectiveStyle)),
           ],
@@ -429,7 +463,10 @@ class ScheduledMessageStatusLine extends StatelessWidget {
 
 // The message a scheduled message quotes, when it is loaded in the channel or
 // in the thread the message is sent to.
-Message? _quotedMessage(BuildContext context, ScheduledMessage scheduledMessage) {
+Message? _quotedMessage(
+  BuildContext context,
+  ScheduledMessage scheduledMessage,
+) {
   final message = scheduledMessage.message;
   if (message.quotedMessage case final quoted?) return quoted;
 
@@ -459,28 +496,46 @@ class _StreamScheduledMessageListItemThemeDefaults extends StreamScheduledMessag
   EdgeInsetsGeometry get padding => EdgeInsets.all(_spacing.md);
 
   @override
-  TextStyle get sendTimeStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);
-
-  @override
-  DateFormatter get sendTimeFormatter {
-    return (context, date) => context.translations.scheduledMessageSendAtText(scheduledAt: date);
+  TextStyle get sendTimeStyle {
+    return _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);
   }
 
   @override
-  TextStyle get failedSendTimeStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textDisabled);
+  DateFormatter get sendTimeFormatter {
+    return (context, date) {
+      final translations = context.translations;
+      return translations.scheduledMessageSendAtText(scheduledAt: date);
+    };
+  }
 
   @override
-  TextStyle get titleStyle => _textTheme.captionEmphasis.copyWith(color: _colorScheme.textTertiary);
+  TextStyle get failedSendTimeStyle {
+    return _textTheme.captionDefault.copyWith(color: _colorScheme.textDisabled);
+  }
 
   @override
-  TextStyle get previewStyle => _textTheme.bodyDefault.copyWith(color: _colorScheme.textPrimary);
+  TextStyle get titleStyle {
+    final color = _colorScheme.textTertiary;
+    return _textTheme.captionEmphasis.copyWith(color: color);
+  }
 
   @override
-  StreamMessagePreviewTextThemeData get previewTextTheme => const StreamMessagePreviewTextThemeData(iconSize: 20);
+  TextStyle get previewStyle {
+    return _textTheme.bodyDefault.copyWith(color: _colorScheme.textPrimary);
+  }
 
   @override
-  TextStyle get statusStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);
+  StreamMessagePreviewTextThemeData get previewTextTheme {
+    return const StreamMessagePreviewTextThemeData(iconSize: 20);
+  }
 
   @override
-  TextStyle get failedStatusStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.accentError);
+  TextStyle get statusStyle {
+    return _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);
+  }
+
+  @override
+  TextStyle get failedStatusStyle {
+    return _textTheme.captionDefault.copyWith(color: _colorScheme.accentError);
+  }
 }

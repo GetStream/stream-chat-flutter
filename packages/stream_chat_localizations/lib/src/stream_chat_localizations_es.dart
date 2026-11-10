@@ -920,8 +920,8 @@ No es posible añadir más de $limit archivos adjuntos
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => 'No se pudo enviar. Inténtalo de nuevo',
-      .internalError => 'Algo salió mal. Inténtalo de nuevo',
+      .requestFailed => 'No se pudo enviar. Inténtalo de nuevo.',
+      .internalError => 'Algo salió mal. Inténtalo de nuevo.',
       .channelDeleted => 'Este canal fue eliminado',
       .userDeleted => 'Tu cuenta fue eliminada',
       .channelFrozen => 'Este canal está congelado',
@@ -933,7 +933,7 @@ No es posible añadir más de $limit archivos adjuntos
       .pendingNotSupported => 'Este canal ahora requiere aprobación. Prográmalo de nuevo.',
       .invalidMessage when isQuoteDeleted => 'El mensaje citado fue eliminado. Edítalo para quitar la cita.',
       .invalidMessage => 'El mensaje ya no cumple los límites de la aplicación. Edítalo.',
-      _ => 'Algo salió mal. Inténtalo de nuevo',
+      _ => 'Algo salió mal. Inténtalo de nuevo.',
     };
   }
 
@@ -1069,7 +1069,7 @@ class _AccessibilityTranslationsEs extends AccessibilityTranslations {
 
   @override
   String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
-    final date = formatDateTime(scheduledAt);
+    final date = formatDateTime(scheduledAt.toLocal());
     return 'Programado para el $date';
   }
 

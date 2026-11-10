@@ -58,48 +58,60 @@ class _ScheduledMessageActionsSheet extends StatelessWidget {
     final isChannelDeleted = scheduledMessage.failureReason == .channelDeleted;
     final hasText = scheduledMessage.message.text?.isNotEmpty ?? false;
 
-    // A failed message can be scheduled again unless its channel was deleted.
     final canEditAndReschedule = isFailed && !isChannelDeleted;
-    // The text of a message that can't be changed is offered to copy instead.
     final canCopyText = hasText && !isScheduled && !canEditAndReschedule;
 
-    void emit(ScheduledMessageAction action) => Navigator.of(context).pop(action);
+    void emit(ScheduledMessageAction action) {
+      Navigator.of(context).pop(action);
+    }
 
     final defaultActions = <Widget>[
       if (isScheduled) ...[
         _ScheduledMessageActionRow(
           icon: Icon(icons.edit),
           label: Text(translations.editMessageLabel),
-          onTap: () => emit(EditScheduledMessage(scheduledMessage: scheduledMessage)),
+          onTap: () => emit(
+            EditScheduledMessage(scheduledMessage: scheduledMessage),
+          ),
         ),
         _ScheduledMessageActionRow(
           icon: Icon(icons.clock),
           label: Text(translations.rescheduleLabel),
-          onTap: () => emit(RescheduleMessage(scheduledMessage: scheduledMessage)),
+          onTap: () => emit(
+            RescheduleMessage(scheduledMessage: scheduledMessage),
+          ),
         ),
         _ScheduledMessageActionRow(
           icon: Icon(icons.send),
           label: Text(translations.sendNowLabel),
-          onTap: () => emit(SendScheduledMessageNow(scheduledMessage: scheduledMessage)),
+          onTap: () => emit(
+            SendScheduledMessageNow(scheduledMessage: scheduledMessage),
+          ),
         ),
       ],
       if (canEditAndReschedule)
         _ScheduledMessageActionRow(
           icon: Icon(icons.edit),
           label: Text(translations.editAndRescheduleLabel),
-          onTap: () => emit(EditAndRescheduleMessage(scheduledMessage: scheduledMessage)),
+          onTap: () => emit(
+            EditAndRescheduleMessage(scheduledMessage: scheduledMessage),
+          ),
         ),
       if (canCopyText)
         _ScheduledMessageActionRow(
           icon: Icon(icons.copy),
           label: Text(translations.copyMessageLabel),
-          onTap: () => emit(CopyScheduledMessageText(scheduledMessage: scheduledMessage)),
+          onTap: () => emit(
+            CopyScheduledMessageText(scheduledMessage: scheduledMessage),
+          ),
         ),
       _ScheduledMessageActionRow(
         icon: Icon(icons.delete),
         label: Text(translations.deleteLabel),
         destructive: true,
-        onTap: () => emit(DeleteScheduledMessage(scheduledMessage: scheduledMessage)),
+        onTap: () => emit(
+          DeleteScheduledMessage(scheduledMessage: scheduledMessage),
+        ),
       ),
     ];
 
@@ -109,7 +121,11 @@ class _ScheduledMessageActionsSheet extends StatelessWidget {
       child: IconTheme.merge(
         data: const IconThemeData(size: 20),
         child: Padding(
-          padding: .only(left: spacing.xxs, top: spacing.xl, right: spacing.xxs),
+          padding: .only(
+            left: spacing.xxs,
+            top: spacing.xl,
+            right: spacing.xxs,
+          ),
           child: Column(
             mainAxisSize: .min,
             children: rows,

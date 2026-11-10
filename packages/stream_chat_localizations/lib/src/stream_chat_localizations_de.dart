@@ -917,8 +917,8 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => 'Senden fehlgeschlagen. Versuche es erneut',
-      .internalError => 'Etwas ist schiefgelaufen. Versuche es erneut',
+      .requestFailed => 'Senden fehlgeschlagen. Versuche es erneut.',
+      .internalError => 'Etwas ist schiefgelaufen. Versuche es erneut.',
       .channelDeleted => 'Dieser Kanal wurde gelöscht',
       .userDeleted => 'Dein Konto wurde gelöscht',
       .channelFrozen => 'Dieser Kanal ist eingefroren',
@@ -931,7 +931,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       .invalidMessage when isQuoteDeleted =>
         'Die zitierte Nachricht wurde gelöscht. Bearbeite die Nachricht, um das Zitat zu entfernen.',
       .invalidMessage => 'Die Nachricht entspricht nicht mehr den Vorgaben der App. Bearbeite sie.',
-      _ => 'Etwas ist schiefgelaufen. Versuche es erneut',
+      _ => 'Etwas ist schiefgelaufen. Versuche es erneut.',
     };
   }
 
@@ -1069,7 +1069,7 @@ class _AccessibilityTranslationsDe extends AccessibilityTranslations {
 
   @override
   String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
-    final date = formatDateTime(scheduledAt);
+    final date = formatDateTime(scheduledAt.toLocal());
     return 'Geplant für $date';
   }
 

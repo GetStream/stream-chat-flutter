@@ -5,23 +5,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import '../../mocks.dart';
+import '../mocks.dart';
 
 void main() {
   late MockClient client;
   late MockClientState clientState;
   late StreamController<ScheduledMessageListState> states;
-
-  final first = _scheduledMessage('first', text: 'Message from the scheduled list');
-  final second = _scheduledMessage('second', text: 'Another scheduled message');
-
-  // Puts [scheduledMessages] in the client state, all loaded unless
-  // [hasLoadedAll] is false.
-  void stubState(List<ScheduledMessage> scheduledMessages, {bool hasLoadedAll = true}) {
-    final state = ScheduledMessageListState(scheduledMessages: scheduledMessages, hasLoadedAll: hasLoadedAll);
-    when(() => clientState.scheduledMessageListState).thenReturn(state);
-    when(client.loadScheduledMessages).thenAnswer((_) async => state);
-  }
 
   setUp(() {
     client = MockClient();
@@ -33,10 +22,12 @@ void main() {
     when(() => clientState.currentUser).thenReturn(OwnUser(id: 'current-user-id'));
     when(() => clientState.channels).thenReturn({});
     when(() => clientState.scheduledMessageListStateStream).thenAnswer((_) => states.stream);
-    stubState([first, second]);
+    _stubState(client, clientState, [_first(), _second()]);
   });
 
-  testWidgets('renders a row for each scheduled message in the client state', (tester) async {
+  testWidgets('StreamScheduledMessageListView renders a row for each scheduled message in the client state', (
+    tester,
+  ) async {
     await tester.pumpWidget(_wrapWithMaterialApp(client: client, child: const StreamScheduledMessageListView()));
 
     expect(find.byType(StreamScheduledMessageListItem), findsNWidgets(2));
@@ -44,26 +35,31 @@ void main() {
     expect(find.textContaining('Another scheduled message', findRichText: true), findsOneWidget);
   });
 
-  testWidgets('lists only the channel ones without the thread replies when given a channel', (tester) async {
-    stubState([
-      _scheduledMessage('channel', text: 'In the channel'),
-      _scheduledMessage('reply', text: 'In a thread', parentId: 'parent'),
-      _scheduledMessage('other', text: 'Elsewhere', cid: 'messaging:other'),
-    ]);
+  testWidgets(
+    'StreamScheduledMessageListView lists only the channel ones without the thread replies when given a channel',
+    (tester) async {
+      _stubState(client, clientState, [
+        _scheduledMessage('channel', text: 'In the channel'),
+        _scheduledMessage('reply', text: 'In a thread', parentId: 'parent'),
+        _scheduledMessage('other', text: 'Elsewhere', cid: 'messaging:other'),
+      ]);
 
-    await tester.pumpWidget(
-      _wrapWithMaterialApp(
-        client: client,
-        child: const StreamScheduledMessageListView(cid: 'messaging:general'),
-      ),
-    );
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          client: client,
+          child: const StreamScheduledMessageListView(cid: 'messaging:general'),
+        ),
+      );
 
-    expect(find.byType(StreamScheduledMessageListItem), findsOneWidget);
-    expect(find.textContaining('In the channel', findRichText: true), findsOneWidget);
-  });
+      expect(find.byType(StreamScheduledMessageListItem), findsOneWidget);
+      expect(find.textContaining('In the channel', findRichText: true), findsOneWidget);
+    },
+  );
 
-  testWidgets('lists only the replies in the thread when given a thread', (tester) async {
-    stubState([
+  testWidgets('StreamScheduledMessageListView lists only the replies in the thread when given a thread', (
+    tester,
+  ) async {
+    _stubState(client, clientState, [
       _scheduledMessage('channel', text: 'In the channel'),
       _scheduledMessage('reply', text: 'In the thread', parentId: 'parent'),
       _scheduledMessage('elsewhere', text: 'In another thread', parentId: 'other-parent'),
@@ -80,50 +76,57 @@ void main() {
     expect(find.textContaining('In the thread', findRichText: true), findsOneWidget);
   });
 
-  testWidgets('lists only the replies in the thread when given a thread without a channel', (tester) async {
-    stubState([
-      _scheduledMessage('channel', text: 'In the channel'),
-      _scheduledMessage('reply', text: 'In the thread', parentId: 'parent'),
-    ]);
+  testWidgets(
+    'StreamScheduledMessageListView lists only the replies in the thread when given a thread without a channel',
+    (tester) async {
+      _stubState(client, clientState, [
+        _scheduledMessage('channel', text: 'In the channel'),
+        _scheduledMessage('reply', text: 'In the thread', parentId: 'parent'),
+      ]);
 
-    await tester.pumpWidget(
-      _wrapWithMaterialApp(
-        client: client,
-        child: const StreamScheduledMessageListView(parentId: 'parent'),
-      ),
-    );
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          client: client,
+          child: const StreamScheduledMessageListView(parentId: 'parent'),
+        ),
+      );
 
-    expect(find.byType(StreamScheduledMessageListItem), findsOneWidget);
-    expect(find.textContaining('In the thread', findRichText: true), findsOneWidget);
-  });
+      expect(find.byType(StreamScheduledMessageListItem), findsOneWidget);
+      expect(find.textContaining('In the thread', findRichText: true), findsOneWidget);
+    },
+  );
 
-  testWidgets('follows the scheduled messages as they change', (tester) async {
-    stubState([first]);
+  testWidgets('StreamScheduledMessageListView follows the scheduled messages as they change', (tester) async {
+    _stubState(client, clientState, [_first()]);
     await tester.pumpWidget(_wrapWithMaterialApp(client: client, child: const StreamScheduledMessageListView()));
 
-    states.add(ScheduledMessageListState(scheduledMessages: [first, second], hasLoadedAll: true));
+    states.add(ScheduledMessageListState(scheduledMessages: [_first(), _second()], hasLoadedAll: true));
     await tester.pump();
 
     expect(find.byType(StreamScheduledMessageListItem), findsNWidgets(2));
   });
 
-  testWidgets('loads the scheduled messages when they are not all loaded', (tester) async {
-    stubState([], hasLoadedAll: false);
+  testWidgets('StreamScheduledMessageListView loads the scheduled messages when they are not all loaded', (
+    tester,
+  ) async {
+    _stubState(client, clientState, [], hasLoadedAll: false);
 
     await tester.pumpWidget(_wrapWithMaterialApp(client: client, child: const StreamScheduledMessageListView()));
 
     verify(client.loadScheduledMessages).called(1);
   });
 
-  testWidgets('does not load the scheduled messages when they are all loaded', (tester) async {
+  testWidgets('StreamScheduledMessageListView does not load the scheduled messages when they are all loaded', (
+    tester,
+  ) async {
     await tester.pumpWidget(_wrapWithMaterialApp(client: client, child: const StreamScheduledMessageListView()));
 
     verifyNever(client.loadScheduledMessages);
   });
 
-  testWidgets('shows loading rows while the scheduled messages load', (tester) async {
+  testWidgets('StreamScheduledMessageListView shows loading rows while the scheduled messages load', (tester) async {
     final load = Completer<ScheduledMessageListState>();
-    stubState([], hasLoadedAll: false);
+    _stubState(client, clientState, [], hasLoadedAll: false);
     when(client.loadScheduledMessages).thenAnswer((_) => load.future);
 
     await tester.pumpWidget(_wrapWithMaterialApp(client: client, child: const StreamScheduledMessageListView()));
@@ -131,9 +134,11 @@ void main() {
     expect(find.byType(StreamSkeletonLoading), findsOneWidget);
   });
 
-  testWidgets('shows the scheduled messages it already holds while loading', (tester) async {
+  testWidgets('StreamScheduledMessageListView shows the scheduled messages it already holds while loading', (
+    tester,
+  ) async {
     final load = Completer<ScheduledMessageListState>();
-    stubState([first], hasLoadedAll: false);
+    _stubState(client, clientState, [_first()], hasLoadedAll: false);
     when(client.loadScheduledMessages).thenAnswer((_) => load.future);
 
     await tester.pumpWidget(_wrapWithMaterialApp(client: client, child: const StreamScheduledMessageListView()));
@@ -142,16 +147,16 @@ void main() {
     expect(find.byType(StreamSkeletonLoading), findsNothing);
   });
 
-  testWidgets('says there are none when the list is empty', (tester) async {
-    stubState([]);
+  testWidgets('StreamScheduledMessageListView says there are none when the list is empty', (tester) async {
+    _stubState(client, clientState, []);
 
     await tester.pumpWidget(_wrapWithMaterialApp(client: client, child: const StreamScheduledMessageListView()));
 
     expect(find.text('No scheduled messages'), findsOneWidget);
   });
 
-  testWidgets('says the scheduled messages could not be loaded', (tester) async {
-    stubState([], hasLoadedAll: false);
+  testWidgets('StreamScheduledMessageListView says the scheduled messages could not be loaded', (tester) async {
+    _stubState(client, clientState, [], hasLoadedAll: false);
     when(client.loadScheduledMessages).thenAnswer((_) async => throw const StreamChatError('Boom'));
 
     await tester.pumpWidget(_wrapWithMaterialApp(client: client, child: const StreamScheduledMessageListView()));
@@ -160,8 +165,8 @@ void main() {
     expect(find.text("Couldn't load scheduled messages"), findsOneWidget);
   });
 
-  testWidgets('loads the scheduled messages again when retry is tapped', (tester) async {
-    stubState([], hasLoadedAll: false);
+  testWidgets('StreamScheduledMessageListView loads the scheduled messages again when retry is tapped', (tester) async {
+    _stubState(client, clientState, [], hasLoadedAll: false);
     when(client.loadScheduledMessages).thenAnswer((_) async => throw const StreamChatError('Boom'));
     await tester.pumpWidget(_wrapWithMaterialApp(client: client, child: const StreamScheduledMessageListView()));
     await tester.pump();
@@ -172,7 +177,9 @@ void main() {
     verify(client.loadScheduledMessages).called(2);
   });
 
-  testWidgets('calls onScheduledMessageTap with the tapped scheduled message', (tester) async {
+  testWidgets('StreamScheduledMessageListView calls onScheduledMessageTap with the tapped scheduled message', (
+    tester,
+  ) async {
     final tapped = <ScheduledMessage>[];
     await tester.pumpWidget(
       _wrapWithMaterialApp(
@@ -183,24 +190,27 @@ void main() {
 
     await tester.tap(find.byType(StreamScheduledMessageListItem).first);
 
-    expect(tapped, [first]);
+    expect(tapped, [_first()]);
   });
 
-  testWidgets('calls onScheduledMessageLongPress with the long-pressed scheduled message', (tester) async {
-    final longPressed = <ScheduledMessage>[];
-    await tester.pumpWidget(
-      _wrapWithMaterialApp(
-        client: client,
-        child: StreamScheduledMessageListView(onScheduledMessageLongPress: longPressed.add),
-      ),
-    );
+  testWidgets(
+    'StreamScheduledMessageListView calls onScheduledMessageLongPress with the long-pressed scheduled message',
+    (tester) async {
+      final longPressed = <ScheduledMessage>[];
+      await tester.pumpWidget(
+        _wrapWithMaterialApp(
+          client: client,
+          child: StreamScheduledMessageListView(onScheduledMessageLongPress: longPressed.add),
+        ),
+      );
 
-    await tester.longPress(find.byType(StreamScheduledMessageListItem).last);
+      await tester.longPress(find.byType(StreamScheduledMessageListItem).last);
 
-    expect(longPressed, [second]);
-  });
+      expect(longPressed, [_second()]);
+    },
+  );
 
-  testWidgets('honors per-instance itemBuilder override', (tester) async {
+  testWidgets('StreamScheduledMessageListView honors per-instance itemBuilder override', (tester) async {
     await tester.pumpWidget(
       _wrapWithMaterialApp(
         client: client,
@@ -213,7 +223,9 @@ void main() {
     expect(find.text('custom-scheduled-row'), findsNWidgets(2));
   });
 
-  testWidgets('honors global scheduledMessageListItem component builder override', (tester) async {
+  testWidgets('StreamScheduledMessageListView honors global scheduledMessageListItem component builder override', (
+    tester,
+  ) async {
     await tester.pumpWidget(
       _wrapWithMaterialApp(
         client: client,
@@ -228,6 +240,30 @@ void main() {
 
     expect(find.text('global-scheduled-item'), findsNWidgets(2));
   });
+}
+
+// Puts [scheduledMessages] in the client state, all loaded unless
+// [hasLoadedAll] is false.
+void _stubState(
+  MockClient client,
+  MockClientState clientState,
+  List<ScheduledMessage> scheduledMessages, {
+  bool hasLoadedAll = true,
+}) {
+  final state = ScheduledMessageListState(
+    scheduledMessages: scheduledMessages,
+    hasLoadedAll: hasLoadedAll,
+  );
+  when(() => clientState.scheduledMessageListState).thenReturn(state);
+  when(client.loadScheduledMessages).thenAnswer((_) async => state);
+}
+
+ScheduledMessage _first() {
+  return _scheduledMessage('first', text: 'Message from the scheduled list');
+}
+
+ScheduledMessage _second() {
+  return _scheduledMessage('second', text: 'Another scheduled message');
 }
 
 ScheduledMessage _scheduledMessage(

@@ -23,16 +23,20 @@ const _kMentionTrigger = '@';
 /// previewed as an OG Attachment.
 typedef OgPreviewFilter = bool Function(Uri matchedUri, String messageText);
 
-/// Signature for [StreamMessageComposer.onSendLongPress], called when the send
+/// Signature for [MessageComposerProps.onSendLongPress], called when the send
 /// button is long-pressed while it would send a new message.
 ///
 /// The [BuildContext] is the composer's.
-typedef StreamSendLongPressCallback = void Function(BuildContext context, StreamSendLongPressDetails details);
+typedef StreamSendLongPressCallback =
+    void Function(
+      BuildContext context,
+      StreamSendLongPressDetails details,
+    );
 
 /// Details of a long press on the send button, passed to
 /// [StreamSendLongPressCallback].
 @immutable
-final class StreamSendLongPressDetails {
+class StreamSendLongPressDetails {
   /// Creates details for a long press on the send button.
   const StreamSendLongPressDetails({required this.controller});
 

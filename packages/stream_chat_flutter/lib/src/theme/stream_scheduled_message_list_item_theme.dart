@@ -5,11 +5,10 @@ import '../../stream_chat_flutter.dart';
 
 part 'stream_scheduled_message_list_item_theme.g.theme.dart';
 
-/// Applies a scheduled message list item theme to descendant
-/// [StreamScheduledMessageListItem] widgets.
+/// An inherited theme for descendant [StreamScheduledMessageListItem]s.
 ///
-/// Wrap a subtree with [StreamScheduledMessageListItemTheme] to override
-/// styling.
+/// Values set here override [StreamChatThemeData.scheduledMessageListItemTheme]
+/// for the subtree.
 ///
 /// {@tool snippet}
 ///
@@ -20,7 +19,7 @@ part 'stream_scheduled_message_list_item_theme.g.theme.dart';
 ///   data: StreamScheduledMessageListItemThemeData(
 ///     sendTimeStyle: TextStyle(color: Colors.blue),
 ///   ),
-///   child: StreamScheduledMessageListView(controller: controller),
+///   child: const StreamScheduledMessageListView(),
 /// )
 /// ```
 /// {@end-tool}
@@ -28,7 +27,7 @@ part 'stream_scheduled_message_list_item_theme.g.theme.dart';
 /// See also:
 ///
 ///  * [StreamScheduledMessageListItemThemeData], which describes the theme.
-///  * [StreamScheduledMessageListItem], the widget affected by this theme.
+///  * [StreamScheduledMessageListItem], which this theme styles.
 class StreamScheduledMessageListItemTheme extends InheritedTheme {
   /// Creates a scheduled message list item theme that controls descendant
   /// widgets.
@@ -41,14 +40,16 @@ class StreamScheduledMessageListItemTheme extends InheritedTheme {
   /// The scheduled message list item theme data for descendant widgets.
   final StreamScheduledMessageListItemThemeData data;
 
-  /// Returns the [StreamScheduledMessageListItemThemeData] merged from local
-  /// and global themes.
+  /// The [StreamScheduledMessageListItemThemeData] merged from local and
+  /// global themes.
   ///
   /// Local values from the nearest [StreamScheduledMessageListItemTheme]
   /// ancestor take precedence over global values from [StreamChatTheme.of].
   static StreamScheduledMessageListItemThemeData of(BuildContext context) {
     final localTheme = context.dependOnInheritedWidgetOfExactType<StreamScheduledMessageListItemTheme>();
-    return StreamChatTheme.of(context).scheduledMessageListItemTheme.merge(localTheme?.data);
+    final globalTheme = StreamChatTheme.of(context).scheduledMessageListItemTheme;
+
+    return globalTheme.merge(localTheme?.data);
   }
 
   @override
@@ -57,14 +58,16 @@ class StreamScheduledMessageListItemTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(StreamScheduledMessageListItemTheme oldWidget) => data != oldWidget.data;
+  bool updateShouldNotify(StreamScheduledMessageListItemTheme oldWidget) {
+    return data != oldWidget.data;
+  }
 }
 
 /// Theme data for customizing [StreamScheduledMessageListItem] widgets.
 ///
 /// {@tool snippet}
 ///
-/// Customize scheduled message rows globally:
+/// Scheduled message rows styled app-wide:
 ///
 /// ```dart
 /// StreamChatThemeData(
@@ -77,8 +80,8 @@ class StreamScheduledMessageListItemTheme extends InheritedTheme {
 ///
 /// See also:
 ///
-///  * [StreamScheduledMessageListItem], the widget that uses this theme data.
-///  * [StreamScheduledMessageListItemTheme], for overriding the theme in a
+///  * [StreamScheduledMessageListItem], which uses this theme data.
+///  * [StreamScheduledMessageListItemTheme], which overrides the theme in a
 ///    widget subtree.
 @themeGen
 @immutable
@@ -157,7 +160,7 @@ class StreamScheduledMessageListItemThemeData with _$StreamScheduledMessageListI
   /// [StreamTextTheme.captionDefault] with [StreamColorScheme.accentError].
   final TextStyle? failedStatusStyle;
 
-  /// Linearly interpolate between two
+  /// Linearly interpolates between two
   /// [StreamScheduledMessageListItemThemeData] objects.
   static StreamScheduledMessageListItemThemeData? lerp(
     StreamScheduledMessageListItemThemeData? a,

@@ -898,8 +898,8 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => '送信できませんでした。もう一度お試しください',
-      .internalError => '問題が発生しました。もう一度お試しください',
+      .requestFailed => '送信できませんでした。もう一度お試しください。',
+      .internalError => '問題が発生しました。もう一度お試しください。',
       .channelDeleted => 'このチャンネルは削除されました',
       .userDeleted => 'アカウントが削除されました',
       .channelFrozen => 'このチャンネルは凍結されています',
@@ -911,7 +911,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
       .pendingNotSupported => 'このチャンネルでは承認が必要になりました。もう一度予約してください。',
       .invalidMessage when isQuoteDeleted => '引用元のメッセージが削除されました。編集して引用を削除してください。',
       .invalidMessage => 'メッセージがアプリの制限を満たさなくなりました。編集してください。',
-      _ => '問題が発生しました。もう一度お試しください',
+      _ => '問題が発生しました。もう一度お試しください。',
     };
   }
 
@@ -1044,7 +1044,7 @@ class _AccessibilityTranslationsJa extends AccessibilityTranslations {
 
   @override
   String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
-    final date = formatDateTime(scheduledAt);
+    final date = formatDateTime(scheduledAt.toLocal());
     return '$date に予約済み';
   }
 

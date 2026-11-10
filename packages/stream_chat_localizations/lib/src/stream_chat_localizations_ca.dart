@@ -918,8 +918,8 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => "No s'ha pogut enviar. Torna-ho a provar",
-      .internalError => 'Alguna cosa ha anat malament. Torna-ho a provar',
+      .requestFailed => "No s'ha pogut enviar. Torna-ho a provar.",
+      .internalError => 'Alguna cosa ha anat malament. Torna-ho a provar.',
       .channelDeleted => "Aquest canal s'ha eliminat",
       .userDeleted => "El teu compte s'ha eliminat",
       .channelFrozen => 'Aquest canal està congelat',
@@ -931,7 +931,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
       .pendingNotSupported => 'Aquest canal ara requereix aprovació. Torna a programar-lo.',
       .invalidMessage when isQuoteDeleted => "El missatge citat s'ha eliminat. Edita'l per treure la cita.",
       .invalidMessage => "El missatge ja no compleix els límits de l'aplicació. Edita'l.",
-      _ => 'Alguna cosa ha anat malament. Torna-ho a provar',
+      _ => 'Alguna cosa ha anat malament. Torna-ho a provar.',
     };
   }
 
@@ -1067,7 +1067,7 @@ class _AccessibilityTranslationsCa extends AccessibilityTranslations {
 
   @override
   String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
-    final date = formatDateTime(scheduledAt);
+    final date = formatDateTime(scheduledAt.toLocal());
     return 'Programat per al $date';
   }
 

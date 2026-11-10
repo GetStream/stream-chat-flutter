@@ -918,8 +918,8 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => 'नहीं भेजा जा सका। फिर से कोशिश करें',
-      .internalError => 'कुछ गलत हो गया। फिर से कोशिश करें',
+      .requestFailed => 'नहीं भेजा जा सका। फिर से कोशिश करें।',
+      .internalError => 'कुछ गलत हो गया। फिर से कोशिश करें।',
       .channelDeleted => 'यह चैनल हटा दिया गया था',
       .userDeleted => 'आपका खाता हटा दिया गया',
       .channelFrozen => 'यह चैनल फ़्रीज़ है',
@@ -931,7 +931,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
       .pendingNotSupported => 'इस चैनल में अब अनुमोदन ज़रूरी है। इसे फिर से शेड्यूल करें।',
       .invalidMessage when isQuoteDeleted => 'उद्धृत संदेश हटा दिया गया था। उद्धरण हटाने के लिए इसे संपादित करें।',
       .invalidMessage => 'संदेश अब ऐप की सीमाओं को पूरा नहीं करता। इसे संपादित करें।',
-      _ => 'कुछ गलत हो गया। फिर से कोशिश करें',
+      _ => 'कुछ गलत हो गया। फिर से कोशिश करें।',
     };
   }
 
@@ -1066,7 +1066,7 @@ class _AccessibilityTranslationsHi extends AccessibilityTranslations {
 
   @override
   String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
-    final date = formatDateTime(scheduledAt);
+    final date = formatDateTime(scheduledAt.toLocal());
     return '$date के लिए शेड्यूल किया गया';
   }
 
