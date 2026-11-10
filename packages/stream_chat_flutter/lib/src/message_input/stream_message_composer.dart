@@ -1808,11 +1808,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             prepared = await onPreMessageSending(message);
           }
 
-          await channel.scheduleMessage(
-            prepared,
-            scheduledAt: scheduledAt,
-            skipEnrichUrl: skipEnrichUrl,
-          );
+          await channel.scheduleMessage(prepared, scheduledAt: scheduledAt, skipEnrichUrl: skipEnrichUrl);
         },
       );
       if (scheduledAt == null || !mounted) return;

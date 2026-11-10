@@ -12,12 +12,8 @@ Widget buildSchedulePickerTheme(BuildContext context, Widget? child) {
   final radius = context.streamRadius;
 
   final accentContainer = colorScheme.brand.shade150;
-  final shape = RoundedRectangleBorder(
-    borderRadius: BorderRadius.all(radius.lg),
-  );
-  final helpTextStyle = textTheme.captionEmphasis.copyWith(
-    color: colorScheme.textSecondary,
-  );
+  final shape = RoundedRectangleBorder(borderRadius: BorderRadius.all(radius.lg));
+  final helpTextStyle = textTheme.captionEmphasis.copyWith(color: colorScheme.textSecondary);
 
   final pickerTheme = theme.copyWith(
     colorScheme: theme.colorScheme.copyWith(

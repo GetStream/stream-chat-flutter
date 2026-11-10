@@ -126,9 +126,7 @@ class _StreamScheduleTimeSheetState extends State<StreamScheduleTimeSheet> {
     if (date == null || !mounted) return;
 
     final time = _scheduledAt;
-    _setScheduledAt(
-      DateTime(date.year, date.month, date.day, time.hour, time.minute),
-    );
+    _setScheduledAt(DateTime(date.year, date.month, date.day, time.hour, time.minute));
   }
 
   Future<void> _pickTime() async {
@@ -140,9 +138,7 @@ class _StreamScheduleTimeSheetState extends State<StreamScheduleTimeSheet> {
     if (time == null || !mounted) return;
 
     final date = _scheduledAt;
-    _setScheduledAt(
-      DateTime(date.year, date.month, date.day, time.hour, time.minute),
-    );
+    _setScheduledAt(DateTime(date.year, date.month, date.day, time.hour, time.minute));
   }
 
   Future<void> _schedule() async {
@@ -211,13 +207,9 @@ class _StreamScheduleTimeSheetState extends State<StreamScheduleTimeSheet> {
     final canSchedule = !isOutOfBounds && !_isScheduling;
 
     final channelName = scheduleChannelName(widget.channel);
-    final valueStyle = textTheme.captionDefault.copyWith(
-      color: colorScheme.textTertiary,
-    );
+    final valueStyle = textTheme.captionDefault.copyWith(color: colorScheme.textTertiary);
     final date = materialLocalizations.formatMediumDate(_scheduledAt);
-    final time = materialLocalizations.formatTimeOfDay(
-      TimeOfDay.fromDateTime(_scheduledAt),
-    );
+    final time = materialLocalizations.formatTimeOfDay(TimeOfDay.fromDateTime(_scheduledAt));
     final timeZone = timeZoneLabel(_scheduledAt.timeZoneOffset);
 
     final contentPadding = EdgeInsets.symmetric(horizontal: spacing.md);
@@ -245,22 +237,15 @@ class _StreamScheduleTimeSheetState extends State<StreamScheduleTimeSheet> {
                     padding: contentPadding,
                     child: StreamMessageComposerEditMessageAttachment(
                       title: Text(
-                        translations.messageToText(
-                          name: channelName ?? translations.noTitleText,
-                        ),
+                        translations.messageToText(name: channelName ?? translations.noTitleText),
                       ),
-                      subtitle: _ScheduledMessagePreviewText(
-                        message: widget.message,
-                      ),
+                      subtitle: _ScheduledMessagePreviewText(message: widget.message),
                     ),
                   ),
                   if (errorText != null)
                     Padding(
                       padding: contentPadding,
-                      child: StreamInlineNotification(
-                        type: .error,
-                        title: Text(errorText),
-                      ),
+                      child: StreamInlineNotification(type: .error, title: Text(errorText)),
                     ),
                   IconTheme.merge(
                     data: const IconThemeData(size: 20),
@@ -288,9 +273,7 @@ class _StreamScheduleTimeSheetState extends State<StreamScheduleTimeSheet> {
                   Padding(
                     padding: contentPadding,
                     child: StreamInlineNotification(
-                      title: Text(
-                        translations.sentInYourTimeZoneText(timeZone: timeZone),
-                      ),
+                      title: Text(translations.sentInYourTimeZoneText(timeZone: timeZone)),
                     ),
                   ),
                   Padding(
@@ -346,17 +329,9 @@ class _ScheduleTimeRow extends StatelessWidget {
     return StreamListTileTheme(
       data: StreamListTileThemeData(
         minTileHeight: 48,
-        contentPadding: .symmetric(
-          horizontal: spacing.sm,
-          vertical: spacing.xs,
-        ),
+        contentPadding: .symmetric(horizontal: spacing.sm, vertical: spacing.xs),
       ),
-      child: StreamListTile(
-        leading: icon,
-        title: label,
-        trailing: value,
-        onTap: onTap,
-      ),
+      child: StreamListTile(leading: icon, title: label, trailing: value, onTap: onTap),
     );
   }
 }

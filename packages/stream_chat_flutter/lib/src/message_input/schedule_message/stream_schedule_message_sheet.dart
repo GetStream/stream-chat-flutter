@@ -114,17 +114,9 @@ class StreamScheduleMessageSheet extends StatelessWidget {
         child: Column(
           mainAxisSize: .min,
           children: [
-            StreamSheetHeader(
-              automaticallyImplyLeading: false,
-              title: Text(title),
-            ),
+            StreamSheetHeader(automaticallyImplyLeading: false, title: Text(title)),
             Padding(
-              padding: EdgeInsets.fromLTRB(
-                spacing.xxs,
-                0,
-                spacing.xxs,
-                spacing.xs,
-              ),
+              padding: EdgeInsets.fromLTRB(spacing.xxs, 0, spacing.xxs, spacing.xs),
               child: Column(
                 mainAxisSize: .min,
                 children: [
@@ -132,12 +124,8 @@ class StreamScheduleMessageSheet extends StatelessWidget {
                     _ScheduleOptionRow(
                       label: Text(
                         switch (isTomorrow(preset)) {
-                          true => translations.scheduleTomorrowText(
-                            scheduledAt: preset,
-                          ),
-                          false => translations.scheduleWeekdayText(
-                            scheduledAt: preset,
-                          ),
+                          true => translations.scheduleTomorrowText(scheduledAt: preset),
+                          false => translations.scheduleWeekdayText(scheduledAt: preset),
                         },
                       ),
                       enabled: !isLimitReached,
@@ -180,10 +168,7 @@ class _ScheduleOptionRow extends StatelessWidget {
     return StreamListTileTheme(
       data: StreamListTileThemeData(
         minTileHeight: 48,
-        contentPadding: .symmetric(
-          horizontal: spacing.sm,
-          vertical: spacing.xs,
-        ),
+        contentPadding: .symmetric(horizontal: spacing.sm, vertical: spacing.xs),
       ),
       child: StreamListTile(
         leading: Icon(context.streamIcons.clock),

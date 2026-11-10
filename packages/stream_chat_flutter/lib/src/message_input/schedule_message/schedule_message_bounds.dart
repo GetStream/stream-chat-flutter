@@ -104,9 +104,7 @@ bool isScheduleLimitReached(Channel channel) {
 String? scheduleChannelName(Channel channel) {
   // A loaded channel keeps its members on its state, not on its model.
   final state = channel.state;
-  final model = state?.channelState.channel?.copyWith(
-    members: state.members,
-  );
+  final model = state?.channelState.channel?.copyWith(members: state.members);
 
   return model?.formatName(currentUser: channel.client.state.currentUser);
 }
