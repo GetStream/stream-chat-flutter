@@ -149,10 +149,7 @@ class DefaultStreamScheduledMessageListItem extends StatelessWidget {
             final isSelected = states.contains(WidgetState.selected);
             if (!isSelected) return effectiveBackgroundColor;
 
-            return .alphaBlend(
-              colorScheme.backgroundSelected,
-              effectiveBackgroundColor,
-            );
+            return .alphaBlend(colorScheme.backgroundSelected, effectiveBackgroundColor);
           }),
         ),
         child: StreamListTileContainer(
@@ -202,12 +199,8 @@ class _ScheduledMessageBody extends StatelessWidget {
     final summary = scheduledMessage.channel;
 
     // A loaded channel keeps its members on its state, not on its model.
-    final loadedModel = channelState?.channelState.channel?.copyWith(
-      members: channelState.members,
-    );
-    final loadedName = loadedModel?.formatName(
-      currentUser: streamChat.currentUser,
-    );
+    final loadedModel = channelState?.channelState.channel?.copyWith(members: channelState.members);
+    final loadedName = loadedModel?.formatName(currentUser: streamChat.currentUser);
     final summaryName = switch (summary?.name) {
       final name? when name.trim().isNotEmpty => name,
       _ => null,
@@ -247,9 +240,7 @@ class _ScheduledMessageBody extends StatelessWidget {
                       style: effectivePreviewStyle,
                       maxLines: 1,
                       overflow: .ellipsis,
-                      child: ScheduledMessagePreview(
-                        scheduledMessage: scheduledMessage,
-                      ),
+                      child: ScheduledMessagePreview(scheduledMessage: scheduledMessage),
                     ),
                   ],
                 ),
@@ -353,9 +344,7 @@ class ScheduledMessagePreview extends StatelessWidget {
 
     final ambientTextTheme = StreamMessagePreviewTextTheme.of(context);
     final baseTextTheme = defaults.previewTextTheme.merge(ambientTextTheme);
-    final effectiveTextTheme = baseTextTheme.merge(
-      textTheme ?? theme.previewTextTheme,
-    );
+    final effectiveTextTheme = baseTextTheme.merge(textTheme ?? theme.previewTextTheme);
 
     final prefix = switch (message) {
       Message(parentId: _?) => translations.scheduledThreadReplyPrefixText,

@@ -30,7 +30,7 @@ typedef StreamScheduledMessageListViewIndexedWidgetBuilder =
 ///
 /// ```dart
 /// StreamScheduledMessageListView(
-///   cid: channel.cid,
+///   channel: channel,
 ///   onScheduledMessageTap: (scheduledMessage) {
 ///     showStreamScheduledMessageActions(
 ///       context,
@@ -49,7 +49,7 @@ class StreamScheduledMessageListView extends StatefulWidget {
   /// {@macro streamScheduledMessageListView}
   const StreamScheduledMessageListView({
     super.key,
-    this.cid,
+    this.channel,
     this.parentId,
     this.itemBuilder,
     this.separatorBuilder = defaultScheduledMessageListViewSeparatorBuilder,
@@ -73,17 +73,16 @@ class StreamScheduledMessageListView extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  });
+  }) : assert(parentId == null || channel != null, 'parentId needs the channel of its thread.');
 
   /// The channel whose scheduled messages are listed.
   ///
   /// When null, every channel's are.
-  final String? cid;
+  final Channel? channel;
 
   /// The ID of the message whose thread's scheduled replies are listed.
   ///
-  /// When set, only the replies in that thread are listed. When null and
-  /// [cid] is set, the replies in the channel's threads are left out.
+  /// Needs [channel].
   final String? parentId;
 
   /// A builder that is called to build items in the [ListView].
@@ -184,72 +183,76 @@ class StreamScheduledMessageListView extends StatefulWidget {
 }
 
 class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageListView> {
-  var _didStartLoading = false;
-  var _isLoading = false;
-  StreamChatError? _error;
+  Future<void>? _loading;
+  Stream<List<ScheduledMessage>>? _stream;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_didStartLoading) return;
-    _didStartLoading = true;
+    _stream ??= _scheduledMessagesStream();
+    _loading ??= _loadIfNeeded();
+  }
 
+  @override
+  void didUpdateWidget(covariant StreamScheduledMessageListView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.channel == oldWidget.channel && widget.parentId == oldWidget.parentId) return;
+
+    _stream = _scheduledMessagesStream();
+  }
+
+  Future<void>? _loadIfNeeded() {
     final client = StreamChat.of(context).client;
-    if (client.state.scheduledMessageListState.hasLoadedAll) return;
-    _loadScheduledMessages();
+    if (client.state.scheduledMessageListState.hasLoadedAll) return null;
+
+    // A failure only shows when there's nothing to list, so it's ignored.
+    return client.loadScheduledMessages()..ignore();
   }
 
-  void _loadScheduledMessages() {
-    _isLoading = true;
-    _error = null;
-
-    final client = StreamChat.of(context).client;
-    _load(client).ignore();
+  void _retry() {
+    setState(() {
+      _loading = _loadIfNeeded();
+    });
   }
 
-  Future<void> _load(StreamChatClient client) async {
-    try {
-      await client.loadScheduledMessages();
-      if (!mounted) return;
-      setState(() => _isLoading = false);
-    } on StreamChatError catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-        _error = error;
-      });
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _isLoading = false;
-        _error = StreamChatError(error.toString());
-      });
-    }
-  }
+  // The scheduled messages in the scope of this list, as they change.
+  Stream<List<ScheduledMessage>> _scheduledMessagesStream() {
+    final channel = widget.channel;
+    if (channel == null) return StreamChat.of(context).client.state.scheduledMessagesStream;
 
-  // Whether [scheduledMessage] belongs to the scope of this list.
-  bool _isListed(ScheduledMessage scheduledMessage) {
-    final cid = widget.cid;
+    final channelState = channel.state!;
     final parentId = widget.parentId;
+    if (parentId == null) return channelState.scheduledMessagesStream;
+    return channelState.scheduledThreadRepliesStream(parentId);
+  }
 
-    if (cid != null && scheduledMessage.cid != cid) return false;
-    if (parentId != null) return scheduledMessage.message.parentId == parentId;
-    if (cid != null) return scheduledMessage.message.parentId == null;
+  // The scheduled messages in the scope of this list.
+  List<ScheduledMessage> _currentScheduledMessages() {
+    final channel = widget.channel;
+    if (channel == null) return StreamChat.of(context).client.state.scheduledMessages;
 
-    return true;
+    final channelState = channel.state!;
+    final parentId = widget.parentId;
+    if (parentId == null) return channelState.scheduledMessages;
+    return channelState.scheduledThreadReplies(parentId);
   }
 
   @override
   Widget build(BuildContext context) {
-    final client = StreamChat.of(context).client;
-
-    return BetterStreamBuilder<ScheduledMessageListState>(
-      stream: client.state.scheduledMessageListStateStream,
-      initialData: client.state.scheduledMessageListState,
-      builder: (context, state) {
-        final listed = state.scheduledMessages.where(_isListed);
-        final scheduledMessages = listed.toList();
-        if (scheduledMessages.isEmpty) return _buildPlaceholder(context);
+    return BetterStreamBuilder<List<ScheduledMessage>>(
+      stream: _stream,
+      initialData: _currentScheduledMessages(),
+      builder: (context, scheduledMessages) {
+        if (scheduledMessages.isEmpty) {
+          return FutureBuilder<void>(
+            future: _loading,
+            builder: (context, snapshot) => switch (snapshot) {
+              AsyncSnapshot(connectionState: .waiting) => _buildLoading(context),
+              AsyncSnapshot(:final error?) => _buildError(context, error),
+              _ => _buildEmpty(context),
+            },
+          );
+        }
 
         return ListView.separated(
           scrollDirection: widget.scrollDirection,
@@ -269,67 +272,56 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
           cacheExtent: widget.cacheExtent,
           clipBehavior: widget.clipBehavior,
           itemCount: scheduledMessages.length,
-          separatorBuilder: (context, index) {
-            return widget.separatorBuilder(context, scheduledMessages, index);
-          },
-          itemBuilder: (context, index) {
-            final scheduledMessage = scheduledMessages[index];
-            final onTap = widget.onScheduledMessageTap;
-            final onLongPress = widget.onScheduledMessageLongPress;
-            final item = StreamScheduledMessageListItem(
-              scheduledMessage: scheduledMessage,
-              onTap: switch (onTap) {
-                final onTap? => () => onTap(scheduledMessage),
-                null => null,
-              },
-              onLongPress: switch (onLongPress) {
-                final onLongPress? => () => onLongPress(scheduledMessage),
-                null => null,
-              },
-            );
-
-            final itemBuilder = widget.itemBuilder;
-            if (itemBuilder == null) return item;
-            return itemBuilder(context, scheduledMessages, index, item);
-          },
+          separatorBuilder: (context, index) => widget.separatorBuilder(context, scheduledMessages, index),
+          itemBuilder: (context, index) => _buildItem(context, scheduledMessages, index),
         );
       },
     );
   }
 
-  // The loading, error or empty state shown while there is no row to list.
-  Widget _buildPlaceholder(BuildContext context) {
-    if (_isLoading) {
-      final loading = widget.loadingBuilder?.call(context);
-      if (loading != null) return loading;
+  Widget _buildItem(BuildContext context, List<ScheduledMessage> scheduledMessages, int index) {
+    final scheduledMessage = scheduledMessages[index];
+    final onTap = widget.onScheduledMessageTap;
+    final onLongPress = widget.onScheduledMessageLongPress;
+    final item = StreamScheduledMessageListItem(
+      scheduledMessage: scheduledMessage,
+      onTap: onTap == null ? null : () => onTap(scheduledMessage),
+      onLongPress: onLongPress == null ? null : () => onLongPress(scheduledMessage),
+    );
 
-      return Center(
-        child: StreamScheduledMessageListSkeletonLoading(
-          padding: widget.padding,
-        ),
-      );
-    }
+    return widget.itemBuilder?.call(context, scheduledMessages, index, item) ?? item;
+  }
 
-    if (_error case final error?) {
-      final custom = widget.errorBuilder?.call(context, error);
-      if (custom != null) return custom;
+  Widget _buildLoading(BuildContext context) {
+    if (widget.loadingBuilder?.call(context) case final custom?) return custom;
 
-      final translations = context.translations;
-      final text = resolveNetworkErrorText(
-        context,
-        error,
-        fallbackTitle: translations.loadingScheduledMessagesError,
-      );
+    return Center(
+      child: StreamScheduledMessageListSkeletonLoading(padding: widget.padding),
+    );
+  }
 
-      return Center(
-        child: StreamScrollViewErrorWidget(
-          errorTitle: Text(text.title),
-          onRetryPressed: () => setState(_loadScheduledMessages),
-        ),
-      );
-    }
+  Widget _buildError(BuildContext context, Object error) {
+    final chatError = switch (error) {
+      final StreamChatError error => error,
+      _ => StreamChatError(error.toString()),
+    };
 
-    if (widget.emptyBuilder?.call(context) case final empty?) return empty;
+    if (widget.errorBuilder?.call(context, chatError) case final custom?) return custom;
+
+    final translations = context.translations;
+    final text = resolveNetworkErrorText(context, chatError, fallbackTitle: translations.loadingScheduledMessagesError);
+
+    return Center(
+      child: StreamScrollViewErrorWidget(
+        errorTitle: Text(text.title),
+        onRetryPressed: _retry,
+      ),
+    );
+  }
+
+  Widget _buildEmpty(BuildContext context) {
+    if (widget.emptyBuilder?.call(context) case final custom?) return custom;
+
     return Center(
       child: StreamScrollViewEmptyWidget(
         emptyIcon: Icon(context.streamIcons.clock),

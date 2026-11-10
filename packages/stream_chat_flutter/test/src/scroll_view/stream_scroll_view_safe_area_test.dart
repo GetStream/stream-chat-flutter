@@ -150,7 +150,8 @@ Future<void> _pumpWithInsets(
   when(() => client.state).thenReturn(clientState);
   when(() => clientState.currentUser).thenReturn(OwnUser(id: 'current-user-id'));
   when(() => clientState.scheduledMessageListState).thenReturn(scheduledState);
-  when(() => clientState.scheduledMessageListStateStream).thenAnswer((_) => Stream.value(scheduledState));
+  when(() => clientState.scheduledMessages).thenReturn(scheduledState.scheduledMessages);
+  when(() => clientState.scheduledMessagesStream).thenAnswer((_) => Stream.value(scheduledState.scheduledMessages));
   when(client.loadScheduledMessages).thenAnswer((_) => loadScheduledMessages?.call() ?? Future.value(scheduledState));
 
   await tester.pumpWidget(

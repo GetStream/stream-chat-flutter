@@ -59,7 +59,8 @@ _MockClient _client({List<ScheduledMessage> scheduledMessages = const []}) {
   when(() => state.channels).thenReturn({});
   when(() => state.users).thenReturn({});
   when(() => state.scheduledMessageListState).thenReturn(listState);
-  when(() => state.scheduledMessageListStateStream).thenAnswer((_) => Stream.value(listState));
+  when(() => state.scheduledMessages).thenReturn(scheduledMessages);
+  when(() => state.scheduledMessagesStream).thenAnswer((_) => Stream.value(scheduledMessages));
   when(client.loadScheduledMessages).thenAnswer((_) async => listState);
 
   return client;

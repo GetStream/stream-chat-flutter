@@ -52,11 +52,16 @@ class ScheduledMessagesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final client = StreamChat.of(context).client;
+    // Opened from a channel the client has loaded.
+    final channel = switch (cid) {
+      final cid? => client.state.channels[cid],
+      null => null,
+    };
 
     return RefreshIndicator.adaptive(
       onRefresh: client.loadScheduledMessages,
       child: StreamScheduledMessageListView(
-        cid: cid,
+        channel: channel,
         parentId: parentId,
         physics: const AlwaysScrollableScrollPhysics(),
         onScheduledMessageTap: (scheduledMessage) {

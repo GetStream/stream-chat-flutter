@@ -68,16 +68,8 @@ class _StreamScheduledMessageListItemSkeleton extends StatelessWidget {
                     crossAxisAlignment: .start,
                     spacing: spacing.xs,
                     children: [
-                      StreamSkeletonBox(
-                        width: 96,
-                        height: 12,
-                        borderRadius: barRadius,
-                      ),
-                      StreamSkeletonBox(
-                        width: 260,
-                        height: 16,
-                        borderRadius: barRadius,
-                      ),
+                      StreamSkeletonBox(width: 96, height: 12, borderRadius: barRadius),
+                      StreamSkeletonBox(width: 260, height: 16, borderRadius: barRadius),
                     ],
                   ),
                 ),
