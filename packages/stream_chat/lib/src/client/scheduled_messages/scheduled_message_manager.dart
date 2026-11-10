@@ -38,9 +38,7 @@ class ScheduledMessageManager {
   ScheduledMessagesApi get _api => _client.chatApi.scheduledMessages;
 
   final _stateNotifier = ScheduledMessageListStateNotifier();
-  late final _eventHandler = ScheduledMessageEventHandler(
-    state: _stateNotifier,
-  );
+  late final _eventHandler = ScheduledMessageEventHandler(state: _stateNotifier);
   late final StreamSubscription<Event> _eventsSubscription;
 
   // The load of the complete list, shared while it runs.
@@ -92,9 +90,7 @@ class ScheduledMessageManager {
 
       String? next;
       do {
-        final response = await queryMessages(
-          ScheduledMessagesQuery(limit: _pageSize, next: next),
-        );
+        final response = await queryMessages(ScheduledMessagesQuery(limit: _pageSize, next: next));
 
         loaded.addAll(response.scheduledMessages);
         next = response.next;
@@ -202,12 +198,7 @@ class ScheduledMessageManager {
         _emitEvent(EventType.scheduledMessageCreated, created, generation);
       } else if (local != null) {
         // Its time had passed, so it was sent right away.
-        _emitEvent(
-          EventType.scheduledMessageSent,
-          _sent(local),
-          generation,
-          messageId: response.message.id,
-        );
+        _emitEvent(EventType.scheduledMessageSent, _sent(local), generation, messageId: response.message.id);
       }
 
       return response;
@@ -221,8 +212,7 @@ class ScheduledMessageManager {
       }
 
       if (!error.isRetriable) {
-        final canceled = _canceled(local);
-        _emitEvent(EventType.scheduledMessageDeleted, canceled, generation);
+        _emitEvent(EventType.scheduledMessageDeleted, _canceled(local), generation);
         rethrow;
       }
 
@@ -236,8 +226,7 @@ class ScheduledMessageManager {
       rethrow;
     } catch (_) {
       if (local != null) {
-        final canceled = _canceled(local);
-        _emitEvent(EventType.scheduledMessageDeleted, canceled, generation);
+        _emitEvent(EventType.scheduledMessageDeleted, _canceled(local), generation);
       }
 
       rethrow;
@@ -308,8 +297,7 @@ class ScheduledMessageManager {
       ),
     );
 
-    final updated = response.scheduledMessage;
-    _emitEvent(EventType.scheduledMessageUpdated, updated, generation);
+    _emitEvent(EventType.scheduledMessageUpdated, response.scheduledMessage, generation);
     return response;
   }
 
@@ -329,14 +317,10 @@ class ScheduledMessageManager {
     final response = await _request(
       scheduledMessage,
       generation,
-      () => _api.updateScheduledMessage(
-        scheduledMessage.id,
-        scheduledAt: scheduledAt,
-      ),
+      () => _api.updateScheduledMessage(scheduledMessage.id, scheduledAt: scheduledAt),
     );
 
-    final updated = response.scheduledMessage;
-    _emitEvent(EventType.scheduledMessageUpdated, updated, generation);
+    _emitEvent(EventType.scheduledMessageUpdated, response.scheduledMessage, generation);
     return response;
   }
 
@@ -356,8 +340,7 @@ class ScheduledMessageManager {
       () => _api.sendScheduledMessageNow(scheduledMessage.id),
     );
 
-    final updated = response.scheduledMessage;
-    _emitEvent(EventType.scheduledMessageUpdated, updated, generation);
+    _emitEvent(EventType.scheduledMessageUpdated, response.scheduledMessage, generation);
     return response;
   }
 
@@ -377,10 +360,8 @@ class ScheduledMessageManager {
     final generation = _generation;
     if (scheduledMessage.failureReason?.isRetriable ?? false) {
       try {
-        final id = scheduledMessage.id;
-        final response = await _api.deleteScheduledMessage(id);
-        final deleted = response.scheduledMessage;
-        _emitEvent(EventType.scheduledMessageDeleted, deleted, generation);
+        final response = await _api.deleteScheduledMessage(scheduledMessage.id);
+        _emitEvent(EventType.scheduledMessageDeleted, response.scheduledMessage, generation);
         return response;
       } on StreamChatNetworkError catch (error) {
         if (error.statusCode != 404) rethrow;
@@ -397,8 +378,7 @@ class ScheduledMessageManager {
       () => _api.deleteScheduledMessage(scheduledMessage.id),
     );
 
-    final deleted = response.scheduledMessage;
-    _emitEvent(EventType.scheduledMessageDeleted, deleted, generation);
+    _emitEvent(EventType.scheduledMessageDeleted, response.scheduledMessage, generation);
     return response;
   }
 
@@ -447,11 +427,7 @@ class ScheduledMessageManager {
       await loadMessages();
       _wasLoadedBeforeConnectionLost = false;
     } catch (error, stackTrace) {
-      _logger?.warning(
-        'Failed to reload the scheduled messages',
-        error,
-        stackTrace,
-      );
+      _logger?.warning('Failed to reload the scheduled messages', error, stackTrace);
     }
   }
 
@@ -466,8 +442,7 @@ class ScheduledMessageManager {
       return await request();
     } on StreamChatNetworkError catch (error) {
       if (error.statusCode == 404) {
-        final canceled = _canceled(scheduledMessage);
-        _emitEvent(EventType.scheduledMessageDeleted, canceled, generation);
+        _emitEvent(EventType.scheduledMessageDeleted, _canceled(scheduledMessage), generation);
       }
 
       rethrow;
@@ -476,18 +451,12 @@ class ScheduledMessageManager {
 
   // [scheduledMessage], marked sent.
   ScheduledMessage _sent(ScheduledMessage scheduledMessage) {
-    return scheduledMessage.copyWith(
-      status: .sent,
-      localUpdatedAt: clock.now(),
-    );
+    return scheduledMessage.copyWith(status: .sent, localUpdatedAt: clock.now());
   }
 
   // [scheduledMessage], marked canceled.
   ScheduledMessage _canceled(ScheduledMessage scheduledMessage) {
-    return scheduledMessage.copyWith(
-      status: .canceled,
-      localUpdatedAt: clock.now(),
-    );
+    return scheduledMessage.copyWith(status: .canceled, localUpdatedAt: clock.now());
   }
 
   // Reports [scheduledMessage] as an event of [type], unless the user changed
@@ -562,9 +531,7 @@ extension ScheduledMessageManagerScope on ScheduledMessageManager {
   Stream<List<ScheduledMessage>> _scopedStream(
     bool Function(ScheduledMessage) test,
   ) {
-    final scoped = stream.map(
-      (it) => it.scheduledMessages.where(test).toList(),
-    );
+    final scoped = stream.map((it) => it.scheduledMessages.where(test).toList());
 
     return scoped.distinct(const ListEquality().equals);
   }

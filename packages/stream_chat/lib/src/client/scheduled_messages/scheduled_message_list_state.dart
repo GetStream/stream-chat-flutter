@@ -75,12 +75,7 @@ class ScheduledMessageListStateNotifier {
     final local = _scheduledMessages.where((it) => it.isLocal);
     final merged = _merged(local, scheduledMessages);
 
-    _emit(
-      state.copyWith(
-        scheduledMessages: _sorted(merged),
-        hasLoadedAll: true,
-      ),
-    );
+    _emit(state.copyWith(scheduledMessages: _sorted(merged), hasLoadedAll: true));
   }
 
   /// Adds [scheduledMessages], from a page or a filtered query.
@@ -97,9 +92,7 @@ class ScheduledMessageListStateNotifier {
   /// The ones still being scheduled, or whose request failed, are kept.
   void onChannelsQueried(List<ChannelScheduledMessages> channels) {
     final cids = {for (final it in channels) it.cid};
-    final kept = _scheduledMessages.where(
-      (it) => !cids.contains(it.cid) || it.isLocal,
-    );
+    final kept = _scheduledMessages.where((it) => !cids.contains(it.cid) || it.isLocal);
 
     final queried = channels.expand((it) => it.scheduledMessages);
     final merged = _merged(kept, queried);

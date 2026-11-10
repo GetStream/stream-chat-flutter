@@ -3174,9 +3174,7 @@ class ClientState {
   ///
   /// Emits the current value on listen, then a new value each time they change.
   Stream<List<ScheduledMessage>> get scheduledMessagesStream {
-    final scheduledMessages = scheduledMessageListStateStream.map(
-      (it) => it.scheduledMessages,
-    );
+    final scheduledMessages = scheduledMessageListStateStream.map((it) => it.scheduledMessages);
 
     return scheduledMessages.distinct(const ListEquality().equals);
   }

@@ -225,11 +225,7 @@ void main() {
 
   test('a request refused while the message is being sent keeps it', () async {
     await hold([a]);
-    final error = StreamChatNetworkError.raw(
-      code: scheduledMessageSendingCode,
-      message: 'Sending',
-      statusCode: 409,
-    );
+    final error = StreamChatNetworkError.raw(code: scheduledMessageSendingCode, message: 'Sending', statusCode: 409);
     when(() => api.scheduledMessages.sendScheduledMessageNow('a')).thenAnswer((_) async => throw error);
 
     await expectLater(client.sendScheduledMessageNow(a), throwsA(error));

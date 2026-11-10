@@ -25,11 +25,7 @@ const scheduledMessageCanceledCode = 124;
 const loadPageSize = 100;
 
 // A scheduled message in a channel other than [testCid].
-final elsewhere = fakeScheduledMessage(
-  'there',
-  cid: 'messaging:other',
-  scheduledAt: DateTime.utc(2026, 11, 3),
-);
+final elsewhere = fakeScheduledMessage('there', cid: 'messaging:other', scheduledAt: DateTime.utc(2026, 11, 3));
 
 ScheduledMessage fakeScheduledMessage(
   String id, {
