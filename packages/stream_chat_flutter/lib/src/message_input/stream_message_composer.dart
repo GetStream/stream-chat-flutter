@@ -23,6 +23,25 @@ const _kMentionTrigger = '@';
 /// previewed as an OG Attachment.
 typedef OgPreviewFilter = bool Function(Uri matchedUri, String messageText);
 
+/// Signature for [StreamMessageComposer.onSendLongPress], called when the send
+/// button is long-pressed while it would send a new message.
+///
+/// The [BuildContext] is the composer's.
+typedef StreamSendLongPressCallback = void Function(BuildContext context, StreamSendLongPressDetails details);
+
+/// Details of a long press on the send button, passed to
+/// [StreamSendLongPressCallback].
+@immutable
+final class StreamSendLongPressDetails {
+  /// Creates details for a long press on the send button.
+  const StreamSendLongPressDetails({required this.controller});
+
+  /// The controller of the composer whose send button was long-pressed.
+  ///
+  /// It holds the message the send button would have sent.
+  final StreamMessageComposerController controller;
+}
+
 /// Inactive state:
 ///
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_input.png)
@@ -71,6 +90,7 @@ class StreamMessageComposer extends StatelessWidget {
     super.key,
     void Function(Message)? onMessageSent,
     FutureOr<Message> Function(Message)? preMessageSending,
+    StreamSendLongPressCallback? onSendLongPress,
     StreamMessageComposerController? messageComposerController,
     FocusNode? focusNode,
     bool disableAttachments = false,
@@ -109,6 +129,7 @@ class StreamMessageComposer extends StatelessWidget {
   }) : props = .new(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
+         onSendLongPress: onSendLongPress,
          messageComposerController: messageComposerController,
          focusNode: focusNode,
          disableAttachments: disableAttachments,
@@ -185,6 +206,7 @@ class MessageComposerProps {
   const MessageComposerProps({
     this.onMessageSent,
     this.preMessageSending,
+    this.onSendLongPress,
     this.messageComposerController,
     this.focusNode,
     this.disableAttachments = false,
@@ -232,6 +254,13 @@ class MessageComposerProps {
   ///
   /// Use this to transform the message.
   final FutureOr<Message> Function(Message)? preMessageSending;
+
+  /// Called when the send button is long-pressed while it would send a new
+  /// message.
+  ///
+  /// The composer is left as it is, so the callback decides what to do with
+  /// the message, such as scheduling it and then resetting the controller.
+  final StreamSendLongPressCallback? onSendLongPress;
 
   /// The controller for the message composer.
   final StreamMessageComposerController? messageComposerController;
@@ -461,6 +490,7 @@ class MessageComposerProps {
   MessageComposerProps copyWith({
     void Function(Message)? onMessageSent,
     FutureOr<Message> Function(Message)? preMessageSending,
+    StreamSendLongPressCallback? onSendLongPress,
     StreamMessageComposerController? messageComposerController,
     FocusNode? focusNode,
     bool? disableAttachments,
@@ -499,6 +529,7 @@ class MessageComposerProps {
     return MessageComposerProps(
       onMessageSent: onMessageSent ?? this.onMessageSent,
       preMessageSending: preMessageSending ?? this.preMessageSending,
+      onSendLongPress: onSendLongPress ?? this.onSendLongPress,
       messageComposerController: messageComposerController ?? this.messageComposerController,
       focusNode: focusNode ?? this.focusNode,
       disableAttachments: disableAttachments ?? this.disableAttachments,
@@ -1082,6 +1113,13 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               placeholder: _buildPlaceholder(context),
               focusNode: focusNode,
               onSendPressed: sendMessage,
+              onSendLongPress: switch (widget.props.onSendLongPress) {
+                final onSendLongPress? => () => onSendLongPress(
+                  context,
+                  StreamSendLongPressDetails(controller: _effectiveController),
+                ),
+                null => null,
+              },
               canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
               audioRecorderController: canRecordVoice ? _audioRecorderController : null,
               sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,

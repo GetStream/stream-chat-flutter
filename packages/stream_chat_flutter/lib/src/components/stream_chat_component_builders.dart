@@ -3,9 +3,10 @@ import '../../stream_chat_flutter.dart';
 
 /// Builds the list of component builders for the stream chat components.
 Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
-  // ── Channel / thread list ────────────────────────────────────────────────
+  // ── Channel / thread / scheduled message list ────────────────────────────
   StreamComponentBuilder<StreamChannelListItemProps>? channelListItem,
   StreamComponentBuilder<StreamThreadListTileProps>? threadListItem,
+  StreamComponentBuilder<StreamScheduledMessageListItemProps>? scheduledMessageListItem,
 
   // ── Message composer ─────────────────────────────────────────────────────
   StreamComponentBuilder<MessageComposerProps>? messageComposer,
@@ -42,6 +43,7 @@ Iterable<StreamComponentBuilderExtension<Object>> streamChatComponentBuilders({
   final builders = [
     if (channelListItem != null) StreamComponentBuilderExtension(builder: channelListItem),
     if (threadListItem != null) StreamComponentBuilderExtension(builder: threadListItem),
+    if (scheduledMessageListItem != null) StreamComponentBuilderExtension(builder: scheduledMessageListItem),
     if (messageComposer != null) StreamComponentBuilderExtension(builder: messageComposer),
     if (messageComposerLeading != null) StreamComponentBuilderExtension(builder: messageComposerLeading),
     if (messageComposerTrailing != null) StreamComponentBuilderExtension(builder: messageComposerTrailing),

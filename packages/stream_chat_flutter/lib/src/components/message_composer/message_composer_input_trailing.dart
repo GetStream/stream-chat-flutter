@@ -83,6 +83,7 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
               _ => a11y.sendMessageTooltip,
             },
             onPressed: canSend ? props.onSendPressed : null,
+            onLongPress: canSend && buttonState == .send ? props.onSendLongPress : null,
           );
         }
 

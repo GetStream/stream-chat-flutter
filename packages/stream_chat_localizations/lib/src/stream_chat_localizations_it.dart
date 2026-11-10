@@ -900,6 +900,68 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String notifyRoleText(String role) => 'Notifica tutti i membri $role';
+
+  @override
+  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return 'Invio il $date alle $time';
+  }
+
+  @override
+  String get scheduledMessageSendingLabel => 'Invio in corso…';
+
+  @override
+  String get scheduledMessageUploadingLabel => 'Caricamento…';
+
+  @override
+  String get scheduledThreadReplyPrefixText => 'Risposta nel thread: ';
+
+  @override
+  String scheduledQuoteReplyPrefixText({String? name}) {
+    if (name == null) return 'Risposta: ';
+    return 'Risposta a $name: ';
+  }
+
+  @override
+  String scheduledMessageFailedText({
+    ScheduledMessageFailureReason? reason,
+    bool isQuoteDeleted = false,
+  }) {
+    return switch (reason) {
+      .requestFailed => 'Invio non riuscito. Riprova',
+      .internalError => 'Si è verificato un errore. Riprova',
+      .channelDeleted => 'Questo canale è stato eliminato',
+      .userDeleted => 'Il tuo account è stato eliminato',
+      .channelFrozen => 'Questo canale è congelato',
+      .banned => 'Non puoi inviare messaggi in questo canale',
+      .noPermission => 'Non sei più autorizzato a pubblicare qui',
+      .moderationBlocked => 'Bloccato dalla moderazione',
+      .hookRejected => "Rifiutato dall'app",
+      .expired => 'Non inviato: il servizio ha subito un ritardo',
+      .pendingNotSupported => 'Questo canale ora richiede approvazione. Programmalo di nuovo.',
+      .invalidMessage when isQuoteDeleted =>
+        'Il messaggio citato è stato eliminato. Modificalo per rimuovere la citazione.',
+      .invalidMessage => "Il messaggio non rispetta più i limiti dell'app. Modificalo.",
+      _ => 'Si è verificato un errore. Riprova',
+    };
+  }
+
+  @override
+  String get noScheduledMessagesText => 'Nessun messaggio programmato';
+
+  @override
+  String get loadingScheduledMessagesError => 'Impossibile caricare i messaggi programmati';
+
+  @override
+  String get editAndRescheduleLabel => 'Modifica e riprogramma';
+
+  @override
+  String get rescheduleLabel => 'Riprogramma';
+
+  @override
+  String get sendNowLabel => 'Invia ora';
 }
 
 class _AccessibilityTranslationsIt extends AccessibilityTranslations {
@@ -1015,6 +1077,12 @@ class _AccessibilityTranslationsIt extends AccessibilityTranslations {
 
   @override
   String get messageActionsLabel => 'Azioni del messaggio';
+
+  @override
+  String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
+    final date = formatDateTime(scheduledAt);
+    return 'Programmato per il $date';
+  }
 
   @override
   String galleryImageLabel({DateTime? createdAt}) {

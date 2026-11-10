@@ -888,6 +888,67 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String notifyRoleText(String role) => 'सभी $role सदस्यों को सूचित करें';
+
+  @override
+  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return '$date को $time पर भेजें';
+  }
+
+  @override
+  String get scheduledMessageSendingLabel => 'भेजा जा रहा है…';
+
+  @override
+  String get scheduledMessageUploadingLabel => 'अपलोड हो रहा है…';
+
+  @override
+  String get scheduledThreadReplyPrefixText => 'थ्रेड में जवाब: ';
+
+  @override
+  String scheduledQuoteReplyPrefixText({String? name}) {
+    if (name == null) return 'जवाब: ';
+    return '$name को जवाब: ';
+  }
+
+  @override
+  String scheduledMessageFailedText({
+    ScheduledMessageFailureReason? reason,
+    bool isQuoteDeleted = false,
+  }) {
+    return switch (reason) {
+      .requestFailed => 'नहीं भेजा जा सका। फिर से कोशिश करें',
+      .internalError => 'कुछ गलत हो गया। फिर से कोशिश करें',
+      .channelDeleted => 'यह चैनल हटा दिया गया था',
+      .userDeleted => 'आपका खाता हटा दिया गया',
+      .channelFrozen => 'यह चैनल फ़्रीज़ है',
+      .banned => 'आप इस चैनल में संदेश नहीं भेज सकते',
+      .noPermission => 'अब आपको यहाँ पोस्ट करने की अनुमति नहीं है',
+      .moderationBlocked => 'मॉडरेशन द्वारा ब्लॉक किया गया',
+      .hookRejected => 'ऐप द्वारा अस्वीकार किया गया',
+      .expired => 'नहीं भेजा गया: सेवा में देरी हुई',
+      .pendingNotSupported => 'इस चैनल में अब अनुमोदन ज़रूरी है। इसे फिर से शेड्यूल करें।',
+      .invalidMessage when isQuoteDeleted => 'उद्धृत संदेश हटा दिया गया था। उद्धरण हटाने के लिए इसे संपादित करें।',
+      .invalidMessage => 'संदेश अब ऐप की सीमाओं को पूरा नहीं करता। इसे संपादित करें।',
+      _ => 'कुछ गलत हो गया। फिर से कोशिश करें',
+    };
+  }
+
+  @override
+  String get noScheduledMessagesText => 'कोई शेड्यूल किया गया संदेश नहीं';
+
+  @override
+  String get loadingScheduledMessagesError => 'शेड्यूल किए गए संदेश लोड नहीं हो सके';
+
+  @override
+  String get editAndRescheduleLabel => 'संपादित करें और फिर से शेड्यूल करें';
+
+  @override
+  String get rescheduleLabel => 'फिर से शेड्यूल करें';
+
+  @override
+  String get sendNowLabel => 'अभी भेजें';
 }
 
 class _AccessibilityTranslationsHi extends AccessibilityTranslations {
@@ -1002,6 +1063,12 @@ class _AccessibilityTranslationsHi extends AccessibilityTranslations {
 
   @override
   String get messageActionsLabel => 'संदेश क्रियाएँ';
+
+  @override
+  String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
+    final date = formatDateTime(scheduledAt);
+    return '$date के लिए शेड्यूल किया गया';
+  }
 
   @override
   String galleryImageLabel({DateTime? createdAt}) {

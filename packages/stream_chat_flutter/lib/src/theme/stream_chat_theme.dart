@@ -111,6 +111,8 @@ class StreamChatTheme extends InheritedTheme {
 ///  * [StreamQuotedMessageThemeData], which defines quoted message styles.
 ///  * [StreamMessagePreviewTextThemeData], which defines message preview styles.
 ///  * [StreamThreadListTileThemeData], which defines thread list tile styles.
+///  * [StreamScheduledMessageListItemThemeData], which defines scheduled
+///    message list item styles.
 ///  * [StreamVoiceRecordingAttachmentThemeData], which defines voice recording attachment styles.
 ///  * [StreamPollCreatorThemeData], which defines poll creator styles.
 ///  * [StreamPollInteractorThemeData], which defines poll interactor styles.
@@ -147,6 +149,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
     StreamQuotedMessageThemeData? quotedMessageTheme,
     StreamChannelListItemThemeData? channelListItemTheme,
     StreamMessagePreviewTextThemeData? messagePreviewTextTheme,
+    StreamScheduledMessageListItemThemeData? scheduledMessageListItemTheme,
   }) {
     // App bars
     channelHeaderTheme ??= const StreamAppBarThemeData();
@@ -174,6 +177,9 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
     channelListItemTheme ??= const StreamChannelListItemThemeData();
     messagePreviewTextTheme ??= const StreamMessagePreviewTextThemeData();
 
+    // Scheduled messages
+    scheduledMessageListItemTheme ??= const StreamScheduledMessageListItemThemeData();
+
     return StreamChatThemeData.raw(
       channelHeaderTheme: channelHeaderTheme,
       channelListHeaderTheme: channelListHeaderTheme,
@@ -191,6 +197,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
       quotedMessageTheme: quotedMessageTheme,
       channelListItemTheme: channelListItemTheme,
       messagePreviewTextTheme: messagePreviewTextTheme,
+      scheduledMessageListItemTheme: scheduledMessageListItemTheme,
     );
   }
 
@@ -213,6 +220,8 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
     required this.channelListItemTheme,
     // TODO(v11): Make required; the default keeps existing callers compiling.
     this.messagePreviewTextTheme = const StreamMessagePreviewTextThemeData(),
+    // TODO(v11): Make required; the default keeps existing callers compiling.
+    this.scheduledMessageListItemTheme = const StreamScheduledMessageListItemThemeData(),
   });
 
   /// The channel header app bar theme for this theme.
@@ -263,4 +272,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
   /// The app-wide styles for parts of a message preview, such as the sender
   /// prefix.
   final StreamMessagePreviewTextThemeData messagePreviewTextTheme;
+
+  /// The scheduled message list item theme for this theme.
+  final StreamScheduledMessageListItemThemeData scheduledMessageListItemTheme;
 }

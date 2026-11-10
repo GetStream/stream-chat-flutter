@@ -888,6 +888,67 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String notifyRoleText(String role) => 'Notifica tots els membres $role';
+
+  @override
+  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return 'Envia el $date a les $time';
+  }
+
+  @override
+  String get scheduledMessageSendingLabel => 'Enviant…';
+
+  @override
+  String get scheduledMessageUploadingLabel => 'Pujant…';
+
+  @override
+  String get scheduledThreadReplyPrefixText => 'Resposta al fil: ';
+
+  @override
+  String scheduledQuoteReplyPrefixText({String? name}) {
+    if (name == null) return 'Resposta: ';
+    return 'Resposta a $name: ';
+  }
+
+  @override
+  String scheduledMessageFailedText({
+    ScheduledMessageFailureReason? reason,
+    bool isQuoteDeleted = false,
+  }) {
+    return switch (reason) {
+      .requestFailed => "No s'ha pogut enviar. Torna-ho a provar",
+      .internalError => 'Alguna cosa ha anat malament. Torna-ho a provar',
+      .channelDeleted => "Aquest canal s'ha eliminat",
+      .userDeleted => "El teu compte s'ha eliminat",
+      .channelFrozen => 'Aquest canal està congelat',
+      .banned => 'No pots enviar missatges en aquest canal',
+      .noPermission => 'Ja no tens permís per publicar aquí',
+      .moderationBlocked => 'Bloquejat per la moderació',
+      .hookRejected => "Rebutjat per l'aplicació",
+      .expired => "No enviat: el servei s'ha endarrerit",
+      .pendingNotSupported => 'Aquest canal ara requereix aprovació. Torna a programar-lo.',
+      .invalidMessage when isQuoteDeleted => "El missatge citat s'ha eliminat. Edita'l per treure la cita.",
+      .invalidMessage => "El missatge ja no compleix els límits de l'aplicació. Edita'l.",
+      _ => 'Alguna cosa ha anat malament. Torna-ho a provar',
+    };
+  }
+
+  @override
+  String get noScheduledMessagesText => 'No hi ha missatges programats';
+
+  @override
+  String get loadingScheduledMessagesError => "No s'han pogut carregar els missatges programats";
+
+  @override
+  String get editAndRescheduleLabel => 'Edita i reprograma';
+
+  @override
+  String get rescheduleLabel => 'Reprograma';
+
+  @override
+  String get sendNowLabel => 'Envia ara';
 }
 
 class _AccessibilityTranslationsCa extends AccessibilityTranslations {
@@ -1003,6 +1064,12 @@ class _AccessibilityTranslationsCa extends AccessibilityTranslations {
 
   @override
   String get messageActionsLabel => 'Accions del missatge';
+
+  @override
+  String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
+    final date = formatDateTime(scheduledAt);
+    return 'Programat per al $date';
+  }
 
   @override
   String galleryImageLabel({DateTime? createdAt}) {

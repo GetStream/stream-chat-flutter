@@ -1,6 +1,8 @@
 // How the paged lists' default loading, empty and error states keep clear of
 // the side safe-area insets, while custom ones are laid out as built.
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -49,6 +51,46 @@ void main() {
     expect(tester.getRect(boxes.at(2)).right, moreOrLessEquals(_screenWidth(tester) - _padding.right));
   });
 
+  testWidgets('StreamScheduledMessageListView centers its default empty state between the side insets', (
+    tester,
+  ) async {
+    await _pumpWithInsets(tester, const StreamScheduledMessageListView());
+
+    final content = find.descendant(of: find.byType(StreamScrollViewEmptyWidget), matching: find.byType(Column));
+    expect(tester.getCenter(content).dx, moreOrLessEquals(_safeCenterX(tester)));
+  });
+
+  testWidgets('StreamScheduledMessageListView centers its default error state between the side insets', (
+    tester,
+  ) async {
+    await _pumpWithInsets(
+      tester,
+      const StreamScheduledMessageListView(),
+      scheduledMessageListState: const ScheduledMessageListState(),
+      loadScheduledMessages: () async => throw const StreamChatError('error'),
+    );
+
+    final content = find.descendant(of: find.byType(StreamScrollViewErrorWidget), matching: find.byType(Column));
+    expect(tester.getCenter(content).dx, moreOrLessEquals(_safeCenterX(tester)));
+  });
+
+  testWidgets('StreamScheduledMessageListView keeps its default loading rows clear of the side insets', (
+    tester,
+  ) async {
+    final load = Completer<ScheduledMessageListState>();
+
+    await _pumpWithInsets(
+      tester,
+      const StreamScheduledMessageListView(),
+      scheduledMessageListState: const ScheduledMessageListState(),
+      loadScheduledMessages: () => load.future,
+    );
+
+    final spacing = tester.element(find.byType(StreamScheduledMessageListView)).streamSpacing;
+    final sendTime = tester.getRect(find.byType(StreamSkeletonBox).first);
+    expect(sendTime.left, moreOrLessEquals(_padding.left + spacing.xxs));
+  });
+
   testWidgets('StreamThreadListView lays out a custom empty state as built', (tester) async {
     const customEmptyKey = Key('custom-empty');
     final controller = _FakeThreadListController(const PagedValue(items: []));
@@ -93,12 +135,23 @@ class _FakeChannelListController extends StreamChannelListController {
   Future<void> doInitialLoad() async {}
 }
 
-// Pumps [child] as a scaffold body on a screen with [_padding] as its safe-area insets.
-Future<void> _pumpWithInsets(WidgetTester tester, Widget child) async {
+// Pumps [child] as a scaffold body on a screen with [_padding] as its
+// safe-area insets. The client holds [scheduledMessageListState], all loaded by
+// default, and loads scheduled messages with [loadScheduledMessages].
+Future<void> _pumpWithInsets(
+  WidgetTester tester,
+  Widget child, {
+  ScheduledMessageListState? scheduledMessageListState,
+  Future<ScheduledMessageListState> Function()? loadScheduledMessages,
+}) async {
   final client = MockClient();
   final clientState = MockClientState();
+  final scheduledState = scheduledMessageListState ?? const ScheduledMessageListState(hasLoadedAll: true);
   when(() => client.state).thenReturn(clientState);
   when(() => clientState.currentUser).thenReturn(OwnUser(id: 'current-user-id'));
+  when(() => clientState.scheduledMessageListState).thenReturn(scheduledState);
+  when(() => clientState.scheduledMessageListStateStream).thenAnswer((_) => Stream.value(scheduledState));
+  when(client.loadScheduledMessages).thenAnswer((_) => loadScheduledMessages?.call() ?? Future.value(scheduledState));
 
   await tester.pumpWidget(
     MaterialApp(

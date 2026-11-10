@@ -68,6 +68,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     this.messageLimit,
     this.memberLimit,
     this.includeActiveMemberCount = false,
+    this.includeScheduledMessages = false,
   }) : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
        _resolvedChannelStateSort = channelStateSort,
        super(const PagedValue.loading());
@@ -87,6 +88,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
     this.messageLimit,
     this.memberLimit,
     this.includeActiveMemberCount = false,
+    this.includeScheduledMessages = false,
   }) : _eventHandler = eventHandler ?? StreamChannelListEventHandler(),
        _resolvedChannelStateSort = channelStateSort;
 
@@ -155,6 +157,14 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   /// Applies to every page and every refresh. Defaults to false.
   final bool includeActiveMemberCount;
 
+  /// Whether the current user's scheduled messages are loaded with the
+  /// channels.
+  ///
+  /// If true, [ClientState.scheduledMessages] lists them for every channel
+  /// this controller loads, on every page and every refresh. Defaults to
+  /// false.
+  final bool includeScheduledMessages;
+
   @override
   set value(PagedValue<int, Channel> newValue) {
     super.value = switch (_resolvedChannelStateSort) {
@@ -197,6 +207,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
         messageLimit: messageLimit,
         presence: presence,
         includeActiveMemberCount: includeActiveMemberCount,
+        includeScheduledMessages: includeScheduledMessages,
         paginationParams: PaginationParams(limit: limit),
       )) {
         _resolveSort(result);
@@ -233,6 +244,7 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
         messageLimit: messageLimit,
         presence: presence,
         includeActiveMemberCount: includeActiveMemberCount,
+        includeScheduledMessages: includeScheduledMessages,
         paginationParams: PaginationParams(limit: limit, offset: nextPageKey),
       )) {
         final channels = result.channels;

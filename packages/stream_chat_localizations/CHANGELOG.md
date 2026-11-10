@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added the scheduled message strings for all supported locales.
+
 ## 10.7.0
 
 🐞 Fixed

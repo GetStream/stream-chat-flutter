@@ -1,3 +1,11 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamScheduledMessageListView` and `StreamScheduledMessageListItem`, to list the current user's scheduled messages, styled by `StreamChatThemeData.scheduledMessageListItemTheme`.
+- Added `showStreamScheduledMessageActions`, a sheet of the actions on a scheduled message.
+- Added `onSendLongPress` to `StreamMessageComposer` and `StreamChatMessageInput`, called when the send button is long-pressed with a new message, for example to schedule it.
+
 ## 10.7.0
 
 ✅ Added

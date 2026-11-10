@@ -887,6 +887,68 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String notifyRoleText(String role) => 'Benachrichtige alle $role-Mitglieder';
+
+  @override
+  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return 'Senden am $date um $time';
+  }
+
+  @override
+  String get scheduledMessageSendingLabel => 'Wird gesendet…';
+
+  @override
+  String get scheduledMessageUploadingLabel => 'Wird hochgeladen…';
+
+  @override
+  String get scheduledThreadReplyPrefixText => 'Antwort im Thread: ';
+
+  @override
+  String scheduledQuoteReplyPrefixText({String? name}) {
+    if (name == null) return 'Antwort: ';
+    return 'Antwort an $name: ';
+  }
+
+  @override
+  String scheduledMessageFailedText({
+    ScheduledMessageFailureReason? reason,
+    bool isQuoteDeleted = false,
+  }) {
+    return switch (reason) {
+      .requestFailed => 'Senden fehlgeschlagen. Versuche es erneut',
+      .internalError => 'Etwas ist schiefgelaufen. Versuche es erneut',
+      .channelDeleted => 'Dieser Kanal wurde gelöscht',
+      .userDeleted => 'Dein Konto wurde gelöscht',
+      .channelFrozen => 'Dieser Kanal ist eingefroren',
+      .banned => 'Du kannst in diesem Kanal keine Nachrichten senden',
+      .noPermission => 'Du darfst hier nicht mehr posten',
+      .moderationBlocked => 'Von der Moderation blockiert',
+      .hookRejected => 'Von der App abgelehnt',
+      .expired => 'Nicht gesendet: Der Dienst war verzögert',
+      .pendingNotSupported => 'Dieser Kanal erfordert jetzt eine Freigabe. Plane die Nachricht erneut.',
+      .invalidMessage when isQuoteDeleted =>
+        'Die zitierte Nachricht wurde gelöscht. Bearbeite die Nachricht, um das Zitat zu entfernen.',
+      .invalidMessage => 'Die Nachricht entspricht nicht mehr den Vorgaben der App. Bearbeite sie.',
+      _ => 'Etwas ist schiefgelaufen. Versuche es erneut',
+    };
+  }
+
+  @override
+  String get noScheduledMessagesText => 'Keine geplanten Nachrichten';
+
+  @override
+  String get loadingScheduledMessagesError => 'Geplante Nachrichten konnten nicht geladen werden';
+
+  @override
+  String get editAndRescheduleLabel => 'Bearbeiten & neu planen';
+
+  @override
+  String get rescheduleLabel => 'Neu planen';
+
+  @override
+  String get sendNowLabel => 'Jetzt senden';
 }
 
 class _AccessibilityTranslationsDe extends AccessibilityTranslations {
@@ -1004,6 +1066,12 @@ class _AccessibilityTranslationsDe extends AccessibilityTranslations {
 
   @override
   String get messageActionsLabel => 'Nachrichtenaktionen';
+
+  @override
+  String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
+    final date = formatDateTime(scheduledAt);
+    return 'Geplant für $date';
+  }
 
   @override
   String galleryImageLabel({DateTime? createdAt}) {

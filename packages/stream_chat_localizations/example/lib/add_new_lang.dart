@@ -910,6 +910,65 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String notifyRoleText(String role) => 'Notify all $role members';
+
+  @override
+  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+    final jiffy = Jiffy.parseFromDateTime(scheduledAt.toLocal());
+    return 'Send ${jiffy.MMMEd} at ${jiffy.jm}';
+  }
+
+  @override
+  String get scheduledMessageSendingLabel => 'Sending…';
+
+  @override
+  String get scheduledMessageUploadingLabel => 'Uploading…';
+
+  @override
+  String get scheduledThreadReplyPrefixText => 'Thread reply: ';
+
+  @override
+  String scheduledQuoteReplyPrefixText({String? name}) {
+    if (name == null) return 'Reply: ';
+    return 'Reply to $name: ';
+  }
+
+  @override
+  String scheduledMessageFailedText({
+    ScheduledMessageFailureReason? reason,
+    bool isQuoteDeleted = false,
+  }) {
+    return switch (reason) {
+      .requestFailed => "Couldn't send. Try again",
+      .internalError => 'Something went wrong. Try again',
+      .channelDeleted => 'This channel was deleted',
+      .userDeleted => 'Your account was deleted',
+      .channelFrozen => 'This channel is frozen',
+      .banned => "You can't send messages in this channel",
+      .noPermission => "You're no longer allowed to post here",
+      .moderationBlocked => 'Blocked by moderation',
+      .hookRejected => 'Rejected by the app',
+      .expired => 'Not sent: the service was delayed',
+      .pendingNotSupported => 'This channel now needs approval. Schedule it again.',
+      .invalidMessage when isQuoteDeleted => 'The quoted message was deleted. Edit it to remove the quote.',
+      .invalidMessage => "The message no longer meets the app's limits. Edit it.",
+      _ => 'Something went wrong. Try again',
+    };
+  }
+
+  @override
+  String get noScheduledMessagesText => 'No scheduled messages';
+
+  @override
+  String get loadingScheduledMessagesError => "Couldn't load scheduled messages";
+
+  @override
+  String get editAndRescheduleLabel => 'Edit & reschedule';
+
+  @override
+  String get rescheduleLabel => 'Reschedule';
+
+  @override
+  String get sendNowLabel => 'Send now';
 }
 
 void main() async {
