@@ -972,7 +972,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get scheduleTooSoonError => 'もっと後の時刻を選んでください。';
 
   @override
-  String get scheduleTooFarError => 'アプリで許可されている期間より先です。';
+  String get scheduleTooFarError => 'アプリで許可されている期間より先です';
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => '上限に達しました（最大$limit件）';
@@ -981,7 +981,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String scheduleUserLimitReachedError({required int limit}) => '予約メッセージの上限（$limit件）に達しました。';
 
   @override
-  String get scheduleMessageError => 'メッセージを予約できませんでした。もう一度お試しください。';
+  String get scheduleMessageError => 'メッセージを予約できませんでした。もう一度お試しください';
 }
 
 class _AccessibilityTranslationsJa extends AccessibilityTranslations {

@@ -975,7 +975,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get scheduleTooSoonError => '더 늦은 시간을 선택하세요.';
 
   @override
-  String get scheduleTooFarError => '앱에서 허용하는 기간보다 먼 시간입니다.';
+  String get scheduleTooFarError => '앱에서 허용하는 기간보다 먼 시간입니다';
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => '한도에 도달했습니다(최대 $limit개)';
@@ -984,7 +984,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String scheduleUserLimitReachedError({required int limit}) => '예약 메시지 한도($limit개)에 도달했습니다.';
 
   @override
-  String get scheduleMessageError => '메시지를 예약하지 못했습니다. 다시 시도하세요.';
+  String get scheduleMessageError => '메시지를 예약하지 못했습니다. 다시 시도하세요';
 }
 
 class _AccessibilityTranslationsKo extends AccessibilityTranslations {

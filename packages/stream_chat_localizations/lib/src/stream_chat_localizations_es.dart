@@ -994,7 +994,7 @@ No es posible añadir más de $limit archivos adjuntos
   String get scheduleTooSoonError => 'Elige una hora posterior.';
 
   @override
-  String get scheduleTooFarError => 'Está más adelante de lo que permite la aplicación.';
+  String get scheduleTooFarError => 'Está más adelante de lo que permite la aplicación';
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Límite alcanzado (máx. $limit)';
@@ -1004,7 +1004,7 @@ No es posible añadir más de $limit archivos adjuntos
       'Has alcanzado tu límite de $limit mensajes programados.';
 
   @override
-  String get scheduleMessageError => 'No se pudo programar el mensaje. Inténtalo de nuevo.';
+  String get scheduleMessageError => 'No se pudo programar el mensaje. Inténtalo de nuevo';
 }
 
 class _AccessibilityTranslationsEs extends AccessibilityTranslations {

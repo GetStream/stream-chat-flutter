@@ -1005,7 +1005,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get scheduleTooSoonError => 'Scegli un orario successivo.';
 
   @override
-  String get scheduleTooFarError => "È più avanti di quanto consenta l'app.";
+  String get scheduleTooFarError => "È più avanti di quanto consenta l'app";
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Limite raggiunto (max $limit)';
@@ -1015,7 +1015,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
       'Hai raggiunto il limite di $limit messaggi programmati.';
 
   @override
-  String get scheduleMessageError => 'Impossibile programmare il messaggio. Riprova.';
+  String get scheduleMessageError => 'Impossibile programmare il messaggio. Riprova';
 }
 
 class _AccessibilityTranslationsIt extends AccessibilityTranslations {

@@ -996,7 +996,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get scheduleTooSoonError => 'Choisissez une heure plus tardive.';
 
   @override
-  String get scheduleTooFarError => "C'est plus loin que ce que l'application permet.";
+  String get scheduleTooFarError => "C'est plus loin que ce que l'application permet";
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Limite atteinte ($limit max.)';
@@ -1006,7 +1006,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
       'Vous avez atteint votre limite de $limit messages programmés.';
 
   @override
-  String get scheduleMessageError => 'Impossible de programmer le message. Réessayez.';
+  String get scheduleMessageError => 'Impossible de programmer le message. Réessayez';
 }
 
 class _AccessibilityTranslationsFr extends AccessibilityTranslations {

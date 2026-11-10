@@ -992,7 +992,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get scheduleTooSoonError => 'Tria una hora posterior.';
 
   @override
-  String get scheduleTooFarError => "És més endavant del que permet l'aplicació.";
+  String get scheduleTooFarError => "És més endavant del que permet l'aplicació";
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Límit assolit (màx. $limit)';
@@ -1001,7 +1001,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String scheduleUserLimitReachedError({required int limit}) => 'Has arribat al límit de $limit missatges programats.';
 
   @override
-  String get scheduleMessageError => "No s'ha pogut programar el missatge. Torna-ho a provar.";
+  String get scheduleMessageError => "No s'ha pogut programar el missatge. Torna-ho a provar";
 }
 
 class _AccessibilityTranslationsCa extends AccessibilityTranslations {

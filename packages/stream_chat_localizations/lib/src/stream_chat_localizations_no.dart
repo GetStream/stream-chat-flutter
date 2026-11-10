@@ -976,7 +976,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get scheduleTooSoonError => 'Velg et senere tidspunkt.';
 
   @override
-  String get scheduleTooFarError => 'Det er lenger frem enn appen tillater.';
+  String get scheduleTooFarError => 'Det er lenger frem enn appen tillater';
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Grensen er nådd (maks. $limit)';
@@ -985,7 +985,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String scheduleUserLimitReachedError({required int limit}) => 'Du har nådd grensen på $limit planlagte meldinger.';
 
   @override
-  String get scheduleMessageError => 'Kunne ikke planlegge meldingen. Prøv igjen.';
+  String get scheduleMessageError => 'Kunne ikke planlegge meldingen. Prøv igjen';
 }
 
 class _AccessibilityTranslationsNo extends AccessibilityTranslations {

@@ -1012,7 +1012,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get scheduleTooSoonError => 'Pick a later time.';
 
   @override
-  String get scheduleTooFarError => "That's further ahead than your app allows.";
+  String get scheduleTooFarError => "That's further ahead than your app allows";
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Limit reached ($limit max)';
@@ -1022,7 +1022,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
       "You've reached your limit of $limit scheduled messages.";
 
   @override
-  String get scheduleMessageError => "Couldn't schedule message. Try again.";
+  String get scheduleMessageError => "Couldn't schedule message. Try again";
 }
 
 void main() async {

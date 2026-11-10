@@ -920,7 +920,7 @@ abstract class Translations {
   String get scheduleTooSoonError;
 
   /// The error shown when the picked time is further ahead than a message can
-  /// be scheduled for, such as "That's further ahead than your app allows.".
+  /// be scheduled for, such as "That's further ahead than your app allows".
   String get scheduleTooFarError;
 
   /// The title of the sheet of times a message can be scheduled for, and the
@@ -933,7 +933,7 @@ abstract class Translations {
   String scheduleUserLimitReachedError({required int limit});
 
   /// The error shown when a message could not be scheduled, such as
-  /// "Couldn't schedule message. Try again.".
+  /// "Couldn't schedule message. Try again".
   String get scheduleMessageError;
 }
 
@@ -1931,7 +1931,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get scheduleTooSoonError => 'Pick a later time.';
 
   @override
-  String get scheduleTooFarError => "That's further ahead than your app allows.";
+  String get scheduleTooFarError => "That's further ahead than your app allows";
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Limit reached ($limit max)';
@@ -1941,7 +1941,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
       "You've reached your limit of $limit scheduled messages.";
 
   @override
-  String get scheduleMessageError => "Couldn't schedule message. Try again.";
+  String get scheduleMessageError => "Couldn't schedule message. Try again";
 }
 
 // Display name for each language code Stream Chat's translation API

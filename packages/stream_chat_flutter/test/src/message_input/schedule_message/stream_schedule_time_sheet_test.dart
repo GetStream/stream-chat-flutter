@@ -99,7 +99,7 @@ void main() {
         initialScheduledAt: _wednesday.add(const Duration(days: 8)),
       );
 
-      expect(find.text("That's further ahead than your app allows."), findsOneWidget);
+      expect(find.text("That's further ahead than your app allows"), findsOneWidget);
     });
   });
 
@@ -169,7 +169,7 @@ void main() {
       await tester.tap(find.text('Schedule'));
       await tester.pumpAndSettle();
 
-      expect(find.text("Couldn't schedule message. Try again."), findsOneWidget);
+      expect(find.text("Couldn't schedule message. Try again"), findsOneWidget);
       expect(results, isEmpty);
     });
   });
