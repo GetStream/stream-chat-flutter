@@ -10,6 +10,7 @@ import '../../core/util/message_predicates.dart';
 import '../../core/util/utils.dart';
 import '../live_location_expiration_scheduler.dart';
 import '../retry_queue.dart';
+import '../scheduled_messages/scheduled_message_manager.dart';
 import 'channel_event_handler.dart';
 import 'channel_state_mutations.dart';
 
@@ -342,6 +343,21 @@ class ChannelClientState {
   Stream<List<Location>> get activeLiveLocationsStream =>
       channelStateStream.map((cs) => cs.activeLiveLocations ?? <Location>[]).distinct(const ListEquality().equals);
 
+  /// The current user's unsent scheduled messages in this channel.
+  ///
+  /// They are the ones in [ClientState.scheduledMessages] in this channel, in
+  /// the same order. Replies in its threads are in [scheduledThreadReplies].
+  List<ScheduledMessage> get scheduledMessages {
+    return _client.scheduledMessageManager.channelMessages(_channel.cid!);
+  }
+
+  /// The [scheduledMessages] as they change.
+  ///
+  /// Emits the current value on listen, then a new value each time they change.
+  Stream<List<ScheduledMessage>> get scheduledMessagesStream {
+    return _client.scheduledMessageManager.channelMessagesStream(_channel.cid!);
+  }
+
   /// Channel draft.
   Draft? get draft => _channelState.draft;
 
@@ -588,6 +604,7 @@ class ChannelClientState {
       pendingMessages: updatedState.pendingMessages,
       pushPreferences: updatedState.pushPreferences,
       activeLiveLocations: updatedState.activeLiveLocations,
+      scheduledMessages: updatedState.scheduledMessages,
     );
   }
 
@@ -671,6 +688,22 @@ class ChannelClientState {
 
   /// The channel threads related to this channel as a stream.
   Stream<Map<String, List<Message>>> get threadsStream => _threadsController;
+
+  /// The current user's unsent scheduled replies in the thread of [parentId].
+  ///
+  /// They are the ones in [ClientState.scheduledMessages] replying to it, in
+  /// the same order.
+  List<ScheduledMessage> scheduledThreadReplies(String parentId) {
+    return _client.scheduledMessageManager.threadReplies(parentId);
+  }
+
+  /// The [scheduledThreadReplies] of [parentId] as they change.
+  ///
+  /// Emits the current value on listen, then a new value each time they change.
+  Stream<List<ScheduledMessage>> scheduledThreadRepliesStream(String parentId) {
+    return _client.scheduledMessageManager.threadRepliesStream(parentId);
+  }
+
   final _threadsController = BehaviorSubject.seeded(<String, List<Message>>{});
   set _threads(Map<String, List<Message>> threads) {
     _threadsController.safeAdd(threads);

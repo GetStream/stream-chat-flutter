@@ -1,3 +1,13 @@
+## Upcoming
+
+✅ Added
+
+- Added scheduled messages: schedule one with `Channel.scheduleMessage`, and read the current user's unsent ones from `ClientState.scheduledMessages` after `StreamChatClient.loadScheduledMessages`.
+
+🔄 Changed
+
+- Overrides of the channel query methods on `Channel` and `StreamChatClient` must add the new `includeScheduledMessages` parameter.
+
 ## 10.7.0
 
 ✅ Added
