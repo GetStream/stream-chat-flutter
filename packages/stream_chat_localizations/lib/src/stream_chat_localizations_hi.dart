@@ -954,7 +954,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get scheduleMessageLabel => 'संदेश शेड्यूल करें';
 
   @override
-  String scheduleLimitReachedText({required int limit}) => 'सीमा पूरी हो गई (अधिकतम $limit)';
+  String get rescheduleMessageLabel => 'संदेश फिर से शेड्यूल करें';
 
   @override
   String get customTimeLabel => 'कस्टम समय';
@@ -974,7 +974,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String messageToText({required String name}) => '$name को संदेश';
+  String messageToLabel({required String channelName}) => '$channelName को संदेश';
 
   @override
   String get dateLabel => 'तारीख';
@@ -989,20 +989,20 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String sentInYourTimeZoneText({required String timeZone}) => 'आपके समय क्षेत्र में भेजा जाएगा ($timeZone)';
 
   @override
-  String get scheduleTooSoonText => 'बाद का समय चुनें।';
+  String get scheduleTooSoonError => 'बाद का समय चुनें।';
 
   @override
-  String get scheduleTooFarText => 'यह ऐप की अनुमति से आगे का समय है।';
+  String get scheduleTooFarError => 'यह ऐप की अनुमति से आगे का समय है।';
 
   @override
-  String scheduledMessageUserLimitText({required int limit}) =>
+  String scheduleChannelLimitReachedLabel({required int limit}) => 'सीमा पूरी हो गई (अधिकतम $limit)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) =>
       'आप $limit शेड्यूल किए गए संदेशों की सीमा तक पहुँच गए हैं।';
 
   @override
-  String get scheduleMessageFailedText => 'संदेश शेड्यूल नहीं हो सका। फिर से कोशिश करें।';
-
-  @override
-  String get rescheduleMessageLabel => 'संदेश फिर से शेड्यूल करें';
+  String get scheduleMessageError => 'संदेश शेड्यूल नहीं हो सका। फिर से कोशिश करें।';
 }
 
 class _AccessibilityTranslationsHi extends AccessibilityTranslations {

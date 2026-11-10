@@ -954,7 +954,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get scheduleMessageLabel => 'Programa el missatge';
 
   @override
-  String scheduleLimitReachedText({required int limit}) => 'Límit assolit (màx. $limit)';
+  String get rescheduleMessageLabel => 'Reprograma el missatge';
 
   @override
   String get customTimeLabel => 'Hora personalitzada';
@@ -974,7 +974,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String messageToText({required String name}) => 'Missatge per a $name';
+  String messageToLabel({required String channelName}) => 'Missatge per a $channelName';
 
   @override
   String get dateLabel => 'Data';
@@ -989,19 +989,19 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String sentInYourTimeZoneText({required String timeZone}) => "S'envia a la teva zona horària ($timeZone)";
 
   @override
-  String get scheduleTooSoonText => 'Tria una hora posterior.';
+  String get scheduleTooSoonError => 'Tria una hora posterior.';
 
   @override
-  String get scheduleTooFarText => "És més endavant del que permet l'aplicació.";
+  String get scheduleTooFarError => "És més endavant del que permet l'aplicació.";
 
   @override
-  String scheduledMessageUserLimitText({required int limit}) => 'Has arribat al límit de $limit missatges programats.';
+  String scheduleChannelLimitReachedLabel({required int limit}) => 'Límit assolit (màx. $limit)';
 
   @override
-  String get scheduleMessageFailedText => "No s'ha pogut programar el missatge. Torna-ho a provar.";
+  String scheduleUserLimitReachedError({required int limit}) => 'Has arribat al límit de $limit missatges programats.';
 
   @override
-  String get rescheduleMessageLabel => 'Reprograma el missatge';
+  String get scheduleMessageError => "No s'ha pogut programar el missatge. Torna-ho a provar.";
 }
 
 class _AccessibilityTranslationsCa extends AccessibilityTranslations {

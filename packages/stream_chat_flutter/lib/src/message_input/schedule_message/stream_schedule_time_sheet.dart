@@ -169,8 +169,8 @@ class _StreamScheduleTimeSheetState extends State<StreamScheduleTimeSheet> {
   // The error to show for the picked time, or for a failure to schedule it.
   String? _errorText(ScheduleMessageBounds bounds) {
     final translations = context.translations;
-    if (bounds.isTooSoon(_scheduledAt)) return translations.scheduleTooSoonText;
-    if (bounds.isTooFar(_scheduledAt)) return translations.scheduleTooFarText;
+    if (bounds.isTooSoon(_scheduledAt)) return translations.scheduleTooSoonError;
+    if (bounds.isTooFar(_scheduledAt)) return translations.scheduleTooFarError;
 
     final failure = _failure;
     if (failure == null) return null;
@@ -184,11 +184,13 @@ class _StreamScheduleTimeSheetState extends State<StreamScheduleTimeSheet> {
     };
 
     return switch (reason) {
-      .scheduledAtTooSoon => translations.scheduleTooSoonText,
-      .scheduledAtTooFar => translations.scheduleTooFarText,
-      .scheduledLimitUser when userLimit != null => translations.scheduledMessageUserLimitText(limit: userLimit),
-      .scheduledLimitChannel when channelLimit != null => translations.scheduleLimitReachedText(limit: channelLimit),
-      _ => translations.scheduleMessageFailedText,
+      .scheduledAtTooSoon => translations.scheduleTooSoonError,
+      .scheduledAtTooFar => translations.scheduleTooFarError,
+      .scheduledLimitUser when userLimit != null => translations.scheduleUserLimitReachedError(limit: userLimit),
+      .scheduledLimitChannel when channelLimit != null => translations.scheduleChannelLimitReachedLabel(
+        limit: channelLimit,
+      ),
+      _ => translations.scheduleMessageError,
     };
   }
 
@@ -209,7 +211,10 @@ class _StreamScheduleTimeSheetState extends State<StreamScheduleTimeSheet> {
     final channelName = scheduleChannelName(widget.channel);
     final valueStyle = textTheme.captionDefault.copyWith(color: colorScheme.textTertiary);
     final date = materialLocalizations.formatMediumDate(_scheduledAt);
-    final time = materialLocalizations.formatTimeOfDay(TimeOfDay.fromDateTime(_scheduledAt));
+    final time = materialLocalizations.formatTimeOfDay(
+      TimeOfDay.fromDateTime(_scheduledAt),
+      alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+    );
     final timeZone = timeZoneLabel(_scheduledAt.timeZoneOffset);
 
     final contentPadding = EdgeInsets.symmetric(horizontal: spacing.md);
@@ -237,7 +242,7 @@ class _StreamScheduleTimeSheetState extends State<StreamScheduleTimeSheet> {
                     padding: contentPadding,
                     child: StreamMessageComposerEditMessageAttachment(
                       title: Text(
-                        translations.messageToText(name: channelName ?? translations.noTitleText),
+                        translations.messageToLabel(channelName: channelName ?? translations.noTitleText),
                       ),
                       subtitle: _ScheduledMessagePreviewText(message: widget.message),
                     ),

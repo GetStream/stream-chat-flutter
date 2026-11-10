@@ -880,10 +880,9 @@ abstract class Translations {
   /// "Schedule message".
   String get scheduleMessageLabel;
 
-  /// The title of the sheet of times a message can be scheduled for, and the
-  /// error shown when scheduling fails, when the channel holds its [limit] of
-  /// scheduled messages, such as "Limit reached (10 max)".
-  String scheduleLimitReachedText({required int limit});
+  /// The title of the sheet that changes when a scheduled message is sent,
+  /// such as "Reschedule message".
+  String get rescheduleMessageLabel;
 
   /// The label of the option that opens a sheet to pick a date and time, such
   /// as "Custom time".
@@ -899,9 +898,9 @@ abstract class Translations {
   /// The [scheduledAt] is shown in local time.
   String scheduleWeekdayText({required DateTime scheduledAt});
 
-  /// The label above a preview of a message sent to [name], such as "Message
-  /// to Maya".
-  String messageToText({required String name});
+  /// The label above a preview of a message sent to [channelName], such as
+  /// "Message to Maya".
+  String messageToLabel({required String channelName});
 
   /// The label of the date a message is scheduled for, such as "Date".
   String get dateLabel;
@@ -918,23 +917,24 @@ abstract class Translations {
 
   /// The error shown when the picked time is too soon to schedule a message
   /// for, such as "Pick a later time.".
-  String get scheduleTooSoonText;
+  String get scheduleTooSoonError;
 
   /// The error shown when the picked time is further ahead than a message can
   /// be scheduled for, such as "That's further ahead than your app allows.".
-  String get scheduleTooFarText;
+  String get scheduleTooFarError;
+
+  /// The title of the sheet of times a message can be scheduled for, and the
+  /// error shown when scheduling fails, when the channel holds its [limit] of
+  /// scheduled messages, such as "Limit reached (10 max)".
+  String scheduleChannelLimitReachedLabel({required int limit});
 
   /// The error shown when the current user holds their [limit] of scheduled
   /// messages, such as "You've reached your limit of 100 scheduled messages.".
-  String scheduledMessageUserLimitText({required int limit});
+  String scheduleUserLimitReachedError({required int limit});
 
   /// The error shown when a message could not be scheduled, such as
   /// "Couldn't schedule message. Try again.".
-  String get scheduleMessageFailedText;
-
-  /// The title of the sheet that changes when a scheduled message is sent,
-  /// such as "Reschedule message".
-  String get rescheduleMessageLabel;
+  String get scheduleMessageError;
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -1893,7 +1893,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get scheduleMessageLabel => 'Schedule message';
 
   @override
-  String scheduleLimitReachedText({required int limit}) => 'Limit reached ($limit max)';
+  String get rescheduleMessageLabel => 'Reschedule message';
 
   @override
   String get customTimeLabel => 'Custom time';
@@ -1913,7 +1913,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   }
 
   @override
-  String messageToText({required String name}) => 'Message to $name';
+  String messageToLabel({required String channelName}) => 'Message to $channelName';
 
   @override
   String get dateLabel => 'Date';
@@ -1928,20 +1928,20 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String sentInYourTimeZoneText({required String timeZone}) => 'Sent in your time zone ($timeZone)';
 
   @override
-  String get scheduleTooSoonText => 'Pick a later time.';
+  String get scheduleTooSoonError => 'Pick a later time.';
 
   @override
-  String get scheduleTooFarText => "That's further ahead than your app allows.";
+  String get scheduleTooFarError => "That's further ahead than your app allows.";
 
   @override
-  String scheduledMessageUserLimitText({required int limit}) =>
+  String scheduleChannelLimitReachedLabel({required int limit}) => 'Limit reached ($limit max)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) =>
       "You've reached your limit of $limit scheduled messages.";
 
   @override
-  String get scheduleMessageFailedText => "Couldn't schedule message. Try again.";
-
-  @override
-  String get rescheduleMessageLabel => 'Reschedule message';
+  String get scheduleMessageError => "Couldn't schedule message. Try again.";
 }
 
 // Display name for each language code Stream Chat's translation API

@@ -956,7 +956,7 @@ No es posible añadir más de $limit archivos adjuntos
   String get scheduleMessageLabel => 'Programar mensaje';
 
   @override
-  String scheduleLimitReachedText({required int limit}) => 'Límite alcanzado (máx. $limit)';
+  String get rescheduleMessageLabel => 'Reprogramar mensaje';
 
   @override
   String get customTimeLabel => 'Hora personalizada';
@@ -976,7 +976,7 @@ No es posible añadir más de $limit archivos adjuntos
   }
 
   @override
-  String messageToText({required String name}) => 'Mensaje para $name';
+  String messageToLabel({required String channelName}) => 'Mensaje para $channelName';
 
   @override
   String get dateLabel => 'Fecha';
@@ -991,20 +991,20 @@ No es posible añadir más de $limit archivos adjuntos
   String sentInYourTimeZoneText({required String timeZone}) => 'Se envía en tu zona horaria ($timeZone)';
 
   @override
-  String get scheduleTooSoonText => 'Elige una hora posterior.';
+  String get scheduleTooSoonError => 'Elige una hora posterior.';
 
   @override
-  String get scheduleTooFarText => 'Está más adelante de lo que permite la aplicación.';
+  String get scheduleTooFarError => 'Está más adelante de lo que permite la aplicación.';
 
   @override
-  String scheduledMessageUserLimitText({required int limit}) =>
+  String scheduleChannelLimitReachedLabel({required int limit}) => 'Límite alcanzado (máx. $limit)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) =>
       'Has alcanzado tu límite de $limit mensajes programados.';
 
   @override
-  String get scheduleMessageFailedText => 'No se pudo programar el mensaje. Inténtalo de nuevo.';
-
-  @override
-  String get rescheduleMessageLabel => 'Reprogramar mensaje';
+  String get scheduleMessageError => 'No se pudo programar el mensaje. Inténtalo de nuevo.';
 }
 
 class _AccessibilityTranslationsEs extends AccessibilityTranslations {

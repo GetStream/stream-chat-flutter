@@ -934,7 +934,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get scheduleMessageLabel => 'メッセージを予約';
 
   @override
-  String scheduleLimitReachedText({required int limit}) => '上限に達しました（最大$limit件）';
+  String get rescheduleMessageLabel => 'メッセージの予約を変更';
 
   @override
   String get customTimeLabel => '時間を指定';
@@ -954,7 +954,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String messageToText({required String name}) => '$nameへのメッセージ';
+  String messageToLabel({required String channelName}) => '$channelNameへのメッセージ';
 
   @override
   String get dateLabel => '日付';
@@ -969,19 +969,19 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String sentInYourTimeZoneText({required String timeZone}) => 'お使いのタイムゾーンで送信されます（$timeZone）';
 
   @override
-  String get scheduleTooSoonText => 'もっと後の時刻を選んでください。';
+  String get scheduleTooSoonError => 'もっと後の時刻を選んでください。';
 
   @override
-  String get scheduleTooFarText => 'アプリで許可されている期間より先です。';
+  String get scheduleTooFarError => 'アプリで許可されている期間より先です。';
 
   @override
-  String scheduledMessageUserLimitText({required int limit}) => '予約メッセージの上限（$limit件）に達しました。';
+  String scheduleChannelLimitReachedLabel({required int limit}) => '上限に達しました（最大$limit件）';
 
   @override
-  String get scheduleMessageFailedText => 'メッセージを予約できませんでした。もう一度お試しください。';
+  String scheduleUserLimitReachedError({required int limit}) => '予約メッセージの上限（$limit件）に達しました。';
 
   @override
-  String get rescheduleMessageLabel => 'メッセージの予約を変更';
+  String get scheduleMessageError => 'メッセージを予約できませんでした。もう一度お試しください。';
 }
 
 class _AccessibilityTranslationsJa extends AccessibilityTranslations {

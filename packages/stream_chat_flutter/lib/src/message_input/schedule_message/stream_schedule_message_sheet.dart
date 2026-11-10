@@ -103,7 +103,7 @@ class StreamScheduleMessageSheet extends StatelessWidget {
     final limit = channel.config?.scheduledMessagesMaxPerChannel;
     final isLimitReached = isScheduleLimitReached(channel);
     final title = switch (limit) {
-      final limit? when isLimitReached => translations.scheduleLimitReachedText(limit: limit),
+      final limit? when isLimitReached => translations.scheduleChannelLimitReachedLabel(limit: limit),
       _ => translations.scheduleMessageLabel,
     };
 

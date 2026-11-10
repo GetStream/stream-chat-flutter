@@ -938,7 +938,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get scheduleMessageLabel => 'Planlegg melding';
 
   @override
-  String scheduleLimitReachedText({required int limit}) => 'Grensen er nådd (maks. $limit)';
+  String get rescheduleMessageLabel => 'Planlegg melding på nytt';
 
   @override
   String get customTimeLabel => 'Egendefinert tid';
@@ -958,7 +958,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String messageToText({required String name}) => 'Melding til $name';
+  String messageToLabel({required String channelName}) => 'Melding til $channelName';
 
   @override
   String get dateLabel => 'Dato';
@@ -973,19 +973,19 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String sentInYourTimeZoneText({required String timeZone}) => 'Sendes i din tidssone ($timeZone)';
 
   @override
-  String get scheduleTooSoonText => 'Velg et senere tidspunkt.';
+  String get scheduleTooSoonError => 'Velg et senere tidspunkt.';
 
   @override
-  String get scheduleTooFarText => 'Det er lenger frem enn appen tillater.';
+  String get scheduleTooFarError => 'Det er lenger frem enn appen tillater.';
 
   @override
-  String scheduledMessageUserLimitText({required int limit}) => 'Du har nådd grensen på $limit planlagte meldinger.';
+  String scheduleChannelLimitReachedLabel({required int limit}) => 'Grensen er nådd (maks. $limit)';
 
   @override
-  String get scheduleMessageFailedText => 'Kunne ikke planlegge meldingen. Prøv igjen.';
+  String scheduleUserLimitReachedError({required int limit}) => 'Du har nådd grensen på $limit planlagte meldinger.';
 
   @override
-  String get rescheduleMessageLabel => 'Planlegg melding på nytt';
+  String get scheduleMessageError => 'Kunne ikke planlegge meldingen. Prøv igjen.';
 }
 
 class _AccessibilityTranslationsNo extends AccessibilityTranslations {

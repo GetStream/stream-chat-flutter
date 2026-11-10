@@ -958,7 +958,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get scheduleMessageLabel => 'Programmer le message';
 
   @override
-  String scheduleLimitReachedText({required int limit}) => 'Limite atteinte ($limit max.)';
+  String get rescheduleMessageLabel => 'Reprogrammer le message';
 
   @override
   String get customTimeLabel => 'Heure personnalisée';
@@ -978,7 +978,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   }
 
   @override
-  String messageToText({required String name}) => 'Message à $name';
+  String messageToLabel({required String channelName}) => 'Message à $channelName';
 
   @override
   String get dateLabel => 'Date';
@@ -993,20 +993,20 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String sentInYourTimeZoneText({required String timeZone}) => 'Envoyé dans votre fuseau horaire ($timeZone)';
 
   @override
-  String get scheduleTooSoonText => 'Choisissez une heure plus tardive.';
+  String get scheduleTooSoonError => 'Choisissez une heure plus tardive.';
 
   @override
-  String get scheduleTooFarText => "C'est plus loin que ce que l'application permet.";
+  String get scheduleTooFarError => "C'est plus loin que ce que l'application permet.";
 
   @override
-  String scheduledMessageUserLimitText({required int limit}) =>
+  String scheduleChannelLimitReachedLabel({required int limit}) => 'Limite atteinte ($limit max.)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) =>
       'Vous avez atteint votre limite de $limit messages programmés.';
 
   @override
-  String get scheduleMessageFailedText => 'Impossible de programmer le message. Réessayez.';
-
-  @override
-  String get rescheduleMessageLabel => 'Reprogrammer le message';
+  String get scheduleMessageError => 'Impossible de programmer le message. Réessayez.';
 }
 
 class _AccessibilityTranslationsFr extends AccessibilityTranslations {
