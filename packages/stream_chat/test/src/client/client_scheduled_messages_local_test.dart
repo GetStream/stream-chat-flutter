@@ -285,6 +285,27 @@ void main() {
     ]);
   });
 
+  test("scheduleMessage reports the sent message's ID when it is sent right away", () async {
+    final message = Message(id: 'a', text: 'Good morning');
+    stubSchedule(message, () async => sentRightAway(message));
+    final sent = client.on(EventType.scheduledMessageSent).first;
+
+    await schedule(message);
+
+    expect((await sent).messageId, 'a');
+  });
+
+  test('scheduleMessage reports no message ID when the message was already sent', () async {
+    final message = Message(id: 'a', text: 'Good morning');
+    final error = refusedWith(scheduledMessageAlreadySentCode);
+    stubSchedule(message, () async => throw error);
+    final sent = client.on(EventType.scheduledMessageSent).first;
+
+    await expectLater(schedule(message), throwsA(error));
+
+    expect((await sent).messageId, isNull);
+  });
+
   test('scheduleMessage rethrows an error other than a network one and stops listing it', () async {
     final message = Message(id: 'a', text: 'Good morning');
     stubSchedule(message, () async => throw StateError('broken'));

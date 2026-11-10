@@ -202,7 +202,12 @@ class ScheduledMessageManager {
         _emitEvent(EventType.scheduledMessageCreated, created, generation);
       } else if (local != null) {
         // Its time had passed, so it was sent right away.
-        _emitEvent(EventType.scheduledMessageSent, _sent(local), generation);
+        _emitEvent(
+          EventType.scheduledMessageSent,
+          _sent(local),
+          generation,
+          messageId: response.message.id,
+        );
       }
 
       return response;
@@ -487,16 +492,20 @@ class ScheduledMessageManager {
 
   // Reports [scheduledMessage] as an event of [type], unless the user changed
   // since the request that produced it started.
+  //
+  // [messageId] is the ID of the message it was sent as, when known.
   void _emitEvent(
     String type,
     ScheduledMessage scheduledMessage,
-    int generation,
-  ) {
+    int generation, {
+    String? messageId,
+  }) {
     if (generation != _generation) return;
 
     final event = Event(
       type: type,
       cid: scheduledMessage.cid,
+      messageId: messageId,
       scheduledMessage: scheduledMessage,
     );
 

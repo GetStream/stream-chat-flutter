@@ -60,7 +60,7 @@ final class ScheduledMessage extends Equatable {
   /// The ID of this scheduled message.
   ///
   /// The sent message gets an ID of its own, given by [Event.messageId] on
-  /// [EventType.scheduledMessageSent].
+  /// [EventType.scheduledMessageSent] when it is known.
   final String id;
 
   /// The ID of the channel this message is sent to, in the form `type:id`.

@@ -184,7 +184,7 @@ class Event {
   /// The scheduled message this event is about.
   ///
   /// On [EventType.scheduledMessageSent], [messageId] is the ID of the sent
-  /// message.
+  /// message, when it is known.
   @JsonKey(includeToJson: false)
   final ScheduledMessage? scheduledMessage;
 
