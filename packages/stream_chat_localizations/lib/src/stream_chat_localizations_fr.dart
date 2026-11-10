@@ -922,8 +922,8 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => "Échec de l'envoi, réessayez",
-      .internalError => 'Une erreur est survenue, réessayez',
+      .requestFailed => "Échec de l'envoi. Réessayez",
+      .internalError => 'Une erreur est survenue. Réessayez',
       .channelDeleted => 'Ce canal a été supprimé',
       .userDeleted => 'Votre compte a été supprimé',
       .channelFrozen => 'Ce canal est gelé',
@@ -932,10 +932,10 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
       .moderationBlocked => 'Bloqué par la modération',
       .hookRejected => "Refusé par l'application",
       .expired => 'Non envoyé : le service a été retardé',
-      .pendingNotSupported => 'Ce canal nécessite désormais une approbation, programmez-le à nouveau',
-      .invalidMessage when isQuoteDeleted => 'Le message cité a été supprimé, modifiez-le pour retirer la citation',
-      .invalidMessage => "Le message ne respecte plus les limites de l'application, modifiez-le",
-      _ => 'Une erreur est survenue, réessayez',
+      .pendingNotSupported => 'Ce canal nécessite désormais une approbation. Programmez-le à nouveau.',
+      .invalidMessage when isQuoteDeleted => 'Le message cité a été supprimé. Modifiez-le pour retirer la citation.',
+      .invalidMessage => "Le message ne respecte plus les limites de l'application. Modifiez-le.",
+      _ => 'Une erreur est survenue. Réessayez',
     };
   }
 
@@ -943,7 +943,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get noScheduledMessagesText => 'Aucun message programmé';
 
   @override
-  String get loadingScheduledMessagesError => 'Erreur de chargement des messages programmés';
+  String get loadingScheduledMessagesError => 'Impossible de charger les messages programmés';
 
   @override
   String get editAndRescheduleLabel => 'Modifier et reprogrammer';

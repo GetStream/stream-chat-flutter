@@ -917,8 +917,8 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => 'Senden fehlgeschlagen, versuche es erneut',
-      .internalError => 'Etwas ist schiefgelaufen, versuche es erneut',
+      .requestFailed => 'Senden fehlgeschlagen. Versuche es erneut',
+      .internalError => 'Etwas ist schiefgelaufen. Versuche es erneut',
       .channelDeleted => 'Dieser Kanal wurde gelöscht',
       .userDeleted => 'Dein Konto wurde gelöscht',
       .channelFrozen => 'Dieser Kanal ist eingefroren',
@@ -927,11 +927,11 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       .moderationBlocked => 'Von der Moderation blockiert',
       .hookRejected => 'Von der App abgelehnt',
       .expired => 'Nicht gesendet: Der Dienst war verzögert',
-      .pendingNotSupported => 'Dieser Kanal erfordert jetzt eine Freigabe, plane die Nachricht erneut',
+      .pendingNotSupported => 'Dieser Kanal erfordert jetzt eine Freigabe. Plane die Nachricht erneut.',
       .invalidMessage when isQuoteDeleted =>
-        'Die zitierte Nachricht wurde gelöscht, bearbeite die Nachricht, um das Zitat zu entfernen',
-      .invalidMessage => 'Die Nachricht entspricht nicht mehr den Vorgaben der App, bearbeite sie',
-      _ => 'Etwas ist schiefgelaufen, versuche es erneut',
+        'Die zitierte Nachricht wurde gelöscht. Bearbeite die Nachricht, um das Zitat zu entfernen.',
+      .invalidMessage => 'Die Nachricht entspricht nicht mehr den Vorgaben der App. Bearbeite sie.',
+      _ => 'Etwas ist schiefgelaufen. Versuche es erneut',
     };
   }
 
@@ -939,7 +939,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get noScheduledMessagesText => 'Keine geplanten Nachrichten';
 
   @override
-  String get loadingScheduledMessagesError => 'Fehler beim Laden der geplanten Nachrichten';
+  String get loadingScheduledMessagesError => 'Geplante Nachrichten konnten nicht geladen werden';
 
   @override
   String get editAndRescheduleLabel => 'Bearbeiten & neu planen';

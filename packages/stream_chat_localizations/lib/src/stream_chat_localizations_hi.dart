@@ -918,8 +918,8 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => 'नहीं भेजा जा सका, फिर से कोशिश करें',
-      .internalError => 'कुछ गलत हो गया, फिर से कोशिश करें',
+      .requestFailed => 'नहीं भेजा जा सका। फिर से कोशिश करें',
+      .internalError => 'कुछ गलत हो गया। फिर से कोशिश करें',
       .channelDeleted => 'यह चैनल हटा दिया गया था',
       .userDeleted => 'आपका खाता हटा दिया गया',
       .channelFrozen => 'यह चैनल फ़्रीज़ है',
@@ -928,10 +928,10 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
       .moderationBlocked => 'मॉडरेशन द्वारा ब्लॉक किया गया',
       .hookRejected => 'ऐप द्वारा अस्वीकार किया गया',
       .expired => 'नहीं भेजा गया: सेवा में देरी हुई',
-      .pendingNotSupported => 'इस चैनल में अब अनुमोदन ज़रूरी है, इसे फिर से शेड्यूल करें',
-      .invalidMessage when isQuoteDeleted => 'उद्धृत संदेश हटा दिया गया था, उद्धरण हटाने के लिए इसे संपादित करें',
-      .invalidMessage => 'संदेश अब ऐप की सीमाओं को पूरा नहीं करता, इसे संपादित करें',
-      _ => 'कुछ गलत हो गया, फिर से कोशिश करें',
+      .pendingNotSupported => 'इस चैनल में अब अनुमोदन ज़रूरी है। इसे फिर से शेड्यूल करें।',
+      .invalidMessage when isQuoteDeleted => 'उद्धृत संदेश हटा दिया गया था। उद्धरण हटाने के लिए इसे संपादित करें।',
+      .invalidMessage => 'संदेश अब ऐप की सीमाओं को पूरा नहीं करता। इसे संपादित करें।',
+      _ => 'कुछ गलत हो गया। फिर से कोशिश करें',
     };
   }
 
@@ -939,7 +939,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get noScheduledMessagesText => 'कोई शेड्यूल किया गया संदेश नहीं';
 
   @override
-  String get loadingScheduledMessagesError => 'शेड्यूल किए गए संदेश लोड करने में त्रुटि';
+  String get loadingScheduledMessagesError => 'शेड्यूल किए गए संदेश लोड नहीं हो सके';
 
   @override
   String get editAndRescheduleLabel => 'संपादित करें और फिर से शेड्यूल करें';
