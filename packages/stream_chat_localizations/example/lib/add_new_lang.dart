@@ -938,8 +938,8 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => "Couldn't send, try again",
-      .internalError => 'Something went wrong, try again',
+      .requestFailed => "Couldn't send. Try again",
+      .internalError => 'Something went wrong. Try again',
       .channelDeleted => 'This channel was deleted',
       .userDeleted => 'Your account was deleted',
       .channelFrozen => 'This channel is frozen',
@@ -948,10 +948,10 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
       .moderationBlocked => 'Blocked by moderation',
       .hookRejected => 'Rejected by the app',
       .expired => 'Not sent: the service was delayed',
-      .pendingNotSupported => 'This channel now needs approval, schedule it again',
-      .invalidMessage when isQuoteDeleted => 'The quoted message was deleted, edit it to remove the quote',
-      .invalidMessage => "The message no longer meets the app's limits, edit it",
-      _ => 'Something went wrong, try again',
+      .pendingNotSupported => 'This channel now needs approval. Schedule it again.',
+      .invalidMessage when isQuoteDeleted => 'The quoted message was deleted. Edit it to remove the quote.',
+      .invalidMessage => "The message no longer meets the app's limits. Edit it.",
+      _ => 'Something went wrong. Try again',
     };
   }
 
@@ -959,7 +959,7 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get noScheduledMessagesText => 'No scheduled messages';
 
   @override
-  String get loadingScheduledMessagesError => 'Error loading scheduled messages';
+  String get loadingScheduledMessagesError => "Couldn't load scheduled messages";
 
   @override
   String get editAndRescheduleLabel => 'Edit & Reschedule';

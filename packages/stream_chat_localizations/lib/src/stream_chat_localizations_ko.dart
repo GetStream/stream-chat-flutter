@@ -911,9 +911,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
       .moderationBlocked => '조정 정책에 의해 차단됨',
       .hookRejected => '앱에서 거부됨',
       .expired => '전송되지 않음: 서비스가 지연되었습니다',
-      .pendingNotSupported => '이제 이 채널은 승인이 필요합니다. 다시 예약하세요',
-      .invalidMessage when isQuoteDeleted => '인용한 메시지가 삭제되었습니다. 인용을 제거하려면 메시지를 수정하세요',
-      .invalidMessage => '메시지가 더 이상 앱의 제한을 충족하지 않습니다. 수정하세요',
+      .pendingNotSupported => '이제 이 채널은 승인이 필요합니다. 다시 예약하세요.',
+      .invalidMessage when isQuoteDeleted => '인용한 메시지가 삭제되었습니다. 인용을 제거하려면 메시지를 수정하세요.',
+      .invalidMessage => '메시지가 더 이상 앱의 제한을 충족하지 않습니다. 수정하세요.',
       _ => '문제가 발생했습니다. 다시 시도하세요',
     };
   }
@@ -922,7 +922,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get noScheduledMessagesText => '예약된 메시지가 없습니다';
 
   @override
-  String get loadingScheduledMessagesError => '예약된 메시지를 불러오는 중 오류가 발생했습니다';
+  String get loadingScheduledMessagesError => '예약된 메시지를 불러오지 못했습니다';
 
   @override
   String get editAndRescheduleLabel => '수정 후 다시 예약';

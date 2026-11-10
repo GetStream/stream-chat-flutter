@@ -908,9 +908,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
       .moderationBlocked => 'モデレーションによりブロックされました',
       .hookRejected => 'アプリにより拒否されました',
       .expired => '送信されませんでした: サービスが遅延しました',
-      .pendingNotSupported => 'このチャンネルでは承認が必要になりました。もう一度予約してください',
-      .invalidMessage when isQuoteDeleted => '引用元のメッセージが削除されました。編集して引用を削除してください',
-      .invalidMessage => 'メッセージがアプリの制限を満たさなくなりました。編集してください',
+      .pendingNotSupported => 'このチャンネルでは承認が必要になりました。もう一度予約してください。',
+      .invalidMessage when isQuoteDeleted => '引用元のメッセージが削除されました。編集して引用を削除してください。',
+      .invalidMessage => 'メッセージがアプリの制限を満たさなくなりました。編集してください。',
       _ => '問題が発生しました。もう一度お試しください',
     };
   }
@@ -919,7 +919,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get noScheduledMessagesText => '予約メッセージはありません';
 
   @override
-  String get loadingScheduledMessagesError => '予約メッセージの読み込みエラー';
+  String get loadingScheduledMessagesError => '予約メッセージを読み込めませんでした';
 
   @override
   String get editAndRescheduleLabel => '編集して再予約';

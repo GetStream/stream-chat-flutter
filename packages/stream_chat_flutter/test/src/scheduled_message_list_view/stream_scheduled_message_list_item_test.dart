@@ -149,7 +149,7 @@ void main() {
   testWidgets('StreamScheduledMessageListItem says why it could not be sent', (tester) async {
     await tester.pumpWidget(_wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: _failed())));
 
-    expect(find.text('This channel now needs approval, schedule it again'), findsOneWidget);
+    expect(find.text('This channel now needs approval. Schedule it again.'), findsOneWidget);
   });
 
   testWidgets(
@@ -164,7 +164,7 @@ void main() {
 
       await tester.pumpWidget(_wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: invalid)));
 
-      expect(find.text('The quoted message was deleted, edit it to remove the quote'), findsOneWidget);
+      expect(find.text('The quoted message was deleted. Edit it to remove the quote.'), findsOneWidget);
     },
   );
 
