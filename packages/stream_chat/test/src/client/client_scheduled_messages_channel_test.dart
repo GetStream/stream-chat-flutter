@@ -24,7 +24,7 @@ void main() {
   ];
 
   for (final (name, load) in loads) {
-    test('$name a channel that has a state updates it and the client', () async {
+    test('$name a channel that has a state updates its scheduledMessages and the client', () async {
       final channel = Channel.fromState(harness.client, ChannelState(channel: ChannelModel(cid: testCid)));
       addTearDown(channel.dispose);
       await harness.hold([fakeScheduledMessage('gone'), local, elsewhere]);
@@ -33,9 +33,20 @@ void main() {
       await load(channel);
 
       expect(idsOf(harness.client.state.scheduledMessages), ['fresh', 'local', 'there']);
-      expect(idsOf(channel.state!.channelState.scheduledMessages), ['fresh', 'local']);
+      expect(idsOf(channel.state!.scheduledMessages), ['fresh', 'local']);
     });
   }
+
+  test("a channel query keeps what it returned in the channel's state", () async {
+    final reply = fakeScheduledMessage('reply', parentId: 'parent');
+    harness.stubQueryChannel(carrying([fakeScheduledMessage('fresh'), reply]));
+    final channel = Channel.fromState(harness.client, ChannelState(channel: ChannelModel(cid: testCid)));
+    addTearDown(channel.dispose);
+
+    await channel.query(includeScheduledMessages: true);
+
+    expect(idsOf(channel.state!.channelState.scheduledMessages), ['fresh', 'reply']);
+  });
 
   test('a channel query keeps one whose request failed', () async {
     final failed = fakeScheduledMessage(
@@ -105,13 +116,13 @@ void main() {
     expect(idsOf(harness.client.state.scheduledMessages), ['in-a', 'in-b']);
   });
 
-  test("a channel created without them starts with the client's ones in that channel", () async {
-    await harness.hold([fakeScheduledMessage('here'), fakeScheduledMessage('reply', parentId: 'parent'), elsewhere]);
+  test("a channel created without them lists the client's ones in that channel", () async {
+    await harness.hold([fakeScheduledMessage('here')]);
 
     final channel = Channel.fromState(harness.client, ChannelState(channel: ChannelModel(cid: testCid)));
     addTearDown(channel.dispose);
 
-    expect(idsOf(channel.state!.channelState.scheduledMessages), ['here']);
+    expect(idsOf(channel.state!.scheduledMessages), ['here']);
   });
 
   test("a channel created with them lists the client's ones instead", () async {
@@ -145,27 +156,53 @@ void main() {
     expect(idsOf(channel.state!.scheduledThreadReplies('parent')), ['reply']);
   });
 
-  test("a scheduledMessageCreated event adds it to the channel's state", () async {
+  test("a channel's scheduledMessages leaves out the ones in other channels", () async {
     final channel = Channel.fromState(harness.client, ChannelState(channel: ChannelModel(cid: testCid)));
     addTearDown(channel.dispose);
 
-    await harness.receive(EventType.scheduledMessageCreated, fakeScheduledMessage('new'));
+    await harness.hold([fakeScheduledMessage('here'), elsewhere]);
 
-    expect(idsOf(channel.state!.channelState.scheduledMessages), ['new']);
+    expect(idsOf(channel.state!.scheduledMessages), ['here']);
   });
 
-  test("a scheduledMessageCreated event emits the channel's state with it", () async {
+  test("a scheduledMessageCreated event adds it to the channel's scheduledMessages", () async {
     final channel = Channel.fromState(harness.client, ChannelState(channel: ChannelModel(cid: testCid)));
     addTearDown(channel.dispose);
-    final emitted = <List<String>>[];
-    final subscription = channel.state!.channelStateStream.listen(
-      (it) => emitted.add(idsOf(it.scheduledMessages)),
-    );
-    addTearDown(subscription.cancel);
 
     await harness.receive(EventType.scheduledMessageCreated, fakeScheduledMessage('new'));
 
-    expect(emitted.last, ['new']);
+    expect(idsOf(channel.state!.scheduledMessages), ['new']);
+  });
+
+  test("a scheduledMessageUpdated event replaces it in the channel's scheduledMessages", () async {
+    final channel = Channel.fromState(harness.client, ChannelState(channel: ChannelModel(cid: testCid)));
+    addTearDown(channel.dispose);
+    await harness.hold([fakeScheduledMessage('a')]);
+    final edited = fakeScheduledMessage('a', text: 'Good evening', updatedAt: DateTime.utc(2026, 10, 30));
+
+    await harness.receive(EventType.scheduledMessageUpdated, edited);
+
+    expect(channel.state!.scheduledMessages, [edited]);
+  });
+
+  test("a scheduledMessageDeleted event removes it from the channel's scheduledMessages", () async {
+    final channel = Channel.fromState(harness.client, ChannelState(channel: ChannelModel(cid: testCid)));
+    addTearDown(channel.dispose);
+    await harness.hold([fakeScheduledMessage('a')]);
+
+    await harness.receive(EventType.scheduledMessageDeleted, fakeScheduledMessage('a'));
+
+    expect(channel.state!.scheduledMessages, isEmpty);
+  });
+
+  test("a scheduledMessageSent event removes it from the channel's scheduledMessages", () async {
+    final channel = Channel.fromState(harness.client, ChannelState(channel: ChannelModel(cid: testCid)));
+    addTearDown(channel.dispose);
+    await harness.hold([fakeScheduledMessage('a')]);
+
+    await harness.receive(EventType.scheduledMessageSent, fakeScheduledMessage('a'));
+
+    expect(channel.state!.scheduledMessages, isEmpty);
   });
 
   test('scheduledMessagesStream emits on listen and on each change in the channel', () async {
@@ -201,29 +238,6 @@ void main() {
       <String>[],
       ['reply'],
     ]);
-  });
-
-  test('updating the channel state with a stale copy does not bring back a sent scheduled message', () async {
-    final channel = Channel.fromState(harness.client, ChannelState(channel: ChannelModel(cid: testCid)));
-    addTearDown(channel.dispose);
-    await harness.hold([fakeScheduledMessage('sent')]);
-    final stale = channel.state!.channelState;
-    await harness.receive(EventType.scheduledMessageSent, fakeScheduledMessage('sent'));
-
-    channel.state!.updateChannelState(stale.copyWith(messages: [Message(id: 'sent')]));
-
-    expect(channel.state!.channelState.scheduledMessages, isEmpty);
-    expect(harness.client.state.scheduledMessages, isEmpty);
-  });
-
-  test('a scheduledMessageCreated event in another channel leaves the channel state as it is', () async {
-    final channel = Channel.fromState(harness.client, ChannelState(channel: ChannelModel(cid: testCid)));
-    addTearDown(channel.dispose);
-    final before = channel.state!.channelState;
-
-    await harness.receive(EventType.scheduledMessageCreated, elsewhere);
-
-    expect(channel.state!.channelState, same(before));
   });
 
   test(

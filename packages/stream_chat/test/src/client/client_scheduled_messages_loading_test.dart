@@ -188,28 +188,28 @@ void main() {
     return channel;
   }
 
-  test("a channel's state lists the ones its query carries", () async {
+  test("a channel's scheduledMessages lists the ones its query carries", () async {
     final channel = await queryChannel();
 
-    expect(idsOf(channel.state!.channelState.scheduledMessages), ['here']);
+    expect(idsOf(channel.state!.scheduledMessages), ['here']);
   });
 
-  test("a channel's state adds one scheduled in it after its query", () async {
+  test("a channel's scheduledMessages adds one scheduled in it after its query", () async {
     final channel = await queryChannel();
 
     final later = fakeScheduledMessage('new', scheduledAt: DateTime.utc(2026, 11, 3));
     await harness.receive(EventType.scheduledMessageCreated, later);
 
-    expect(idsOf(channel.state!.channelState.scheduledMessages), ['here', 'new']);
+    expect(idsOf(channel.state!.scheduledMessages), ['here', 'new']);
   });
 
-  test("a channel's state lists the ones a later complete load returns", () async {
+  test("a channel's scheduledMessages lists the ones a later complete load returns", () async {
     final channel = await queryChannel();
 
     harness.stubQuery(fakePage([fakeScheduledMessage('loaded')]));
     await harness.client.loadScheduledMessages();
     await settle();
 
-    expect(idsOf(channel.state!.channelState.scheduledMessages), ['loaded']);
+    expect(idsOf(channel.state!.scheduledMessages), ['loaded']);
   });
 }

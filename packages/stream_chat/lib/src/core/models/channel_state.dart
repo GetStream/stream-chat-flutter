@@ -96,13 +96,10 @@ class ChannelState implements ComparableFieldProvider {
   /// The list of active live locations in the channel.
   final List<Location>? activeLiveLocations;
 
-  /// The current user's unsent scheduled messages in the channel.
+  /// The current user's scheduled messages in this channel when it was queried.
   ///
+  /// Use [ChannelClientState.scheduledMessages] for the list as it changes.
   /// Null when the query did not ask for them.
-  ///
-  /// A channel query result includes thread replies.
-  /// [ChannelClientState.channelState] leaves them out and lists the current
-  /// user's scheduled messages in the channel on this device.
   @JsonKey(includeToJson: false)
   final List<ScheduledMessage>? scheduledMessages;
 

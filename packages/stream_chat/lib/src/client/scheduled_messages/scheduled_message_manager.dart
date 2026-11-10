@@ -501,6 +501,11 @@ extension ScheduledMessageManagerScope on ScheduledMessageManager {
     return _scoped(_inChannel(cid));
   }
 
+  /// The [channelMessages], emitted on listen and again each time they change.
+  Stream<List<ScheduledMessage>> channelMessagesStream(String cid) {
+    return _scopedStream(_inChannel(cid));
+  }
+
   /// The scheduled replies in the thread of the message [parentId].
   List<ScheduledMessage> threadReplies(String parentId) {
     return _scoped(_inThread(parentId));

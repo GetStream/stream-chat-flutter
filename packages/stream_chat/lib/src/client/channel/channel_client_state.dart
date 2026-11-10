@@ -30,7 +30,6 @@ class ChannelClientState {
 
     final seededState = channelState.copyWith(
       pinnedMessages: MessageMerging.sortPinnedMessages(channelState.pinnedMessages),
-      scheduledMessages: _client.scheduledMessageManager.channelMessages(_channel.cid!),
     );
 
     _channelStateController = BehaviorSubject.seeded(seededState);
@@ -48,7 +47,6 @@ class ChannelClientState {
       deleteMessagesFromUser: _deleteMessagesFromUser,
     );
 
-    _startSyncingScheduledMessages();
     final handler = ChannelEventHandler(channel: _channel, mutations: mutations);
     _subscriptions.add(_channel.on().listen(handler.handleEvent));
 
@@ -71,21 +69,6 @@ class ChannelClientState {
   final Channel _channel;
   StreamChatClient get _client => _channel.client;
   final _subscriptions = CompositeSubscription();
-
-  // Keeps the channel's scheduled messages in step with the client's list of
-  // the current user's scheduled messages on this device.
-  void _syncScheduledMessages() {
-    final scheduledMessages = _client.scheduledMessageManager.channelMessages(_channel.cid!);
-    final current = _channelState.scheduledMessages;
-    if (const ListEquality().equals(scheduledMessages, current)) return;
-
-    _channelState = _channelState.copyWith(scheduledMessages: scheduledMessages);
-  }
-
-  void _startSyncingScheduledMessages() {
-    final changes = _client.scheduledMessageManager.stream;
-    _subscriptions.add(changes.listen((_) => _syncScheduledMessages()));
-  }
 
   // Removes the watcher from the channel state, optionally updating the
   // watcher count when provided.
@@ -363,23 +346,17 @@ class ChannelClientState {
 
   /// The current user's unsent scheduled messages in this channel.
   ///
-  /// Lists the ones known on this device, failed ones last, each group earliest
-  /// first. Scheduled replies in this channel's threads are in
-  /// [scheduledThreadReplies] instead.
-  ///
-  /// It is complete when [ScheduledMessageListState.hasLoadedAll] of
-  /// [ClientState.scheduledMessageListState] is true. A channel query with
-  /// `includeScheduledMessages` refreshes it for this channel.
-  List<ScheduledMessage> get scheduledMessages => _channelState.scheduledMessages ?? <ScheduledMessage>[];
+  /// They are the ones in [ClientState.scheduledMessages] in this channel, in
+  /// the same order. Replies in its threads are in [scheduledThreadReplies].
+  List<ScheduledMessage> get scheduledMessages {
+    return _client.scheduledMessageManager.channelMessages(_channel.cid!);
+  }
 
   /// The [scheduledMessages] as they change.
   ///
-  /// Emits the current value on listen, then a new value each time they
-  /// change. Like [scheduledMessages], it lists the ones known on this device.
+  /// Emits the current value on listen, then a new value each time they change.
   Stream<List<ScheduledMessage>> get scheduledMessagesStream {
-    final scheduledMessages = channelStateStream.map((cs) => cs.scheduledMessages ?? <ScheduledMessage>[]);
-
-    return scheduledMessages.distinct(const ListEquality().equals);
+    return _client.scheduledMessageManager.channelMessagesStream(_channel.cid!);
   }
 
   /// Channel draft.
@@ -628,6 +605,7 @@ class ChannelClientState {
       pendingMessages: updatedState.pendingMessages,
       pushPreferences: updatedState.pushPreferences,
       activeLiveLocations: updatedState.activeLiveLocations,
+      scheduledMessages: updatedState.scheduledMessages,
     );
   }
 
@@ -645,7 +623,6 @@ class ChannelClientState {
   /// genuinely comes from the network or offline storage.
   void updateChannelStateFromServer(ChannelState remoteState) {
     updateChannelState(_preserveLocalUnreadState(remoteState));
-    _syncScheduledMessages();
   }
 
   /// Rewrites the current user's [Read] in [remoteState], if present, to
