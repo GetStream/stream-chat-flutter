@@ -1,4 +1,8 @@
 analyzer:
+  errors:
+    # Flutter 3.50 deprecates the material and cupertino imports.
+    # TODO: Remove once the minimum Flutter version is 3.50 and the imports are migrated.
+    deprecated_member_use: ignore
   exclude:
     - packages/*/lib/**/*.g.dart
     - packages/*/lib/scrollable_positioned_list/**
