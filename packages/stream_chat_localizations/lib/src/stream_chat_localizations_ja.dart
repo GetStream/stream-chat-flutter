@@ -982,6 +982,41 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String get scheduleMessageError => 'メッセージを予約できませんでした。もう一度お試しください';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count件の予約メッセージ',
+      other: '$count件の予約メッセージ',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count件の予約返信',
+      other: '$count件の予約返信',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count件の送信に失敗',
+      other: '$count件の送信に失敗',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$limit件中$count件の予約メッセージ';
+  }
 }
 
 class _AccessibilityTranslationsJa extends AccessibilityTranslations {

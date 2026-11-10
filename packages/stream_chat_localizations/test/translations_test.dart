@@ -475,6 +475,13 @@ void main() {
       expect(localizations.scheduleUserLimitReachedError(limit: 100), contains('100'));
       expect(localizations.scheduleMessageError, isNotEmpty);
       expect(localizations.rescheduleMessageLabel, isNotEmpty);
+      expect(localizations.scheduledMessagesCountText(count: 3), contains('3'));
+      expect(localizations.scheduledRepliesCountText(count: 2), contains('2'));
+      expect(localizations.scheduledMessagesFailedCountText(count: 2), contains('2'));
+      expect(
+        localizations.scheduledMessagesLimitText(count: 7, limit: 10),
+        allOf(contains('7'), contains('10')),
+      );
 
       // Accessibility translations
       final a11y = localizations.accessibility;

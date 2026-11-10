@@ -1016,6 +1016,41 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String get scheduleMessageError => 'Impossibile programmare il messaggio. Riprova';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count messaggio programmato',
+      other: '$count messaggi programmati',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count risposta programmata',
+      other: '$count risposte programmate',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count non inviato',
+      other: '$count non inviati',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count di $limit messaggi programmati';
+  }
 }
 
 class _AccessibilityTranslationsIt extends AccessibilityTranslations {

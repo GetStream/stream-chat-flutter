@@ -986,6 +986,41 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get scheduleMessageError => 'Kunne ikke planlegge meldingen. Prøv igjen';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count planlagt melding',
+      other: '$count planlagte meldinger',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count planlagt svar',
+      other: '$count planlagte svar',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count kunne ikke sendes',
+      other: '$count kunne ikke sendes',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count av $limit planlagte meldinger';
+  }
 }
 
 class _AccessibilityTranslationsNo extends AccessibilityTranslations {

@@ -935,6 +935,22 @@ abstract class Translations {
   /// The error shown when a message could not be scheduled, such as
   /// "Couldn't schedule message. Try again".
   String get scheduleMessageError;
+
+  /// The count of scheduled messages in a channel, such as "3 scheduled
+  /// messages".
+  String scheduledMessagesCountText({required int count});
+
+  /// The count of scheduled replies in a thread, such as "2 scheduled
+  /// replies".
+  String scheduledRepliesCountText({required int count});
+
+  /// The count of scheduled messages that failed to send, such as "2 failed
+  /// to send".
+  String scheduledMessagesFailedCountText({required int count});
+
+  /// The count of scheduled messages in a channel out of its [limit], such as
+  /// "10 of 10 scheduled messages".
+  String scheduledMessagesLimitText({required int count, required int limit});
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -1942,6 +1958,41 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get scheduleMessageError => "Couldn't schedule message. Try again";
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count scheduled message',
+      other: '$count scheduled messages',
+      locale: 'en',
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count scheduled reply',
+      other: '$count scheduled replies',
+      locale: 'en',
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count failed to send',
+      other: '$count failed to send',
+      locale: 'en',
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count of $limit scheduled messages';
+  }
 }
 
 // Display name for each language code Stream Chat's translation API

@@ -1002,6 +1002,41 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get scheduleMessageError => "No s'ha pogut programar el missatge. Torna-ho a provar";
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count missatge programat',
+      other: '$count missatges programats',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count resposta programada',
+      other: '$count respostes programades',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: "$count no s'ha pogut enviar",
+      other: "$count no s'han pogut enviar",
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count de $limit missatges programats';
+  }
 }
 
 class _AccessibilityTranslationsCa extends AccessibilityTranslations {

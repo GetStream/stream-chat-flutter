@@ -1001,6 +1001,41 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get scheduleMessageError => "Couldn't schedule message. Try again";
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count scheduled message',
+      other: '$count scheduled messages',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count scheduled reply',
+      other: '$count scheduled replies',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count failed to send',
+      other: '$count failed to send',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count of $limit scheduled messages';
+  }
 }
 
 class _AccessibilityTranslationsEn extends AccessibilityTranslations {

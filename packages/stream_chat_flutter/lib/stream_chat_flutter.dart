@@ -84,6 +84,7 @@ export 'src/message_input/enums.dart';
 export 'src/message_input/message_input_placeholder.dart';
 export 'src/message_input/schedule_message/stream_schedule_message_sheet.dart';
 export 'src/message_input/schedule_message/stream_schedule_time_sheet.dart';
+export 'src/message_input/schedule_message/stream_scheduled_messages_banner.dart';
 export 'src/message_input/stream_message_composer.dart';
 export 'src/message_input/stream_message_composer_attachment_list.dart';
 export 'src/message_input/stream_message_text_field.dart';

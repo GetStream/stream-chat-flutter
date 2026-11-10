@@ -113,6 +113,8 @@ class StreamChatTheme extends InheritedTheme {
 ///  * [StreamThreadListTileThemeData], which defines thread list tile styles.
 ///  * [StreamScheduledMessageListItemThemeData], which defines scheduled
 ///    message list item styles.
+///  * [StreamScheduledMessagesBannerThemeData], which defines scheduled
+///    messages banner styles.
 ///  * [StreamVoiceRecordingAttachmentThemeData], which defines voice recording attachment styles.
 ///  * [StreamPollCreatorThemeData], which defines poll creator styles.
 ///  * [StreamPollInteractorThemeData], which defines poll interactor styles.
@@ -150,6 +152,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
     StreamChannelListItemThemeData? channelListItemTheme,
     StreamMessagePreviewTextThemeData? messagePreviewTextTheme,
     StreamScheduledMessageListItemThemeData? scheduledMessageListItemTheme,
+    StreamScheduledMessagesBannerThemeData? scheduledMessagesBannerTheme,
   }) {
     // App bars
     channelHeaderTheme ??= const StreamAppBarThemeData();
@@ -179,6 +182,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
 
     // Scheduled messages
     scheduledMessageListItemTheme ??= const StreamScheduledMessageListItemThemeData();
+    scheduledMessagesBannerTheme ??= const StreamScheduledMessagesBannerThemeData();
 
     return StreamChatThemeData.raw(
       channelHeaderTheme: channelHeaderTheme,
@@ -198,6 +202,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
       channelListItemTheme: channelListItemTheme,
       messagePreviewTextTheme: messagePreviewTextTheme,
       scheduledMessageListItemTheme: scheduledMessageListItemTheme,
+      scheduledMessagesBannerTheme: scheduledMessagesBannerTheme,
     );
   }
 
@@ -222,6 +227,8 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
     this.messagePreviewTextTheme = const StreamMessagePreviewTextThemeData(),
     // TODO(v11): Make required; the default keeps existing callers compiling.
     this.scheduledMessageListItemTheme = const StreamScheduledMessageListItemThemeData(),
+    // TODO(v11): Make required; the default keeps existing callers compiling.
+    this.scheduledMessagesBannerTheme = const StreamScheduledMessagesBannerThemeData(),
   });
 
   /// The channel header app bar theme for this theme.
@@ -275,4 +282,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
 
   /// The default styles of every [StreamScheduledMessageListItem].
   final StreamScheduledMessageListItemThemeData scheduledMessageListItemTheme;
+
+  /// The default styles of every [StreamScheduledMessagesBanner].
+  final StreamScheduledMessagesBannerThemeData scheduledMessagesBannerTheme;
 }

@@ -985,6 +985,41 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get scheduleMessageError => '메시지를 예약하지 못했습니다. 다시 시도하세요';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '예약 메시지 $count개',
+      other: '예약 메시지 $count개',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '예약 답글 $count개',
+      other: '예약 답글 $count개',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '전송 실패 $count개',
+      other: '전송 실패 $count개',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '예약 메시지 $count/$limit개';
+  }
 }
 
 class _AccessibilityTranslationsKo extends AccessibilityTranslations {

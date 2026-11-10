@@ -1007,6 +1007,41 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String get scheduleMessageError => 'Impossible de programmer le message. Réessayez';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count message programmé',
+      other: '$count messages programmés',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count réponse programmée',
+      other: '$count réponses programmées',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: "$count échec d'envoi",
+      other: "$count échecs d'envoi",
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count sur $limit messages programmés';
+  }
 }
 
 class _AccessibilityTranslationsFr extends AccessibilityTranslations {

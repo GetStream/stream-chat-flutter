@@ -1023,6 +1023,26 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String get scheduleMessageError => "Couldn't schedule message. Try again";
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    if (count == 1) return '1 scheduled message';
+    return '$count scheduled messages';
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    if (count == 1) return '1 scheduled reply';
+    return '$count scheduled replies';
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) => '$count failed to send';
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count of $limit scheduled messages';
+  }
 }
 
 void main() async {

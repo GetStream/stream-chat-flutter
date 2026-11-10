@@ -1003,6 +1003,41 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String get scheduleMessageError => 'Nachricht konnte nicht geplant werden. Versuche es erneut';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count geplante Nachricht',
+      other: '$count geplante Nachrichten',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count geplante Antwort',
+      other: '$count geplante Antworten',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count konnte nicht gesendet werden',
+      other: '$count konnten nicht gesendet werden',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count von $limit geplanten Nachrichten';
+  }
 }
 
 class _AccessibilityTranslationsDe extends AccessibilityTranslations {

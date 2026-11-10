@@ -1003,6 +1003,41 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get scheduleMessageError => 'Não foi possível agendar a mensagem. Tente novamente';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count mensagem agendada',
+      other: '$count mensagens agendadas',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count resposta agendada',
+      other: '$count respostas agendadas',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count falhou ao enviar',
+      other: '$count falharam ao enviar',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count de $limit mensagens agendadas';
+  }
 }
 
 class _AccessibilityTranslationsPt extends AccessibilityTranslations {
