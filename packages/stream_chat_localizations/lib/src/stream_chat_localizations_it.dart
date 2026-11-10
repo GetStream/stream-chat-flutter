@@ -916,22 +916,22 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get scheduledMessageUploadingLabel => 'Caricamento…';
 
   @override
-  String get scheduledThreadReplyPrefixText => 'Risposta nel thread: ';
+  String get scheduledThreadReplyPrefixText => 'Risposta nel thread:';
 
   @override
   String scheduledQuoteReplyPrefixText({String? name}) {
-    if (name == null) return 'Risposta: ';
-    return 'Risposta a $name: ';
+    if (name == null) return 'Risposta:';
+    return 'Risposta a $name:';
   }
 
   @override
-  String scheduledMessageFailedText({
+  String scheduledMessageFailureReasonText({
     ScheduledMessageFailureReason? reason,
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => 'Invio non riuscito. Riprova.',
-      .internalError => 'Si è verificato un errore. Riprova.',
+      .requestFailed => 'Invio non riuscito, riprova',
+      .internalError => 'Si è verificato un errore, riprova',
       .channelDeleted => 'Questo canale è stato eliminato',
       .userDeleted => 'Il tuo account è stato eliminato',
       .channelFrozen => 'Questo canale è congelato',
@@ -940,11 +940,11 @@ Attenzione: il limite massimo di $limit file è stato superato.
       .moderationBlocked => 'Bloccato dalla moderazione',
       .hookRejected => "Rifiutato dall'app",
       .expired => 'Non inviato: il servizio ha subito un ritardo',
-      .pendingNotSupported => 'Questo canale ora richiede approvazione. Programmalo di nuovo.',
+      .pendingNotSupported => 'Questo canale ora richiede approvazione, programmalo di nuovo',
       .invalidMessage when isQuoteDeleted =>
-        'Il messaggio citato è stato eliminato. Modificalo per rimuovere la citazione.',
-      .invalidMessage => "Il messaggio non rispetta più i limiti dell'app. Modificalo.",
-      _ => 'Si è verificato un errore. Riprova.',
+        'Il messaggio citato è stato eliminato, modificalo per rimuovere la citazione',
+      .invalidMessage => "Il messaggio non rispetta più i limiti dell'app, modificalo",
+      _ => 'Si è verificato un errore, riprova',
     };
   }
 
@@ -952,7 +952,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get noScheduledMessagesText => 'Nessun messaggio programmato';
 
   @override
-  String get loadingScheduledMessagesError => 'Impossibile caricare i messaggi programmati';
+  String get loadingScheduledMessagesError => 'Errore durante il caricamento dei messaggi programmati';
 
   @override
   String get editAndRescheduleLabel => 'Modifica e riprogramma';

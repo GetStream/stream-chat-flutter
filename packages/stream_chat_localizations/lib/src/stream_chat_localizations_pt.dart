@@ -905,22 +905,22 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get scheduledMessageUploadingLabel => 'Enviando arquivos…';
 
   @override
-  String get scheduledThreadReplyPrefixText => 'Resposta na conversa: ';
+  String get scheduledThreadReplyPrefixText => 'Resposta na conversa:';
 
   @override
   String scheduledQuoteReplyPrefixText({String? name}) {
-    if (name == null) return 'Resposta: ';
-    return 'Resposta a $name: ';
+    if (name == null) return 'Resposta:';
+    return 'Resposta a $name:';
   }
 
   @override
-  String scheduledMessageFailedText({
+  String scheduledMessageFailureReasonText({
     ScheduledMessageFailureReason? reason,
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => 'Não foi possível enviar. Tente novamente.',
-      .internalError => 'Algo deu errado. Tente novamente.',
+      .requestFailed => 'Não foi possível enviar, tente novamente',
+      .internalError => 'Algo deu errado, tente novamente',
       .channelDeleted => 'Este canal foi excluído',
       .userDeleted => 'Sua conta foi excluída',
       .channelFrozen => 'Este canal está congelado',
@@ -929,10 +929,10 @@ Não é possível adicionar mais de $limit arquivos de uma vez
       .moderationBlocked => 'Bloqueada pela moderação',
       .hookRejected => 'Rejeitada pelo aplicativo',
       .expired => 'Não enviada: o serviço atrasou',
-      .pendingNotSupported => 'Este canal agora exige aprovação. Agende novamente.',
-      .invalidMessage when isQuoteDeleted => 'A mensagem citada foi excluída. Edite para remover a citação.',
-      .invalidMessage => 'A mensagem não atende mais aos limites do aplicativo. Edite-a.',
-      _ => 'Algo deu errado. Tente novamente.',
+      .pendingNotSupported => 'Este canal agora exige aprovação, agende novamente',
+      .invalidMessage when isQuoteDeleted => 'A mensagem citada foi excluída, edite para remover a citação',
+      .invalidMessage => 'A mensagem não atende mais aos limites do aplicativo, edite-a',
+      _ => 'Algo deu errado, tente novamente',
     };
   }
 
@@ -940,7 +940,7 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get noScheduledMessagesText => 'Nenhuma mensagem agendada';
 
   @override
-  String get loadingScheduledMessagesError => 'Não foi possível carregar as mensagens agendadas';
+  String get loadingScheduledMessagesError => 'Erro ao carregar as mensagens agendadas';
 
   @override
   String get editAndRescheduleLabel => 'Editar e reagendar';

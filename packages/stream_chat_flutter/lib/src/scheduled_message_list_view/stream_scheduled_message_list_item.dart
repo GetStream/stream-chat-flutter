@@ -361,6 +361,7 @@ class ScheduledMessagePreview extends StatelessWidget {
 
     if (prefix == null) return preview;
     return Row(
+      spacing: context.streamSpacing.xxs,
       children: [
         Flexible(child: Text(prefix, maxLines: 1, overflow: .ellipsis)),
         Flexible(child: preview),
@@ -408,7 +409,7 @@ class ScheduledMessageStatusLine extends StatelessWidget {
         final themeStyle = theme.failedStatusStyle ?? defaults.failedStatusStyle;
         final effectiveStyle = failedStyle ?? themeStyle;
         final quoted = _quotedMessage(context, scheduledMessage);
-        final reason = translations.scheduledMessageFailedText(
+        final reason = translations.scheduledMessageFailureReasonText(
           reason: scheduledMessage.failureReason,
           isQuoteDeleted: quoted?.isDeleted ?? false,
         );

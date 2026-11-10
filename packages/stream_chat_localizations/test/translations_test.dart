@@ -441,10 +441,10 @@ void main() {
         ScheduledMessageFailureReason.invalidMessage,
         null,
       ]) {
-        expect(localizations.scheduledMessageFailedText(reason: reason), isNotNull);
+        expect(localizations.scheduledMessageFailureReasonText(reason: reason), isNotNull);
       }
       expect(
-        localizations.scheduledMessageFailedText(
+        localizations.scheduledMessageFailureReasonText(
           reason: ScheduledMessageFailureReason.invalidMessage,
           isQuoteDeleted: true,
         ),

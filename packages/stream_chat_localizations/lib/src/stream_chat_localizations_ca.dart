@@ -904,22 +904,22 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get scheduledMessageUploadingLabel => 'Pujant…';
 
   @override
-  String get scheduledThreadReplyPrefixText => 'Resposta al fil: ';
+  String get scheduledThreadReplyPrefixText => 'Resposta al fil:';
 
   @override
   String scheduledQuoteReplyPrefixText({String? name}) {
-    if (name == null) return 'Resposta: ';
-    return 'Resposta a $name: ';
+    if (name == null) return 'Resposta:';
+    return 'Resposta a $name:';
   }
 
   @override
-  String scheduledMessageFailedText({
+  String scheduledMessageFailureReasonText({
     ScheduledMessageFailureReason? reason,
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => "No s'ha pogut enviar. Torna-ho a provar.",
-      .internalError => 'Alguna cosa ha anat malament. Torna-ho a provar.',
+      .requestFailed => "No s'ha pogut enviar, torna-ho a provar",
+      .internalError => 'Alguna cosa ha anat malament, torna-ho a provar',
       .channelDeleted => "Aquest canal s'ha eliminat",
       .userDeleted => "El teu compte s'ha eliminat",
       .channelFrozen => 'Aquest canal està congelat',
@@ -928,10 +928,10 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
       .moderationBlocked => 'Bloquejat per la moderació',
       .hookRejected => "Rebutjat per l'aplicació",
       .expired => "No enviat: el servei s'ha endarrerit",
-      .pendingNotSupported => 'Aquest canal ara requereix aprovació. Torna a programar-lo.',
-      .invalidMessage when isQuoteDeleted => "El missatge citat s'ha eliminat. Edita'l per treure la cita.",
-      .invalidMessage => "El missatge ja no compleix els límits de l'aplicació. Edita'l.",
-      _ => 'Alguna cosa ha anat malament. Torna-ho a provar.',
+      .pendingNotSupported => 'Aquest canal ara requereix aprovació, torna a programar-lo',
+      .invalidMessage when isQuoteDeleted => "El missatge citat s'ha eliminat, edita'l per treure la cita",
+      .invalidMessage => "El missatge ja no compleix els límits de l'aplicació, edita'l",
+      _ => 'Alguna cosa ha anat malament, torna-ho a provar',
     };
   }
 
@@ -939,7 +939,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get noScheduledMessagesText => 'No hi ha missatges programats';
 
   @override
-  String get loadingScheduledMessagesError => "No s'han pogut carregar els missatges programats";
+  String get loadingScheduledMessagesError => 'Error en carregar els missatges programats';
 
   @override
   String get editAndRescheduleLabel => 'Edita i reprograma';

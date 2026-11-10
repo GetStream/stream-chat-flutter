@@ -841,23 +841,21 @@ abstract class Translations {
   String get scheduledMessageUploadingLabel;
 
   /// The prefix of the preview of a scheduled reply in a thread, such as
-  /// "Thread reply: ".
+  /// "Thread reply:".
   String get scheduledThreadReplyPrefixText;
 
   /// The prefix of the preview of a scheduled message quoting another, such
-  /// as "Reply to Maya: ".
+  /// as "Reply to Maya:".
   ///
   /// [name] is the quoted message's author, or null when it is not known.
   String scheduledQuoteReplyPrefixText({String? name});
 
-  /// Why a scheduled message that failed with [reason] could not be sent, such
-  /// as "This channel is frozen".
+  /// The reason a scheduled message failed, such as "This channel is frozen".
   ///
-  /// A null or unrecognized [reason] gives a generic text.
-  ///
-  /// [isQuoteDeleted] tells whether the message quotes one that was deleted,
-  /// which explains a [ScheduledMessageFailureReason.invalidMessage].
-  String scheduledMessageFailedText({
+  /// A null or unrecognized [reason] gives a generic text. [isQuoteDeleted]
+  /// explains a [ScheduledMessageFailureReason.invalidMessage] whose quoted
+  /// message was deleted.
+  String scheduledMessageFailureReasonText({
     ScheduledMessageFailureReason? reason,
     bool isQuoteDeleted = false,
   });
@@ -869,7 +867,7 @@ abstract class Translations {
   String get loadingScheduledMessagesError;
 
   /// The label of the action that edits a scheduled message that failed and
-  /// schedules it again, such as "Edit & reschedule".
+  /// schedules it again, such as "Edit & Reschedule".
   String get editAndRescheduleLabel;
 
   /// The label of the action that changes when a scheduled message is sent.
@@ -1785,22 +1783,22 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get scheduledMessageUploadingLabel => 'Uploading…';
 
   @override
-  String get scheduledThreadReplyPrefixText => 'Thread reply: ';
+  String get scheduledThreadReplyPrefixText => 'Thread reply:';
 
   @override
   String scheduledQuoteReplyPrefixText({String? name}) {
-    if (name == null) return 'Reply: ';
-    return 'Reply to $name: ';
+    if (name == null) return 'Reply:';
+    return 'Reply to $name:';
   }
 
   @override
-  String scheduledMessageFailedText({
+  String scheduledMessageFailureReasonText({
     ScheduledMessageFailureReason? reason,
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => "Couldn't send. Try again.",
-      .internalError => 'Something went wrong. Try again.',
+      .requestFailed => "Couldn't send, try again",
+      .internalError => 'Something went wrong, try again',
       .channelDeleted => 'This channel was deleted',
       .userDeleted => 'Your account was deleted',
       .channelFrozen => 'This channel is frozen',
@@ -1809,10 +1807,10 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
       .moderationBlocked => 'Blocked by moderation',
       .hookRejected => 'Rejected by the app',
       .expired => 'Not sent: the service was delayed',
-      .pendingNotSupported => 'This channel now needs approval. Schedule it again.',
-      .invalidMessage when isQuoteDeleted => 'The quoted message was deleted. Edit it to remove the quote.',
-      .invalidMessage => "The message no longer meets the app's limits. Edit it.",
-      _ => 'Something went wrong. Try again.',
+      .pendingNotSupported => 'This channel now needs approval, schedule it again',
+      .invalidMessage when isQuoteDeleted => 'The quoted message was deleted, edit it to remove the quote',
+      .invalidMessage => "The message no longer meets the app's limits, edit it",
+      _ => 'Something went wrong, try again',
     };
   }
 
@@ -1820,7 +1818,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get noScheduledMessagesText => 'No scheduled messages';
 
   @override
-  String get loadingScheduledMessagesError => "Couldn't load scheduled messages";
+  String get loadingScheduledMessagesError => 'Error loading scheduled messages';
 
   @override
   String get editAndRescheduleLabel => 'Edit & Reschedule';

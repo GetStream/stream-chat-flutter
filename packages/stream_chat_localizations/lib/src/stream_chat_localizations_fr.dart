@@ -908,22 +908,22 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get scheduledMessageUploadingLabel => 'Téléversement en cours…';
 
   @override
-  String get scheduledThreadReplyPrefixText => 'Réponse dans le fil : ';
+  String get scheduledThreadReplyPrefixText => 'Réponse dans le fil :';
 
   @override
   String scheduledQuoteReplyPrefixText({String? name}) {
-    if (name == null) return 'Réponse : ';
-    return 'Réponse à $name : ';
+    if (name == null) return 'Réponse :';
+    return 'Réponse à $name :';
   }
 
   @override
-  String scheduledMessageFailedText({
+  String scheduledMessageFailureReasonText({
     ScheduledMessageFailureReason? reason,
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => "Échec de l'envoi. Réessayez.",
-      .internalError => 'Une erreur est survenue. Réessayez.',
+      .requestFailed => "Échec de l'envoi, réessayez",
+      .internalError => 'Une erreur est survenue, réessayez',
       .channelDeleted => 'Ce canal a été supprimé',
       .userDeleted => 'Votre compte a été supprimé',
       .channelFrozen => 'Ce canal est gelé',
@@ -932,10 +932,10 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
       .moderationBlocked => 'Bloqué par la modération',
       .hookRejected => "Refusé par l'application",
       .expired => 'Non envoyé : le service a été retardé',
-      .pendingNotSupported => 'Ce canal nécessite désormais une approbation. Programmez-le à nouveau.',
-      .invalidMessage when isQuoteDeleted => 'Le message cité a été supprimé. Modifiez-le pour retirer la citation.',
-      .invalidMessage => "Le message ne respecte plus les limites de l'application. Modifiez-le.",
-      _ => 'Une erreur est survenue. Réessayez.',
+      .pendingNotSupported => 'Ce canal nécessite désormais une approbation, programmez-le à nouveau',
+      .invalidMessage when isQuoteDeleted => 'Le message cité a été supprimé, modifiez-le pour retirer la citation',
+      .invalidMessage => "Le message ne respecte plus les limites de l'application, modifiez-le",
+      _ => 'Une erreur est survenue, réessayez',
     };
   }
 
@@ -943,7 +943,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get noScheduledMessagesText => 'Aucun message programmé';
 
   @override
-  String get loadingScheduledMessagesError => 'Impossible de charger les messages programmés';
+  String get loadingScheduledMessagesError => 'Erreur de chargement des messages programmés';
 
   @override
   String get editAndRescheduleLabel => 'Modifier et reprogrammer';

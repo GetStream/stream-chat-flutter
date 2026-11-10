@@ -887,22 +887,22 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get scheduledMessageUploadingLabel => 'Laster opp…';
 
   @override
-  String get scheduledThreadReplyPrefixText => 'Svar i tråd: ';
+  String get scheduledThreadReplyPrefixText => 'Svar i tråd:';
 
   @override
   String scheduledQuoteReplyPrefixText({String? name}) {
-    if (name == null) return 'Svar: ';
-    return 'Svar til $name: ';
+    if (name == null) return 'Svar:';
+    return 'Svar til $name:';
   }
 
   @override
-  String scheduledMessageFailedText({
+  String scheduledMessageFailureReasonText({
     ScheduledMessageFailureReason? reason,
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => 'Kunne ikke sende. Prøv igjen.',
-      .internalError => 'Noe gikk galt. Prøv igjen.',
+      .requestFailed => 'Kunne ikke sende, prøv igjen',
+      .internalError => 'Noe gikk galt, prøv igjen',
       .channelDeleted => 'Denne kanalen ble slettet',
       .userDeleted => 'Kontoen din ble slettet',
       .channelFrozen => 'Denne kanalen er frosset',
@@ -911,11 +911,11 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
       .moderationBlocked => 'Blokkert av moderering',
       .hookRejected => 'Avvist av appen',
       .expired => 'Ikke sendt: tjenesten ble forsinket',
-      .pendingNotSupported => 'Denne kanalen krever nå godkjenning. Planlegg den på nytt.',
+      .pendingNotSupported => 'Denne kanalen krever nå godkjenning, planlegg den på nytt',
       .invalidMessage when isQuoteDeleted =>
-        'Den siterte meldingen ble slettet. Rediger meldingen for å fjerne sitatet.',
-      .invalidMessage => 'Meldingen oppfyller ikke lenger appens grenser. Rediger den.',
-      _ => 'Noe gikk galt. Prøv igjen.',
+        'Den siterte meldingen ble slettet, rediger meldingen for å fjerne sitatet',
+      .invalidMessage => 'Meldingen oppfyller ikke lenger appens grenser, rediger den',
+      _ => 'Noe gikk galt, prøv igjen',
     };
   }
 
@@ -923,7 +923,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get noScheduledMessagesText => 'Ingen planlagte meldinger';
 
   @override
-  String get loadingScheduledMessagesError => 'Kunne ikke laste inn planlagte meldinger';
+  String get loadingScheduledMessagesError => 'Feil ved lasting av planlagte meldinger';
 
   @override
   String get editAndRescheduleLabel => 'Rediger og planlegg på nytt';

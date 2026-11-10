@@ -903,22 +903,22 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get scheduledMessageUploadingLabel => 'Wird hochgeladen…';
 
   @override
-  String get scheduledThreadReplyPrefixText => 'Antwort im Thread: ';
+  String get scheduledThreadReplyPrefixText => 'Antwort im Thread:';
 
   @override
   String scheduledQuoteReplyPrefixText({String? name}) {
-    if (name == null) return 'Antwort: ';
-    return 'Antwort an $name: ';
+    if (name == null) return 'Antwort:';
+    return 'Antwort an $name:';
   }
 
   @override
-  String scheduledMessageFailedText({
+  String scheduledMessageFailureReasonText({
     ScheduledMessageFailureReason? reason,
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => 'Senden fehlgeschlagen. Versuche es erneut.',
-      .internalError => 'Etwas ist schiefgelaufen. Versuche es erneut.',
+      .requestFailed => 'Senden fehlgeschlagen, versuche es erneut',
+      .internalError => 'Etwas ist schiefgelaufen, versuche es erneut',
       .channelDeleted => 'Dieser Kanal wurde gelöscht',
       .userDeleted => 'Dein Konto wurde gelöscht',
       .channelFrozen => 'Dieser Kanal ist eingefroren',
@@ -927,11 +927,11 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
       .moderationBlocked => 'Von der Moderation blockiert',
       .hookRejected => 'Von der App abgelehnt',
       .expired => 'Nicht gesendet: Der Dienst war verzögert',
-      .pendingNotSupported => 'Dieser Kanal erfordert jetzt eine Freigabe. Plane die Nachricht erneut.',
+      .pendingNotSupported => 'Dieser Kanal erfordert jetzt eine Freigabe, plane die Nachricht erneut',
       .invalidMessage when isQuoteDeleted =>
-        'Die zitierte Nachricht wurde gelöscht. Bearbeite die Nachricht, um das Zitat zu entfernen.',
-      .invalidMessage => 'Die Nachricht entspricht nicht mehr den Vorgaben der App. Bearbeite sie.',
-      _ => 'Etwas ist schiefgelaufen. Versuche es erneut.',
+        'Die zitierte Nachricht wurde gelöscht, bearbeite die Nachricht, um das Zitat zu entfernen',
+      .invalidMessage => 'Die Nachricht entspricht nicht mehr den Vorgaben der App, bearbeite sie',
+      _ => 'Etwas ist schiefgelaufen, versuche es erneut',
     };
   }
 
@@ -939,7 +939,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get noScheduledMessagesText => 'Keine geplanten Nachrichten';
 
   @override
-  String get loadingScheduledMessagesError => 'Geplante Nachrichten konnten nicht geladen werden';
+  String get loadingScheduledMessagesError => 'Fehler beim Laden der geplanten Nachrichten';
 
   @override
   String get editAndRescheduleLabel => 'Bearbeiten & neu planen';

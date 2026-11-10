@@ -884,22 +884,22 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get scheduledMessageUploadingLabel => 'アップロード中…';
 
   @override
-  String get scheduledThreadReplyPrefixText => 'スレッドへの返信: ';
+  String get scheduledThreadReplyPrefixText => 'スレッドへの返信:';
 
   @override
   String scheduledQuoteReplyPrefixText({String? name}) {
-    if (name == null) return '返信: ';
-    return '$name さんへの返信: ';
+    if (name == null) return '返信:';
+    return '$name さんへの返信:';
   }
 
   @override
-  String scheduledMessageFailedText({
+  String scheduledMessageFailureReasonText({
     ScheduledMessageFailureReason? reason,
     bool isQuoteDeleted = false,
   }) {
     return switch (reason) {
-      .requestFailed => '送信できませんでした。もう一度お試しください。',
-      .internalError => '問題が発生しました。もう一度お試しください。',
+      .requestFailed => '送信できませんでした。もう一度お試しください',
+      .internalError => '問題が発生しました。もう一度お試しください',
       .channelDeleted => 'このチャンネルは削除されました',
       .userDeleted => 'アカウントが削除されました',
       .channelFrozen => 'このチャンネルは凍結されています',
@@ -908,10 +908,10 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
       .moderationBlocked => 'モデレーションによりブロックされました',
       .hookRejected => 'アプリにより拒否されました',
       .expired => '送信されませんでした: サービスが遅延しました',
-      .pendingNotSupported => 'このチャンネルでは承認が必要になりました。もう一度予約してください。',
-      .invalidMessage when isQuoteDeleted => '引用元のメッセージが削除されました。編集して引用を削除してください。',
-      .invalidMessage => 'メッセージがアプリの制限を満たさなくなりました。編集してください。',
-      _ => '問題が発生しました。もう一度お試しください。',
+      .pendingNotSupported => 'このチャンネルでは承認が必要になりました。もう一度予約してください',
+      .invalidMessage when isQuoteDeleted => '引用元のメッセージが削除されました。編集して引用を削除してください',
+      .invalidMessage => 'メッセージがアプリの制限を満たさなくなりました。編集してください',
+      _ => '問題が発生しました。もう一度お試しください',
     };
   }
 
@@ -919,7 +919,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get noScheduledMessagesText => '予約メッセージはありません';
 
   @override
-  String get loadingScheduledMessagesError => '予約メッセージを読み込めませんでした';
+  String get loadingScheduledMessagesError => '予約メッセージの読み込みエラー';
 
   @override
   String get editAndRescheduleLabel => '編集して再予約';

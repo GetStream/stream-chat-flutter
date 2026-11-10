@@ -149,7 +149,7 @@ void main() {
     await tester.pumpWidget(_wrapWithMaterialApp(client: client, child: const StreamScheduledMessageListView()));
     await tester.pump();
 
-    expect(find.text("Couldn't load scheduled messages"), findsOneWidget);
+    expect(find.text('Error loading scheduled messages'), findsOneWidget);
   });
 
   testWidgets('StreamScheduledMessageListView hands errorBuilder a StreamChatError for any failure', (tester) async {
