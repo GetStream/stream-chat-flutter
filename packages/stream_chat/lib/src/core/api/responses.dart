@@ -783,8 +783,9 @@ class _ScheduledMessageBaseResponse extends _BaseResponse {
   late ScheduledMessage scheduledMessage;
 }
 
-/// Model response for the [StreamChatClient.updateScheduledMessage] and
-/// [StreamChatClient.rescheduleMessage] API calls.
+/// Model response for [StreamChatClient.updateScheduledMessage].
+///
+/// Also returned by [StreamChatClient.rescheduleMessage].
 @JsonSerializable(createToJson: false)
 final class UpdateScheduledMessageResponse extends _ScheduledMessageBaseResponse {
   /// Creates a new instance from [json].
@@ -800,8 +801,7 @@ final class DeleteScheduledMessageResponse extends _ScheduledMessageBaseResponse
       _$DeleteScheduledMessageResponseFromJson(json);
 }
 
-/// Model response for the [StreamChatClient.sendScheduledMessageNow] API
-/// call.
+/// Model response for [StreamChatClient.sendScheduledMessageNow].
 @JsonSerializable(createToJson: false)
 final class SendScheduledMessageNowResponse extends _ScheduledMessageBaseResponse {
   /// Creates a new instance from [json].

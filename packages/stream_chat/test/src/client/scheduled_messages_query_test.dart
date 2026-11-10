@@ -2,7 +2,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 void main() {
-  test('copyWith replaces only the given fields', () {
+  test('ScheduledMessagesQuery.copyWith replaces only the given fields', () {
     const query = ScheduledMessagesQuery(cid: 'messaging:general', limit: 25);
 
     final next = query.copyWith(next: 'cursor');

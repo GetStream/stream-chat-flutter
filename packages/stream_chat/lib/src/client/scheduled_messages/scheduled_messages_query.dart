@@ -31,8 +31,7 @@ final class ScheduledMessagesQuery extends Equatable {
     this.next,
   });
 
-  /// The channel whose scheduled messages are listed, or null for every
-  /// channel.
+  /// The channel to list scheduled messages from, or null for every channel.
   final String? cid;
 
   /// The statuses the listed ones have, or null for any status.
@@ -44,10 +43,9 @@ final class ScheduledMessagesQuery extends Equatable {
   /// The number of scheduled messages in the page, from 1 to 100.
   final int? limit;
 
-  /// The cursor of the page to get, taken from
-  /// [QueryScheduledMessagesResponse.next] of the previous page.
+  /// The cursor of the page to get, or null for the first page.
   ///
-  /// Null gets the first page.
+  /// Taken from [QueryScheduledMessagesResponse.next] of the previous page.
   final String? next;
 
   /// Returns a copy with the given fields replaced.

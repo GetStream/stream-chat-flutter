@@ -40,8 +40,7 @@ class ScheduledMessagesApi {
     return ScheduleMessageResponse.fromJson(response.data);
   }
 
-  /// Queries the page of the current user's scheduled messages that [query]
-  /// describes.
+  /// Queries the page of scheduled messages that [query] describes.
   Future<QueryScheduledMessagesResponse> queryScheduledMessages(
     ScheduledMessagesQuery query,
   ) async {

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
-import 'package:meta/meta.dart';
 
 import '../../core/api/responses.dart';
 import '../../core/api/scheduled_messages_api.dart';
@@ -19,14 +18,14 @@ import 'scheduled_message_event_handler.dart';
 import 'scheduled_message_list_state.dart';
 import 'scheduled_messages_query.dart';
 
-/// A store of the current user's scheduled messages.
+/// The runner of the current user's scheduled message requests, which applies their events.
 ///
-/// Every scheduled message request goes through it. The events of its client,
-/// including the ones its own requests emit, update its [state].
+/// The events of its client, including the ones its own requests emit, update
+/// its [state].
 class ScheduledMessageManager {
   /// Creates a manager for the scheduled messages of `client`.
   ///
-  /// The optional `logger` logs its warnings.
+  /// The `logger` logs its warnings.
   ScheduledMessageManager(this._client, {this._logger}) {
     _eventsSubscription = _client.eventStream.listen(_onEvent);
   }
@@ -75,12 +74,12 @@ class ScheduledMessageManager {
     return response;
   }
 
-  /// Loads the complete list, which then replaces
-  /// [ScheduledMessageListState.scheduledMessages].
+  /// Loads the complete list of scheduled messages.
   ///
-  /// The ones still being scheduled, or whose request failed, are kept. If a
-  /// page fails, the ones before it are added, nothing is removed, and the
-  /// error is rethrown. Calling this again while it runs shares the load.
+  /// It replaces [ScheduledMessageListState.scheduledMessages], keeping the
+  /// ones still being scheduled or whose request failed. If a page fails, the
+  /// ones before it are added, nothing is removed, and the error is rethrown.
+  /// Calling this again while it runs shares the load.
   ///
   /// Returns the [state] once the list is loaded.
   Future<ScheduledMessageListState> loadMessages() {
@@ -205,7 +204,7 @@ class ScheduledMessageManager {
     } on StreamChatNetworkError catch (error) {
       if (local == null) rethrow;
 
-      // Already sent: on a retry, the first attempt reached the server.
+      // Already sent: on a retry, the first attempt went through.
       if (error.scheduledMessageErrorReason == .scheduledMessageAlreadySent) {
         _emitEvent(EventType.scheduledMessageSent, _sent(local), generation);
         rethrow;
@@ -233,8 +232,7 @@ class ScheduledMessageManager {
     }
   }
 
-  /// Schedules [scheduledMessage] again, after its request failed in a way
-  /// that can be retried.
+  /// Schedules [scheduledMessage] again after its request failed.
   ///
   /// It keeps its ID, so it is never scheduled twice. If its time has passed,
   /// it is sent right away: it is no longer listed, and it arrives in its
@@ -382,12 +380,10 @@ class ScheduledMessageManager {
     return response;
   }
 
-  /// Replaces the scheduled messages in each of the queried channels with
-  /// the [ChannelState.scheduledMessages] listed for it in [channelStates].
+  /// Replaces the scheduled messages of each channel in [channelStates] with its [ChannelState.scheduledMessages].
   ///
-  /// A channel whose state has no [ChannelState.scheduledMessages] is left as
-  /// it is. The ones still being scheduled, or whose request failed, are kept.
-  @internal
+  /// A channel whose state has none is left as it is. The ones still being
+  /// scheduled, or whose request failed, are kept.
   void onChannelsQueried(List<ChannelState> channelStates) {
     final channels = <ChannelScheduledMessages>[];
     for (final channelState in channelStates) {
@@ -498,8 +494,7 @@ class ScheduledMessageManager {
   }
 }
 
-/// Views of a [ScheduledMessageManager]'s scheduled messages in one channel
-/// or thread.
+/// Views of a [ScheduledMessageManager]'s scheduled messages in one channel or thread.
 extension ScheduledMessageManagerScope on ScheduledMessageManager {
   /// The scheduled messages in the channel [cid], without its thread replies.
   List<ScheduledMessage> channelMessages(String cid) {

@@ -25,7 +25,9 @@ part 'scheduled_message.g.dart';
 final class ScheduledMessage extends Equatable {
   /// Creates a scheduled [message] for the channel [cid].
   ///
-  /// The [id] defaults to the ID of [message].
+  /// The [id] defaults to the ID of [message]. The [localCreatedAt] and
+  /// [localUpdatedAt] are used until [remoteCreatedAt] and [remoteUpdatedAt]
+  /// are known.
   ScheduledMessage({
     String? id,
     required this.cid,
@@ -181,7 +183,7 @@ final class ScheduledMessage extends Equatable {
 extension type const ScheduledMessageStatus(String _) implements String {
   /// Being scheduled from this device.
   ///
-  /// Only set on this device, until the request to schedule it completes.
+  /// Only set until the request to schedule it completes.
   static const preparingToSchedule = ScheduledMessageStatus('preparing_to_schedule');
 
   /// Waiting for its time.
@@ -189,7 +191,7 @@ extension type const ScheduledMessageStatus(String _) implements String {
 
   /// Being sent.
   ///
-  /// It stays so while a failed attempt waits to be retried.
+  /// It can stay so for a while if sending is retried.
   ///
   /// It cannot be edited, sent now or deleted until it is sent or fails.
   static const sending = ScheduledMessageStatus('sending');

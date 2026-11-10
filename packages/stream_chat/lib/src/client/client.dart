@@ -173,7 +173,7 @@ class StreamChatClient {
 
   late final StreamChatApi _chatApi;
 
-  /// The API the client requests through.
+  /// The API this client requests through.
   @internal
   StreamChatApi get chatApi => _chatApi;
   late final WebSocket _ws;
@@ -2455,8 +2455,9 @@ class StreamChatClient {
     return _chatApi.reminders.deleteReminder(messageId);
   }
 
-  /// Queries the page of the current user's scheduled messages that [query]
-  /// describes, by default the first page of all of them.
+  /// Queries one page of the current user's scheduled messages.
+  ///
+  /// The [query] picks the page, by default the first page of all of them.
   ///
   /// The page is added to [ClientState.scheduledMessages]; nothing is taken
   /// away. [loadScheduledMessages] loads all of them.
@@ -2503,11 +2504,7 @@ class StreamChatClient {
   /// [retryScheduledMessage] or delete with [deleteScheduledMessage].
   ///
   /// Each of these changes is also reported on [on] as a scheduled message
-  /// event with [Event.isLocal] true: an [EventType.scheduledMessageCreated]
-  /// for the one being scheduled and then the scheduled one, an
-  /// [EventType.scheduledMessageUpdated] for one whose request failed, an
-  /// [EventType.scheduledMessageSent] for one sent right away, and an
-  /// [EventType.scheduledMessageDeleted] for one that can't be scheduled.
+  /// event with [Event.isLocal] true.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails.
   ///
@@ -2532,8 +2529,7 @@ class StreamChatClient {
     );
   }
 
-  /// Schedules [scheduledMessage] again, after its request failed in a way
-  /// that can be retried.
+  /// Schedules [scheduledMessage] again after its request failed.
   ///
   /// It keeps its ID, so it is never scheduled twice. If its
   /// [ScheduledMessage.scheduledAt] has passed, it is sent right away: it is
@@ -2630,9 +2626,8 @@ class StreamChatClient {
   /// it no longer exists, an [EventType.scheduledMessageDeleted] event reports
   /// it, so it stops being listed too.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, which leaves it
-  /// listed unless it is already gone. Deleting one already gone throws too,
-  /// unless its own request had failed.
+  /// Throws a [StreamChatNetworkError] if the request fails, unless it is
+  /// already gone and its own request had failed.
   Future<DeleteScheduledMessageResponse> deleteScheduledMessage(
     ScheduledMessage scheduledMessage,
   ) {
@@ -3179,8 +3174,7 @@ class ClientState {
     return scheduledMessages.distinct(const ListEquality().equals);
   }
 
-  /// The current user's scheduled messages, and whether all of them are
-  /// loaded.
+  /// The current user's scheduled messages and whether all are loaded.
   ScheduledMessageListState get scheduledMessageListState => _client._scheduledMessageManager.state;
 
   /// The [scheduledMessageListState] as it changes.

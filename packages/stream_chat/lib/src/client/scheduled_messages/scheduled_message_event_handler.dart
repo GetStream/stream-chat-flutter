@@ -2,8 +2,7 @@ import '../../core/models/event.dart';
 import '../../event_type.dart';
 import 'scheduled_message_list_state.dart';
 
-/// A handler that applies scheduled message events to a
-/// [ScheduledMessageListStateNotifier].
+/// A handler that applies scheduled message events to a [ScheduledMessageListStateNotifier].
 class ScheduledMessageEventHandler {
   /// Creates a handler applying events to [state].
   const ScheduledMessageEventHandler({required this.state});

@@ -346,7 +346,7 @@ void main() {
         expect(channel.state!.messages, isEmpty);
       });
 
-      test('leaves a message sent right away to arrive through its message.new event', () async {
+      test("a message sent right away isn't in the channel after scheduling", () async {
         final message = Message(id: 'sent-id', text: 'Good morning');
         when(
           () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
@@ -356,6 +356,14 @@ void main() {
 
         expect(res.scheduledMessage, isNull);
         expect(channel.state!.messages, isEmpty);
+      });
+
+      test('the message.new event of a message sent right away adds it', () async {
+        final message = Message(id: 'sent-id', text: 'Good morning');
+        when(
+          () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer((_) async => ScheduleMessageResponse()..message = message);
+        await channel.scheduleMessage(message, scheduledAt: scheduledAt);
 
         client.addEvent(Event(type: EventType.messageNew, cid: channel.cid, message: message));
         await pumpEventQueue();

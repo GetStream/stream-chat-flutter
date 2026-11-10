@@ -1,3 +1,4 @@
+/// @docImport 'client/client.dart';
 /// @docImport 'core/models/event.dart';
 /// @docImport 'core/models/scheduled_message.dart';
 library;
@@ -178,12 +179,16 @@ class EventType {
   /// Event sent when the current user schedules a message.
   ///
   /// The client also sends one with [Event.isLocal] true while the message is
-  /// being scheduled, as [ScheduledMessageStatus.preparingToSchedule].
+  /// being scheduled, as [ScheduledMessageStatus.preparingToSchedule], and one
+  /// with the scheduled copy once the request succeeds.
   static const String scheduledMessageCreated = 'scheduled_message.created';
 
   /// Event sent when the current user edits or reschedules a scheduled message.
   ///
-  /// The client also sends one with [Event.isLocal] true when the request to
+  /// The client also sends one with [Event.isLocal] true after
+  /// [StreamChatClient.updateScheduledMessage],
+  /// [StreamChatClient.rescheduleMessage] and
+  /// [StreamChatClient.sendScheduledMessageNow], and when the request to
   /// schedule a message fails in a way that can be retried, as
   /// [ScheduledMessageFailureReason.requestFailed].
   static const String scheduledMessageUpdated = 'scheduled_message.updated';

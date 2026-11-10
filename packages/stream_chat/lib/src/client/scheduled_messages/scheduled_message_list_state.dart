@@ -16,6 +16,8 @@ typedef ChannelScheduledMessages = ({
 });
 
 /// The current user's scheduled messages, and whether all of them are loaded.
+///
+/// Obtained via [ClientState.scheduledMessageListState].
 @immutable
 final class ScheduledMessageListState extends Equatable {
   /// Creates a state listing [scheduledMessages].
@@ -24,13 +26,12 @@ final class ScheduledMessageListState extends Equatable {
     this.hasLoadedAll = false,
   });
 
-  /// Every scheduled message on this device.
+  /// The current user's unsent scheduled messages known on this device.
   ///
   /// Failed ones last, each group earliest first.
   final List<ScheduledMessage> scheduledMessages;
 
-  /// Whether [scheduledMessages] lists all of the current user's scheduled
-  /// messages.
+  /// Whether every one of the current user's scheduled messages is listed.
   ///
   /// It becomes true once [StreamChatClient.loadScheduledMessages] completes,
   /// and false when the connection is lost. If it was true when the connection
@@ -52,7 +53,7 @@ final class ScheduledMessageListState extends Equatable {
   List<Object?> get props => [scheduledMessages, hasLoadedAll];
 }
 
-/// A store of the current user's scheduled messages.
+/// The holder of the current user's scheduled message list state.
 ///
 /// It is their only writer.
 class ScheduledMessageListStateNotifier {
@@ -67,10 +68,10 @@ class ScheduledMessageListStateNotifier {
 
   List<ScheduledMessage> get _scheduledMessages => state.scheduledMessages;
 
-  /// Replaces the scheduled messages with [scheduledMessages], the complete
-  /// list, which is then loaded.
+  /// Replaces the scheduled messages with [scheduledMessages], the complete list.
   ///
-  /// The ones still being scheduled, or whose request failed, are kept.
+  /// The list is then loaded. The ones still being scheduled, or whose request
+  /// failed, are kept.
   void onLoadScheduledMessages(List<ScheduledMessage> scheduledMessages) {
     final local = _scheduledMessages.where((it) => it.isLocal);
     final merged = _merged(local, scheduledMessages);
@@ -86,8 +87,7 @@ class ScheduledMessageListStateNotifier {
     _emit(state.copyWith(scheduledMessages: _sorted(merged)));
   }
 
-  /// Replaces the scheduled messages in each of [channels] with the ones the
-  /// query returned for it.
+  /// Replaces the scheduled messages of each of [channels] with its queried ones.
   ///
   /// The ones still being scheduled, or whose request failed, are kept.
   void onChannelsQueried(List<ChannelScheduledMessages> channels) {
@@ -143,8 +143,7 @@ class ScheduledMessageListStateNotifier {
     return a.id.compareTo(b.id);
   }
 
-  // An older copy can arrive after a newer one; the newer one is kept. A copy
-  // from the server always wins over one from this device.
+  // A newer copy wins over an older one, and one from the API over a local one.
   static ScheduledMessage _newer(
     ScheduledMessage original,
     ScheduledMessage updated,
