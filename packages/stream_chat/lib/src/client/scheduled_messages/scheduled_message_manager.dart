@@ -18,7 +18,8 @@ import 'scheduled_message_event_handler.dart';
 import 'scheduled_message_list_state.dart';
 import 'scheduled_messages_query.dart';
 
-/// The runner of the current user's scheduled message requests, which applies their events.
+/// The runner of the current user's scheduled message requests, which applies
+/// their events.
 ///
 /// The events of its client, including the ones its own requests emit, update
 /// its [state].
@@ -380,7 +381,8 @@ class ScheduledMessageManager {
     return response;
   }
 
-  /// Replaces the scheduled messages of each channel in [channelStates] with its [ChannelState.scheduledMessages].
+  /// Replaces the scheduled messages of each channel in [channelStates] with
+  /// its [ChannelState.scheduledMessages].
   ///
   /// A channel whose state has none is left as it is. The ones still being
   /// scheduled, or whose request failed, are kept.
@@ -494,7 +496,8 @@ class ScheduledMessageManager {
   }
 }
 
-/// Views of a [ScheduledMessageManager]'s scheduled messages in one channel or thread.
+/// Views of a [ScheduledMessageManager]'s scheduled messages in one channel or
+/// thread.
 extension ScheduledMessageManagerScope on ScheduledMessageManager {
   /// The scheduled messages in the channel [cid], without its thread replies.
   List<ScheduledMessage> channelMessages(String cid) {

@@ -46,7 +46,6 @@ class ChannelClientState {
       updateMember: _updateMember,
       deleteMessagesFromUser: _deleteMessagesFromUser,
     );
-
     final handler = ChannelEventHandler(channel: _channel, mutations: mutations);
     _subscriptions.add(_channel.on().listen(handler.handleEvent));
 

@@ -68,7 +68,8 @@ class ScheduledMessageListStateNotifier {
 
   List<ScheduledMessage> get _scheduledMessages => state.scheduledMessages;
 
-  /// Replaces the scheduled messages with [scheduledMessages], the complete list.
+  /// Replaces the scheduled messages with [scheduledMessages], the complete
+  /// list.
   ///
   /// The list is then loaded. The ones still being scheduled, or whose request
   /// failed, are kept.
@@ -87,7 +88,8 @@ class ScheduledMessageListStateNotifier {
     _emit(state.copyWith(scheduledMessages: _sorted(merged)));
   }
 
-  /// Replaces the scheduled messages of each of [channels] with its queried ones.
+  /// Replaces the scheduled messages of each of [channels] with its queried
+  /// ones.
   ///
   /// The ones still being scheduled, or whose request failed, are kept.
   void onChannelsQueried(List<ChannelScheduledMessages> channels) {

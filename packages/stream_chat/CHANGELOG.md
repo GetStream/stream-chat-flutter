@@ -2,7 +2,7 @@
 
 ✅ Added
 
-- Added scheduled messages: schedule one with `Channel.scheduleMessage` and read the current user's unsent ones from `ClientState.scheduledMessageListState`.
+- Added scheduled messages: schedule one with `Channel.scheduleMessage`, and read the current user's unsent ones from `ClientState.scheduledMessages` after `StreamChatClient.loadScheduledMessages`.
 
 🔄 Changed
 

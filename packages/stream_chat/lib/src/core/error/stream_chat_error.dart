@@ -252,7 +252,8 @@ StreamChatNetworkErrorType _networkErrorTypeFromDio(DioExceptionType type) {
 
 /// The reason a request to schedule or change a scheduled message was refused.
 ///
-/// Read from [StreamChatNetworkErrorScheduledMessages.scheduledMessageErrorReason].
+/// Read from
+/// [StreamChatNetworkErrorScheduledMessages.scheduledMessageErrorReason].
 extension type const ScheduledMessageErrorReason(String _) implements String {
   /// Scheduled messages are turned off for the app.
   static const scheduledMessagesDisabled = ScheduledMessageErrorReason('scheduled_messages_disabled');
