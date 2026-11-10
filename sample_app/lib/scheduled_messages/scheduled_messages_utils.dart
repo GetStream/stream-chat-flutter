@@ -32,17 +32,16 @@ String describeScheduleError(Object error, {required String fallback}) {
 String scheduledMessageChannelName(BuildContext context, ScheduledMessage scheduledMessage) {
   final client = StreamChat.of(context).client;
   final name = switch (client.state.channels[scheduledMessage.cid]) {
-    final loaded? => channelDisplayName(loaded),
+    final loaded? => _channelDisplayName(loaded),
     null => scheduledMessage.channel?.name,
   };
 
   return name ?? scheduledMessage.cid;
 }
 
-/// The name of [channel].
-///
-/// A channel without a name of its own is named after its other members.
-String? channelDisplayName(Channel channel) {
+// The name of [channel]. A channel without a name of its own is named after
+// its other members.
+String? _channelDisplayName(Channel channel) {
   // A loaded channel keeps its members on its state, not on its model.
   final state = channel.state;
   final model = state?.channelState.channel?.copyWith(members: state.members);

@@ -953,6 +953,60 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String get sendNowLabel => 'Envoyer maintenant';
+
+  @override
+  String get scheduleMessageLabel => 'Programmer le message';
+
+  @override
+  String scheduleLimitReachedText({required int limit}) => 'Limite atteinte ($limit max.)';
+
+  @override
+  String get customTimeLabel => 'Heure personnalisée';
+
+  @override
+  String scheduleTomorrowText({required DateTime scheduledAt}) {
+    final time = DateFormat.jm(localeName).format(scheduledAt.toLocal());
+    return 'Demain à $time';
+  }
+
+  @override
+  String scheduleWeekdayText({required DateTime scheduledAt}) {
+    final local = scheduledAt.toLocal();
+    final weekday = toBeginningOfSentenceCase(DateFormat.EEEE(localeName).format(local), localeName);
+    final time = DateFormat.jm(localeName).format(local);
+    return '$weekday à $time';
+  }
+
+  @override
+  String messageToText({required String name}) => 'Message à $name';
+
+  @override
+  String get dateLabel => 'Date';
+
+  @override
+  String get timeLabel => 'Heure';
+
+  @override
+  String get scheduleLabel => 'Programmer';
+
+  @override
+  String sentInYourTimeZoneText({required String timeZone}) => 'Envoyé dans votre fuseau horaire ($timeZone)';
+
+  @override
+  String get scheduleTooSoonText => 'Choisissez une heure plus tardive.';
+
+  @override
+  String get scheduleTooFarText => "C'est plus loin que ce que l'application permet.";
+
+  @override
+  String scheduledMessageUserLimitText({required int limit}) =>
+      'Vous avez atteint votre limite de $limit messages programmés.';
+
+  @override
+  String get scheduleMessageFailedText => 'Impossible de programmer le message. Réessayez.';
+
+  @override
+  String get rescheduleMessageLabel => 'Reprogrammer le message';
 }
 
 class _AccessibilityTranslationsFr extends AccessibilityTranslations {

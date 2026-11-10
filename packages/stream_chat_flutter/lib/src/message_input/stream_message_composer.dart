@@ -264,6 +264,11 @@ class MessageComposerProps {
   ///
   /// The composer is left as it is, so the callback decides what to do with
   /// the message, such as scheduling it and then resetting the controller.
+  ///
+  /// When null and the channel allows scheduling messages, a long press opens
+  /// [showStreamScheduleMessageSheet], schedules the message for the chosen
+  /// time and clears the composer, but not while the message has attachments
+  /// that aren't uploaded yet.
   final StreamSendLongPressCallback? onSendLongPress;
 
   /// The controller for the message composer.
@@ -1088,6 +1093,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
       valueListenable: controller,
       builder: (context, value, _) {
         final canUploadFile = capabilities.contains(ChannelCapability.uploadFile);
+        final canScheduleMessage = capabilities.contains(ChannelCapability.scheduleMessage);
         final canRecordVoice = widget.props.enableVoiceRecording && canUploadFile;
         final allowedTypes = _getAllowedAttachmentPickerTypes(capabilities);
         final canOpenPicker = allowedTypes.isNotEmpty;
@@ -1122,6 +1128,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
                   context,
                   StreamSendLongPressDetails(controller: _effectiveController),
                 ),
+                null when canScheduleMessage && value.attachments.every((it) => it.uploadState.isSuccess) =>
+                  _scheduleMessage,
                 null => null,
               },
               canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
@@ -1658,6 +1666,7 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
   /// Sends the current message
   Future<void> sendMessage() async {
+    if (_isScheduling) return;
     if (_effectiveController.isSlowModeActive) return;
     if (!_effectiveController.canSend) return;
 
@@ -1750,6 +1759,83 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
           silent: error is StreamChatNetworkError,
         ),
       );
+    }
+  }
+
+  // Whether the message is being scheduled, during which nothing is sent.
+  var _isScheduling = false;
+
+  // Shows the times the current message can be scheduled for, and schedules
+  // it for the chosen one.
+  Future<void> _scheduleMessage() async {
+    if (_isScheduling) return;
+    if (!_effectiveController.canSend) return;
+
+    final streamChannel = StreamChannel.maybeOf(context);
+    if (streamChannel == null) return;
+
+    _hidePicker();
+
+    final channel = streamChannel.channel;
+    final message = _effectiveController.value;
+
+    if (!channel.canSendLinks && _urlRegex.hasMatch(message.text ?? '')) {
+      showInfoBottomSheet(
+        context,
+        icon: Icon(
+          context.streamIcons.exclamationCircleFill,
+          color: context.streamColorScheme.accentError,
+          size: 24,
+        ),
+        title: context.translations.linkDisabledError,
+        details: context.translations.linkDisabledDetails,
+        okText: context.translations.okLabel,
+      );
+      return;
+    }
+
+    final skipEnrichUrl = _effectiveController.skipEnrichUrl;
+    _isScheduling = true;
+
+    try {
+      final scheduledAt = await showStreamScheduleMessageSheet(
+        context,
+        channel: channel,
+        message: message,
+        onSchedule: (scheduledAt) async {
+          var prepared = message;
+          if (widget.props.preMessageSending case final onPreMessageSending?) {
+            prepared = await onPreMessageSending(message);
+          }
+
+          await channel.scheduleMessage(
+            prepared,
+            scheduledAt: scheduledAt,
+            skipEnrichUrl: skipEnrichUrl,
+          );
+        },
+      );
+      if (scheduledAt == null || !mounted) return;
+
+      _maybeDeleteDraftMessage(message, channel);
+      widget.props.onQuotedMessageCleared?.call();
+      _effectiveController.reset();
+    } catch (error, stackTrace) {
+      if (widget.props.onError case final onError?) {
+        return onError(error, stackTrace);
+      }
+
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stackTrace,
+          library: 'stream_chat_flutter',
+          context: ErrorDescription('while scheduling a message'),
+          silent: error is StreamChatNetworkError,
+        ),
+      );
+    } finally {
+      _isScheduling = false;
     }
   }
 

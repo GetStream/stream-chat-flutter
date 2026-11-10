@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -164,6 +167,249 @@ void main() {
     expect(controller.text, 'Hello');
     verifyNever(() => channel.sendMessage(any()));
   });
+
+  testWidgets('shows the schedule sheet on a long press when the channel allows scheduling', (tester) async {
+    _useFakeRecordPlatform();
+    final controller = _controller();
+    await _pumpComposer(
+      tester,
+      channel: _schedulingChannel(),
+      composer: StreamMessageComposer(messageComposerController: controller, enableVoiceRecording: false),
+    );
+    await tester.enterText(find.byType(EditableText), 'Hello');
+    await tester.pump();
+
+    await tester.longPress(find.byKey(const ValueKey('send_key')));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamScheduleMessageSheet), findsOneWidget);
+  });
+
+  testWidgets('offers no long press when the channel does not allow scheduling', (tester) async {
+    _useFakeRecordPlatform();
+    final controller = _controller();
+    await _pumpComposer(
+      tester,
+      composer: StreamMessageComposer(messageComposerController: controller, enableVoiceRecording: false),
+    );
+
+    await tester.enterText(find.byType(EditableText), 'Hello');
+    await tester.pump();
+
+    expect(_sendButton(tester).props.onLongPress, isNull);
+  });
+
+  testWidgets('offers no long press to schedule while editing', (tester) async {
+    _useFakeRecordPlatform();
+    final controller = _controller()
+      ..editMessage(
+        Message(
+          id: 'message-id',
+          text: 'Hello',
+          createdAt: DateTime.utc(2026, 10, 29),
+        ),
+      );
+
+    await _pumpComposer(
+      tester,
+      channel: _schedulingChannel(),
+      composer: StreamMessageComposer(messageComposerController: controller, enableVoiceRecording: false),
+    );
+
+    expect(_sendButton(tester).props.onLongPress, isNull);
+  });
+
+  testWidgets('calls onSendLongPress instead of showing the schedule sheet', (tester) async {
+    _useFakeRecordPlatform();
+    final controller = _controller();
+    var longPresses = 0;
+    await _pumpComposer(
+      tester,
+      channel: _schedulingChannel(),
+      composer: StreamMessageComposer(
+        messageComposerController: controller,
+        enableVoiceRecording: false,
+        onSendLongPress: (context, details) => longPresses++,
+      ),
+    );
+    await tester.enterText(find.byType(EditableText), 'Hello');
+    await tester.pump();
+
+    await tester.longPress(find.byKey(const ValueKey('send_key')));
+    await tester.pumpAndSettle();
+
+    expect(longPresses, 1);
+    expect(find.byType(StreamScheduleMessageSheet), findsNothing);
+  });
+
+  testWidgets('schedules the message for a preset time', (tester) async {
+    _useFakeRecordPlatform();
+    final controller = _controller();
+    final channel = _schedulingChannel();
+
+    await withClock(Clock.fixed(DateTime(2026, 10, 21, 10)), () async {
+      await _pumpComposer(
+        tester,
+        channel: channel,
+        composer: StreamMessageComposer(messageComposerController: controller, enableVoiceRecording: false),
+      );
+      await tester.enterText(find.byType(EditableText), 'Hello');
+      await tester.pump();
+      await tester.longPress(find.byKey(const ValueKey('send_key')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Tomorrow at 9:00\u202fAM'));
+      await tester.pumpAndSettle();
+    });
+
+    final scheduled = verify(
+      () => channel.scheduleMessage(
+        captureAny(),
+        scheduledAt: DateTime(2026, 10, 22, 9),
+        skipEnrichUrl: any(named: 'skipEnrichUrl'),
+      ),
+    ).captured;
+    expect((scheduled.single as Message).text, 'Hello');
+  });
+
+  testWidgets('clears the composer once the message is scheduled', (tester) async {
+    _useFakeRecordPlatform();
+    final controller = _controller();
+
+    await withClock(Clock.fixed(DateTime(2026, 10, 21, 10)), () async {
+      await _pumpComposer(
+        tester,
+        channel: _schedulingChannel(),
+        composer: StreamMessageComposer(messageComposerController: controller, enableVoiceRecording: false),
+      );
+      await tester.enterText(find.byType(EditableText), 'Hello');
+      await tester.pump();
+      await tester.longPress(find.byKey(const ValueKey('send_key')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Tomorrow at 9:00\u202fAM'));
+      await tester.pumpAndSettle();
+    });
+
+    expect(controller.text, isEmpty);
+  });
+
+  testWidgets('offers no long press to schedule while an attachment uploads', (tester) async {
+    _useFakeRecordPlatform();
+    final controller = _controller()
+      ..text = 'Hello'
+      ..addAttachment(
+        Attachment(
+          type: AttachmentType.image,
+          file: AttachmentFile(size: 10, path: 'photo.png'),
+        ),
+      );
+
+    await _pumpComposer(
+      tester,
+      channel: _schedulingChannel(),
+      composer: StreamMessageComposer(messageComposerController: controller, enableVoiceRecording: false),
+    );
+
+    expect(_sendButton(tester).props.onLongPress, isNull);
+  });
+
+  testWidgets("doesn't send while the message is being scheduled", (tester) async {
+    _useFakeRecordPlatform();
+    final controller = _controller();
+    final channel = _schedulingChannel();
+    final scheduling = Completer<ScheduleMessageResponse>();
+    when(
+      () => channel.scheduleMessage(
+        any(),
+        scheduledAt: any(named: 'scheduledAt'),
+        skipEnrichUrl: any(named: 'skipEnrichUrl'),
+      ),
+    ).thenAnswer((_) => scheduling.future);
+
+    await withClock(Clock.fixed(DateTime(2026, 10, 21, 10)), () async {
+      await _pumpComposer(
+        tester,
+        channel: channel,
+        composer: StreamMessageComposer(messageComposerController: controller, enableVoiceRecording: false),
+      );
+      await tester.enterText(find.byType(EditableText), 'Hello');
+      await tester.pump();
+      await tester.longPress(find.byKey(const ValueKey('send_key')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Tomorrow at 9:00\u202fAM'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('send_key')));
+      await tester.pump();
+    });
+
+    verifyNever(() => channel.sendMessage(any()));
+  });
+
+  testWidgets('schedules the message as preMessageSending changes it', (tester) async {
+    _useFakeRecordPlatform();
+    final controller = _controller();
+    final channel = _schedulingChannel();
+
+    await withClock(Clock.fixed(DateTime(2026, 10, 21, 10)), () async {
+      await _pumpComposer(
+        tester,
+        channel: channel,
+        composer: StreamMessageComposer(
+          messageComposerController: controller,
+          enableVoiceRecording: false,
+          preMessageSending: (message) => message.copyWith(text: 'Edited'),
+        ),
+      );
+      await tester.enterText(find.byType(EditableText), 'Hello');
+      await tester.pump();
+      await tester.longPress(find.byKey(const ValueKey('send_key')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Tomorrow at 9:00\u202fAM'));
+      await tester.pumpAndSettle();
+    });
+
+    final scheduled = verify(
+      () => channel.scheduleMessage(
+        captureAny(),
+        scheduledAt: any(named: 'scheduledAt'),
+        skipEnrichUrl: any(named: 'skipEnrichUrl'),
+      ),
+    ).captured;
+    expect((scheduled.single as Message).text, 'Edited');
+  });
+
+  testWidgets('schedules without a link preview the user dismissed', (tester) async {
+    _useFakeRecordPlatform();
+    final controller = _controller();
+    final channel = _schedulingChannel();
+
+    await withClock(Clock.fixed(DateTime(2026, 10, 21, 10)), () async {
+      await _pumpComposer(
+        tester,
+        channel: channel,
+        composer: StreamMessageComposer(messageComposerController: controller, enableVoiceRecording: false),
+      );
+      await tester.enterText(find.byType(EditableText), 'Hello');
+      await tester.pump();
+      controller.clearOGAttachment(dismissed: true);
+      await tester.longPress(find.byKey(const ValueKey('send_key')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Tomorrow at 9:00\u202fAM'));
+      await tester.pumpAndSettle();
+    });
+
+    verify(
+      () => channel.scheduleMessage(
+        any(),
+        scheduledAt: any(named: 'scheduledAt'),
+        skipEnrichUrl: true,
+      ),
+    ).called(1);
+  });
 }
 
 // Replaces the recording platform with a fake for the rest of the test.
@@ -233,10 +479,15 @@ Future<MockChannel> _pumpComposer(WidgetTester tester, {required Widget composer
   return channel;
 }
 
-MockChannel _channel() {
+MockChannel _channel({
+  List<ChannelCapability> capabilities = const [
+    ChannelCapability.sendMessage,
+    ChannelCapability.uploadFile,
+  ],
+}) {
   final client = MockClient();
   final clientState = MockClientState();
-  final channel = MockChannel();
+  final channel = MockChannel(ownCapabilities: capabilities);
   final channelState = MockChannelState();
   final member = Member(
     userId: 'user-id',
@@ -260,6 +511,34 @@ MockChannel _channel() {
   when(() => channelState.draftStream).thenAnswer((_) => Stream.value(null));
   registerFallbackValue(Message());
   when(() => channel.sendMessage(any())).thenAnswer((_) async => SendMessageResponse());
+
+  return channel;
+}
+
+// A channel that allows scheduling messages, and accepts the ones scheduled.
+MockChannel _schedulingChannel() {
+  final channel = _channel(
+    capabilities: const [
+      ChannelCapability.sendMessage,
+      ChannelCapability.uploadFile,
+      ChannelCapability.scheduleMessage,
+    ],
+  );
+
+  final clientState = channel.client.state as MockClientState;
+  final channelState = channel.state! as MockChannelState;
+
+  registerFallbackValue(DateTime(2026));
+  when(() => channel.config).thenReturn(ChannelConfig());
+  when(() => clientState.scheduledMessages).thenReturn([]);
+  when(() => channelState.channelState).thenReturn(const ChannelState());
+  when(
+    () => channel.scheduleMessage(
+      any(),
+      scheduledAt: any(named: 'scheduledAt'),
+      skipEnrichUrl: any(named: 'skipEnrichUrl'),
+    ),
+  ).thenAnswer((_) async => ScheduleMessageResponse());
 
   return channel;
 }

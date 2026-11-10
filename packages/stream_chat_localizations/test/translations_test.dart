@@ -455,6 +455,26 @@ void main() {
       expect(localizations.editAndRescheduleLabel, isNotNull);
       expect(localizations.rescheduleLabel, isNotNull);
       expect(localizations.sendNowLabel, isNotNull);
+      // Scheduling a message.
+      final presetTime = DateFormat.jm(language).format(localScheduledAt);
+      final weekday = DateFormat.EEEE(language).format(localScheduledAt);
+      expect(localizations.scheduleMessageLabel, isNotEmpty);
+      expect(localizations.scheduleLimitReachedText(limit: 10), contains('10'));
+      expect(localizations.customTimeLabel, isNotEmpty);
+      expect(localizations.scheduleTomorrowText(scheduledAt: scheduledAt), contains(presetTime));
+      final weekdayText = localizations.scheduleWeekdayText(scheduledAt: scheduledAt);
+      expect(weekdayText, contains(presetTime));
+      expect(weekdayText.toLowerCase(), contains(weekday.toLowerCase()));
+      expect(localizations.messageToText(name: 'Maya'), contains('Maya'));
+      expect(localizations.dateLabel, isNotEmpty);
+      expect(localizations.timeLabel, isNotEmpty);
+      expect(localizations.scheduleLabel, isNotEmpty);
+      expect(localizations.sentInYourTimeZoneText(timeZone: 'GMT+2'), contains('GMT+2'));
+      expect(localizations.scheduleTooSoonText, isNotEmpty);
+      expect(localizations.scheduleTooFarText, isNotEmpty);
+      expect(localizations.scheduledMessageUserLimitText(limit: 100), contains('100'));
+      expect(localizations.scheduleMessageFailedText, isNotEmpty);
+      expect(localizations.rescheduleMessageLabel, isNotEmpty);
 
       // Accessibility translations
       final a11y = localizations.accessibility;

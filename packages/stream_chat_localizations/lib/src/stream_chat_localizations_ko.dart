@@ -932,6 +932,59 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get sendNowLabel => '지금 보내기';
+
+  @override
+  String get scheduleMessageLabel => '메시지 예약';
+
+  @override
+  String scheduleLimitReachedText({required int limit}) => '한도에 도달했습니다(최대 $limit개)';
+
+  @override
+  String get customTimeLabel => '시간 직접 설정';
+
+  @override
+  String scheduleTomorrowText({required DateTime scheduledAt}) {
+    final time = DateFormat.jm(localeName).format(scheduledAt.toLocal());
+    return '내일 $time';
+  }
+
+  @override
+  String scheduleWeekdayText({required DateTime scheduledAt}) {
+    final local = scheduledAt.toLocal();
+    final weekday = DateFormat.EEEE(localeName).format(local);
+    final time = DateFormat.jm(localeName).format(local);
+    return '$weekday $time';
+  }
+
+  @override
+  String messageToText({required String name}) => '$name님에게 보낼 메시지';
+
+  @override
+  String get dateLabel => '날짜';
+
+  @override
+  String get timeLabel => '시간';
+
+  @override
+  String get scheduleLabel => '예약';
+
+  @override
+  String sentInYourTimeZoneText({required String timeZone}) => '내 시간대 기준으로 전송됩니다($timeZone)';
+
+  @override
+  String get scheduleTooSoonText => '더 늦은 시간을 선택하세요.';
+
+  @override
+  String get scheduleTooFarText => '앱에서 허용하는 기간보다 먼 시간입니다.';
+
+  @override
+  String scheduledMessageUserLimitText({required int limit}) => '예약 메시지 한도($limit개)에 도달했습니다.';
+
+  @override
+  String get scheduleMessageFailedText => '메시지를 예약하지 못했습니다. 다시 시도하세요.';
+
+  @override
+  String get rescheduleMessageLabel => '메시지 예약 변경';
 }
 
 class _AccessibilityTranslationsKo extends AccessibilityTranslations {

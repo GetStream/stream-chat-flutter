@@ -949,6 +949,59 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get sendNowLabel => 'Envia ara';
+
+  @override
+  String get scheduleMessageLabel => 'Programa el missatge';
+
+  @override
+  String scheduleLimitReachedText({required int limit}) => 'Límit assolit (màx. $limit)';
+
+  @override
+  String get customTimeLabel => 'Hora personalitzada';
+
+  @override
+  String scheduleTomorrowText({required DateTime scheduledAt}) {
+    final time = DateFormat.jm(localeName).format(scheduledAt.toLocal());
+    return 'Demà a les $time';
+  }
+
+  @override
+  String scheduleWeekdayText({required DateTime scheduledAt}) {
+    final local = scheduledAt.toLocal();
+    final weekday = toBeginningOfSentenceCase(DateFormat.EEEE(localeName).format(local), localeName);
+    final time = DateFormat.jm(localeName).format(local);
+    return '$weekday a les $time';
+  }
+
+  @override
+  String messageToText({required String name}) => 'Missatge per a $name';
+
+  @override
+  String get dateLabel => 'Data';
+
+  @override
+  String get timeLabel => 'Hora';
+
+  @override
+  String get scheduleLabel => 'Programa';
+
+  @override
+  String sentInYourTimeZoneText({required String timeZone}) => "S'envia a la teva zona horària ($timeZone)";
+
+  @override
+  String get scheduleTooSoonText => 'Tria una hora posterior.';
+
+  @override
+  String get scheduleTooFarText => "És més endavant del que permet l'aplicació.";
+
+  @override
+  String scheduledMessageUserLimitText({required int limit}) => 'Has arribat al límit de $limit missatges programats.';
+
+  @override
+  String get scheduleMessageFailedText => "No s'ha pogut programar el missatge. Torna-ho a provar.";
+
+  @override
+  String get rescheduleMessageLabel => 'Reprograma el missatge';
 }
 
 class _AccessibilityTranslationsCa extends AccessibilityTranslations {
