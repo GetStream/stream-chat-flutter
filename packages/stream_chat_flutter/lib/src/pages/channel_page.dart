@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../stream_chat_flutter.dart';
+import 'page_composer.dart';
 
 /// A channel page with optional floating composer support.
 ///
@@ -63,6 +64,7 @@ class StreamChannelPage extends StatefulWidget {
     this.automaticallyImplyLeading = true,
     this.onBackPressed,
     this.onChannelAvatarPressed,
+    this.onScheduledMessagesViewAllPressed,
   });
 
   /// Initial scroll index for the message list.
@@ -84,6 +86,11 @@ class StreamChannelPage extends StatefulWidget {
 
   /// Called when the default channel-avatar in the trailing slot is pressed.
   final void Function(BuildContext context, Channel channel)? onChannelAvatarPressed;
+
+  /// Called when "View all" on the [StreamScheduledMessagesBanner] is tapped.
+  ///
+  /// When null, "View all" isn't shown.
+  final VoidCallback? onScheduledMessagesViewAllPressed;
 
   @override
   State<StreamChannelPage> createState() => _StreamChannelPageState();
@@ -126,11 +133,15 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
       onChannelAvatarPressed: (channel) => widget.onChannelAvatarPressed?.call(context, channel),
     );
 
-    final composer = StreamMessageComposer(
-      focusNode: _focusNode,
-      messageComposerController: _messageComposerController,
-      onQuotedMessageCleared: _messageComposerController.clearQuotedMessage,
-      enableVoiceRecording: true,
+    final composer = PageComposer(
+      controller: _messageComposerController,
+      onScheduledMessagesViewAllPressed: widget.onScheduledMessagesViewAllPressed,
+      composer: StreamMessageComposer(
+        focusNode: _focusNode,
+        messageComposerController: _messageComposerController,
+        onQuotedMessageCleared: _messageComposerController.clearQuotedMessage,
+        enableVoiceRecording: true,
+      ),
     );
 
     return StreamScaffold(

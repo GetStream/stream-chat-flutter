@@ -17,6 +17,86 @@ void main() {
     expect(find.byType(StreamMessageComposer), findsOneWidget);
   });
 
+  testWidgets('shows the scheduled messages banner above the composer', (tester) async {
+    await _pumpChannelPage(tester, scheduledMessages: [_scheduledMessage()]);
+
+    final banner = _bannerPill(tester);
+    final input = tester.getRect(find.byType(StreamChatMessageInput));
+    expect(find.text('1 scheduled message'), findsOneWidget);
+    expect(banner.bottom, lessThanOrEqualTo(input.top));
+  });
+
+  testWidgets('insets the scheduled messages banner by 16 at its sides', (tester) async {
+    await _pumpChannelPage(tester, scheduledMessages: [_scheduledMessage()]);
+
+    final page = tester.getRect(find.byType(StreamChannelPage));
+    final banner = _bannerPill(tester);
+    expect(banner.left - page.left, 16);
+    expect(page.right - banner.right, 16);
+  });
+
+  testWidgets('leaves 16 between the scheduled messages banner and a regular composer', (tester) async {
+    await _pumpChannelPage(tester, scheduledMessages: [_scheduledMessage()]);
+
+    final banner = _bannerPill(tester);
+    final composer = tester.getRect(find.byType(StreamMessageComposer));
+    expect(composer.top - banner.bottom, 16);
+  });
+
+  testWidgets('sets the scheduled messages banner directly on a floating composer', (tester) async {
+    await _pumpChannelPage(tester, surfaceStyle: StreamSurfaceStyle.floating, scheduledMessages: [_scheduledMessage()]);
+
+    final banner = _bannerPill(tester);
+    final composer = tester.getRect(find.byType(StreamMessageComposer));
+    expect(composer.top - banner.bottom, 0);
+  });
+
+  testWidgets('adds no space above the composer without scheduled messages', (tester) async {
+    await _pumpChannelPage(tester);
+
+    final list = tester.getRect(find.byType(StreamMessageListView));
+    final composer = tester.getRect(find.byType(StreamMessageComposer));
+    expect(composer.top, list.bottom);
+  });
+
+  testWidgets('hides the scheduled messages banner while a message is edited', (tester) async {
+    await _pumpChannelPage(tester, scheduledMessages: [_scheduledMessage()]);
+
+    _composerController(tester).editMessage(
+      Message(id: 'message-id', text: 'Hello', createdAt: DateTime.utc(2026, 10, 29)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamScheduledMessagesBanner), findsNothing);
+  });
+
+  testWidgets('tapping View all invokes onScheduledMessagesViewAllPressed', (tester) async {
+    var taps = 0;
+    await _pumpChannelPage(
+      tester,
+      scheduledMessages: [_scheduledMessage()],
+      onScheduledMessagesViewAllPressed: () => taps += 1,
+    );
+
+    await tester.tap(find.text('View all'));
+
+    expect(taps, 1);
+  });
+
+  testWidgets('shows a screen snackbar above the scheduled messages banner', (tester) async {
+    await _pumpChannelPage(tester, scheduledMessages: [_scheduledMessage()]);
+
+    final context = tester.element(find.byType(StreamMessageListView));
+    StreamSnackbarMessenger.of(context).show(StreamSnackbar(message: const Text('Snackbar')));
+    await tester.pumpAndSettle();
+
+    final snackbar = tester.getRect(
+      find.descendant(of: find.byType(StreamScaffold), matching: find.text('Snackbar')),
+    );
+    final banner = _bannerPill(tester);
+    expect(snackbar.bottom, lessThanOrEqualTo(banner.top));
+  });
+
   testWidgets('tapping the channel avatar invokes onChannelAvatarPressed', (tester) async {
     Channel? pressedChannel;
     await _pumpChannelPage(tester, onChannelAvatarPressed: (_, channel) => pressedChannel = channel);
@@ -227,6 +307,23 @@ bool? _backButtonIsFloating(WidgetTester tester) {
   return tester.widget<StreamButton>(button).props.isFloating;
 }
 
+ScheduledMessage _scheduledMessage() {
+  return ScheduledMessage(
+    id: 'scheduled-id',
+    cid: 'test-chanel-type:test-channel-id',
+    user: User(id: 'user-id'),
+    message: Message(id: 'scheduled-id', text: 'Later'),
+    scheduledAt: DateTime(2026, 10, 23, 9),
+    status: ScheduledMessageStatus.scheduled,
+  );
+}
+
+// The visible pill of the scheduled messages banner, inside its margin.
+Rect _bannerPill(WidgetTester tester) {
+  final pill = find.descendant(of: find.byType(StreamScheduledMessagesBanner), matching: find.byType(DecoratedBox));
+  return tester.getRect(pill.first);
+}
+
 StreamMessageListView _messageListView(WidgetTester tester) {
   return tester.widget<StreamMessageListView>(find.byType(StreamMessageListView));
 }
@@ -258,6 +355,8 @@ Future<void> _pumpChannelPage(
   bool automaticallyImplyLeading = true,
   VoidCallback? onBackPressed,
   bool pushOntoARoute = false,
+  List<ScheduledMessage> scheduledMessages = const [],
+  VoidCallback? onScheduledMessagesViewAllPressed,
 }) async {
   final originalRecordPlatform = RecordPlatform.instance;
   RecordPlatform.instance = FakeRecordPlatform();
@@ -265,7 +364,13 @@ Future<void> _pumpChannelPage(
 
   final client = MockClient();
   final clientState = MockClientState();
-  final channel = MockChannel();
+  final channel = MockChannel(
+    ownCapabilities: [
+      ChannelCapability.sendMessage,
+      ChannelCapability.uploadFile,
+      ChannelCapability.scheduleMessage,
+    ],
+  );
   final channelState = MockChannelState();
   final currentUser = OwnUser(id: 'user-id');
 
@@ -303,11 +408,14 @@ Future<void> _pumpChannelPage(
   when(() => channelState.readStream).thenAnswer((_) => Stream.value([]));
   when(() => channelState.currentUserRead).thenReturn(null);
   when(() => channelState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
+  when(() => channelState.scheduledMessages).thenReturn(scheduledMessages);
+  when(() => channelState.scheduledMessagesStream).thenAnswer((_) => Stream.value(scheduledMessages));
 
   final page = StreamChannelPage(
     onChannelAvatarPressed: onChannelAvatarPressed,
     automaticallyImplyLeading: automaticallyImplyLeading,
     onBackPressed: onBackPressed,
+    onScheduledMessagesViewAllPressed: onScheduledMessagesViewAllPressed,
   );
 
   await tester.pumpWidget(

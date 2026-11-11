@@ -6,7 +6,7 @@
 - Added `showStreamScheduledMessageActions`, a sheet of the actions on a scheduled message.
 - Added `showStreamScheduleMessageSheet` and `showStreamScheduleTimeSheet`, to pick when a message is sent.
 - Added scheduling to `StreamMessageComposer`: a long press on send schedules the message when the channel allows it and `onSendLongPress` is not set.
-- Added `StreamScheduledMessagesBanner`, which shows how many scheduled messages a channel or thread has, styled by `StreamChatThemeData.scheduledMessagesBannerTheme`.
+- Added `StreamScheduledMessagesBanner`, which shows how many scheduled messages a channel or thread has, styled by `StreamChatThemeData.scheduledMessagesBannerTheme`. `StreamChannelPage` and `StreamThreadPage` show it above their composer.
 - Added `onSendLongPress` to `StreamMessageComposer` and `StreamChatMessageInput`, called when the send button is long-pressed with a new message, in place of the built-in scheduling.
 
 🔄 Changed

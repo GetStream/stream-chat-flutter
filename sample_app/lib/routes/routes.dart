@@ -21,6 +21,10 @@ abstract class Routes {
     name: 'group_info_screen',
     path: 'group_info_screen',
   );
+  static const ChannelRouteConfig SCHEDULED_MESSAGES = ChannelRouteConfig(
+    name: 'scheduled_messages',
+    path: 'scheduled_messages',
+  );
   static const RouteConfig CHANNEL_LIST_PAGE = RouteConfig(name: 'channel_list_page', path: '/channels');
 }
 

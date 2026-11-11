@@ -12,6 +12,7 @@ import '../pages/group_chat_details_screen.dart';
 import '../pages/group_info_screen.dart';
 import '../pages/new_chat_screen.dart';
 import '../pages/new_group_chat_screen.dart';
+import '../scheduled_messages/screens/scheduled_messages_screen.dart';
 import '../state/new_group_chat_state.dart';
 import '../widgets/split_view.dart';
 import 'routes.dart';
@@ -78,6 +79,11 @@ final appRoutes = [
                         builder: (context, parent) => StreamThreadPage(
                           parent: parent,
                           automaticallyImplyLeading: showBackButton,
+                          onScheduledMessagesViewAllPressed: () => GoRouter.of(context).pushNamed(
+                            Routes.SCHEDULED_MESSAGES.name,
+                            pathParameters: Routes.SCHEDULED_MESSAGES.params(channel),
+                            queryParameters: {'pid': parent.id},
+                          ),
                           onViewInChannelTap: (message) {
                             GoRouter.of(context).goNamed(
                               Routes.CHANNEL_PAGE.name,
@@ -91,6 +97,10 @@ final appRoutes = [
 
                     return StreamChannelPage(
                       automaticallyImplyLeading: showBackButton,
+                      onScheduledMessagesViewAllPressed: () => GoRouter.of(context).pushNamed(
+                        Routes.SCHEDULED_MESSAGES.name,
+                        pathParameters: Routes.SCHEDULED_MESSAGES.params(channel),
+                      ),
                       onChannelAvatarPressed: (context, channel) {
                         final isOneToOne = channel.isOneToOne;
                         final currentUserId = StreamChat.of(context).currentUser?.id;
@@ -150,6 +160,16 @@ final appRoutes = [
                   return StreamChannel.value(
                     channel: _resolveChannel(context, state),
                     child: const GroupInfoScreen(),
+                  );
+                },
+              ),
+              GoRoute(
+                name: Routes.SCHEDULED_MESSAGES.name,
+                path: Routes.SCHEDULED_MESSAGES.path,
+                builder: (BuildContext context, GoRouterState state) {
+                  return ScheduledMessagesScreen(
+                    cid: _resolveChannel(context, state).cid,
+                    parentId: state.uri.queryParameters['pid'],
                   );
                 },
               ),

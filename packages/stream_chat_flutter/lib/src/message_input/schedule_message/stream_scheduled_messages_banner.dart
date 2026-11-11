@@ -27,7 +27,8 @@ class StreamScheduledMessagesBanner extends StatelessWidget {
     super.key,
     String? parentId,
     VoidCallback? onViewAllPressed,
-  }) : props = .new(parentId: parentId, onViewAllPressed: onViewAllPressed);
+    EdgeInsetsGeometry? margin,
+  }) : props = .new(parentId: parentId, onViewAllPressed: onViewAllPressed, margin: margin);
 
   /// Creates a banner from pre-built [props].
   const StreamScheduledMessagesBanner.fromProps({
@@ -57,6 +58,7 @@ class StreamScheduledMessagesBannerProps {
   const StreamScheduledMessagesBannerProps({
     this.parentId,
     this.onViewAllPressed,
+    this.margin,
   });
 
   /// The ID of the message whose thread's scheduled replies are counted.
@@ -69,15 +71,22 @@ class StreamScheduledMessagesBannerProps {
   /// When null, "View all" isn't shown.
   final VoidCallback? onViewAllPressed;
 
+  /// Empty space to surround the banner.
+  ///
+  /// Not applied while the banner shows nothing.
+  final EdgeInsetsGeometry? margin;
+
   /// Returns a copy of this [StreamScheduledMessagesBannerProps] with the
   /// given fields replaced with new values.
   StreamScheduledMessagesBannerProps copyWith({
     String? parentId,
     VoidCallback? onViewAllPressed,
+    EdgeInsetsGeometry? margin,
   }) {
     return StreamScheduledMessagesBannerProps(
       parentId: parentId ?? this.parentId,
       onViewAllPressed: onViewAllPressed ?? this.onViewAllPressed,
+      margin: margin ?? this.margin,
     );
   }
 }
@@ -130,6 +139,7 @@ class DefaultStreamScheduledMessagesBanner extends StatelessWidget {
             channelPendingCount: channelMessages.where(_isPending).length,
             isThread: parentId != null,
             onViewAllPressed: props.onViewAllPressed,
+            margin: props.margin,
           ),
         );
       },
@@ -151,6 +161,7 @@ class _ScheduledMessagesBanner extends StatelessWidget {
     required this.channelPendingCount,
     required this.isThread,
     this.onViewAllPressed,
+    this.margin,
   });
 
   final Channel channel;
@@ -158,6 +169,7 @@ class _ScheduledMessagesBanner extends StatelessWidget {
   final int channelPendingCount;
   final bool isThread;
   final VoidCallback? onViewAllPressed;
+  final EdgeInsetsGeometry? margin;
 
   @override
   Widget build(BuildContext context) {
@@ -241,19 +253,20 @@ class _ScheduledMessagesBanner extends StatelessWidget {
     );
 
     // Announced as one phrase whenever the count changes.
-    return Padding(
-      padding: EdgeInsetsDirectional.only(start: spacing.md, end: spacing.md, bottom: spacing.xs),
-      child: Semantics(
-        container: true,
-        liveRegion: true,
-        button: onViewAllPressed != null,
-        child: GestureDetector(
-          behavior: .opaque,
-          onTap: onViewAllPressed,
-          child: banner,
-        ),
+    final result = Semantics(
+      container: true,
+      liveRegion: true,
+      button: onViewAllPressed != null,
+      child: GestureDetector(
+        behavior: .opaque,
+        onTap: onViewAllPressed,
+        child: banner,
       ),
     );
+
+    final margin = this.margin;
+    if (margin == null) return result;
+    return Padding(padding: margin, child: result);
   }
 }
 

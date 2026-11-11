@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../stream_chat_flutter.dart';
+import 'page_composer.dart';
 
 /// A page that displays a thread of messages for a given parent message.
 ///
@@ -33,6 +34,7 @@ class StreamThreadPage extends StatefulWidget {
     this.onViewInChannelTap,
     this.automaticallyImplyLeading = true,
     this.onBackPressed,
+    this.onScheduledMessagesViewAllPressed,
   });
 
   /// The parent message of the thread.
@@ -57,6 +59,11 @@ class StreamThreadPage extends StatefulWidget {
   /// Replaces the default action, which pops the current route. When null the
   /// default is kept.
   final VoidCallback? onBackPressed;
+
+  /// Called when "View all" on the [StreamScheduledMessagesBanner] is tapped.
+  ///
+  /// When null, "View all" isn't shown.
+  final VoidCallback? onScheduledMessagesViewAllPressed;
 
   @override
   State<StreamThreadPage> createState() => _StreamThreadPageState();
@@ -103,10 +110,15 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
 
     final canReply = !widget.parent.isDeleted || (widget.parent.replyCount ?? 0) > 0;
     final composer = canReply
-        ? StreamMessageComposer(
-            focusNode: _focusNode,
-            messageComposerController: _messageComposerController,
-            enableVoiceRecording: true,
+        ? PageComposer(
+            controller: _messageComposerController,
+            parentId: widget.parent.id,
+            onScheduledMessagesViewAllPressed: widget.onScheduledMessagesViewAllPressed,
+            composer: StreamMessageComposer(
+              focusNode: _focusNode,
+              messageComposerController: _messageComposerController,
+              enableVoiceRecording: true,
+            ),
           )
         : null;
 

@@ -17,6 +17,53 @@ void main() {
     expect(find.byType(StreamMessageComposer), findsOneWidget);
   });
 
+  testWidgets('shows the scheduled messages banner above the composer', (tester) async {
+    await _pumpThreadPage(tester, scheduledMessages: [_scheduledMessage(parentId: 'parent-id')]);
+
+    final banner = tester.getRect(find.byType(StreamScheduledMessagesBanner));
+    final input = tester.getRect(find.byType(StreamChatMessageInput));
+    expect(find.text('1 scheduled reply'), findsOneWidget);
+    expect(banner.bottom, lessThanOrEqualTo(input.top));
+  });
+
+  testWidgets('hides the scheduled messages banner while a message is edited', (tester) async {
+    await _pumpThreadPage(tester, scheduledMessages: [_scheduledMessage(parentId: 'parent-id')]);
+
+    _composerController(tester).editMessage(
+      Message(id: 'message-id', text: 'Hello', createdAt: DateTime.utc(2026, 10, 29)),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamScheduledMessagesBanner), findsNothing);
+  });
+
+  testWidgets('tapping View all invokes onScheduledMessagesViewAllPressed', (tester) async {
+    var taps = 0;
+    await _pumpThreadPage(
+      tester,
+      scheduledMessages: [_scheduledMessage(parentId: 'parent-id')],
+      onScheduledMessagesViewAllPressed: () => taps += 1,
+    );
+
+    await tester.tap(find.text('View all'));
+
+    expect(taps, 1);
+  });
+
+  testWidgets('shows a screen snackbar above the scheduled messages banner', (tester) async {
+    await _pumpThreadPage(tester, scheduledMessages: [_scheduledMessage(parentId: 'parent-id')]);
+
+    final context = tester.element(find.byType(StreamMessageListView));
+    StreamSnackbarMessenger.of(context).show(StreamSnackbar(message: const Text('Snackbar')));
+    await tester.pumpAndSettle();
+
+    final snackbar = tester.getRect(
+      find.descendant(of: find.byType(StreamScaffold), matching: find.text('Snackbar')),
+    );
+    final banner = tester.getRect(find.byType(StreamScheduledMessagesBanner));
+    expect(snackbar.bottom, lessThanOrEqualTo(banner.top));
+  });
+
   testWidgets('shows the thread of the parent message', (tester) async {
     final parent = Message(id: 'parent-id', text: 'Hello world!');
 
@@ -209,6 +256,17 @@ bool? _backButtonIsFloating(WidgetTester tester) {
   return tester.widget<StreamButton>(button).props.isFloating;
 }
 
+ScheduledMessage _scheduledMessage({String? parentId}) {
+  return ScheduledMessage(
+    id: 'scheduled-id',
+    cid: 'test-chanel-type:test-channel-id',
+    user: User(id: 'user-id'),
+    message: Message(id: 'scheduled-id', text: 'Later', parentId: parentId),
+    scheduledAt: DateTime(2026, 10, 23, 9),
+    status: ScheduledMessageStatus.scheduled,
+  );
+}
+
 StreamMessageListView _messageListView(WidgetTester tester) {
   return tester.widget<StreamMessageListView>(find.byType(StreamMessageListView));
 }
@@ -232,6 +290,8 @@ Future<void> _pumpThreadPage(
   bool automaticallyImplyLeading = true,
   VoidCallback? onBackPressed,
   bool pushOntoARoute = false,
+  List<ScheduledMessage> scheduledMessages = const [],
+  VoidCallback? onScheduledMessagesViewAllPressed,
 }) async {
   final originalRecordPlatform = RecordPlatform.instance;
   RecordPlatform.instance = FakeRecordPlatform();
@@ -239,7 +299,13 @@ Future<void> _pumpThreadPage(
 
   final client = MockClient();
   final clientState = MockClientState();
-  final channel = MockChannel();
+  final channel = MockChannel(
+    ownCapabilities: [
+      ChannelCapability.sendMessage,
+      ChannelCapability.uploadFile,
+      ChannelCapability.scheduleMessage,
+    ],
+  );
   final channelState = MockChannelState();
   final currentUser = OwnUser(id: 'user-id');
   final parentMessage = parent ?? Message(id: 'parent-id', text: 'Hello world!');
@@ -292,12 +358,17 @@ Future<void> _pumpThreadPage(
   when(() => channelState.readStream).thenAnswer((_) => Stream.value([]));
   when(() => channelState.currentUserRead).thenReturn(null);
   when(() => channelState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
+  when(() => channelState.scheduledThreadReplies(parentMessage.id)).thenReturn(scheduledMessages);
+  when(
+    () => channelState.scheduledThreadRepliesStream(parentMessage.id),
+  ).thenAnswer((_) => Stream.value(scheduledMessages));
 
   final page = StreamThreadPage(
     parent: parentMessage,
     onViewInChannelTap: onViewInChannelTap,
     automaticallyImplyLeading: automaticallyImplyLeading,
     onBackPressed: onBackPressed,
+    onScheduledMessagesViewAllPressed: onScheduledMessagesViewAllPressed,
   );
 
   await tester.pumpWidget(

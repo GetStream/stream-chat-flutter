@@ -223,6 +223,10 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                                   extensions: streamChatComponentBuilders(
                                     messageItem: customMessageItemBuilder,
                                     messageComposer: locationAwareMessageComposer,
+                                    scheduledMessagesBanner: switch (config.enableScheduledMessages) {
+                                      true => null,
+                                      false => (_, _) => const SizedBox.shrink(),
+                                    },
                                   ),
                                 ),
                                 themeData: config.toStreamChatThemeData(),

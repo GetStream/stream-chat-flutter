@@ -117,6 +117,53 @@ void main() {
     expect(find.text('1 failed to send'), findsOneWidget);
   });
 
+  testWidgets('StreamScheduledMessagesBanner adds no space around its pill', (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        StreamScheduledMessagesBanner(),
+        channel: _channel(scheduledMessages: [_scheduledMessage('a')]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final banner = tester.getRect(find.byType(StreamScheduledMessagesBanner));
+    final pill = tester.getRect(
+      find.descendant(of: find.byType(StreamScheduledMessagesBanner), matching: find.byType(DecoratedBox)).first,
+    );
+    expect(pill, banner);
+  });
+
+  testWidgets('StreamScheduledMessagesBanner applies its margin around the pill', (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        StreamScheduledMessagesBanner(margin: const EdgeInsets.fromLTRB(4, 8, 12, 16)),
+        channel: _channel(scheduledMessages: [_scheduledMessage('a')]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final banner = tester.getRect(find.byType(StreamScheduledMessagesBanner));
+    final pill = tester.getRect(
+      find.descendant(of: find.byType(StreamScheduledMessagesBanner), matching: find.byType(DecoratedBox)).first,
+    );
+    expect(pill.left - banner.left, 4);
+    expect(pill.top - banner.top, 8);
+    expect(banner.right - pill.right, 12);
+    expect(banner.bottom - pill.bottom, 16);
+  });
+
+  testWidgets('StreamScheduledMessagesBanner takes no space with a margin while it shows nothing', (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        StreamScheduledMessagesBanner(margin: const EdgeInsets.all(16)),
+        channel: _channel(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(tester.getSize(find.byType(StreamScheduledMessagesBanner)), Size.zero);
+  });
+
   testWidgets('StreamScheduledMessagesBanner calls onViewAllPressed when View all is tapped', (tester) async {
     var taps = 0;
 

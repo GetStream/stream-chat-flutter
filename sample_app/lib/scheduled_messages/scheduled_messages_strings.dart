@@ -13,7 +13,6 @@ abstract final class ScheduledMessagesStrings {
   static const deleteQuestion = 'Delete scheduled message?';
   static const editScheduledMessage = 'Edit scheduled message';
   static const messageHint = 'Message';
-  static const viewAll = 'View all';
   static const pickFutureTime = 'Pick a time in the future';
   static const pickEarlierTime = 'Pick an earlier time';
   static const scheduledMessagesDisabled = 'Scheduled messages are turned off for this app';
@@ -27,9 +26,4 @@ abstract final class ScheduledMessagesStrings {
   static const sentOrDeleted = 'This message was already sent or deleted';
 
   static String deleteDescription(String name) => "This message to $name won't be sent. This can't be undone.";
-
-  static String scheduledCount(int count) {
-    if (count == 1) return '1 scheduled message';
-    return '$count scheduled messages';
-  }
 }
