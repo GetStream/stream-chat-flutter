@@ -25,7 +25,8 @@ typedef StreamScheduledMessageListViewIndexedWidgetBuilder =
 /// all loaded yet, showing the list loads them.
 ///
 /// Each row is rendered using [StreamScheduledMessageListItem], which can be
-/// customized app-wide through [StreamComponentFactory].
+/// customized app-wide through
+/// `streamChatComponentBuilders(scheduledMessageListItem: ...)`.
 ///
 /// Example:
 ///
@@ -134,7 +135,7 @@ class StreamScheduledMessageListView extends StatefulWidget {
   /// boundaries so that they do not need to be repainted as the list scrolls.
   /// If the children are easy to repaint (e.g., solid color blocks or a short
   /// snippet of text), it might be more efficient to not add a repaint boundary
-  /// and simply repaint the children during scrolling.
+  /// and repaint the children during scrolling.
   ///
   /// Defaults to true.
   final bool addRepaintBoundaries;
@@ -191,8 +192,8 @@ class StreamScheduledMessageListView extends StatefulWidget {
 }
 
 class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageListView> {
-  Stream<List<ScheduledMessage>>? _scheduledMessagesStream;
   Future<void>? _scheduledMessagesLoad;
+  Stream<List<ScheduledMessage>>? _scheduledMessagesStream;
 
   @override
   void didChangeDependencies() {
@@ -225,12 +226,6 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
       client.logger.warning('Could not load the scheduled messages', error, stackTrace);
       rethrow;
     }
-  }
-
-  void _retry() {
-    setState(() {
-      _scheduledMessagesLoad = _loadScheduledMessagesIfNeeded();
-    });
   }
 
   Stream<List<ScheduledMessage>> _scopedScheduledMessagesStream() {
@@ -281,7 +276,9 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
           scrollCacheExtent: widget.scrollCacheExtent,
           clipBehavior: widget.clipBehavior,
           itemCount: scheduledMessages.length,
-          separatorBuilder: (context, index) => widget.separatorBuilder(context, scheduledMessages, index),
+          separatorBuilder: (context, index) {
+            return widget.separatorBuilder(context, scheduledMessages, index);
+          },
           itemBuilder: (context, index) => _buildItem(context, scheduledMessages, index),
         );
       },
@@ -331,6 +328,12 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
         onRetryPressed: _retry,
       ),
     );
+  }
+
+  void _retry() {
+    setState(() {
+      _scheduledMessagesLoad = _loadScheduledMessagesIfNeeded();
+    });
   }
 
   Widget _buildEmpty(BuildContext context) {

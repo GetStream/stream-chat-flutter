@@ -271,16 +271,19 @@ class _ScheduledAtText extends StatelessWidget {
     final defaults = _StreamScheduledMessageListItemThemeDefaults(context);
     final a11y = context.translations.accessibility;
 
-    final effectiveScheduledAtStyle = theme.scheduledAtStyle ?? defaults.scheduledAtStyle;
-    final effectiveFailedScheduledAtStyle = theme.failedScheduledAtStyle ?? defaults.failedScheduledAtStyle;
-    final effectiveScheduledAtFormatter = theme.scheduledAtFormatter ?? defaults.scheduledAtFormatter;
+    final effectiveStyle = switch (isFailed) {
+      true => theme.failedScheduledAtStyle ?? defaults.failedScheduledAtStyle,
+      false => theme.scheduledAtStyle ?? defaults.scheduledAtStyle,
+    };
+
+    final effectiveFormatter = theme.scheduledAtFormatter ?? defaults.scheduledAtFormatter;
 
     return Semantics(
       label: a11y.scheduledMessageSendAtLabel(scheduledAt: scheduledAt),
       excludeSemantics: true,
       child: Text(
-        effectiveScheduledAtFormatter(context, scheduledAt),
-        style: isFailed ? effectiveFailedScheduledAtStyle : effectiveScheduledAtStyle,
+        effectiveFormatter(context, scheduledAt),
+        style: effectiveStyle,
         maxLines: 1,
         overflow: .ellipsis,
       ),
@@ -304,8 +307,9 @@ class _ScheduledMessagePreview extends StatelessWidget {
     final theme = StreamScheduledMessageListItemTheme.of(context);
     final defaults = _StreamScheduledMessageListItemThemeDefaults(context);
 
-    final basePreviewTextTheme = defaults.messagePreviewTextTheme.merge(StreamMessagePreviewTextTheme.of(context));
-    final effectiveMessagePreviewTextTheme = basePreviewTextTheme.merge(theme.messagePreviewTextTheme);
+    final inheritedTextTheme = StreamMessagePreviewTextTheme.of(context);
+    final baseTextTheme = defaults.messagePreviewTextTheme.merge(inheritedTextTheme);
+    final effectiveTextTheme = baseTextTheme.merge(theme.messagePreviewTextTheme);
 
     final message = scheduledMessage.message;
 
@@ -318,7 +322,7 @@ class _ScheduledMessagePreview extends StatelessWidget {
     };
 
     final preview = StreamMessagePreviewTextTheme(
-      data: effectiveMessagePreviewTextTheme,
+      data: effectiveTextTheme,
       child: StreamMessagePreviewText(message: message),
     );
 
@@ -427,31 +431,45 @@ class _StreamScheduledMessageListItemThemeDefaults extends StreamScheduledMessag
   late final _textTheme = _context.streamTextTheme;
 
   @override
-  WidgetStateProperty<Color?> get backgroundColor => .resolveWith((states) {
-    final base = _colorScheme.backgroundApp;
-    if (!states.contains(WidgetState.selected)) return base;
-    return .alphaBlend(_colorScheme.backgroundSelected, base);
-  });
-
-  @override
-  EdgeInsetsGeometry get contentPadding => .symmetric(horizontal: _spacing.md, vertical: _spacing.sm);
-
-  @override
-  TextStyle get scheduledAtStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);
-
-  @override
-  DateFormatter get scheduledAtFormatter {
-    return (context, date) => context.translations.scheduledMessageSendAtText(scheduledAt: date);
+  WidgetStateProperty<Color?> get backgroundColor {
+    return .resolveWith((states) {
+      final base = _colorScheme.backgroundApp;
+      if (!states.contains(WidgetState.selected)) return base;
+      return .alphaBlend(_colorScheme.backgroundSelected, base);
+    });
   }
 
   @override
-  TextStyle get failedScheduledAtStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textDisabled);
+  EdgeInsetsGeometry get contentPadding {
+    return .symmetric(horizontal: _spacing.md, vertical: _spacing.sm);
+  }
 
   @override
-  TextStyle get channelNameStyle => _textTheme.captionEmphasis.copyWith(color: _colorScheme.textTertiary);
+  TextStyle get scheduledAtStyle {
+    return _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);
+  }
 
   @override
-  TextStyle get messagePreviewStyle => _textTheme.bodyDefault.copyWith(color: _colorScheme.textPrimary);
+  DateFormatter get scheduledAtFormatter {
+    return (context, date) {
+      return context.translations.scheduledMessageSendAtText(scheduledAt: date);
+    };
+  }
+
+  @override
+  TextStyle get failedScheduledAtStyle {
+    return _textTheme.captionDefault.copyWith(color: _colorScheme.textDisabled);
+  }
+
+  @override
+  TextStyle get channelNameStyle {
+    return _textTheme.captionEmphasis.copyWith(color: _colorScheme.textTertiary);
+  }
+
+  @override
+  TextStyle get messagePreviewStyle {
+    return _textTheme.bodyDefault.copyWith(color: _colorScheme.textPrimary);
+  }
 
   @override
   StreamMessagePreviewTextThemeData get messagePreviewTextTheme {
@@ -459,8 +477,12 @@ class _StreamScheduledMessageListItemThemeDefaults extends StreamScheduledMessag
   }
 
   @override
-  TextStyle get statusStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);
+  TextStyle get statusStyle {
+    return _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);
+  }
 
   @override
-  TextStyle get failedStatusStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.accentError);
+  TextStyle get failedStatusStyle {
+    return _textTheme.captionDefault.copyWith(color: _colorScheme.accentError);
+  }
 }

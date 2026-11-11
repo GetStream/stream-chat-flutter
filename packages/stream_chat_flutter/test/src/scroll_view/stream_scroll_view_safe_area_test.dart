@@ -1,4 +1,4 @@
-// How the paged lists' default loading, empty and error states keep clear of
+// How the lists' default loading, empty and error states keep clear of
 // the side safe-area insets, while custom ones are laid out as built.
 
 import 'dart:async';

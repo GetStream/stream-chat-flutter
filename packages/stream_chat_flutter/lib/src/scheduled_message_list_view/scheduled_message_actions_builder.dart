@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../stream_chat_flutter.dart';
 
-/// Builds the actions offered on a [ScheduledMessage].
+/// The actions offered on a [ScheduledMessage].
 ///
 /// See also:
 ///
@@ -13,10 +13,12 @@ class StreamScheduledMessageActionsBuilder {
 
   /// Returns the actions [scheduledMessage] allows.
   ///
-  /// A scheduled message can be edited, rescheduled, sent now or deleted. A
-  /// failed one can be edited and scheduled again, or deleted, and retried
-  /// when its request failed; when its channel was deleted, its text can only
-  /// be copied before it is deleted.
+  /// A scheduled message can be edited, rescheduled, sent now or deleted.
+  ///
+  /// A failed one can be edited and scheduled again, or deleted. It can also
+  /// be retried when its request failed. When its channel was deleted, its
+  /// text can only be copied before it is deleted.
+  ///
   /// Any other message has no actions.
   static List<StreamScheduledMessageActionTile> buildActions({
     required BuildContext context,
@@ -25,7 +27,6 @@ class StreamScheduledMessageActionsBuilder {
     final isScheduled = scheduledMessage.status == .scheduled;
     final isFailed = scheduledMessage.status == .failed;
 
-    // Only a scheduled or a failed message has actions.
     if (!isScheduled && !isFailed) return [];
 
     final icons = context.streamIcons;

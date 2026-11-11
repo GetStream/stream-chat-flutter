@@ -3,7 +3,7 @@ import 'package:collection/collection.dart';
 import '../../core/models/scheduled_message.dart';
 import '../client.dart';
 
-/// Views of a [ClientState]'s scheduled messages in one channel or thread.
+/// Subsets of a [ClientState]'s scheduled messages in one channel or thread.
 extension ScheduledMessagesScope on ClientState {
   /// The scheduled messages in the channel [cid], without its thread replies.
   ///

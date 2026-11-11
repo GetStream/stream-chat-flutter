@@ -45,8 +45,8 @@ final class SendScheduledMessageNow extends ScheduledMessageAction {
 
 /// Action to schedule a failed scheduled message again, as it is.
 ///
-/// Offered when its request to be scheduled failed, so it keeps its ID and
-/// can't be scheduled twice.
+/// Offered when the request to schedule it failed. Retrying never schedules
+/// it twice.
 final class RetryScheduledMessage extends ScheduledMessageAction {
   /// Creates a retry scheduled message action.
   const RetryScheduledMessage({required super.scheduledMessage});
@@ -55,8 +55,8 @@ final class RetryScheduledMessage extends ScheduledMessageAction {
 /// Action to schedule the content of a failed scheduled message again, with
 /// its text edited.
 ///
-/// A failed scheduled message can't be changed, so the caller is expected to
-/// schedule a new message and delete the failed one.
+/// A failed scheduled message can't be changed. Consider scheduling a new
+/// message and deleting the failed one.
 final class EditAndRescheduleMessage extends ScheduledMessageAction {
   /// Creates an edit and reschedule message action.
   const EditAndRescheduleMessage({required super.scheduledMessage});

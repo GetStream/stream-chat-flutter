@@ -17,8 +17,7 @@ class StreamScheduledMessageListSkeletonLoading extends StatelessWidget {
 
   /// Padding around the skeleton list.
   ///
-  /// When null, the list auto-insets from `MediaQuery.padding` — matching the
-  /// real scheduled message list so the layout doesn't shift once it loads.
+  /// When null, the list insets itself from the screen's safe area.
   final EdgeInsetsGeometry? padding;
 
   @override
