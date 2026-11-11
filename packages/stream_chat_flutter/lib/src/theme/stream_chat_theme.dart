@@ -202,6 +202,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
   }
 
   /// Creates a theme configuration with every component theme supplied.
+  // TODO(v11): Make this private, with every component theme required.
   const StreamChatThemeData.raw({
     required this.channelHeaderTheme,
     required this.channelListHeaderTheme,
