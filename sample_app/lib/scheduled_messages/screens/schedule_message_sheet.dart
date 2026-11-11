@@ -81,11 +81,14 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
 
   Future<void> _pickDate() async {
     final now = DateTime.now();
+    final lastDate = now.add(widget.maxLeadTime);
+    // A failed message's time may have passed, which the picker can't start at.
+    final initialDate = _time.isBefore(now) ? now : (_time.isAfter(lastDate) ? lastDate : _time);
     final date = await showDatePicker(
       context: context,
-      initialDate: _time,
+      initialDate: initialDate,
       firstDate: now,
-      lastDate: now.add(widget.maxLeadTime),
+      lastDate: lastDate,
       builder: _withPickerTheme,
     );
     if (date == null) return;

@@ -52,11 +52,21 @@ class ScheduledMessagesPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final client = StreamChat.of(context).client;
-    // Opened from a channel the client has loaded.
     final channel = switch (cid) {
       final cid? => client.state.channels[cid],
       null => null,
     };
+
+    // A channel that isn't loaded can't be listed, and must not widen the
+    // list to every channel.
+    if (cid != null && channel == null) {
+      return Center(
+        child: StreamScrollViewEmptyWidget(
+          emptyIcon: Icon(context.streamIcons.clock),
+          emptyTitle: Text(context.translations.noScheduledMessagesText),
+        ),
+      );
+    }
 
     return RefreshIndicator.adaptive(
       onRefresh: client.loadScheduledMessages,
@@ -221,14 +231,15 @@ Future<void> _maybeDelete(BuildContext context, ScheduledMessage scheduledMessag
     await client.deleteScheduledMessage(scheduledMessage);
     messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.deleted), variant: .success));
   } catch (error) {
-    // A message that is gone was sent at its time, and leaves the list.
-    final isGone = switch (error) {
-      StreamChatNetworkError(statusCode: 404) => true,
-      StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) => true,
-      _ => false,
+    final goneMessage = switch (error) {
+      StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) =>
+        ScheduledMessagesStrings.alreadySent,
+      // Not found: sent at its time, or deleted elsewhere.
+      StreamChatNetworkError(statusCode: 404) => ScheduledMessagesStrings.sentOrDeleted,
+      _ => null,
     };
-    if (isGone) {
-      messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.alreadySent)));
+    if (goneMessage != null) {
+      messenger.show(StreamSnackbar(message: Text(goneMessage)));
       return;
     }
 
