@@ -22,15 +22,20 @@ class ScheduleMessageBounds {
     final now = clock.now();
 
     return ScheduleMessageBounds._(
+      minLeadTime: minLeadTime,
       earliest: now.add(minLeadTime + _clockSkewBuffer),
       latest: now.add(maxLeadTime),
     );
   }
 
   const ScheduleMessageBounds._({
+    required this.minLeadTime,
     required this.earliest,
     required this.latest,
   });
+
+  /// How far ahead of now a message must be scheduled.
+  final Duration minLeadTime;
 
   /// The earliest time a message can be scheduled for.
   final DateTime earliest;

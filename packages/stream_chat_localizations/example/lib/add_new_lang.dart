@@ -1009,7 +1009,14 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String sentInYourTimeZoneText({required String timeZone}) => 'Sent in your time zone ($timeZone)';
 
   @override
-  String get scheduleTooSoonError => 'Pick a later time.';
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    if (minutes == 1) return 'Pick a time at least $minutes minute from now';
+    return 'Pick a time at least $minutes minutes from now';
+  }
+
+  @override
+  String get rescheduleTooSoonError => "Pick a later time. Editing can't send a message right away.";
 
   @override
   String get scheduleTooFarError => "That's further ahead than your app allows";

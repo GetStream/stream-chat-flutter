@@ -1002,7 +1002,19 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String sentInYourTimeZoneText({required String timeZone}) => 'Inviato nel tuo fuso orario ($timeZone)';
 
   @override
-  String get scheduleTooSoonError => 'Scegli un orario successivo.';
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: 'Scegli un orario tra almeno $minutes minuto',
+      other: 'Scegli un orario tra almeno $minutes minuti',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError =>
+      'Scegli un orario successivo. Durante la modifica non è possibile inviare subito un messaggio.';
 
   @override
   String get scheduleTooFarError => "È più avanti di quanto consenta l'app";

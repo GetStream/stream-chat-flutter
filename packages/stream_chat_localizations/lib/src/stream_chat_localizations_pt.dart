@@ -990,7 +990,19 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String sentInYourTimeZoneText({required String timeZone}) => 'Enviada no seu fuso horário ($timeZone)';
 
   @override
-  String get scheduleTooSoonError => 'Escolha um horário mais tarde.';
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: 'Escolha um horário daqui a pelo menos $minutes minuto',
+      other: 'Escolha um horário daqui a pelo menos $minutes minutos',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError =>
+      'Escolha um horário mais tarde. Ao editar, não é possível enviar uma mensagem imediatamente.';
 
   @override
   String get scheduleTooFarError => 'Esse horário está além do que o aplicativo permite';

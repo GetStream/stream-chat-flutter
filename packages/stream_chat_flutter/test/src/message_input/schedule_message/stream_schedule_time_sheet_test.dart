@@ -73,11 +73,20 @@ void main() {
     });
   });
 
-  testWidgets('showStreamScheduleTimeSheet says the time is too soon', (tester) async {
+  testWidgets('showStreamScheduleTimeSheet says how soon a new message can be scheduled', (tester) async {
+    await withClock(Clock.fixed(_wednesday), () async {
+      final config = ChannelConfig(scheduledMessagesMinLeadTime: const Duration(hours: 2));
+      await _showSheet(tester, _channel(config: config));
+
+      expect(find.text('Pick a time at least 120 minutes from now'), findsOneWidget);
+    });
+  });
+
+  testWidgets('showStreamScheduleTimeSheet says to pick a later time when rescheduling too soon', (tester) async {
     await withClock(Clock.fixed(_wednesday), () async {
       await _showSheet(tester, _channel(), initialScheduledAt: _wednesday.add(const Duration(seconds: 30)));
 
-      expect(find.text('Pick a later time.'), findsOneWidget);
+      expect(find.text("Pick a later time. Editing can't send a message right away."), findsOneWidget);
     });
   });
 

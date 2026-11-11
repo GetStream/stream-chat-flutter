@@ -916,8 +916,15 @@ abstract class Translations {
   String sentInYourTimeZoneText({required String timeZone});
 
   /// The error shown when the picked time is too soon to schedule a message
-  /// for, such as "Pick a later time.".
-  String get scheduleTooSoonError;
+  /// for, such as "Pick a time at least 1 minute from now".
+  ///
+  /// [minLeadTime] is how far ahead a message must be scheduled.
+  String scheduleTooSoonError({required Duration minLeadTime});
+
+  /// The error shown when the picked time is too soon to reschedule a message
+  /// for, such as "Pick a later time. Editing can't send a message right
+  /// away.".
+  String get rescheduleTooSoonError;
 
   /// The error shown when the picked time is further ahead than a message can
   /// be scheduled for, such as "That's further ahead than your app allows".
@@ -1944,7 +1951,18 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String sentInYourTimeZoneText({required String timeZone}) => 'Sent in your time zone ($timeZone)';
 
   @override
-  String get scheduleTooSoonError => 'Pick a later time.';
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: 'Pick a time at least $minutes minute from now',
+      other: 'Pick a time at least $minutes minutes from now',
+      locale: 'en',
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError => "Pick a later time. Editing can't send a message right away.";
 
   @override
   String get scheduleTooFarError => "That's further ahead than your app allows";

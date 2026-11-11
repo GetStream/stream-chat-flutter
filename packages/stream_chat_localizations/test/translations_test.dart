@@ -470,7 +470,8 @@ void main() {
       expect(localizations.timeLabel, isNotEmpty);
       expect(localizations.scheduleLabel, isNotEmpty);
       expect(localizations.sentInYourTimeZoneText(timeZone: 'GMT+2'), contains('GMT+2'));
-      expect(localizations.scheduleTooSoonError, isNotEmpty);
+      expect(localizations.scheduleTooSoonError(minLeadTime: const Duration(minutes: 5)), contains('5'));
+      expect(localizations.rescheduleTooSoonError, isNotEmpty);
       expect(localizations.scheduleTooFarError, isNotEmpty);
       expect(localizations.scheduleUserLimitReachedError(limit: 100), contains('100'));
       expect(localizations.scheduleMessageError, isNotEmpty);

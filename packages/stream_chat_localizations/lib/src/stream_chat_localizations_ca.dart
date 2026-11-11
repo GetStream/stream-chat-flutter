@@ -989,7 +989,19 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String sentInYourTimeZoneText({required String timeZone}) => "S'envia a la teva zona horària ($timeZone)";
 
   @override
-  String get scheduleTooSoonError => 'Tria una hora posterior.';
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: "Tria una hora d'aquí a almenys $minutes minut",
+      other: "Tria una hora d'aquí a almenys $minutes minuts",
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError =>
+      'Tria una hora posterior. Quan edites, no pots enviar un missatge immediatament.';
 
   @override
   String get scheduleTooFarError => "És més endavant del que permet l'aplicació";

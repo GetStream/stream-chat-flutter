@@ -969,7 +969,18 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String sentInYourTimeZoneText({required String timeZone}) => 'お使いのタイムゾーンで送信されます（$timeZone）';
 
   @override
-  String get scheduleTooSoonError => 'もっと後の時刻を選んでください。';
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: '$minutes分以上先の時刻を選んでください',
+      other: '$minutes分以上先の時刻を選んでください',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError => 'もっと後の時刻を選んでください。編集中はメッセージをすぐに送信できません。';
 
   @override
   String get scheduleTooFarError => 'アプリで許可されている期間より先です';

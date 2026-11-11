@@ -169,7 +169,12 @@ class _StreamScheduleTimeSheetState extends State<StreamScheduleTimeSheet> {
   // The error to show for the picked time, or for a failure to schedule it.
   String? _errorText(ScheduleMessageBounds bounds) {
     final translations = context.translations;
-    if (bounds.isTooSoon(_scheduledAt)) return translations.scheduleTooSoonError;
+    // A sheet that starts at a time moves a message that is already scheduled.
+    final tooSoonError = switch (widget.initialScheduledAt) {
+      null => translations.scheduleTooSoonError(minLeadTime: bounds.minLeadTime),
+      _ => translations.rescheduleTooSoonError,
+    };
+    if (bounds.isTooSoon(_scheduledAt)) return tooSoonError;
     if (bounds.isTooFar(_scheduledAt)) return translations.scheduleTooFarError;
 
     final failure = _failure;
@@ -184,7 +189,7 @@ class _StreamScheduleTimeSheetState extends State<StreamScheduleTimeSheet> {
     };
 
     return switch (reason) {
-      .scheduledAtTooSoon => translations.scheduleTooSoonError,
+      .scheduledAtTooSoon => tooSoonError,
       .scheduledAtTooFar => translations.scheduleTooFarError,
       .scheduledLimitUser when userLimit != null => translations.scheduleUserLimitReachedError(limit: userLimit),
       .scheduledLimitChannel when channelLimit != null => translations.scheduleChannelLimitReachedLabel(

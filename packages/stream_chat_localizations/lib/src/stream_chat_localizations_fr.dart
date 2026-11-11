@@ -993,7 +993,19 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String sentInYourTimeZoneText({required String timeZone}) => 'Envoyé dans votre fuseau horaire ($timeZone)';
 
   @override
-  String get scheduleTooSoonError => 'Choisissez une heure plus tardive.';
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: 'Choisissez une heure dans au moins $minutes minute',
+      other: 'Choisissez une heure dans au moins $minutes minutes',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError =>
+      'Choisissez une heure plus tardive. Une modification ne peut pas envoyer un message immédiatement.';
 
   @override
   String get scheduleTooFarError => "C'est plus loin que ce que l'application permet";

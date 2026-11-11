@@ -989,7 +989,19 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String sentInYourTimeZoneText({required String timeZone}) => 'Wird in deiner Zeitzone gesendet ($timeZone)';
 
   @override
-  String get scheduleTooSoonError => 'Wähle eine spätere Uhrzeit.';
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: 'Wähle eine Zeit mindestens $minutes Minute ab jetzt',
+      other: 'Wähle eine Zeit mindestens $minutes Minuten ab jetzt',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError =>
+      'Wähle eine spätere Uhrzeit. Beim Bearbeiten kann eine Nachricht nicht sofort gesendet werden.';
 
   @override
   String get scheduleTooFarError => 'Das liegt weiter in der Zukunft, als die App erlaubt';
