@@ -202,6 +202,36 @@ void main() {
     tearDown(() {
       channel.dispose();
     });
+
+    test('`.query` reads the offline cache even when scheduled messages are asked for', () async {
+      final cached =
+          _generateChannelState(
+            channelId,
+            channelType,
+          ).copyWith(
+            messages: [Message(id: 'cached', text: 'From the cache')],
+          );
+      when(
+        () => client.chatPersistenceClient.getChannelStateByCid(
+          channelCid,
+          messagePagination: any(named: 'messagePagination'),
+        ),
+      ).thenAnswer((_) async => cached);
+      when(() => client.channelDeliveryReporter.submitForDelivery(any())).thenAnswer((_) async {});
+      await pumpEventQueue();
+
+      final channelState = await channel.query(preferOffline: true, includeScheduledMessages: true);
+
+      expect(channelState, same(cached));
+      verifyNever(
+        () => client.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: any(named: 'channelData'),
+          includeScheduledMessages: any(named: 'includeScheduledMessages'),
+        ),
+      );
+    });
   });
 
   group('Initialized Channel', () {
@@ -268,6 +298,78 @@ void main() {
 
     test('should throw if trying to set `name`', () {
       expect(() => channel.name = 'New name', throwsA(isA<StateError>()));
+    });
+
+    group('`.scheduleMessage`', () {
+      final scheduledAt = DateTime.utc(2026, 10, 31, 12);
+
+      ScheduledMessage scheduledMessageFor(Message message) => ScheduledMessage(
+        id: message.id,
+        cid: channelCid,
+        user: client.state.currentUser!,
+        message: message,
+        scheduledAt: scheduledAt,
+        status: ScheduledMessageStatus.scheduled,
+        createdAt: DateTime.utc(2026, 10, 29),
+        updatedAt: DateTime.utc(2026, 10, 29),
+      );
+
+      test('keeps a scheduled message out of the channel', () async {
+        final message = Message(id: 'scheduled-id', text: 'Good morning');
+        when(
+          () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer(
+          (_) async => ScheduleMessageResponse()
+            ..message = message
+            ..scheduledMessage = scheduledMessageFor(message),
+        );
+
+        final res = await channel.scheduleMessage(message, scheduledAt: scheduledAt);
+
+        expect(res.scheduledMessage?.id, message.id);
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test('keeps a scheduled thread reply out of the thread', () async {
+        final reply = Message(id: 'reply-id', text: 'Good morning', parentId: 'parent-id', showInChannel: true);
+        when(
+          () => client.scheduleMessage(reply, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer(
+          (_) async => ScheduleMessageResponse()
+            ..message = reply
+            ..scheduledMessage = scheduledMessageFor(reply),
+        );
+
+        await channel.scheduleMessage(reply, scheduledAt: scheduledAt);
+
+        expect(channel.state!.threads['parent-id'], isNull);
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test("a message sent right away isn't in the channel after scheduling", () async {
+        final message = Message(id: 'sent-id', text: 'Good morning');
+        when(
+          () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer((_) async => ScheduleMessageResponse()..message = message);
+
+        final res = await channel.scheduleMessage(message, scheduledAt: scheduledAt);
+
+        expect(res.scheduledMessage, isNull);
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test('the message.new event of a message sent right away adds it', () async {
+        final message = Message(id: 'sent-id', text: 'Good morning');
+        when(
+          () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer((_) async => ScheduleMessageResponse()..message = message);
+        await channel.scheduleMessage(message, scheduledAt: scheduledAt);
+
+        client.addEvent(Event(type: EventType.messageNew, cid: channel.cid, message: message));
+        await pumpEventQueue();
+
+        expect(channel.state!.messages.single.id, 'sent-id');
+      });
     });
 
     group('`.sendMessage`', () {
@@ -6083,6 +6185,47 @@ void main() {
 
       channel.keyStroke().ignore();
       await channel.updateMessage(message);
+
+      verify(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).called(1);
+    });
+
+    test('.scheduleMessage stops typing when the user is typing', () async {
+      // The group shares one client mock.
+      addTearDown(() => clearInteractions(client));
+
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [ChannelCapability.typingEvents, ChannelCapability.sendMessage],
+      );
+
+      final channel = Channel.fromState(client, channelState);
+      addTearDown(channel.dispose);
+
+      final startTypingEvent = Event(type: EventType.typingStart);
+      final stopTypingEvent = Event(type: EventType.typingStop);
+      final message = Message(id: 'test-message-id', text: 'Good morning');
+      final scheduledAt = DateTime.utc(2026, 11, 2, 9);
+
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(startTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.scheduleMessage(
+          any(that: isSameMessageAs(message)),
+          channelId,
+          channelType,
+          scheduledAt: scheduledAt,
+        ),
+      ).thenAnswer((_) async => ScheduleMessageResponse()..message = message);
+
+      channel.keyStroke().ignore();
+      await channel.scheduleMessage(message, scheduledAt: scheduledAt);
 
       verify(
         () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),

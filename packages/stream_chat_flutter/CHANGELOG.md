@@ -1,4 +1,4 @@
-## Upcoming
+## 10.7.0
 
 ✅ Added
 
