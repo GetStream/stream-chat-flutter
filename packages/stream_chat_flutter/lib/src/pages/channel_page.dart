@@ -64,6 +64,7 @@ class StreamChannelPage extends StatefulWidget {
     this.automaticallyImplyLeading = true,
     this.onBackPressed,
     this.onChannelAvatarPressed,
+    this.showScheduledMessagesBanner = true,
     this.onScheduledMessagesViewAllPressed,
   });
 
@@ -87,10 +88,16 @@ class StreamChannelPage extends StatefulWidget {
   /// Called when the default channel-avatar in the trailing slot is pressed.
   final void Function(BuildContext context, Channel channel)? onChannelAvatarPressed;
 
+  /// Whether a [StreamScheduledMessagesBanner] of the channel's scheduled
+  /// messages is shown above the composer.
+  ///
+  /// Defaults to true. It is hidden while a message is edited.
+  final bool showScheduledMessagesBanner;
+
   /// Called when "View all" on the [StreamScheduledMessagesBanner] is tapped.
   ///
   /// When null, "View all" isn't shown.
-  final VoidCallback? onScheduledMessagesViewAllPressed;
+  final void Function(BuildContext context, Channel channel)? onScheduledMessagesViewAllPressed;
 
   @override
   State<StreamChannelPage> createState() => _StreamChannelPageState();
@@ -123,6 +130,14 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
     });
   }
 
+  // The page's "View all" callback, called with the page's channel.
+  VoidCallback? _onScheduledMessagesViewAllPressed() {
+    final onViewAllPressed = widget.onScheduledMessagesViewAllPressed;
+    if (onViewAllPressed == null) return null;
+
+    return () => onViewAllPressed(context, StreamChannel.of(context).channel);
+  }
+
   @override
   Widget build(BuildContext context) {
     final appBar = StreamChannelHeader(
@@ -135,7 +150,8 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
 
     final composer = PageComposer(
       controller: _messageComposerController,
-      onScheduledMessagesViewAllPressed: widget.onScheduledMessagesViewAllPressed,
+      showScheduledMessagesBanner: widget.showScheduledMessagesBanner,
+      onScheduledMessagesViewAllPressed: _onScheduledMessagesViewAllPressed(),
       composer: StreamMessageComposer(
         focusNode: _focusNode,
         messageComposerController: _messageComposerController,

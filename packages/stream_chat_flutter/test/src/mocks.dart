@@ -6,17 +6,11 @@ class MockClient extends Mock implements StreamChatClient {
   MockClient() {
     when(() => wsConnectionStatus).thenReturn(ConnectionStatus.connected);
     when(() => wsConnectionStatusStream).thenAnswer((_) => Stream.value(ConnectionStatus.connected));
-    final clientState = MockClientState();
-    when(() => state).thenReturn(clientState);
+    when(() => state).thenReturn(MockClientState());
   }
 }
 
-class MockClientState extends Mock implements ClientState {
-  MockClientState() {
-    when(() => scheduledMessages).thenReturn([]);
-    when(() => scheduledMessagesStream).thenAnswer((_) => Stream.value([]));
-  }
-}
+class MockClientState extends Mock implements ClientState {}
 
 class MockChannel extends Mock implements Channel {
   MockChannel({
@@ -101,10 +95,6 @@ class MockChannelState extends Mock implements ChannelClientState {
     when(() => read).thenReturn([]);
     when(() => draftStream).thenAnswer((_) => Stream.value(null));
     when(() => threadDraftStream(any())).thenAnswer((_) => Stream.value(null));
-    when(() => scheduledMessages).thenReturn([]);
-    when(() => scheduledMessagesStream).thenAnswer((_) => Stream.value([]));
-    when(() => scheduledThreadReplies(any())).thenReturn([]);
-    when(() => scheduledThreadRepliesStream(any())).thenAnswer((_) => Stream.value([]));
   }
 }
 

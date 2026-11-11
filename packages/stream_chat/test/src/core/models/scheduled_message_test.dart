@@ -154,4 +154,13 @@ void main() {
     expect(scheduledMessage.createdAt, DateTime.utc(2026, 10, 29, 10));
     expect(scheduledMessage.updatedAt, DateTime.utc(2026, 10, 29, 10, 5));
   });
+
+  test('ScheduledMessageStatus.isPending is true until the message is sent or fails', () {
+    expect(ScheduledMessageStatus.preparingToSchedule.isPending, isTrue);
+    expect(ScheduledMessageStatus.scheduled.isPending, isTrue);
+    expect(ScheduledMessageStatus.sending.isPending, isTrue);
+    expect(ScheduledMessageStatus.failed.isPending, isFalse);
+    expect(ScheduledMessageStatus.canceled.isPending, isFalse);
+    expect(ScheduledMessageStatus.sent.isPending, isFalse);
+  });
 }

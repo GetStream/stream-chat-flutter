@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../config/sample_app_config.dart';
 import '../pages/advanced_options_page.dart';
 import '../pages/channel_list_page.dart';
 import '../pages/channel_placeholder_page.dart';
@@ -68,6 +69,7 @@ final appRoutes = [
                   builder: (context) {
                     // Both panes are visible in a split, so there is nothing to go back to.
                     final showBackButton = !AdaptiveSplitView.isExpandedOf(context);
+                    final showScheduledMessages = context.sampleAppConfig.enableScheduledMessages;
 
                     if (parentMessage case final parent?) {
                       return BetterStreamBuilder<Message>(
@@ -79,7 +81,8 @@ final appRoutes = [
                         builder: (context, parent) => StreamThreadPage(
                           parent: parent,
                           automaticallyImplyLeading: showBackButton,
-                          onScheduledMessagesViewAllPressed: () => GoRouter.of(context).pushNamed(
+                          showScheduledMessagesBanner: showScheduledMessages,
+                          onScheduledMessagesViewAllPressed: (context, channel) => GoRouter.of(context).pushNamed(
                             Routes.SCHEDULED_MESSAGES.name,
                             pathParameters: Routes.SCHEDULED_MESSAGES.params(channel),
                             queryParameters: {'pid': parent.id},
@@ -97,7 +100,8 @@ final appRoutes = [
 
                     return StreamChannelPage(
                       automaticallyImplyLeading: showBackButton,
-                      onScheduledMessagesViewAllPressed: () => GoRouter.of(context).pushNamed(
+                      showScheduledMessagesBanner: showScheduledMessages,
+                      onScheduledMessagesViewAllPressed: (context, channel) => GoRouter.of(context).pushNamed(
                         Routes.SCHEDULED_MESSAGES.name,
                         pathParameters: Routes.SCHEDULED_MESSAGES.params(channel),
                       ),

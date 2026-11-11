@@ -2,29 +2,26 @@ import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_chat_flutter.dart';
+import '../../utils/channel_name.dart';
 import 'schedule_message_bounds.dart';
 import 'schedule_message_picker_theme.dart';
-
-/// Signature for a callback that schedules a message for [scheduledAt].
-typedef StreamScheduleMessageCallback = Future<void> Function(DateTime scheduledAt);
 
 /// Shows a sheet to pick the date and time [message] is sent at in [channel].
 ///
 /// The sheet starts at [initialScheduledAt], or an hour from now, and is
-/// headed by [title], or [Translations.scheduleMessageLabel] by default. A time sooner or
+/// headed by [title], or "Schedule message" by default. A time sooner or
 /// further ahead than the channel allows shows an error, and can't be picked.
-///
-/// When [onSchedule] is given, it schedules the picked time before the sheet
-/// closes; a failure keeps the sheet open and shows the error.
-///
 /// Returns the picked time, or null when the sheet is dismissed.
-Future<DateTime?> showStreamScheduleTimeSheet(
-  BuildContext context, {
+///
+/// [onSchedule], when given, schedules the picked time before the sheet
+/// closes; a failure keeps the sheet open and shows the error.
+Future<DateTime?> showStreamScheduleTimeSheet({
+  required BuildContext context,
   required Channel channel,
   required Message message,
   DateTime? initialScheduledAt,
   Widget? title,
-  StreamScheduleMessageCallback? onSchedule,
+  Future<void> Function(DateTime scheduledAt)? onSchedule,
 }) {
   return showStreamSheet<DateTime>(
     context: context,
@@ -32,7 +29,7 @@ Future<DateTime?> showStreamScheduleTimeSheet(
     // A drag closes the sheet even while it schedules, so it's turned off
     // when the sheet schedules the picked time itself.
     enableDrag: onSchedule == null,
-    builder: (_, _) => StreamScheduleTimeSheet(
+    builder: (_, _) => _ScheduleTimeSheet(
       channel: channel,
       message: message,
       initialScheduledAt: initialScheduledAt,
@@ -42,20 +39,10 @@ Future<DateTime?> showStreamScheduleTimeSheet(
   );
 }
 
-/// A sheet to pick the date and time a message is sent at.
-///
-/// It previews the message, and shows a date and a time to change through the
-/// Material pickers. Scheduling closes the sheet with the picked time.
-///
-/// See also:
-///
-///  * [showStreamScheduleTimeSheet], which shows this sheet.
-///  * [StreamScheduleMessageSheet], which offers preset times and opens this
-///    sheet for a custom one.
-class StreamScheduleTimeSheet extends StatefulWidget {
-  /// Creates a sheet to pick when [message] is sent in [channel].
-  const StreamScheduleTimeSheet({
-    super.key,
+// A sheet to pick the date and time a message is sent at. It previews the
+// message, and shows a date and a time to change through the Material pickers.
+class _ScheduleTimeSheet extends StatefulWidget {
+  const _ScheduleTimeSheet({
     required this.channel,
     required this.message,
     this.initialScheduledAt,
@@ -63,35 +50,140 @@ class StreamScheduleTimeSheet extends StatefulWidget {
     this.onSchedule,
   });
 
-  /// The channel the message is sent to.
   final Channel channel;
-
-  /// The message to schedule.
   final Message message;
-
-  /// The time the sheet starts at.
-  ///
-  /// Defaults to an hour from now.
   final DateTime? initialScheduledAt;
-
-  /// The title of the sheet.
-  ///
-  /// Defaults to [Translations.scheduleMessageLabel].
   final Widget? title;
-
-  /// Called to schedule the picked time before the sheet closes.
-  ///
-  /// A failure keeps the sheet open and shows the error.
-  final StreamScheduleMessageCallback? onSchedule;
+  final Future<void> Function(DateTime scheduledAt)? onSchedule;
 
   @override
-  State<StreamScheduleTimeSheet> createState() => _StreamScheduleTimeSheetState();
+  State<_ScheduleTimeSheet> createState() => _ScheduleTimeSheetState();
 }
 
-class _StreamScheduleTimeSheetState extends State<StreamScheduleTimeSheet> {
+class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
   late var _scheduledAt = _initialScheduledAt();
   var _isScheduling = false;
   Object? _failure;
+
+  @override
+  Widget build(BuildContext context) {
+    final icons = context.streamIcons;
+    final spacing = context.streamSpacing;
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+    final translations = context.translations;
+    final materialLocalizations = MaterialLocalizations.of(context);
+
+    final bounds = ScheduleMessageBounds.of(widget.channel);
+    final errorText = _errorText(bounds);
+    final isOutOfBounds = !bounds.contains(_scheduledAt);
+    final canSchedule = !isOutOfBounds && !_isScheduling;
+
+    final channel = widget.channel;
+    final channelName = loadedChannelName(channel, currentUser: channel.client.state.currentUser);
+    final channelLabel = translations.messageToLabel(
+      channelName: channelName ?? translations.noTitleText,
+    );
+    final valueStyle = textTheme.captionDefault.copyWith(color: colorScheme.textTertiary);
+    final date = materialLocalizations.formatMediumDate(_scheduledAt);
+    final time = materialLocalizations.formatTimeOfDay(
+      TimeOfDay.fromDateTime(_scheduledAt),
+      alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+    );
+    final timeZone = timeZoneLabel(_scheduledAt.timeZoneOffset);
+
+    final contentPadding = EdgeInsets.symmetric(horizontal: spacing.md);
+
+    return PopScope(
+      canPop: !_isScheduling,
+      child: SafeArea(
+        top: false,
+        child: Column(
+          mainAxisSize: .min,
+          crossAxisAlignment: .stretch,
+          children: [
+            StreamSheetHeader(
+              automaticallyImplyLeading: false,
+              title: widget.title ?? Text(translations.scheduleMessageLabel),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(vertical: spacing.md),
+              child: Column(
+                mainAxisSize: .min,
+                crossAxisAlignment: .stretch,
+                spacing: spacing.md,
+                children: [
+                  Padding(
+                    padding: contentPadding,
+                    child: StreamMessageComposerEditMessageAttachment(
+                      title: Text(channelLabel),
+                      subtitle: _ScheduledMessagePreviewText(message: widget.message),
+                    ),
+                  ),
+                  if (errorText != null)
+                    Padding(
+                      padding: contentPadding,
+                      child: StreamInlineNotification(type: .error, title: Text(errorText)),
+                    ),
+                  IconTheme.merge(
+                    data: const IconThemeData(size: 20),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
+                      child: Column(
+                        mainAxisSize: .min,
+                        children: [
+                          _ScheduleTimeRow(
+                            icon: Icon(icons.calendar),
+                            label: Text(translations.dateLabel),
+                            value: Text(date, style: valueStyle),
+                            onTap: () => _pickDate(bounds),
+                          ),
+                          _ScheduleTimeRow(
+                            icon: Icon(icons.clock),
+                            label: Text(translations.timeLabel),
+                            value: Text(time, style: valueStyle),
+                            onTap: _pickTime,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Padding(
+                    padding: contentPadding,
+                    child: StreamInlineNotification(
+                      title: Text(translations.sentInYourTimeZoneText(timeZone: timeZone)),
+                    ),
+                  ),
+                  Padding(
+                    padding: contentPadding,
+                    child: Row(
+                      mainAxisAlignment: .end,
+                      spacing: spacing.xs,
+                      children: [
+                        StreamButton(
+                          type: .ghost,
+                          style: .primary,
+                          onPressed: switch (_isScheduling) {
+                            true => null,
+                            false => () => Navigator.of(context).maybePop(),
+                          },
+                          child: Text(translations.cancelLabel),
+                        ),
+                        StreamButton(
+                          onPressed: canSchedule ? _schedule : null,
+                          child: Text(translations.scheduleLabel),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   DateTime _initialScheduledAt() {
     if (widget.initialScheduledAt case final initial?) return initial.toLocal();
@@ -197,124 +289,6 @@ class _StreamScheduleTimeSheetState extends State<StreamScheduleTimeSheet> {
       ),
       _ => translations.scheduleMessageError,
     };
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final icons = context.streamIcons;
-    final spacing = context.streamSpacing;
-    final textTheme = context.streamTextTheme;
-    final colorScheme = context.streamColorScheme;
-    final translations = context.translations;
-    final materialLocalizations = MaterialLocalizations.of(context);
-
-    final bounds = ScheduleMessageBounds.of(widget.channel);
-    final errorText = _errorText(bounds);
-    final isOutOfBounds = !bounds.contains(_scheduledAt);
-    final canSchedule = !isOutOfBounds && !_isScheduling;
-
-    final channelName = scheduleChannelName(widget.channel);
-    final valueStyle = textTheme.captionDefault.copyWith(color: colorScheme.textTertiary);
-    final date = materialLocalizations.formatMediumDate(_scheduledAt);
-    final time = materialLocalizations.formatTimeOfDay(
-      TimeOfDay.fromDateTime(_scheduledAt),
-      alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
-    );
-    final timeZone = timeZoneLabel(_scheduledAt.timeZoneOffset);
-
-    final contentPadding = EdgeInsets.symmetric(horizontal: spacing.md);
-
-    return PopScope(
-      canPop: !_isScheduling,
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: .min,
-          crossAxisAlignment: .stretch,
-          children: [
-            StreamSheetHeader(
-              automaticallyImplyLeading: false,
-              title: widget.title ?? Text(translations.scheduleMessageLabel),
-            ),
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: spacing.md),
-              child: Column(
-                mainAxisSize: .min,
-                crossAxisAlignment: .stretch,
-                spacing: spacing.md,
-                children: [
-                  Padding(
-                    padding: contentPadding,
-                    child: StreamMessageComposerEditMessageAttachment(
-                      title: Text(
-                        translations.messageToLabel(channelName: channelName ?? translations.noTitleText),
-                      ),
-                      subtitle: _ScheduledMessagePreviewText(message: widget.message),
-                    ),
-                  ),
-                  if (errorText != null)
-                    Padding(
-                      padding: contentPadding,
-                      child: StreamInlineNotification(type: .error, title: Text(errorText)),
-                    ),
-                  IconTheme.merge(
-                    data: const IconThemeData(size: 20),
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
-                      child: Column(
-                        mainAxisSize: .min,
-                        children: [
-                          _ScheduleTimeRow(
-                            icon: Icon(icons.calendar),
-                            label: Text(translations.dateLabel),
-                            value: Text(date, style: valueStyle),
-                            onTap: () => _pickDate(bounds),
-                          ),
-                          _ScheduleTimeRow(
-                            icon: Icon(icons.clock),
-                            label: Text(translations.timeLabel),
-                            value: Text(time, style: valueStyle),
-                            onTap: _pickTime,
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  Padding(
-                    padding: contentPadding,
-                    child: StreamInlineNotification(
-                      title: Text(translations.sentInYourTimeZoneText(timeZone: timeZone)),
-                    ),
-                  ),
-                  Padding(
-                    padding: contentPadding,
-                    child: Row(
-                      mainAxisAlignment: .end,
-                      spacing: spacing.xs,
-                      children: [
-                        StreamButton(
-                          type: .ghost,
-                          style: .primary,
-                          onPressed: switch (_isScheduling) {
-                            true => null,
-                            false => () => Navigator.of(context).maybePop(),
-                          },
-                          child: Text(translations.cancelLabel),
-                        ),
-                        StreamButton(
-                          onPressed: canSchedule ? _schedule : null,
-                          child: Text(translations.scheduleLabel),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
 

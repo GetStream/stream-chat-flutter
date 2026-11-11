@@ -158,7 +158,7 @@ Future<void> _editAndReschedule(BuildContext context, ScheduledMessage scheduled
   final channel = _channelOf(client, scheduledMessage);
   var isFailedOneRemoved = true;
   final time = await showStreamScheduleTimeSheet(
-    context,
+    context: context,
     channel: channel,
     message: scheduledMessage.message.copyWith(text: text),
     onSchedule: (scheduledAt) async {
@@ -177,7 +177,7 @@ Future<void> _reschedule(BuildContext context, ScheduledMessage scheduledMessage
 
   final messenger = StreamSnackbarMessenger.of(context);
   final time = await showStreamScheduleTimeSheet(
-    context,
+    context: context,
     channel: _channelOf(client, scheduledMessage),
     message: scheduledMessage.message,
     initialScheduledAt: scheduledMessage.scheduledAt,

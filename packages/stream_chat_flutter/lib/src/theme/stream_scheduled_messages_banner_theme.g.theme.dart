@@ -38,8 +38,8 @@ mixin _$StreamScheduledMessagesBannerThemeData {
           : BorderSide.lerp(a.side!, b.side!, t),
       boxShadow: t < 0.5 ? a.boxShadow : b.boxShadow,
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
-      labelStyle: TextStyle.lerp(a.labelStyle, b.labelStyle, t),
-      linkStyle: TextStyle.lerp(a.linkStyle, b.linkStyle, t),
+      countStyle: TextStyle.lerp(a.countStyle, b.countStyle, t),
+      viewAllStyle: TextStyle.lerp(a.viewAllStyle, b.viewAllStyle, t),
       iconColor: Color.lerp(a.iconColor, b.iconColor, t),
       failedIconColor: Color.lerp(a.failedIconColor, b.failedIconColor, t),
     );
@@ -50,8 +50,8 @@ mixin _$StreamScheduledMessagesBannerThemeData {
     BorderSide? side,
     List<BoxShadow>? boxShadow,
     EdgeInsetsGeometry? padding,
-    TextStyle? labelStyle,
-    TextStyle? linkStyle,
+    TextStyle? countStyle,
+    TextStyle? viewAllStyle,
     Color? iconColor,
     Color? failedIconColor,
   }) {
@@ -62,8 +62,8 @@ mixin _$StreamScheduledMessagesBannerThemeData {
       side: side ?? _this.side,
       boxShadow: boxShadow ?? _this.boxShadow,
       padding: padding ?? _this.padding,
-      labelStyle: labelStyle ?? _this.labelStyle,
-      linkStyle: linkStyle ?? _this.linkStyle,
+      countStyle: countStyle ?? _this.countStyle,
+      viewAllStyle: viewAllStyle ?? _this.viewAllStyle,
       iconColor: iconColor ?? _this.iconColor,
       failedIconColor: failedIconColor ?? _this.failedIconColor,
     );
@@ -89,8 +89,9 @@ mixin _$StreamScheduledMessagesBannerThemeData {
           : other.side,
       boxShadow: other.boxShadow,
       padding: other.padding,
-      labelStyle: _this.labelStyle?.merge(other.labelStyle) ?? other.labelStyle,
-      linkStyle: _this.linkStyle?.merge(other.linkStyle) ?? other.linkStyle,
+      countStyle: _this.countStyle?.merge(other.countStyle) ?? other.countStyle,
+      viewAllStyle:
+          _this.viewAllStyle?.merge(other.viewAllStyle) ?? other.viewAllStyle,
       iconColor: other.iconColor,
       failedIconColor: other.failedIconColor,
     );
@@ -113,8 +114,8 @@ mixin _$StreamScheduledMessagesBannerThemeData {
         _other.side == _this.side &&
         _other.boxShadow == _this.boxShadow &&
         _other.padding == _this.padding &&
-        _other.labelStyle == _this.labelStyle &&
-        _other.linkStyle == _this.linkStyle &&
+        _other.countStyle == _this.countStyle &&
+        _other.viewAllStyle == _this.viewAllStyle &&
         _other.iconColor == _this.iconColor &&
         _other.failedIconColor == _this.failedIconColor;
   }
@@ -129,8 +130,8 @@ mixin _$StreamScheduledMessagesBannerThemeData {
       _this.side,
       _this.boxShadow,
       _this.padding,
-      _this.labelStyle,
-      _this.linkStyle,
+      _this.countStyle,
+      _this.viewAllStyle,
       _this.iconColor,
       _this.failedIconColor,
     );

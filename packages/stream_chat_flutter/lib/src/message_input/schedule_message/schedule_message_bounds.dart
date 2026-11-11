@@ -1,7 +1,6 @@
 import 'package:clock/clock.dart';
+import 'package:meta/meta.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
-
-import '../../utils/extensions.dart';
 
 // How soon and how far ahead a message can be scheduled when the channel
 // config doesn't say.
@@ -13,6 +12,7 @@ const _clockSkewBuffer = Duration(minutes: 1);
 
 /// The earliest and latest times a message can be scheduled for in a
 /// channel, measured from now.
+@internal
 class ScheduleMessageBounds {
   /// Creates the bounds of [channel], measured from now.
   factory ScheduleMessageBounds.of(Channel channel) {
@@ -59,6 +59,7 @@ class ScheduleMessageBounds {
 ///
 /// They are tomorrow at 09:00 and 13:00, and the next Monday at 09:00. When
 /// tomorrow is Monday, that Monday is the one a week later.
+@internal
 List<DateTime> schedulePresets() {
   final now = clock.now();
 
@@ -74,48 +75,24 @@ List<DateTime> schedulePresets() {
   ];
 }
 
-/// Whether [scheduledAt] falls on the day after today, in local time.
-bool isTomorrow(DateTime scheduledAt) {
-  final now = clock.now();
-  final tomorrow = DateTime(now.year, now.month, now.day + 1);
-  final local = scheduledAt.toLocal();
-
-  return local.year == tomorrow.year && local.month == tomorrow.month && local.day == tomorrow.day;
-}
-
 /// Whether [channel] holds as many pending scheduled messages as its config
 /// allows.
 ///
 /// Messages that failed don't count toward the limit.
+@internal
 bool isScheduleLimitReached(Channel channel) {
   final limit = channel.config?.scheduledMessagesMaxPerChannel;
   if (limit == null) return false;
 
   final scheduledMessages = channel.client.state.scheduledMessages;
-  final pending = scheduledMessages.where((it) {
-    if (it.cid != channel.cid) return false;
-    return switch (it.status) {
-      .scheduled || .sending || .preparingToSchedule => true,
-      _ => false,
-    };
-  });
+  final pending = scheduledMessages.where((it) => it.cid == channel.cid && it.status.isPending);
 
   return pending.length >= limit;
 }
 
-/// The name of [channel], for a label such as "Message to Maya".
-///
-/// A channel without a name of its own is named after its other members.
-String? scheduleChannelName(Channel channel) {
-  // A loaded channel keeps its members on its state, not on its model.
-  final state = channel.state;
-  final model = state?.channelState.channel?.copyWith(members: state.members);
-
-  return model?.formatName(currentUser: channel.client.state.currentUser);
-}
-
 /// The label of a time-zone [offset] from UTC, such as "GMT", "GMT+2" or
 /// "GMT+5:30".
+@internal
 String timeZoneLabel(Duration offset) {
   if (offset == Duration.zero) return 'GMT';
 

@@ -208,6 +208,10 @@ extension type const ScheduledMessageStatus(String _) implements String {
 
   /// Sent to its channel.
   static const sent = ScheduledMessageStatus('sent');
+
+  /// Whether the message is still to be sent: being scheduled, waiting for its
+  /// time, or being sent.
+  bool get isPending => this == preparingToSchedule || this == scheduled || this == sending;
 }
 
 /// The reason a [ScheduledMessage] could not be sent.

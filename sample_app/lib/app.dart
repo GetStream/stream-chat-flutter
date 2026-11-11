@@ -17,6 +17,7 @@ import 'notification/notification_service.dart';
 import 'pages/splash_screen.dart';
 import 'routes/app_routes.dart';
 import 'routes/routes.dart';
+import 'scheduled_messages/schedule_on_send_long_press.dart';
 import 'widgets/custom_message_actions.dart';
 import 'widgets/location/location_attachment.dart';
 import 'widgets/location/location_aware_message_composer.dart';
@@ -222,11 +223,14 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                                 componentBuilders: StreamComponentBuilders(
                                   extensions: streamChatComponentBuilders(
                                     messageItem: customMessageItemBuilder,
-                                    messageComposer: locationAwareMessageComposer,
-                                    scheduledMessagesBanner: switch (config.enableScheduledMessages) {
-                                      true => null,
-                                      false => (_, _) => const SizedBox.shrink(),
-                                    },
+                                    messageComposer: (context, props) => locationAwareMessageComposer(
+                                      context,
+                                      props.copyWith(
+                                        onSendLongPress: config.enableScheduledMessages
+                                            ? scheduleOnSendLongPress
+                                            : null,
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 themeData: config.toStreamChatThemeData(),

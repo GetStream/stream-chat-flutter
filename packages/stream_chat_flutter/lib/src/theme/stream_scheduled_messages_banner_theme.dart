@@ -12,12 +12,12 @@ part 'stream_scheduled_messages_banner_theme.g.theme.dart';
 ///
 /// {@tool snippet}
 ///
-/// Shows the banner's link in green:
+/// Shows the banner's "View all" in green:
 ///
 /// ```dart
 /// StreamScheduledMessagesBannerTheme(
 ///   data: StreamScheduledMessagesBannerThemeData(
-///     linkStyle: TextStyle(color: Colors.green),
+///     viewAllStyle: TextStyle(color: Colors.green),
 ///   ),
 ///   child: StreamScheduledMessagesBanner(),
 /// )
@@ -46,10 +46,8 @@ class StreamScheduledMessagesBannerTheme extends InheritedTheme {
   /// Local values from the nearest [StreamScheduledMessagesBannerTheme]
   /// ancestor take precedence over global values from [StreamChatTheme.of].
   static StreamScheduledMessagesBannerThemeData of(BuildContext context) {
-    final localTheme = context.dependOnInheritedWidgetOfExactType<StreamScheduledMessagesBannerTheme>();
-    final globalTheme = StreamChatTheme.of(context).scheduledMessagesBannerTheme;
-
-    return globalTheme.merge(localTheme?.data);
+    final local = context.dependOnInheritedWidgetOfExactType<StreamScheduledMessagesBannerTheme>();
+    return StreamChatTheme.of(context).scheduledMessagesBannerTheme.merge(local?.data);
   }
 
   @override
@@ -93,8 +91,8 @@ class StreamScheduledMessagesBannerThemeData with _$StreamScheduledMessagesBanne
     this.side,
     this.boxShadow,
     this.padding,
-    this.labelStyle,
-    this.linkStyle,
+    this.countStyle,
+    this.viewAllStyle,
     this.iconColor,
     this.failedIconColor,
   });
@@ -124,13 +122,13 @@ class StreamScheduledMessagesBannerThemeData with _$StreamScheduledMessagesBanne
   ///
   /// Falls back to [StreamTextTheme.metadataEmphasis] with
   /// [StreamColorScheme.textPrimary].
-  final TextStyle? labelStyle;
+  final TextStyle? countStyle;
 
-  /// The text style of the link to the scheduled messages.
+  /// The text style of "View all".
   ///
   /// Falls back to [StreamTextTheme.metadataDefault] with
   /// [StreamColorScheme.textLink].
-  final TextStyle? linkStyle;
+  final TextStyle? viewAllStyle;
 
   /// The color of the icon while messages are scheduled.
   ///

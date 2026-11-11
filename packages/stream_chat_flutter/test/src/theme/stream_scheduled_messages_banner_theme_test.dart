@@ -33,7 +33,7 @@ void main() {
   testWidgets('StreamScheduledMessagesBannerTheme.of keeps app-wide values the local theme leaves unset', (
     tester,
   ) async {
-    const linkStyle = TextStyle(fontSize: 12);
+    const viewAllStyle = TextStyle(fontSize: 12);
     late StreamScheduledMessagesBannerThemeData theme;
 
     await tester.pumpWidget(
@@ -41,7 +41,7 @@ void main() {
         home: StreamChatTheme(
           data: StreamChatThemeData(
             scheduledMessagesBannerTheme: const StreamScheduledMessagesBannerThemeData(
-              linkStyle: linkStyle,
+              viewAllStyle: viewAllStyle,
             ),
           ),
           child: StreamScheduledMessagesBannerTheme(
@@ -57,7 +57,7 @@ void main() {
       ),
     );
 
-    expect(theme.linkStyle, linkStyle);
+    expect(theme.viewAllStyle, viewAllStyle);
   });
 
   test('StreamScheduledMessagesBannerThemeData with the same values are equal', () {
@@ -103,7 +103,7 @@ void main() {
     final merged = original.merge(other);
 
     expect(merged.side, original.side);
-    expect(merged.labelStyle, original.labelStyle);
+    expect(merged.countStyle, original.countStyle);
   });
 
   test('StreamScheduledMessagesBannerThemeData.merge with null returns the same theme', () {
@@ -152,8 +152,8 @@ StreamScheduledMessagesBannerThemeData _fullTheme() {
     // Shared, as the theme compares its shadow list by identity.
     boxShadow: const [BoxShadow(blurRadius: 4)],
     padding: const EdgeInsets.all(8),
-    labelStyle: const TextStyle(fontSize: 14),
-    linkStyle: const TextStyle(fontSize: 12),
+    countStyle: const TextStyle(fontSize: 14),
+    viewAllStyle: const TextStyle(fontSize: 12),
     iconColor: Colors.blue,
     failedIconColor: Colors.orange,
   );

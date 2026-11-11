@@ -6,21 +6,19 @@ import 'schedule_message_bounds.dart';
 /// Shows the times [message] can be scheduled for in [channel] in a sheet.
 ///
 /// The sheet offers tomorrow morning and afternoon, the next Monday morning,
-/// and a custom time, which opens [showStreamScheduleTimeSheet] on top. A
-/// preset outside the times the channel allows isn't offered. When the
-/// channel holds as many scheduled messages as it allows, no time can be
-/// picked.
+/// and a custom time, which opens [showStreamScheduleTimeSheet]. A preset the
+/// channel doesn't allow isn't offered, and none can be picked once the
+/// channel holds its limit. Returns the chosen time, or null when the sheet is
+/// dismissed.
 ///
-/// When [onSchedule] is given, it schedules the chosen time before this
-/// returns. A failure for a custom time keeps that sheet open and shows the
-/// error; a failure for a preset completes the returned future with it.
-///
-/// Returns the chosen time, or null when the sheet is dismissed.
-Future<DateTime?> showStreamScheduleMessageSheet(
-  BuildContext context, {
+/// [onSchedule], when given, schedules the chosen time before this returns. A
+/// failure for a custom time keeps that sheet open and shows the error; a
+/// failure for a preset completes the returned future with it.
+Future<DateTime?> showStreamScheduleMessageSheet({
+  required BuildContext context,
   required Channel channel,
   required Message message,
-  StreamScheduleMessageCallback? onSchedule,
+  Future<void> Function(DateTime scheduledAt)? onSchedule,
 }) async {
   DateTime? scheduledCustomAt;
   Future<void> scheduleCustomTime(DateTime scheduledAt) async {
@@ -31,7 +29,7 @@ Future<DateTime?> showStreamScheduleMessageSheet(
   final scheduledAt = await showStreamSheet<DateTime>(
     context: context,
     isDismissible: true,
-    builder: (_, _) => StreamScheduleMessageSheet(
+    builder: (_, _) => _ScheduleMessageSheet(
       channel: channel,
       message: message,
       onSchedule: onSchedule == null ? null : scheduleCustomTime,
@@ -46,50 +44,22 @@ Future<DateTime?> showStreamScheduleMessageSheet(
   return scheduledAt;
 }
 
-/// A sheet of the times a message can be scheduled for.
-///
-/// Tapping a preset time closes the sheet with it. "Custom time" opens a
-/// [StreamScheduleTimeSheet] on top, and closes this sheet with the time
-/// picked there.
-///
-/// See also:
-///
-///  * [showStreamScheduleMessageSheet], which shows this sheet.
-class StreamScheduleMessageSheet extends StatelessWidget {
-  /// Creates a sheet of the times [message] can be scheduled for in
-  /// [channel].
-  const StreamScheduleMessageSheet({
-    super.key,
+// A sheet of the times a message can be scheduled for. A preset closes it with
+// that time; "Custom time" opens the time sheet on top, and closes this one
+// with the time picked there.
+class _ScheduleMessageSheet extends StatelessWidget {
+  const _ScheduleMessageSheet({
     required this.channel,
     required this.message,
     this.onSchedule,
   });
 
-  /// The channel the message is sent to.
   final Channel channel;
-
-  /// The message to schedule.
   final Message message;
 
-  /// Called to schedule a time picked in the [StreamScheduleTimeSheet]
-  /// before that sheet closes.
-  ///
-  /// A failure keeps the [StreamScheduleTimeSheet] open and shows the error.
-  /// Preset times are not passed to it.
-  final StreamScheduleMessageCallback? onSchedule;
-
-  Future<void> _pickCustomTime(BuildContext context) async {
-    final navigator = Navigator.of(context);
-    final scheduledAt = await showStreamScheduleTimeSheet(
-      context,
-      channel: channel,
-      message: message,
-      onSchedule: onSchedule,
-    );
-    if (scheduledAt == null) return;
-
-    navigator.pop(scheduledAt);
-  }
+  // Schedules a custom time before its sheet closes. Presets aren't passed to
+  // it.
+  final Future<void> Function(DateTime scheduledAt)? onSchedule;
 
   @override
   Widget build(BuildContext context) {
@@ -101,10 +71,11 @@ class StreamScheduleMessageSheet extends StatelessWidget {
     final presets = schedulePresets().where(bounds.contains);
 
     final limit = channel.config?.scheduledMessagesMaxPerChannel;
-    final isLimitReached = isScheduleLimitReached(channel);
-    final title = switch (limit) {
-      final limit? when isLimitReached => translations.scheduleChannelLimitReachedLabel(limit: limit),
-      _ => translations.scheduleMessageLabel,
+    final reachedLimit = isScheduleLimitReached(channel) ? limit : null;
+    final isLimitReached = reachedLimit != null;
+    final title = switch (reachedLimit) {
+      final limit? => translations.scheduleChannelLimitReachedLabel(limit: limit),
+      null => translations.scheduleMessageLabel,
     };
 
     return SafeArea(
@@ -123,7 +94,7 @@ class StreamScheduleMessageSheet extends StatelessWidget {
                   for (final preset in presets)
                     _ScheduleOptionRow(
                       label: Text(
-                        switch (isTomorrow(preset)) {
+                        switch (preset.isTomorrow) {
                           true => translations.scheduleTomorrowText(scheduledAt: preset),
                           false => translations.scheduleWeekdayText(scheduledAt: preset),
                         },
@@ -144,6 +115,19 @@ class StreamScheduleMessageSheet extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  Future<void> _pickCustomTime(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    final scheduledAt = await showStreamScheduleTimeSheet(
+      context: context,
+      channel: channel,
+      message: message,
+      onSchedule: onSchedule,
+    );
+    if (scheduledAt == null) return;
+
+    navigator.pop(scheduledAt);
   }
 }
 

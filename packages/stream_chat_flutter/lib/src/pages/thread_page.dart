@@ -34,6 +34,7 @@ class StreamThreadPage extends StatefulWidget {
     this.onViewInChannelTap,
     this.automaticallyImplyLeading = true,
     this.onBackPressed,
+    this.showScheduledMessagesBanner = true,
     this.onScheduledMessagesViewAllPressed,
   });
 
@@ -60,10 +61,16 @@ class StreamThreadPage extends StatefulWidget {
   /// default is kept.
   final VoidCallback? onBackPressed;
 
+  /// Whether a [StreamScheduledMessagesBanner] of the thread's scheduled
+  /// replies is shown above the composer.
+  ///
+  /// Defaults to true. It is hidden while a message is edited.
+  final bool showScheduledMessagesBanner;
+
   /// Called when "View all" on the [StreamScheduledMessagesBanner] is tapped.
   ///
   /// When null, "View all" isn't shown.
-  final VoidCallback? onScheduledMessagesViewAllPressed;
+  final void Function(BuildContext context, Channel channel)? onScheduledMessagesViewAllPressed;
 
   @override
   State<StreamThreadPage> createState() => _StreamThreadPageState();
@@ -98,6 +105,14 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
     });
   }
 
+  // The page's "View all" callback, called with the page's channel.
+  VoidCallback? _onScheduledMessagesViewAllPressed() {
+    final onViewAllPressed = widget.onScheduledMessagesViewAllPressed;
+    if (onViewAllPressed == null) return null;
+
+    return () => onViewAllPressed(context, StreamChannel.of(context).channel);
+  }
+
   @override
   Widget build(BuildContext context) {
     final appBar = StreamThreadHeader(
@@ -113,7 +128,8 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
         ? PageComposer(
             controller: _messageComposerController,
             parentId: widget.parent.id,
-            onScheduledMessagesViewAllPressed: widget.onScheduledMessagesViewAllPressed,
+            showScheduledMessagesBanner: widget.showScheduledMessagesBanner,
+            onScheduledMessagesViewAllPressed: _onScheduledMessagesViewAllPressed(),
             composer: StreamMessageComposer(
               focusNode: _focusNode,
               messageComposerController: _messageComposerController,
