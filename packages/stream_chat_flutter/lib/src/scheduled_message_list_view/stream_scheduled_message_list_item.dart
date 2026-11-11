@@ -137,7 +137,7 @@ class DefaultStreamScheduledMessageListItem extends StatelessWidget {
     final defaults = _StreamScheduledMessageListItemThemeDefaults(context);
 
     final effectiveBackgroundColor = theme.backgroundColor ?? defaults.backgroundColor;
-    final effectivePadding = theme.padding ?? defaults.padding;
+    final effectiveContentPadding = theme.contentPadding ?? defaults.contentPadding;
 
     final scheduledMessage = props.scheduledMessage;
 
@@ -145,7 +145,7 @@ class DefaultStreamScheduledMessageListItem extends StatelessWidget {
       padding: EdgeInsets.all(spacing.xxs),
       child: StreamListTileTheme(
         data: StreamListTileThemeData(
-          contentPadding: effectivePadding,
+          contentPadding: effectiveContentPadding,
           backgroundColor: effectiveBackgroundColor,
         ),
         child: StreamListTileContainer(
@@ -156,7 +156,7 @@ class DefaultStreamScheduledMessageListItem extends StatelessWidget {
             crossAxisAlignment: .start,
             spacing: spacing.xs,
             children: [
-              _ScheduledMessageSendTime(
+              _ScheduledAtText(
                 scheduledAt: scheduledMessage.scheduledAt,
                 isFailed: scheduledMessage.status == .failed,
               ),
@@ -185,7 +185,7 @@ class _ScheduledMessageBody extends StatelessWidget {
     final theme = StreamScheduledMessageListItemTheme.of(context);
     final defaults = _StreamScheduledMessageListItemThemeDefaults(context);
 
-    final effectiveTitleStyle = theme.titleStyle ?? defaults.titleStyle;
+    final effectiveChannelNameStyle = theme.channelNameStyle ?? defaults.channelNameStyle;
     final effectiveMessagePreviewStyle = theme.messagePreviewStyle ?? defaults.messagePreviewStyle;
 
     final streamChat = StreamChat.of(context);
@@ -228,7 +228,7 @@ class _ScheduledMessageBody extends StatelessWidget {
                   children: [
                     Text(
                       channelName,
-                      style: effectiveTitleStyle,
+                      style: effectiveChannelNameStyle,
                       maxLines: 1,
                       overflow: .ellipsis,
                     ),
@@ -250,19 +250,19 @@ class _ScheduledMessageBody extends StatelessWidget {
   }
 }
 
-// The send time of a scheduled message, such as "Send Wed, Oct 21 at 8:00
+// The time a scheduled message is sent at, such as "Send Wed, Oct 21 at 8:00
 // AM".
 //
 // Screen readers announce the full date and time.
-class _ScheduledMessageSendTime extends StatelessWidget {
-  const _ScheduledMessageSendTime({
+class _ScheduledAtText extends StatelessWidget {
+  const _ScheduledAtText({
     required this.scheduledAt,
     this.isFailed = false,
   });
 
   final DateTime scheduledAt;
 
-  // A failed message shows its send time in the failed style.
+  // A failed message shows its time in the failed style.
   final bool isFailed;
 
   @override
@@ -271,16 +271,16 @@ class _ScheduledMessageSendTime extends StatelessWidget {
     final defaults = _StreamScheduledMessageListItemThemeDefaults(context);
     final a11y = context.translations.accessibility;
 
-    final effectiveSendTimeStyle = theme.sendTimeStyle ?? defaults.sendTimeStyle;
-    final effectiveFailedSendTimeStyle = theme.failedSendTimeStyle ?? defaults.failedSendTimeStyle;
-    final effectiveSendTimeFormatter = theme.sendTimeFormatter ?? defaults.sendTimeFormatter;
+    final effectiveScheduledAtStyle = theme.scheduledAtStyle ?? defaults.scheduledAtStyle;
+    final effectiveFailedScheduledAtStyle = theme.failedScheduledAtStyle ?? defaults.failedScheduledAtStyle;
+    final effectiveScheduledAtFormatter = theme.scheduledAtFormatter ?? defaults.scheduledAtFormatter;
 
     return Semantics(
       label: a11y.scheduledMessageSendAtLabel(scheduledAt: scheduledAt),
       excludeSemantics: true,
       child: Text(
-        effectiveSendTimeFormatter(context, scheduledAt),
-        style: isFailed ? effectiveFailedSendTimeStyle : effectiveSendTimeStyle,
+        effectiveScheduledAtFormatter(context, scheduledAt),
+        style: isFailed ? effectiveFailedScheduledAtStyle : effectiveScheduledAtStyle,
         maxLines: 1,
         overflow: .ellipsis,
       ),
@@ -353,47 +353,48 @@ class _ScheduledMessageStatusLine extends core.NullableStatelessWidget {
     final effectiveStatusStyle = theme.statusStyle ?? defaults.statusStyle;
     final effectiveFailedStatusStyle = theme.failedStatusStyle ?? defaults.failedStatusStyle;
 
-    switch (scheduledMessage.status) {
-      case .failed:
-        final quoted = _quotedMessage(context, scheduledMessage);
-        final reason = translations.scheduledMessageFailureReasonText(
-          reason: scheduledMessage.failureReason,
-          isQuoteDeleted: quoted?.isDeleted ?? false,
-        );
+    final status = scheduledMessage.status;
 
-        return Row(
-          crossAxisAlignment: .start,
-          spacing: spacing.xxs,
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(vertical: spacing.xxxs),
-              child: Icon(
-                context.streamIcons.exclamationTriangleFill,
-                size: 16,
-                color: effectiveFailedStatusStyle.color,
-              ),
+    if (status == .failed) {
+      final quoted = _quotedMessage(context, scheduledMessage);
+      final reason = translations.scheduledMessageFailureReasonText(
+        reason: scheduledMessage.failureReason,
+        isQuoteDeleted: quoted?.isDeleted ?? false,
+      );
+
+      return Row(
+        crossAxisAlignment: .start,
+        spacing: spacing.xxs,
+        children: [
+          Padding(
+            padding: EdgeInsets.symmetric(vertical: spacing.xxxs),
+            child: Icon(
+              context.streamIcons.exclamationTriangleFill,
+              size: 16,
+              color: effectiveFailedStatusStyle.color,
             ),
-            Expanded(child: Text(reason, style: effectiveFailedStatusStyle)),
-          ],
-        );
-      case .preparingToSchedule || .sending:
-        final attachments = scheduledMessage.message.attachments;
-        final isUploading = attachments.any((it) => !it.uploadState.isSuccess);
-        final label = switch (isUploading) {
-          true => translations.scheduledMessageUploadingLabel,
-          false => translations.scheduledMessageSendingLabel,
-        };
-
-        return Row(
-          spacing: spacing.xxs,
-          children: [
-            StreamLoadingSpinner(size: .xs),
-            Flexible(child: Text(label, style: effectiveStatusStyle)),
-          ],
-        );
-      default:
-        return null;
+          ),
+          Expanded(child: Text(reason, style: effectiveFailedStatusStyle)),
+        ],
+      );
     }
+
+    if (status != .preparingToSchedule && status != .sending) return null;
+
+    final attachments = scheduledMessage.message.attachments;
+    final isUploading = attachments.any((it) => !it.uploadState.isSuccess);
+    final label = switch (isUploading) {
+      true => translations.scheduledMessageUploadingLabel,
+      false => translations.scheduledMessageSendingLabel,
+    };
+
+    return Row(
+      spacing: spacing.xxs,
+      children: [
+        StreamLoadingSpinner(size: .xs),
+        Flexible(child: Text(label, style: effectiveStatusStyle)),
+      ],
+    );
   }
 }
 
@@ -433,27 +434,29 @@ class _StreamScheduledMessageListItemThemeDefaults extends StreamScheduledMessag
   });
 
   @override
-  EdgeInsetsGeometry get padding => .symmetric(horizontal: _spacing.md, vertical: _spacing.sm);
+  EdgeInsetsGeometry get contentPadding => .symmetric(horizontal: _spacing.md, vertical: _spacing.sm);
 
   @override
-  TextStyle get sendTimeStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);
+  TextStyle get scheduledAtStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);
 
   @override
-  DateFormatter get sendTimeFormatter =>
-      (context, date) => context.translations.scheduledMessageSendAtText(scheduledAt: date);
+  DateFormatter get scheduledAtFormatter {
+    return (context, date) => context.translations.scheduledMessageSendAtText(scheduledAt: date);
+  }
 
   @override
-  TextStyle get failedSendTimeStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textDisabled);
+  TextStyle get failedScheduledAtStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textDisabled);
 
   @override
-  TextStyle get titleStyle => _textTheme.captionEmphasis.copyWith(color: _colorScheme.textTertiary);
+  TextStyle get channelNameStyle => _textTheme.captionEmphasis.copyWith(color: _colorScheme.textTertiary);
 
   @override
   TextStyle get messagePreviewStyle => _textTheme.bodyDefault.copyWith(color: _colorScheme.textPrimary);
 
   @override
-  StreamMessagePreviewTextThemeData get messagePreviewTextTheme =>
-      const StreamMessagePreviewTextThemeData(iconSize: 20);
+  StreamMessagePreviewTextThemeData get messagePreviewTextTheme {
+    return const StreamMessagePreviewTextThemeData(iconSize: 20);
+  }
 
   @override
   TextStyle get statusStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);

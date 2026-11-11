@@ -316,7 +316,11 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
     if (widget.errorBuilder?.call(context, chatError) case final custom?) return custom;
 
     final translations = context.translations;
-    final text = resolveNetworkErrorText(context, chatError, fallbackTitle: translations.loadingScheduledMessagesError);
+    final text = resolveNetworkErrorText(
+      context,
+      chatError,
+      fallbackTitle: translations.loadingScheduledMessagesError,
+    );
 
     return Center(
       child: StreamScrollViewErrorWidget(

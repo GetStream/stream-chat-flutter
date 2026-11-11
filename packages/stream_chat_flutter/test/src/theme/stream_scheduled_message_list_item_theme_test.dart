@@ -33,7 +33,7 @@ void main() {
   testWidgets('StreamScheduledMessageListItemTheme.of keeps app-wide values the local theme leaves unset', (
     tester,
   ) async {
-    const sendTimeStyle = TextStyle(fontSize: 12);
+    const scheduledAtStyle = TextStyle(fontSize: 12);
     late StreamScheduledMessageListItemThemeData theme;
 
     await tester.pumpWidget(
@@ -41,7 +41,7 @@ void main() {
         home: StreamChatTheme(
           data: StreamChatThemeData(
             scheduledMessageListItemTheme: const StreamScheduledMessageListItemThemeData(
-              sendTimeStyle: sendTimeStyle,
+              scheduledAtStyle: scheduledAtStyle,
             ),
           ),
           child: StreamScheduledMessageListItemTheme(
@@ -57,7 +57,7 @@ void main() {
       ),
     );
 
-    expect(theme.sendTimeStyle, sendTimeStyle);
+    expect(theme.scheduledAtStyle, scheduledAtStyle);
   });
 
   test('StreamScheduledMessageListItemThemeData with the same values are equal', () {
@@ -75,11 +75,11 @@ void main() {
   test('StreamScheduledMessageListItemThemeData.copyWith replaces the given values', () {
     final copied = _fullTheme().copyWith(
       backgroundColor: const WidgetStatePropertyAll(Colors.blue),
-      padding: const EdgeInsets.all(16),
+      contentPadding: const EdgeInsets.all(16),
     );
 
     expect(copied.backgroundColor?.resolve({}), Colors.blue);
-    expect(copied.padding, const EdgeInsets.all(16));
+    expect(copied.contentPadding, const EdgeInsets.all(16));
   });
 
   test('StreamScheduledMessageListItemThemeData.copyWith keeps the other values', () {
@@ -87,8 +87,8 @@ void main() {
 
     final copied = original.copyWith(backgroundColor: const WidgetStatePropertyAll(Colors.blue));
 
-    expect(copied.titleStyle, original.titleStyle);
-    expect(copied.sendTimeFormatter, original.sendTimeFormatter);
+    expect(copied.channelNameStyle, original.channelNameStyle);
+    expect(copied.scheduledAtFormatter, original.scheduledAtFormatter);
   });
 
   test('StreamScheduledMessageListItemThemeData.merge takes the values the other theme sets', () {
@@ -105,8 +105,8 @@ void main() {
 
     final merged = original.merge(other);
 
-    expect(merged.titleStyle, original.titleStyle);
-    expect(merged.sendTimeFormatter, original.sendTimeFormatter);
+    expect(merged.channelNameStyle, original.channelNameStyle);
+    expect(merged.scheduledAtFormatter, original.scheduledAtFormatter);
   });
 
   test('StreamScheduledMessageListItemThemeData.merge with null returns the same theme', () {
@@ -119,40 +119,40 @@ void main() {
     final lerped = StreamScheduledMessageListItemThemeData.lerp(_lerpStart, _lerpEnd, 0)!;
 
     expect(lerped.backgroundColor?.resolve({}), Colors.black);
-    expect(lerped.padding, _lerpStart.padding);
-    expect(lerped.sendTimeFormatter, _lerpStart.sendTimeFormatter);
+    expect(lerped.contentPadding, _lerpStart.contentPadding);
+    expect(lerped.scheduledAtFormatter, _lerpStart.scheduledAtFormatter);
   });
 
   test('StreamScheduledMessageListItemThemeData.lerp at 1 returns the second theme', () {
     final lerped = StreamScheduledMessageListItemThemeData.lerp(_lerpStart, _lerpEnd, 1)!;
 
     expect(lerped.backgroundColor?.resolve({}), Colors.white);
-    expect(lerped.padding, _lerpEnd.padding);
-    expect(lerped.sendTimeFormatter, _lerpEnd.sendTimeFormatter);
+    expect(lerped.contentPadding, _lerpEnd.contentPadding);
+    expect(lerped.scheduledAtFormatter, _lerpEnd.scheduledAtFormatter);
   });
 
-  test('StreamScheduledMessageListItemThemeData.lerp halfway blends colors and padding', () {
+  test('StreamScheduledMessageListItemThemeData.lerp halfway blends colors and content padding', () {
     final lerped = StreamScheduledMessageListItemThemeData.lerp(_lerpStart, _lerpEnd, 0.5)!;
 
     expect(lerped.backgroundColor?.resolve({}), Color.lerp(Colors.black, Colors.white, 0.5));
-    expect(lerped.padding, EdgeInsetsGeometry.lerp(const EdgeInsets.all(8), const EdgeInsets.all(16), 0.5));
+    expect(lerped.contentPadding, EdgeInsetsGeometry.lerp(const EdgeInsets.all(8), const EdgeInsets.all(16), 0.5));
   });
 
   test('StreamScheduledMessageListItemThemeData.lerp halfway takes the second formatter', () {
     final lerped = StreamScheduledMessageListItemThemeData.lerp(_lerpStart, _lerpEnd, 0.5)!;
 
-    expect(lerped.sendTimeFormatter, _lerpEnd.sendTimeFormatter);
+    expect(lerped.scheduledAtFormatter, _lerpEnd.scheduledAtFormatter);
   });
 }
 
 StreamScheduledMessageListItemThemeData _fullTheme() {
   return const StreamScheduledMessageListItemThemeData(
     backgroundColor: WidgetStatePropertyAll(Colors.red),
-    padding: EdgeInsets.all(8),
-    sendTimeStyle: TextStyle(fontSize: 12),
-    failedSendTimeStyle: TextStyle(fontSize: 12),
-    sendTimeFormatter: _dummyFormatter,
-    titleStyle: TextStyle(fontSize: 14),
+    contentPadding: EdgeInsets.all(8),
+    scheduledAtStyle: TextStyle(fontSize: 12),
+    failedScheduledAtStyle: TextStyle(fontSize: 12),
+    scheduledAtFormatter: _dummyFormatter,
+    channelNameStyle: TextStyle(fontSize: 14),
     messagePreviewStyle: TextStyle(fontSize: 16),
     messagePreviewTextTheme: StreamMessagePreviewTextThemeData(iconSize: 20),
     statusStyle: TextStyle(fontSize: 12),
@@ -162,14 +162,14 @@ StreamScheduledMessageListItemThemeData _fullTheme() {
 
 const _lerpStart = StreamScheduledMessageListItemThemeData(
   backgroundColor: WidgetStatePropertyAll(Colors.black),
-  padding: EdgeInsets.all(8),
-  sendTimeFormatter: _dummyFormatter,
+  contentPadding: EdgeInsets.all(8),
+  scheduledAtFormatter: _dummyFormatter,
 );
 
 const _lerpEnd = StreamScheduledMessageListItemThemeData(
   backgroundColor: WidgetStatePropertyAll(Colors.white),
-  padding: EdgeInsets.all(16),
-  sendTimeFormatter: _otherFormatter,
+  contentPadding: EdgeInsets.all(16),
+  scheduledAtFormatter: _otherFormatter,
 );
 
 String _dummyFormatter(BuildContext context, DateTime date) => 'formatted';

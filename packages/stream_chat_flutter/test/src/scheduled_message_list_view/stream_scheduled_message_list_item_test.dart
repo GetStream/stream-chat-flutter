@@ -82,13 +82,13 @@ void main() {
     expect(find.text('messaging:general'), findsNothing);
   });
 
-  testWidgets('StreamScheduledMessageListItem formats the send time with the theme formatter', (tester) async {
+  testWidgets('StreamScheduledMessageListItem formats the scheduled time with the theme formatter', (tester) async {
     await tester.pumpWidget(
       _wrapWithMaterialApp(
         StreamScheduledMessageListItem(scheduledMessage: _scheduledMessage()),
         chatTheme: StreamChatThemeData(
           scheduledMessageListItemTheme: StreamScheduledMessageListItemThemeData(
-            sendTimeFormatter: (_, date) => 'At ${date.hour}h',
+            scheduledAtFormatter: (_, date) => 'At ${date.hour}h',
           ),
         ),
       ),
@@ -168,12 +168,12 @@ void main() {
     },
   );
 
-  testWidgets('StreamScheduledMessageListItem dims the send time of one that could not be sent', (tester) async {
+  testWidgets('StreamScheduledMessageListItem dims the scheduled time of one that could not be sent', (tester) async {
     await tester.pumpWidget(_wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: _failed())));
 
     final colorScheme = tester.element(find.byType(StreamScheduledMessageListItem)).streamColorScheme;
-    final sendTime = tester.widget<Text>(find.text('Send Wed, Oct 21 at 8:00\u202fAM'));
-    expect(sendTime.style?.color, colorScheme.textDisabled);
+    final scheduledAt = tester.widget<Text>(find.text('Send Wed, Oct 21 at 8:00\u202fAM'));
+    expect(scheduledAt.style?.color, colorScheme.textDisabled);
   });
 
   testWidgets('StreamScheduledMessageListItem tints the background when selected', (tester) async {
@@ -198,7 +198,7 @@ void main() {
     expect(_itemBackground(tester), Colors.red);
   });
 
-  testWidgets('StreamScheduledMessageListItem merges into one accessible node with the spelled-out send time', (
+  testWidgets('StreamScheduledMessageListItem merges into one accessible node with the spelled-out scheduled time', (
     tester,
   ) async {
     final handle = tester.ensureSemantics();

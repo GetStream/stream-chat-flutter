@@ -9,11 +9,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 ///
 /// Any widget can be mixed in alongside the default rows; an added row handles
 /// its own tap.
-typedef ScheduledMessageActionsBuilder =
-    List<Widget> Function(
-      BuildContext context,
-      List<Widget> defaultActions,
-    );
+typedef ScheduledMessageActionsBuilder = List<Widget> Function(BuildContext context, List<Widget> defaultActions);
 
 /// An action on a scheduled message, chosen from the scheduled message
 /// actions sheet.

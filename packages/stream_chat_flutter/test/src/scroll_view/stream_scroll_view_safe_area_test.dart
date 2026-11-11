@@ -87,8 +87,8 @@ void main() {
     );
 
     final spacing = tester.element(find.byType(StreamScheduledMessageListView)).streamSpacing;
-    final sendTime = tester.getRect(find.byType(StreamSkeletonBox).first);
-    expect(sendTime.left, moreOrLessEquals(_padding.left + spacing.xxs));
+    final scheduledAt = tester.getRect(find.byType(StreamSkeletonBox).first);
+    expect(scheduledAt.left, moreOrLessEquals(_padding.left + spacing.xxs));
   });
 
   testWidgets('StreamThreadListView lays out a custom empty state as built', (tester) async {
