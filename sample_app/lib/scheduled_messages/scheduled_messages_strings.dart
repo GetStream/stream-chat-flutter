@@ -24,6 +24,8 @@ abstract final class ScheduledMessagesStrings {
   static const alreadySentError = 'This message was already sent';
   static const canceled = 'This message was deleted';
   static const sentOrDeleted = 'This message was already sent or deleted';
+  static const failedOneNotRemoved =
+      "Scheduled again, but the failed message couldn't be removed. Delete it from the list.";
 
   static String deleteDescription(String name) => "This message to $name won't be sent. This can't be undone.";
 }

@@ -17,7 +17,7 @@ void main() {
     expect(find.text('Reschedule'), findsOneWidget);
   });
 
-  testWidgets('ScheduledMessagesPage says a deleted one was already sent when it is gone', (tester) async {
+  testWidgets('ScheduledMessagesPage says a deleted one was sent or deleted when it is gone', (tester) async {
     final scheduledMessage = _scheduledMessage('a', text: '#sent');
     final client = _client(scheduledMessages: [scheduledMessage]);
     when(() => client.deleteScheduledMessage(any())).thenAnswer((_) async => throw _notFound());
@@ -30,7 +30,7 @@ void main() {
     await tester.tap(find.text('Delete').last);
     await tester.pump();
 
-    expect(find.text("Already sent. It's in the channel now."), findsOneWidget);
+    expect(find.text('This message was already sent or deleted'), findsOneWidget);
   });
 }
 

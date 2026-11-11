@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 import 'package:stream_core_flutter/chat.dart';
 
 /// A shimmer loading placeholder for the scheduled message list view.
+@internal
 class StreamScheduledMessageListSkeletonLoading extends StatelessWidget {
   /// Creates a scheduled message list loading placeholder.
   const StreamScheduledMessageListSkeletonLoading({
@@ -15,8 +17,7 @@ class StreamScheduledMessageListSkeletonLoading extends StatelessWidget {
 
   /// Padding around the skeleton list.
   ///
-  /// When null, the list auto-insets from `MediaQuery.padding` — matching the
-  /// real scheduled message list so the layout doesn't shift once it loads.
+  /// When null, the list insets itself from the screen's safe area.
   final EdgeInsetsGeometry? padding;
 
   @override
@@ -28,12 +29,8 @@ class StreamScheduledMessageListSkeletonLoading extends StatelessWidget {
         padding: padding,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: itemCount,
-        separatorBuilder: (context, index) {
-          return Divider(height: 1, color: colorScheme.borderSubtle);
-        },
-        itemBuilder: (context, index) {
-          return const _StreamScheduledMessageListItemSkeleton();
-        },
+        separatorBuilder: (context, index) => Divider(height: 1, color: colorScheme.borderSubtle),
+        itemBuilder: (context, index) => const _StreamScheduledMessageListItemSkeleton(),
       ),
     );
   }

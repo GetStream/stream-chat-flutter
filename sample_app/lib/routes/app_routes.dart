@@ -167,10 +167,12 @@ final appRoutes = [
                 name: Routes.SCHEDULED_MESSAGES.name,
                 path: Routes.SCHEDULED_MESSAGES.path,
                 builder: (BuildContext context, GoRouterState state) {
-                  return ScheduledMessagesScreen(
-                    cid: _resolveChannel(context, state).cid,
-                    parentId: state.uri.queryParameters['pid'],
-                  );
+                  // A thread's replies are listed by its parent alone.
+                  if (state.uri.queryParameters['pid'] case final parentId?) {
+                    return ScheduledMessagesScreen(parentId: parentId);
+                  }
+
+                  return ScheduledMessagesScreen(cid: _resolveChannel(context, state).cid);
                 },
               ),
             ],

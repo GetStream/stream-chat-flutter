@@ -5,19 +5,20 @@ import '../../stream_chat_flutter.dart';
 
 part 'stream_scheduled_message_list_item_theme.g.theme.dart';
 
-/// An inherited theme for descendant [StreamScheduledMessageListItem]s.
+/// Applies a scheduled message list item theme to descendant
+/// [StreamScheduledMessageListItem] widgets.
 ///
 /// Values set here override [StreamChatThemeData.scheduledMessageListItemTheme]
 /// for the subtree.
 ///
 /// {@tool snippet}
 ///
-/// Shows the send time of every scheduled message in blue:
+/// Shows the scheduled time of every scheduled message in blue:
 ///
 /// ```dart
 /// StreamScheduledMessageListItemTheme(
 ///   data: StreamScheduledMessageListItemThemeData(
-///     sendTimeStyle: TextStyle(color: Colors.blue),
+///     scheduledAtStyle: TextStyle(color: Colors.blue),
 ///   ),
 ///   child: const StreamScheduledMessageListView(),
 /// )
@@ -47,9 +48,7 @@ class StreamScheduledMessageListItemTheme extends InheritedTheme {
   /// ancestor take precedence over global values from [StreamChatTheme.of].
   static StreamScheduledMessageListItemThemeData of(BuildContext context) {
     final localTheme = context.dependOnInheritedWidgetOfExactType<StreamScheduledMessageListItemTheme>();
-    final globalTheme = StreamChatTheme.of(context).scheduledMessageListItemTheme;
-
-    return globalTheme.merge(localTheme?.data);
+    return StreamChatTheme.of(context).scheduledMessageListItemTheme.merge(localTheme?.data);
   }
 
   @override
@@ -58,9 +57,7 @@ class StreamScheduledMessageListItemTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(StreamScheduledMessageListItemTheme oldWidget) {
-    return data != oldWidget.data;
-  }
+  bool updateShouldNotify(StreamScheduledMessageListItemTheme oldWidget) => data != oldWidget.data;
 }
 
 /// Theme data for customizing [StreamScheduledMessageListItem] widgets.
@@ -72,7 +69,7 @@ class StreamScheduledMessageListItemTheme extends InheritedTheme {
 /// ```dart
 /// StreamChatThemeData(
 ///   scheduledMessageListItemTheme: StreamScheduledMessageListItemThemeData(
-///     backgroundColor: Colors.white,
+///     backgroundColor: WidgetStatePropertyAll(Colors.white),
 ///   ),
 /// )
 /// ```
@@ -90,65 +87,70 @@ class StreamScheduledMessageListItemThemeData with _$StreamScheduledMessageListI
   /// overrides.
   const StreamScheduledMessageListItemThemeData({
     this.backgroundColor,
-    this.padding,
-    this.sendTimeStyle,
-    this.failedSendTimeStyle,
-    this.sendTimeFormatter,
-    this.titleStyle,
-    this.previewStyle,
-    this.previewTextTheme,
+    this.contentPadding,
+    this.scheduledAtStyle,
+    this.failedScheduledAtStyle,
+    this.scheduledAtFormatter,
+    this.channelNameStyle,
+    this.messagePreviewStyle,
+    this.messagePreviewTextTheme,
     this.statusStyle,
     this.failedStatusStyle,
   });
 
   /// The background color of the row.
   ///
-  /// A selected row tints it with [StreamColorScheme.backgroundSelected].
-  /// Falls back to [StreamColorScheme.backgroundApp].
-  final Color? backgroundColor;
+  /// This color is resolved from [WidgetState]s. Falls back to
+  /// [StreamColorScheme.backgroundApp], tinted with
+  /// [StreamColorScheme.backgroundSelected] when selected.
+  final WidgetStateProperty<Color?>? backgroundColor;
 
-  /// The padding around the content of the row.
+  /// The padding inside the row, around its content.
   ///
-  /// Falls back to [StreamSpacing.md] on every side.
-  final EdgeInsetsGeometry? padding;
+  /// Falls back to [StreamSpacing.md] at the sides and [StreamSpacing.sm] at
+  /// the top and bottom.
+  final EdgeInsetsGeometry? contentPadding;
 
-  /// The text style of the send time.
+  /// The text style of the time the message is scheduled to be sent at.
   ///
   /// Falls back to [StreamTextTheme.captionDefault] with
   /// [StreamColorScheme.textTertiary].
-  final TextStyle? sendTimeStyle;
+  final TextStyle? scheduledAtStyle;
 
-  /// The text style of the send time of a message that failed.
+  /// The text style of the time a message that failed was scheduled to be
+  /// sent at.
   ///
   /// Falls back to [StreamTextTheme.captionDefault] with
   /// [StreamColorScheme.textDisabled].
-  final TextStyle? failedSendTimeStyle;
+  final TextStyle? failedScheduledAtStyle;
 
-  /// The formatter of the send time.
+  /// The formatter of the time the message is scheduled to be sent at.
   ///
-  /// Falls back to [Translations.scheduledMessageSendAtText].
-  final DateFormatter? sendTimeFormatter;
+  /// It formats the whole line, such as "Send Wed, Oct 21 at 8:00 AM". Falls
+  /// back to [Translations.scheduledMessageSendAtText].
+  final DateFormatter? scheduledAtFormatter;
 
   /// The text style for the name of the channel the message is sent to.
   ///
   /// Falls back to [StreamTextTheme.captionEmphasis] with
   /// [StreamColorScheme.textTertiary].
-  final TextStyle? titleStyle;
+  final TextStyle? channelNameStyle;
 
   /// The text style for the preview of the message.
   ///
   /// Falls back to [StreamTextTheme.bodyDefault] with
   /// [StreamColorScheme.textPrimary].
-  final TextStyle? previewStyle;
+  final TextStyle? messagePreviewStyle;
 
   /// The theme for styling parts of the message preview differently from the
   /// rest.
   ///
   /// Takes precedence over an enclosing [StreamMessagePreviewTextTheme] and
   /// the app-wide one. Icons default to a size of 20.
-  final StreamMessagePreviewTextThemeData? previewTextTheme;
+  final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 
-  /// The text style for the state of a message being sent.
+  /// The text style of the status line while the message is being sent or
+  /// its attachments upload.
   ///
   /// Falls back to [StreamTextTheme.captionDefault] with
   /// [StreamColorScheme.textTertiary].

@@ -207,6 +207,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
   }
 
   /// Creates a theme configuration with every component theme supplied.
+  // TODO(v11): Make this private, with every component theme required.
   const StreamChatThemeData.raw({
     required this.channelHeaderTheme,
     required this.channelListHeaderTheme,
@@ -280,7 +281,7 @@ class StreamChatThemeData extends ThemeExtension<StreamChatThemeData> with _$Str
   /// prefix.
   final StreamMessagePreviewTextThemeData messagePreviewTextTheme;
 
-  /// The default styles of every [StreamScheduledMessageListItem].
+  /// The theme for scheduled message list items.
   final StreamScheduledMessageListItemThemeData scheduledMessageListItemTheme;
 
   /// The default styles of every [StreamScheduledMessagesBanner].

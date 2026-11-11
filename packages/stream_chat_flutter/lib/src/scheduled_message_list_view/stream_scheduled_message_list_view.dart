@@ -10,7 +10,7 @@ Widget defaultScheduledMessageListViewSeparatorBuilder(
   BuildContext context,
   List<ScheduledMessage> scheduledMessages,
   int index,
-) => const StreamScheduledMessageListSeparator();
+) => const _ScheduledMessageListSeparator();
 
 /// Signature for the item builder that creates the children of the
 /// [StreamScheduledMessageListView].
@@ -24,16 +24,17 @@ typedef StreamScheduledMessageListViewIndexedWidgetBuilder =
 /// all loaded yet, showing the list loads them.
 ///
 /// Each row is rendered using [StreamScheduledMessageListItem], which can be
-/// customized app-wide through [StreamComponentFactory].
+/// customized app-wide through
+/// `streamChatComponentBuilders(scheduledMessageListItem: ...)`.
 ///
 /// Example:
 ///
 /// ```dart
 /// StreamScheduledMessageListView(
-///   channel: channel,
+///   cid: channel.cid,
 ///   onScheduledMessageTap: (scheduledMessage) {
-///     showStreamScheduledMessageActions(
-///       context,
+///     showStreamScheduledMessageActionsSheet(
+///       context: context,
 ///       scheduledMessage: scheduledMessage,
 ///     );
 ///   },
@@ -43,13 +44,13 @@ typedef StreamScheduledMessageListViewIndexedWidgetBuilder =
 /// See also:
 ///
 ///  * [StreamScheduledMessageListItem], which renders each scheduled message.
-///  * [showStreamScheduledMessageActions], which shows the actions on one.
+///  * [showStreamScheduledMessageActionsSheet], which shows the actions on one.
 /// {@endtemplate}
 class StreamScheduledMessageListView extends StatefulWidget {
   /// {@macro streamScheduledMessageListView}
   const StreamScheduledMessageListView({
     super.key,
-    this.channel,
+    this.cid,
     this.parentId,
     this.itemBuilder,
     this.separatorBuilder = defaultScheduledMessageListViewSeparatorBuilder,
@@ -73,16 +74,17 @@ class StreamScheduledMessageListView extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(parentId == null || channel != null, 'parentId needs the channel of its thread.');
+  });
 
-  /// The channel whose scheduled messages are listed.
+  /// The ID of the channel whose scheduled messages are listed, without its
+  /// thread replies.
   ///
-  /// When null, every channel's are.
-  final Channel? channel;
+  /// When both this and [parentId] are null, every channel's are listed.
+  final String? cid;
 
   /// The ID of the message whose thread's scheduled replies are listed.
   ///
-  /// Needs [channel].
+  /// When set, [cid] is ignored.
   final String? parentId;
 
   /// A builder that is called to build items in the [ListView].
@@ -127,6 +129,12 @@ class StreamScheduledMessageListView extends StatefulWidget {
   final bool addAutomaticKeepAlives;
 
   /// Whether to wrap each child in a [RepaintBoundary].
+  ///
+  /// Typically, children in a scrolling container are wrapped in repaint
+  /// boundaries so that they do not need to be repainted as the list scrolls.
+  /// If the children are easy to repaint (e.g., solid color blocks or a short
+  /// snippet of text), it might be more efficient to not add a repaint boundary
+  /// and repaint the children during scrolling.
   ///
   /// Defaults to true.
   final bool addRepaintBoundaries;
@@ -183,69 +191,65 @@ class StreamScheduledMessageListView extends StatefulWidget {
 }
 
 class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageListView> {
-  Future<void>? _loading;
-  Stream<List<ScheduledMessage>>? _stream;
+  Future<void>? _scheduledMessagesLoad;
+  Stream<List<ScheduledMessage>>? _scheduledMessagesStream;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _stream ??= _scheduledMessagesStream();
-    _loading ??= _loadIfNeeded();
+    _scheduledMessagesStream ??= _scopedScheduledMessagesStream();
+    _scheduledMessagesLoad ??= _loadScheduledMessagesIfNeeded();
   }
 
   @override
   void didUpdateWidget(covariant StreamScheduledMessageListView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.channel == oldWidget.channel && widget.parentId == oldWidget.parentId) return;
+    if (widget.cid == oldWidget.cid && widget.parentId == oldWidget.parentId) return;
 
-    _stream = _scheduledMessagesStream();
+    _scheduledMessagesStream = _scopedScheduledMessagesStream();
   }
 
-  Future<void>? _loadIfNeeded() {
+  Future<void>? _loadScheduledMessagesIfNeeded() {
     final client = StreamChat.of(context).client;
     if (client.state.scheduledMessageListState.hasLoadedAll) return null;
 
-    // A failure only shows when there's nothing to list, so it's ignored.
-    return client.loadScheduledMessages()..ignore();
+    // A failure only shows when there's nothing to list, so it's also logged.
+    return _loadScheduledMessages(client)..ignore();
   }
 
-  void _retry() {
-    setState(() {
-      _loading = _loadIfNeeded();
-    });
+  // The list stays not fully loaded when this fails, so the next load tries again.
+  Future<void> _loadScheduledMessages(StreamChatClient client) async {
+    try {
+      await client.loadScheduledMessages();
+    } catch (error, stackTrace) {
+      client.logger.warning('Could not load the scheduled messages', error, stackTrace);
+      rethrow;
+    }
   }
 
-  // The scheduled messages in the scope of this list, as they change.
-  Stream<List<ScheduledMessage>> _scheduledMessagesStream() {
-    final channel = widget.channel;
-    if (channel == null) return StreamChat.of(context).client.state.scheduledMessagesStream;
-
-    final channelState = channel.state!;
-    final parentId = widget.parentId;
-    if (parentId == null) return channelState.scheduledMessagesStream;
-    return channelState.scheduledThreadRepliesStream(parentId);
+  Stream<List<ScheduledMessage>> _scopedScheduledMessagesStream() {
+    final state = StreamChat.of(context).client.state;
+    if (widget.parentId case final parentId?) return state.scheduledThreadRepliesStream(parentId);
+    if (widget.cid case final cid?) return state.scheduledChannelMessagesStream(cid);
+    return state.scheduledMessagesStream;
   }
 
-  // The scheduled messages in the scope of this list.
-  List<ScheduledMessage> _currentScheduledMessages() {
-    final channel = widget.channel;
-    if (channel == null) return StreamChat.of(context).client.state.scheduledMessages;
-
-    final channelState = channel.state!;
-    final parentId = widget.parentId;
-    if (parentId == null) return channelState.scheduledMessages;
-    return channelState.scheduledThreadReplies(parentId);
+  List<ScheduledMessage> _scopedScheduledMessages() {
+    final state = StreamChat.of(context).client.state;
+    if (widget.parentId case final parentId?) return state.scheduledThreadReplies(parentId);
+    if (widget.cid case final cid?) return state.scheduledChannelMessages(cid);
+    return state.scheduledMessages;
   }
 
   @override
   Widget build(BuildContext context) {
     return BetterStreamBuilder<List<ScheduledMessage>>(
-      stream: _stream,
-      initialData: _currentScheduledMessages(),
+      stream: _scheduledMessagesStream,
+      initialData: _scopedScheduledMessages(),
       builder: (context, scheduledMessages) {
         if (scheduledMessages.isEmpty) {
           return FutureBuilder<void>(
-            future: _loading,
+            future: _scheduledMessagesLoad,
             builder: (context, snapshot) => switch (snapshot) {
               AsyncSnapshot(connectionState: .waiting) => _buildLoading(context),
               AsyncSnapshot(:final error?) => _buildError(context, error),
@@ -272,7 +276,9 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
           cacheExtent: widget.cacheExtent,
           clipBehavior: widget.clipBehavior,
           itemCount: scheduledMessages.length,
-          separatorBuilder: (context, index) => widget.separatorBuilder(context, scheduledMessages, index),
+          separatorBuilder: (context, index) {
+            return widget.separatorBuilder(context, scheduledMessages, index);
+          },
           itemBuilder: (context, index) => _buildItem(context, scheduledMessages, index),
         );
       },
@@ -309,14 +315,25 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
     if (widget.errorBuilder?.call(context, chatError) case final custom?) return custom;
 
     final translations = context.translations;
-    final text = resolveNetworkErrorText(context, chatError, fallbackTitle: translations.loadingScheduledMessagesError);
+    final text = resolveNetworkErrorText(
+      context,
+      chatError,
+      fallbackTitle: translations.loadingScheduledMessagesError,
+    );
 
     return Center(
       child: StreamScrollViewErrorWidget(
         errorTitle: Text(text.title),
+        errorSubtitle: Text(text.description),
         onRetryPressed: _retry,
       ),
     );
+  }
+
+  void _retry() {
+    setState(() {
+      _scheduledMessagesLoad = _loadScheduledMessagesIfNeeded();
+    });
   }
 
   Widget _buildEmpty(BuildContext context) {
@@ -331,10 +348,9 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
   }
 }
 
-/// The divider between [StreamScheduledMessageListItem]s.
-class StreamScheduledMessageListSeparator extends StatelessWidget {
-  /// Creates a scheduled message list separator.
-  const StreamScheduledMessageListSeparator({super.key});
+// The divider between [StreamScheduledMessageListItem]s.
+class _ScheduledMessageListSeparator extends StatelessWidget {
+  const _ScheduledMessageListSeparator();
 
   @override
   Widget build(BuildContext context) {
