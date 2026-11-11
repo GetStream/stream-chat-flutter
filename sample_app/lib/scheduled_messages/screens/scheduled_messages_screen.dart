@@ -118,14 +118,6 @@ Future<void> _run(BuildContext context, Future<String> Function() call) async {
   }
 }
 
-// The channel [scheduledMessage] is sent to, loaded or not.
-Channel _channelOf(StreamChatClient client, ScheduledMessage scheduledMessage) {
-  if (client.state.channels[scheduledMessage.cid] case final channel?) return channel;
-
-  final ChannelModel(:id, :type) = ChannelModel(cid: scheduledMessage.cid);
-  return client.channel(type, id: id);
-}
-
 Future<void> _editScheduledMessage(BuildContext context, ScheduledMessage scheduledMessage) async {
   final client = StreamChat.of(context).client;
 
@@ -156,17 +148,16 @@ Future<void> _editAndReschedule(BuildContext context, ScheduledMessage scheduled
   if (text == null || !context.mounted) return;
 
   final fallback = context.translations.genericErrorText;
-  final channel = _channelOf(client, scheduledMessage);
   final scheduledAt = await showStreamScheduleTimeSheet(
     context: context,
-    channel: channel,
+    cid: scheduledMessage.cid,
     message: scheduledMessage.message.copyWith(text: text),
   );
   if (scheduledAt == null) return;
 
   final bool isFailedOneRemoved;
   try {
-    isFailedOneRemoved = await _scheduleAgain(client, channel, scheduledMessage, scheduledAt, text: text);
+    isFailedOneRemoved = await _scheduleAgain(client, scheduledMessage, scheduledAt, text: text);
   } catch (error) {
     final description = describeScheduleError(error, fallback: fallback);
     messenger.show(StreamSnackbar(message: Text(description), variant: .error));
@@ -183,7 +174,7 @@ Future<void> _reschedule(BuildContext context, ScheduledMessage scheduledMessage
 
   final scheduledAt = await showStreamScheduleTimeSheet(
     context: context,
-    channel: _channelOf(client, scheduledMessage),
+    cid: scheduledMessage.cid,
     message: scheduledMessage.message,
     initialScheduledAt: scheduledMessage.scheduledAt,
     title: Text(context.translations.rescheduleMessageLabel),
@@ -268,7 +259,6 @@ Future<void> _maybeDelete(BuildContext context, ScheduledMessage scheduledMessag
 // the failed one was removed.
 Future<bool> _scheduleAgain(
   StreamChatClient client,
-  Channel channel,
   ScheduledMessage scheduledMessage,
   DateTime scheduledAt, {
   String? text,
@@ -292,7 +282,8 @@ Future<bool> _scheduleAgain(
     extraData: content.extraData,
   );
 
-  await channel.scheduleMessage(message, scheduledAt: scheduledAt);
+  final ChannelModel(:id, :type) = ChannelModel(cid: scheduledMessage.cid);
+  await client.scheduleMessage(message, id, type, scheduledAt: scheduledAt);
 
   try {
     await client.deleteScheduledMessage(scheduledMessage);

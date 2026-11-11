@@ -20,7 +20,7 @@ void main() {
         final button = openButton(
           (context) => showStreamScheduleTimeSheet(
             context: context,
-            channel: channel,
+            cid: scheduleCid,
             message: messageToSchedule(),
             initialScheduledAt: DateTime(2099, 1, 15, 9),
           ),
@@ -129,6 +129,24 @@ void main() {
       await showTimeSheet(tester, scheduleChannel());
 
       expect(find.textContaining('Sent in your time zone (GMT'), findsOneWidget);
+    });
+  });
+
+  testWidgets("showStreamScheduleTimeSheet uses the default bounds and no name for a channel that isn't loaded", (
+    tester,
+  ) async {
+    // Further ahead than this config allows, but not than the default.
+    final config = ChannelConfig(scheduledMessagesMaxLeadTime: const Duration(days: 7));
+
+    await withClock(Clock.fixed(wednesday), () async {
+      await showTimeSheet(
+        tester,
+        scheduleChannel(loaded: false, config: config),
+        initialScheduledAt: wednesday.add(const Duration(days: 8)),
+      );
+
+      expect(scheduleButton(tester).props.onPressed, isNotNull);
+      expect(find.text('Message to No title'), findsOneWidget);
     });
   });
 }

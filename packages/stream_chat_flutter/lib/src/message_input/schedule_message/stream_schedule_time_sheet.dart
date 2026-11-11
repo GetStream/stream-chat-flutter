@@ -3,10 +3,11 @@ import 'package:flutter/material.dart';
 
 import '../../../stream_chat_flutter.dart';
 import '../../utils/channel_name.dart';
-import 'schedule_message_bounds.dart';
 import 'schedule_message_picker_theme.dart';
+import 'schedule_message_time.dart';
 
-/// Shows a sheet to pick the date and time [message] is sent at in [channel].
+/// Shows a sheet to pick the date and time [message] is sent at in the channel
+/// [cid].
 ///
 /// The sheet starts at [initialScheduledAt], or an hour from now, and is
 /// headed by [title], or "Schedule message" by default. A time sooner or
@@ -14,7 +15,7 @@ import 'schedule_message_picker_theme.dart';
 /// Returns the picked time, or null when the sheet is dismissed.
 Future<DateTime?> showStreamScheduleTimeSheet({
   required BuildContext context,
-  required Channel channel,
+  required String cid,
   required Message message,
   DateTime? initialScheduledAt,
   Widget? title,
@@ -23,7 +24,7 @@ Future<DateTime?> showStreamScheduleTimeSheet({
     context: context,
     isDismissible: true,
     builder: (_, _) => _ScheduleTimeSheet(
-      channel: channel,
+      cid: cid,
       message: message,
       initialScheduledAt: initialScheduledAt,
       title: title,
@@ -35,13 +36,13 @@ Future<DateTime?> showStreamScheduleTimeSheet({
 // message, and shows a date and a time to change through the Material pickers.
 class _ScheduleTimeSheet extends StatefulWidget {
   const _ScheduleTimeSheet({
-    required this.channel,
+    required this.cid,
     required this.message,
     this.initialScheduledAt,
     this.title,
   });
 
-  final Channel channel;
+  final String cid;
   final Message message;
   final DateTime? initialScheduledAt;
   final Widget? title;
@@ -62,12 +63,14 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
     final translations = context.translations;
     final materialLocalizations = MaterialLocalizations.of(context);
 
-    final bounds = ScheduleMessageBounds.of(widget.channel);
-    final errorText = _errorText(bounds);
-    final canSchedule = bounds.contains(_scheduledAt);
+    final client = StreamChat.of(context).client;
+    final config = loadedChannelConfig(client, widget.cid);
+    final window = scheduleWindow(config);
+    final errorText = _errorText(window, config);
+    final canSchedule = errorText == null;
 
-    final channel = widget.channel;
-    final channelName = loadedChannelName(channel, currentUser: channel.client.state.currentUser);
+    final channel = client.state.channels[widget.cid];
+    final channelName = loadedChannelName(channel, currentUser: client.state.currentUser);
     final channelLabel = translations.messageToLabel(
       channelName: channelName ?? translations.noTitleText,
     );
@@ -121,7 +124,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
                           icon: Icon(icons.calendar),
                           label: Text(translations.dateLabel),
                           value: Text(date, style: valueStyle),
-                          onTap: () => _pickDate(bounds),
+                          onTap: () => _pickDate(window),
                         ),
                         _ScheduleTimeRow(
                           icon: Icon(icons.clock),
@@ -180,12 +183,12 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
     setState(() => _scheduledAt = scheduledAt);
   }
 
-  Future<void> _pickDate(ScheduleMessageBounds bounds) async {
-    final earliest = bounds.earliest;
+  Future<void> _pickDate(({DateTime earliest, DateTime latest}) window) async {
+    final (:earliest, :latest) = window;
     final firstDate = DateTime(earliest.year, earliest.month, earliest.day);
     final initialDate = switch (_scheduledAt) {
       final date when date.isBefore(firstDate) => firstDate,
-      final date when date.isAfter(bounds.latest) => bounds.latest,
+      final date when date.isAfter(latest) => latest,
       final date => date,
     };
 
@@ -193,7 +196,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
       context: context,
       initialDate: initialDate,
       firstDate: firstDate,
-      lastDate: bounds.latest,
+      lastDate: latest,
       builder: buildSchedulePickerTheme,
     );
     if (date == null || !mounted) return;
@@ -215,17 +218,22 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
   }
 
   // The error to show for the picked time, when the channel doesn't allow it.
-  String? _errorText(ScheduleMessageBounds bounds) {
+  String? _errorText(
+    ({DateTime earliest, DateTime latest}) window,
+    ChannelConfig? config,
+  ) {
     final translations = context.translations;
-    if (bounds.isTooSoon(_scheduledAt)) {
+    if (_scheduledAt.isBefore(window.earliest)) {
       // A sheet that starts at a time moves a message that is already
       // scheduled.
-      return switch (widget.initialScheduledAt) {
-        null => translations.scheduleTooSoonError(minLeadTime: bounds.minLeadTime),
-        _ => translations.rescheduleTooSoonError,
-      };
+      if (widget.initialScheduledAt != null) {
+        return translations.rescheduleTooSoonError;
+      }
+
+      final minLeadTime = config?.scheduledMessagesMinLeadTime ?? defaultScheduleMinLeadTime;
+      return translations.scheduleTooSoonError(minLeadTime: minLeadTime);
     }
-    if (bounds.isTooFar(_scheduledAt)) return translations.scheduleTooFarError;
+    if (_scheduledAt.isAfter(window.latest)) return translations.scheduleTooFarError;
     return null;
   }
 }

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_chat_flutter.dart';
-import 'schedule_message_bounds.dart';
+import 'schedule_message_time.dart';
 
-/// Shows the times [message] can be scheduled for in [channel] in a sheet.
+/// Shows the times [message] can be scheduled for in the channel [cid] in a
+/// sheet.
 ///
 /// The sheet offers tomorrow morning and afternoon, the next Monday morning,
 /// and a custom time, which opens [showStreamScheduleTimeSheet]. A preset the
@@ -12,16 +13,13 @@ import 'schedule_message_bounds.dart';
 /// dismissed.
 Future<DateTime?> showStreamScheduleMessageSheet({
   required BuildContext context,
-  required Channel channel,
+  required String cid,
   required Message message,
 }) {
   return showStreamSheet<DateTime>(
     context: context,
     isDismissible: true,
-    builder: (_, _) => _ScheduleMessageSheet(
-      channel: channel,
-      message: message,
-    ),
+    builder: (_, _) => _ScheduleMessageSheet(cid: cid, message: message),
   );
 }
 
@@ -30,11 +28,11 @@ Future<DateTime?> showStreamScheduleMessageSheet({
 // with the time picked there.
 class _ScheduleMessageSheet extends StatelessWidget {
   const _ScheduleMessageSheet({
-    required this.channel,
+    required this.cid,
     required this.message,
   });
 
-  final Channel channel;
+  final String cid;
   final Message message;
 
   @override
@@ -43,11 +41,20 @@ class _ScheduleMessageSheet extends StatelessWidget {
     final spacing = context.streamSpacing;
     final translations = context.translations;
 
-    final bounds = ScheduleMessageBounds.of(channel);
-    final presets = schedulePresets().where(bounds.contains);
+    final client = StreamChat.of(context).client;
+    final config = loadedChannelConfig(client, cid);
+    final window = scheduleWindow(config);
+    final presets = schedulePresets().where(
+      (it) => !it.isBefore(window.earliest) && !it.isAfter(window.latest),
+    );
 
-    final limit = channel.config?.scheduledMessagesMaxPerChannel;
-    final reachedLimit = isScheduleLimitReached(channel) ? limit : null;
+    // Messages that failed don't count toward the channel's limit.
+    final scheduledMessages = client.state.scheduledMessages;
+    final pending = scheduledMessages.where((it) => it.cid == cid && it.status.isPending);
+    final reachedLimit = switch (config?.scheduledMessagesMaxPerChannel) {
+      final limit? when pending.length >= limit => limit,
+      _ => null,
+    };
     final isLimitReached = reachedLimit != null;
     final title = switch (reachedLimit) {
       final limit? => translations.scheduleChannelLimitReachedLabel(limit: limit),
@@ -100,7 +107,7 @@ class _ScheduleMessageSheet extends StatelessWidget {
     final navigator = Navigator.of(context);
     final scheduledAt = await showStreamScheduleTimeSheet(
       context: context,
-      channel: channel,
+      cid: cid,
       message: message,
     );
     if (scheduledAt == null) return;

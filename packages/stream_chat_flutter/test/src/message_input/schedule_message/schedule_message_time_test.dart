@@ -1,7 +1,7 @@
 // Imports the internal helper: a widget test can't set the device's time
 // zone, so the offsets below can't be reached through the sheet.
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat_flutter/src/message_input/schedule_message/schedule_message_bounds.dart';
+import 'package:stream_chat_flutter/src/message_input/schedule_message/schedule_message_time.dart';
 
 void main() {
   test('timeZoneLabel names UTC GMT', () {
