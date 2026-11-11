@@ -139,9 +139,9 @@ class _ScheduledMessageActionRow extends StatelessWidget {
       data: StreamListTileThemeData(
         iconColor: destructive ? .all(colorScheme.accentError) : null,
         titleColor: destructive ? .all(colorScheme.accentError) : null,
-        // Matches the design's tap target size for action rows.
-        minTileHeight: 44,
+        minTileHeight: 48,
         contentPadding: .symmetric(horizontal: spacing.sm),
+        shape: RoundedRectangleBorder(borderRadius: .all(context.streamRadius.md)),
       ),
       child: StreamListTile(leading: icon, title: label, onTap: onTap),
     );

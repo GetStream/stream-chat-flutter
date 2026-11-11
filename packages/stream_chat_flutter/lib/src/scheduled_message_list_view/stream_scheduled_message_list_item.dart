@@ -1,5 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../stream_chat_flutter.dart';
 
@@ -145,6 +146,7 @@ class DefaultStreamScheduledMessageListItem extends StatelessWidget {
       child: StreamListTileTheme(
         data: StreamListTileThemeData(
           contentPadding: effectivePadding,
+          shape: RoundedRectangleBorder(borderRadius: .all(context.streamRadius.md)),
           backgroundColor: .resolveWith((states) {
             final isSelected = states.contains(WidgetState.selected);
             if (!isSelected) return effectiveBackgroundColor;
@@ -220,7 +222,7 @@ class _ScheduledMessageBody extends StatelessWidget {
           ),
         },
         Expanded(
-          child: Column(
+          child: core.StreamColumn(
             crossAxisAlignment: .start,
             spacing: spacing.xs,
             children: [
@@ -375,7 +377,7 @@ class ScheduledMessagePreview extends StatelessWidget {
 /// A message being scheduled or sent shows a spinner and "Sending…", or
 /// "Uploading…" while its attachments upload. One that failed shows a warning
 /// icon and why. A scheduled one shows nothing.
-class ScheduledMessageStatusLine extends StatelessWidget {
+class ScheduledMessageStatusLine extends core.NullableStatelessWidget {
   /// Creates the status of [scheduledMessage].
   const ScheduledMessageStatusLine({
     super.key,
@@ -398,7 +400,7 @@ class ScheduledMessageStatusLine extends StatelessWidget {
   final TextStyle? failedStyle;
 
   @override
-  Widget build(BuildContext context) {
+  Widget? nullableBuild(BuildContext context) {
     final spacing = context.streamSpacing;
     final translations = context.translations;
     final theme = StreamScheduledMessageListItemTheme.of(context);
@@ -446,7 +448,7 @@ class ScheduledMessageStatusLine extends StatelessWidget {
           ],
         );
       default:
-        return const SizedBox.shrink();
+        return null;
     }
   }
 }
