@@ -23,7 +23,8 @@ void main() {
         );
         return wrapWithMaterialApp(button, channel: channel, brightness: brightness);
       },
-      whilePerforming: tapOpenButton,
+      // The presets follow today's date, so it's fixed for the image.
+      whilePerforming: (tester) => withClock(Clock.fixed(wednesday), () => tapOpenButton(tester)),
     );
   }
 
