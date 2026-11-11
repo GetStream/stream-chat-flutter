@@ -13,8 +13,8 @@ import '../../stream_chat_flutter.dart';
 /// Returns the chosen action, or null when the sheet is dismissed or a row
 /// added by [actionsBuilder] is tapped. Taking the action is up to the
 /// caller.
-Future<ScheduledMessageAction?> showStreamScheduledMessageActions(
-  BuildContext context, {
+Future<ScheduledMessageAction?> showStreamScheduledMessageActionsSheet({
+  required BuildContext context,
   required ScheduledMessage scheduledMessage,
   ScheduledMessageActionsBuilder? actionsBuilder,
 }) async {

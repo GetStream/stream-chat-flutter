@@ -6,7 +6,7 @@ import '../../stream_chat_flutter.dart';
 ///
 /// See also:
 ///
-///  * [showStreamScheduledMessageActions], which shows these actions in a
+///  * [showStreamScheduledMessageActionsSheet], which shows these actions in a
 ///    sheet.
 class StreamScheduledMessageActionsBuilder {
   StreamScheduledMessageActionsBuilder._();

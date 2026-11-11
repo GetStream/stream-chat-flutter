@@ -2,8 +2,8 @@
 
 ✅ Added
 
-- Added `StreamScheduledMessageListView` and `StreamScheduledMessageListItem`, to list the current user's scheduled messages, styled by `StreamChatThemeData.scheduledMessageListItemTheme`.
-- Added `showStreamScheduledMessageActions`, a sheet of the actions on a scheduled message, built by `StreamScheduledMessageActionsBuilder`.
+- Added `StreamScheduledMessageListView` and `StreamScheduledMessageListItem`, to list the current user's scheduled messages, styled by `StreamScheduledMessageListItemTheme` and `StreamChatThemeData.scheduledMessageListItemTheme`, and replaceable through `streamChatComponentBuilders(scheduledMessageListItem: ...)`.
+- Added `showStreamScheduledMessageActionsSheet`, a sheet of the actions on a scheduled message, built by `StreamScheduledMessageActionsBuilder`.
 
 🔄 Changed
 

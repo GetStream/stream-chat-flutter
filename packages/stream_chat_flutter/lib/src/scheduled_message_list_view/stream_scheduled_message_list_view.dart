@@ -33,8 +33,8 @@ typedef StreamScheduledMessageListViewIndexedWidgetBuilder =
 /// StreamScheduledMessageListView(
 ///   channel: channel,
 ///   onScheduledMessageTap: (scheduledMessage) {
-///     showStreamScheduledMessageActions(
-///       context,
+///     showStreamScheduledMessageActionsSheet(
+///       context: context,
 ///       scheduledMessage: scheduledMessage,
 ///     );
 ///   },
@@ -44,7 +44,7 @@ typedef StreamScheduledMessageListViewIndexedWidgetBuilder =
 /// See also:
 ///
 ///  * [StreamScheduledMessageListItem], which renders each scheduled message.
-///  * [showStreamScheduledMessageActions], which shows the actions on one.
+///  * [showStreamScheduledMessageActionsSheet], which shows the actions on one.
 /// {@endtemplate}
 class StreamScheduledMessageListView extends StatefulWidget {
   /// {@macro streamScheduledMessageListView}
@@ -129,6 +129,12 @@ class StreamScheduledMessageListView extends StatefulWidget {
   final bool addAutomaticKeepAlives;
 
   /// Whether to wrap each child in a [RepaintBoundary].
+  ///
+  /// Typically, children in a scrolling container are wrapped in repaint
+  /// boundaries so that they do not need to be repainted as the list scrolls.
+  /// If the children are easy to repaint (e.g., solid color blocks or a short
+  /// snippet of text), it might be more efficient to not add a repaint boundary
+  /// and simply repaint the children during scrolling.
   ///
   /// Defaults to true.
   final bool addRepaintBoundaries;

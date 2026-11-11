@@ -5,7 +5,8 @@ import '../../stream_chat_flutter.dart';
 
 part 'stream_scheduled_message_list_item_theme.g.theme.dart';
 
-/// An inherited theme for descendant [StreamScheduledMessageListItem]s.
+/// Applies a scheduled message list item theme to descendant
+/// [StreamScheduledMessageListItem] widgets.
 ///
 /// Values set here override [StreamChatThemeData.scheduledMessageListItemTheme]
 /// for the subtree.

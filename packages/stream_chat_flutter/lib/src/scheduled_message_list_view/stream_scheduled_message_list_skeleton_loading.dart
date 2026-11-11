@@ -30,12 +30,8 @@ class StreamScheduledMessageListSkeletonLoading extends StatelessWidget {
         padding: padding,
         physics: const NeverScrollableScrollPhysics(),
         itemCount: itemCount,
-        separatorBuilder: (context, index) {
-          return Divider(height: 1, color: colorScheme.borderSubtle);
-        },
-        itemBuilder: (context, index) {
-          return const _StreamScheduledMessageListItemSkeleton();
-        },
+        separatorBuilder: (context, index) => Divider(height: 1, color: colorScheme.borderSubtle),
+        itemBuilder: (context, index) => const _StreamScheduledMessageListItemSkeleton(),
       ),
     );
   }

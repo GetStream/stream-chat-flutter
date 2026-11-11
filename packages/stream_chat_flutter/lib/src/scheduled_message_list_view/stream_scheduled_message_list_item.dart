@@ -21,8 +21,8 @@ import '../../stream_chat_flutter.dart';
 /// ```dart
 /// StreamScheduledMessageListItem(
 ///   scheduledMessage: scheduledMessage,
-///   onTap: () => showStreamScheduledMessageActions(
-///     context,
+///   onTap: () => showStreamScheduledMessageActionsSheet(
+///     context: context,
 ///     scheduledMessage: scheduledMessage,
 ///   ),
 /// )
@@ -63,8 +63,7 @@ class StreamScheduledMessageListItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final builder = context.chatComponentBuilder<StreamScheduledMessageListItemProps>();
-    if (builder != null) return builder(context, props);
-    return DefaultStreamScheduledMessageListItem(props: props);
+    return builder?.call(context, props) ?? DefaultStreamScheduledMessageListItem(props: props);
   }
 }
 
@@ -93,6 +92,8 @@ class StreamScheduledMessageListItemProps {
   final GestureLongPressCallback? onLongPress;
 
   /// Whether the item is in a selected state.
+  ///
+  /// Defaults to `false`.
   final bool selected;
 
   /// Returns a copy of this [StreamScheduledMessageListItemProps] with the
@@ -186,8 +187,6 @@ class _ScheduledMessageBody extends StatelessWidget {
 
     final effectiveTitleStyle = theme.titleStyle ?? defaults.titleStyle;
     final effectiveMessagePreviewStyle = theme.messagePreviewStyle ?? defaults.messagePreviewStyle;
-    final basePreviewTextTheme = defaults.messagePreviewTextTheme.merge(StreamMessagePreviewTextTheme.of(context));
-    final effectiveMessagePreviewTextTheme = basePreviewTextTheme.merge(theme.messagePreviewTextTheme);
 
     final streamChat = StreamChat.of(context);
     final channel = streamChat.client.state.channels[scheduledMessage.cid];
@@ -237,10 +236,7 @@ class _ScheduledMessageBody extends StatelessWidget {
                       style: effectiveMessagePreviewStyle,
                       maxLines: 1,
                       overflow: .ellipsis,
-                      child: _ScheduledMessagePreview(
-                        scheduledMessage: scheduledMessage,
-                        messagePreviewTextTheme: effectiveMessagePreviewTextTheme,
-                      ),
+                      child: _ScheduledMessagePreview(scheduledMessage: scheduledMessage),
                     ),
                   ],
                 ),
@@ -298,17 +294,19 @@ class _ScheduledMessageSendTime extends StatelessWidget {
 // that of a message quoting another with the quoted author's name.
 // Attachments show their icon and label.
 class _ScheduledMessagePreview extends StatelessWidget {
-  const _ScheduledMessagePreview({
-    required this.scheduledMessage,
-    required this.messagePreviewTextTheme,
-  });
+  const _ScheduledMessagePreview({required this.scheduledMessage});
 
   final ScheduledMessage scheduledMessage;
-  final StreamMessagePreviewTextThemeData messagePreviewTextTheme;
 
   @override
   Widget build(BuildContext context) {
     final translations = context.translations;
+    final theme = StreamScheduledMessageListItemTheme.of(context);
+    final defaults = _StreamScheduledMessageListItemThemeDefaults(context);
+
+    final basePreviewTextTheme = defaults.messagePreviewTextTheme.merge(StreamMessagePreviewTextTheme.of(context));
+    final effectiveMessagePreviewTextTheme = basePreviewTextTheme.merge(theme.messagePreviewTextTheme);
+
     final message = scheduledMessage.message;
 
     final prefix = switch (message) {
@@ -320,7 +318,7 @@ class _ScheduledMessagePreview extends StatelessWidget {
     };
 
     final preview = StreamMessagePreviewTextTheme(
-      data: messagePreviewTextTheme,
+      data: effectiveMessagePreviewTextTheme,
       child: StreamMessagePreviewText(message: message),
     );
 
@@ -423,9 +421,9 @@ class _StreamScheduledMessageListItemThemeDefaults extends StreamScheduledMessag
 
   final BuildContext _context;
 
+  late final _spacing = _context.streamSpacing;
   late final _colorScheme = _context.streamColorScheme;
   late final _textTheme = _context.streamTextTheme;
-  late final _spacing = _context.streamSpacing;
 
   @override
   WidgetStateProperty<Color?> get backgroundColor => .resolveWith((states) {
@@ -438,44 +436,28 @@ class _StreamScheduledMessageListItemThemeDefaults extends StreamScheduledMessag
   EdgeInsetsGeometry get padding => .symmetric(horizontal: _spacing.md, vertical: _spacing.sm);
 
   @override
-  TextStyle get sendTimeStyle {
-    return _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);
-  }
+  TextStyle get sendTimeStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);
 
   @override
-  DateFormatter get sendTimeFormatter => (context, date) {
-    final translations = context.translations;
-    return translations.scheduledMessageSendAtText(scheduledAt: date);
-  };
+  DateFormatter get sendTimeFormatter =>
+      (context, date) => context.translations.scheduledMessageSendAtText(scheduledAt: date);
 
   @override
-  TextStyle get failedSendTimeStyle {
-    return _textTheme.captionDefault.copyWith(color: _colorScheme.textDisabled);
-  }
+  TextStyle get failedSendTimeStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textDisabled);
 
   @override
-  TextStyle get titleStyle {
-    final color = _colorScheme.textTertiary;
-    return _textTheme.captionEmphasis.copyWith(color: color);
-  }
+  TextStyle get titleStyle => _textTheme.captionEmphasis.copyWith(color: _colorScheme.textTertiary);
 
   @override
-  TextStyle get messagePreviewStyle {
-    return _textTheme.bodyDefault.copyWith(color: _colorScheme.textPrimary);
-  }
+  TextStyle get messagePreviewStyle => _textTheme.bodyDefault.copyWith(color: _colorScheme.textPrimary);
 
   @override
-  StreamMessagePreviewTextThemeData get messagePreviewTextTheme {
-    return const StreamMessagePreviewTextThemeData(iconSize: 20);
-  }
+  StreamMessagePreviewTextThemeData get messagePreviewTextTheme =>
+      const StreamMessagePreviewTextThemeData(iconSize: 20);
 
   @override
-  TextStyle get statusStyle {
-    return _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);
-  }
+  TextStyle get statusStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.textTertiary);
 
   @override
-  TextStyle get failedStatusStyle {
-    return _textTheme.captionDefault.copyWith(color: _colorScheme.accentError);
-  }
+  TextStyle get failedStatusStyle => _textTheme.captionDefault.copyWith(color: _colorScheme.accentError);
 }

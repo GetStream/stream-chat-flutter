@@ -86,8 +86,8 @@ Future<void> _openScheduledMessageActions(
   BuildContext context,
   ScheduledMessage scheduledMessage,
 ) async {
-  final action = await showStreamScheduledMessageActions(
-    context,
+  final action = await showStreamScheduledMessageActionsSheet(
+    context: context,
     scheduledMessage: scheduledMessage,
   );
 
