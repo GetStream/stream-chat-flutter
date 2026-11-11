@@ -167,8 +167,10 @@ Future<void> _editScheduledMessage(BuildContext context, ScheduledMessage schedu
 
 Future<void> _editAndReschedule(BuildContext context, ScheduledMessage scheduledMessage) async {
   final client = StreamChat.of(context).client;
+  final messenger = StreamSnackbarMessenger.of(context);
 
-  final text = await _showEditSheet(context, scheduledMessage.message);
+  // Scheduling it again may only need a new time, so the text can stay as is.
+  final text = await _showEditSheet(context, scheduledMessage.message, allowUnchanged: true);
   if (text == null || !context.mounted) return;
 
   final channelName = scheduledMessageChannelName(context, scheduledMessage);
@@ -181,10 +183,14 @@ Future<void> _editAndReschedule(BuildContext context, ScheduledMessage scheduled
   );
   if (time == null || !context.mounted) return;
 
-  return _run(context, () async {
-    await _scheduleAgain(client, scheduledMessage, time, text: text);
+  var isFailedOneRemoved = true;
+  await _run(context, () async {
+    isFailedOneRemoved = await _scheduleAgain(client, scheduledMessage, time, text: text);
     return ScheduledMessagesStrings.scheduled;
   });
+
+  if (isFailedOneRemoved) return;
+  messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.failedOneNotRemoved), variant: .error));
 }
 
 Future<void> _reschedule(BuildContext context, ScheduledMessage scheduledMessage) async {
@@ -266,8 +272,9 @@ Future<void> _maybeDelete(BuildContext context, ScheduledMessage scheduledMessag
 }
 
 // A failed scheduled message can't be changed, so its content is scheduled
-// again as a new message and the failed one is removed.
-Future<void> _scheduleAgain(
+// again as a new message and the failed one is removed. Resolves to whether
+// the failed one was removed.
+Future<bool> _scheduleAgain(
   StreamChatClient client,
   ScheduledMessage scheduledMessage,
   DateTime time, {
@@ -297,9 +304,11 @@ Future<void> _scheduleAgain(
 
   try {
     await client.deleteScheduledMessage(scheduledMessage);
-  } catch (error) {
+    return true;
+  } catch (error, stackTrace) {
     // It is scheduled again either way; the failed one can be deleted later.
-    debugPrint('Could not delete the failed scheduled message: $error');
+    debugPrint('Could not delete the failed scheduled message: $error\n$stackTrace');
+    return false;
   }
 }
 
@@ -337,18 +346,32 @@ Future<Message?> _resolveQuotedMessage(StreamChatClient client, ScheduledMessage
   }
 }
 
-Future<String?> _showEditSheet(BuildContext context, Message message) {
+Future<String?> _showEditSheet(BuildContext context, Message message, {bool allowUnchanged = false}) {
   return showStreamSheet<String>(
     context: context,
     isDismissible: true,
-    builder: (_, _) => _EditSheet(text: message.text ?? ''),
+    builder: (_, _) => _EditSheet(
+      text: message.text ?? '',
+      hasAttachments: message.attachments.isNotEmpty,
+      allowUnchanged: allowUnchanged,
+    ),
   );
 }
 
 class _EditSheet extends StatefulWidget {
-  const _EditSheet({required this.text});
+  const _EditSheet({
+    required this.text,
+    required this.hasAttachments,
+    required this.allowUnchanged,
+  });
 
   final String text;
+
+  // A message with attachments can be saved without text.
+  final bool hasAttachments;
+
+  // Whether the text can be saved without a change.
+  final bool allowUnchanged;
 
   @override
   State<_EditSheet> createState() => _EditSheetState();
@@ -371,6 +394,8 @@ class _EditSheetState extends State<_EditSheet> {
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
     final text = _controller.text.trim();
+    final hasContent = text.isNotEmpty || widget.hasAttachments;
+    final canSave = hasContent && (widget.allowUnchanged || text != widget.text);
 
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
@@ -383,7 +408,7 @@ class _EditSheetState extends State<_EditSheet> {
               trailing: StreamButton.icon(
                 icon: Icon(context.streamIcons.checkmark),
                 type: .solid,
-                onPressed: text.isEmpty || text == widget.text ? null : () => Navigator.of(context).pop(text),
+                onPressed: canSave ? () => Navigator.of(context).pop(text) : null,
               ),
             ),
             Padding(

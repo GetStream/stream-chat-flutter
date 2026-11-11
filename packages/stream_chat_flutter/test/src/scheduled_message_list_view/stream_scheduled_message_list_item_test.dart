@@ -198,6 +198,41 @@ void main() {
     expect(_itemBackground(tester), Colors.red);
   });
 
+  testWidgets("StreamScheduledMessageListItem names a loaded direct message by its other member", (tester) async {
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        StreamScheduledMessageListItem(
+          scheduledMessage: _scheduledMessage(channel: ChannelModel(cid: 'messaging:general')),
+        ),
+        channels: {'messaging:general': _loadedDirectMessage()},
+      ),
+    );
+
+    expect(find.text('Maya Ross'), findsOneWidget);
+  });
+
+  testWidgets("StreamScheduledMessageListItem names the author of a quoted message it finds in the channel", (
+    tester,
+  ) async {
+    final quoted = Message(
+      id: 'quoted-id',
+      text: 'The venues',
+      user: User(id: 'maya', name: 'Maya Ross'),
+    );
+    final scheduledMessage = _scheduledMessage(quotedMessageId: quoted.id);
+
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        StreamScheduledMessageListItem(scheduledMessage: scheduledMessage),
+        channels: {
+          'messaging:general': _loadedDirectMessage(messages: [quoted]),
+        },
+      ),
+    );
+
+    expect(find.text('Reply to Maya Ross:'), findsOneWidget);
+  });
+
   testWidgets('StreamScheduledMessageListItem merges into one accessible node with the spelled-out scheduled time', (
     tester,
   ) async {
@@ -276,6 +311,7 @@ ScheduledMessage _scheduledMessage({
   List<Attachment> attachments = const [],
   String? parentId,
   Message? quotedMessage,
+  String? quotedMessageId,
   ChannelModel? channel,
 }) {
   return ScheduledMessage(
@@ -287,7 +323,7 @@ ScheduledMessage _scheduledMessage({
       text: text,
       attachments: attachments,
       parentId: parentId,
-      quotedMessageId: quotedMessage?.id,
+      quotedMessageId: quotedMessageId ?? quotedMessage?.id,
       quotedMessage: quotedMessage,
     ),
     scheduledAt: DateTime(2026, 10, 21, 8),
@@ -317,6 +353,39 @@ ScheduledMessage _failed() {
   );
 }
 
+// A loaded direct message channel without a name, with [messages] loaded.
+Channel _loadedDirectMessage({List<Message> messages = const []}) {
+  final channel = MockChannel(type: 'messaging', id: 'general');
+  final state = MockChannelState();
+  final members = [
+    Member(
+      userId: 'current-user-id',
+      user: User(id: 'current-user-id', name: 'Current User'),
+    ),
+    Member(
+      userId: 'maya',
+      user: User(id: 'maya', name: 'Maya Ross'),
+    ),
+  ];
+
+  final client = MockClient();
+  final clientState = MockClientState();
+  when(() => client.state).thenReturn(clientState);
+  when(() => clientState.currentUser).thenReturn(OwnUser(id: 'current-user-id'));
+
+  when(() => channel.client).thenReturn(client);
+  when(() => channel.state).thenReturn(state);
+  when(() => channel.isOneToOne).thenReturn(true);
+  when(() => channel.image).thenReturn(null);
+  when(() => channel.imageStream).thenAnswer((_) => Stream.value(null));
+  when(() => state.membersStream).thenAnswer((_) => const Stream.empty());
+  when(() => state.channelState).thenReturn(ChannelState(channel: ChannelModel(cid: 'messaging:general')));
+  when(() => state.members).thenReturn(members);
+  when(() => state.messages).thenReturn(messages);
+  when(() => state.threads).thenReturn({});
+  return channel;
+}
+
 Color? _itemBackground(WidgetTester tester) {
   final ink = tester.widget<Ink>(
     find.descendant(of: find.byType(StreamScheduledMessageListItem), matching: find.byType(Ink)).first,
@@ -329,6 +398,7 @@ Widget _wrapWithMaterialApp(
   Brightness brightness = Brightness.light,
   StreamChatThemeData? chatTheme,
   StreamComponentBuilders? componentBuilders,
+  Map<String, Channel> channels = const {},
 }) {
   final client = MockClient();
   final clientState = MockClientState();
@@ -336,7 +406,7 @@ Widget _wrapWithMaterialApp(
 
   when(() => client.state).thenReturn(clientState);
   when(() => clientState.currentUser).thenReturn(currentUser);
-  when(() => clientState.channels).thenReturn({});
+  when(() => clientState.channels).thenReturn(channels);
 
   return MaterialApp(
     theme: ThemeData(brightness: brightness),
