@@ -186,6 +186,8 @@ class _ScheduledMessageBody extends StatelessWidget {
 
     final effectiveTitleStyle = theme.titleStyle ?? defaults.titleStyle;
     final effectiveMessagePreviewStyle = theme.messagePreviewStyle ?? defaults.messagePreviewStyle;
+    final basePreviewTextTheme = defaults.messagePreviewTextTheme.merge(StreamMessagePreviewTextTheme.of(context));
+    final effectiveMessagePreviewTextTheme = basePreviewTextTheme.merge(theme.messagePreviewTextTheme);
 
     final streamChat = StreamChat.of(context);
     final channel = streamChat.client.state.channels[scheduledMessage.cid];
@@ -235,7 +237,10 @@ class _ScheduledMessageBody extends StatelessWidget {
                       style: effectiveMessagePreviewStyle,
                       maxLines: 1,
                       overflow: .ellipsis,
-                      child: _ScheduledMessagePreview(scheduledMessage: scheduledMessage),
+                      child: _ScheduledMessagePreview(
+                        scheduledMessage: scheduledMessage,
+                        messagePreviewTextTheme: effectiveMessagePreviewTextTheme,
+                      ),
                     ),
                   ],
                 ),
@@ -293,19 +298,18 @@ class _ScheduledMessageSendTime extends StatelessWidget {
 // that of a message quoting another with the quoted author's name.
 // Attachments show their icon and label.
 class _ScheduledMessagePreview extends StatelessWidget {
-  const _ScheduledMessagePreview({required this.scheduledMessage});
+  const _ScheduledMessagePreview({
+    required this.scheduledMessage,
+    required this.messagePreviewTextTheme,
+  });
 
   final ScheduledMessage scheduledMessage;
+  final StreamMessagePreviewTextThemeData messagePreviewTextTheme;
 
   @override
   Widget build(BuildContext context) {
     final translations = context.translations;
-    final theme = StreamScheduledMessageListItemTheme.of(context);
-    final defaults = _StreamScheduledMessageListItemThemeDefaults(context);
     final message = scheduledMessage.message;
-
-    final basePreviewTextTheme = defaults.messagePreviewTextTheme.merge(StreamMessagePreviewTextTheme.of(context));
-    final effectiveMessagePreviewTextTheme = basePreviewTextTheme.merge(theme.messagePreviewTextTheme);
 
     final prefix = switch (message) {
       Message(parentId: _?) => translations.scheduledThreadReplyPrefixText,
@@ -316,7 +320,7 @@ class _ScheduledMessagePreview extends StatelessWidget {
     };
 
     final preview = StreamMessagePreviewTextTheme(
-      data: effectiveMessagePreviewTextTheme,
+      data: messagePreviewTextTheme,
       child: StreamMessagePreviewText(message: message),
     );
 

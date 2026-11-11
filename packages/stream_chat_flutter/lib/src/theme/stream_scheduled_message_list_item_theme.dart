@@ -47,9 +47,7 @@ class StreamScheduledMessageListItemTheme extends InheritedTheme {
   /// ancestor take precedence over global values from [StreamChatTheme.of].
   static StreamScheduledMessageListItemThemeData of(BuildContext context) {
     final localTheme = context.dependOnInheritedWidgetOfExactType<StreamScheduledMessageListItemTheme>();
-    final globalTheme = StreamChatTheme.of(context).scheduledMessageListItemTheme;
-
-    return globalTheme.merge(localTheme?.data);
+    return StreamChatTheme.of(context).scheduledMessageListItemTheme.merge(localTheme?.data);
   }
 
   @override
@@ -58,9 +56,7 @@ class StreamScheduledMessageListItemTheme extends InheritedTheme {
   }
 
   @override
-  bool updateShouldNotify(StreamScheduledMessageListItemTheme oldWidget) {
-    return data != oldWidget.data;
-  }
+  bool updateShouldNotify(StreamScheduledMessageListItemTheme oldWidget) => data != oldWidget.data;
 }
 
 /// Theme data for customizing [StreamScheduledMessageListItem] widgets.
