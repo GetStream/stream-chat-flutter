@@ -69,7 +69,7 @@ class ScheduledMessagesPage extends StatelessWidget {
     }
 
     return RefreshIndicator.adaptive(
-      onRefresh: client.loadScheduledMessages,
+      onRefresh: () => _refresh(context),
       child: StreamScheduledMessageListView(
         channel: channel,
         parentId: parentId,
@@ -79,6 +79,21 @@ class ScheduledMessagesPage extends StatelessWidget {
         },
       ),
     );
+  }
+}
+
+// Reloads the scheduled messages, showing why when it fails.
+Future<void> _refresh(BuildContext context) async {
+  final client = StreamChat.of(context).client;
+  final messenger = StreamSnackbarMessenger.of(context);
+  final fallback = context.translations.genericErrorText;
+
+  try {
+    await client.loadScheduledMessages();
+  } catch (error, stackTrace) {
+    debugPrint('Could not load the scheduled messages: $error\n$stackTrace');
+    final description = describeScheduleError(error, fallback: fallback);
+    messenger.show(StreamSnackbar(message: Text(description), variant: .error));
   }
 }
 
@@ -92,7 +107,7 @@ Future<void> _openScheduledMessageActions(
   );
 
   if (action == null || !context.mounted) return;
-  return _onScheduledMessageAction(context, action).ignore();
+  return _onScheduledMessageAction(context, action);
 }
 
 Future<void> _onScheduledMessageAction(
@@ -117,7 +132,8 @@ Future<void> _run(BuildContext context, Future<String> Function() call) async {
   try {
     final done = await call();
     messenger.show(StreamSnackbar(message: Text(done), variant: .success));
-  } catch (error) {
+  } catch (error, stackTrace) {
+    debugPrint('Scheduled message action failed: $error\n$stackTrace');
     final description = describeScheduleError(error, fallback: fallback);
     messenger.show(StreamSnackbar(message: Text(description), variant: .error));
   }
@@ -230,7 +246,8 @@ Future<void> _maybeDelete(BuildContext context, ScheduledMessage scheduledMessag
   try {
     await client.deleteScheduledMessage(scheduledMessage);
     messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.deleted), variant: .success));
-  } catch (error) {
+  } catch (error, stackTrace) {
+    debugPrint('Could not delete the scheduled message: $error\n$stackTrace');
     final goneMessage = switch (error) {
       StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) =>
         ScheduledMessagesStrings.alreadySent,
@@ -312,9 +329,11 @@ Future<Message?> _resolveQuotedMessage(StreamChatClient client, ScheduledMessage
   try {
     final response = await client.getMessage(quotedMessageId);
     return response.message;
-  } catch (error) {
-    debugPrint('Could not load the quoted message $quotedMessageId: $error');
-    return null;
+  } on StreamChatNetworkError catch (error) {
+    // Only a quoted message that is gone is dropped; any other failure stops
+    // the edit, so a network error doesn't lose the quote.
+    if (error.statusCode == 404) return null;
+    rethrow;
   }
 }
 

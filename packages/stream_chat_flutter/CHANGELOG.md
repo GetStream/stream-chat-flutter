@@ -7,7 +7,7 @@
 
 🔄 Changed
 
-- A class that `implements Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` provides them.
+- A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
 
 ## 10.7.0
 
