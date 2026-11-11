@@ -20,7 +20,6 @@ class StreamChatMessageInput extends StatefulWidget {
     super.key,
     this.controller,
     required this.onSendPressed,
-    this.onSendLongPress,
     this.onAttachmentButtonPressed,
     this.isPickerOpen = false,
     this.focusNode,
@@ -45,10 +44,6 @@ class StreamChatMessageInput extends StatefulWidget {
 
   /// The callback for when the send button is pressed.
   final VoidCallback onSendPressed;
-
-  /// The callback for when the send button is long-pressed while it would
-  /// send a new message.
-  final VoidCallback? onSendLongPress;
 
   /// The callback for when the attachment button is pressed.
   final VoidCallback? onAttachmentButtonPressed;
@@ -254,7 +249,6 @@ class _StreamChatMessageInputContent extends StatelessWidget {
           isFloating: widget.isFloating,
           currentUserId: widget.currentUserId,
           onSendPressed: widget.onSendPressed,
-          onSendLongPress: widget.onSendLongPress,
           voiceRecordingCallback: _createVoiceRecordingCallback(context),
           onAttachmentButtonPressed: widget.onAttachmentButtonPressed,
           isPickerOpen: widget.isPickerOpen,

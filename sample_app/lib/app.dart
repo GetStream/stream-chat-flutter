@@ -17,9 +17,9 @@ import 'notification/notification_service.dart';
 import 'pages/splash_screen.dart';
 import 'routes/app_routes.dart';
 import 'routes/routes.dart';
-import 'scheduled_messages/screens/schedule_aware_message_composer.dart';
 import 'widgets/custom_message_actions.dart';
 import 'widgets/location/location_attachment.dart';
+import 'widgets/location/location_aware_message_composer.dart';
 import 'widgets/location/location_detail_dialog.dart';
 
 /// Root widget of the sample app: boots prefs + notifications, runs
@@ -222,7 +222,7 @@ class _StreamChatSampleAppState extends State<StreamChatSampleApp>
                                 componentBuilders: StreamComponentBuilders(
                                   extensions: streamChatComponentBuilders(
                                     messageItem: customMessageItemBuilder,
-                                    messageComposer: scheduleAwareMessageComposer,
+                                    messageComposer: locationAwareMessageComposer,
                                   ),
                                 ),
                                 themeData: config.toStreamChatThemeData(),

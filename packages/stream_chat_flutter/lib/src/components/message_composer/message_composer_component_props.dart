@@ -41,7 +41,6 @@ class MessageComposerComponentProps {
     required this.controller,
     this.isFloating = false,
     required this.onSendPressed,
-    this.onSendLongPress,
     this.voiceRecordingCallback,
     this.onAttachmentButtonPressed,
     this.isPickerOpen = false,
@@ -62,12 +61,6 @@ class MessageComposerComponentProps {
 
   /// The callback for when the send button is pressed.
   final VoidCallback onSendPressed;
-
-  /// The callback for when the send button is long-pressed.
-  ///
-  /// Only offered while the button would send a new message, not while it
-  /// saves an edit or runs a command.
-  final VoidCallback? onSendLongPress;
 
   /// The callback for when the microphone button is pressed.
   final VoiceRecordingCallback? voiceRecordingCallback;
@@ -117,7 +110,6 @@ class MessageComposerLeadingProps extends MessageComposerComponentProps {
     required super.controller,
     required super.isFloating,
     required super.onSendPressed,
-    required super.onSendLongPress,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
     required super.isPickerOpen,
@@ -134,7 +126,6 @@ class MessageComposerLeadingProps extends MessageComposerComponentProps {
       controller: props.controller,
       isFloating: props.isFloating,
       onSendPressed: props.onSendPressed,
-      onSendLongPress: props.onSendLongPress,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
       isPickerOpen: props.isPickerOpen,
@@ -153,7 +144,6 @@ class MessageComposerTrailingProps extends MessageComposerComponentProps {
     required super.controller,
     required super.isFloating,
     required super.onSendPressed,
-    required super.onSendLongPress,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
     required super.isPickerOpen,
@@ -170,7 +160,6 @@ class MessageComposerTrailingProps extends MessageComposerComponentProps {
       controller: props.controller,
       isFloating: props.isFloating,
       onSendPressed: props.onSendPressed,
-      onSendLongPress: props.onSendLongPress,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
       isPickerOpen: props.isPickerOpen,
@@ -189,7 +178,6 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
     required super.controller,
     required super.isFloating,
     required super.onSendPressed,
-    required super.onSendLongPress,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
     required super.isPickerOpen,
@@ -231,7 +219,6 @@ class MessageComposerInputProps extends MessageComposerComponentProps {
       controller: props.controller,
       isFloating: props.isFloating,
       onSendPressed: props.onSendPressed,
-      onSendLongPress: props.onSendLongPress,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
       isPickerOpen: props.isPickerOpen,
@@ -294,7 +281,6 @@ class MessageComposerInputCenterProps extends MessageComposerComponentProps {
     required super.controller,
     required super.isFloating,
     required super.onSendPressed,
-    required super.onSendLongPress,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
     required super.isPickerOpen,
@@ -323,7 +309,6 @@ class MessageComposerInputCenterProps extends MessageComposerComponentProps {
       controller: inputProps.controller,
       isFloating: inputProps.isFloating,
       onSendPressed: inputProps.onSendPressed,
-      onSendLongPress: inputProps.onSendLongPress,
       voiceRecordingCallback: inputProps.voiceRecordingCallback,
       onAttachmentButtonPressed: inputProps.onAttachmentButtonPressed,
       isPickerOpen: inputProps.isPickerOpen,
@@ -386,7 +371,6 @@ class MessageComposerInputLeadingProps extends MessageComposerComponentProps {
     required super.controller,
     required super.isFloating,
     required super.onSendPressed,
-    required super.onSendLongPress,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
     required super.isPickerOpen,
@@ -403,7 +387,6 @@ class MessageComposerInputLeadingProps extends MessageComposerComponentProps {
       controller: props.controller,
       isFloating: props.isFloating,
       onSendPressed: props.onSendPressed,
-      onSendLongPress: props.onSendLongPress,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
       isPickerOpen: props.isPickerOpen,
@@ -422,7 +405,6 @@ class MessageComposerInputHeaderProps extends MessageComposerComponentProps {
     required super.controller,
     required super.isFloating,
     required super.onSendPressed,
-    required super.onSendLongPress,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
     required super.isPickerOpen,
@@ -439,7 +421,6 @@ class MessageComposerInputHeaderProps extends MessageComposerComponentProps {
       controller: props.controller,
       isFloating: props.isFloating,
       onSendPressed: props.onSendPressed,
-      onSendLongPress: props.onSendLongPress,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
       isPickerOpen: props.isPickerOpen,
@@ -458,7 +439,6 @@ class MessageComposerInputTrailingProps extends MessageComposerComponentProps {
     required super.controller,
     required super.isFloating,
     required super.onSendPressed,
-    required super.onSendLongPress,
     required super.voiceRecordingCallback,
     required super.onAttachmentButtonPressed,
     required super.isPickerOpen,
@@ -475,7 +455,6 @@ class MessageComposerInputTrailingProps extends MessageComposerComponentProps {
       controller: props.controller,
       isFloating: props.isFloating,
       onSendPressed: props.onSendPressed,
-      onSendLongPress: props.onSendLongPress,
       voiceRecordingCallback: props.voiceRecordingCallback,
       onAttachmentButtonPressed: props.onAttachmentButtonPressed,
       isPickerOpen: props.isPickerOpen,

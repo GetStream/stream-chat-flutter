@@ -70,8 +70,6 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
         final voiceRecordingCallback = props.voiceRecordingCallback;
         if (buttonState == .send || buttonState == .edit || buttonState == .command || voiceRecordingCallback == null) {
           final a11y = context.translations.accessibility;
-          final canSendLongPress = canSend && buttonState == .send;
-
           return StreamButton.icon(
             key: _sendKey,
             icon: switch (buttonState) {
@@ -85,7 +83,6 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
               _ => a11y.sendMessageTooltip,
             },
             onPressed: canSend ? props.onSendPressed : null,
-            onLongPress: canSendLongPress ? props.onSendLongPress : null,
           );
         }
 
