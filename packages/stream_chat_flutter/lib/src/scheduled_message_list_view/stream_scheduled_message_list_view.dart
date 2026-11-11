@@ -1,6 +1,5 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
 
 import '../../stream_chat_flutter.dart';
 import '../utils/network_error_text.dart';
@@ -70,7 +69,7 @@ class StreamScheduledMessageListView extends StatefulWidget {
     this.addAutomaticKeepAlives = true,
     this.addRepaintBoundaries = true,
     this.addSemanticIndexes = true,
-    this.scrollCacheExtent,
+    this.cacheExtent,
     this.dragStartBehavior = DragStartBehavior.start,
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
@@ -170,8 +169,8 @@ class StreamScheduledMessageListView extends StatefulWidget {
   /// {@macro flutter.widgets.scroll_view.physics}
   final ScrollPhysics? physics;
 
-  /// {@macro flutter.rendering.RenderViewportBase.scrollCacheExtent}
-  final ScrollCacheExtent? scrollCacheExtent;
+  /// {@macro flutter.rendering.RenderViewportBase.cacheExtent}
+  final double? cacheExtent;
 
   /// {@macro flutter.widgets.scrollable.dragStartBehavior}
   final DragStartBehavior dragStartBehavior;
@@ -273,7 +272,8 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
           keyboardDismissBehavior: widget.keyboardDismissBehavior,
           restorationId: widget.restorationId,
           dragStartBehavior: widget.dragStartBehavior,
-          scrollCacheExtent: widget.scrollCacheExtent,
+          // ignore: deprecated_member_use
+          cacheExtent: widget.cacheExtent,
           clipBehavior: widget.clipBehavior,
           itemCount: scheduledMessages.length,
           separatorBuilder: (context, index) {
