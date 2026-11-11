@@ -11,84 +11,102 @@ import '../../stream_chat_flutter.dart';
 class StreamScheduledMessageActionsBuilder {
   StreamScheduledMessageActionsBuilder._();
 
-  /// Returns the action rows [scheduledMessage] allows.
+  /// Returns the actions [scheduledMessage] allows.
   ///
   /// A scheduled message can be edited, rescheduled, sent now or deleted. A
   /// failed one can be edited and scheduled again, or deleted; when its
   /// channel was deleted, its text can only be copied before it is deleted.
-  /// Tapping a row closes the route of [context] with its
-  /// [ScheduledMessageAction].
-  static List<Widget> buildActions({
+  /// Any other message has no actions.
+  static List<StreamScheduledMessageActionTile> buildActions({
     required BuildContext context,
     required ScheduledMessage scheduledMessage,
   }) {
+    final isScheduled = scheduledMessage.status == .scheduled;
+    final isFailed = scheduledMessage.status == .failed;
+
+    // Only a scheduled or a failed message has actions.
+    if (!isScheduled && !isFailed) return [];
+
     final icons = context.streamIcons;
     final translations = context.translations;
 
-    final isScheduled = scheduledMessage.status == .scheduled;
-    final isFailed = scheduledMessage.status == .failed;
+    // A message whose channel was deleted can't be scheduled again.
     final isChannelDeleted = scheduledMessage.failureReason == .channelDeleted;
     final hasText = scheduledMessage.message.text?.isNotEmpty ?? false;
 
-    final canEditAndReschedule = isFailed && !isChannelDeleted;
-    final canCopyText = hasText && !isScheduled && !canEditAndReschedule;
-
-    void emit(ScheduledMessageAction action) => Navigator.of(context).pop(action);
-
-    return <Widget>[
+    return [
       if (isScheduled) ...[
-        _ScheduledMessageActionRow(
-          icon: Icon(icons.edit),
+        StreamScheduledMessageActionTile(
+          value: EditScheduledMessage(scheduledMessage: scheduledMessage),
           label: Text(translations.editMessageLabel),
-          onTap: () => emit(EditScheduledMessage(scheduledMessage: scheduledMessage)),
+          leading: Icon(icons.edit),
         ),
-        _ScheduledMessageActionRow(
-          icon: Icon(icons.clock),
+        StreamScheduledMessageActionTile(
+          value: RescheduleMessage(scheduledMessage: scheduledMessage),
           label: Text(translations.rescheduleLabel),
-          onTap: () => emit(RescheduleMessage(scheduledMessage: scheduledMessage)),
+          leading: Icon(icons.clock),
         ),
-        _ScheduledMessageActionRow(
-          icon: Icon(icons.send),
+        StreamScheduledMessageActionTile(
+          value: SendScheduledMessageNow(scheduledMessage: scheduledMessage),
           label: Text(translations.sendNowLabel),
-          onTap: () => emit(SendScheduledMessageNow(scheduledMessage: scheduledMessage)),
+          leading: Icon(icons.send),
         ),
       ],
-      if (canEditAndReschedule)
-        _ScheduledMessageActionRow(
-          icon: Icon(icons.edit),
+      if (isFailed && !isChannelDeleted)
+        StreamScheduledMessageActionTile(
+          value: EditAndRescheduleMessage(scheduledMessage: scheduledMessage),
           label: Text(translations.editAndRescheduleLabel),
-          onTap: () => emit(EditAndRescheduleMessage(scheduledMessage: scheduledMessage)),
+          leading: Icon(icons.edit),
         ),
-      if (canCopyText)
-        _ScheduledMessageActionRow(
-          icon: Icon(icons.copy),
+      if (isFailed && isChannelDeleted && hasText)
+        StreamScheduledMessageActionTile(
+          value: CopyScheduledMessageText(scheduledMessage: scheduledMessage),
           label: Text(translations.copyMessageLabel),
-          onTap: () => emit(CopyScheduledMessageText(scheduledMessage: scheduledMessage)),
+          leading: Icon(icons.copy),
         ),
-      _ScheduledMessageActionRow(
-        icon: Icon(icons.delete),
+      StreamScheduledMessageActionTile.destructive(
+        value: DeleteScheduledMessage(scheduledMessage: scheduledMessage),
         label: Text(translations.deleteLabel),
-        destructive: true,
-        onTap: () => emit(DeleteScheduledMessage(scheduledMessage: scheduledMessage)),
+        leading: Icon(icons.delete),
       ),
     ];
   }
 }
 
-// A tappable action row of the scheduled message actions sheet, painted with
-// the error color when destructive.
-class _ScheduledMessageActionRow extends StatelessWidget {
-  const _ScheduledMessageActionRow({
-    required this.icon,
+/// A row of the scheduled message actions sheet that closes the sheet with
+/// its [value] when tapped.
+///
+/// See also:
+///
+///  * [StreamScheduledMessageActionsBuilder], which builds these rows.
+class StreamScheduledMessageActionTile extends StatelessWidget {
+  /// Creates a scheduled message action row.
+  const StreamScheduledMessageActionTile({
+    super.key,
+    required this.value,
     required this.label,
-    this.onTap,
-    this.destructive = false,
-  });
+    this.leading,
+  }) : isDestructive = false;
 
-  final Widget icon;
+  /// Creates a scheduled message action row painted with the error color.
+  const StreamScheduledMessageActionTile.destructive({
+    super.key,
+    required this.value,
+    required this.label,
+    this.leading,
+  }) : isDestructive = true;
+
+  /// The action the sheet resolves to when this row is tapped.
+  final ScheduledMessageAction value;
+
+  /// The label of the action.
   final Widget label;
-  final VoidCallback? onTap;
-  final bool destructive;
+
+  /// The icon before the [label].
+  final Widget? leading;
+
+  /// Whether the action destroys something, such as deleting the message.
+  final bool isDestructive;
 
   @override
   Widget build(BuildContext context) {
@@ -97,12 +115,16 @@ class _ScheduledMessageActionRow extends StatelessWidget {
 
     return StreamListTileTheme(
       data: StreamListTileThemeData(
-        iconColor: destructive ? .all(colorScheme.accentError) : null,
-        titleColor: destructive ? .all(colorScheme.accentError) : null,
+        iconColor: isDestructive ? .all(colorScheme.accentError) : null,
+        titleColor: isDestructive ? .all(colorScheme.accentError) : null,
         minTileHeight: 48,
         contentPadding: .symmetric(horizontal: spacing.sm),
       ),
-      child: StreamListTile(leading: icon, title: label, onTap: onTap),
+      child: StreamListTile(
+        leading: leading,
+        title: label,
+        onTap: () => Navigator.of(context).pop(value),
+      ),
     );
   }
 }

@@ -48,19 +48,12 @@ void main() {
     },
   );
 
-  testWidgets('showStreamScheduledMessageActionsSheet offers copy and delete on a message in an unknown status', (
-    tester,
-  ) async {
-    await _showActions(tester, _scheduledMessage(status: const ScheduledMessageStatus('paused')));
-
-    expect(_rowLabels(tester), ['Copy Message', 'Delete']);
-  });
-
   for (final status in [
     ScheduledMessageStatus.preparingToSchedule,
     ScheduledMessageStatus.sending,
     ScheduledMessageStatus.sent,
     ScheduledMessageStatus.canceled,
+    const ScheduledMessageStatus('paused'),
   ]) {
     testWidgets(
       'showStreamScheduledMessageActionsSheet shows no sheet and resolves null for a message that is $status',
@@ -69,7 +62,7 @@ void main() {
       ) async {
         final results = await _showActions(tester, _scheduledMessage(status: status));
 
-        expect(find.byType(StreamListTile), findsNothing);
+        expect(find.byType(_Action), findsNothing);
         expect(results, [null]);
       },
     );
@@ -78,7 +71,7 @@ void main() {
   testWidgets('showStreamScheduledMessageActionsSheet paints the delete row with the error color', (tester) async {
     await _showActions(tester, _scheduledMessage());
 
-    final colorScheme = tester.element(find.byType(StreamListTile).first).streamColorScheme;
+    final colorScheme = tester.element(find.byType(_Action).first).streamColorScheme;
     expect(_labelColor(tester, 'Delete'), colorScheme.accentError);
     expect(_labelColor(tester, 'Edit Message'), isNot(colorScheme.accentError));
   });
@@ -89,28 +82,65 @@ void main() {
       _scheduledMessage(),
       actionsBuilder: (context, defaultActions) => [
         ...defaultActions,
-        StreamListTile(title: const Text('Pin'), onTap: () => Navigator.of(context).pop()),
+        const ListTile(title: Text('Pin')),
       ],
     );
 
-    expect(_rowLabels(tester), ['Edit Message', 'Reschedule', 'Send Now', 'Delete', 'Pin']);
+    expect(_rowLabels(tester), ['Edit Message', 'Reschedule', 'Send Now', 'Delete']);
+    expect(find.text('Pin'), findsOneWidget);
   });
 
-  testWidgets('showStreamScheduledMessageActionsSheet resolves null when a row added by actionsBuilder is tapped', (
+  testWidgets('showStreamScheduledMessageActionsSheet lets actionsBuilder remove a default action by its value', (
     tester,
   ) async {
-    final results = await _showActions(
+    await _showActions(
       tester,
       _scheduledMessage(),
       actionsBuilder: (context, defaultActions) => [
-        StreamListTile(title: const Text('Pin'), onTap: () => Navigator.of(context).pop()),
+        ...defaultActions.where((it) => it.value is! SendScheduledMessageNow),
       ],
     );
 
-    await tester.tap(find.text('Pin'));
-    await tester.pumpAndSettle();
+    expect(_rowLabels(tester), ['Edit Message', 'Reschedule', 'Delete']);
+  });
 
-    expect(results, [null]);
+  testWidgets(
+    'showStreamScheduledMessageActionsSheet resolves null when an added row closes the sheet without an action',
+    (
+      tester,
+    ) async {
+      final results = await _showActions(
+        tester,
+        _scheduledMessage(),
+        actionsBuilder: (context, defaultActions) => [
+          ListTile(title: const Text('Pin'), onTap: () => Navigator.of(context).pop()),
+        ],
+      );
+
+      await tester.tap(find.text('Pin'));
+      await tester.pumpAndSettle();
+
+      expect(results, [null]);
+    },
+  );
+
+  testWidgets('StreamScheduledMessageActionsBuilder offers no actions on a message being sent', (tester) async {
+    late List<_Action> actions;
+    await tester.pumpWidget(
+      _wrapWithMaterialApp(
+        Builder(
+          builder: (context) {
+            actions = StreamScheduledMessageActionsBuilder.buildActions(
+              context: context,
+              scheduledMessage: _scheduledMessage(status: .sending),
+            );
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(actions, isEmpty);
   });
 
   testWidgets('showStreamScheduledMessageActionsSheet resolves null when the sheet is dismissed', (tester) async {
@@ -119,7 +149,7 @@ void main() {
     await tester.tapAt(const Offset(10, 10));
     await tester.pumpAndSettle();
 
-    expect(find.byType(StreamListTile), findsNothing);
+    expect(find.byType(_Action), findsNothing);
     expect(results, [null]);
   });
 
@@ -223,9 +253,11 @@ Future<List<ScheduledMessageAction?>> _showActions(
   return results;
 }
 
+typedef _Action = StreamScheduledMessageActionTile;
+
 List<String?> _rowLabels(WidgetTester tester) {
-  final tiles = tester.widgetList<StreamListTile>(find.byType(StreamListTile));
-  return [for (final tile in tiles) (tile.props.title! as Text).data];
+  final actions = tester.widgetList<_Action>(find.byType(_Action));
+  return [for (final action in actions) (action.label as Text).data];
 }
 
 Color? _labelColor(WidgetTester tester, String label) {

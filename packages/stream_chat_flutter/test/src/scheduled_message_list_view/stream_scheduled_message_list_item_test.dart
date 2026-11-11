@@ -198,7 +198,7 @@ void main() {
     expect(_itemBackground(tester), Colors.red);
   });
 
-  testWidgets("StreamScheduledMessageListItem names a loaded direct message by its other member", (tester) async {
+  testWidgets('StreamScheduledMessageListItem names a loaded direct message by its other member', (tester) async {
     await tester.pumpWidget(
       _wrapWithMaterialApp(
         StreamScheduledMessageListItem(
@@ -211,7 +211,7 @@ void main() {
     expect(find.text('Maya Ross'), findsOneWidget);
   });
 
-  testWidgets("StreamScheduledMessageListItem names the author of a quoted message it finds in the channel", (
+  testWidgets('StreamScheduledMessageListItem names the author of a quoted message it finds in the channel', (
     tester,
   ) async {
     final quoted = Message(

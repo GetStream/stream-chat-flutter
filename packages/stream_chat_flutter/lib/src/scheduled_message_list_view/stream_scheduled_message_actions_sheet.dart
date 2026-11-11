@@ -4,62 +4,49 @@ import '../../stream_chat_flutter.dart';
 
 /// Shows the actions on [scheduledMessage] in a sheet.
 ///
-/// The rows are the [StreamScheduledMessageActionsBuilder.buildActions] of
-/// [scheduledMessage]. A message being scheduled or sent, or already sent or
-/// canceled, has no actions, so no sheet is shown.
+/// The actions are the [StreamScheduledMessageActionsBuilder.buildActions] of
+/// [scheduledMessage]. A message without actions, such as one being sent,
+/// shows no sheet.
 ///
-/// [actionsBuilder] adds, removes or reorders the rows.
+/// [actionsBuilder] adds, removes or reorders the actions.
 ///
-/// Returns the chosen action, or null when the sheet is dismissed or a row
-/// added by [actionsBuilder] is tapped. Taking the action is up to the
-/// caller.
+/// Returns the chosen action, or null when the sheet is dismissed. Taking the
+/// action is up to the caller.
 Future<ScheduledMessageAction?> showStreamScheduledMessageActionsSheet({
   required BuildContext context,
   required ScheduledMessage scheduledMessage,
   ScheduledMessageActionsBuilder? actionsBuilder,
 }) async {
-  final hasActions = switch (scheduledMessage.status) {
-    .preparingToSchedule || .sending || .sent || .canceled => false,
-    _ => true,
-  };
-  if (!hasActions) return null;
+  final defaultActions = StreamScheduledMessageActionsBuilder.buildActions(
+    context: context,
+    scheduledMessage: scheduledMessage,
+  );
+
+  final actions = actionsBuilder?.call(context, defaultActions) ?? defaultActions;
+  if (actions.isEmpty) return null;
 
   return showStreamSheet<ScheduledMessageAction>(
     context: context,
     isDismissible: true,
-    builder: (_, _) => _ScheduledMessageActionsSheet(
-      scheduledMessage: scheduledMessage,
-      actionsBuilder: actionsBuilder,
-    ),
+    builder: (_, _) => _ScheduledMessageActionsSheet(children: actions),
   );
 }
 
 class _ScheduledMessageActionsSheet extends StatelessWidget {
-  const _ScheduledMessageActionsSheet({
-    required this.scheduledMessage,
-    this.actionsBuilder,
-  });
+  const _ScheduledMessageActionsSheet({required this.children});
 
-  final ScheduledMessage scheduledMessage;
-  final ScheduledMessageActionsBuilder? actionsBuilder;
+  final List<Widget> children;
 
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
-
-    final defaultActions = StreamScheduledMessageActionsBuilder.buildActions(
-      context: context,
-      scheduledMessage: scheduledMessage,
-    );
-
-    final rows = actionsBuilder?.call(context, defaultActions) ?? defaultActions;
 
     return SafeArea(
       child: IconTheme.merge(
         data: const IconThemeData(size: 20),
         child: Padding(
           padding: .only(left: spacing.xxs, top: spacing.xl, right: spacing.xxs),
-          child: Column(mainAxisSize: .min, children: rows),
+          child: Column(mainAxisSize: .min, children: children),
         ),
       ),
     );

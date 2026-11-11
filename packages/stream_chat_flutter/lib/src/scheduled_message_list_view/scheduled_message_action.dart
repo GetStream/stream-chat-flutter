@@ -1,15 +1,19 @@
 import 'package:flutter/widgets.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
-/// Signature for a builder that customizes the rows of the scheduled message
-/// actions sheet.
+import 'scheduled_message_actions_builder.dart';
+
+/// Signature for a builder that customizes the actions of the scheduled
+/// message actions sheet.
 ///
-/// [defaultActions] are the rows offered for the scheduled message. The
-/// returned list replaces them, so rows can be added, removed, or reordered.
-///
-/// Any widget can be mixed in alongside the default rows; an added row handles
-/// its own tap.
-typedef ScheduledMessageActionsBuilder = List<Widget> Function(BuildContext context, List<Widget> defaultActions);
+/// [defaultActions] are the actions offered for the scheduled message. The
+/// returned widgets replace them, so actions can be added, removed, or
+/// reordered.
+typedef ScheduledMessageActionsBuilder =
+    List<Widget> Function(
+      BuildContext context,
+      List<StreamScheduledMessageActionTile> defaultActions,
+    );
 
 /// An action on a scheduled message, chosen from the scheduled message
 /// actions sheet.
