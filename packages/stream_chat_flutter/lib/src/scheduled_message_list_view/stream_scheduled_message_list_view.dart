@@ -51,7 +51,6 @@ class StreamScheduledMessageListView extends StatefulWidget {
   const StreamScheduledMessageListView({
     super.key,
     this.channel,
-    this.parentId,
     this.itemBuilder,
     this.separatorBuilder = defaultScheduledMessageListViewSeparatorBuilder,
     this.emptyBuilder,
@@ -74,17 +73,47 @@ class StreamScheduledMessageListView extends StatefulWidget {
     this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
     this.restorationId,
     this.clipBehavior = Clip.hardEdge,
-  }) : assert(parentId == null || channel != null, 'parentId needs the channel of its thread.');
+  }) : parentId = null;
+
+  /// Creates a list of the scheduled replies in the thread of the message
+  /// [parentId] in [channel].
+  const StreamScheduledMessageListView.thread({
+    super.key,
+    required Channel this.channel,
+    required String this.parentId,
+    this.itemBuilder,
+    this.separatorBuilder = defaultScheduledMessageListViewSeparatorBuilder,
+    this.emptyBuilder,
+    this.loadingBuilder,
+    this.errorBuilder,
+    this.onScheduledMessageTap,
+    this.onScheduledMessageLongPress,
+    this.scrollDirection = Axis.vertical,
+    this.reverse = false,
+    this.scrollController,
+    this.primary,
+    this.physics,
+    this.shrinkWrap = false,
+    this.padding,
+    this.addAutomaticKeepAlives = true,
+    this.addRepaintBoundaries = true,
+    this.addSemanticIndexes = true,
+    this.scrollCacheExtent,
+    this.dragStartBehavior = DragStartBehavior.start,
+    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
+    this.restorationId,
+    this.clipBehavior = Clip.hardEdge,
+  });
 
   /// The channel whose scheduled messages are listed.
   ///
   /// When null, every channel's are. Replies in its threads are listed with
-  /// [parentId].
+  /// [StreamScheduledMessageListView.thread].
   final Channel? channel;
 
   /// The ID of the message whose thread's scheduled replies are listed.
   ///
-  /// Needs [channel].
+  /// Set by [StreamScheduledMessageListView.thread].
   final String? parentId;
 
   /// A builder that is called to build items in the [ListView].
@@ -213,8 +242,18 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
     final client = StreamChat.of(context).client;
     if (client.state.scheduledMessageListState.hasLoadedAll) return null;
 
-    // A failure only shows when there's nothing to list, so it's ignored.
-    return client.loadScheduledMessages()..ignore();
+    // A failure only shows when there's nothing to list, so it's also logged.
+    return _load(client)..ignore();
+  }
+
+  // The list stays not fully loaded when this fails, so the next load tries again.
+  Future<void> _load(StreamChatClient client) async {
+    try {
+      await client.loadScheduledMessages();
+    } catch (error, stackTrace) {
+      client.logger.warning('Could not load the scheduled messages', error, stackTrace);
+      rethrow;
+    }
   }
 
   void _retry() {

@@ -20,12 +20,38 @@ void main() {
   testWidgets('showStreamScheduledMessageActionsSheet offers edit and reschedule, and delete, on a failed message', (
     tester,
   ) async {
-    final failed = _scheduledMessage(status: .failed, failureReason: .requestFailed);
+    final failed = _scheduledMessage(status: .failed, failureReason: .internalError);
 
     await _showActions(tester, failed);
 
     expect(_rowLabels(tester), ['Edit & Reschedule', 'Delete']);
   });
+
+  testWidgets('showStreamScheduledMessageActionsSheet also offers retry on a message whose request failed', (
+    tester,
+  ) async {
+    final failed = _scheduledMessage(status: .failed, failureReason: .requestFailed);
+
+    await _showActions(tester, failed);
+
+    expect(_rowLabels(tester), ['Retry', 'Edit & Reschedule', 'Delete']);
+  });
+
+  testWidgets(
+    'showStreamScheduledMessageActionsSheet resolves RetryScheduledMessage carrying the message when tapped',
+    (
+      tester,
+    ) async {
+      final failed = _scheduledMessage(status: .failed, failureReason: .requestFailed);
+      final results = await _showActions(tester, failed);
+
+      await tester.tap(find.text('Retry'));
+      await tester.pumpAndSettle();
+
+      expect(results.single, isA<RetryScheduledMessage>());
+      expect(results.single?.scheduledMessage, failed);
+    },
+  );
 
   testWidgets('showStreamScheduledMessageActionsSheet offers copy and delete on a message whose channel was deleted', (
     tester,

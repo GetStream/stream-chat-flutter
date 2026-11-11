@@ -70,14 +70,19 @@ class ScheduledMessagesPage extends StatelessWidget {
 
     return RefreshIndicator.adaptive(
       onRefresh: () => _refresh(context),
-      child: StreamScheduledMessageListView(
-        channel: channel,
-        parentId: parentId,
-        physics: const AlwaysScrollableScrollPhysics(),
-        onScheduledMessageTap: (scheduledMessage) {
-          _openScheduledMessageActions(context, scheduledMessage);
-        },
-      ),
+      child: switch ((channel, parentId)) {
+        (final channel?, final parentId?) => StreamScheduledMessageListView.thread(
+          channel: channel,
+          parentId: parentId,
+          physics: const AlwaysScrollableScrollPhysics(),
+          onScheduledMessageTap: (it) => _openScheduledMessageActions(context, it),
+        ),
+        _ => StreamScheduledMessageListView(
+          channel: channel,
+          physics: const AlwaysScrollableScrollPhysics(),
+          onScheduledMessageTap: (it) => _openScheduledMessageActions(context, it),
+        ),
+      },
     );
   }
 }
@@ -116,6 +121,7 @@ Future<void> _onScheduledMessageAction(
 ) async {
   return switch (action) {
     EditScheduledMessage(:final scheduledMessage) => _editScheduledMessage(context, scheduledMessage),
+    RetryScheduledMessage(:final scheduledMessage) => _retry(context, scheduledMessage),
     EditAndRescheduleMessage(:final scheduledMessage) => _editAndReschedule(context, scheduledMessage),
     RescheduleMessage(:final scheduledMessage) => _reschedule(context, scheduledMessage),
     SendScheduledMessageNow(:final scheduledMessage) => _sendNow(context, scheduledMessage),
@@ -209,6 +215,15 @@ Future<void> _reschedule(BuildContext context, ScheduledMessage scheduledMessage
 
   return _run(context, () async {
     await client.rescheduleMessage(scheduledMessage, scheduledAt: time);
+    return ScheduledMessagesStrings.scheduled;
+  });
+}
+
+Future<void> _retry(BuildContext context, ScheduledMessage scheduledMessage) {
+  final client = StreamChat.of(context).client;
+
+  return _run(context, () async {
+    await client.retryScheduledMessage(scheduledMessage);
     return ScheduledMessagesStrings.scheduled;
   });
 }

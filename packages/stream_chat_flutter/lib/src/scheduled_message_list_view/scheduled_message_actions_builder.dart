@@ -14,8 +14,9 @@ class StreamScheduledMessageActionsBuilder {
   /// Returns the actions [scheduledMessage] allows.
   ///
   /// A scheduled message can be edited, rescheduled, sent now or deleted. A
-  /// failed one can be edited and scheduled again, or deleted; when its
-  /// channel was deleted, its text can only be copied before it is deleted.
+  /// failed one can be edited and scheduled again, or deleted, and retried
+  /// when its request failed; when its channel was deleted, its text can only
+  /// be copied before it is deleted.
   /// Any other message has no actions.
   static List<StreamScheduledMessageActionTile> buildActions({
     required BuildContext context,
@@ -32,6 +33,7 @@ class StreamScheduledMessageActionsBuilder {
 
     // A message whose channel was deleted can't be scheduled again.
     final isChannelDeleted = scheduledMessage.failureReason == .channelDeleted;
+    final isRetriable = scheduledMessage.failureReason?.isRetriable ?? false;
     final hasText = scheduledMessage.message.text?.isNotEmpty ?? false;
 
     return [
@@ -52,6 +54,12 @@ class StreamScheduledMessageActionsBuilder {
           leading: Icon(icons.send),
         ),
       ],
+      if (isFailed && isRetriable)
+        StreamScheduledMessageActionTile(
+          value: RetryScheduledMessage(scheduledMessage: scheduledMessage),
+          label: Text(translations.retryLabel),
+          leading: Icon(icons.retry),
+        ),
       if (isFailed && !isChannelDeleted)
         StreamScheduledMessageActionTile(
           value: EditAndRescheduleMessage(scheduledMessage: scheduledMessage),

@@ -43,6 +43,15 @@ final class SendScheduledMessageNow extends ScheduledMessageAction {
   const SendScheduledMessageNow({required super.scheduledMessage});
 }
 
+/// Action to schedule a failed scheduled message again, as it is.
+///
+/// Offered when its request to be scheduled failed, so it keeps its ID and
+/// can't be scheduled twice.
+final class RetryScheduledMessage extends ScheduledMessageAction {
+  /// Creates a retry scheduled message action.
+  const RetryScheduledMessage({required super.scheduledMessage});
+}
+
 /// Action to schedule the content of a failed scheduled message again, with
 /// its text edited.
 ///

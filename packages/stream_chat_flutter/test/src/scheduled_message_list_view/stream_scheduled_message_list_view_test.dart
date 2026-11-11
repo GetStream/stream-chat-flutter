@@ -59,19 +59,12 @@ void main() {
     await tester.pumpWidget(
       _wrapWithMaterialApp(
         client: client,
-        child: StreamScheduledMessageListView(channel: channel, parentId: 'parent'),
+        child: StreamScheduledMessageListView.thread(channel: channel, parentId: 'parent'),
       ),
     );
 
     expect(find.byType(StreamScheduledMessageListItem), findsOneWidget);
     expect(find.textContaining('In the thread', findRichText: true), findsOneWidget);
-  });
-
-  test('StreamScheduledMessageListView asserts that a thread has a channel', () {
-    expect(
-      () => StreamScheduledMessageListView(parentId: 'parent'),
-      throwsA(isA<AssertionError>()),
-    );
   });
 
   testWidgets('StreamScheduledMessageListView follows the scheduled messages as they change', (tester) async {
@@ -331,7 +324,7 @@ void main() {
         child: StatefulBuilder(
           builder: (context, setState) {
             setParentState = setState;
-            return StreamScheduledMessageListView(channel: channel, parentId: parentId);
+            return StreamScheduledMessageListView.thread(channel: channel, parentId: parentId);
           },
         ),
       ),
@@ -385,6 +378,7 @@ void _stubClient(
     scheduledMessages: scheduledMessages,
     hasLoadedAll: hasLoadedAll,
   );
+  when(() => client.logger).thenReturn(Logger.detached('test'));
   when(() => clientState.scheduledMessageListState).thenReturn(state);
   when(() => clientState.scheduledMessages).thenReturn(scheduledMessages);
   when(() => clientState.scheduledMessagesStream).thenAnswer((_) => messages.stream);
