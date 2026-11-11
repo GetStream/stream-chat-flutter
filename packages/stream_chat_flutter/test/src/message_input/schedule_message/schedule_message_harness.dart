@@ -6,12 +6,6 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../../mocks.dart';
 
-/// The error code of a user holding their limit of scheduled messages.
-const scheduledLimitUserCode = 118;
-
-/// The error code of a channel holding its limit of scheduled messages.
-const scheduledLimitChannelCode = 117;
-
 /// A Wednesday morning in local time.
 final wednesday = DateTime(2026, 10, 21, 10);
 
@@ -120,18 +114,15 @@ Future<AsyncCallback?> tapOpenButton(WidgetTester tester) async {
 /// added to once the sheet resolves.
 Future<List<DateTime?>> showMessageSheet(
   WidgetTester tester,
-  MockChannel channel, {
-  Future<void> Function(DateTime scheduledAt)? onSchedule,
-  void Function(Object error)? onError,
-}) async {
+  MockChannel channel,
+) async {
   final results = <DateTime?>[];
   final button = openButton(
     (context) => showStreamScheduleMessageSheet(
       context: context,
       channel: channel,
       message: messageToSchedule(),
-      onSchedule: onSchedule,
-    ).then(results.add, onError: (Object error) => onError?.call(error)),
+    ).then(results.add),
   );
 
   await tester.pumpWidget(wrapWithMaterialApp(button, channel: channel));
@@ -146,7 +137,6 @@ Future<List<DateTime?>> showTimeSheet(
   MockChannel channel, {
   DateTime? initialScheduledAt,
   Widget? title,
-  Future<void> Function(DateTime scheduledAt)? onSchedule,
 }) async {
   final results = <DateTime?>[];
   final button = openButton(
@@ -156,7 +146,6 @@ Future<List<DateTime?>> showTimeSheet(
       message: messageToSchedule(),
       initialScheduledAt: initialScheduledAt,
       title: title,
-      onSchedule: onSchedule,
     ).then(results.add),
   );
 

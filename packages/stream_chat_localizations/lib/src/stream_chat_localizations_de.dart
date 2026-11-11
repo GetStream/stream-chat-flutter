@@ -1010,10 +1010,6 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Limit erreicht (max. $limit)';
 
   @override
-  String scheduleUserLimitReachedError({required int limit}) =>
-      'Du hast dein Limit von $limit geplanten Nachrichten erreicht.';
-
-  @override
   String get scheduleMessageError => 'Nachricht konnte nicht geplant werden. Versuche es erneut';
 
   @override

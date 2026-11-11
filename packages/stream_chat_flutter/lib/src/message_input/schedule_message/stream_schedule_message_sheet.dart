@@ -10,38 +10,19 @@ import 'schedule_message_bounds.dart';
 /// channel doesn't allow isn't offered, and none can be picked once the
 /// channel holds its limit. Returns the chosen time, or null when the sheet is
 /// dismissed.
-///
-/// [onSchedule], when given, schedules the chosen time before this returns. A
-/// failure for a custom time keeps that sheet open and shows the error; a
-/// failure for a preset completes the returned future with it.
 Future<DateTime?> showStreamScheduleMessageSheet({
   required BuildContext context,
   required Channel channel,
   required Message message,
-  Future<void> Function(DateTime scheduledAt)? onSchedule,
-}) async {
-  DateTime? scheduledCustomAt;
-  Future<void> scheduleCustomTime(DateTime scheduledAt) async {
-    await onSchedule!(scheduledAt);
-    scheduledCustomAt = scheduledAt;
-  }
-
-  final scheduledAt = await showStreamSheet<DateTime>(
+}) {
+  return showStreamSheet<DateTime>(
     context: context,
     isDismissible: true,
     builder: (_, _) => _ScheduleMessageSheet(
       channel: channel,
       message: message,
-      onSchedule: onSchedule == null ? null : scheduleCustomTime,
     ),
   );
-  // A custom time is scheduled by its sheet, even when that sheet's result
-  // doesn't make it back here.
-  if (scheduledCustomAt case final customAt?) return customAt;
-  if (scheduledAt == null) return null;
-
-  await onSchedule?.call(scheduledAt);
-  return scheduledAt;
 }
 
 // A sheet of the times a message can be scheduled for. A preset closes it with
@@ -51,15 +32,10 @@ class _ScheduleMessageSheet extends StatelessWidget {
   const _ScheduleMessageSheet({
     required this.channel,
     required this.message,
-    this.onSchedule,
   });
 
   final Channel channel;
   final Message message;
-
-  // Schedules a custom time before its sheet closes. Presets aren't passed to
-  // it.
-  final Future<void> Function(DateTime scheduledAt)? onSchedule;
 
   @override
   Widget build(BuildContext context) {
@@ -85,7 +61,10 @@ class _ScheduleMessageSheet extends StatelessWidget {
         child: Column(
           mainAxisSize: .min,
           children: [
-            StreamSheetHeader(automaticallyImplyLeading: false, title: Text(title)),
+            StreamSheetHeader(
+              automaticallyImplyLeading: false,
+              title: Text(title),
+            ),
             Padding(
               padding: EdgeInsets.fromLTRB(spacing.xxs, 0, spacing.xxs, spacing.xs),
               child: Column(
@@ -123,7 +102,6 @@ class _ScheduleMessageSheet extends StatelessWidget {
       context: context,
       channel: channel,
       message: message,
-      onSchedule: onSchedule,
     );
     if (scheduledAt == null) return;
 

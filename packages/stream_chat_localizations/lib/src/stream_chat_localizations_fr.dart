@@ -1014,10 +1014,6 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Limite atteinte ($limit max.)';
 
   @override
-  String scheduleUserLimitReachedError({required int limit}) =>
-      'Vous avez atteint votre limite de $limit messages programmés.';
-
-  @override
   String get scheduleMessageError => 'Impossible de programmer le message. Réessayez';
 
   @override

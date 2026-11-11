@@ -935,10 +935,6 @@ abstract class Translations {
   /// scheduled messages, such as "Limit reached (10 max)".
   String scheduleChannelLimitReachedLabel({required int limit});
 
-  /// The error shown when the current user holds their [limit] of scheduled
-  /// messages, such as "You've reached your limit of 100 scheduled messages.".
-  String scheduleUserLimitReachedError({required int limit});
-
   /// The error shown when a message could not be scheduled, such as
   /// "Couldn't schedule message. Try again".
   String get scheduleMessageError;
@@ -1969,10 +1965,6 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Limit reached ($limit max)';
-
-  @override
-  String scheduleUserLimitReachedError({required int limit}) =>
-      "You've reached your limit of $limit scheduled messages.";
 
   @override
   String get scheduleMessageError => "Couldn't schedule message. Try again";

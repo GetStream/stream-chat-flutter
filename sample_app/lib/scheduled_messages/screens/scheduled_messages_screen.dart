@@ -155,17 +155,23 @@ Future<void> _editAndReschedule(BuildContext context, ScheduledMessage scheduled
   final text = await _showEditSheet(context, scheduledMessage.message, allowUnchanged: true);
   if (text == null || !context.mounted) return;
 
+  final fallback = context.translations.genericErrorText;
   final channel = _channelOf(client, scheduledMessage);
-  var isFailedOneRemoved = true;
-  final time = await showStreamScheduleTimeSheet(
+  final scheduledAt = await showStreamScheduleTimeSheet(
     context: context,
     channel: channel,
     message: scheduledMessage.message.copyWith(text: text),
-    onSchedule: (scheduledAt) async {
-      isFailedOneRemoved = await _scheduleAgain(client, channel, scheduledMessage, scheduledAt, text: text);
-    },
   );
-  if (time == null) return;
+  if (scheduledAt == null) return;
+
+  final bool isFailedOneRemoved;
+  try {
+    isFailedOneRemoved = await _scheduleAgain(client, channel, scheduledMessage, scheduledAt, text: text);
+  } catch (error) {
+    final description = describeScheduleError(error, fallback: fallback);
+    messenger.show(StreamSnackbar(message: Text(description), variant: .error));
+    return;
+  }
 
   messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.scheduled), variant: .success));
   if (isFailedOneRemoved) return;
@@ -175,18 +181,19 @@ Future<void> _editAndReschedule(BuildContext context, ScheduledMessage scheduled
 Future<void> _reschedule(BuildContext context, ScheduledMessage scheduledMessage) async {
   final client = StreamChat.of(context).client;
 
-  final messenger = StreamSnackbarMessenger.of(context);
-  final time = await showStreamScheduleTimeSheet(
+  final scheduledAt = await showStreamScheduleTimeSheet(
     context: context,
     channel: _channelOf(client, scheduledMessage),
     message: scheduledMessage.message,
     initialScheduledAt: scheduledMessage.scheduledAt,
     title: Text(context.translations.rescheduleMessageLabel),
-    onSchedule: (scheduledAt) => client.rescheduleMessage(scheduledMessage, scheduledAt: scheduledAt),
   );
-  if (time == null) return;
+  if (scheduledAt == null || !context.mounted) return;
 
-  messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.scheduled), variant: .success));
+  return _run(context, () async {
+    await client.rescheduleMessage(scheduledMessage, scheduledAt: scheduledAt);
+    return ScheduledMessagesStrings.scheduled;
+  });
 }
 
 Future<void> _retry(BuildContext context, ScheduledMessage scheduledMessage) {

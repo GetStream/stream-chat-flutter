@@ -85,11 +85,11 @@ extension DateTimeComparisonUtils on DateTime {
   /// Returns true if [this] falls on today's calendar day.
   bool get isToday => toLocal().isSame(clock.now(), unit: .day);
 
-  /// Returns true if [this] fell on yesterday's calendar day.
-  bool get isYesterday => toLocal().isSame(clock.now().subtract(const Duration(days: 1)), unit: .day);
-
   /// Returns true if [this] falls on tomorrow's calendar day.
   bool get isTomorrow => toLocal().isSame(clock.now().add(const Duration(days: 1)), unit: .day);
+
+  /// Returns true if [this] fell on yesterday's calendar day.
+  bool get isYesterday => toLocal().isSame(clock.now().subtract(const Duration(days: 1)), unit: .day);
 
   /// Returns true if [this] is within 1 minute of now in either direction.
   ///

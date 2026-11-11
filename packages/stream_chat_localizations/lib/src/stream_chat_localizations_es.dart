@@ -1012,10 +1012,6 @@ No es posible añadir más de $limit archivos adjuntos
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Límite alcanzado (máx. $limit)';
 
   @override
-  String scheduleUserLimitReachedError({required int limit}) =>
-      'Has alcanzado tu límite de $limit mensajes programados.';
-
-  @override
   String get scheduleMessageError => 'No se pudo programar el mensaje. Inténtalo de nuevo';
 
   @override

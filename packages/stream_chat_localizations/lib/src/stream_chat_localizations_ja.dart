@@ -989,9 +989,6 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String scheduleChannelLimitReachedLabel({required int limit}) => '上限に達しました（最大$limit件）';
 
   @override
-  String scheduleUserLimitReachedError({required int limit}) => '予約メッセージの上限（$limit件）に達しました。';
-
-  @override
   String get scheduleMessageError => 'メッセージを予約できませんでした。もう一度お試しください';
 
   @override

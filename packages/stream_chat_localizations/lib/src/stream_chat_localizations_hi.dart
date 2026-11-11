@@ -1009,10 +1009,6 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String scheduleChannelLimitReachedLabel({required int limit}) => 'सीमा पूरी हो गई (अधिकतम $limit)';
 
   @override
-  String scheduleUserLimitReachedError({required int limit}) =>
-      'आप $limit शेड्यूल किए गए संदेशों की सीमा तक पहुँच गए हैं।';
-
-  @override
   String get scheduleMessageError => 'संदेश शेड्यूल नहीं हो सका। फिर से कोशिश करें';
 
   @override

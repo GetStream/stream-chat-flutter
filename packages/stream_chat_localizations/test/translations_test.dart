@@ -473,7 +473,6 @@ void main() {
       expect(localizations.scheduleTooSoonError(minLeadTime: const Duration(minutes: 5)), contains('5'));
       expect(localizations.rescheduleTooSoonError, isNotEmpty);
       expect(localizations.scheduleTooFarError, isNotEmpty);
-      expect(localizations.scheduleUserLimitReachedError(limit: 100), contains('100'));
       expect(localizations.scheduleMessageError, isNotEmpty);
       expect(localizations.rescheduleMessageLabel, isNotEmpty);
       expect(localizations.scheduledMessagesCountText(count: 3), contains('3'));

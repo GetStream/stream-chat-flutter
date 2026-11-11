@@ -1023,10 +1023,6 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Limite raggiunto (max $limit)';
 
   @override
-  String scheduleUserLimitReachedError({required int limit}) =>
-      'Hai raggiunto il limite di $limit messaggi programmati.';
-
-  @override
   String get scheduleMessageError => 'Impossibile programmare il messaggio. Riprova';
 
   @override

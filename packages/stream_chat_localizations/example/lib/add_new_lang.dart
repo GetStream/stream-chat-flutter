@@ -1025,10 +1025,6 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Limit reached ($limit max)';
 
   @override
-  String scheduleUserLimitReachedError({required int limit}) =>
-      "You've reached your limit of $limit scheduled messages.";
-
-  @override
   String get scheduleMessageError => "Couldn't schedule message. Try again";
 
   @override

@@ -5,9 +5,9 @@ import 'scheduled_messages_utils.dart';
 
 /// Schedules the composer's message when its send button is long-pressed.
 ///
-/// Opens the schedule sheet and, once a time is picked and scheduled, clears
-/// the composer. Does nothing when the channel doesn't allow scheduling, or
-/// while an attachment uploads.
+/// Opens the schedule sheet, schedules the message for the picked time, and
+/// clears the composer once it is scheduled. Does nothing when the channel
+/// doesn't allow scheduling, or while an attachment uploads.
 Future<void> scheduleOnSendLongPress(
   BuildContext context,
   StreamMessageComposerController controller,
@@ -22,15 +22,15 @@ Future<void> scheduleOnSendLongPress(
   final messenger = StreamSnackbarMessenger.of(context);
   final fallback = context.translations.scheduleMessageError;
 
-  try {
-    final scheduledAt = await showStreamScheduleMessageSheet(
-      context: context,
-      channel: channel,
-      message: message,
-      onSchedule: (scheduledAt) => _schedule(channel, message, scheduledAt),
-    );
-    if (scheduledAt == null) return;
+  final scheduledAt = await showStreamScheduleMessageSheet(
+    context: context,
+    channel: channel,
+    message: message,
+  );
+  if (scheduledAt == null) return;
 
+  try {
+    await _schedule(channel, message, scheduledAt);
     controller.reset();
   } catch (error) {
     final description = describeScheduleError(error, fallback: fallback);
