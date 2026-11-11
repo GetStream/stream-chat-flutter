@@ -20,8 +20,6 @@ Future<ScheduledMessageAction?> showStreamScheduledMessageActions(
   required ScheduledMessage scheduledMessage,
   ScheduledMessageActionsBuilder? actionsBuilder,
 }) async {
-  // A message being scheduled or sent, or already sent or canceled, has no
-  // actions.
   final hasActions = switch (scheduledMessage.status) {
     .preparingToSchedule || .sending || .sent || .canceled => false,
     _ => true,

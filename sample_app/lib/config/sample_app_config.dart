@@ -211,7 +211,7 @@ class SampleAppConfigData {
   /// Whether reminder actions appear in the message context menu.
   final bool enableReminderActions;
 
-  /// Whether messages can be scheduled from the composer.
+  /// Whether the scheduled messages tab and channel info entries appear.
   ///
   /// A tab then lists the scheduled ones.
   final bool enableScheduledMessages;

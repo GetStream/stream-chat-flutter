@@ -884,12 +884,12 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get scheduledMessageUploadingLabel => 'アップロード中…';
 
   @override
-  String get scheduledThreadReplyPrefixText => 'スレッドへの返信:';
+  String get scheduledThreadReplyPrefixText => 'スレッドへの返信：';
 
   @override
   String scheduledQuoteReplyPrefixText({String? name}) {
-    if (name == null) return '返信:';
-    return '$name さんへの返信:';
+    if (name == null) return '返信：';
+    return '$name さんへの返信：';
   }
 
   @override
@@ -907,7 +907,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
       .noPermission => 'ここに投稿する権限がなくなりました',
       .moderationBlocked => 'モデレーションによりブロックされました',
       .hookRejected => 'アプリにより拒否されました',
-      .expired => '送信されませんでした: サービスが遅延しました',
+      .expired => '送信されませんでした：サービスが遅延しました',
       .pendingNotSupported => 'このチャンネルでは承認が必要になりました。もう一度予約してください。',
       .invalidMessage when isQuoteDeleted => '引用元のメッセージが削除されました。編集して引用を削除してください。',
       .invalidMessage => 'メッセージがアプリの制限を満たさなくなりました。編集してください。',

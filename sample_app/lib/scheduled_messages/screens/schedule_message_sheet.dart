@@ -6,29 +6,6 @@ import '../scheduled_messages_strings.dart';
 // How far ahead a message can be scheduled when the channel doesn't say.
 const _defaultMaxLeadTime = Duration(days: 120);
 
-/// Shows the quick choices for when to send [message] to [recipient].
-///
-/// The choices are two times tomorrow, Monday morning, or a custom time. A
-/// custom time can be at most [maxLeadTime] ahead, 120 days by default.
-///
-/// Resolves to the chosen time, or null if the user closes the sheet.
-Future<DateTime?> showScheduleMessageSheet(
-  BuildContext context, {
-  required Message message,
-  required String recipient,
-  Duration? maxLeadTime,
-}) {
-  return showStreamSheet<DateTime>(
-    context: context,
-    isDismissible: true,
-    builder: (_, _) => _ScheduleOptionsSheet(
-      message: message,
-      recipient: recipient,
-      maxLeadTime: maxLeadTime ?? _defaultMaxLeadTime,
-    ),
-  );
-}
-
 /// Shows a sheet to pick the date and time [message] is sent at.
 ///
 /// The [title] heads the sheet and the [label] sits above the message, so the
@@ -67,69 +44,6 @@ String _gmtLabel(Duration offset) {
 
   if (minutes == 0) return 'GMT$sign$hours';
   return 'GMT$sign$hours:${minutes.toString().padLeft(2, '0')}';
-}
-
-class _ScheduleOptionsSheet extends StatelessWidget {
-  const _ScheduleOptionsSheet({
-    required this.message,
-    required this.recipient,
-    required this.maxLeadTime,
-  });
-
-  final Message message;
-  final String recipient;
-  final Duration maxLeadTime;
-
-  @override
-  Widget build(BuildContext context) {
-    final icons = context.streamIcons;
-    final spacing = context.streamSpacing;
-
-    final now = DateTime.now();
-    final tomorrow = DateTime(now.year, now.month, now.day + 1);
-    final daysToMonday = (DateTime.monday - now.weekday) % 7;
-    final monday = DateTime(now.year, now.month, now.day + (daysToMonday == 0 ? 7 : daysToMonday));
-
-    final options = [
-      (ScheduledMessagesStrings.tomorrowMorning, tomorrow.add(const Duration(hours: 9))),
-      (ScheduledMessagesStrings.tomorrowAfternoon, tomorrow.add(const Duration(hours: 13))),
-      (ScheduledMessagesStrings.mondayMorning, monday.add(const Duration(hours: 9))),
-    ];
-
-    return SafeArea(
-      child: Padding(
-        padding: EdgeInsets.only(bottom: spacing.sm),
-        child: Column(
-          mainAxisSize: .min,
-          children: [
-            StreamSheetHeader(title: const Text(ScheduledMessagesStrings.scheduleMessage)),
-            for (final (label, time) in options)
-              StreamListTile(
-                leading: Icon(icons.clock),
-                title: Text(label),
-                onTap: () => Navigator.of(context).pop(time),
-              ),
-            StreamListTile(
-              leading: Icon(icons.clock),
-              title: const Text(ScheduledMessagesStrings.customTime),
-              trailing: Icon(icons.chevronRight),
-              onTap: () async {
-                final navigator = Navigator.of(context);
-                final time = await showScheduleTimeSheet(
-                  context,
-                  title: ScheduledMessagesStrings.scheduleMessage,
-                  label: ScheduledMessagesStrings.messageTo(recipient),
-                  message: message,
-                  maxLeadTime: maxLeadTime,
-                );
-                if (time != null) navigator.pop(time);
-              },
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 }
 
 class _ScheduleTimeSheet extends StatefulWidget {

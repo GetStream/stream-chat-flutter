@@ -97,7 +97,7 @@ class SampleAppConfigScreen extends StatelessWidget {
                     SettingsSwitchRow(
                       icon: icons.clock,
                       title: 'Scheduled Messages',
-                      subtitle: 'Long-press send to schedule',
+                      subtitle: 'List and manage scheduled messages',
                       value: config.enableScheduledMessages,
                       onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableScheduledMessages: v)),
                     ),
