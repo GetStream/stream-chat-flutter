@@ -60,6 +60,7 @@ class MockChannel extends Mock implements Channel {
     PaginationParams? messagesPagination,
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
+    bool includeScheduledMessages = false,
   }) {
     return Future.value(const ChannelState());
   }

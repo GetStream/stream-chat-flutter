@@ -1,4 +1,8 @@
 analyzer:
+  errors:
+    # Flutter 3.50 deprecates the material and cupertino imports.
+    # TODO: Remove once the imports are migrated to material_ui and cupertino_ui.
+    deprecated_member_use: ignore
   exclude:
     - packages/*/lib/**/*.g.dart
     - packages/*/lib/scrollable_positioned_list/**
