@@ -31,7 +31,7 @@ typedef StreamScheduledMessageListViewIndexedWidgetBuilder =
 ///
 /// ```dart
 /// StreamScheduledMessageListView(
-///   channel: channel,
+///   cid: channel.cid,
 ///   onScheduledMessageTap: (scheduledMessage) {
 ///     showStreamScheduledMessageActionsSheet(
 ///       context: context,
@@ -50,37 +50,8 @@ class StreamScheduledMessageListView extends StatefulWidget {
   /// {@macro streamScheduledMessageListView}
   const StreamScheduledMessageListView({
     super.key,
-    this.channel,
-    this.itemBuilder,
-    this.separatorBuilder = defaultScheduledMessageListViewSeparatorBuilder,
-    this.emptyBuilder,
-    this.loadingBuilder,
-    this.errorBuilder,
-    this.onScheduledMessageTap,
-    this.onScheduledMessageLongPress,
-    this.scrollDirection = Axis.vertical,
-    this.reverse = false,
-    this.scrollController,
-    this.primary,
-    this.physics,
-    this.shrinkWrap = false,
-    this.padding,
-    this.addAutomaticKeepAlives = true,
-    this.addRepaintBoundaries = true,
-    this.addSemanticIndexes = true,
-    this.scrollCacheExtent,
-    this.dragStartBehavior = DragStartBehavior.start,
-    this.keyboardDismissBehavior = ScrollViewKeyboardDismissBehavior.manual,
-    this.restorationId,
-    this.clipBehavior = Clip.hardEdge,
-  }) : parentId = null;
-
-  /// Creates a list of the scheduled replies in the thread of the message
-  /// [parentId] in [channel].
-  const StreamScheduledMessageListView.thread({
-    super.key,
-    required Channel this.channel,
-    required String this.parentId,
+    this.cid,
+    this.parentId,
     this.itemBuilder,
     this.separatorBuilder = defaultScheduledMessageListViewSeparatorBuilder,
     this.emptyBuilder,
@@ -105,15 +76,15 @@ class StreamScheduledMessageListView extends StatefulWidget {
     this.clipBehavior = Clip.hardEdge,
   });
 
-  /// The channel whose scheduled messages are listed.
+  /// The ID of the channel whose scheduled messages are listed, without its
+  /// thread replies.
   ///
-  /// When null, every channel's are. Replies in its threads are listed with
-  /// [StreamScheduledMessageListView.thread].
-  final Channel? channel;
+  /// When both this and [parentId] are null, every channel's are listed.
+  final String? cid;
 
   /// The ID of the message whose thread's scheduled replies are listed.
   ///
-  /// Set by [StreamScheduledMessageListView.thread].
+  /// When set, [cid] is ignored.
   final String? parentId;
 
   /// A builder that is called to build items in the [ListView].
@@ -220,34 +191,34 @@ class StreamScheduledMessageListView extends StatefulWidget {
 }
 
 class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageListView> {
-  Future<void>? _loading;
-  Stream<List<ScheduledMessage>>? _stream;
+  Stream<List<ScheduledMessage>>? _scheduledMessagesStream;
+  Future<void>? _scheduledMessagesLoad;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _stream ??= _scheduledMessagesStream();
-    _loading ??= _loadIfNeeded();
+    _scheduledMessagesStream ??= _scopedScheduledMessagesStream();
+    _scheduledMessagesLoad ??= _loadScheduledMessagesIfNeeded();
   }
 
   @override
   void didUpdateWidget(covariant StreamScheduledMessageListView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.channel == oldWidget.channel && widget.parentId == oldWidget.parentId) return;
+    if (widget.cid == oldWidget.cid && widget.parentId == oldWidget.parentId) return;
 
-    _stream = _scheduledMessagesStream();
+    _scheduledMessagesStream = _scopedScheduledMessagesStream();
   }
 
-  Future<void>? _loadIfNeeded() {
+  Future<void>? _loadScheduledMessagesIfNeeded() {
     final client = StreamChat.of(context).client;
     if (client.state.scheduledMessageListState.hasLoadedAll) return null;
 
     // A failure only shows when there's nothing to list, so it's also logged.
-    return _load(client)..ignore();
+    return _loadScheduledMessages(client)..ignore();
   }
 
   // The list stays not fully loaded when this fails, so the next load tries again.
-  Future<void> _load(StreamChatClient client) async {
+  Future<void> _loadScheduledMessages(StreamChatClient client) async {
     try {
       await client.loadScheduledMessages();
     } catch (error, stackTrace) {
@@ -258,41 +229,33 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
 
   void _retry() {
     setState(() {
-      _loading = _loadIfNeeded();
+      _scheduledMessagesLoad = _loadScheduledMessagesIfNeeded();
     });
   }
 
-  // The scheduled messages in the scope of this list, as they change.
-  Stream<List<ScheduledMessage>> _scheduledMessagesStream() {
-    final channel = widget.channel;
-    if (channel == null) return StreamChat.of(context).client.state.scheduledMessagesStream;
-
-    final channelState = channel.state!;
-    final parentId = widget.parentId;
-    if (parentId == null) return channelState.scheduledMessagesStream;
-    return channelState.scheduledThreadRepliesStream(parentId);
+  Stream<List<ScheduledMessage>> _scopedScheduledMessagesStream() {
+    final state = StreamChat.of(context).client.state;
+    if (widget.parentId case final parentId?) return state.scheduledThreadRepliesStream(parentId);
+    if (widget.cid case final cid?) return state.scheduledChannelMessagesStream(cid);
+    return state.scheduledMessagesStream;
   }
 
-  // The scheduled messages in the scope of this list.
-  List<ScheduledMessage> _currentScheduledMessages() {
-    final channel = widget.channel;
-    if (channel == null) return StreamChat.of(context).client.state.scheduledMessages;
-
-    final channelState = channel.state!;
-    final parentId = widget.parentId;
-    if (parentId == null) return channelState.scheduledMessages;
-    return channelState.scheduledThreadReplies(parentId);
+  List<ScheduledMessage> _scopedScheduledMessages() {
+    final state = StreamChat.of(context).client.state;
+    if (widget.parentId case final parentId?) return state.scheduledThreadReplies(parentId);
+    if (widget.cid case final cid?) return state.scheduledChannelMessages(cid);
+    return state.scheduledMessages;
   }
 
   @override
   Widget build(BuildContext context) {
     return BetterStreamBuilder<List<ScheduledMessage>>(
-      stream: _stream,
-      initialData: _currentScheduledMessages(),
+      stream: _scheduledMessagesStream,
+      initialData: _scopedScheduledMessages(),
       builder: (context, scheduledMessages) {
         if (scheduledMessages.isEmpty) {
           return FutureBuilder<void>(
-            future: _loading,
+            future: _scheduledMessagesLoad,
             builder: (context, snapshot) => switch (snapshot) {
               AsyncSnapshot(connectionState: .waiting) => _buildLoading(context),
               AsyncSnapshot(:final error?) => _buildError(context, error),

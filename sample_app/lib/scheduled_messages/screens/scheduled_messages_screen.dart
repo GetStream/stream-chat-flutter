@@ -9,18 +9,17 @@ import 'schedule_message_sheet.dart';
 
 /// A pushed screen listing the current user's scheduled messages.
 ///
-/// It lists the replies in the thread of [parentId] when both [cid] and
-/// [parentId] are set, the messages in the channel [cid] when only [cid] is,
-/// and those in every channel when [cid] is null.
+/// It lists the messages in the channel [cid], the replies in the thread of
+/// [parentId], or those in every channel when both are null.
 class ScheduledMessagesScreen extends StatelessWidget {
   const ScheduledMessagesScreen({super.key, this.cid, this.parentId});
 
   /// The channel whose scheduled messages are listed.
-  ///
-  /// Null lists those in every channel.
   final String? cid;
 
   /// The ID of the message whose thread's scheduled replies are listed.
+  ///
+  /// When set, [cid] is ignored.
   final String? parentId;
 
   @override
@@ -35,54 +34,29 @@ class ScheduledMessagesScreen extends StatelessWidget {
 
 /// The current user's scheduled messages, with the actions on each.
 ///
-/// It lists the replies in the thread of [parentId] when both [cid] and
-/// [parentId] are set, the messages in the channel [cid] when only [cid] is,
-/// and those in every channel when [cid] is null.
+/// It lists the messages in the channel [cid], the replies in the thread of
+/// [parentId], or those in every channel when both are null.
 class ScheduledMessagesPage extends StatelessWidget {
   const ScheduledMessagesPage({super.key, this.cid, this.parentId});
 
   /// The channel whose scheduled messages are listed.
-  ///
-  /// Null lists those in every channel.
   final String? cid;
 
   /// The ID of the message whose thread's scheduled replies are listed.
+  ///
+  /// When set, [cid] is ignored.
   final String? parentId;
 
   @override
   Widget build(BuildContext context) {
-    final client = StreamChat.of(context).client;
-    final channel = switch (cid) {
-      final cid? => client.state.channels[cid],
-      null => null,
-    };
-
-    // A channel that isn't loaded can't be listed, and must not widen the
-    // list to every channel.
-    if (cid != null && channel == null) {
-      return Center(
-        child: StreamScrollViewEmptyWidget(
-          emptyIcon: Icon(context.streamIcons.clock),
-          emptyTitle: Text(context.translations.noScheduledMessagesText),
-        ),
-      );
-    }
-
     return RefreshIndicator.adaptive(
       onRefresh: () => _refresh(context),
-      child: switch ((channel, parentId)) {
-        (final channel?, final parentId?) => StreamScheduledMessageListView.thread(
-          channel: channel,
-          parentId: parentId,
-          physics: const AlwaysScrollableScrollPhysics(),
-          onScheduledMessageTap: (it) => _openScheduledMessageActions(context, it),
-        ),
-        _ => StreamScheduledMessageListView(
-          channel: channel,
-          physics: const AlwaysScrollableScrollPhysics(),
-          onScheduledMessageTap: (it) => _openScheduledMessageActions(context, it),
-        ),
-      },
+      child: StreamScheduledMessageListView(
+        cid: cid,
+        parentId: parentId,
+        physics: const AlwaysScrollableScrollPhysics(),
+        onScheduledMessageTap: (it) => _openScheduledMessageActions(context, it),
+      ),
     );
   }
 }
