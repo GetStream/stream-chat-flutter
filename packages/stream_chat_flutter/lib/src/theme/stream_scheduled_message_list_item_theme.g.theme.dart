@@ -30,7 +30,12 @@ mixin _$StreamScheduledMessageListItemThemeData {
     }
 
     return StreamScheduledMessageListItemThemeData(
-      backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
+      backgroundColor: WidgetStateProperty.lerp<Color?>(
+        a.backgroundColor,
+        b.backgroundColor,
+        t,
+        Color.lerp,
+      ),
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
       sendTimeStyle: TextStyle.lerp(a.sendTimeStyle, b.sendTimeStyle, t),
       failedSendTimeStyle: TextStyle.lerp(
@@ -40,10 +45,14 @@ mixin _$StreamScheduledMessageListItemThemeData {
       ),
       sendTimeFormatter: t < 0.5 ? a.sendTimeFormatter : b.sendTimeFormatter,
       titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
-      previewStyle: TextStyle.lerp(a.previewStyle, b.previewStyle, t),
-      previewTextTheme: StreamMessagePreviewTextThemeData.lerp(
-        a.previewTextTheme,
-        b.previewTextTheme,
+      messagePreviewStyle: TextStyle.lerp(
+        a.messagePreviewStyle,
+        b.messagePreviewStyle,
+        t,
+      ),
+      messagePreviewTextTheme: StreamMessagePreviewTextThemeData.lerp(
+        a.messagePreviewTextTheme,
+        b.messagePreviewTextTheme,
         t,
       ),
       statusStyle: TextStyle.lerp(a.statusStyle, b.statusStyle, t),
@@ -56,14 +65,14 @@ mixin _$StreamScheduledMessageListItemThemeData {
   }
 
   StreamScheduledMessageListItemThemeData copyWith({
-    Color? backgroundColor,
+    WidgetStateProperty<Color?>? backgroundColor,
     EdgeInsetsGeometry? padding,
     TextStyle? sendTimeStyle,
     TextStyle? failedSendTimeStyle,
     String Function(BuildContext, DateTime)? sendTimeFormatter,
     TextStyle? titleStyle,
-    TextStyle? previewStyle,
-    StreamMessagePreviewTextThemeData? previewTextTheme,
+    TextStyle? messagePreviewStyle,
+    StreamMessagePreviewTextThemeData? messagePreviewTextTheme,
     TextStyle? statusStyle,
     TextStyle? failedStatusStyle,
   }) {
@@ -76,8 +85,9 @@ mixin _$StreamScheduledMessageListItemThemeData {
       failedSendTimeStyle: failedSendTimeStyle ?? _this.failedSendTimeStyle,
       sendTimeFormatter: sendTimeFormatter ?? _this.sendTimeFormatter,
       titleStyle: titleStyle ?? _this.titleStyle,
-      previewStyle: previewStyle ?? _this.previewStyle,
-      previewTextTheme: previewTextTheme ?? _this.previewTextTheme,
+      messagePreviewStyle: messagePreviewStyle ?? _this.messagePreviewStyle,
+      messagePreviewTextTheme:
+          messagePreviewTextTheme ?? _this.messagePreviewTextTheme,
       statusStyle: statusStyle ?? _this.statusStyle,
       failedStatusStyle: failedStatusStyle ?? _this.failedStatusStyle,
     );
@@ -107,11 +117,12 @@ mixin _$StreamScheduledMessageListItemThemeData {
           other.failedSendTimeStyle,
       sendTimeFormatter: other.sendTimeFormatter,
       titleStyle: _this.titleStyle?.merge(other.titleStyle) ?? other.titleStyle,
-      previewStyle:
-          _this.previewStyle?.merge(other.previewStyle) ?? other.previewStyle,
-      previewTextTheme:
-          _this.previewTextTheme?.merge(other.previewTextTheme) ??
-          other.previewTextTheme,
+      messagePreviewStyle:
+          _this.messagePreviewStyle?.merge(other.messagePreviewStyle) ??
+          other.messagePreviewStyle,
+      messagePreviewTextTheme:
+          _this.messagePreviewTextTheme?.merge(other.messagePreviewTextTheme) ??
+          other.messagePreviewTextTheme,
       statusStyle:
           _this.statusStyle?.merge(other.statusStyle) ?? other.statusStyle,
       failedStatusStyle:
@@ -139,8 +150,8 @@ mixin _$StreamScheduledMessageListItemThemeData {
         _other.failedSendTimeStyle == _this.failedSendTimeStyle &&
         _other.sendTimeFormatter == _this.sendTimeFormatter &&
         _other.titleStyle == _this.titleStyle &&
-        _other.previewStyle == _this.previewStyle &&
-        _other.previewTextTheme == _this.previewTextTheme &&
+        _other.messagePreviewStyle == _this.messagePreviewStyle &&
+        _other.messagePreviewTextTheme == _this.messagePreviewTextTheme &&
         _other.statusStyle == _this.statusStyle &&
         _other.failedStatusStyle == _this.failedStatusStyle;
   }
@@ -157,8 +168,8 @@ mixin _$StreamScheduledMessageListItemThemeData {
       _this.failedSendTimeStyle,
       _this.sendTimeFormatter,
       _this.titleStyle,
-      _this.previewStyle,
-      _this.previewTextTheme,
+      _this.messagePreviewStyle,
+      _this.messagePreviewTextTheme,
       _this.statusStyle,
       _this.failedStatusStyle,
     );

@@ -133,6 +133,7 @@ export 'src/poll/stream_poll_results_sheet.dart';
 export 'src/reactions/detail/reaction_detail_sheet.dart';
 export 'src/reactions/picker/reaction_picker.dart';
 export 'src/scheduled_message_list_view/scheduled_message_action.dart';
+export 'src/scheduled_message_list_view/scheduled_message_actions_builder.dart';
 export 'src/scheduled_message_list_view/stream_scheduled_message_actions_sheet.dart';
 export 'src/scheduled_message_list_view/stream_scheduled_message_list_item.dart';
 export 'src/scheduled_message_list_view/stream_scheduled_message_list_view.dart';

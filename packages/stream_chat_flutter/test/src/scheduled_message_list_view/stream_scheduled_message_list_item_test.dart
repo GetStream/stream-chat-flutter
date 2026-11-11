@@ -185,13 +185,17 @@ void main() {
     expect(_itemBackground(tester), Color.alphaBlend(colorScheme.backgroundSelected, colorScheme.backgroundApp));
   });
 
-  testWidgets('StreamScheduledMessageListItem does not tint the background by default', (tester) async {
+  testWidgets('StreamScheduledMessageListItem uses the background color of its theme', (tester) async {
     await tester.pumpWidget(
-      _wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: _scheduledMessage())),
+      _wrapWithMaterialApp(
+        StreamScheduledMessageListItemTheme(
+          data: const StreamScheduledMessageListItemThemeData(backgroundColor: WidgetStatePropertyAll(Colors.red)),
+          child: StreamScheduledMessageListItem(scheduledMessage: _scheduledMessage()),
+        ),
+      ),
     );
 
-    final colorScheme = tester.element(find.byType(StreamScheduledMessageListItem)).streamColorScheme;
-    expect(_itemBackground(tester), colorScheme.backgroundApp);
+    expect(_itemBackground(tester), Colors.red);
   });
 
   testWidgets('StreamScheduledMessageListItem merges into one accessible node with the spelled-out send time', (

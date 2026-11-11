@@ -11,7 +11,7 @@ Widget defaultScheduledMessageListViewSeparatorBuilder(
   BuildContext context,
   List<ScheduledMessage> scheduledMessages,
   int index,
-) => const StreamScheduledMessageListSeparator();
+) => const _ScheduledMessageListSeparator();
 
 /// Signature for the item builder that creates the children of the
 /// [StreamScheduledMessageListView].
@@ -332,10 +332,9 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
   }
 }
 
-/// The divider between [StreamScheduledMessageListItem]s.
-class StreamScheduledMessageListSeparator extends StatelessWidget {
-  /// Creates a scheduled message list separator.
-  const StreamScheduledMessageListSeparator({super.key});
+// The divider between [StreamScheduledMessageListItem]s.
+class _ScheduledMessageListSeparator extends StatelessWidget {
+  const _ScheduledMessageListSeparator();
 
   @override
   Widget build(BuildContext context) {

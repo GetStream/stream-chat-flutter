@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 import 'package:stream_core_flutter/chat.dart';
 
 /// A shimmer loading placeholder for the scheduled message list view.
+@internal
 class StreamScheduledMessageListSkeletonLoading extends StatelessWidget {
   /// Creates a scheduled message list loading placeholder.
   const StreamScheduledMessageListSkeletonLoading({

@@ -72,7 +72,7 @@ class StreamScheduledMessageListItemTheme extends InheritedTheme {
 /// ```dart
 /// StreamChatThemeData(
 ///   scheduledMessageListItemTheme: StreamScheduledMessageListItemThemeData(
-///     backgroundColor: Colors.white,
+///     backgroundColor: WidgetStatePropertyAll(Colors.white),
 ///   ),
 /// )
 /// ```
@@ -95,21 +95,23 @@ class StreamScheduledMessageListItemThemeData with _$StreamScheduledMessageListI
     this.failedSendTimeStyle,
     this.sendTimeFormatter,
     this.titleStyle,
-    this.previewStyle,
-    this.previewTextTheme,
+    this.messagePreviewStyle,
+    this.messagePreviewTextTheme,
     this.statusStyle,
     this.failedStatusStyle,
   });
 
   /// The background color of the row.
   ///
-  /// A selected row tints it with [StreamColorScheme.backgroundSelected].
-  /// Falls back to [StreamColorScheme.backgroundApp].
-  final Color? backgroundColor;
+  /// This color is resolved from [WidgetState]s. Falls back to
+  /// [StreamColorScheme.backgroundApp], tinted with
+  /// [StreamColorScheme.backgroundSelected] when selected.
+  final WidgetStateProperty<Color?>? backgroundColor;
 
   /// The padding around the content of the row.
   ///
-  /// Falls back to [StreamSpacing.md] on every side.
+  /// Falls back to [StreamSpacing.md] at the sides and [StreamSpacing.sm] at
+  /// the top and bottom.
   final EdgeInsetsGeometry? padding;
 
   /// The text style of the send time.
@@ -126,7 +128,8 @@ class StreamScheduledMessageListItemThemeData with _$StreamScheduledMessageListI
 
   /// The formatter of the send time.
   ///
-  /// Falls back to [Translations.scheduledMessageSendAtText].
+  /// It formats the whole line, such as "Send Wed, Oct 21 at 8:00 AM". Falls
+  /// back to [Translations.scheduledMessageSendAtText].
   final DateFormatter? sendTimeFormatter;
 
   /// The text style for the name of the channel the message is sent to.
@@ -139,14 +142,14 @@ class StreamScheduledMessageListItemThemeData with _$StreamScheduledMessageListI
   ///
   /// Falls back to [StreamTextTheme.bodyDefault] with
   /// [StreamColorScheme.textPrimary].
-  final TextStyle? previewStyle;
+  final TextStyle? messagePreviewStyle;
 
   /// The theme for styling parts of the message preview differently from the
   /// rest.
   ///
   /// Takes precedence over an enclosing [StreamMessagePreviewTextTheme] and
   /// the app-wide one. Icons default to a size of 20.
-  final StreamMessagePreviewTextThemeData? previewTextTheme;
+  final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 
   /// The text style for the state of a message being sent.
   ///

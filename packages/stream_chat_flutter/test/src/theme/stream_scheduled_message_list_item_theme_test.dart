@@ -11,11 +11,11 @@ void main() {
         home: StreamChatTheme(
           data: StreamChatThemeData(
             scheduledMessageListItemTheme: const StreamScheduledMessageListItemThemeData(
-              backgroundColor: Colors.blue,
+              backgroundColor: WidgetStatePropertyAll(Colors.blue),
             ),
           ),
           child: StreamScheduledMessageListItemTheme(
-            data: const StreamScheduledMessageListItemThemeData(backgroundColor: Colors.red),
+            data: const StreamScheduledMessageListItemThemeData(backgroundColor: WidgetStatePropertyAll(Colors.red)),
             child: Builder(
               builder: (context) {
                 theme = StreamScheduledMessageListItemTheme.of(context);
@@ -27,7 +27,7 @@ void main() {
       ),
     );
 
-    expect(theme.backgroundColor, Colors.red);
+    expect(theme.backgroundColor?.resolve({}), Colors.red);
   });
 
   testWidgets('StreamScheduledMessageListItemTheme.of keeps app-wide values the local theme leaves unset', (
@@ -45,7 +45,7 @@ void main() {
             ),
           ),
           child: StreamScheduledMessageListItemTheme(
-            data: const StreamScheduledMessageListItemThemeData(backgroundColor: Colors.red),
+            data: const StreamScheduledMessageListItemThemeData(backgroundColor: WidgetStatePropertyAll(Colors.red)),
             child: Builder(
               builder: (context) {
                 theme = StreamScheduledMessageListItemTheme.of(context);
@@ -69,36 +69,39 @@ void main() {
   });
 
   test('StreamScheduledMessageListItemThemeData with a different value are not equal', () {
-    expect(_fullTheme(), isNot(_fullTheme().copyWith(backgroundColor: Colors.blue)));
+    expect(_fullTheme(), isNot(_fullTheme().copyWith(backgroundColor: const WidgetStatePropertyAll(Colors.blue))));
   });
 
   test('StreamScheduledMessageListItemThemeData.copyWith replaces the given values', () {
-    final copied = _fullTheme().copyWith(backgroundColor: Colors.blue, padding: const EdgeInsets.all(16));
+    final copied = _fullTheme().copyWith(
+      backgroundColor: const WidgetStatePropertyAll(Colors.blue),
+      padding: const EdgeInsets.all(16),
+    );
 
-    expect(copied.backgroundColor, Colors.blue);
+    expect(copied.backgroundColor?.resolve({}), Colors.blue);
     expect(copied.padding, const EdgeInsets.all(16));
   });
 
   test('StreamScheduledMessageListItemThemeData.copyWith keeps the other values', () {
     final original = _fullTheme();
 
-    final copied = original.copyWith(backgroundColor: Colors.blue);
+    final copied = original.copyWith(backgroundColor: const WidgetStatePropertyAll(Colors.blue));
 
     expect(copied.titleStyle, original.titleStyle);
     expect(copied.sendTimeFormatter, original.sendTimeFormatter);
   });
 
   test('StreamScheduledMessageListItemThemeData.merge takes the values the other theme sets', () {
-    const other = StreamScheduledMessageListItemThemeData(backgroundColor: Colors.blue);
+    const other = StreamScheduledMessageListItemThemeData(backgroundColor: WidgetStatePropertyAll(Colors.blue));
 
     final merged = _fullTheme().merge(other);
 
-    expect(merged.backgroundColor, Colors.blue);
+    expect(merged.backgroundColor?.resolve({}), Colors.blue);
   });
 
   test('StreamScheduledMessageListItemThemeData.merge keeps the values the other theme leaves unset', () {
     final original = _fullTheme();
-    const other = StreamScheduledMessageListItemThemeData(backgroundColor: Colors.blue);
+    const other = StreamScheduledMessageListItemThemeData(backgroundColor: WidgetStatePropertyAll(Colors.blue));
 
     final merged = original.merge(other);
 
@@ -115,7 +118,7 @@ void main() {
   test('StreamScheduledMessageListItemThemeData.lerp at 0 returns the first theme', () {
     final lerped = StreamScheduledMessageListItemThemeData.lerp(_lerpStart, _lerpEnd, 0)!;
 
-    expect(lerped.backgroundColor, _lerpStart.backgroundColor);
+    expect(lerped.backgroundColor?.resolve({}), Colors.black);
     expect(lerped.padding, _lerpStart.padding);
     expect(lerped.sendTimeFormatter, _lerpStart.sendTimeFormatter);
   });
@@ -123,7 +126,7 @@ void main() {
   test('StreamScheduledMessageListItemThemeData.lerp at 1 returns the second theme', () {
     final lerped = StreamScheduledMessageListItemThemeData.lerp(_lerpStart, _lerpEnd, 1)!;
 
-    expect(lerped.backgroundColor, _lerpEnd.backgroundColor);
+    expect(lerped.backgroundColor?.resolve({}), Colors.white);
     expect(lerped.padding, _lerpEnd.padding);
     expect(lerped.sendTimeFormatter, _lerpEnd.sendTimeFormatter);
   });
@@ -131,7 +134,7 @@ void main() {
   test('StreamScheduledMessageListItemThemeData.lerp halfway blends colors and padding', () {
     final lerped = StreamScheduledMessageListItemThemeData.lerp(_lerpStart, _lerpEnd, 0.5)!;
 
-    expect(lerped.backgroundColor, Color.lerp(Colors.black, Colors.white, 0.5));
+    expect(lerped.backgroundColor?.resolve({}), Color.lerp(Colors.black, Colors.white, 0.5));
     expect(lerped.padding, EdgeInsetsGeometry.lerp(const EdgeInsets.all(8), const EdgeInsets.all(16), 0.5));
   });
 
@@ -144,27 +147,27 @@ void main() {
 
 StreamScheduledMessageListItemThemeData _fullTheme() {
   return const StreamScheduledMessageListItemThemeData(
-    backgroundColor: Colors.red,
+    backgroundColor: WidgetStatePropertyAll(Colors.red),
     padding: EdgeInsets.all(8),
     sendTimeStyle: TextStyle(fontSize: 12),
     failedSendTimeStyle: TextStyle(fontSize: 12),
     sendTimeFormatter: _dummyFormatter,
     titleStyle: TextStyle(fontSize: 14),
-    previewStyle: TextStyle(fontSize: 16),
-    previewTextTheme: StreamMessagePreviewTextThemeData(iconSize: 20),
+    messagePreviewStyle: TextStyle(fontSize: 16),
+    messagePreviewTextTheme: StreamMessagePreviewTextThemeData(iconSize: 20),
     statusStyle: TextStyle(fontSize: 12),
     failedStatusStyle: TextStyle(fontSize: 12),
   );
 }
 
 const _lerpStart = StreamScheduledMessageListItemThemeData(
-  backgroundColor: Colors.black,
+  backgroundColor: WidgetStatePropertyAll(Colors.black),
   padding: EdgeInsets.all(8),
   sendTimeFormatter: _dummyFormatter,
 );
 
 const _lerpEnd = StreamScheduledMessageListItemThemeData(
-  backgroundColor: Colors.white,
+  backgroundColor: WidgetStatePropertyAll(Colors.white),
   padding: EdgeInsets.all(16),
   sendTimeFormatter: _otherFormatter,
 );
