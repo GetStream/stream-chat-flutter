@@ -127,7 +127,7 @@ class StreamScheduledMessageListItemThemeData with _$StreamScheduledMessageListI
   /// The formatter of the time the message is scheduled to be sent at.
   ///
   /// It formats the whole line, such as "Send Wed, Oct 21 at 8:00 AM". Falls
-  /// back to [Translations.scheduledMessageSendAtText].
+  /// back to the localized `scheduledMessageSendAtText`.
   final DateFormatter? scheduledAtFormatter;
 
   /// The text style for the name of the channel the message is sent to.
