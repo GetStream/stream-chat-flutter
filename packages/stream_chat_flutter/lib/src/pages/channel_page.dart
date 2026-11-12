@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import '../../stream_chat_flutter.dart';
 import 'page_composer.dart';
 
+/// Called when "View all" on a page's [StreamScheduledMessagesBanner] is
+/// tapped.
+///
+/// [parent] is the parent message of the thread whose banner was tapped, or
+/// null for the channel's own banner.
+typedef StreamScheduledMessagesViewAllCallback = void Function(BuildContext context, Channel channel, Message? parent);
+
 /// A channel page with optional floating composer support.
 ///
 /// Wires up a [StreamChannelHeader], a [StreamMessageListView] and a
@@ -96,8 +103,9 @@ class StreamChannelPage extends StatefulWidget {
 
   /// Called when "View all" on the [StreamScheduledMessagesBanner] is tapped.
   ///
-  /// When null, "View all" isn't shown.
-  final void Function(BuildContext context, Channel channel)? onScheduledMessagesViewAllPressed;
+  /// When null, "View all" isn't shown. The thread pages it opens call it too,
+  /// with their parent message.
+  final StreamScheduledMessagesViewAllCallback? onScheduledMessagesViewAllPressed;
 
   @override
   State<StreamChannelPage> createState() => _StreamChannelPageState();
@@ -135,7 +143,7 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
     final onViewAllPressed = widget.onScheduledMessagesViewAllPressed;
     if (onViewAllPressed == null) return null;
 
-    return () => onViewAllPressed(context, StreamChannel.of(context).channel);
+    return () => onViewAllPressed(context, StreamChannel.of(context).channel, null);
   }
 
   @override
@@ -171,6 +179,8 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
         initialAlignment: widget.initialAlignment,
         onReply: _reply,
         onEditMessage: _editMessage,
+        showScheduledMessagesBanner: widget.showScheduledMessagesBanner,
+        onScheduledMessagesViewAllPressed: widget.onScheduledMessagesViewAllPressed,
       ),
     );
   }
@@ -181,14 +191,19 @@ class _ChannelPageBody extends StatelessWidget {
   const _ChannelPageBody({
     required this.onReply,
     required this.onEditMessage,
+    required this.showScheduledMessagesBanner,
     this.initialScrollIndex,
     this.initialAlignment,
+    this.onScheduledMessagesViewAllPressed,
   });
 
   final void Function(Message) onReply;
   final void Function(Message) onEditMessage;
   final int? initialScrollIndex;
   final double? initialAlignment;
+  // Passed on to the thread pages opened from the channel.
+  final bool showScheduledMessagesBanner;
+  final StreamScheduledMessagesViewAllCallback? onScheduledMessagesViewAllPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +213,11 @@ class _ChannelPageBody extends StatelessWidget {
       onEditMessageTap: onEditMessage,
       onReplyTap: onReply,
       threadBuilder: (_, parentMessage) {
-        return StreamThreadPage(parent: parentMessage!);
+        return StreamThreadPage(
+          parent: parentMessage!,
+          showScheduledMessagesBanner: showScheduledMessagesBanner,
+          onScheduledMessagesViewAllPressed: onScheduledMessagesViewAllPressed,
+        );
       },
       enableSafeArea: true,
     );

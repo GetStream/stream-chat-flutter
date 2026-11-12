@@ -82,11 +82,7 @@ final appRoutes = [
                           parent: parent,
                           automaticallyImplyLeading: showBackButton,
                           showScheduledMessagesBanner: showScheduledMessages,
-                          onScheduledMessagesViewAllPressed: (context, channel) => GoRouter.of(context).pushNamed(
-                            Routes.SCHEDULED_MESSAGES.name,
-                            pathParameters: Routes.SCHEDULED_MESSAGES.params(channel),
-                            queryParameters: {'pid': parent.id},
-                          ),
+                          onScheduledMessagesViewAllPressed: _openScheduledMessages,
                           onViewInChannelTap: (message) {
                             GoRouter.of(context).goNamed(
                               Routes.CHANNEL_PAGE.name,
@@ -101,10 +97,7 @@ final appRoutes = [
                     return StreamChannelPage(
                       automaticallyImplyLeading: showBackButton,
                       showScheduledMessagesBanner: showScheduledMessages,
-                      onScheduledMessagesViewAllPressed: (context, channel) => GoRouter.of(context).pushNamed(
-                        Routes.SCHEDULED_MESSAGES.name,
-                        pathParameters: Routes.SCHEDULED_MESSAGES.params(channel),
-                      ),
+                      onScheduledMessagesViewAllPressed: _openScheduledMessages,
                       onChannelAvatarPressed: (context, channel) {
                         final isOneToOne = channel.isOneToOne;
                         final currentUserId = StreamChat.of(context).currentUser?.id;
@@ -226,4 +219,13 @@ final appRoutes = [
 Channel _resolveChannel(BuildContext context, GoRouterState state) {
   final [type, id] = state.pathParameters['cid']!.split(':');
   return StreamChat.of(context).client.channel(type, id: id);
+}
+
+// Opens the scheduled messages of [channel], or of the thread of [parent].
+void _openScheduledMessages(BuildContext context, Channel channel, Message? parent) {
+  GoRouter.of(context).pushNamed(
+    Routes.SCHEDULED_MESSAGES.name,
+    pathParameters: Routes.SCHEDULED_MESSAGES.params(channel),
+    queryParameters: {if (parent != null) 'pid': parent.id},
+  );
 }

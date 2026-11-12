@@ -27,17 +27,17 @@ void main() {
     expect(find.byType(StreamScheduledMessagesBanner), findsNothing);
   });
 
-  testWidgets('tapping View all invokes onScheduledMessagesViewAllPressed', (tester) async {
-    var taps = 0;
+  testWidgets('tapping View all invokes onScheduledMessagesViewAllPressed with the parent message', (tester) async {
+    final parents = <Message?>[];
     await pumpThreadPage(
       tester,
       scheduledMessages: [scheduledMessage(parentId: 'parent-id')],
-      onScheduledMessagesViewAllPressed: (_, _) => taps += 1,
+      onScheduledMessagesViewAllPressed: (_, _, parent) => parents.add(parent),
     );
 
     await tester.tap(find.text('View all'));
 
-    expect(taps, 1);
+    expect(parents.map((it) => it?.id), ['parent-id']);
   });
 
   testWidgets('shows a screen snackbar above the scheduled messages banner', (tester) async {

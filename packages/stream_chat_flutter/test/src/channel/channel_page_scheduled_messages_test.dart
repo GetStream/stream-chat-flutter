@@ -34,17 +34,17 @@ void main() {
     expect(find.byType(StreamScheduledMessagesBanner), findsNothing);
   });
 
-  testWidgets("tapping the banner's link invokes onScheduledMessagesViewAllPressed", (tester) async {
-    var taps = 0;
+  testWidgets("tapping the banner's link invokes onScheduledMessagesViewAllPressed with no parent", (tester) async {
+    final parents = <Message?>[];
     await pumpChannelPage(
       tester,
       scheduledMessages: [scheduledMessage()],
-      onScheduledMessagesViewAllPressed: (_, _) => taps += 1,
+      onScheduledMessagesViewAllPressed: (_, _, parent) => parents.add(parent),
     );
 
     await tester.tap(find.text('View'));
 
-    expect(taps, 1);
+    expect(parents, [null]);
   });
 
   testWidgets('shows a screen snackbar above the scheduled messages banner', (tester) async {
@@ -92,6 +92,37 @@ void main() {
 
     // A rebuild would create a new Text.
     expect(tester.widget<Text>(find.text(_scheduledForLabel)), same(countBefore));
+  });
+
+  testWidgets('passes onScheduledMessagesViewAllPressed to the thread pages it opens', (tester) async {
+    void onViewAllPressed(BuildContext context, Channel channel, Message? parent) {}
+    final parentMessage = Message(id: 'parent-id', text: 'Hello world!');
+
+    await pumpChannelPage(tester, onScheduledMessagesViewAllPressed: onViewAllPressed);
+    final context = tester.element(find.byType(StreamMessageListView));
+    final thread = messageListView(tester).threadBuilder!(context, parentMessage);
+
+    expect(
+      thread,
+      isA<StreamThreadPage>().having(
+        (it) => it.onScheduledMessagesViewAllPressed,
+        'onScheduledMessagesViewAllPressed',
+        onViewAllPressed,
+      ),
+    );
+  });
+
+  testWidgets('hides the scheduled messages banner on the thread pages it opens when told to', (tester) async {
+    final parentMessage = Message(id: 'parent-id', text: 'Hello world!');
+
+    await pumpChannelPage(tester, showScheduledMessagesBanner: false);
+    final context = tester.element(find.byType(StreamMessageListView));
+    final thread = messageListView(tester).threadBuilder!(context, parentMessage);
+
+    expect(
+      thread,
+      isA<StreamThreadPage>().having((it) => it.showScheduledMessagesBanner, 'showScheduledMessagesBanner', isFalse),
+    );
   });
 }
 

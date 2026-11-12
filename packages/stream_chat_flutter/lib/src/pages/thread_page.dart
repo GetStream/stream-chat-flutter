@@ -69,8 +69,8 @@ class StreamThreadPage extends StatefulWidget {
 
   /// Called when "View all" on the [StreamScheduledMessagesBanner] is tapped.
   ///
-  /// When null, "View all" isn't shown.
-  final void Function(BuildContext context, Channel channel)? onScheduledMessagesViewAllPressed;
+  /// When null, "View all" isn't shown. It is called with [parent].
+  final StreamScheduledMessagesViewAllCallback? onScheduledMessagesViewAllPressed;
 
   @override
   State<StreamThreadPage> createState() => _StreamThreadPageState();
@@ -105,12 +105,13 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
     });
   }
 
-  // The page's "View all" callback, called with the page's channel.
+  // The page's "View all" callback, called with the page's channel and
+  // parent message.
   VoidCallback? _onScheduledMessagesViewAllPressed() {
     final onViewAllPressed = widget.onScheduledMessagesViewAllPressed;
     if (onViewAllPressed == null) return null;
 
-    return () => onViewAllPressed(context, StreamChannel.of(context).channel);
+    return () => onViewAllPressed(context, StreamChannel.of(context).channel, widget.parent);
   }
 
   @override

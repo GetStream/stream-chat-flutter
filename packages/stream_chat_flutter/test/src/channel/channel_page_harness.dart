@@ -54,7 +54,7 @@ Future<void> pumpChannelPage(
   List<ScheduledMessage> scheduledMessages = const [],
   Stream<List<ScheduledMessage>>? scheduledMessagesStream,
   bool showScheduledMessagesBanner = true,
-  void Function(BuildContext context, Channel channel)? onScheduledMessagesViewAllPressed,
+  StreamScheduledMessagesViewAllCallback? onScheduledMessagesViewAllPressed,
 }) async {
   final originalRecordPlatform = RecordPlatform.instance;
   RecordPlatform.instance = FakeRecordPlatform();
