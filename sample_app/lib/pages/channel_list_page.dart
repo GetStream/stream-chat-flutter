@@ -107,6 +107,11 @@ class _ChannelListPageState extends State<ChannelListPage> {
     final selected = enabledTabs.firstWhere((t) => t.tab == _selectedTab, orElse: () => enabledTabs.first);
     final currentIndex = enabledTabs.indexOf(selected);
 
+    // The keyboard covers the nav bar's place, so it would ride up between
+    // the keyboard and a field above it. The bar is hidden in place, as
+    // dropping the scaffold's bottom would rebuild the body and lose its focus.
+    final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
+
     return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamChannelListHeader(
@@ -119,10 +124,14 @@ class _ChannelListPageState extends State<ChannelListPage> {
       // surface style, so a nav-bar-only override is applied fully instead of
       // just partly (the nav bar rendering vs. the scaffold inset).
       bottomSurfaceStyle: StreamBottomNavBar.resolveSurfaceStyle(context),
-      bottom: StreamBottomNavBar(
-        currentIndex: currentIndex,
-        onTap: (i) => setState(() => _selectedTab = enabledTabs[i].tab),
-        items: [for (final tab in enabledTabs) tab.navItem],
+      bottom: Visibility(
+        visible: !isKeyboardOpen,
+        maintainState: true,
+        child: StreamBottomNavBar(
+          currentIndex: currentIndex,
+          onTap: (i) => setState(() => _selectedTab = enabledTabs[i].tab),
+          items: [for (final tab in enabledTabs) tab.navItem],
+        ),
       ),
       body: IndexedStack(
         index: currentIndex,
