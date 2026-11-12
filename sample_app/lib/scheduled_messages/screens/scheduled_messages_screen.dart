@@ -55,6 +55,38 @@ class ScheduledMessagesPage extends StatelessWidget {
         parentId: parentId,
         physics: const AlwaysScrollableScrollPhysics(),
         onScheduledMessageTap: (it) => _openScheduledMessageActions(context, it),
+        emptyBuilder: (context) => const _NoScheduledMessages(),
+      ),
+    );
+  }
+}
+
+// The empty list, with a hint on how to schedule a message.
+class _NoScheduledMessages extends StatelessWidget {
+  const _NoScheduledMessages();
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = context.streamTextTheme;
+    final colorScheme = context.streamColorScheme;
+
+    return Center(
+      child: StreamScrollViewEmptyWidget(
+        emptyIcon: Icon(context.streamIcons.clock),
+        emptyTitle: Column(
+          mainAxisSize: .min,
+          children: [
+            Text(
+              context.translations.noScheduledMessagesText,
+              style: textTheme.bodyEmphasis.copyWith(color: colorScheme.textPrimary),
+            ),
+            Text(
+              ScheduledMessagesStrings.emptyDescription,
+              textAlign: .center,
+              style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -79,6 +111,17 @@ Future<void> _openScheduledMessageActions(
   BuildContext context,
   ScheduledMessage scheduledMessage,
 ) async {
+  // A message being sent has no actions, so its sheet wouldn't open.
+  final actions = StreamScheduledMessageActionsBuilder.buildActions(
+    context: context,
+    scheduledMessage: scheduledMessage,
+  );
+  if (actions.isEmpty) {
+    final messenger = StreamSnackbarMessenger.of(context);
+    messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.stillSending)));
+    return;
+  }
+
   final action = await showStreamScheduledMessageActionsSheet(
     context: context,
     scheduledMessage: scheduledMessage,
