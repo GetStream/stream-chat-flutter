@@ -90,15 +90,6 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
         crossAxisAlignment: .stretch,
         children: [
           StreamSheetHeader(
-            // A close button, not a back one, even when the sheet is stacked
-            // on another, as closing it picks no time.
-            leading: StreamButton.icon(
-              type: .outline,
-              style: .secondary,
-              tooltip: materialLocalizations.closeButtonTooltip,
-              icon: Icon(icons.xmark),
-              onPressed: () => Navigator.of(context).maybePop(),
-            ),
             title: Text(
               switch (_isRescheduling) {
                 true => translations.rescheduleMessageLabel,

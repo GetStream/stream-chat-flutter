@@ -38,4 +38,13 @@ void main() {
       expect(results, [null]);
     });
   });
+
+  testWidgets('showStreamScheduleTimeSheet opened on its own is headed by a close button', (tester) async {
+    await withClock(Clock.fixed(wednesday), () async {
+      await showTimeSheet(tester, scheduleChannel());
+
+      expect(closeButton(), findsOneWidget);
+      expect(backButton(), findsNothing);
+    });
+  });
 }

@@ -170,8 +170,11 @@ List<String?> rowLabels(WidgetTester tester) {
   return [for (final tile in tiles) (tile.props.title! as Text).data];
 }
 
-/// The close button of the sheet on top.
-Finder closeButton() => find.byTooltip('Close').last;
+/// The close button of a sheet opened on its own.
+Finder closeButton() => find.byTooltip('Close');
+
+/// The back button of a sheet stacked on another.
+Finder backButton() => find.byTooltip('Back');
 
 /// The custom time sheet's confirm button.
 Finder confirmButton() => find.byTooltip('Schedule');

@@ -18,17 +18,27 @@ void main() {
     });
   });
 
-  testWidgets('showStreamScheduleMessageSheet stays open when the custom time sheet is closed', (tester) async {
+  testWidgets('showStreamScheduleMessageSheet stays open when the custom time sheet goes back', (tester) async {
     await withClock(Clock.fixed(wednesday), () async {
       final results = await showMessageSheet(tester, scheduleChannel());
       await tester.tap(find.text('Custom time'));
       await tester.pumpAndSettle();
 
-      await tester.tap(closeButton());
+      await tester.tap(backButton());
       await tester.pumpAndSettle();
 
       expect(find.text('Custom time'), findsOneWidget);
       expect(results, isEmpty);
+    });
+  });
+
+  testWidgets('showStreamScheduleMessageSheet heads the custom time sheet with a back button', (tester) async {
+    await withClock(Clock.fixed(wednesday), () async {
+      await showMessageSheet(tester, scheduleChannel());
+      await tester.tap(find.text('Custom time'));
+      await tester.pumpAndSettle();
+
+      expect(backButton(), findsOneWidget);
     });
   });
 }
