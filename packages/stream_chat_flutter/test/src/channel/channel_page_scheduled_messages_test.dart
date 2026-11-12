@@ -11,7 +11,7 @@ void main() {
 
     final banner = bannerPill(tester);
     final input = tester.getRect(find.byType(StreamChatMessageInput));
-    expect(find.text('1 scheduled message'), findsOneWidget);
+    expect(find.text(_scheduledForLabel), findsOneWidget);
     expect(banner.bottom, lessThanOrEqualTo(input.top));
   });
 
@@ -34,7 +34,7 @@ void main() {
     expect(find.byType(StreamScheduledMessagesBanner), findsNothing);
   });
 
-  testWidgets('tapping View all invokes onScheduledMessagesViewAllPressed', (tester) async {
+  testWidgets("tapping the banner's link invokes onScheduledMessagesViewAllPressed", (tester) async {
     var taps = 0;
     await pumpChannelPage(
       tester,
@@ -42,7 +42,7 @@ void main() {
       onScheduledMessagesViewAllPressed: (_, _) => taps += 1,
     );
 
-    await tester.tap(find.text('View all'));
+    await tester.tap(find.text('View'));
 
     expect(taps, 1);
   });
@@ -85,12 +85,17 @@ void main() {
 
   testWidgets("doesn't rebuild the scheduled messages banner while typing", (tester) async {
     await pumpChannelPage(tester, scheduledMessages: [scheduledMessage()]);
-    final countBefore = tester.widget<Text>(find.text('1 scheduled message'));
+    final countBefore = tester.widget<Text>(find.text(_scheduledForLabel));
 
     await tester.enterText(find.byType(EditableText), 'Hello');
     await tester.pumpAndSettle();
 
     // A rebuild would create a new Text.
-    expect(tester.widget<Text>(find.text('1 scheduled message')), same(countBefore));
+    expect(tester.widget<Text>(find.text(_scheduledForLabel)), same(countBefore));
   });
 }
+
+// The banner's label for the channel's only scheduled message.
+final _scheduledForLabel = DefaultTranslations.instance.scheduledMessageScheduledForText(
+  scheduledAt: scheduledMessage().scheduledAt,
+);

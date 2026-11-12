@@ -832,6 +832,12 @@ abstract class Translations {
   /// The [scheduledAt] is shown in local time.
   String scheduledMessageSendAtText({required DateTime scheduledAt});
 
+  /// The time a message is scheduled for, such as "Scheduled for Fri, Oct 23
+  /// at 9:00 AM".
+  ///
+  /// The [scheduledAt] is shown in local time.
+  String scheduledMessageScheduledForText({required DateTime scheduledAt});
+
   /// The status of a scheduled message while it is being sent, such as
   /// "Sending…".
   String get scheduledMessageSendingLabel;
@@ -934,6 +940,10 @@ abstract class Translations {
   /// error shown when scheduling fails, when the channel holds its [limit] of
   /// scheduled messages, such as "Limit reached (10 max)".
   String scheduleChannelLimitReachedLabel({required int limit});
+
+  /// The error shown when the current user holds their [limit] of scheduled
+  /// messages, such as "You've reached your limit of 100 scheduled messages.".
+  String scheduleUserLimitReachedError({required int limit});
 
   /// The error shown when a message could not be scheduled, such as
   /// "Couldn't schedule message. Try again".
@@ -1856,6 +1866,14 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   }
 
   @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd('en_US').format(localScheduledAt);
+    final time = DateFormat.jm('en_US').format(localScheduledAt);
+    return 'Scheduled for $date at $time';
+  }
+
+  @override
   String get scheduledMessageSendingLabel => 'Sending…';
 
   @override
@@ -1965,6 +1983,10 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Limit reached ($limit max)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) =>
+      "You've reached your limit of $limit scheduled messages.";
 
   @override
   String get scheduleMessageError => "Couldn't schedule message. Try again";

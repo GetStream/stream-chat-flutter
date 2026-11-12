@@ -878,6 +878,14 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return '$date $time に予約済み';
+  }
+
+  @override
   String get scheduledMessageSendingLabel => '送信中…';
 
   @override
@@ -987,6 +995,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => '上限に達しました（最大$limit件）';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) => '予約メッセージの上限（$limit件）に達しました。';
 
   @override
   String get scheduleMessageError => 'メッセージを予約できませんでした。もう一度お試しください';

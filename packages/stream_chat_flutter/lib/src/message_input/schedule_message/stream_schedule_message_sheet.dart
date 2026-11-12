@@ -48,13 +48,15 @@ class _ScheduleMessageSheet extends StatelessWidget {
 
     final config = channel.config;
     final bounds = ScheduleMessageBounds.fromConfig(config);
-    final presets = schedulePresets().where(bounds.contains);
+    final presets = schedulePresets();
 
-    // Messages that failed don't count toward the channel's limit.
+    // Messages that failed don't count toward the channel's or the user's
+    // limit.
     final scheduledMessages = channel.client.state.scheduledMessages;
     final counts = ScheduledMessageCounts.of(scheduledMessages, cid: channel.cid!);
-    final reachedLimit = switch (config?.scheduledMessagesMaxPerChannel) {
-      final limit? when counts.channelPending >= limit => limit,
+    final reachedLimit = switch ((config?.scheduledMessagesMaxPerChannel, config?.scheduledMessagesMaxPerUser)) {
+      (final limit?, _) when counts.channelPending >= limit => limit,
+      (_, final limit?) when counts.userPending >= limit => limit,
       _ => null,
     };
     final isLimitReached = reachedLimit != null;
@@ -78,7 +80,8 @@ class _ScheduleMessageSheet extends StatelessWidget {
                   for (final preset in presets)
                     _ScheduleOptionRow(
                       label: Text(_presetLabel(translations, preset)),
-                      enabled: !isLimitReached,
+                      // A preset the channel doesn't allow is shown, but can't be picked.
+                      enabled: !isLimitReached && bounds.contains(preset),
                       onTap: () => Navigator.of(context).pop(preset),
                     ),
                   _ScheduleOptionRow(

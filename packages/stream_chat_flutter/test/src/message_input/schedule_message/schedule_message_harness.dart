@@ -170,6 +170,12 @@ List<String?> rowLabels(WidgetTester tester) {
   return [for (final tile in tiles) (tile.props.title! as Text).data];
 }
 
+/// Whether each of the schedule sheet's rows can be tapped, in order.
+List<bool> rowsEnabled(WidgetTester tester) {
+  final tiles = tester.widgetList<StreamListTile>(find.byType(StreamListTile));
+  return [for (final tile in tiles) tile.props.enabled];
+}
+
 /// The close button of a sheet opened on its own.
 Finder closeButton() => find.byTooltip('Close');
 

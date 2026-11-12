@@ -197,17 +197,31 @@ class _ScheduledMessagesBanner extends StatelessWidget {
     final isPending = counts.hasPending && channel.canScheduleMessage;
     if (!isFailed && !isPending) return const SizedBox.shrink();
 
+    final limit = channel.config?.scheduledMessagesMaxPerChannel;
+    final isAtLimit = limit != null && channelPending >= limit;
+    // A channel's only scheduled message is named by when it is sent.
+    final onlyScheduledAt = switch (counts.nextScheduledAt) {
+      final scheduledAt? when !isFailed && !isThread && !isAtLimit && pending == 1 => scheduledAt,
+      _ => null,
+    };
+
     String label() {
       if (isFailed) return translations.scheduledMessagesFailedCountText(count: failed);
       if (isThread) return translations.scheduledRepliesCountText(count: pending);
-
-      final limit = channel.config?.scheduledMessagesMaxPerChannel;
-      if (limit != null && channelPending >= limit) {
+      if (limit != null && isAtLimit) {
         return translations.scheduledMessagesLimitText(count: channelPending, limit: limit);
+      }
+      if (onlyScheduledAt != null) {
+        return translations.scheduledMessageScheduledForText(scheduledAt: onlyScheduledAt);
       }
 
       return translations.scheduledMessagesCountText(count: pending);
     }
+
+    final linkLabel = switch (onlyScheduledAt) {
+      null => translations.viewAllLabel,
+      _ => translations.viewLabel,
+    };
 
     final effectiveIconColor = switch (isFailed) {
       true => theme.failedIconColor ?? defaults.failedIconColor,
@@ -227,28 +241,32 @@ class _ScheduledMessagesBanner extends StatelessWidget {
       color: effectiveBackgroundColor,
       elevation: effectiveElevation,
       shape: effectiveShape,
-      child: ConstrainedBox(
-        constraints: const BoxConstraints(minHeight: 44),
-        child: Padding(
-          padding: effectivePadding,
-          child: Row(
-            spacing: spacing.sm,
-            children: [
-              Icon(
-                isFailed ? icons.exclamationCircle : icons.clock,
-                size: 20,
-                color: effectiveIconColor,
-              ),
-              Expanded(
-                child: Text(
-                  label(),
-                  style: effectiveCountStyle,
-                  maxLines: 1,
-                  overflow: .ellipsis,
+      child: InkWell(
+        customBorder: effectiveShape,
+        onTap: onViewAllPressed,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 44),
+          child: Padding(
+            padding: effectivePadding,
+            child: Row(
+              spacing: spacing.sm,
+              children: [
+                Icon(
+                  isFailed ? icons.exclamationCircle : icons.clock,
+                  size: 20,
+                  color: effectiveIconColor,
                 ),
-              ),
-              if (onViewAllPressed != null) Text(translations.viewAllLabel, style: effectiveViewAllStyle),
-            ],
+                Expanded(
+                  child: Text(
+                    label(),
+                    style: effectiveCountStyle,
+                    maxLines: 1,
+                    overflow: .ellipsis,
+                  ),
+                ),
+                if (onViewAllPressed != null) Text(linkLabel, style: effectiveViewAllStyle),
+              ],
+            ),
           ),
         ),
       ),
@@ -259,11 +277,7 @@ class _ScheduledMessagesBanner extends StatelessWidget {
       container: true,
       liveRegion: true,
       button: onViewAllPressed != null,
-      child: GestureDetector(
-        behavior: .opaque,
-        onTap: onViewAllPressed,
-        child: banner,
-      ),
+      child: banner,
     );
 
     final margin = this.margin;

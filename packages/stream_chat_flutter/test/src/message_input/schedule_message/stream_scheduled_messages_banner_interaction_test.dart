@@ -60,7 +60,7 @@ void main() {
     await tester.pumpWidget(
       wrapWithMaterialApp(
         StreamScheduledMessagesBanner(onViewAllPressed: () => taps += 1),
-        channel: scheduleChannel(scheduledMessages: [scheduledMessage('a')]),
+        channel: scheduleChannel(scheduledMessages: [scheduledMessage('a'), scheduledMessage('b')]),
       ),
     );
     await tester.pumpAndSettle();
@@ -75,11 +75,11 @@ void main() {
     await tester.pumpWidget(
       wrapWithMaterialApp(
         StreamScheduledMessagesBanner(onViewAllPressed: () => taps += 1),
-        channel: scheduleChannel(scheduledMessages: [scheduledMessage('a')]),
+        channel: scheduleChannel(scheduledMessages: [scheduledMessage('a'), scheduledMessage('b')]),
       ),
     );
     await tester.pumpAndSettle();
-    await tester.tap(find.text('1 scheduled message'));
+    await tester.tap(find.text('2 scheduled messages'));
 
     expect(taps, 1);
   });
@@ -119,12 +119,12 @@ void main() {
     await tester.pumpWidget(
       wrapWithMaterialApp(
         StreamScheduledMessagesBanner(onViewAllPressed: () {}),
-        channel: scheduleChannel(scheduledMessages: [scheduledMessage('a')]),
+        channel: scheduleChannel(scheduledMessages: [scheduledMessage('a'), scheduledMessage('b')]),
       ),
     );
     await tester.pumpAndSettle();
 
-    final banner = find.bySemanticsLabel(RegExp('1 scheduled message.*View all', dotAll: true));
+    final banner = find.bySemanticsLabel(RegExp('2 scheduled messages.*View all', dotAll: true));
     expect(
       tester.getSemantics(banner),
       isSemantics(isLiveRegion: true, isButton: true, hasTapAction: true),
@@ -138,13 +138,13 @@ void main() {
     await tester.pumpWidget(
       wrapWithMaterialApp(
         StreamScheduledMessagesBanner(),
-        channel: scheduleChannel(scheduledMessages: [scheduledMessage('a')]),
+        channel: scheduleChannel(scheduledMessages: [scheduledMessage('a'), scheduledMessage('b')]),
       ),
     );
     await tester.pumpAndSettle();
 
     expect(
-      tester.getSemantics(find.bySemanticsLabel('1 scheduled message')),
+      tester.getSemantics(find.bySemanticsLabel('2 scheduled messages')),
       isSemantics(isLiveRegion: true, isButton: false, hasTapAction: false),
     );
     handle.dispose();
@@ -166,20 +166,21 @@ void main() {
   testWidgets("StreamScheduledMessagesBanner doesn't rebuild when a change leaves its counts as they are", (
     tester,
   ) async {
-    final scheduled = scheduledMessage('a');
+    final next = scheduledMessage('a');
+    final later = scheduledMessage('b');
     final updates = StreamController<List<ScheduledMessage>>();
     addTearDown(updates.close);
-    final channel = scheduleChannel(scheduledMessages: [scheduled], scheduledMessagesStream: updates.stream);
+    final channel = scheduleChannel(scheduledMessages: [next, later], scheduledMessagesStream: updates.stream);
 
     await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessagesBanner(), channel: channel));
     await tester.pumpAndSettle();
-    final countBefore = tester.widget<Text>(find.text('1 scheduled message'));
+    final countBefore = tester.widget<Text>(find.text('2 scheduled messages'));
 
-    updates.add([scheduled.copyWith(scheduledAt: DateTime(2026, 10, 24, 9))]);
+    updates.add([next, later.copyWith(scheduledAt: DateTime(2026, 10, 24, 9))]);
     await tester.pumpAndSettle();
 
     // A rebuild would create a new Text.
-    expect(tester.widget<Text>(find.text('1 scheduled message')), same(countBefore));
+    expect(tester.widget<Text>(find.text('2 scheduled messages')), same(countBefore));
   });
 
   testWidgets('StreamScheduledMessagesBanner updates its count when a message is scheduled', (tester) async {

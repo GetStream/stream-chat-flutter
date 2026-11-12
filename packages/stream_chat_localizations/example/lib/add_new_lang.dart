@@ -918,6 +918,12 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+    final jiffy = Jiffy.parseFromDateTime(scheduledAt.toLocal());
+    return 'Scheduled for ${jiffy.MMMEd} at ${jiffy.jm}';
+  }
+
+  @override
   String get scheduledMessageSendingLabel => 'Sending…';
 
   @override
@@ -1023,6 +1029,10 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Limit reached ($limit max)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) =>
+      "You've reached your limit of $limit scheduled messages.";
 
   @override
   String get scheduleMessageError => "Couldn't schedule message. Try again";

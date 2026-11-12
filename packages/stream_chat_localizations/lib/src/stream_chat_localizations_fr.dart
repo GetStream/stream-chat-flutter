@@ -902,6 +902,14 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   }
 
   @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return 'Programmé pour le $date à $time';
+  }
+
+  @override
   String get scheduledMessageSendingLabel => 'Envoi en cours…';
 
   @override
@@ -1012,6 +1020,10 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Limite atteinte ($limit max.)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) =>
+      'Vous avez atteint votre limite de $limit messages programmés.';
 
   @override
   String get scheduleMessageError => 'Impossible de programmer le message. Réessayez';

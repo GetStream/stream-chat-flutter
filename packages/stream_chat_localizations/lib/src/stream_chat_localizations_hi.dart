@@ -898,6 +898,14 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return '$date को $time के लिए शेड्यूल किया गया';
+  }
+
+  @override
   String get scheduledMessageSendingLabel => 'भेजा जा रहा है…';
 
   @override
@@ -1007,6 +1015,10 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => 'सीमा पूरी हो गई (अधिकतम $limit)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) =>
+      'आप $limit शेड्यूल किए गए संदेशों की सीमा तक पहुँच गए हैं।';
 
   @override
   String get scheduleMessageError => 'संदेश शेड्यूल नहीं हो सका। फिर से कोशिश करें';

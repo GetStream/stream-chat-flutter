@@ -133,4 +133,64 @@ void main() {
       expect(find.textContaining('Sent in your time zone (GMT'), findsOneWidget);
     });
   });
+
+  testWidgets('showStreamScheduleTimeSheet says the user holds their limit of scheduled messages', (tester) async {
+    final config = ChannelConfig(scheduledMessagesMaxPerUser: 2);
+    final pending = [scheduledMessage('a'), scheduledMessage('b')];
+
+    await withClock(Clock.fixed(wednesday), () async {
+      await showTimeSheet(tester, scheduleChannel(config: config, scheduledMessages: pending));
+
+      expect(find.text("You've reached your limit of 2 scheduled messages."), findsOneWidget);
+    });
+  });
+
+  testWidgets("showStreamScheduleTimeSheet can't schedule while the user holds their limit", (tester) async {
+    final config = ChannelConfig(scheduledMessagesMaxPerUser: 2);
+    final pending = [scheduledMessage('a'), scheduledMessage('b')];
+
+    await withClock(Clock.fixed(wednesday), () async {
+      await showTimeSheet(tester, scheduleChannel(config: config, scheduledMessages: pending));
+
+      expect(scheduleButton(tester).props.onPressed, isNull);
+    });
+  });
+
+  testWidgets('showStreamScheduleTimeSheet can reschedule while the user holds their limit', (tester) async {
+    final config = ChannelConfig(scheduledMessagesMaxPerUser: 2);
+    final pending = [scheduledMessage('a'), scheduledMessage('b')];
+
+    await withClock(Clock.fixed(wednesday), () async {
+      await showTimeSheet(
+        tester,
+        scheduleChannel(config: config, scheduledMessages: pending),
+        initialScheduledAt: DateTime(2026, 10, 23, 9),
+      );
+
+      expect(scheduleButton(tester).props.onPressed, isNotNull);
+    });
+  });
+
+  testWidgets('showStreamScheduleTimeSheet previews when a rescheduled message is sent', (tester) async {
+    final scheduledAt = DateTime(2026, 10, 23, 9);
+
+    await withClock(Clock.fixed(wednesday), () async {
+      await showTimeSheet(tester, scheduleChannel(), initialScheduledAt: scheduledAt);
+
+      final label = DefaultTranslations.instance.scheduledMessageScheduledForText(scheduledAt: scheduledAt);
+      expect(find.text(label), findsOneWidget);
+    });
+  });
+
+  testWidgets('showStreamScheduleTimeSheet opens the time picker for typing the time', (tester) async {
+    await withClock(Clock.fixed(wednesday), () async {
+      await showTimeSheet(tester, scheduleChannel());
+
+      await tester.tap(find.text('Time'));
+      await tester.pumpAndSettle();
+
+      final picker = tester.widget<TimePickerDialog>(find.byType(TimePickerDialog));
+      expect(picker.initialEntryMode, TimePickerEntryMode.input);
+    });
+  });
 }

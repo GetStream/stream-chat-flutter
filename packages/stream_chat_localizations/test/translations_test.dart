@@ -420,6 +420,9 @@ void main() {
       final sendAt = localizations.scheduledMessageSendAtText(scheduledAt: scheduledAt);
       expect(sendAt, contains(DateFormat.MMMEd(language).format(localScheduledAt)));
       expect(sendAt, contains(DateFormat.jm(language).format(localScheduledAt)));
+      final scheduledFor = localizations.scheduledMessageScheduledForText(scheduledAt: scheduledAt);
+      expect(scheduledFor, contains(DateFormat.MMMEd(language).format(localScheduledAt)));
+      expect(scheduledFor, contains(DateFormat.jm(language).format(localScheduledAt)));
       expect(localizations.scheduledMessageSendingLabel, isNotNull);
       expect(localizations.scheduledMessageUploadingLabel, isNotNull);
       expect(localizations.scheduledThreadReplyPrefixText, isNotNull);
@@ -473,6 +476,7 @@ void main() {
       expect(localizations.scheduleTooSoonError(minLeadTime: const Duration(minutes: 5)), contains('5'));
       expect(localizations.rescheduleTooSoonError, isNotEmpty);
       expect(localizations.scheduleTooFarError, isNotEmpty);
+      expect(localizations.scheduleUserLimitReachedError(limit: 100), contains('100'));
       expect(localizations.scheduleMessageError, isNotEmpty);
       expect(localizations.rescheduleMessageLabel, isNotEmpty);
       expect(localizations.scheduledMessagesCountText(count: 3), contains('3'));

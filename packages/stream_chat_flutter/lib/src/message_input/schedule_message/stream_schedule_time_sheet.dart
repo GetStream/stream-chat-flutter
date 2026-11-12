@@ -5,6 +5,7 @@ import '../../../stream_chat_flutter.dart';
 import '../../utils/channel_name.dart';
 import 'schedule_message_bounds.dart';
 import 'schedule_message_picker_theme.dart';
+import 'scheduled_message_counts.dart';
 
 /// Shows a sheet to pick the date and time [message] is sent at in [channel],
 /// which must be initialized.
@@ -64,13 +65,20 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
 
     final materialLocalizations = MaterialLocalizations.of(context);
 
-    final bounds = ScheduleMessageBounds.fromConfig(widget.channel.config);
-    final errorText = _errorText(bounds);
-    final canSchedule = bounds.contains(_scheduledAt);
-
     final channel = widget.channel;
-    final channelName = loadedChannelName(channel, currentUser: channel.client.state.currentUser);
-    final channelLabel = translations.messageToLabel(channelName: channelName ?? translations.noTitleText);
+    final bounds = ScheduleMessageBounds.fromConfig(channel.config);
+    final scheduledMessages = channel.client.state.scheduledMessages;
+    final counts = ScheduledMessageCounts.of(scheduledMessages, cid: channel.cid!);
+    final errorText = _errorText(bounds, counts);
+    final canSchedule = errorText == null;
+
+    final previewTitle = switch (widget.initialScheduledAt) {
+      final scheduledAt? => translations.scheduledMessageScheduledForText(scheduledAt: scheduledAt),
+      null => translations.messageToLabel(
+        channelName:
+            loadedChannelName(channel, currentUser: channel.client.state.currentUser) ?? translations.noTitleText,
+      ),
+    };
     final valueStyle = textTheme.captionDefault.copyWith(color: colorScheme.textTertiary);
 
     final date = materialLocalizations.formatMediumDate(_scheduledAt);
@@ -116,7 +124,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
                 Padding(
                   padding: contentPadding,
                   child: StreamMessageComposerEditMessageAttachment(
-                    title: Text(channelLabel),
+                    title: Text(previewTitle),
                     subtitle: _ScheduledMessagePreviewText(message: widget.message),
                   ),
                 ),
@@ -202,6 +210,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
     final time = await showTimePicker(
       context: context,
       initialTime: .fromDateTime(_scheduledAt),
+      initialEntryMode: .input,
       builder: buildSchedulePickerTheme,
     );
 
@@ -211,9 +220,16 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
     _setScheduledAt(DateTime(date.year, date.month, date.day, time.hour, time.minute));
   }
 
-  // The error to show for the picked time, when the channel doesn't allow it.
-  String? _errorText(ScheduleMessageBounds bounds) {
+  // Why the picked time can't be scheduled, or null when it can.
+  String? _errorText(ScheduleMessageBounds bounds, ScheduledMessageCounts counts) {
     final translations = context.translations;
+
+    // Rescheduling moves a message the user already counts toward the limit.
+    final userLimit = widget.channel.config?.scheduledMessagesMaxPerUser;
+    if (!_isRescheduling && userLimit != null && counts.userPending >= userLimit) {
+      return translations.scheduleUserLimitReachedError(limit: userLimit);
+    }
+
     if (bounds.isTooSoon(_scheduledAt)) {
       return switch (_isRescheduling) {
         true => translations.rescheduleTooSoonError,

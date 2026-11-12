@@ -881,6 +881,14 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return '$date $time에 예약됨';
+  }
+
+  @override
   String get scheduledMessageSendingLabel => '전송 중…';
 
   @override
@@ -990,6 +998,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => '한도에 도달했습니다(최대 $limit개)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) => '예약 메시지 한도($limit개)에 도달했습니다.';
 
   @override
   String get scheduleMessageError => '메시지를 예약하지 못했습니다. 다시 시도하세요';

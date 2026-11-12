@@ -910,6 +910,14 @@ Attenzione: il limite massimo di $limit file è stato superato.
   }
 
   @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return 'Programmato per il $date alle $time';
+  }
+
+  @override
   String get scheduledMessageSendingLabel => 'Invio in corso…';
 
   @override
@@ -1021,6 +1029,10 @@ Attenzione: il limite massimo di $limit file è stato superato.
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Limite raggiunto (max $limit)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) =>
+      'Hai raggiunto il limite di $limit messaggi programmati.';
 
   @override
   String get scheduleMessageError => 'Impossibile programmare il messaggio. Riprova';

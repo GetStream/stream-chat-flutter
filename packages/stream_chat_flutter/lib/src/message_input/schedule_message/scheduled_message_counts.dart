@@ -5,7 +5,8 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 /// The counts of scheduled messages in a channel or thread.
 ///
 /// [channelPending] counts the pending messages of the whole channel, thread
-/// replies included, as they all count toward its limit.
+/// replies included, and [userPending] those of every channel, as they count
+/// toward the channel's and the user's limits.
 @internal
 class ScheduledMessageCounts extends Equatable {
   /// Creates counts of scheduled messages.
@@ -13,6 +14,8 @@ class ScheduledMessageCounts extends Equatable {
     required this.failed,
     required this.pending,
     required this.channelPending,
+    required this.userPending,
+    this.nextScheduledAt,
   });
 
   /// Counts [scheduledMessages] in the channel [cid], or in the thread of
@@ -25,22 +28,32 @@ class ScheduledMessageCounts extends Equatable {
     var failed = 0;
     var pending = 0;
     var channelPending = 0;
+    var userPending = 0;
+    DateTime? nextScheduledAt;
     for (final it in scheduledMessages) {
-      if (it.cid != cid) continue;
-
       final isPending = it.status.isPending;
+      if (isPending) userPending += 1;
+      if (it.cid != cid) continue;
       if (isPending) channelPending += 1;
 
       // A channel counts its own messages, a thread its replies.
       if (it.message.parentId != parentId) continue;
       if (it.status == .failed) failed += 1;
-      if (isPending) pending += 1;
+      if (!isPending) continue;
+
+      pending += 1;
+      final scheduledAt = it.scheduledAt;
+      if (nextScheduledAt == null || scheduledAt.isBefore(nextScheduledAt)) {
+        nextScheduledAt = scheduledAt;
+      }
     }
 
     return ScheduledMessageCounts(
       failed: failed,
       pending: pending,
       channelPending: channelPending,
+      userPending: userPending,
+      nextScheduledAt: nextScheduledAt,
     );
   }
 
@@ -53,6 +66,13 @@ class ScheduledMessageCounts extends Equatable {
   /// The pending messages of the whole channel, thread replies included.
   final int channelPending;
 
+  /// The pending messages of every channel.
+  final int userPending;
+
+  /// When the first pending message in the channel or thread is sent, or null
+  /// when none is pending.
+  final DateTime? nextScheduledAt;
+
   /// Whether any message failed.
   bool get hasFailed => failed > 0;
 
@@ -61,5 +81,5 @@ class ScheduledMessageCounts extends Equatable {
 
   /// Every field must be listed, or the banner skips rebuilds it needs.
   @override
-  List<Object?> get props => [failed, pending, channelPending];
+  List<Object?> get props => [failed, pending, channelPending, userPending, nextScheduledAt];
 }

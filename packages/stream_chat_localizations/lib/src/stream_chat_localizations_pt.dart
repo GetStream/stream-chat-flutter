@@ -899,6 +899,14 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   }
 
   @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return 'Agendado para $date às $time';
+  }
+
+  @override
   String get scheduledMessageSendingLabel => 'Enviando…';
 
   @override
@@ -1009,6 +1017,9 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String scheduleChannelLimitReachedLabel({required int limit}) => 'Limite atingido (máx. $limit)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) => 'Você atingiu o limite de $limit mensagens agendadas.';
 
   @override
   String get scheduleMessageError => 'Não foi possível agendar a mensagem. Tente novamente';

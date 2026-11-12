@@ -67,7 +67,7 @@ void main() {
     });
   });
 
-  testWidgets('showStreamScheduleMessageSheet hides presets further ahead than the channel allows', (
+  testWidgets('showStreamScheduleMessageSheet disables presets further ahead than the channel allows', (
     tester,
   ) async {
     final config = ChannelConfig(scheduledMessagesMaxLeadTime: const Duration(days: 1));
@@ -75,17 +75,17 @@ void main() {
     await withClock(Clock.fixed(wednesday), () async {
       await showMessageSheet(tester, scheduleChannel(config: config));
 
-      expect(rowLabels(tester), ['Tomorrow at 9:00\u202fAM', 'Custom time']);
+      expect(rowsEnabled(tester), [true, false, false, true]);
     });
   });
 
-  testWidgets('showStreamScheduleMessageSheet hides presets sooner than the channel allows', (tester) async {
+  testWidgets('showStreamScheduleMessageSheet disables presets sooner than the channel allows', (tester) async {
     final config = ChannelConfig(scheduledMessagesMinLeadTime: const Duration(hours: 24));
 
     await withClock(Clock.fixed(wednesday), () async {
       await showMessageSheet(tester, scheduleChannel(config: config));
 
-      expect(rowLabels(tester), ['Tomorrow at 1:00\u202fPM', 'Monday at 9:00\u202fAM', 'Custom time']);
+      expect(rowsEnabled(tester), [false, true, true, true]);
     });
   });
 
@@ -163,6 +163,30 @@ void main() {
 
       final scheduledAt = results.single!;
       expect((scheduledAt.day, scheduledAt.hour, scheduledAt.minute), (25, 13, 0));
+    });
+  });
+
+  testWidgets('showStreamScheduleMessageSheet says the limit is reached when the user holds their limit', (
+    tester,
+  ) async {
+    final config = ChannelConfig(scheduledMessagesMaxPerUser: 2);
+    final pending = [scheduledMessage('a'), scheduledMessage('b')];
+
+    await withClock(Clock.fixed(wednesday), () async {
+      await showMessageSheet(tester, scheduleChannel(config: config, scheduledMessages: pending));
+
+      expect(find.text('Limit reached (2 max)'), findsOneWidget);
+    });
+  });
+
+  testWidgets('showStreamScheduleMessageSheet disables every row when the user holds their limit', (tester) async {
+    final config = ChannelConfig(scheduledMessagesMaxPerUser: 2);
+    final pending = [scheduledMessage('a'), scheduledMessage('b')];
+
+    await withClock(Clock.fixed(wednesday), () async {
+      await showMessageSheet(tester, scheduleChannel(config: config, scheduledMessages: pending));
+
+      expect(rowsEnabled(tester), everyElement(isFalse));
     });
   });
 }

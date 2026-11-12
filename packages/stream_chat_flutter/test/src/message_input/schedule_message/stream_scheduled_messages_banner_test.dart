@@ -143,4 +143,20 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(find.byType(Text), findsNothing);
   });
+
+  testWidgets("StreamScheduledMessagesBanner names when the channel's only scheduled message is sent", (tester) async {
+    final channel = scheduleChannel(scheduledMessages: [scheduledMessage('a')]);
+
+    await tester.pumpWidget(
+      wrapWithMaterialApp(StreamScheduledMessagesBanner(onViewAllPressed: () {}), channel: channel),
+    );
+    await tester.pumpAndSettle();
+
+    final scheduledAt = DateTime(2026, 10, 23, 9);
+    expect(
+      find.text(DefaultTranslations.instance.scheduledMessageScheduledForText(scheduledAt: scheduledAt)),
+      findsOne,
+    );
+    expect(find.text('View'), findsOneWidget);
+  });
 }
