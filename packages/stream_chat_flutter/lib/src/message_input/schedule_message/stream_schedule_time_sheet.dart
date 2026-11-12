@@ -255,7 +255,7 @@ class _SchedulePickerRow extends StatelessWidget {
     return StreamListTileTheme(
       data: StreamListTileThemeData(
         minTileHeight: 48,
-        contentPadding: .symmetric(horizontal: spacing.sm, vertical: spacing.xs),
+        contentPadding: .symmetric(horizontal: spacing.sm),
       ),
       child: StreamListTile(leading: icon, title: label, trailing: value, onTap: onTap),
     );
