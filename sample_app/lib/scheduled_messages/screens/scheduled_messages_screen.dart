@@ -253,7 +253,7 @@ Future<void> _reschedule(BuildContext context, ScheduledMessage scheduledMessage
 
   return _run(context, () async {
     await client.rescheduleMessage(scheduledMessage, scheduledAt: scheduledAt);
-    return ScheduledMessagesStrings.scheduled;
+    return ScheduledMessagesStrings.rescheduled;
   });
 }
 

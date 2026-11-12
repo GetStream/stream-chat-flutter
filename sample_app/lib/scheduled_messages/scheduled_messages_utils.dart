@@ -7,6 +7,14 @@ import 'scheduled_messages_strings.dart';
 ///
 /// Returns [fallback] when [error] has nothing more specific to say.
 String describeScheduleError(Object error, {required String fallback}) {
+  if (error is ScheduledMessageRefusedError) {
+    return switch (error.reason) {
+      .slashCommand => ScheduledMessagesStrings.commandNotSchedulable,
+      .quotedMessageDeleted => ScheduledMessagesStrings.quotedMessageDeleted,
+      _ => fallback,
+    };
+  }
+
   if (error is! StreamChatNetworkError) return fallback;
 
   return switch (error.scheduledMessageErrorReason) {
@@ -20,7 +28,7 @@ String describeScheduleError(Object error, {required String fallback}) {
     .scheduledMessageConflict => ScheduledMessagesStrings.conflict,
     .scheduledMessageAlreadySent => ScheduledMessagesStrings.alreadySentError,
     .scheduledMessageCanceled => ScheduledMessagesStrings.canceled,
-    _ when error.statusCode == 404 => ScheduledMessagesStrings.sentOrDeleted,
+    _ when error.isScheduledMessageNotFound => ScheduledMessagesStrings.sentOrDeleted,
     _ => fallback,
   };
 }

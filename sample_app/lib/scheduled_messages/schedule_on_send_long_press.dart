@@ -40,12 +40,12 @@ Future<void> scheduleOnSendLongPress(
 
 // A failure that leaves the message listed as failed counts as scheduled, so
 // it can be retried from the scheduled messages instead of scheduled twice.
+// Any other failure keeps the message in the composer.
 Future<void> _schedule(Channel channel, Message message, DateTime scheduledAt) async {
   try {
     await channel.scheduleMessage(message, scheduledAt: scheduledAt);
-  } catch (_) {
-    final scheduledMessages = channel.client.state.scheduledMessages;
-    final isListed = scheduledMessages.any((it) => it.message.id == message.id);
-    if (!isListed) rethrow;
+  } on StreamChatNetworkError catch (error) {
+    final isAlreadySent = error.scheduledMessageErrorReason == .scheduledMessageAlreadySent;
+    if (!error.isRetriable && !isAlreadySent) rethrow;
   }
 }
