@@ -825,6 +825,56 @@ abstract class Translations {
   /// The text shown under a role mention entry in the mention autocomplete,
   /// describing that it notifies every member holding the role named [role].
   String notifyRoleText(String role);
+
+  /// The send time of a scheduled message, such as "Send Wed, Oct 21 at
+  /// 8:00 AM".
+  ///
+  /// The [scheduledAt] is shown in local time.
+  String scheduledMessageSendAtText({required DateTime scheduledAt});
+
+  /// The status of a scheduled message while it is being sent, such as
+  /// "Sending…".
+  String get scheduledMessageSendingLabel;
+
+  /// The status of a scheduled message while its attachments upload, such as
+  /// "Uploading…".
+  String get scheduledMessageUploadingLabel;
+
+  /// The prefix of the preview of a scheduled reply in a thread, such as
+  /// "Thread reply:".
+  String get scheduledThreadReplyPrefixText;
+
+  /// The prefix of the preview of a scheduled message quoting another, such
+  /// as "Reply to Maya:".
+  ///
+  /// [name] is the quoted message's author, or null when it is not known.
+  String scheduledQuoteReplyPrefixText({String? name});
+
+  /// The reason a scheduled message failed, such as "This channel is frozen".
+  ///
+  /// A null or unrecognized [reason] gives a generic text. [isQuoteDeleted]
+  /// explains a [ScheduledMessageFailureReason.invalidMessage] whose quoted
+  /// message was deleted.
+  String scheduledMessageFailureReasonText({
+    ScheduledMessageFailureReason? reason,
+    bool isQuoteDeleted = false,
+  });
+
+  /// The text shown when there are no scheduled messages.
+  String get noScheduledMessagesText;
+
+  /// The error shown when the scheduled messages could not be loaded.
+  String get loadingScheduledMessagesError;
+
+  /// The label of the action that edits a scheduled message that failed and
+  /// schedules it again, such as "Edit & Reschedule".
+  String get editAndRescheduleLabel;
+
+  /// The label of the action that changes when a scheduled message is sent.
+  String get rescheduleLabel;
+
+  /// The label of the action that sends a scheduled message right away.
+  String get sendNowLabel;
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -1717,6 +1767,67 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String notifyRoleText(String role) => 'Notify all $role members';
+
+  @override
+  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd('en_US').format(localScheduledAt);
+    final time = DateFormat.jm('en_US').format(localScheduledAt);
+    return 'Send $date at $time';
+  }
+
+  @override
+  String get scheduledMessageSendingLabel => 'Sending…';
+
+  @override
+  String get scheduledMessageUploadingLabel => 'Uploading…';
+
+  @override
+  String get scheduledThreadReplyPrefixText => 'Thread reply:';
+
+  @override
+  String scheduledQuoteReplyPrefixText({String? name}) {
+    if (name == null) return 'Reply:';
+    return 'Reply to $name:';
+  }
+
+  @override
+  String scheduledMessageFailureReasonText({
+    ScheduledMessageFailureReason? reason,
+    bool isQuoteDeleted = false,
+  }) {
+    return switch (reason) {
+      .requestFailed => "Couldn't send. Try again",
+      .internalError => 'Something went wrong. Try again',
+      .channelDeleted => 'This channel was deleted',
+      .userDeleted => 'Your account was deleted',
+      .channelFrozen => 'This channel is frozen',
+      .banned => "You can't send messages in this channel",
+      .noPermission => "You're no longer allowed to post here",
+      .moderationBlocked => 'Blocked by moderation',
+      .hookRejected => 'Rejected by the app',
+      .expired => 'Not sent: the service was delayed',
+      .pendingNotSupported => 'This channel now needs approval. Schedule it again.',
+      .invalidMessage when isQuoteDeleted => 'The quoted message was deleted. Edit it to remove the quote.',
+      .invalidMessage => "The message no longer meets the app's limits. Edit it.",
+      _ => 'Something went wrong. Try again',
+    };
+  }
+
+  @override
+  String get noScheduledMessagesText => 'No scheduled messages';
+
+  @override
+  String get loadingScheduledMessagesError => "Couldn't load scheduled messages";
+
+  @override
+  String get editAndRescheduleLabel => 'Edit & Reschedule';
+
+  @override
+  String get rescheduleLabel => 'Reschedule';
+
+  @override
+  String get sendNowLabel => 'Send Now';
 }
 
 // Display name for each language code Stream Chat's translation API

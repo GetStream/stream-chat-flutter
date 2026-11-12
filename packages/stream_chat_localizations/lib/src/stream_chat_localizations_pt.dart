@@ -889,6 +889,67 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String notifyRoleText(String role) => 'Notificar todos os membros $role';
+
+  @override
+  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return 'Enviar em $date às $time';
+  }
+
+  @override
+  String get scheduledMessageSendingLabel => 'Enviando…';
+
+  @override
+  String get scheduledMessageUploadingLabel => 'Enviando arquivos…';
+
+  @override
+  String get scheduledThreadReplyPrefixText => 'Resposta na conversa:';
+
+  @override
+  String scheduledQuoteReplyPrefixText({String? name}) {
+    if (name == null) return 'Resposta:';
+    return 'Resposta a $name:';
+  }
+
+  @override
+  String scheduledMessageFailureReasonText({
+    ScheduledMessageFailureReason? reason,
+    bool isQuoteDeleted = false,
+  }) {
+    return switch (reason) {
+      .requestFailed => 'Não foi possível enviar. Tente novamente',
+      .internalError => 'Algo deu errado. Tente novamente',
+      .channelDeleted => 'Este canal foi excluído',
+      .userDeleted => 'Sua conta foi excluída',
+      .channelFrozen => 'Este canal está congelado',
+      .banned => 'Você não pode enviar mensagens neste canal',
+      .noPermission => 'Você não tem mais permissão para publicar aqui',
+      .moderationBlocked => 'Bloqueada pela moderação',
+      .hookRejected => 'Rejeitada pelo aplicativo',
+      .expired => 'Não enviada: o serviço atrasou',
+      .pendingNotSupported => 'Este canal agora exige aprovação. Agende novamente.',
+      .invalidMessage when isQuoteDeleted => 'A mensagem citada foi excluída. Edite para remover a citação.',
+      .invalidMessage => 'A mensagem não atende mais aos limites do aplicativo. Edite-a.',
+      _ => 'Algo deu errado. Tente novamente',
+    };
+  }
+
+  @override
+  String get noScheduledMessagesText => 'Nenhuma mensagem agendada';
+
+  @override
+  String get loadingScheduledMessagesError => 'Não foi possível carregar as mensagens agendadas';
+
+  @override
+  String get editAndRescheduleLabel => 'Editar e reagendar';
+
+  @override
+  String get rescheduleLabel => 'Reagendar';
+
+  @override
+  String get sendNowLabel => 'Enviar agora';
 }
 
 class _AccessibilityTranslationsPt extends AccessibilityTranslations {
@@ -1004,6 +1065,12 @@ class _AccessibilityTranslationsPt extends AccessibilityTranslations {
 
   @override
   String get messageActionsLabel => 'Ações da mensagem';
+
+  @override
+  String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
+    final date = formatDateTime(scheduledAt.toLocal());
+    return 'Agendada para $date';
+  }
 
   @override
   String galleryImageLabel({DateTime? createdAt}) {

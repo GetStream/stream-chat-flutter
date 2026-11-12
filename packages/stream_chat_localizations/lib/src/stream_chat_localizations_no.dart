@@ -871,6 +871,68 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String notifyRoleText(String role) => 'Varsle alle $role-medlemmer';
+
+  @override
+  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return 'Sendes $date kl. $time';
+  }
+
+  @override
+  String get scheduledMessageSendingLabel => 'Sender…';
+
+  @override
+  String get scheduledMessageUploadingLabel => 'Laster opp…';
+
+  @override
+  String get scheduledThreadReplyPrefixText => 'Svar i tråd:';
+
+  @override
+  String scheduledQuoteReplyPrefixText({String? name}) {
+    if (name == null) return 'Svar:';
+    return 'Svar til $name:';
+  }
+
+  @override
+  String scheduledMessageFailureReasonText({
+    ScheduledMessageFailureReason? reason,
+    bool isQuoteDeleted = false,
+  }) {
+    return switch (reason) {
+      .requestFailed => 'Kunne ikke sende. Prøv igjen',
+      .internalError => 'Noe gikk galt. Prøv igjen',
+      .channelDeleted => 'Denne kanalen ble slettet',
+      .userDeleted => 'Kontoen din ble slettet',
+      .channelFrozen => 'Denne kanalen er frosset',
+      .banned => 'Du kan ikke sende meldinger i denne kanalen',
+      .noPermission => 'Du har ikke lenger lov til å publisere her',
+      .moderationBlocked => 'Blokkert av moderering',
+      .hookRejected => 'Avvist av appen',
+      .expired => 'Ikke sendt: tjenesten ble forsinket',
+      .pendingNotSupported => 'Denne kanalen krever nå godkjenning. Planlegg den på nytt.',
+      .invalidMessage when isQuoteDeleted =>
+        'Den siterte meldingen ble slettet. Rediger meldingen for å fjerne sitatet.',
+      .invalidMessage => 'Meldingen oppfyller ikke lenger appens grenser. Rediger den.',
+      _ => 'Noe gikk galt. Prøv igjen',
+    };
+  }
+
+  @override
+  String get noScheduledMessagesText => 'Ingen planlagte meldinger';
+
+  @override
+  String get loadingScheduledMessagesError => 'Kunne ikke laste inn planlagte meldinger';
+
+  @override
+  String get editAndRescheduleLabel => 'Rediger og planlegg på nytt';
+
+  @override
+  String get rescheduleLabel => 'Planlegg på nytt';
+
+  @override
+  String get sendNowLabel => 'Send nå';
 }
 
 class _AccessibilityTranslationsNo extends AccessibilityTranslations {
@@ -986,6 +1048,12 @@ class _AccessibilityTranslationsNo extends AccessibilityTranslations {
 
   @override
   String get messageActionsLabel => 'Meldingshandlinger';
+
+  @override
+  String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
+    final date = formatDateTime(scheduledAt.toLocal());
+    return 'Planlagt til $date';
+  }
 
   @override
   String galleryImageLabel({DateTime? createdAt}) {

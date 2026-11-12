@@ -2,6 +2,8 @@ import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../config/sample_app_config.dart';
+import '../scheduled_messages/screens/scheduled_messages_screen.dart';
 import '../widgets/add_members_sheet.dart';
 import '../widgets/all_members_sheet.dart';
 import '../widgets/edit_group_sheet.dart';
@@ -131,6 +133,7 @@ class _MediaSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
+    final channel = StreamChannel.of(context).channel;
     return _Section(
       children: [
         _Tile(
@@ -139,6 +142,13 @@ class _MediaSection extends StatelessWidget {
           trailing: Icon(icons.chevronRight),
           onTap: () => _push(context, const PinnedMessagesScreen()),
         ),
+        if (context.sampleAppConfig.enableScheduledMessages && channel.canScheduleMessage)
+          _Tile(
+            icon: Icon(icons.clock),
+            label: const Text('Scheduled Messages'),
+            trailing: Icon(icons.chevronRight),
+            onTap: () => _push(context, ScheduledMessagesScreen(cid: channel.cid)),
+          ),
         _Tile(
           icon: Icon(icons.image),
           label: const Text('Photos & Videos'),

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:clock/clock.dart';
-import 'package:collection/collection.dart';
 import 'package:logging/logging.dart';
 
 import '../../core/api/responses.dart';
@@ -493,49 +492,5 @@ class ScheduledMessageManager {
   Future<void> dispose() async {
     await _eventsSubscription.cancel();
     await _stateNotifier.dispose();
-  }
-}
-
-/// Views of a [ScheduledMessageManager]'s scheduled messages in one channel or
-/// thread.
-extension ScheduledMessageManagerScope on ScheduledMessageManager {
-  /// The scheduled messages in the channel [cid], without its thread replies.
-  List<ScheduledMessage> channelMessages(String cid) {
-    return _scoped(_inChannel(cid));
-  }
-
-  /// The [channelMessages], emitted on listen and again each time they change.
-  Stream<List<ScheduledMessage>> channelMessagesStream(String cid) {
-    return _scopedStream(_inChannel(cid));
-  }
-
-  /// The scheduled replies in the thread of the message [parentId].
-  List<ScheduledMessage> threadReplies(String parentId) {
-    return _scoped(_inThread(parentId));
-  }
-
-  /// The [threadReplies], emitted on listen and again each time they change.
-  Stream<List<ScheduledMessage>> threadRepliesStream(String parentId) {
-    return _scopedStream(_inThread(parentId));
-  }
-
-  static bool Function(ScheduledMessage) _inChannel(String cid) {
-    return (it) => it.cid == cid && it.message.parentId == null;
-  }
-
-  static bool Function(ScheduledMessage) _inThread(String parentId) {
-    return (it) => it.message.parentId == parentId;
-  }
-
-  List<ScheduledMessage> _scoped(bool Function(ScheduledMessage) test) {
-    return state.scheduledMessages.where(test).toList();
-  }
-
-  Stream<List<ScheduledMessage>> _scopedStream(
-    bool Function(ScheduledMessage) test,
-  ) {
-    final scoped = stream.map((it) => it.scheduledMessages.where(test).toList());
-
-    return scoped.distinct(const ListEquality().equals);
   }
 }

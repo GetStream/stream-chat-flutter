@@ -27,6 +27,7 @@ export 'src/client/query_channels_result.dart';
 export 'src/client/retry_policy.dart';
 export 'src/client/scheduled_messages/scheduled_message_list_state.dart' show ScheduledMessageListState;
 export 'src/client/scheduled_messages/scheduled_messages_query.dart';
+export 'src/client/scheduled_messages/scheduled_messages_scope.dart';
 export 'src/core/api/attachment_file_uploader.dart';
 export 'src/core/api/requests.dart';
 export 'src/core/api/responses.dart';

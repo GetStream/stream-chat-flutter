@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamChannelListController.includeScheduledMessages`, to load the current user's scheduled messages with the channels.
+
 ## 10.7.0
 
 ✅ Added

@@ -1,3 +1,13 @@
+## Upcoming
+
+✅ Added
+
+- Added the scheduled message strings for all supported locales.
+
+🔄 Changed
+
+- A language added by subclassing `GlobalStreamChatLocalizations` must add the scheduled message strings.
+
 ## 10.7.0
 
 🐞 Fixed
