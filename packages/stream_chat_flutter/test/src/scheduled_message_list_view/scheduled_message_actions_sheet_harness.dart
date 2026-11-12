@@ -26,6 +26,7 @@ Future<List<ScheduledMessageAction?>> showActions(
   WidgetTester tester,
   ScheduledMessage scheduledMessage, {
   ScheduledMessageActionsBuilder? actionsBuilder,
+  Map<String, Channel> channels = const {},
 }) async {
   final results = <ScheduledMessageAction?>[];
   await tester.pumpWidget(
@@ -40,6 +41,7 @@ Future<List<ScheduledMessageAction?>> showActions(
           child: const Text('Open'),
         ),
       ),
+      channels: channels,
     ),
   );
 
@@ -53,12 +55,14 @@ List<String?> rowLabels(WidgetTester tester) {
   return [for (final action in actions) (action.label as Text).data];
 }
 
-Widget wrapWithMaterialApp(Widget widget) {
+/// Wraps [widget] in an app whose client has loaded [channels].
+Widget wrapWithMaterialApp(Widget widget, {Map<String, Channel> channels = const {}}) {
   final client = MockClient();
   final clientState = MockClientState();
 
   when(() => client.state).thenReturn(clientState);
   when(() => clientState.currentUser).thenReturn(OwnUser(id: 'current-user-id'));
+  when(() => clientState.channels).thenReturn(channels);
 
   return MaterialApp(
     home: StreamChat(
@@ -68,4 +72,21 @@ Widget wrapWithMaterialApp(Widget widget) {
       child: Scaffold(body: Center(child: widget)),
     ),
   );
+}
+
+/// A loaded channel of the scheduled messages that allows scheduling unless
+/// [canSchedule] is false.
+Channel loadedChannel({bool canSchedule = true}) {
+  final channel = MockChannel(
+    type: 'messaging',
+    id: 'general',
+    ownCapabilities: [
+      ChannelCapability.sendMessage,
+      if (canSchedule) ChannelCapability.scheduleMessage,
+    ],
+  );
+  final state = MockChannelState();
+  when(() => channel.state).thenReturn(state);
+
+  return channel;
 }

@@ -17,7 +17,8 @@ class StreamScheduledMessageActionsBuilder {
   ///
   /// A failed one can be edited and scheduled again, or deleted. It can also
   /// be retried when its request failed. When its channel was deleted, its
-  /// text can only be copied before it is deleted.
+  /// text can only be copied before it is deleted. Editing, rescheduling and
+  /// retrying are left out when the loaded channel doesn't allow scheduling.
   ///
   /// Any other message has no actions.
   static List<StreamScheduledMessageActionTile> buildActions({
@@ -37,31 +38,41 @@ class StreamScheduledMessageActionsBuilder {
     final isRetriable = scheduledMessage.failureReason?.isRetriable ?? false;
     final hasText = scheduledMessage.message.text?.isNotEmpty ?? false;
 
+    // A channel that isn't loaded can't tell, so everything is offered and
+    // the server decides, as with the checks made before a request.
+    final channel = StreamChat.of(context).client.state.channels[scheduledMessage.cid];
+    final canSchedule = switch (channel) {
+      final channel? when channel.state != null => channel.canScheduleMessage,
+      _ => true,
+    };
+
     return [
       if (isScheduled) ...[
-        StreamScheduledMessageActionTile(
-          value: EditScheduledMessage(scheduledMessage: scheduledMessage),
-          label: Text(translations.editMessageLabel),
-          leading: Icon(icons.edit),
-        ),
-        StreamScheduledMessageActionTile(
-          value: RescheduleMessage(scheduledMessage: scheduledMessage),
-          label: Text(translations.rescheduleLabel),
-          leading: Icon(icons.clock),
-        ),
+        if (canSchedule) ...[
+          StreamScheduledMessageActionTile(
+            value: EditScheduledMessage(scheduledMessage: scheduledMessage),
+            label: Text(translations.editMessageLabel),
+            leading: Icon(icons.edit),
+          ),
+          StreamScheduledMessageActionTile(
+            value: RescheduleMessage(scheduledMessage: scheduledMessage),
+            label: Text(translations.rescheduleLabel),
+            leading: Icon(icons.clock),
+          ),
+        ],
         StreamScheduledMessageActionTile(
           value: SendScheduledMessageNow(scheduledMessage: scheduledMessage),
           label: Text(translations.sendNowLabel),
           leading: Icon(icons.send),
         ),
       ],
-      if (isFailed && isRetriable)
+      if (isFailed && isRetriable && canSchedule)
         StreamScheduledMessageActionTile(
           value: RetryScheduledMessage(scheduledMessage: scheduledMessage),
           label: Text(translations.retryLabel),
           leading: Icon(icons.retry),
         ),
-      if (isFailed && !isChannelDeleted)
+      if (isFailed && !isChannelDeleted && canSchedule)
         StreamScheduledMessageActionTile(
           value: EditAndRescheduleMessage(scheduledMessage: scheduledMessage),
           label: Text(translations.editAndRescheduleLabel),

@@ -57,6 +57,44 @@ void main() {
     },
   );
 
+  testWidgets(
+    "showStreamScheduledMessageActionsSheet offers only send now and delete when the channel can't schedule",
+    (tester) async {
+      final channels = {'messaging:general': loadedChannel(canSchedule: false)};
+
+      await showActions(tester, fakeScheduledMessage(), channels: channels);
+
+      expect(rowLabels(tester), ['Send Now', 'Delete']);
+    },
+  );
+
+  testWidgets(
+    "showStreamScheduledMessageActionsSheet offers only delete on a failed message when the channel can't schedule",
+    (tester) async {
+      final channels = {'messaging:general': loadedChannel(canSchedule: false)};
+      final failed = fakeScheduledMessage(status: .failed, failureReason: .requestFailed);
+
+      await showActions(tester, failed, channels: channels);
+
+      expect(rowLabels(tester), ['Delete']);
+    },
+  );
+
+  testWidgets('showStreamScheduledMessageActionsSheet offers every action when the loaded channel can schedule', (
+    tester,
+  ) async {
+    final channels = {'messaging:general': loadedChannel()};
+    final failed = fakeScheduledMessage(status: .failed, failureReason: .requestFailed);
+
+    await showActions(tester, fakeScheduledMessage(), channels: channels);
+    expect(rowLabels(tester), ['Edit Message', 'Reschedule', 'Send Now', 'Delete']);
+
+    // A fresh app, so the first sheet is gone.
+    await tester.pumpWidget(const SizedBox.shrink());
+    await showActions(tester, failed, channels: channels);
+    expect(rowLabels(tester), ['Retry', 'Edit & Reschedule', 'Delete']);
+  });
+
   for (final status in [
     ScheduledMessageStatus.preparingToSchedule,
     ScheduledMessageStatus.sending,
