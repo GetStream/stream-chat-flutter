@@ -51,9 +51,7 @@ class ScheduleMessageBounds {
   bool isTooFar(DateTime scheduledAt) => scheduledAt.isAfter(latest);
 
   /// Whether [scheduledAt] is within the bounds.
-  bool contains(DateTime scheduledAt) {
-    return !isTooSoon(scheduledAt) && !isTooFar(scheduledAt);
-  }
+  bool contains(DateTime scheduledAt) => !isTooSoon(scheduledAt) && !isTooFar(scheduledAt);
 }
 
 /// The preset times offered for scheduling a message, in local time.

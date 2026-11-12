@@ -140,7 +140,6 @@ Future<List<DateTime?>> showTimeSheet(
   WidgetTester tester,
   MockChannel channel, {
   DateTime? initialScheduledAt,
-  Widget? title,
 }) async {
   final results = <DateTime?>[];
   final button = openButton(
@@ -149,7 +148,6 @@ Future<List<DateTime?>> showTimeSheet(
       channel: channel,
       message: messageToSchedule(),
       initialScheduledAt: initialScheduledAt,
-      title: title,
     ).then(results.add),
   );
 

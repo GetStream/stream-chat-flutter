@@ -47,10 +47,14 @@ void main() {
     });
   });
 
-  testWidgets('showStreamScheduleTimeSheet is headed by the given title', (tester) async {
+  testWidgets('showStreamScheduleTimeSheet is headed for rescheduling only when it starts at a time', (tester) async {
     await withClock(Clock.fixed(wednesday), () async {
-      await showTimeSheet(tester, scheduleChannel(), title: const Text('Reschedule message'));
+      await showTimeSheet(tester, scheduleChannel());
+      expect(find.text('Schedule message'), findsOneWidget);
 
+      // A fresh app, so the first sheet is gone.
+      await tester.pumpWidget(const SizedBox.shrink());
+      await showTimeSheet(tester, scheduleChannel(), initialScheduledAt: DateTime(2026, 10, 23, 9));
       expect(find.text('Reschedule message'), findsOneWidget);
     });
   });

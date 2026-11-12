@@ -205,7 +205,6 @@ Future<void> _reschedule(BuildContext context, ScheduledMessage scheduledMessage
     channel: channel,
     message: scheduledMessage.message,
     initialScheduledAt: scheduledMessage.scheduledAt,
-    title: Text(context.translations.rescheduleMessageLabel),
   );
   if (scheduledAt == null || !context.mounted) return;
 

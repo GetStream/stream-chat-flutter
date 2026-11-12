@@ -9,16 +9,16 @@ import 'schedule_message_picker_theme.dart';
 /// Shows a sheet to pick the date and time [message] is sent at in [channel],
 /// which must be initialized.
 ///
-/// The sheet starts at [initialScheduledAt], or an hour from now, and is
-/// headed by [title], or "Schedule message" by default. A time sooner or
-/// further ahead than the channel allows shows an error, and can't be picked.
-/// Returns the picked time, or null when the sheet is dismissed.
+/// The sheet starts at [initialScheduledAt], or an hour from now. With
+/// [initialScheduledAt] set, it is headed "Reschedule message" and its
+/// too-soon error is the one for rescheduling. A time sooner or further ahead
+/// than the channel allows shows an error, and can't be picked; the sheet
+/// returns the picked time, or null when dismissed.
 Future<DateTime?> showStreamScheduleTimeSheet({
   required BuildContext context,
   required Channel channel,
   required Message message,
   DateTime? initialScheduledAt,
-  Widget? title,
 }) {
   return showStreamSheet<DateTime>(
     context: context,
@@ -27,7 +27,6 @@ Future<DateTime?> showStreamScheduleTimeSheet({
       channel: channel,
       message: message,
       initialScheduledAt: initialScheduledAt,
-      title: title,
     ),
   );
 }
@@ -39,13 +38,11 @@ class _ScheduleTimeSheet extends StatefulWidget {
     required this.channel,
     required this.message,
     this.initialScheduledAt,
-    this.title,
   });
 
   final Channel channel;
   final Message message;
   final DateTime? initialScheduledAt;
-  final Widget? title;
 
   @override
   State<_ScheduleTimeSheet> createState() => _ScheduleTimeSheetState();
@@ -53,6 +50,9 @@ class _ScheduleTimeSheet extends StatefulWidget {
 
 class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
   late var _scheduledAt = _initialScheduledAt();
+
+  // A sheet that starts at a time moves a message that is already scheduled.
+  bool get _isRescheduling => widget.initialScheduledAt != null;
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +90,12 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
         children: [
           StreamSheetHeader(
             automaticallyImplyLeading: false,
-            title: widget.title ?? Text(translations.scheduleMessageLabel),
+            title: Text(
+              switch (_isRescheduling) {
+                true => translations.rescheduleMessageLabel,
+                false => translations.scheduleMessageLabel,
+              },
+            ),
           ),
           Padding(
             padding: EdgeInsets.symmetric(vertical: spacing.md),
@@ -118,13 +123,13 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
                     child: Column(
                       mainAxisSize: .min,
                       children: [
-                        _ScheduleTimeRow(
+                        _SchedulePickerRow(
                           icon: Icon(icons.calendar),
                           label: Text(translations.dateLabel),
                           value: Text(date, style: valueStyle),
                           onTap: () => _pickDate(bounds),
                         ),
-                        _ScheduleTimeRow(
+                        _SchedulePickerRow(
                           icon: Icon(icons.clock),
                           label: Text(translations.timeLabel),
                           value: Text(time, style: valueStyle),
@@ -219,11 +224,9 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
   String? _errorText(ScheduleMessageBounds bounds) {
     final translations = context.translations;
     if (bounds.isTooSoon(_scheduledAt)) {
-      // A sheet that starts at a time moves a message that is already
-      // scheduled.
-      return switch (widget.initialScheduledAt) {
-        null => translations.scheduleTooSoonError(minLeadTime: bounds.minLeadTime),
-        _ => translations.rescheduleTooSoonError,
+      return switch (_isRescheduling) {
+        true => translations.rescheduleTooSoonError,
+        false => translations.scheduleTooSoonError(minLeadTime: bounds.minLeadTime),
       };
     }
     if (bounds.isTooFar(_scheduledAt)) return translations.scheduleTooFarError;
@@ -231,9 +234,9 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
   }
 }
 
-// A date or time row of the sheet, which opens a picker when tapped.
-class _ScheduleTimeRow extends StatelessWidget {
-  const _ScheduleTimeRow({
+// A row of the time sheet that opens a date or time picker when tapped.
+class _SchedulePickerRow extends StatelessWidget {
+  const _SchedulePickerRow({
     required this.icon,
     required this.label,
     required this.value,

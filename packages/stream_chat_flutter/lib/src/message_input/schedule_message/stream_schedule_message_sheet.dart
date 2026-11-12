@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_chat_flutter.dart';
+import '../../localization/translations.dart';
 import 'schedule_message_bounds.dart';
 
 /// Shows the times [message] can be scheduled for in [channel], which must be
@@ -62,7 +63,6 @@ class _ScheduleMessageSheet extends StatelessWidget {
     };
 
     return SafeArea(
-      top: false,
       child: IconTheme.merge(
         data: const IconThemeData(size: 20),
         child: Column(
@@ -73,18 +73,13 @@ class _ScheduleMessageSheet extends StatelessWidget {
               title: Text(title),
             ),
             Padding(
-              padding: EdgeInsets.fromLTRB(spacing.xxs, 0, spacing.xxs, spacing.xs),
+              padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
               child: Column(
                 mainAxisSize: .min,
                 children: [
                   for (final preset in presets)
                     _ScheduleOptionRow(
-                      label: Text(
-                        switch (preset.isTomorrow) {
-                          true => translations.scheduleTomorrowText(scheduledAt: preset),
-                          false => translations.scheduleWeekdayText(scheduledAt: preset),
-                        },
-                      ),
+                      label: Text(_presetLabel(translations, preset)),
                       enabled: !isLimitReached,
                       onTap: () => Navigator.of(context).pop(preset),
                     ),
@@ -103,16 +98,24 @@ class _ScheduleMessageSheet extends StatelessWidget {
     );
   }
 
+  String _presetLabel(Translations translations, DateTime preset) {
+    return switch (preset.isTomorrow) {
+      true => translations.scheduleTomorrowText(scheduledAt: preset),
+      false => translations.scheduleWeekdayText(scheduledAt: preset),
+    };
+  }
+
   Future<void> _pickCustomTime(BuildContext context) async {
     final navigator = Navigator.of(context);
+
     final scheduledAt = await showStreamScheduleTimeSheet(
       context: context,
       channel: channel,
       message: message,
     );
-    if (scheduledAt == null) return;
 
-    navigator.pop(scheduledAt);
+    if (scheduledAt == null) return;
+    return navigator.pop(scheduledAt);
   }
 }
 
