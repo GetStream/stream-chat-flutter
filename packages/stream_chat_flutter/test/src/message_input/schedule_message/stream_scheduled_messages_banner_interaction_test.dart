@@ -181,4 +181,19 @@ void main() {
     // A rebuild would create a new Text.
     expect(tester.widget<Text>(find.text('1 scheduled message')), same(countBefore));
   });
+
+  testWidgets('StreamScheduledMessagesBanner updates its count when a message is scheduled', (tester) async {
+    final scheduled = scheduledMessage('a');
+    final updates = StreamController<List<ScheduledMessage>>();
+    addTearDown(updates.close);
+    final channel = scheduleChannel(scheduledMessages: [scheduled], scheduledMessagesStream: updates.stream);
+
+    await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessagesBanner(), channel: channel));
+    await tester.pumpAndSettle();
+
+    updates.add([scheduled, scheduledMessage('b')]);
+    await tester.pumpAndSettle();
+
+    expect(find.text('2 scheduled messages'), findsOneWidget);
+  });
 }

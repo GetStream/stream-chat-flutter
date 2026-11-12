@@ -1,3 +1,4 @@
+import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_chat_flutter.dart';
@@ -113,13 +114,9 @@ class DefaultStreamScheduledMessagesBanner extends StatefulWidget {
   }
 }
 
-// The counts a banner shows. [channelPending] counts the pending messages of
-// the whole channel, thread replies included, toward its limit.
-typedef _Counts = ({int failed, int pending, int channelPending});
-
 class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamScheduledMessagesBanner> {
   Channel? _channel;
-  late Stream<_Counts> _counts;
+  late Stream<_BannerCounts> _counts;
 
   @override
   void didChangeDependencies() {
@@ -139,11 +136,11 @@ class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamSche
     _counts = _followCounts();
   }
 
-  Stream<_Counts> _followCounts() {
-    return _channel!.client.state.scheduledMessagesStream.map(_countsOf).distinct();
+  Stream<_BannerCounts> _followCounts() {
+    return _channel!.client.state.scheduledMessagesStream.map(_countsOf);
   }
 
-  _Counts _countsOf(List<ScheduledMessage> scheduledMessages) {
+  _BannerCounts _countsOf(List<ScheduledMessage> scheduledMessages) {
     final cid = _channel!.cid;
     final parentId = widget.props.parentId;
 
@@ -162,7 +159,7 @@ class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamSche
       if (isPending) pending += 1;
     }
 
-    return (failed: failed, pending: pending, channelPending: channelPending);
+    return _BannerCounts(failed: failed, pending: pending, channelPending: channelPending);
   }
 
   @override
@@ -170,7 +167,7 @@ class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamSche
     final channel = _channel!;
     final scheduledMessages = channel.client.state.scheduledMessages;
 
-    return BetterStreamBuilder<_Counts>(
+    return BetterStreamBuilder<_BannerCounts>(
       stream: _counts,
       initialData: _countsOf(scheduledMessages),
       builder: (context, counts) => _ScheduledMessagesBanner(
@@ -184,6 +181,32 @@ class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamSche
   }
 }
 
+// What the scheduled messages banner shows, counted in one pass.
+class _BannerCounts extends Equatable {
+  const _BannerCounts({
+    required this.failed,
+    required this.pending,
+    required this.channelPending,
+  });
+
+  // Failed messages in the banner's scope.
+  final int failed;
+
+  // Scheduled and sending messages in the banner's scope.
+  final int pending;
+
+  // Pending messages of the whole channel, thread replies included, which
+  // count toward its limit.
+  final int channelPending;
+
+  bool get hasFailed => failed > 0;
+  bool get hasPending => pending > 0;
+
+  // Every field must be listed, or the banner skips rebuilds it needs.
+  @override
+  List<Object?> get props => [failed, pending, channelPending];
+}
+
 class _ScheduledMessagesBanner extends StatelessWidget {
   const _ScheduledMessagesBanner({
     required this.channel,
@@ -194,7 +217,7 @@ class _ScheduledMessagesBanner extends StatelessWidget {
   });
 
   final Channel channel;
-  final _Counts counts;
+  final _BannerCounts counts;
   final bool isThread;
   final VoidCallback? onViewAllPressed;
   final EdgeInsetsGeometry? margin;
@@ -209,9 +232,9 @@ class _ScheduledMessagesBanner extends StatelessWidget {
     final theme = StreamScheduledMessagesBannerTheme.of(context);
     final defaults = _StreamScheduledMessagesBannerThemeDefaults(context);
 
-    final (:failed, :pending, :channelPending) = counts;
-    final isFailed = failed > 0;
-    final isPending = pending > 0 && channel.canScheduleMessage;
+    final _BannerCounts(:failed, :pending, :channelPending) = counts;
+    final isFailed = counts.hasFailed;
+    final isPending = counts.hasPending && channel.canScheduleMessage;
     if (!isFailed && !isPending) return const SizedBox.shrink();
 
     String label() {
@@ -230,6 +253,7 @@ class _ScheduledMessagesBanner extends StatelessWidget {
       true => theme.failedIconColor ?? defaults.failedIconColor,
       false => theme.iconColor ?? defaults.iconColor,
     };
+
     final effectiveCountStyle = theme.countStyle ?? defaults.countStyle;
     final effectiveViewAllStyle = theme.viewAllStyle ?? defaults.viewAllStyle;
     final effectiveSide = theme.side ?? defaults.side;
