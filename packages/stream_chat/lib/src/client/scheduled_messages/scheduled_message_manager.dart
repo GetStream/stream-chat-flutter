@@ -11,6 +11,7 @@ import '../../core/models/event.dart';
 import '../../core/models/message.dart';
 import '../../core/models/scheduled_message.dart';
 import '../../core/util/in_flight_cache.dart';
+import '../../core/util/scheduled_message_rules.dart';
 import '../../event_type.dart';
 import '../client.dart';
 import 'scheduled_message_event_handler.dart';
@@ -163,7 +164,7 @@ class ScheduledMessageManager {
       );
     }
 
-    _checkSchedulable('$channelType:$channelId', message);
+    _refuseUnschedulable('$channelType:$channelId', message);
 
     final generation = _generation;
 
@@ -292,7 +293,7 @@ class ScheduledMessageManager {
       );
     }
 
-    _checkSchedulable(scheduledMessage.cid, message);
+    _refuseUnschedulable(scheduledMessage.cid, message);
 
     final generation = _generation;
     final response = await _request(
@@ -326,7 +327,7 @@ class ScheduledMessageManager {
   }) async {
     // A message kept at its time isn't checked again.
     if (!scheduledAt.isAtSameMomentAs(scheduledMessage.scheduledAt)) {
-      _checkQuote(scheduledMessage.cid, scheduledMessage.message);
+      _refuseUnschedulable(scheduledMessage.cid, scheduledMessage.message, includeCommand: false);
     }
 
     final generation = _generation;
@@ -352,7 +353,7 @@ class ScheduledMessageManager {
   Future<SendScheduledMessageNowResponse> sendMessageNow(
     ScheduledMessage scheduledMessage,
   ) async {
-    _checkQuote(scheduledMessage.cid, scheduledMessage.message);
+    _refuseUnschedulable(scheduledMessage.cid, scheduledMessage.message, includeCommand: false);
 
     final generation = _generation;
     final response = await _request(
@@ -469,39 +470,17 @@ class ScheduledMessageManager {
     }
   }
 
-  // Refuses [message] in the channel [cid] when it can't be scheduled.
-  void _checkSchedulable(String cid, Message message) {
-    _checkQuote(cid, message);
-
-    // A command runs when it is sent, so it can't be scheduled in a channel
-    // that has commands. Elsewhere the text is sent as it is.
-    final text = message.text;
-    if (text == null || !text.startsWith('/')) return;
-
-    final channelState = _client.state.channels[cid]?.state?.channelState;
-    final commands = channelState?.channel?.config.commands;
-    if (commands == null || commands.isEmpty) return;
-
-    throw const ScheduledMessageRefusedError(.slashCommand, "Commands can't be scheduled");
-  }
-
-  // Refuses [message] in the channel [cid] when it quotes a message known to
-  // be deleted.
-  void _checkQuote(String cid, Message message) {
-    final quotedMessageId = message.quotedMessageId ?? message.quotedMessage?.id;
-    if (quotedMessageId == null) return;
-
-    // The channel's own copy is the latest one known.
-    final state = _client.state.channels[cid]?.state;
-    final loaded = switch (state) {
-      final state? => [...state.messages, ...state.threads.values.expand((it) => it)],
-      null => const <Message>[],
-    };
-    final quoted = loaded.where((it) => it.id == quotedMessageId).firstOrNull ?? message.quotedMessage;
-    if (quoted == null) return;
-    if (!quoted.isDeleted && quoted.deletedAt == null) return;
-
-    throw const ScheduledMessageRefusedError(.quotedMessageDeleted, "Can't quote a deleted message");
+  // Refuses [message] in the channel [cid] when it can't be scheduled: when
+  // it quotes a deleted message, or, unless [includeCommand] is false, when
+  // it is a command.
+  void _refuseUnschedulable(String cid, Message message, {bool includeCommand = true}) {
+    final channel = _client.state.channels[cid];
+    if (ScheduledMessageRules.quotesDeletedMessage(message, channel)) {
+      throw const ScheduledMessageRefusedError(.quotedMessageDeleted, "Can't quote a deleted message");
+    }
+    if (includeCommand && ScheduledMessageRules.isCommand(message, channel)) {
+      throw const ScheduledMessageRefusedError(.slashCommand, "Commands can't be scheduled");
+    }
   }
 
   // [scheduledMessage], marked sent.
