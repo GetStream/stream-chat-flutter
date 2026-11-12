@@ -112,7 +112,9 @@ class ScheduledMessageManager {
   /// [ScheduledMessageFailureReason.requestFailed]; any other failure removes
   /// it.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails.
+  /// Throws a [StreamChatNetworkError] if the request fails, or a
+  /// [ScheduledMessageRefusedError] without making it when [message] is a
+  /// command in a channel that has commands, or quotes a deleted message.
   ///
   /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
   /// attachment of [message] is not uploaded yet. A message to send right
@@ -160,6 +162,8 @@ class ScheduledMessageManager {
         'Attachments must be uploaded before scheduling',
       );
     }
+
+    _checkSchedulable('$channelType:$channelId', message);
 
     final generation = _generation;
 
@@ -269,6 +273,10 @@ class ScheduledMessageManager {
   /// [EventType.scheduledMessageDeleted] event reports it, so [state] stops
   /// listing it.
   ///
+  /// Throws a [ScheduledMessageRefusedError] without making the request when
+  /// [message] is a command in a channel that has commands, or quotes a
+  /// deleted message.
+  ///
   /// Throws an [ArgumentError] if an attachment of [message] is not uploaded
   /// yet.
   Future<UpdateScheduledMessageResponse> updateMessage(
@@ -283,6 +291,8 @@ class ScheduledMessageManager {
         'Attachments must be uploaded before updating',
       );
     }
+
+    _checkSchedulable(scheduledMessage.cid, message);
 
     final generation = _generation;
     final response = await _request(
@@ -307,10 +317,18 @@ class ScheduledMessageManager {
   /// scheduled message is already gone. If it is, an
   /// [EventType.scheduledMessageDeleted] event reports it, so [state] stops
   /// listing it.
+  ///
+  /// Throws a [ScheduledMessageRefusedError] without making the request when
+  /// it is moved to another time but quotes a deleted message.
   Future<UpdateScheduledMessageResponse> rescheduleMessage(
     ScheduledMessage scheduledMessage, {
     required DateTime scheduledAt,
   }) async {
+    // A message kept at its time isn't checked again.
+    if (!scheduledAt.isAtSameMomentAs(scheduledMessage.scheduledAt)) {
+      _checkQuote(scheduledMessage.cid, scheduledMessage.message);
+    }
+
     final generation = _generation;
     final response = await _request(
       scheduledMessage,
@@ -328,9 +346,14 @@ class ScheduledMessageManager {
   /// scheduled message is already gone. If it is, an
   /// [EventType.scheduledMessageDeleted] event reports it, so [state] stops
   /// listing it.
+  ///
+  /// Throws a [ScheduledMessageRefusedError] without making the request when
+  /// it quotes a deleted message, which would fail it once sent.
   Future<SendScheduledMessageNowResponse> sendMessageNow(
     ScheduledMessage scheduledMessage,
   ) async {
+    _checkQuote(scheduledMessage.cid, scheduledMessage.message);
+
     final generation = _generation;
     final response = await _request(
       scheduledMessage,
@@ -362,7 +385,7 @@ class ScheduledMessageManager {
         _emitEvent(EventType.scheduledMessageDeleted, response.scheduledMessage, generation);
         return response;
       } on StreamChatNetworkError catch (error) {
-        if (error.statusCode != 404) rethrow;
+        if (!error.isScheduledMessageNotFound) rethrow;
 
         final canceled = _canceled(scheduledMessage);
         _emitEvent(EventType.scheduledMessageDeleted, canceled, generation);
@@ -438,12 +461,47 @@ class ScheduledMessageManager {
     try {
       return await request();
     } on StreamChatNetworkError catch (error) {
-      if (error.statusCode == 404) {
+      if (error.isScheduledMessageNotFound) {
         _emitEvent(EventType.scheduledMessageDeleted, _canceled(scheduledMessage), generation);
       }
 
       rethrow;
     }
+  }
+
+  // Refuses [message] in the channel [cid] when it can't be scheduled.
+  void _checkSchedulable(String cid, Message message) {
+    _checkQuote(cid, message);
+
+    // A command runs when it is sent, so it can't be scheduled in a channel
+    // that has commands. Elsewhere the text is sent as it is.
+    final text = message.text;
+    if (text == null || !text.startsWith('/')) return;
+
+    final channelState = _client.state.channels[cid]?.state?.channelState;
+    final commands = channelState?.channel?.config.commands;
+    if (commands == null || commands.isEmpty) return;
+
+    throw const ScheduledMessageRefusedError(.slashCommand, "Commands can't be scheduled");
+  }
+
+  // Refuses [message] in the channel [cid] when it quotes a message known to
+  // be deleted.
+  void _checkQuote(String cid, Message message) {
+    final quotedMessageId = message.quotedMessageId ?? message.quotedMessage?.id;
+    if (quotedMessageId == null) return;
+
+    // The channel's own copy is the latest one known.
+    final state = _client.state.channels[cid]?.state;
+    final loaded = switch (state) {
+      final state? => [...state.messages, ...state.threads.values.expand((it) => it)],
+      null => const <Message>[],
+    };
+    final quoted = loaded.where((it) => it.id == quotedMessageId).firstOrNull ?? message.quotedMessage;
+    if (quoted == null) return;
+    if (!quoted.isDeleted && quoted.deletedAt == null) return;
+
+    throw const ScheduledMessageRefusedError(.quotedMessageDeleted, "Can't quote a deleted message");
   }
 
   // [scheduledMessage], marked sent.

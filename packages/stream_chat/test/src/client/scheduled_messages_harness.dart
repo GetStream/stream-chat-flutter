@@ -11,7 +11,19 @@ const testCid = 'messaging:general';
 
 final testUser = User(id: 'test-user-id');
 final testToken = Token.development(testUser.id).rawValue;
-final missingError = StreamChatNetworkError(ChatErrorCode.doesNotExist, statusCode: 404);
+// The error a request on a scheduled message that no longer exists gets.
+final missingError = StreamChatNetworkError.raw(
+  code: 16,
+  message: 'UpdateScheduledMessage failed with error: "scheduled message a not found"',
+  statusCode: 404,
+);
+
+// The error a request on a scheduled message quoting a deleted message gets.
+final quoteDeletedError = StreamChatNetworkError.raw(
+  code: 16,
+  message: 'UpdateScheduledMessage failed with error: "Can\'t quote this message. The message has been deleted"',
+  statusCode: 404,
+);
 final offline = StreamChatNetworkError.raw(code: -1, message: 'No connection');
 
 // The codes of the errors that refuse a scheduled message request because the

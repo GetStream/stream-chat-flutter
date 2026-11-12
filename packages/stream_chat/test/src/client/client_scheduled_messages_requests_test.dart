@@ -214,6 +214,16 @@ void main() {
       expect(event.scheduledMessage?.status, ScheduledMessageStatus.canceled);
     });
 
+    test('$name keeps one when something else is not found', () async {
+      await harness.hold([a]);
+      stub(harness.api, quoteDeletedError);
+
+      await expectLater(request(harness.client), throwsA(quoteDeletedError));
+      await settle();
+
+      expect(idsOf(harness.client.state.scheduledMessages), ['a']);
+    });
+
     test('$name stops listing one that no longer exists', () async {
       await harness.hold([a]);
       stub(harness.api, missingError);
