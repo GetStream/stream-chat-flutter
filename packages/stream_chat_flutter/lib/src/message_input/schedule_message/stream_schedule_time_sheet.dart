@@ -69,9 +69,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
 
     final channel = widget.channel;
     final channelName = loadedChannelName(channel, currentUser: channel.client.state.currentUser);
-    final channelLabel = translations.messageToLabel(
-      channelName: channelName ?? translations.noTitleText,
-    );
+    final channelLabel = translations.messageToLabel(channelName: channelName ?? translations.noTitleText);
     final valueStyle = textTheme.captionDefault.copyWith(color: colorScheme.textTertiary);
     final date = materialLocalizations.formatMediumDate(_scheduledAt);
     final time = materialLocalizations.formatTimeOfDay(
@@ -98,7 +96,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
             ),
           ),
           Padding(
-            padding: EdgeInsets.symmetric(vertical: spacing.md),
+            padding: .symmetric(vertical: spacing.md),
             child: Column(
               mainAxisSize: .min,
               crossAxisAlignment: .stretch,
@@ -119,7 +117,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
                 IconTheme.merge(
                   data: const IconThemeData(size: 20),
                   child: Padding(
-                    padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
+                    padding: .symmetric(horizontal: spacing.xxs),
                     child: Column(
                       mainAxisSize: .min,
                       children: [
@@ -127,7 +125,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
                           icon: Icon(icons.calendar),
                           label: Text(translations.dateLabel),
                           value: Text(date, style: valueStyle),
-                          onTap: () => _pickDate(bounds),
+                          onTap: _pickDate,
                         ),
                         _SchedulePickerRow(
                           icon: Icon(icons.clock),
@@ -158,6 +156,8 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
                         child: Text(translations.cancelLabel),
                       ),
                       StreamButton(
+                        type: .solid,
+                        style: .primary,
                         onPressed: switch (canSchedule) {
                           true => () => Navigator.of(context).pop(_scheduledAt),
                           false => null,
@@ -186,7 +186,9 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
     setState(() => _scheduledAt = scheduledAt);
   }
 
-  Future<void> _pickDate(ScheduleMessageBounds bounds) async {
+  Future<void> _pickDate() async {
+    // Measured when the picker opens, as the sheet may have been open a while.
+    final bounds = ScheduleMessageBounds.fromConfig(widget.channel.config);
     final earliest = bounds.earliest;
     final firstDate = DateTime(earliest.year, earliest.month, earliest.day);
     final initialDate = switch (_scheduledAt) {
@@ -202,6 +204,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
       lastDate: bounds.latest,
       builder: buildSchedulePickerTheme,
     );
+
     if (date == null || !mounted) return;
 
     final time = _scheduledAt;
@@ -211,9 +214,10 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
   Future<void> _pickTime() async {
     final time = await showTimePicker(
       context: context,
-      initialTime: TimeOfDay.fromDateTime(_scheduledAt),
+      initialTime: .fromDateTime(_scheduledAt),
       builder: buildSchedulePickerTheme,
     );
+
     if (time == null || !mounted) return;
 
     final date = _scheduledAt;
