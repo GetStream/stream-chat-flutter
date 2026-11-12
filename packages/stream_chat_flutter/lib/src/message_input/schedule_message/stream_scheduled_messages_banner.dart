@@ -7,9 +7,9 @@ import 'scheduled_message_counts.dart';
 ///
 /// It counts the channel's own scheduled messages, or the scheduled replies of
 /// the thread of [StreamScheduledMessagesBannerProps.parentId] when given.
-/// Failed messages take precedence over the others, which are counted only
-/// while the channel allows scheduling messages. The banner is empty when there
-/// is nothing to count.
+/// Failed messages take precedence over the others. It shows only in channels
+/// where the current user can schedule messages, and is empty when there is
+/// nothing to count.
 ///
 /// It counts the scheduled messages the client has loaded, such as through
 /// `includeScheduledMessages` on a channel or channel list query, or
@@ -196,9 +196,11 @@ class _ScheduledMessagesBanner extends StatelessWidget {
     final theme = StreamScheduledMessagesBannerTheme.of(context);
     final defaults = _StreamScheduledMessagesBannerThemeDefaults(context);
 
+    if (!channel.canScheduleMessage) return const SizedBox.shrink();
+
     final ScheduledMessageCounts(:failed, :pending, :channelPending) = counts;
     final isFailed = counts.hasFailed;
-    final isPending = counts.hasPending && channel.canScheduleMessage;
+    final isPending = counts.hasPending;
     if (!isFailed && !isPending) return const SizedBox.shrink();
 
     final limit = channel.config?.scheduledMessagesMaxPerChannel;

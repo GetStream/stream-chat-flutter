@@ -34,7 +34,6 @@ class StreamThreadPage extends StatefulWidget {
     this.onViewInChannelTap,
     this.automaticallyImplyLeading = true,
     this.onBackPressed,
-    this.showScheduledMessagesBanner = true,
     this.onScheduledMessagesViewAllPressed,
   });
 
@@ -60,12 +59,6 @@ class StreamThreadPage extends StatefulWidget {
   /// Replaces the default action, which pops the current route. When null the
   /// default is kept.
   final VoidCallback? onBackPressed;
-
-  /// Whether a [StreamScheduledMessagesBanner] of the thread's scheduled
-  /// replies is shown above the composer.
-  ///
-  /// Defaults to true. It is hidden while a message is edited.
-  final bool showScheduledMessagesBanner;
 
   /// Called when "View all" on the [StreamScheduledMessagesBanner] is tapped.
   ///
@@ -129,7 +122,6 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
         ? PageComposer(
             controller: _messageComposerController,
             parentId: widget.parent.id,
-            showScheduledMessagesBanner: widget.showScheduledMessagesBanner,
             onScheduledMessagesViewAllPressed: _onScheduledMessagesViewAllPressed(),
             composer: StreamMessageComposer(
               focusNode: _focusNode,

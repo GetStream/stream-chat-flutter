@@ -61,12 +61,6 @@ void main() {
     expect(snackbar.bottom, lessThanOrEqualTo(banner.top));
   });
 
-  testWidgets('hides the scheduled messages banner when showScheduledMessagesBanner is false', (tester) async {
-    await pumpChannelPage(tester, scheduledMessages: [scheduledMessage()], showScheduledMessagesBanner: false);
-
-    expect(find.byType(StreamScheduledMessagesBanner), findsNothing);
-  });
-
   testWidgets("doesn't resubscribe to the scheduled messages while typing", (tester) async {
     final scheduledMessages = [scheduledMessage()];
     var listens = 0;
@@ -109,19 +103,6 @@ void main() {
         'onScheduledMessagesViewAllPressed',
         onViewAllPressed,
       ),
-    );
-  });
-
-  testWidgets('hides the scheduled messages banner on the thread pages it opens when told to', (tester) async {
-    final parentMessage = Message(id: 'parent-id', text: 'Hello world!');
-
-    await pumpChannelPage(tester, showScheduledMessagesBanner: false);
-    final context = tester.element(find.byType(StreamMessageListView));
-    final thread = messageListView(tester).threadBuilder!(context, parentMessage);
-
-    expect(
-      thread,
-      isA<StreamThreadPage>().having((it) => it.showScheduledMessagesBanner, 'showScheduledMessagesBanner', isFalse),
     );
   });
 }

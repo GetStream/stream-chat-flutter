@@ -53,14 +53,4 @@ void main() {
     final banner = bannerPill(tester);
     expect(snackbar.bottom, lessThanOrEqualTo(banner.top));
   });
-
-  testWidgets('hides the scheduled messages banner when showScheduledMessagesBanner is false', (tester) async {
-    await pumpThreadPage(
-      tester,
-      scheduledMessages: [scheduledMessage(parentId: 'parent-id')],
-      showScheduledMessagesBanner: false,
-    );
-
-    expect(find.byType(StreamScheduledMessagesBanner), findsNothing);
-  });
 }

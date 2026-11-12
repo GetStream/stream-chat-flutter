@@ -71,7 +71,6 @@ class StreamChannelPage extends StatefulWidget {
     this.automaticallyImplyLeading = true,
     this.onBackPressed,
     this.onChannelAvatarPressed,
-    this.showScheduledMessagesBanner = true,
     this.onScheduledMessagesViewAllPressed,
   });
 
@@ -94,12 +93,6 @@ class StreamChannelPage extends StatefulWidget {
 
   /// Called when the default channel-avatar in the trailing slot is pressed.
   final void Function(BuildContext context, Channel channel)? onChannelAvatarPressed;
-
-  /// Whether a [StreamScheduledMessagesBanner] of the channel's scheduled
-  /// messages is shown above the composer.
-  ///
-  /// Defaults to true. It is hidden while a message is edited.
-  final bool showScheduledMessagesBanner;
 
   /// Called when "View all" on the [StreamScheduledMessagesBanner] is tapped.
   ///
@@ -158,7 +151,6 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
 
     final composer = PageComposer(
       controller: _messageComposerController,
-      showScheduledMessagesBanner: widget.showScheduledMessagesBanner,
       onScheduledMessagesViewAllPressed: _onScheduledMessagesViewAllPressed(),
       composer: StreamMessageComposer(
         focusNode: _focusNode,
@@ -179,7 +171,6 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
         initialAlignment: widget.initialAlignment,
         onReply: _reply,
         onEditMessage: _editMessage,
-        showScheduledMessagesBanner: widget.showScheduledMessagesBanner,
         onScheduledMessagesViewAllPressed: widget.onScheduledMessagesViewAllPressed,
       ),
     );
@@ -191,7 +182,6 @@ class _ChannelPageBody extends StatelessWidget {
   const _ChannelPageBody({
     required this.onReply,
     required this.onEditMessage,
-    required this.showScheduledMessagesBanner,
     this.initialScrollIndex,
     this.initialAlignment,
     this.onScheduledMessagesViewAllPressed,
@@ -202,7 +192,6 @@ class _ChannelPageBody extends StatelessWidget {
   final int? initialScrollIndex;
   final double? initialAlignment;
   // Passed on to the thread pages opened from the channel.
-  final bool showScheduledMessagesBanner;
   final StreamScheduledMessagesViewAllCallback? onScheduledMessagesViewAllPressed;
 
   @override
@@ -215,7 +204,6 @@ class _ChannelPageBody extends StatelessWidget {
       threadBuilder: (_, parentMessage) {
         return StreamThreadPage(
           parent: parentMessage!,
-          showScheduledMessagesBanner: showScheduledMessagesBanner,
           onScheduledMessagesViewAllPressed: onScheduledMessagesViewAllPressed,
         );
       },

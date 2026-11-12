@@ -10,7 +10,7 @@
 
 🔄 Changed
 
-- `StreamChannelPage` and `StreamThreadPage` show the scheduled messages banner above their composer; pass `showScheduledMessagesBanner: false` to hide it.
+- `StreamChannelPage` and `StreamThreadPage` show the scheduled messages banner above their composer in channels where the user can schedule messages.
 - A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
 
 ## 10.7.0

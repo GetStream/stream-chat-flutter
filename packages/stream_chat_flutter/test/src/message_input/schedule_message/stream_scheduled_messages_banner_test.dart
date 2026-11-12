@@ -122,16 +122,21 @@ void main() {
     expect(find.byType(Text), findsNothing);
   });
 
-  testWidgets("StreamScheduledMessagesBanner shows failed ones when the channel can't schedule", (tester) async {
+  testWidgets("StreamScheduledMessagesBanner shows nothing when the channel can't schedule, failed ones included", (
+    tester,
+  ) async {
     final channel = scheduleChannel(
       canSchedule: false,
-      scheduledMessages: [scheduledMessage('a', status: ScheduledMessageStatus.failed)],
+      scheduledMessages: [
+        scheduledMessage('a'),
+        scheduledMessage('b', status: ScheduledMessageStatus.failed),
+      ],
     );
 
     await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessagesBanner(), channel: channel));
     await tester.pumpAndSettle();
 
-    expect(find.text('1 failed to send'), findsOneWidget);
+    expect(find.byType(Text), findsNothing);
   });
 
   testWidgets("StreamScheduledMessagesBanner shows nothing for a channel that isn't created yet", (tester) async {

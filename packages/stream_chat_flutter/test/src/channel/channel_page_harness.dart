@@ -53,7 +53,6 @@ Future<void> pumpChannelPage(
   bool pushOntoARoute = false,
   List<ScheduledMessage> scheduledMessages = const [],
   Stream<List<ScheduledMessage>>? scheduledMessagesStream,
-  bool showScheduledMessagesBanner = true,
   StreamScheduledMessagesViewAllCallback? onScheduledMessagesViewAllPressed,
 }) async {
   final originalRecordPlatform = RecordPlatform.instance;
@@ -115,7 +114,6 @@ Future<void> pumpChannelPage(
     onChannelAvatarPressed: onChannelAvatarPressed,
     automaticallyImplyLeading: automaticallyImplyLeading,
     onBackPressed: onBackPressed,
-    showScheduledMessagesBanner: showScheduledMessagesBanner,
     onScheduledMessagesViewAllPressed: onScheduledMessagesViewAllPressed,
   );
 

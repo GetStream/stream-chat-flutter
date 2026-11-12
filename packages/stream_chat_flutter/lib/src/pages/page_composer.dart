@@ -6,8 +6,7 @@ import '../../stream_chat_flutter.dart';
 /// The composer of a [StreamChannelPage] or [StreamThreadPage], with a
 /// [StreamScheduledMessagesBanner] above it.
 ///
-/// The banner is hidden while [controller] edits a message, or when
-/// [showScheduledMessagesBanner] is false.
+/// The banner is hidden while [controller] edits a message.
 @internal
 class PageComposer extends StatelessWidget {
   /// Creates a page composer that shows [composer] below the banner.
@@ -16,7 +15,6 @@ class PageComposer extends StatelessWidget {
     required this.controller,
     required this.composer,
     this.parentId,
-    this.showScheduledMessagesBanner = true,
     this.onScheduledMessagesViewAllPressed,
   });
 
@@ -31,9 +29,6 @@ class PageComposer extends StatelessWidget {
   /// When null, the banner counts the channel's scheduled messages.
   final String? parentId;
 
-  /// Whether the banner is shown above [composer].
-  final bool showScheduledMessagesBanner;
-
   /// Called when "View all" on the banner is tapped.
   ///
   /// When null, "View all" isn't shown.
@@ -41,8 +36,6 @@ class PageComposer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!showScheduledMessagesBanner) return composer;
-
     final spacing = context.streamSpacing;
     // A floating composer's own top padding spaces the banner from its pill.
     final isFloating = StreamMessageComposer.resolveSurfaceStyle(context).isFloating;
