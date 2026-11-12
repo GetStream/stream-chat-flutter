@@ -133,4 +133,14 @@ void main() {
 
     expect(find.text('1 failed to send'), findsOneWidget);
   });
+
+  testWidgets("StreamScheduledMessagesBanner shows nothing for a channel that isn't created yet", (tester) async {
+    final channel = scheduleChannel(isCreated: false, scheduledMessages: [scheduledMessage('a')]);
+
+    await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessagesBanner(), channel: channel));
+    await tester.pumpAndSettle();
+
+    expect(tester.takeException(), isNull);
+    expect(find.byType(Text), findsNothing);
+  });
 }

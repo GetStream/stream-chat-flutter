@@ -35,8 +35,11 @@ ScheduledMessage scheduledMessage(
 }
 
 /// A channel named "General", whose user holds [scheduledMessages].
+///
+/// Without [isCreated], the channel has no ID yet.
 MockChannel scheduleChannel({
   bool canSchedule = true,
+  bool isCreated = true,
   ChannelConfig? config,
   List<ScheduledMessage> scheduledMessages = const [],
   Stream<List<ScheduledMessage>>? scheduledMessagesStream,
@@ -44,6 +47,8 @@ MockChannel scheduleChannel({
   final client = MockClient();
   final clientState = MockClientState();
   final channel = MockChannel(
+    // A channel that isn't created yet has no ID.
+    id: isCreated ? 'test-channel-id' : null,
     ownCapabilities: [
       ChannelCapability.sendMessage,
       if (canSchedule) ChannelCapability.scheduleMessage,

@@ -114,7 +114,9 @@ class DefaultStreamScheduledMessagesBanner extends StatefulWidget {
 
 class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamScheduledMessagesBanner> {
   Channel? _channel;
-  late Stream<ScheduledMessageCounts> _counts;
+  // Followed once the channel has a cid, and again when it or the thread
+  // changes.
+  Stream<ScheduledMessageCounts>? _counts;
 
   @override
   void didChangeDependencies() {
@@ -123,7 +125,7 @@ class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamSche
     if (channel == _channel) return;
 
     _channel = channel;
-    _counts = _followCounts();
+    _counts = null;
   }
 
   @override
@@ -131,17 +133,13 @@ class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamSche
     super.didUpdateWidget(oldWidget);
     if (widget.props.parentId == oldWidget.props.parentId) return;
 
-    _counts = _followCounts();
+    _counts = null;
   }
 
-  Stream<ScheduledMessageCounts> _followCounts() {
-    return _channel!.client.state.scheduledMessagesStream.map(_countsOf);
-  }
-
-  ScheduledMessageCounts _countsOf(List<ScheduledMessage> scheduledMessages) {
+  ScheduledMessageCounts _countsOf(List<ScheduledMessage> scheduledMessages, String cid) {
     return ScheduledMessageCounts.of(
       scheduledMessages,
-      cid: _channel!.cid!,
+      cid: cid,
       parentId: widget.props.parentId,
     );
   }
@@ -149,11 +147,16 @@ class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamSche
   @override
   Widget build(BuildContext context) {
     final channel = _channel!;
-    final scheduledMessages = channel.client.state.scheduledMessages;
+    // A channel that isn't created yet has no scheduled messages.
+    final cid = channel.cid;
+    if (cid == null) return const SizedBox.shrink();
+
+    final clientState = channel.client.state;
+    final counts = _counts ??= clientState.scheduledMessagesStream.map((it) => _countsOf(it, cid));
 
     return BetterStreamBuilder<ScheduledMessageCounts>(
-      stream: _counts,
-      initialData: _countsOf(scheduledMessages),
+      stream: counts,
+      initialData: _countsOf(clientState.scheduledMessages, cid),
       builder: (context, counts) => _ScheduledMessagesBanner(
         channel: channel,
         counts: counts,
