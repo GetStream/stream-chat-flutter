@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../stream_chat_flutter.dart';
 import '../../localization/translations.dart';
 import 'schedule_message_bounds.dart';
+import 'scheduled_message_counts.dart';
 
 /// Shows the times [message] can be scheduled for in [channel], which must be
 /// initialized, in a sheet.
@@ -51,9 +52,9 @@ class _ScheduleMessageSheet extends StatelessWidget {
 
     // Messages that failed don't count toward the channel's limit.
     final scheduledMessages = channel.client.state.scheduledMessages;
-    final pending = scheduledMessages.where((it) => it.cid == channel.cid && it.status.isPending);
+    final counts = ScheduledMessageCounts.of(scheduledMessages, cid: channel.cid!);
     final reachedLimit = switch (config?.scheduledMessagesMaxPerChannel) {
-      final limit? when pending.length >= limit => limit,
+      final limit? when counts.channelPending >= limit => limit,
       _ => null,
     };
     final isLimitReached = reachedLimit != null;
