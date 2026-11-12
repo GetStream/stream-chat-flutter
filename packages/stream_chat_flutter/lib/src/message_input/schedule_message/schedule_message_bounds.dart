@@ -7,9 +7,6 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 const _defaultMinLeadTime = Duration(minutes: 1);
 const _defaultMaxLeadTime = Duration(days: 120);
 
-// Leaves room for this device's clock running ahead.
-const _clockSkewBuffer = Duration(minutes: 1);
-
 /// The earliest and latest times a message can be scheduled for in a
 /// channel, measured from now.
 @internal
@@ -24,7 +21,7 @@ class ScheduleMessageBounds {
 
     return ScheduleMessageBounds._(
       minLeadTime: minLeadTime,
-      earliest: now.add(minLeadTime + _clockSkewBuffer),
+      earliest: now.add(minLeadTime),
       latest: now.add(maxLeadTime),
     );
   }

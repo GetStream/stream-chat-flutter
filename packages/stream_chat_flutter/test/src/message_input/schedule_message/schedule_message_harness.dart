@@ -34,7 +34,8 @@ ScheduledMessage scheduledMessage(
   );
 }
 
-/// A channel named "General", whose user holds [scheduledMessages].
+/// A channel named [name], "General" by default, whose user holds
+/// [scheduledMessages].
 ///
 /// Without [isCreated], the channel has no ID yet.
 MockChannel scheduleChannel({
@@ -42,6 +43,8 @@ MockChannel scheduleChannel({
   bool isCreated = true,
   ChannelConfig? config,
   List<ScheduledMessage> scheduledMessages = const [],
+  List<Member> members = const [],
+  String? name = 'General',
   Stream<List<ScheduledMessage>>? scheduledMessagesStream,
 }) {
   final client = MockClient();
@@ -58,7 +61,7 @@ MockChannel scheduleChannel({
   final model = ChannelModel(
     cid: scheduleCid,
     config: config,
-    extraData: const {'name': 'General'},
+    extraData: {'name': ?name},
   );
 
   when(() => client.state).thenReturn(clientState);
@@ -71,7 +74,7 @@ MockChannel scheduleChannel({
   when(() => channel.config).thenReturn(config ?? ChannelConfig());
   when(() => channel.state).thenReturn(channelState);
   when(() => channelState.channelState).thenReturn(ChannelState(channel: model));
-  when(() => channelState.members).thenReturn([]);
+  when(() => channelState.members).thenReturn(members);
 
   return channel;
 }

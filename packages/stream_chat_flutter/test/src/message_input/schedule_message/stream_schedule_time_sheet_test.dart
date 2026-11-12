@@ -193,4 +193,44 @@ void main() {
       expect(picker.initialEntryMode, TimePickerEntryMode.input);
     });
   });
+
+  testWidgets('showStreamScheduleTimeSheet says the channel holds its limit for a new message', (tester) async {
+    final config = ChannelConfig(scheduledMessagesMaxPerChannel: 2);
+    final pending = [scheduledMessage('a'), scheduledMessage('b')];
+
+    await withClock(Clock.fixed(wednesday), () async {
+      await showTimeSheet(tester, scheduleChannel(config: config, scheduledMessages: pending));
+
+      expect(find.text('Limit reached (2 max)'), findsOneWidget);
+      expect(scheduleButton(tester).props.onPressed, isNull);
+    });
+  });
+
+  testWidgets('showStreamScheduleTimeSheet can reschedule while the channel holds its limit', (tester) async {
+    final config = ChannelConfig(scheduledMessagesMaxPerChannel: 2);
+    final pending = [scheduledMessage('a'), scheduledMessage('b')];
+
+    await withClock(Clock.fixed(wednesday), () async {
+      await showTimeSheet(
+        tester,
+        scheduleChannel(config: config, scheduledMessages: pending),
+        initialScheduledAt: DateTime(2026, 10, 23, 9),
+      );
+
+      expect(scheduleButton(tester).props.onPressed, isNotNull);
+    });
+  });
+
+  testWidgets('showStreamScheduleTimeSheet names a channel whose members have no names as untitled', (
+    tester,
+  ) async {
+    // A member without a user has no name to show.
+    final channel = scheduleChannel(name: null, members: [Member(userId: 'other')]);
+
+    await withClock(Clock.fixed(wednesday), () async {
+      await showTimeSheet(tester, channel);
+
+      expect(find.text('Message to No title'), findsOneWidget);
+    });
+  });
 }

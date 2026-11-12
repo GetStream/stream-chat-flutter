@@ -13,7 +13,7 @@ void main() {
     final bounds = withClock(Clock.fixed(now), () => ScheduleMessageBounds.fromConfig(null));
 
     expect(bounds.minLeadTime, const Duration(minutes: 1));
-    expect(bounds.earliest, now.add(const Duration(minutes: 2)));
+    expect(bounds.earliest, now.add(const Duration(minutes: 1)));
     expect(bounds.latest, now.add(const Duration(days: 120)));
   });
 
@@ -25,7 +25,7 @@ void main() {
     final bounds = withClock(Clock.fixed(now), () => ScheduleMessageBounds.fromConfig(config));
 
     expect(bounds.minLeadTime, const Duration(hours: 2));
-    expect(bounds.earliest, now.add(const Duration(hours: 2, minutes: 1)));
+    expect(bounds.earliest, now.add(const Duration(hours: 2)));
     expect(bounds.latest, now.add(const Duration(days: 7)));
   });
 

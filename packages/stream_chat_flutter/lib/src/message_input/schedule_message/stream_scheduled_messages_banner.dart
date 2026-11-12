@@ -11,6 +11,10 @@ import 'scheduled_message_counts.dart';
 /// while the channel allows scheduling messages. The banner is empty when there
 /// is nothing to count.
 ///
+/// It counts the scheduled messages the client has loaded, such as through
+/// `includeScheduledMessages` on a channel or channel list query, or
+/// [StreamChatClient.loadScheduledMessages].
+///
 /// This widget renders [DefaultStreamScheduledMessagesBanner] unless a custom
 /// builder is registered through
 /// `streamChatComponentBuilders(scheduledMessagesBanner: ...)`, which then

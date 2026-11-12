@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 
@@ -109,7 +111,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
               tooltip: translations.scheduleLabel,
               icon: Icon(icons.checkmark),
               onPressed: switch (canSchedule) {
-                true => () => Navigator.of(context).pop(_scheduledAt),
+                true => _confirm,
                 false => null,
               },
             ),
@@ -220,21 +222,42 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
     _setScheduledAt(DateTime(date.year, date.month, date.day, time.hour, time.minute));
   }
 
+  // Picks the time, unless the sheet stayed open until it was no longer
+  // allowed; a rebuild then shows why.
+  void _confirm() {
+    final channel = widget.channel;
+    final bounds = ScheduleMessageBounds.fromConfig(channel.config);
+    final scheduledMessages = channel.client.state.scheduledMessages;
+    final counts = ScheduledMessageCounts.of(scheduledMessages, cid: channel.cid!);
+    if (_errorText(bounds, counts) != null) return setState(() {});
+
+    Navigator.of(context).pop(_scheduledAt);
+  }
+
   // Why the picked time can't be scheduled, or null when it can.
   String? _errorText(ScheduleMessageBounds bounds, ScheduledMessageCounts counts) {
     final translations = context.translations;
 
-    // Rescheduling moves a message the user already counts toward the limit.
-    final userLimit = widget.channel.config?.scheduledMessagesMaxPerUser;
-    if (!_isRescheduling && userLimit != null && counts.userPending >= userLimit) {
-      return translations.scheduleUserLimitReachedError(limit: userLimit);
+    // Rescheduling moves a message the user already counts toward the limits.
+    if (!_isRescheduling) {
+      final config = widget.channel.config;
+      final channelLimit = config?.scheduledMessagesMaxPerChannel;
+      if (channelLimit != null && counts.channelPending >= channelLimit) {
+        return translations.scheduleChannelLimitReachedLabel(limit: channelLimit);
+      }
+
+      final userLimit = config?.scheduledMessagesMaxPerUser;
+      if (userLimit != null && counts.userPending >= userLimit) {
+        return translations.scheduleUserLimitReachedError(limit: userLimit);
+      }
     }
 
     if (bounds.isTooSoon(_scheduledAt)) {
-      return switch (_isRescheduling) {
-        true => translations.rescheduleTooSoonError,
-        false => translations.scheduleTooSoonError(minLeadTime: bounds.minLeadTime),
-      };
+      if (_isRescheduling) return translations.rescheduleTooSoonError;
+
+      // Shown in whole minutes, so a shorter minimum still reads as one.
+      final minutes = math.max(1, (bounds.minLeadTime.inSeconds / 60).ceil());
+      return translations.scheduleTooSoonError(minLeadTime: Duration(minutes: minutes));
     }
     if (bounds.isTooFar(_scheduledAt)) return translations.scheduleTooFarError;
     return null;

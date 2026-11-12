@@ -3,7 +3,8 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 
 import 'extensions.dart';
 
-/// The name of [channel] while it is loaded, or null when it isn't.
+/// The name of [channel] while it is loaded, or null when it isn't or has no
+/// name to show.
 ///
 /// A channel without a name of its own is named after its other members, as
 /// [currentUser] sees them.
@@ -13,5 +14,8 @@ String? loadedChannelName(Channel? channel, {User? currentUser}) {
   final state = channel?.state;
   final model = state?.channelState.channel?.copyWith(members: state.members);
 
-  return model?.formatName(currentUser: currentUser);
+  final name = model?.formatName(currentUser: currentUser);
+  if (name == null || name.trim().isEmpty) return null;
+
+  return name;
 }

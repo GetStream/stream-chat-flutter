@@ -1,5 +1,6 @@
 import 'package:clock/clock.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'schedule_message_harness.dart';
 
@@ -46,5 +47,34 @@ void main() {
       expect(closeButton(), findsOneWidget);
       expect(backButton(), findsNothing);
     });
+  });
+
+  testWidgets('showStreamScheduleTimeSheet keeps the sheet open when the time became too soon', (tester) async {
+    var now = wednesday;
+    final results = await withClock(Clock(() => now), () => showTimeSheet(tester, scheduleChannel()));
+
+    // The sheet starts an hour ahead; two hours later that has passed.
+    now = wednesday.add(const Duration(hours: 2));
+    await withClock(Clock(() => now), () async {
+      await tester.tap(confirmButton());
+      await tester.pumpAndSettle();
+    });
+
+    expect(results, isEmpty);
+    expect(find.text('Pick a time at least 1 minute from now'), findsOneWidget);
+  });
+
+  testWidgets('showStreamScheduleTimeSheet rounds a minimum under a minute up to one', (tester) async {
+    final config = ChannelConfig(scheduledMessagesMinLeadTime: const Duration(seconds: 30));
+    var now = wednesday;
+    await withClock(Clock(() => now), () => showTimeSheet(tester, scheduleChannel(config: config)));
+
+    now = wednesday.add(const Duration(hours: 2));
+    await withClock(Clock(() => now), () async {
+      await tester.tap(confirmButton());
+      await tester.pumpAndSettle();
+    });
+
+    expect(find.text('Pick a time at least 1 minute from now'), findsOneWidget);
   });
 }
