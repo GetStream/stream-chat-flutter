@@ -194,14 +194,24 @@ Future<Channel?> _loadChannel(BuildContext context, ScheduledMessage scheduledMe
   final ChannelModel(:id, :type) = ChannelModel(cid: cid);
   final channel = client.channel(type, id: id);
 
+  void showError(String description) {
+    messenger.show(StreamSnackbar(message: Text(description), variant: .error));
+  }
+
   try {
     await channel.query();
-    return channel;
   } catch (error) {
-    final description = describeScheduleError(error, fallback: fallback);
-    messenger.show(StreamSnackbar(message: Text(description), variant: .error));
+    showError(describeScheduleError(error, fallback: fallback));
     return null;
   }
+
+  // Offline, a query can answer from the cache without loading the channel.
+  if (channel.state == null) {
+    showError(fallback);
+    return null;
+  }
+
+  return channel;
 }
 
 Future<void> _editAndReschedule(BuildContext context, ScheduledMessage scheduledMessage) async {

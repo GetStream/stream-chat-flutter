@@ -31,7 +31,8 @@ Future<void> scheduleOnSendLongPress(
 
   try {
     await _schedule(channel, message, scheduledAt);
-    controller.reset();
+    // Text typed while it was being scheduled stays in the composer.
+    if (controller.value == message) controller.reset();
   } catch (error) {
     final description = describeScheduleError(error, fallback: fallback);
     messenger.show(StreamSnackbar(message: Text(description), variant: .error));
