@@ -18,7 +18,7 @@ void main() {
 
     final banner = tester.getRect(find.byType(StreamScheduledMessagesBanner));
     final pill = tester.getRect(
-      find.descendant(of: find.byType(StreamScheduledMessagesBanner), matching: find.byType(DecoratedBox)).first,
+      find.descendant(of: find.byType(StreamScheduledMessagesBanner), matching: find.byType(Material)).first,
     );
     expect(pill, banner);
   });
@@ -34,7 +34,7 @@ void main() {
 
     final banner = tester.getRect(find.byType(StreamScheduledMessagesBanner));
     final pill = tester.getRect(
-      find.descendant(of: find.byType(StreamScheduledMessagesBanner), matching: find.byType(DecoratedBox)).first,
+      find.descendant(of: find.byType(StreamScheduledMessagesBanner), matching: find.byType(Material)).first,
     );
     expect(pill.left - banner.left, 4);
     expect(pill.top - banner.top, 8);

@@ -226,7 +226,6 @@ class _ScheduledMessagesBanner extends StatelessWidget {
   Widget build(BuildContext context) {
     final icons = context.streamIcons;
     final spacing = context.streamSpacing;
-    final radius = context.streamRadius;
     final translations = context.translations;
 
     final theme = StreamScheduledMessagesBannerTheme.of(context);
@@ -256,19 +255,17 @@ class _ScheduledMessagesBanner extends StatelessWidget {
 
     final effectiveCountStyle = theme.countStyle ?? defaults.countStyle;
     final effectiveViewAllStyle = theme.viewAllStyle ?? defaults.viewAllStyle;
-    final effectiveSide = theme.side ?? defaults.side;
-    final effectiveBoxShadow = theme.boxShadow ?? defaults.boxShadow;
+    final effectiveShape = theme.shape ?? defaults.shape;
+    final effectiveElevation = theme.elevation ?? defaults.elevation;
     final effectivePadding = theme.padding ?? defaults.padding;
     final effectiveBackgroundColor = theme.backgroundColor ?? defaults.backgroundColor;
 
     final onViewAllPressed = this.onViewAllPressed;
 
-    final banner = DecoratedBox(
-      decoration: ShapeDecoration(
-        color: effectiveBackgroundColor,
-        shadows: effectiveBoxShadow,
-        shape: RoundedSuperellipseBorder(borderRadius: .all(radius.max), side: effectiveSide),
-      ),
+    final banner = Material(
+      color: effectiveBackgroundColor,
+      elevation: effectiveElevation,
+      shape: effectiveShape,
       child: ConstrainedBox(
         constraints: const BoxConstraints(minHeight: 44),
         child: Padding(
@@ -327,10 +324,15 @@ class _StreamScheduledMessagesBannerThemeDefaults extends StreamScheduledMessage
   Color get backgroundColor => _colorScheme.backgroundElevation2;
 
   @override
-  BorderSide get side => BorderSide(color: _colorScheme.borderDefault);
+  ShapeBorder get shape {
+    return RoundedSuperellipseBorder(
+      borderRadius: .all(_context.streamRadius.max),
+      side: BorderSide(color: _colorScheme.borderDefault),
+    );
+  }
 
   @override
-  List<BoxShadow> get boxShadow => _context.streamBoxShadow.elevation3;
+  double get elevation => _context.streamElevation.level3;
 
   @override
   EdgeInsetsGeometry get padding {

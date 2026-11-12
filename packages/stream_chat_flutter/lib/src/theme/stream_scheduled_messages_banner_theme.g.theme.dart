@@ -31,12 +31,8 @@ mixin _$StreamScheduledMessagesBannerThemeData {
 
     return StreamScheduledMessagesBannerThemeData(
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
-      side: a.side == null
-          ? b.side
-          : b.side == null
-          ? a.side
-          : BorderSide.lerp(a.side!, b.side!, t),
-      boxShadow: t < 0.5 ? a.boxShadow : b.boxShadow,
+      shape: ShapeBorder.lerp(a.shape, b.shape, t),
+      elevation: lerpDouble$(a.elevation, b.elevation, t),
       padding: EdgeInsetsGeometry.lerp(a.padding, b.padding, t),
       countStyle: TextStyle.lerp(a.countStyle, b.countStyle, t),
       viewAllStyle: TextStyle.lerp(a.viewAllStyle, b.viewAllStyle, t),
@@ -47,8 +43,8 @@ mixin _$StreamScheduledMessagesBannerThemeData {
 
   StreamScheduledMessagesBannerThemeData copyWith({
     Color? backgroundColor,
-    BorderSide? side,
-    List<BoxShadow>? boxShadow,
+    ShapeBorder? shape,
+    double? elevation,
     EdgeInsetsGeometry? padding,
     TextStyle? countStyle,
     TextStyle? viewAllStyle,
@@ -59,8 +55,8 @@ mixin _$StreamScheduledMessagesBannerThemeData {
 
     return StreamScheduledMessagesBannerThemeData(
       backgroundColor: backgroundColor ?? _this.backgroundColor,
-      side: side ?? _this.side,
-      boxShadow: boxShadow ?? _this.boxShadow,
+      shape: shape ?? _this.shape,
+      elevation: elevation ?? _this.elevation,
       padding: padding ?? _this.padding,
       countStyle: countStyle ?? _this.countStyle,
       viewAllStyle: viewAllStyle ?? _this.viewAllStyle,
@@ -84,10 +80,8 @@ mixin _$StreamScheduledMessagesBannerThemeData {
 
     return copyWith(
       backgroundColor: other.backgroundColor,
-      side: _this.side != null && other.side != null
-          ? BorderSide.merge(_this.side!, other.side!)
-          : other.side,
-      boxShadow: other.boxShadow,
+      shape: other.shape,
+      elevation: other.elevation,
       padding: other.padding,
       countStyle: _this.countStyle?.merge(other.countStyle) ?? other.countStyle,
       viewAllStyle:
@@ -111,8 +105,8 @@ mixin _$StreamScheduledMessagesBannerThemeData {
     final _other = (other as StreamScheduledMessagesBannerThemeData);
 
     return _other.backgroundColor == _this.backgroundColor &&
-        _other.side == _this.side &&
-        _other.boxShadow == _this.boxShadow &&
+        _other.shape == _this.shape &&
+        _other.elevation == _this.elevation &&
         _other.padding == _this.padding &&
         _other.countStyle == _this.countStyle &&
         _other.viewAllStyle == _this.viewAllStyle &&
@@ -127,8 +121,8 @@ mixin _$StreamScheduledMessagesBannerThemeData {
     return Object.hash(
       runtimeType,
       _this.backgroundColor,
-      _this.side,
-      _this.boxShadow,
+      _this.shape,
+      _this.elevation,
       _this.padding,
       _this.countStyle,
       _this.viewAllStyle,

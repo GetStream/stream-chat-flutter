@@ -22,7 +22,7 @@ ScheduledMessage scheduledMessage() {
 
 /// The visible pill of the scheduled messages banner, inside its margin.
 Rect bannerPill(WidgetTester tester) {
-  final pill = find.descendant(of: find.byType(StreamScheduledMessagesBanner), matching: find.byType(DecoratedBox));
+  final pill = find.descendant(of: find.byType(StreamScheduledMessagesBanner), matching: find.byType(Material));
   return tester.getRect(pill.first);
 }
 

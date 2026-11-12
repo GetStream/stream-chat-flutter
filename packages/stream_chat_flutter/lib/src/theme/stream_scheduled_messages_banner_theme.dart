@@ -88,8 +88,8 @@ class StreamScheduledMessagesBannerThemeData with _$StreamScheduledMessagesBanne
   /// overrides.
   const StreamScheduledMessagesBannerThemeData({
     this.backgroundColor,
-    this.side,
-    this.boxShadow,
+    this.shape,
+    this.elevation,
     this.padding,
     this.countStyle,
     this.viewAllStyle,
@@ -102,15 +102,16 @@ class StreamScheduledMessagesBannerThemeData with _$StreamScheduledMessagesBanne
   /// Falls back to [StreamColorScheme.backgroundElevation2].
   final Color? backgroundColor;
 
-  /// The border of the banner.
+  /// The shape of the banner, including its border.
   ///
-  /// Falls back to a 1px [StreamColorScheme.borderDefault] border.
-  final BorderSide? side;
+  /// Falls back to a [RoundedSuperellipseBorder] with [StreamRadius.max]
+  /// corners and a 1px [StreamColorScheme.borderDefault] border.
+  final ShapeBorder? shape;
 
-  /// The shadow of the banner.
+  /// The elevation of the banner.
   ///
-  /// Falls back to [StreamBoxShadow.elevation3].
-  final List<BoxShadow>? boxShadow;
+  /// Falls back to [StreamElevation.level3].
+  final double? elevation;
 
   /// The padding around the content of the banner.
   ///
