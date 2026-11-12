@@ -35,11 +35,8 @@ ScheduledMessage scheduledMessage(
 }
 
 /// A channel named "General", whose user holds [scheduledMessages].
-///
-/// The client lists it among its loaded channels unless [loaded] is false.
 MockChannel scheduleChannel({
   bool canSchedule = true,
-  bool loaded = true,
   ChannelConfig? config,
   List<ScheduledMessage> scheduledMessages = const [],
 }) {
@@ -62,7 +59,6 @@ MockChannel scheduleChannel({
   when(() => clientState.currentUser).thenReturn(OwnUser(id: 'current-user'));
   when(() => clientState.scheduledMessages).thenReturn(scheduledMessages);
   when(() => clientState.scheduledMessagesStream).thenAnswer((_) => Stream.value(scheduledMessages));
-  when(() => clientState.channels).thenReturn({if (loaded) scheduleCid: channel});
   when(() => channel.client).thenReturn(client);
   when(() => channel.config).thenReturn(config ?? ChannelConfig());
   when(() => channel.state).thenReturn(channelState);
@@ -128,7 +124,7 @@ Future<List<DateTime?>> showMessageSheet(
   final button = openButton(
     (context) => showStreamScheduleMessageSheet(
       context: context,
-      cid: scheduleCid,
+      channel: channel,
       message: messageToSchedule(),
     ).then(results.add),
   );
@@ -150,7 +146,7 @@ Future<List<DateTime?>> showTimeSheet(
   final button = openButton(
     (context) => showStreamScheduleTimeSheet(
       context: context,
-      cid: scheduleCid,
+      channel: channel,
       message: messageToSchedule(),
       initialScheduledAt: initialScheduledAt,
       title: title,

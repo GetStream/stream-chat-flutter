@@ -27,5 +27,8 @@ abstract final class ScheduledMessagesStrings {
   static const failedOneNotRemoved =
       "Scheduled again, but the failed message couldn't be removed. Delete it from the list.";
 
-  static String deleteDescription(String name) => "This message to $name won't be sent. This can't be undone.";
+  static String deleteDescription(String? name) => switch (name) {
+    final name? => "This message to $name won't be sent. This can't be undone.",
+    null => "This message won't be sent. This can't be undone.",
+  };
 }

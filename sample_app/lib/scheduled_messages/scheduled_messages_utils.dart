@@ -25,18 +25,17 @@ String describeScheduleError(Object error, {required String fallback}) {
   };
 }
 
-/// The name of the channel [scheduledMessage] is sent to.
+/// The name of the channel [scheduledMessage] is sent to, or null when it has
+/// none.
 ///
 /// A loaded channel without a name of its own is named after its other
-/// members. One that is not loaded falls back to its ID.
-String scheduledMessageChannelName(BuildContext context, ScheduledMessage scheduledMessage) {
+/// members.
+String? scheduledMessageChannelName(BuildContext context, ScheduledMessage scheduledMessage) {
   final client = StreamChat.of(context).client;
-  final name = switch (client.state.channels[scheduledMessage.cid]) {
+  return switch (client.state.channels[scheduledMessage.cid]) {
     final loaded? => _channelDisplayName(loaded),
     null => scheduledMessage.channel?.name,
   };
-
-  return name ?? scheduledMessage.cid;
 }
 
 // The name of [channel]. A channel without a name of its own is named after

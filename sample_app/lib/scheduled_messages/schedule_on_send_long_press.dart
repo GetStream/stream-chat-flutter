@@ -24,7 +24,7 @@ Future<void> scheduleOnSendLongPress(
 
   final scheduledAt = await showStreamScheduleMessageSheet(
     context: context,
-    cid: channel.cid!,
+    channel: channel,
     message: message,
   );
   if (scheduledAt == null) return;

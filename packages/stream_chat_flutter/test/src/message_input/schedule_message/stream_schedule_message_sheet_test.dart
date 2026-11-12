@@ -17,7 +17,7 @@ void main() {
         final button = openButton(
           (context) => showStreamScheduleMessageSheet(
             context: context,
-            cid: scheduleCid,
+            channel: channel,
             message: messageToSchedule(),
           ),
         );
