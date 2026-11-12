@@ -5,7 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../scheduled_messages_strings.dart';
 import '../scheduled_messages_utils.dart';
-import 'edit_scheduled_message_sheet.dart';
+import 'scheduled_message_edit_composer.dart';
 
 /// A pushed screen listing the current user's scheduled messages.
 ///
@@ -36,7 +36,7 @@ class ScheduledMessagesScreen extends StatelessWidget {
 ///
 /// It lists the messages in the channel [cid], the replies in the thread of
 /// [parentId], or those in every channel when both are null.
-class ScheduledMessagesPage extends StatelessWidget {
+class ScheduledMessagesPage extends StatefulWidget {
   const ScheduledMessagesPage({super.key, this.cid, this.parentId});
 
   /// The channel whose scheduled messages are listed.
@@ -48,19 +48,65 @@ class ScheduledMessagesPage extends StatelessWidget {
   final String? parentId;
 
   @override
+  State<ScheduledMessagesPage> createState() => _ScheduledMessagesPageState();
+}
+
+class _ScheduledMessagesPageState extends State<ScheduledMessagesPage> {
+  // The scheduled message being edited in the composer under the list.
+  _Edit? _edit;
+
+  void _startEdit(_Edit edit) => setState(() => _edit = edit);
+
+  void _closeEdit() => setState(() => _edit = null);
+
+  @override
   Widget build(BuildContext context) {
-    return RefreshIndicator.adaptive(
-      onRefresh: () => _refresh(context),
-      child: StreamScheduledMessageListView(
-        cid: cid,
-        parentId: parentId,
-        physics: const AlwaysScrollableScrollPhysics(),
-        onScheduledMessageTap: (it) => _openScheduledMessageActions(context, it),
-        emptyBuilder: (context) => const _NoScheduledMessages(),
+    final edit = _edit;
+
+    // Back ends an edit before it leaves the page.
+    return PopScope(
+      canPop: edit == null,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) _closeEdit();
+      },
+      child: Column(
+        children: [
+          Expanded(
+            child: RefreshIndicator.adaptive(
+              onRefresh: () => _refresh(context),
+              child: StreamScheduledMessageListView(
+                cid: widget.cid,
+                parentId: widget.parentId,
+                physics: const AlwaysScrollableScrollPhysics(),
+                onScheduledMessageTap: (it) => _openScheduledMessageActions(context, it, _startEdit),
+                emptyBuilder: (context) => const _NoScheduledMessages(),
+              ),
+            ),
+          ),
+          if (edit != null)
+            ScheduledMessageEditComposer(
+              key: ValueKey(edit.scheduledMessage.id),
+              channel: edit.channel,
+              scheduledMessage: edit.scheduledMessage,
+              message: edit.message,
+              onSave: edit.onSave,
+              onSaveLongPress: edit.onSaveLongPress,
+              onClose: _closeEdit,
+            ),
+        ],
       ),
     );
   }
 }
+
+// An edit of a scheduled message in the composer under the list.
+typedef _Edit = ({
+  Channel channel,
+  ScheduledMessage scheduledMessage,
+  Message message,
+  ScheduledMessageEditCallback onSave,
+  ScheduledMessageEditCallback onSaveLongPress,
+});
 
 // The empty list, with a hint on how to schedule a message.
 class _NoScheduledMessages extends StatelessWidget {
@@ -111,6 +157,7 @@ Future<void> _refresh(BuildContext context) async {
 Future<void> _openScheduledMessageActions(
   BuildContext context,
   ScheduledMessage scheduledMessage,
+  void Function(_Edit edit) startEdit,
 ) async {
   // A message being sent has no actions, so its sheet wouldn't open.
   final actions = StreamScheduledMessageActionsBuilder.buildActions(
@@ -129,17 +176,18 @@ Future<void> _openScheduledMessageActions(
   );
 
   if (action == null || !context.mounted) return;
-  return _onScheduledMessageAction(context, action);
+  return _onScheduledMessageAction(context, action, startEdit);
 }
 
 Future<void> _onScheduledMessageAction(
   BuildContext context,
   ScheduledMessageAction action,
+  void Function(_Edit edit) startEdit,
 ) async {
   return switch (action) {
-    EditScheduledMessage(:final scheduledMessage) => _editScheduledMessage(context, scheduledMessage),
+    EditScheduledMessage(:final scheduledMessage) => _editScheduledMessage(context, scheduledMessage, startEdit),
     RetryScheduledMessage(:final scheduledMessage) => _retry(context, scheduledMessage),
-    EditAndRescheduleMessage(:final scheduledMessage) => _editAndReschedule(context, scheduledMessage),
+    EditAndRescheduleMessage(:final scheduledMessage) => _editAndReschedule(context, scheduledMessage, startEdit),
     RescheduleMessage(:final scheduledMessage) => _reschedule(context, scheduledMessage),
     SendScheduledMessageNow(:final scheduledMessage) => _sendNow(context, scheduledMessage),
     CopyScheduledMessageText(:final scheduledMessage) => _copyText(context, scheduledMessage),
@@ -162,7 +210,11 @@ Future<void> _run(BuildContext context, Future<String> Function() call) async {
   }
 }
 
-Future<void> _editScheduledMessage(BuildContext context, ScheduledMessage scheduledMessage) async {
+Future<void> _editScheduledMessage(
+  BuildContext context,
+  ScheduledMessage scheduledMessage,
+  void Function(_Edit edit) startEdit,
+) async {
   final client = StreamChat.of(context).client;
   final messenger = StreamSnackbarMessenger.of(context);
 
@@ -172,12 +224,11 @@ Future<void> _editScheduledMessage(BuildContext context, ScheduledMessage schedu
   final message = await _prefill(context, client, scheduledMessage);
   if (message == null || !context.mounted) return;
 
-  return showEditScheduledMessageSheet(
-    context: context,
+  startEdit((
     channel: channel,
     scheduledMessage: scheduledMessage,
     message: message,
-    title: ScheduledMessagesStrings.editScheduledMessage,
+    // Keeps its time.
     onSave: (context, edited) async {
       await client.updateScheduledMessage(scheduledMessage, edited);
       messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.updated), variant: .success));
@@ -197,7 +248,7 @@ Future<void> _editScheduledMessage(BuildContext context, ScheduledMessage schedu
       messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.rescheduled), variant: .success));
       return true;
     },
-  );
+  ));
 }
 
 // The content of [scheduledMessage] for the composer, with its mentioned
@@ -260,10 +311,13 @@ Future<Channel?> _loadChannel(BuildContext context, ScheduledMessage scheduledMe
   return channel;
 }
 
-Future<void> _editAndReschedule(BuildContext context, ScheduledMessage scheduledMessage) async {
+Future<void> _editAndReschedule(
+  BuildContext context,
+  ScheduledMessage scheduledMessage,
+  void Function(_Edit edit) startEdit,
+) async {
   final client = StreamChat.of(context).client;
   final messenger = StreamSnackbarMessenger.of(context);
-  final title = context.translations.editAndRescheduleLabel;
 
   final channel = await _loadChannel(context, scheduledMessage);
   if (channel == null || !context.mounted) return;
@@ -285,15 +339,13 @@ Future<void> _editAndReschedule(BuildContext context, ScheduledMessage scheduled
     return true;
   }
 
-  return showEditScheduledMessageSheet(
-    context: context,
+  startEdit((
     channel: channel,
     scheduledMessage: scheduledMessage,
     message: message,
-    title: title,
     onSave: scheduleAgain,
     onSaveLongPress: scheduleAgain,
-  );
+  ));
 }
 
 Future<void> _reschedule(BuildContext context, ScheduledMessage scheduledMessage) async {
