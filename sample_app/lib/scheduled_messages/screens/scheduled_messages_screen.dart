@@ -5,6 +5,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../scheduled_messages_strings.dart';
 import '../scheduled_messages_utils.dart';
+import 'edit_scheduled_message_sheet.dart';
 
 /// A pushed screen listing the current user's scheduled messages.
 ///
@@ -163,23 +164,68 @@ Future<void> _run(BuildContext context, Future<String> Function() call) async {
 
 Future<void> _editScheduledMessage(BuildContext context, ScheduledMessage scheduledMessage) async {
   final client = StreamChat.of(context).client;
+  final messenger = StreamSnackbarMessenger.of(context);
 
-  final text = await _showEditSheet(context, scheduledMessage.message);
-  if (text == null || !context.mounted) return;
+  final channel = await _loadChannel(context, scheduledMessage);
+  if (channel == null || !context.mounted) return;
 
-  return _run(context, () async {
-    final content = scheduledMessage.message;
+  final message = await _prefill(context, client, scheduledMessage);
+  if (message == null || !context.mounted) return;
+
+  return showEditScheduledMessageSheet(
+    context: context,
+    channel: channel,
+    scheduledMessage: scheduledMessage,
+    message: message,
+    title: ScheduledMessagesStrings.editScheduledMessage,
+    onSave: (context, edited) async {
+      await client.updateScheduledMessage(scheduledMessage, edited);
+      messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.updated), variant: .success));
+      return true;
+    },
+    // A long press also moves it to another time.
+    onSaveLongPress: (context, edited) async {
+      final scheduledAt = await showStreamScheduleTimeSheet(
+        context: context,
+        channel: channel,
+        message: edited,
+        initialScheduledAt: scheduledMessage.scheduledAt,
+      );
+      if (scheduledAt == null) return false;
+
+      await client.updateScheduledMessage(scheduledMessage, edited, scheduledAt: scheduledAt);
+      messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.rescheduled), variant: .success));
+      return true;
+    },
+  );
+}
+
+// The content of [scheduledMessage] for the composer, with its mentioned
+// users and quoted message resolved. Shows why they couldn't be, and resolves
+// to null.
+Future<Message?> _prefill(
+  BuildContext context,
+  StreamChatClient client,
+  ScheduledMessage scheduledMessage,
+) async {
+  final messenger = StreamSnackbarMessenger.of(context);
+  final fallback = context.translations.genericErrorText;
+  final content = scheduledMessage.message;
+
+  try {
     final mentionedUsers = await _resolveMentionedUsers(client, content);
     final quotedMessage = await _resolveQuotedMessage(client, scheduledMessage);
-    final edited = content.copyWith(
-      text: text,
+    // The composer starts from a draft, not from a message already sent.
+    return content.copyWith(
       mentionedUsers: mentionedUsers,
       quotedMessage: quotedMessage,
+      state: const MessageState.initial(),
     );
-
-    await client.updateScheduledMessage(scheduledMessage, edited);
-    return ScheduledMessagesStrings.updated;
-  });
+  } catch (error) {
+    final description = describeScheduleError(error, fallback: fallback);
+    messenger.show(StreamSnackbar(message: Text(description), variant: .error));
+    return null;
+  }
 }
 
 // The channel [scheduledMessage] is sent to, loaded without watching it when
@@ -217,34 +263,37 @@ Future<Channel?> _loadChannel(BuildContext context, ScheduledMessage scheduledMe
 Future<void> _editAndReschedule(BuildContext context, ScheduledMessage scheduledMessage) async {
   final client = StreamChat.of(context).client;
   final messenger = StreamSnackbarMessenger.of(context);
+  final title = context.translations.editAndRescheduleLabel;
 
-  // Scheduling it again may only need a new time, so the text can stay as is.
-  final text = await _showEditSheet(context, scheduledMessage.message, allowUnchanged: true);
-  if (text == null || !context.mounted) return;
-
-  final fallback = context.translations.genericErrorText;
   final channel = await _loadChannel(context, scheduledMessage);
   if (channel == null || !context.mounted) return;
 
-  final scheduledAt = await showStreamScheduleTimeSheet(
-    context: context,
-    channel: channel,
-    message: scheduledMessage.message.copyWith(text: text),
-  );
-  if (scheduledAt == null) return;
+  final message = await _prefill(context, client, scheduledMessage);
+  if (message == null || !context.mounted) return;
 
-  final bool isFailedOneRemoved;
-  try {
-    isFailedOneRemoved = await _scheduleAgain(client, channel, scheduledMessage, scheduledAt, text: text);
-  } catch (error) {
-    final description = describeScheduleError(error, fallback: fallback);
-    messenger.show(StreamSnackbar(message: Text(description), variant: .error));
-    return;
+  Future<bool> scheduleAgain(BuildContext context, Message edited) async {
+    final scheduledAt = await showStreamScheduleTimeSheet(context: context, channel: channel, message: edited);
+    if (scheduledAt == null) return false;
+
+    final isFailedOneRemoved = await _scheduleAgain(client, channel, scheduledMessage, scheduledAt, edited);
+    messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.scheduled), variant: .success));
+    if (!isFailedOneRemoved) {
+      messenger.show(
+        StreamSnackbar(message: const Text(ScheduledMessagesStrings.failedOneNotRemoved), variant: .error),
+      );
+    }
+    return true;
   }
 
-  messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.scheduled), variant: .success));
-  if (isFailedOneRemoved) return;
-  messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.failedOneNotRemoved), variant: .error));
+  return showEditScheduledMessageSheet(
+    context: context,
+    channel: channel,
+    scheduledMessage: scheduledMessage,
+    message: message,
+    title: title,
+    onSave: scheduleAgain,
+    onSaveLongPress: scheduleAgain,
+  );
 }
 
 Future<void> _reschedule(BuildContext context, ScheduledMessage scheduledMessage) async {
@@ -334,33 +383,30 @@ Future<void> _maybeDelete(BuildContext context, ScheduledMessage scheduledMessag
   }
 }
 
-// A failed scheduled message can't be changed, so its content is scheduled
-// again as a new message and the failed one is removed. Resolves to whether
-// the failed one was removed.
+// A failed scheduled message can't be changed, so [edited] is scheduled as a
+// new message and the failed one is removed. Resolves to whether the failed
+// one was removed.
 Future<bool> _scheduleAgain(
   StreamChatClient client,
   Channel channel,
   ScheduledMessage scheduledMessage,
-  DateTime scheduledAt, {
-  String? text,
-}) async {
-  final content = scheduledMessage.message;
-
+  DateTime scheduledAt,
+  Message edited,
+) async {
   // A quoted message that was deleted can't be quoted again.
-  final quoted = await _resolveQuotedMessage(client, scheduledMessage);
-  final quotedMessageId = switch (quoted) {
+  final quotedMessageId = switch (edited.quotedMessage) {
     final quoted? when !quoted.isDeleted => quoted.id,
     _ => null,
   };
 
   final message = Message(
-    text: text ?? content.text,
-    attachments: content.attachments,
-    mentionedUsers: await _resolveMentionedUsers(client, content),
+    text: edited.text,
+    attachments: edited.attachments,
+    mentionedUsers: edited.mentionedUsers,
     quotedMessageId: quotedMessageId,
-    parentId: content.parentId,
-    showInChannel: content.showInChannel,
-    extraData: content.extraData,
+    parentId: edited.parentId,
+    showInChannel: edited.showInChannel,
+    extraData: edited.extraData,
   );
 
   await channel.scheduleMessage(message, scheduledAt: scheduledAt);
@@ -406,88 +452,5 @@ Future<Message?> _resolveQuotedMessage(StreamChatClient client, ScheduledMessage
     // the edit, so a network error doesn't lose the quote.
     if (error.statusCode == 404) return null;
     rethrow;
-  }
-}
-
-Future<String?> _showEditSheet(BuildContext context, Message message, {bool allowUnchanged = false}) {
-  return showStreamSheet<String>(
-    context: context,
-    isDismissible: true,
-    builder: (_, _) => _EditSheet(
-      text: message.text ?? '',
-      hasAttachments: message.attachments.isNotEmpty,
-      allowUnchanged: allowUnchanged,
-    ),
-  );
-}
-
-class _EditSheet extends StatefulWidget {
-  const _EditSheet({
-    required this.text,
-    required this.hasAttachments,
-    required this.allowUnchanged,
-  });
-
-  final String text;
-
-  // A message with attachments can be saved without text.
-  final bool hasAttachments;
-
-  // Whether the text can be saved without a change.
-  final bool allowUnchanged;
-
-  @override
-  State<_EditSheet> createState() => _EditSheetState();
-}
-
-class _EditSheetState extends State<_EditSheet> {
-  late final _controller = TextEditingController(text: widget.text)
-    ..addListener(() {
-      // The text changed, which enables or disables the save button.
-      setState(() {});
-    });
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final spacing = context.streamSpacing;
-    final text = _controller.text.trim();
-    final hasContent = text.isNotEmpty || widget.hasAttachments;
-    final canSave = hasContent && (widget.allowUnchanged || text != widget.text);
-
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.viewInsetsOf(context).bottom),
-      child: SafeArea(
-        child: Column(
-          mainAxisSize: .min,
-          children: [
-            StreamSheetHeader(
-              title: const Text(ScheduledMessagesStrings.editScheduledMessage),
-              trailing: StreamButton.icon(
-                icon: Icon(context.streamIcons.checkmark),
-                type: .solid,
-                onPressed: canSave ? () => Navigator.of(context).pop(text) : null,
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.fromLTRB(spacing.md, spacing.xs, spacing.md, spacing.md),
-              child: StreamTextInput(
-                controller: _controller,
-                autofocus: true,
-                autocorrect: true,
-                maxLines: 6,
-                minLines: 1,
-                hintText: ScheduledMessagesStrings.messageHint,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
