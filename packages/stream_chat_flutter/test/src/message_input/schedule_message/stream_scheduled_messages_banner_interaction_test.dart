@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -159,5 +161,24 @@ void main() {
     final props = StreamScheduledMessagesBannerProps(onViewAllPressed: onViewAllPressed);
 
     expect(props.copyWith(parentId: 'other').onViewAllPressed, onViewAllPressed);
+  });
+
+  testWidgets("StreamScheduledMessagesBanner doesn't rebuild when a change leaves its counts as they are", (
+    tester,
+  ) async {
+    final scheduled = scheduledMessage('a');
+    final updates = StreamController<List<ScheduledMessage>>();
+    addTearDown(updates.close);
+    final channel = scheduleChannel(scheduledMessages: [scheduled], scheduledMessagesStream: updates.stream);
+
+    await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessagesBanner(), channel: channel));
+    await tester.pumpAndSettle();
+    final countBefore = tester.widget<Text>(find.text('1 scheduled message'));
+
+    updates.add([scheduled.copyWith(scheduledAt: DateTime(2026, 10, 24, 9))]);
+    await tester.pumpAndSettle();
+
+    // A rebuild would create a new Text.
+    expect(tester.widget<Text>(find.text('1 scheduled message')), same(countBefore));
   });
 }

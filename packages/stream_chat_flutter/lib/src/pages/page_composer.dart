@@ -53,15 +53,13 @@ class PageComposer extends StatelessWidget {
       children: [
         ListenableBuilder(
           listenable: controller,
-          builder: (context, _) {
-            if (controller.isEditing) return const SizedBox.shrink();
-
-            return StreamScheduledMessagesBanner(
-              parentId: parentId,
-              onViewAllPressed: onScheduledMessagesViewAllPressed,
-              margin: EdgeInsetsDirectional.fromSTEB(spacing.md, 0, spacing.md, bottom),
-            );
-          },
+          builder: (context, banner) => controller.isEditing ? const SizedBox.shrink() : banner!,
+          // Built once, so typing doesn't rebuild it.
+          child: StreamScheduledMessagesBanner(
+            parentId: parentId,
+            onViewAllPressed: onScheduledMessagesViewAllPressed,
+            margin: EdgeInsetsDirectional.fromSTEB(spacing.md, 0, spacing.md, bottom),
+          ),
         ),
         composer,
       ],

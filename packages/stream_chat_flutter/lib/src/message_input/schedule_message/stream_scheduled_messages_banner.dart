@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
 import '../../../stream_chat_flutter.dart';
@@ -114,13 +113,13 @@ class DefaultStreamScheduledMessagesBanner extends StatefulWidget {
   }
 }
 
+// The counts a banner shows. [channelPending] counts the pending messages of
+// the whole channel, thread replies included, toward its limit.
+typedef _Counts = ({int failed, int pending, int channelPending});
+
 class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamScheduledMessagesBanner> {
   Channel? _channel;
-  // The scheduled messages the banner counts.
-  Stream<List<ScheduledMessage>>? _stream;
-  // Every scheduled message of the channel, thread replies included, which
-  // count toward its limit. Only followed for a channel's own banner.
-  Stream<List<ScheduledMessage>>? _channelStream;
+  late Stream<_Counts> _counts;
 
   @override
   void didChangeDependencies() {
@@ -129,7 +128,7 @@ class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamSche
     if (channel == _channel) return;
 
     _channel = channel;
-    _followScheduledMessages();
+    _counts = _followCounts();
   }
 
   @override
@@ -137,74 +136,50 @@ class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamSche
     super.didUpdateWidget(oldWidget);
     if (widget.props.parentId == oldWidget.props.parentId) return;
 
-    _followScheduledMessages();
+    _counts = _followCounts();
   }
 
-  void _followScheduledMessages() {
-    final channel = _channel!;
-    final clientState = channel.client.state;
-    final cid = channel.cid;
+  Stream<_Counts> _followCounts() {
+    return _channel!.client.state.scheduledMessagesStream.map(_countsOf).distinct();
+  }
 
-    _stream = switch ((widget.props.parentId, cid)) {
-      (final parentId?, _) => clientState.scheduledThreadRepliesStream(parentId),
-      (null, final cid?) => clientState.scheduledChannelMessagesStream(cid),
-      (null, null) => null,
-    };
-    _channelStream = switch ((widget.props.parentId, cid)) {
-      (null, final cid?) =>
-        clientState.scheduledMessagesStream
-            .map((it) => it.where((message) => message.cid == cid).toList())
-            .distinct(const ListEquality<ScheduledMessage>().equals),
-      _ => null,
-    };
+  _Counts _countsOf(List<ScheduledMessage> scheduledMessages) {
+    final cid = _channel!.cid;
+    final parentId = widget.props.parentId;
+
+    var failed = 0;
+    var pending = 0;
+    var channelPending = 0;
+    for (final it in scheduledMessages) {
+      if (it.cid != cid) continue;
+
+      final isPending = it.status.isPending;
+      if (isPending) channelPending += 1;
+
+      // A channel's banner counts its own messages, a thread's its replies.
+      if (it.message.parentId != parentId) continue;
+      if (it.status == .failed) failed += 1;
+      if (isPending) pending += 1;
+    }
+
+    return (failed: failed, pending: pending, channelPending: channelPending);
   }
 
   @override
   Widget build(BuildContext context) {
     final channel = _channel!;
-    final stream = _stream;
-    if (stream == null) return const SizedBox.shrink();
+    final scheduledMessages = channel.client.state.scheduledMessages;
 
-    final clientState = channel.client.state;
-    final parentId = widget.props.parentId;
-    final cid = channel.cid!;
-    final initialData = switch (parentId) {
-      final parentId? => clientState.scheduledThreadReplies(parentId),
-      null => clientState.scheduledChannelMessages(cid),
-    };
-
-    return BetterStreamBuilder<List<ScheduledMessage>>(
-      stream: stream,
-      initialData: initialData,
-      builder: (context, scheduledMessages) {
-        final channelStream = _channelStream;
-        if (channelStream == null) {
-          return _buildBanner(scheduledMessages, channelPendingCount: null);
-        }
-
-        final channelMessages = clientState.scheduledMessages.where((it) => it.cid == cid).toList();
-        return BetterStreamBuilder<List<ScheduledMessage>>(
-          stream: channelStream,
-          initialData: channelMessages,
-          builder: (context, channelMessages) {
-            final channelPendingCount = channelMessages.where((it) => it.status.isPending).length;
-            return _buildBanner(scheduledMessages, channelPendingCount: channelPendingCount);
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildBanner(
-    List<ScheduledMessage> scheduledMessages, {
-    required int? channelPendingCount,
-  }) {
-    return _ScheduledMessagesBanner(
-      channel: _channel!,
-      scheduledMessages: scheduledMessages,
-      channelPendingCount: channelPendingCount,
-      onViewAllPressed: widget.props.onViewAllPressed,
-      margin: widget.props.margin,
+    return BetterStreamBuilder<_Counts>(
+      stream: _counts,
+      initialData: _countsOf(scheduledMessages),
+      builder: (context, counts) => _ScheduledMessagesBanner(
+        channel: channel,
+        counts: counts,
+        isThread: widget.props.parentId != null,
+        onViewAllPressed: widget.props.onViewAllPressed,
+        margin: widget.props.margin,
+      ),
     );
   }
 }
@@ -212,16 +187,15 @@ class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamSche
 class _ScheduledMessagesBanner extends StatelessWidget {
   const _ScheduledMessagesBanner({
     required this.channel,
-    required this.scheduledMessages,
-    required this.channelPendingCount,
+    required this.counts,
+    required this.isThread,
     this.onViewAllPressed,
     this.margin,
   });
 
   final Channel channel;
-  final List<ScheduledMessage> scheduledMessages;
-  // The pending messages of the whole channel, or null for a thread's banner.
-  final int? channelPendingCount;
+  final _Counts counts;
+  final bool isThread;
   final VoidCallback? onViewAllPressed;
   final EdgeInsetsGeometry? margin;
 
@@ -235,30 +209,21 @@ class _ScheduledMessagesBanner extends StatelessWidget {
     final theme = StreamScheduledMessagesBannerTheme.of(context);
     final defaults = _StreamScheduledMessagesBannerThemeDefaults(context);
 
-    final failed = scheduledMessages.where((it) => it.status == .failed);
-    final pending = scheduledMessages.where((it) => it.status.isPending);
-
-    final failedCount = failed.length;
-    final pendingCount = pending.length;
-    final isFailed = failedCount > 0;
-    final isPending = pendingCount > 0 && channel.canScheduleMessage;
+    final (:failed, :pending, :channelPending) = counts;
+    final isFailed = failed > 0;
+    final isPending = pending > 0 && channel.canScheduleMessage;
     if (!isFailed && !isPending) return const SizedBox.shrink();
 
     String label() {
-      if (isFailed) {
-        return translations.scheduledMessagesFailedCountText(count: failedCount);
-      }
-      final channelPendingCount = this.channelPendingCount;
-      if (channelPendingCount == null) {
-        return translations.scheduledRepliesCountText(count: pendingCount);
-      }
+      if (isFailed) return translations.scheduledMessagesFailedCountText(count: failed);
+      if (isThread) return translations.scheduledRepliesCountText(count: pending);
 
       final limit = channel.config?.scheduledMessagesMaxPerChannel;
-      if (limit != null && channelPendingCount >= limit) {
-        return translations.scheduledMessagesLimitText(count: channelPendingCount, limit: limit);
+      if (limit != null && channelPending >= limit) {
+        return translations.scheduledMessagesLimitText(count: channelPending, limit: limit);
       }
 
-      return translations.scheduledMessagesCountText(count: pendingCount);
+      return translations.scheduledMessagesCountText(count: pending);
     }
 
     final effectiveIconColor = switch (isFailed) {

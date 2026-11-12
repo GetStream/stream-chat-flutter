@@ -82,4 +82,15 @@ void main() {
 
     expect(listens, listensBeforeTyping);
   });
+
+  testWidgets("doesn't rebuild the scheduled messages banner while typing", (tester) async {
+    await pumpChannelPage(tester, scheduledMessages: [scheduledMessage()]);
+    final countBefore = tester.widget<Text>(find.text('1 scheduled message'));
+
+    await tester.enterText(find.byType(EditableText), 'Hello');
+    await tester.pumpAndSettle();
+
+    // A rebuild would create a new Text.
+    expect(tester.widget<Text>(find.text('1 scheduled message')), same(countBefore));
+  });
 }

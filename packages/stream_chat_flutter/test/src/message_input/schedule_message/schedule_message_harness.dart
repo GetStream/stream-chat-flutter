@@ -39,6 +39,7 @@ MockChannel scheduleChannel({
   bool canSchedule = true,
   ChannelConfig? config,
   List<ScheduledMessage> scheduledMessages = const [],
+  Stream<List<ScheduledMessage>>? scheduledMessagesStream,
 }) {
   final client = MockClient();
   final clientState = MockClientState();
@@ -58,7 +59,9 @@ MockChannel scheduleChannel({
   when(() => client.state).thenReturn(clientState);
   when(() => clientState.currentUser).thenReturn(OwnUser(id: 'current-user'));
   when(() => clientState.scheduledMessages).thenReturn(scheduledMessages);
-  when(() => clientState.scheduledMessagesStream).thenAnswer((_) => Stream.value(scheduledMessages));
+  when(
+    () => clientState.scheduledMessagesStream,
+  ).thenAnswer((_) => scheduledMessagesStream ?? Stream.value(scheduledMessages));
   when(() => channel.client).thenReturn(client);
   when(() => channel.config).thenReturn(config ?? ChannelConfig());
   when(() => channel.state).thenReturn(channelState);
