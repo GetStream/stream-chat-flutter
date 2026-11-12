@@ -69,10 +69,7 @@ class _ScheduleMessageSheet extends StatelessWidget {
         child: Column(
           mainAxisSize: .min,
           children: [
-            StreamSheetHeader(
-              automaticallyImplyLeading: false,
-              title: Text(title),
-            ),
+            StreamSheetHeader(title: Text(title)),
             Padding(
               padding: EdgeInsets.symmetric(horizontal: spacing.xxs),
               child: Column(

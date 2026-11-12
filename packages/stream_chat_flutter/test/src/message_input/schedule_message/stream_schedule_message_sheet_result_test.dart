@@ -10,7 +10,7 @@ void main() {
       await tester.tap(find.text('Custom time'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Schedule'));
+      await tester.tap(confirmButton());
       await tester.pumpAndSettle();
 
       // The custom time sheet starts an hour from now.
@@ -18,13 +18,13 @@ void main() {
     });
   });
 
-  testWidgets('showStreamScheduleMessageSheet stays open when the custom time sheet is canceled', (tester) async {
+  testWidgets('showStreamScheduleMessageSheet stays open when the custom time sheet is closed', (tester) async {
     await withClock(Clock.fixed(wednesday), () async {
       final results = await showMessageSheet(tester, scheduleChannel());
       await tester.tap(find.text('Custom time'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(closeButton());
       await tester.pumpAndSettle();
 
       expect(find.text('Custom time'), findsOneWidget);

@@ -61,6 +61,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
     final textTheme = context.streamTextTheme;
     final colorScheme = context.streamColorScheme;
     final translations = context.translations;
+
     final materialLocalizations = MaterialLocalizations.of(context);
 
     final bounds = ScheduleMessageBounds.fromConfig(widget.channel.config);
@@ -71,11 +72,13 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
     final channelName = loadedChannelName(channel, currentUser: channel.client.state.currentUser);
     final channelLabel = translations.messageToLabel(channelName: channelName ?? translations.noTitleText);
     final valueStyle = textTheme.captionDefault.copyWith(color: colorScheme.textTertiary);
+
     final date = materialLocalizations.formatMediumDate(_scheduledAt);
     final time = materialLocalizations.formatTimeOfDay(
       TimeOfDay.fromDateTime(_scheduledAt),
       alwaysUse24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
     );
+
     final timeZone = timeZoneLabel(_scheduledAt.timeZoneOffset);
 
     final contentPadding = EdgeInsets.symmetric(horizontal: spacing.md);
@@ -87,11 +90,28 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
         crossAxisAlignment: .stretch,
         children: [
           StreamSheetHeader(
-            automaticallyImplyLeading: false,
+            // A close button, not a back one, even when the sheet is stacked
+            // on another, as closing it picks no time.
+            leading: StreamButton.icon(
+              type: .outline,
+              style: .secondary,
+              tooltip: materialLocalizations.closeButtonTooltip,
+              icon: Icon(icons.xmark),
+              onPressed: () => Navigator.of(context).maybePop(),
+            ),
             title: Text(
               switch (_isRescheduling) {
                 true => translations.rescheduleMessageLabel,
                 false => translations.scheduleMessageLabel,
+              },
+            ),
+            trailing: StreamButton.icon(
+              type: .solid,
+              tooltip: translations.scheduleLabel,
+              icon: Icon(icons.checkmark),
+              onPressed: switch (canSchedule) {
+                true => () => Navigator.of(context).pop(_scheduledAt),
+                false => null,
               },
             ),
           ),
@@ -141,30 +161,6 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
                   padding: contentPadding,
                   child: StreamInlineNotification(
                     title: Text(translations.sentInYourTimeZoneText(timeZone: timeZone)),
-                  ),
-                ),
-                Padding(
-                  padding: contentPadding,
-                  child: Row(
-                    mainAxisAlignment: .end,
-                    spacing: spacing.xs,
-                    children: [
-                      StreamButton(
-                        type: .ghost,
-                        style: .primary,
-                        onPressed: () => Navigator.of(context).maybePop(),
-                        child: Text(translations.cancelLabel),
-                      ),
-                      StreamButton(
-                        type: .solid,
-                        style: .primary,
-                        onPressed: switch (canSchedule) {
-                          true => () => Navigator.of(context).pop(_scheduledAt),
-                          false => null,
-                        },
-                        child: Text(translations.scheduleLabel),
-                      ),
-                    ],
                   ),
                 ),
               ],

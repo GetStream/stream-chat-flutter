@@ -165,12 +165,14 @@ List<String?> rowLabels(WidgetTester tester) {
   return [for (final tile in tiles) (tile.props.title! as Text).data];
 }
 
-/// The custom time sheet's Cancel button.
-StreamButton cancelButton(WidgetTester tester) {
-  return tester.widget<StreamButton>(find.widgetWithText(StreamButton, 'Cancel'));
-}
+/// The close button of the sheet on top.
+Finder closeButton() => find.byTooltip('Close').last;
 
-/// The custom time sheet's Schedule button.
+/// The custom time sheet's confirm button.
+Finder confirmButton() => find.byTooltip('Schedule');
+
+/// The custom time sheet's confirm button, as a widget.
 StreamButton scheduleButton(WidgetTester tester) {
-  return tester.widget<StreamButton>(find.widgetWithText(StreamButton, 'Schedule'));
+  final button = find.ancestor(of: confirmButton(), matching: find.byType(StreamButton));
+  return tester.widget<StreamButton>(button.first);
 }

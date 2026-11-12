@@ -10,18 +10,18 @@ void main() {
     await withClock(Clock.fixed(wednesday), () async {
       final results = await showTimeSheet(tester, scheduleChannel(), initialScheduledAt: scheduledAt);
 
-      await tester.tap(find.text('Schedule'));
+      await tester.tap(confirmButton());
       await tester.pumpAndSettle();
 
       expect(results, [scheduledAt]);
     });
   });
 
-  testWidgets('showStreamScheduleTimeSheet resolves null when Cancel is tapped', (tester) async {
+  testWidgets('showStreamScheduleTimeSheet resolves null when its close button is tapped', (tester) async {
     await withClock(Clock.fixed(wednesday), () async {
       final results = await showTimeSheet(tester, scheduleChannel());
 
-      await tester.tap(find.text('Cancel'));
+      await tester.tap(closeButton());
       await tester.pumpAndSettle();
 
       expect(results, [null]);
