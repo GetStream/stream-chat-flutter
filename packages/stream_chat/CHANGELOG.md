@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added scheduled messages: schedule one with `Channel.scheduleMessage`, and read the current user's unsent ones from `ClientState.scheduledMessages` after `StreamChatClient.loadScheduledMessages`, or those in one channel or thread with `ClientState.scheduledChannelMessages` and `ClientState.scheduledThreadReplies`.
+- Scheduling, editing or sending now a scheduled message that the server would reject, such as a command in a channel with commands or a quote of a deleted message, now fails before any request is made.
 
 🔄 Changed
 

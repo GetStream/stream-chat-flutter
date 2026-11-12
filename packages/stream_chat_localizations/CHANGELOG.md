@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added the scheduled message strings for all supported locales.
+- Added the strings for picking when a message is sent and for the scheduled messages banner.
 
 🔄 Changed
 
