@@ -13,21 +13,19 @@ void main() {
       fileName: 'stream_schedule_time_sheet_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 412, height: 480),
       builder: () {
-        // A fixed time the channel allows, so the image doesn't change with
-        // today's date.
-        final config = ChannelConfig(scheduledMessagesMaxLeadTime: const Duration(days: 365 * 100));
-        final channel = scheduleChannel(config: config);
+        final channel = scheduleChannel();
         final button = openButton(
           (context) => showStreamScheduleTimeSheet(
             context: context,
             channel: channel,
             message: messageToSchedule(),
-            initialScheduledAt: DateTime(2099, 1, 15, 9),
           ),
         );
         return wrapWithMaterialApp(button, channel: channel, brightness: brightness);
       },
-      whilePerforming: tapOpenButton,
+      // The sheet starts an hour from now, so today's date is fixed for the
+      // image.
+      whilePerforming: (tester) => withClock(Clock.fixed(wednesday), () => tapOpenButton(tester)),
     );
   }
 
