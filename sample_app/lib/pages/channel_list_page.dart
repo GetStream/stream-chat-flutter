@@ -31,7 +31,8 @@ class ChannelListPage extends StatefulWidget {
 }
 
 class _ChannelListPageState extends State<ChannelListPage> {
-  int _currentIndex = 0;
+  // The selected tab, which stays selected while others are turned on or off.
+  _Tab _selectedTab = _Tab.chats;
 
   late final _locationService = SharedLocationService(
     client: StreamChat.of(context).client,
@@ -52,6 +53,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
 
     final allTabs = <_TabDef>[
       _TabDef(
+        tab: _Tab.chats,
         navItem: StreamBottomNavBarItem(
           icon: StreamUnreadIndicator(child: Icon(icons.messageBubble)),
           selectedIcon: StreamUnreadIndicator(child: Icon(icons.messageBubbleFill)),
@@ -60,6 +62,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
         page: const ChannelList(),
       ),
       _TabDef(
+        tab: _Tab.threads,
         navItem: StreamBottomNavBarItem(
           icon: StreamUnreadIndicator.threads(child: Icon(icons.thread)),
           selectedIcon: StreamUnreadIndicator.threads(child: Icon(icons.threadFill)),
@@ -68,6 +71,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
         page: const ThreadListPage(),
       ),
       _TabDef(
+        tab: _Tab.drafts,
         navItem: const StreamBottomNavBarItem(
           icon: Icon(Icons.drafts_outlined),
           selectedIcon: Icon(Icons.drafts_rounded),
@@ -77,6 +81,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
         enabled: config.draftMessagesEnabled,
       ),
       _TabDef(
+        tab: _Tab.reminders,
         navItem: const StreamBottomNavBarItem(
           icon: Icon(Icons.bookmark_outline_rounded),
           selectedIcon: Icon(Icons.bookmark_rounded),
@@ -86,6 +91,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
         enabled: config.enableReminderActions,
       ),
       _TabDef(
+        tab: _Tab.scheduled,
         navItem: StreamBottomNavBarItem(
           icon: Icon(icons.clock),
           selectedIcon: Icon(icons.clock),
@@ -97,11 +103,14 @@ class _ChannelListPageState extends State<ChannelListPage> {
     ];
 
     final enabledTabs = allTabs.where((t) => t.enabled).toList();
+    // A selected tab that was turned off falls back to the first one.
+    final selected = enabledTabs.firstWhere((t) => t.tab == _selectedTab, orElse: () => enabledTabs.first);
+    final currentIndex = enabledTabs.indexOf(selected);
 
     return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamChannelListHeader(
-        title: Text(enabledTabs[_currentIndex].navItem.label, style: textTheme.headingSm),
+        title: Text(selected.navItem.label, style: textTheme.headingSm),
         // Beside the channel, the drawer slides in over both panes.
         onUserAvatarPressed: isExpanded ? (_) => AdaptiveSplitView.openDrawerOf(context) : null,
       ),
@@ -111,13 +120,16 @@ class _ChannelListPageState extends State<ChannelListPage> {
       // just partly (the nav bar rendering vs. the scaffold inset).
       bottomSurfaceStyle: StreamBottomNavBar.resolveSurfaceStyle(context),
       bottom: StreamBottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: (i) => setState(() => _currentIndex = i),
+        currentIndex: currentIndex,
+        onTap: (i) => setState(() => _selectedTab = enabledTabs[i].tab),
         items: [for (final tab in enabledTabs) tab.navItem],
       ),
       body: IndexedStack(
-        index: _currentIndex,
-        children: [for (final tab in enabledTabs) tab.page],
+        index: currentIndex,
+        // Keyed, so each page keeps its state while tabs before it come and go.
+        children: [
+          for (final tab in enabledTabs) KeyedSubtree(key: ValueKey(tab.tab), child: tab.page),
+        ],
       ),
     );
   }
@@ -149,13 +161,17 @@ class _ChannelListPageState extends State<ChannelListPage> {
 // Tab definition
 // ---------------------------------------------------------------------------
 
+enum _Tab { chats, threads, drafts, reminders, scheduled }
+
 class _TabDef {
   const _TabDef({
+    required this.tab,
     required this.navItem,
     required this.page,
     this.enabled = true,
   });
 
+  final _Tab tab;
   final StreamBottomNavBarItem navItem;
   final Widget page;
   final bool enabled;
