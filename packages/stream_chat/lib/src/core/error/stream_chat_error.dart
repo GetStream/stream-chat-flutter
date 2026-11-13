@@ -253,7 +253,9 @@ StreamChatNetworkErrorType _networkErrorTypeFromDio(DioExceptionType type) {
 /// The reason a request to schedule or change a scheduled message was refused.
 ///
 /// Read from
-/// [StreamChatNetworkErrorScheduledMessages.scheduledMessageErrorReason].
+/// [StreamChatNetworkErrorScheduledMessages.scheduledMessageErrorReason] for
+/// a refusal by the server, or [ScheduledMessageRefusedError.reason] for one
+/// on this device.
 extension type const ScheduledMessageErrorReason(String _) implements String {
   /// Scheduled messages are turned off for the app.
   static const scheduledMessagesDisabled = ScheduledMessageErrorReason('scheduled_messages_disabled');
@@ -293,6 +295,29 @@ extension type const ScheduledMessageErrorReason(String _) implements String {
 
   /// The scheduled message was deleted.
   static const scheduledMessageCanceled = ScheduledMessageErrorReason('scheduled_message_canceled');
+
+  /// The message is a command, such as `/giphy`, which is run when it is sent
+  /// and so can't be scheduled.
+  static const slashCommand = ScheduledMessageErrorReason('slash_command');
+
+  /// The message quotes a message that was deleted.
+  static const quotedMessageDeleted = ScheduledMessageErrorReason('quoted_message_deleted');
+}
+
+/// A request to schedule or change a scheduled message, refused on this
+/// device before it was sent.
+class ScheduledMessageRefusedError extends StreamChatError {
+  /// Creates an error refusing a request for [reason].
+  const ScheduledMessageRefusedError(this.reason, super.message);
+
+  /// Why the request was refused.
+  final ScheduledMessageErrorReason reason;
+
+  @override
+  List<Object?> get props => [...super.props, reason];
+
+  @override
+  String toString() => 'ScheduledMessageRefusedError(reason: $reason, message: $message)';
 }
 
 const _scheduledMessageErrorReasons = {
@@ -315,4 +340,12 @@ extension StreamChatNetworkErrorScheduledMessages on StreamChatNetworkError {
   ///
   /// Null when this error has another cause.
   ScheduledMessageErrorReason? get scheduledMessageErrorReason => _scheduledMessageErrorReasons[code];
+
+  /// Whether the scheduled message the request was for no longer exists.
+  ///
+  /// Other errors that something was not found, such as a quoted message that
+  /// was deleted, are false.
+  bool get isScheduledMessageNotFound => statusCode == 404 && _scheduledMessageNotFound.hasMatch(message);
 }
+
+final _scheduledMessageNotFound = RegExp('scheduled message .* not found');

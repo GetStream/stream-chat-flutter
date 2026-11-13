@@ -14,7 +14,7 @@ class MockClientState extends Mock implements ClientState {}
 
 class MockChannel extends Mock implements Channel {
   MockChannel({
-    this.type = 'test-chanel-type',
+    this.type = 'test-channel-type',
     this.id = 'test-channel-id',
     this.ownCapabilities = const [
       ChannelCapability.sendMessage,

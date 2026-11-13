@@ -881,6 +881,14 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return 'Planlagt $date kl. $time';
+  }
+
+  @override
   String get scheduledMessageSendingLabel => 'Sender…';
 
   @override
@@ -933,6 +941,106 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get sendNowLabel => 'Send nå';
+
+  @override
+  String get scheduleMessageLabel => 'Planlegg melding';
+
+  @override
+  String get rescheduleMessageLabel => 'Planlegg melding på nytt';
+
+  @override
+  String get customTimeLabel => 'Egendefinert tid';
+
+  @override
+  String scheduleTomorrowText({required DateTime scheduledAt}) {
+    final time = DateFormat.jm(localeName).format(scheduledAt.toLocal());
+    return 'I morgen kl. $time';
+  }
+
+  @override
+  String scheduleWeekdayText({required DateTime scheduledAt}) {
+    final local = scheduledAt.toLocal();
+    final weekday = toBeginningOfSentenceCase(DateFormat.EEEE(localeName).format(local), localeName);
+    final time = DateFormat.jm(localeName).format(local);
+    return '$weekday kl. $time';
+  }
+
+  @override
+  String messageToLabel({required String channelName}) => 'Melding til $channelName';
+
+  @override
+  String get dateLabel => 'Dato';
+
+  @override
+  String get timeLabel => 'Tid';
+
+  @override
+  String get scheduleLabel => 'Planlegg';
+
+  @override
+  String sentInYourTimeZoneText({required String timeZone}) => 'Sendes i din tidssone ($timeZone)';
+
+  @override
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: 'Velg et tidspunkt minst $minutes minutt fra nå',
+      other: 'Velg et tidspunkt minst $minutes minutter fra nå',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError =>
+      'Velg et senere tidspunkt. Ved redigering kan en melding ikke sendes med en gang.';
+
+  @override
+  String get scheduleTooFarError => 'Det er lenger frem enn appen tillater';
+
+  @override
+  String scheduleLimitReachedLabel({required int limit}) => 'Grensen er nådd (maks. $limit)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) => 'Du har nådd grensen på $limit planlagte meldinger.';
+
+  @override
+  String get scheduleMessageError => 'Kunne ikke planlegge meldingen. Prøv igjen';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count planlagt melding',
+      other: '$count planlagte meldinger',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count planlagt svar',
+      other: '$count planlagte svar',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count kunne ikke sendes',
+      other: '$count kunne ikke sendes',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count av $limit planlagte meldinger';
+  }
 }
 
 class _AccessibilityTranslationsNo extends AccessibilityTranslations {

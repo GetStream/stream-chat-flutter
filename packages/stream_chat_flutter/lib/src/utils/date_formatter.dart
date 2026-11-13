@@ -85,6 +85,14 @@ extension DateTimeComparisonUtils on DateTime {
   /// Returns true if [this] falls on today's calendar day.
   bool get isToday => toLocal().isSame(clock.now(), unit: .day);
 
+  /// Returns true if [this] falls on tomorrow's calendar day.
+  bool get isTomorrow {
+    // Built from calendar fields, so a daylight saving change doesn't move it
+    // off tomorrow.
+    final now = clock.now().toLocal();
+    return toLocal().isSame(DateTime(now.year, now.month, now.day + 1), unit: .day);
+  }
+
   /// Returns true if [this] fell on yesterday's calendar day.
   bool get isYesterday => toLocal().isSame(clock.now().subtract(const Duration(days: 1)), unit: .day);
 

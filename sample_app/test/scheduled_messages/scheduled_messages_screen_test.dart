@@ -81,7 +81,11 @@ ScheduledMessage _scheduledMessage(String id, {String text = 'Hello'}) {
 
 // The error of a request for a scheduled message that no longer exists.
 StreamChatNetworkError _notFound() {
-  return StreamChatNetworkError(ChatErrorCode.doesNotExist, statusCode: 404);
+  return StreamChatNetworkError.raw(
+    code: ChatErrorCode.doesNotExist.code,
+    message: 'DeleteScheduledMessage failed with error: "scheduled message a not found"',
+    statusCode: 404,
+  );
 }
 
 // Shows a [ScheduledMessagesPage] within a [StreamChat] for [client].

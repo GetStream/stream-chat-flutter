@@ -7,6 +7,14 @@ import 'scheduled_messages_strings.dart';
 ///
 /// Returns [fallback] when [error] has nothing more specific to say.
 String describeScheduleError(Object error, {required String fallback}) {
+  if (error is ScheduledMessageRefusedError) {
+    return switch (error.reason) {
+      .slashCommand => ScheduledMessagesStrings.commandNotSchedulable,
+      .quotedMessageDeleted => ScheduledMessagesStrings.quotedMessageDeleted,
+      _ => fallback,
+    };
+  }
+
   if (error is! StreamChatNetworkError) return fallback;
 
   return switch (error.scheduledMessageErrorReason) {
@@ -20,29 +28,45 @@ String describeScheduleError(Object error, {required String fallback}) {
     .scheduledMessageConflict => ScheduledMessagesStrings.conflict,
     .scheduledMessageAlreadySent => ScheduledMessagesStrings.alreadySentError,
     .scheduledMessageCanceled => ScheduledMessagesStrings.canceled,
-    _ when error.statusCode == 404 => ScheduledMessagesStrings.sentOrDeleted,
+    _ when error.isScheduledMessageNotFound => ScheduledMessagesStrings.sentOrDeleted,
     _ => fallback,
   };
 }
 
-/// The name of the channel [scheduledMessage] is sent to.
+/// Shows why scheduling or changing a scheduled message failed, on
+/// [messenger].
 ///
-/// A loaded channel without a name of its own is named after its other
-/// members. One that is not loaded falls back to its ID.
-String scheduledMessageChannelName(BuildContext context, ScheduledMessage scheduledMessage) {
-  final client = StreamChat.of(context).client;
-  final name = switch (client.state.channels[scheduledMessage.cid]) {
-    final loaded? => channelDisplayName(loaded),
-    null => scheduledMessage.channel?.name,
-  };
-
-  return name ?? scheduledMessage.cid;
+/// One already sent or deleted is shown as a notice rather than an error, as
+/// there is nothing left to change.
+void showScheduleError(StreamSnackbarMessenger messenger, Object error, {required String fallback}) {
+  final description = describeScheduleError(error, fallback: fallback);
+  final variant = _isScheduledMessageGone(error) ? StreamSnackbarVariant.neutral : StreamSnackbarVariant.error;
+  messenger.show(StreamSnackbar(message: Text(description), variant: variant));
 }
 
-/// The name of [channel].
+// Whether [error] says the scheduled message was already sent or deleted.
+bool _isScheduledMessageGone(Object error) {
+  if (error is! StreamChatNetworkError) return false;
+  if (error.scheduledMessageErrorReason == .scheduledMessageAlreadySent) return true;
+  return error.isScheduledMessageNotFound;
+}
+
+/// The name of the channel [scheduledMessage] is sent to, or null when it has
+/// none.
 ///
-/// A channel without a name of its own is named after its other members.
-String? channelDisplayName(Channel channel) {
+/// A loaded channel without a name of its own is named after its other
+/// members.
+String? scheduledMessageChannelName(BuildContext context, ScheduledMessage scheduledMessage) {
+  final client = StreamChat.of(context).client;
+  return switch (client.state.channels[scheduledMessage.cid]) {
+    final loaded? => _channelDisplayName(loaded),
+    null => scheduledMessage.channel?.name,
+  };
+}
+
+// The name of [channel]. A channel without a name of its own is named after
+// its other members.
+String? _channelDisplayName(Channel channel) {
   // A loaded channel keeps its members on its state, not on its model.
   final state = channel.state;
   final model = state?.channelState.channel?.copyWith(members: state.members);

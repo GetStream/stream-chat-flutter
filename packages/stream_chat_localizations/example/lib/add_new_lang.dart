@@ -918,6 +918,12 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+    final jiffy = Jiffy.parseFromDateTime(scheduledAt.toLocal());
+    return 'Scheduled for ${jiffy.MMMEd} at ${jiffy.jm}';
+  }
+
+  @override
   String get scheduledMessageSendingLabel => 'Sending…';
 
   @override
@@ -969,6 +975,87 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
 
   @override
   String get sendNowLabel => 'Send Now';
+
+  @override
+  String get scheduleMessageLabel => 'Schedule message';
+
+  @override
+  String get rescheduleMessageLabel => 'Reschedule message';
+
+  @override
+  String get customTimeLabel => 'Custom time';
+
+  @override
+  String scheduleTomorrowText({required DateTime scheduledAt}) {
+    final time = Jiffy.parseFromDateTime(scheduledAt.toLocal()).jm;
+    return 'Tomorrow at $time';
+  }
+
+  @override
+  String scheduleWeekdayText({required DateTime scheduledAt}) {
+    final jiffy = Jiffy.parseFromDateTime(scheduledAt.toLocal());
+    final weekday = jiffy.EEEE;
+    final time = jiffy.jm;
+    return '$weekday at $time';
+  }
+
+  @override
+  String messageToLabel({required String channelName}) => 'Message to $channelName';
+
+  @override
+  String get dateLabel => 'Date';
+
+  @override
+  String get timeLabel => 'Time';
+
+  @override
+  String get scheduleLabel => 'Schedule';
+
+  @override
+  String sentInYourTimeZoneText({required String timeZone}) => 'Sent in your time zone ($timeZone)';
+
+  @override
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    if (minutes == 1) return 'Pick a time at least $minutes minute from now';
+    return 'Pick a time at least $minutes minutes from now';
+  }
+
+  @override
+  String get rescheduleTooSoonError => "Pick a later time. Editing can't send a message right away.";
+
+  @override
+  String get scheduleTooFarError => "That's further ahead than your app allows";
+
+  @override
+  String scheduleLimitReachedLabel({required int limit}) => 'Limit reached ($limit max)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) =>
+      "You've reached your limit of $limit scheduled messages.";
+
+  @override
+  String get scheduleMessageError => "Couldn't schedule message. Try again";
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    if (count == 1) return '1 scheduled message';
+    return '$count scheduled messages';
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    if (count == 1) return '1 scheduled reply';
+    return '$count scheduled replies';
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) => '$count failed to send';
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count of $limit scheduled messages';
+  }
 }
 
 void main() async {

@@ -23,6 +23,28 @@ const _kMentionTrigger = '@';
 /// previewed as an OG Attachment.
 typedef OgPreviewFilter = bool Function(Uri matchedUri, String messageText);
 
+/// Signature for [MessageComposerProps.onSendLongPress], called when the send
+/// button is long-pressed while it would send a new message.
+///
+/// The [BuildContext] is the composer's, and [controller] holds the message the
+/// send button would have sent.
+typedef StreamSendLongPressCallback =
+    FutureOr<void> Function(
+      BuildContext context,
+      StreamMessageComposerController controller,
+    );
+
+/// Signature for [MessageComposerProps.onSendMessage], called in place of
+/// sending or updating the message.
+///
+/// The [BuildContext] is the composer's, and [controller] holds the message to
+/// send or the edit to save.
+typedef StreamSendMessageCallback =
+    FutureOr<void> Function(
+      BuildContext context,
+      StreamMessageComposerController controller,
+    );
+
 /// Inactive state:
 ///
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_input.png)
@@ -71,6 +93,8 @@ class StreamMessageComposer extends StatelessWidget {
     super.key,
     void Function(Message)? onMessageSent,
     FutureOr<Message> Function(Message)? preMessageSending,
+    StreamSendMessageCallback? onSendMessage,
+    StreamSendLongPressCallback? onSendLongPress,
     StreamMessageComposerController? messageComposerController,
     FocusNode? focusNode,
     bool disableAttachments = false,
@@ -109,6 +133,8 @@ class StreamMessageComposer extends StatelessWidget {
   }) : props = .new(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
+         onSendMessage: onSendMessage,
+         onSendLongPress: onSendLongPress,
          messageComposerController: messageComposerController,
          focusNode: focusNode,
          disableAttachments: disableAttachments,
@@ -185,6 +211,8 @@ class MessageComposerProps {
   const MessageComposerProps({
     this.onMessageSent,
     this.preMessageSending,
+    this.onSendMessage,
+    this.onSendLongPress,
     this.messageComposerController,
     this.focusNode,
     this.disableAttachments = false,
@@ -232,6 +260,24 @@ class MessageComposerProps {
   ///
   /// Use this to transform the message.
   final FutureOr<Message> Function(Message)? preMessageSending;
+
+  /// Called in place of sending a new message or saving an edit.
+  ///
+  /// The composer doesn't send, update or clear anything when it is set, so the
+  /// callback is responsible for the message and for resetting the controller.
+  /// [preMessageSending] and [onMessageSent] aren't called, and links aren't
+  /// checked against channels that don't allow them. The send button is still
+  /// enabled only while the message can be sent.
+  final StreamSendMessageCallback? onSendMessage;
+
+  /// Called when the send button is long-pressed while it would send a new
+  /// message.
+  ///
+  /// The composer is left as it is, so the callback decides what to do with
+  /// the message, such as scheduling it through
+  /// [showStreamScheduleMessageSheet] and then resetting the controller. When
+  /// null, the send button has no long press.
+  final StreamSendLongPressCallback? onSendLongPress;
 
   /// The controller for the message composer.
   final StreamMessageComposerController? messageComposerController;
@@ -461,6 +507,8 @@ class MessageComposerProps {
   MessageComposerProps copyWith({
     void Function(Message)? onMessageSent,
     FutureOr<Message> Function(Message)? preMessageSending,
+    StreamSendMessageCallback? onSendMessage,
+    StreamSendLongPressCallback? onSendLongPress,
     StreamMessageComposerController? messageComposerController,
     FocusNode? focusNode,
     bool? disableAttachments,
@@ -499,6 +547,8 @@ class MessageComposerProps {
     return MessageComposerProps(
       onMessageSent: onMessageSent ?? this.onMessageSent,
       preMessageSending: preMessageSending ?? this.preMessageSending,
+      onSendMessage: onSendMessage ?? this.onSendMessage,
+      onSendLongPress: onSendLongPress ?? this.onSendLongPress,
       messageComposerController: messageComposerController ?? this.messageComposerController,
       focusNode: focusNode ?? this.focusNode,
       disableAttachments: disableAttachments ?? this.disableAttachments,
@@ -1082,6 +1132,10 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               placeholder: _buildPlaceholder(context),
               focusNode: focusNode,
               onSendPressed: sendMessage,
+              onSendLongPress: switch (widget.props.onSendLongPress) {
+                final onSendLongPress? => () => onSendLongPress(context, _effectiveController),
+                null => null,
+              },
               canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
               audioRecorderController: canRecordVoice ? _audioRecorderController : null,
               sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,
@@ -1620,6 +1674,10 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     if (!_effectiveController.canSend) return;
 
     _hidePicker();
+
+    if (widget.props.onSendMessage case final onSendMessage?) {
+      return onSendMessage(context, _effectiveController);
+    }
 
     final streamChannel = StreamChannel.maybeOf(context);
     if (streamChannel == null) return;

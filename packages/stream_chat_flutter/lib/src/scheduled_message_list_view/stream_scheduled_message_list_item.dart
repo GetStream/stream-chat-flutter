@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../stream_chat_flutter.dart';
+import '../utils/channel_name.dart';
 
 /// A row that shows a [ScheduledMessage] in a list of scheduled messages.
 ///
@@ -194,9 +195,7 @@ class _ScheduledMessageBody extends StatelessWidget {
     final loadedChannel = channelState != null ? channel : null;
     final summary = scheduledMessage.channel;
 
-    // A loaded channel keeps its members on its state, not on its model.
-    final loadedModel = channelState?.channelState.channel?.copyWith(members: channelState.members);
-    final loadedName = loadedModel?.formatName(currentUser: streamChat.currentUser);
+    final loadedName = loadedChannelName(channel, currentUser: streamChat.currentUser);
     final summaryName = switch (summary?.name) {
       final name? when name.trim().isNotEmpty => name,
       _ => null,
@@ -383,7 +382,9 @@ class _ScheduledMessageStatusLine extends core.NullableStatelessWidget {
       );
     }
 
-    if (status != .preparingToSchedule && status != .sending) return null;
+    // An edit in flight keeps showing the scheduled message.
+    final isBeingScheduled = status == .preparingToSchedule && scheduledMessage.remoteCreatedAt == null;
+    if (!isBeingScheduled && status != .sending) return null;
 
     final attachments = scheduledMessage.message.attachments;
     final isUploading = attachments.any((it) => !it.uploadState.isSuccess);

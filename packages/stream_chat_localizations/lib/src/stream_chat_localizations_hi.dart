@@ -898,6 +898,14 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }
 
   @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return '$date को $time के लिए शेड्यूल किया गया';
+  }
+
+  @override
   String get scheduledMessageSendingLabel => 'भेजा जा रहा है…';
 
   @override
@@ -949,6 +957,106 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get sendNowLabel => 'अभी भेजें';
+
+  @override
+  String get scheduleMessageLabel => 'संदेश शेड्यूल करें';
+
+  @override
+  String get rescheduleMessageLabel => 'संदेश फिर से शेड्यूल करें';
+
+  @override
+  String get customTimeLabel => 'कस्टम समय';
+
+  @override
+  String scheduleTomorrowText({required DateTime scheduledAt}) {
+    final time = DateFormat.jm(localeName).format(scheduledAt.toLocal());
+    return 'कल $time पर';
+  }
+
+  @override
+  String scheduleWeekdayText({required DateTime scheduledAt}) {
+    final local = scheduledAt.toLocal();
+    final weekday = DateFormat.EEEE(localeName).format(local);
+    final time = DateFormat.jm(localeName).format(local);
+    return '$weekday $time पर';
+  }
+
+  @override
+  String messageToLabel({required String channelName}) => '$channelName को संदेश';
+
+  @override
+  String get dateLabel => 'तारीख';
+
+  @override
+  String get timeLabel => 'समय';
+
+  @override
+  String get scheduleLabel => 'शेड्यूल करें';
+
+  @override
+  String sentInYourTimeZoneText({required String timeZone}) => 'आपके समय क्षेत्र में भेजा जाएगा ($timeZone)';
+
+  @override
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: 'अभी से कम से कम $minutes मिनट बाद का समय चुनें',
+      other: 'अभी से कम से कम $minutes मिनट बाद का समय चुनें',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError => 'बाद का समय चुनें। संपादन करते समय संदेश तुरंत नहीं भेजा जा सकता।';
+
+  @override
+  String get scheduleTooFarError => 'यह ऐप की अनुमति से आगे का समय है';
+
+  @override
+  String scheduleLimitReachedLabel({required int limit}) => 'सीमा पूरी हो गई (अधिकतम $limit)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) =>
+      'आप $limit शेड्यूल किए गए संदेशों की सीमा तक पहुँच गए हैं।';
+
+  @override
+  String get scheduleMessageError => 'संदेश शेड्यूल नहीं हो सका। फिर से कोशिश करें';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count शेड्यूल किया गया संदेश',
+      other: '$count शेड्यूल किए गए संदेश',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count शेड्यूल किया गया जवाब',
+      other: '$count शेड्यूल किए गए जवाब',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count भेजा नहीं जा सका',
+      other: '$count भेजे नहीं जा सके',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$limit में से $count शेड्यूल किए गए संदेश';
+  }
 }
 
 class _AccessibilityTranslationsHi extends AccessibilityTranslations {

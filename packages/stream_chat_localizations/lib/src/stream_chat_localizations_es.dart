@@ -900,6 +900,14 @@ No es posible añadir más de $limit archivos adjuntos
   }
 
   @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return 'Programado para el $date a las $time';
+  }
+
+  @override
   String get scheduledMessageSendingLabel => 'Enviando…';
 
   @override
@@ -951,6 +959,107 @@ No es posible añadir más de $limit archivos adjuntos
 
   @override
   String get sendNowLabel => 'Enviar ahora';
+
+  @override
+  String get scheduleMessageLabel => 'Programar mensaje';
+
+  @override
+  String get rescheduleMessageLabel => 'Reprogramar mensaje';
+
+  @override
+  String get customTimeLabel => 'Hora personalizada';
+
+  @override
+  String scheduleTomorrowText({required DateTime scheduledAt}) {
+    final time = DateFormat.jm(localeName).format(scheduledAt.toLocal());
+    return 'Mañana a las $time';
+  }
+
+  @override
+  String scheduleWeekdayText({required DateTime scheduledAt}) {
+    final local = scheduledAt.toLocal();
+    final weekday = toBeginningOfSentenceCase(DateFormat.EEEE(localeName).format(local), localeName);
+    final time = DateFormat.jm(localeName).format(local);
+    return '$weekday a las $time';
+  }
+
+  @override
+  String messageToLabel({required String channelName}) => 'Mensaje para $channelName';
+
+  @override
+  String get dateLabel => 'Fecha';
+
+  @override
+  String get timeLabel => 'Hora';
+
+  @override
+  String get scheduleLabel => 'Programar';
+
+  @override
+  String sentInYourTimeZoneText({required String timeZone}) => 'Se envía en tu zona horaria ($timeZone)';
+
+  @override
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: 'Elige una hora dentro de al menos $minutes minuto',
+      other: 'Elige una hora dentro de al menos $minutes minutos',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError =>
+      'Elige una hora posterior. Al editar no se puede enviar un mensaje de inmediato.';
+
+  @override
+  String get scheduleTooFarError => 'Está más adelante de lo que permite la aplicación';
+
+  @override
+  String scheduleLimitReachedLabel({required int limit}) => 'Límite alcanzado (máx. $limit)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) =>
+      'Has alcanzado tu límite de $limit mensajes programados.';
+
+  @override
+  String get scheduleMessageError => 'No se pudo programar el mensaje. Inténtalo de nuevo';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count mensaje programado',
+      other: '$count mensajes programados',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count respuesta programada',
+      other: '$count respuestas programadas',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count no se pudo enviar',
+      other: '$count no se pudieron enviar',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count de $limit mensajes programados';
+  }
 }
 
 class _AccessibilityTranslationsEs extends AccessibilityTranslations {

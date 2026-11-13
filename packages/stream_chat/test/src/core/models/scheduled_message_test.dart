@@ -154,4 +154,97 @@ void main() {
     expect(scheduledMessage.createdAt, DateTime.utc(2026, 10, 29, 10));
     expect(scheduledMessage.updatedAt, DateTime.utc(2026, 10, 29, 10, 5));
   });
+
+  test('ScheduledMessageStatus.isPending is true until the message is sent or fails', () {
+    expect(ScheduledMessageStatus.preparingToSchedule.isPending, isTrue);
+    expect(ScheduledMessageStatus.scheduled.isPending, isTrue);
+    expect(ScheduledMessageStatus.sending.isPending, isTrue);
+    expect(ScheduledMessageStatus.failed.isPending, isFalse);
+    expect(ScheduledMessageStatus.canceled.isPending, isFalse);
+    expect(ScheduledMessageStatus.sent.isPending, isFalse);
+  });
+
+  test('ScheduledMessage.toMessage carries the content to edit', () {
+    final scheduledMessage = ScheduledMessage(
+      id: 'scheduled-id',
+      cid: 'messaging:general',
+      user: User(id: 'alice'),
+      message: Message(
+        id: 'message-id',
+        text: 'Good morning @bob',
+        attachments: [Attachment(type: 'image', imageUrl: 'https://example.com/a.png')],
+        mentionedUsers: [User(id: 'bob')],
+        quotedMessageId: 'quoted-id',
+        parentId: 'parent-id',
+        showInChannel: true,
+        extraData: const {'mood': 'happy'},
+        state: MessageState.sent,
+      ),
+      scheduledAt: DateTime.utc(2026, 11, 2, 9),
+      status: ScheduledMessageStatus.scheduled,
+    );
+
+    final message = scheduledMessage.toMessage();
+
+    expect(message.id, 'scheduled-id');
+    expect(message.text, 'Good morning @bob');
+    expect(message.attachments, scheduledMessage.message.attachments);
+    expect(message.mentionedUsers, [User(id: 'bob')]);
+    expect(message.quotedMessageId, 'quoted-id');
+    expect(message.parentId, 'parent-id');
+    expect(message.showInChannel, isTrue);
+    expect(message.extraData, {'mood': 'happy'});
+    expect(message.state, const MessageState.initial());
+  });
+
+  test('ScheduledMessage.copyWith clears the failure reason only when told to', () {
+    final failed = ScheduledMessage(
+      cid: 'messaging:general',
+      user: User(id: 'alice'),
+      message: Message(id: 'message-id', text: 'Good morning'),
+      scheduledAt: DateTime.utc(2026, 11, 2, 9),
+      status: ScheduledMessageStatus.failed,
+      failureReason: ScheduledMessageFailureReason.updateFailed,
+    );
+
+    expect(failed.copyWith().failureReason, ScheduledMessageFailureReason.updateFailed);
+    expect(failed.copyWith(failureReason: null).failureReason, isNull);
+  });
+
+  test('ScheduledMessage.toMessage keeps whether it is silent, its poll, its mentions and who can see it', () {
+    final poll = Poll(
+      id: 'poll-id',
+      name: 'Lunch?',
+      options: const [PollOption(text: 'Pizza')],
+    );
+    final scheduledMessage = ScheduledMessage(
+      id: 'scheduled-id',
+      cid: 'messaging:general',
+      user: User(id: 'alice'),
+      message: Message(
+        id: 'message-id',
+        text: 'Good morning',
+        silent: true,
+        poll: poll,
+        restrictedVisibility: const ['bob'],
+        mentionedChannel: true,
+        mentionedHere: true,
+        mentionedRoles: const ['admin'],
+        mentionedGroupIds: const ['design'],
+      ),
+      scheduledAt: DateTime.utc(2026, 11, 2, 9),
+      status: ScheduledMessageStatus.scheduled,
+    );
+
+    final message = scheduledMessage.toMessage();
+
+    expect(message.silent, isTrue);
+    expect(message.poll, poll);
+    expect(message.pollId, 'poll-id');
+    expect(message.restrictedVisibility, ['bob']);
+    expect(message.mentionedChannel, isTrue);
+    expect(message.mentionedHere, isTrue);
+    expect(message.mentionedRoles, ['admin']);
+    expect(message.mentionedGroupIds, ['design']);
+  });
 }

@@ -1,5 +1,14 @@
 import 'package:flutter/material.dart';
 import '../../stream_chat_flutter.dart';
+import 'page_composer.dart';
+
+/// Signature for the callback called when a page's
+/// [StreamScheduledMessagesBanner] is tapped.
+///
+/// [parent] is the parent message of the thread whose banner was tapped, or
+/// null for the channel's own banner.
+typedef StreamScheduledMessagesBannerTapCallback =
+    void Function(BuildContext context, Channel channel, Message? parent);
 
 /// A channel page with optional floating composer support.
 ///
@@ -63,6 +72,7 @@ class StreamChannelPage extends StatefulWidget {
     this.automaticallyImplyLeading = true,
     this.onBackPressed,
     this.onChannelAvatarPressed,
+    this.onScheduledMessagesBannerTap,
   });
 
   /// Initial scroll index for the message list.
@@ -84,6 +94,12 @@ class StreamChannelPage extends StatefulWidget {
 
   /// Called when the default channel-avatar in the trailing slot is pressed.
   final void Function(BuildContext context, Channel channel)? onChannelAvatarPressed;
+
+  /// Called when the [StreamScheduledMessagesBanner] is tapped.
+  ///
+  /// When null, the banner's link isn't shown. The thread pages it opens call
+  /// it too, with their parent message.
+  final StreamScheduledMessagesBannerTapCallback? onScheduledMessagesBannerTap;
 
   @override
   State<StreamChannelPage> createState() => _StreamChannelPageState();
@@ -116,6 +132,14 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
     });
   }
 
+  // The page's banner tap callback, called with the page's channel.
+  VoidCallback? _onScheduledMessagesBannerTap() {
+    final onTap = widget.onScheduledMessagesBannerTap;
+    if (onTap == null) return null;
+
+    return () => onTap(context, StreamChannel.of(context).channel, null);
+  }
+
   @override
   Widget build(BuildContext context) {
     final appBar = StreamChannelHeader(
@@ -126,11 +150,15 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
       onChannelAvatarPressed: (channel) => widget.onChannelAvatarPressed?.call(context, channel),
     );
 
-    final composer = StreamMessageComposer(
-      focusNode: _focusNode,
-      messageComposerController: _messageComposerController,
-      onQuotedMessageCleared: _messageComposerController.clearQuotedMessage,
-      enableVoiceRecording: true,
+    final composer = PageComposer(
+      controller: _messageComposerController,
+      onScheduledMessagesBannerTap: _onScheduledMessagesBannerTap(),
+      composer: StreamMessageComposer(
+        focusNode: _focusNode,
+        messageComposerController: _messageComposerController,
+        onQuotedMessageCleared: _messageComposerController.clearQuotedMessage,
+        enableVoiceRecording: true,
+      ),
     );
 
     return StreamScaffold(
@@ -144,6 +172,7 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
         initialAlignment: widget.initialAlignment,
         onReply: _reply,
         onEditMessage: _editMessage,
+        onScheduledMessagesBannerTap: widget.onScheduledMessagesBannerTap,
       ),
     );
   }
@@ -156,12 +185,15 @@ class _ChannelPageBody extends StatelessWidget {
     required this.onEditMessage,
     this.initialScrollIndex,
     this.initialAlignment,
+    this.onScheduledMessagesBannerTap,
   });
 
   final void Function(Message) onReply;
   final void Function(Message) onEditMessage;
   final int? initialScrollIndex;
   final double? initialAlignment;
+  // Passed on to the thread pages opened from the channel.
+  final StreamScheduledMessagesBannerTapCallback? onScheduledMessagesBannerTap;
 
   @override
   Widget build(BuildContext context) {
@@ -171,7 +203,10 @@ class _ChannelPageBody extends StatelessWidget {
       onEditMessageTap: onEditMessage,
       onReplyTap: onReply,
       threadBuilder: (_, parentMessage) {
-        return StreamThreadPage(parent: parentMessage!);
+        return StreamThreadPage(
+          parent: parentMessage!,
+          onScheduledMessagesBannerTap: onScheduledMessagesBannerTap,
+        );
       },
       enableSafeArea: true,
     );

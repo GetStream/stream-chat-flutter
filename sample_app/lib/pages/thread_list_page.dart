@@ -26,7 +26,7 @@ class _ThreadListPageState extends State<ThreadListPage> {
   @override
   Widget build(BuildContext context) {
     final openThreadId = switch (AdaptiveSplitView.isExpandedOf(context)) {
-      true => GoRouterState.of(context).uri.queryParameters['pid'],
+      true => GoRouterState.of(context).uri.queryParameters['parentId'],
       false => null,
     };
 
@@ -53,7 +53,7 @@ class _ThreadListPageState extends State<ThreadListPage> {
           GoRouter.of(context).goNamed(
             Routes.CHANNEL_PAGE.name,
             pathParameters: Routes.CHANNEL_PAGE.params(channel),
-            queryParameters: {'mid': thread.parentMessageId, 'pid': thread.parentMessageId},
+            queryParameters: {'mid': thread.parentMessageId, 'parentId': thread.parentMessageId},
             // The thread's parent may not be loaded in the channel yet.
             extra: thread.parentMessage,
           );

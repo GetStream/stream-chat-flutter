@@ -32,7 +32,7 @@ class _DraftListPageState extends State<DraftListPage> {
       false => null,
     };
     final openCid = openRoute?.pathParameters['cid'];
-    final openThreadId = openRoute?.uri.queryParameters['pid'];
+    final openThreadId = openRoute?.uri.queryParameters['parentId'];
 
     return RefreshIndicator(
       onRefresh: controller.refresh,
@@ -79,7 +79,7 @@ class _DraftListPageState extends State<DraftListPage> {
             Routes.CHANNEL_PAGE.name,
             pathParameters: Routes.CHANNEL_PAGE.params(channel),
             queryParameters: switch (draft.parentId) {
-              final parentId? => {'mid': parentId, 'pid': parentId},
+              final parentId? => {'mid': parentId, 'parentId': parentId},
               _ => const <String, String>{},
             },
             // The thread's parent may not be loaded in the channel yet.

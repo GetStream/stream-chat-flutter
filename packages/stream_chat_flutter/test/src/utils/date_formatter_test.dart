@@ -204,6 +204,26 @@ void main() {
       });
     });
 
+    group('isTomorrow', () {
+      test('is true late tomorrow', () {
+        withClock(Clock.fixed(DateTime(2026, 3, 28, 23, 30)), () {
+          expect(DateTime(2026, 3, 29, 23, 59).isTomorrow, isTrue);
+        });
+      });
+
+      test('is false today', () {
+        withClock(Clock.fixed(DateTime(2026, 3, 28, 23, 30)), () {
+          expect(DateTime(2026, 3, 28, 23, 59).isTomorrow, isFalse);
+        });
+      });
+
+      test('is false the day after tomorrow', () {
+        withClock(Clock.fixed(DateTime(2026, 3, 28, 23, 30)), () {
+          expect(DateTime(2026, 3, 30, 0, 30).isTomorrow, isFalse);
+        });
+      });
+    });
+
     group('isYesterday', () {
       test('returns true for yesterday', () {
         final yesterday = DateTime.now().subtract(const Duration(days: 1));
