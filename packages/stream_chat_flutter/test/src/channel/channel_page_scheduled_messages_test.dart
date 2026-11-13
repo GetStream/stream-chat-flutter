@@ -93,6 +93,7 @@ void main() {
       ),
     );
     final buildsBeforeTyping = builds;
+    expect(buildsBeforeTyping, isPositive);
 
     await tester.enterText(find.byType(EditableText), 'Hello');
     await tester.pumpAndSettle();
