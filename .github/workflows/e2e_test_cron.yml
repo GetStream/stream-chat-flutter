@@ -69,6 +69,8 @@ jobs:
           free -m
           # Flutter's own Gradle plugin is an included build, which ignores e2e_app's
           # gradle.properties; without this it starts a Kotlin daemon with Gradle's 4 GB heap.
+          # ~/.gradle is missing when the Gradle cache misses.
+          mkdir -p ~/.gradle
           echo 'kotlin.compiler.execution.strategy=in-process' >> ~/.gradle/gradle.properties
 
       - name: Bootstrap
