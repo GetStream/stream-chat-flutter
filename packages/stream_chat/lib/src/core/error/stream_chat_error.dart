@@ -341,8 +341,7 @@ extension StreamChatNetworkErrorScheduledMessages on StreamChatNetworkError {
   /// Null when this error has another cause.
   ScheduledMessageErrorReason? get scheduledMessageErrorReason => _scheduledMessageErrorReasons[code];
 
-  /// Whether the scheduled message the request was for no longer exists, or
-  /// was already sent.
+  /// Whether the scheduled message the request was for no longer exists.
   ///
   /// Other errors that something was not found, such as a quoted message that
   /// was deleted, are false.

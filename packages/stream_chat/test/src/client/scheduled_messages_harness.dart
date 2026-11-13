@@ -13,14 +13,14 @@ final testUser = User(id: 'test-user-id');
 final testToken = Token.development(testUser.id).rawValue;
 // The error a request on a scheduled message that no longer exists gets.
 final missingError = StreamChatNetworkError.raw(
-  code: 16,
+  code: ChatErrorCode.doesNotExist.code,
   message: 'UpdateScheduledMessage failed with error: "scheduled message a not found"',
   statusCode: 404,
 );
 
 // The error a request on a scheduled message quoting a deleted message gets.
 final quoteDeletedError = StreamChatNetworkError.raw(
-  code: 16,
+  code: ChatErrorCode.doesNotExist.code,
   message: 'UpdateScheduledMessage failed with error: "Can\'t quote this message. The message has been deleted"',
   statusCode: 404,
 );
@@ -129,6 +129,25 @@ class ScheduledMessageHarness {
   Future<void> receive(String type, ScheduledMessage message) async {
     client.handleEvent(Event(type: type, cid: message.cid, scheduledMessage: message, isLocal: false));
     await settle();
+  }
+
+  // The scheduled message events while [run] runs, as type and status. A
+  // network error [run] throws is ignored.
+  Future<List<(String, ScheduledMessageStatus?)>> eventsDuring(Future<void> Function() run) async {
+    final events = <(String, ScheduledMessageStatus?)>[];
+    final subscription = client.on().where((it) => it.scheduledMessage != null).listen((it) {
+      events.add((it.type, it.scheduledMessage?.status));
+    });
+
+    try {
+      await run();
+    } on StreamChatNetworkError {
+      // The events are what is checked.
+    }
+
+    await settle();
+    await subscription.cancel();
+    return events;
   }
 
   // Makes the client hold [messages], as if each had just been scheduled.

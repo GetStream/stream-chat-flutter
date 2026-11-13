@@ -72,10 +72,10 @@ class ScheduledMessageListStateNotifier {
   /// list.
   ///
   /// The list is then loaded. The ones still being scheduled, or whose request
-  /// failed, are kept.
+  /// failed, are kept, and so are edits not saved yet of the ones listed.
   void onLoadScheduledMessages(List<ScheduledMessage> scheduledMessages) {
-    final local = _scheduledMessages.where((it) => it.isLocal);
-    final merged = _merged(local, scheduledMessages);
+    final kept = _scheduledMessages.where((it) => it.isKeptOver(scheduledMessages));
+    final merged = _merged(kept, scheduledMessages);
 
     _emit(state.copyWith(scheduledMessages: _sorted(merged), hasLoadedAll: true));
   }
@@ -91,12 +91,15 @@ class ScheduledMessageListStateNotifier {
   /// Replaces the scheduled messages of each of [channels] with its queried
   /// ones.
   ///
-  /// The ones still being scheduled, or whose request failed, are kept.
+  /// The ones still being scheduled, or whose request failed, are kept, and so
+  /// are edits not saved yet of the ones queried.
   void onChannelsQueried(List<ChannelScheduledMessages> channels) {
     final cids = {for (final it in channels) it.cid};
-    final kept = _scheduledMessages.where((it) => !cids.contains(it.cid) || it.isLocal);
+    final queried = channels.expand((it) => it.scheduledMessages).toList();
+    final kept = _scheduledMessages.where((it) {
+      return !cids.contains(it.cid) || it.isKeptOver(queried);
+    });
 
-    final queried = channels.expand((it) => it.scheduledMessages);
     final merged = _merged(kept, queried);
     _emit(state.copyWith(scheduledMessages: _sorted(merged)));
   }
@@ -145,22 +148,37 @@ class ScheduledMessageListStateNotifier {
     return a.id.compareTo(b.id);
   }
 
-  // A newer copy wins over an older one, and one from the API over a local one.
+  // A newer copy wins over an older one, and one from the API over one not on
+  // the API yet. On a tie, a change made on this device to that version wins
+  // over the API's copy of it.
   static ScheduledMessage _newer(
     ScheduledMessage original,
     ScheduledMessage updated,
   ) {
     if (original.remoteUpdatedAt == null) return updated;
     if (updated.remoteUpdatedAt == null) return original;
-    return original.updatedAt.isAfter(updated.updatedAt) ? original : updated;
+    if (original.updatedAt.isAfter(updated.updatedAt)) return original;
+    if (updated.updatedAt.isAfter(original.updatedAt)) return updated;
+
+    final isLocalChange = original.localUpdatedAt != null && updated.localUpdatedAt == null;
+    return isLocalChange ? original : updated;
   }
 
-  // [listed] with [incoming] merged in by ID, keeping the newer of two.
+  // [listed] with [incoming] merged in by ID, keeping the newer of two. On a
+  // tie, an edit made on this device is kept.
   static Iterable<ScheduledMessage> _merged(
     Iterable<ScheduledMessage> listed,
     Iterable<ScheduledMessage> incoming,
   ) {
-    return listed.merge(incoming, key: (it) => it.id, update: _newer);
+    return listed.merge(
+      incoming,
+      key: (it) => it.id,
+      update: (original, updated) {
+        final isNewer = updated.updatedAt.isAfter(original.updatedAt);
+        if (original.isLocalEdit && !isNewer) return original;
+        return _newer(original, updated);
+      },
+    );
   }
 
   static List<ScheduledMessage> _sorted(
@@ -180,6 +198,16 @@ extension on ScheduledMessage {
   // retried.
   bool get isLocal {
     if (status == .preparingToSchedule) return true;
-    return failureReason?.isRetriable ?? false;
+    return failureReason == .requestFailed;
+  }
+
+  // Whether it holds an edit not saved yet.
+  bool get isLocalEdit => status == .updating || failureReason == .updateFailed;
+
+  // Whether it is kept when [loaded] replaces the list: it isn't on the server
+  // yet, or it holds an edit of one still there.
+  bool isKeptOver(List<ScheduledMessage> loaded) {
+    if (isLocal) return true;
+    return isLocalEdit && loaded.any((it) => it.id == id);
   }
 }

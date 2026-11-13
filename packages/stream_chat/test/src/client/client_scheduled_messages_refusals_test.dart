@@ -167,6 +167,22 @@ void main() {
     verifyNotUpdated();
   });
 
+  test("rescheduleMessage doesn't refuse keeping one that quotes a deleted message at its time", () async {
+    loadChannel(messages: [deleted]);
+    final a = fakeScheduledMessage('a');
+    final quoting = a.copyWith(message: a.message.copyWith(quotedMessageId: 'quoted'));
+    await harness.hold([quoting]);
+    when(
+      () => harness.api.scheduledMessages.updateScheduledMessage('a', scheduledAt: quoting.scheduledAt),
+    ).thenAnswer((_) async => fakeUpdate(quoting));
+
+    await harness.client.rescheduleMessage(quoting, scheduledAt: quoting.scheduledAt);
+
+    verify(
+      () => harness.api.scheduledMessages.updateScheduledMessage('a', scheduledAt: quoting.scheduledAt),
+    ).called(1);
+  });
+
   test('sendScheduledMessageNow refuses one that quotes a deleted message, without a request', () async {
     loadChannel(messages: [deleted]);
     final a = fakeScheduledMessage('a');

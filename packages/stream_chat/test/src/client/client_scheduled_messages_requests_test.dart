@@ -56,11 +56,11 @@ void main() {
 
     await harness.client.rescheduleMessage(a, scheduledAt: scheduledAt);
     await settle();
+    final before = emitted.length;
     await harness.receive(EventType.scheduledMessageUpdated, moved());
 
-    expect(emitted, [
-      [moved()],
-    ]);
+    expect(emitted.last, [moved()]);
+    expect(emitted, hasLength(before));
   });
 
   test('updateScheduledMessage sends the message and time', () async {
@@ -97,7 +97,7 @@ void main() {
     expect(harness.client.state.scheduledMessages, [updated]);
   });
 
-  test('updateScheduledMessage reports nothing when the user disconnects before the server answers', () async {
+  test('updateScheduledMessage reports only the edit when the user disconnects before the server answers', () async {
     await harness.hold([a]);
     final edited = Message(id: 'a', text: 'Good evening');
     final answer = Completer<UpdateScheduledMessageResponse>();
@@ -115,7 +115,7 @@ void main() {
     await request;
     await settle();
 
-    expect(updates, isEmpty);
+    expect(updates.map((it) => it.scheduledMessage?.status), [ScheduledMessageStatus.updating]);
   });
 
   test('updateScheduledMessage refuses an attachment that is not uploaded', () async {
@@ -167,7 +167,9 @@ void main() {
     await harness.client.sendScheduledMessageNow(a);
     await settle();
 
-    expect(harness.client.state.scheduledMessages, [sending]);
+    final [listed] = harness.client.state.scheduledMessages;
+    expect(listed.status, ScheduledMessageStatus.sending);
+    expect(listed.remoteUpdatedAt, sending.remoteUpdatedAt);
   });
 
   final requests = [

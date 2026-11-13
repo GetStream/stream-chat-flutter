@@ -13,6 +13,12 @@ import 'user.dart';
 
 part 'scheduled_message.g.dart';
 
+class _NullConst {
+  const _NullConst();
+}
+
+const _nullConst = _NullConst();
+
 /// A message that is sent to its channel at [scheduledAt].
 ///
 /// Until then, only its author sees it, and it can be edited, rescheduled,
@@ -135,7 +141,7 @@ final class ScheduledMessage extends Equatable {
     Message? message,
     DateTime? scheduledAt,
     ScheduledMessageStatus? status,
-    ScheduledMessageFailureReason? failureReason,
+    Object? failureReason = _nullConst,
     DateTime? createdAt,
     DateTime? localCreatedAt,
     DateTime? updatedAt,
@@ -149,11 +155,31 @@ final class ScheduledMessage extends Equatable {
       message: message ?? this.message,
       scheduledAt: scheduledAt ?? this.scheduledAt,
       status: status ?? this.status,
-      failureReason: failureReason ?? this.failureReason,
+      failureReason: switch (failureReason) {
+        _NullConst() => this.failureReason,
+        _ => failureReason as ScheduledMessageFailureReason?,
+      },
       createdAt: createdAt ?? remoteCreatedAt,
       localCreatedAt: localCreatedAt ?? this.localCreatedAt,
       updatedAt: updatedAt ?? remoteUpdatedAt,
       localUpdatedAt: localUpdatedAt ?? this.localUpdatedAt,
+    );
+  }
+
+  /// Its [message], as a draft to edit.
+  ///
+  /// Its [Message.mentionedUsers] can have only their [User.id] set, and its
+  /// quoted message is identified by [Message.quotedMessageId] only.
+  Message toMessage() {
+    return Message(
+      id: id,
+      text: message.text,
+      attachments: message.attachments,
+      mentionedUsers: message.mentionedUsers,
+      quotedMessageId: message.quotedMessageId,
+      parentId: message.parentId,
+      showInChannel: message.showInChannel,
+      extraData: message.extraData,
     );
   }
 
@@ -189,6 +215,11 @@ extension type const ScheduledMessageStatus(String _) implements String {
   /// Waiting for its time.
   static const scheduled = ScheduledMessageStatus('scheduled');
 
+  /// Being edited from this device.
+  ///
+  /// Only set until the request to edit it completes.
+  static const updating = ScheduledMessageStatus('updating');
+
   /// Being sent.
   ///
   /// It can stay so for a while if sending is retried.
@@ -199,8 +230,8 @@ extension type const ScheduledMessageStatus(String _) implements String {
   /// Could not be sent.
   ///
   /// The reason is [ScheduledMessage.failureReason]. One whose reason
-  /// [ScheduledMessageFailureReason.isRetriable] can be scheduled again;
-  /// any other can only be deleted.
+  /// [ScheduledMessageFailureReason.isRetriable] can be retried; any other can
+  /// only be deleted.
   static const failed = ScheduledMessageStatus('failed');
 
   /// Deleted before it was sent.
@@ -210,8 +241,8 @@ extension type const ScheduledMessageStatus(String _) implements String {
   static const sent = ScheduledMessageStatus('sent');
 
   /// Whether the message is still to be sent: being scheduled, waiting for its
-  /// time, or being sent.
-  bool get isPending => this == preparingToSchedule || this == scheduled || this == sending;
+  /// time, being edited, or being sent.
+  bool get isPending => this == preparingToSchedule || this == scheduled || this == updating || this == sending;
 }
 
 /// The reason a [ScheduledMessage] could not be sent.
@@ -221,6 +252,11 @@ extension type const ScheduledMessageStatus(String _) implements String {
 extension type const ScheduledMessageFailureReason(String _) implements String {
   /// The request to schedule it failed in a way that can be retried.
   static const requestFailed = ScheduledMessageFailureReason('request_failed');
+
+  /// The request to edit it failed.
+  ///
+  /// The message is still scheduled as it was before the edit.
+  static const updateFailed = ScheduledMessageFailureReason('update_failed');
 
   /// The user is banned from the channel.
   static const banned = ScheduledMessageFailureReason('banned');
@@ -255,6 +291,6 @@ extension type const ScheduledMessageFailureReason(String _) implements String {
   /// Something went wrong while sending.
   static const internalError = ScheduledMessageFailureReason('internal_error');
 
-  /// Whether the message can be scheduled again.
-  bool get isRetriable => this == requestFailed;
+  /// Whether the failed request can be made again.
+  bool get isRetriable => this == requestFailed || this == updateFailed;
 }
