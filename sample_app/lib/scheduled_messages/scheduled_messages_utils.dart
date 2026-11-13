@@ -33,8 +33,19 @@ String describeScheduleError(Object error, {required String fallback}) {
   };
 }
 
-/// Whether [error] says the scheduled message was already sent or deleted.
-bool isScheduledMessageGone(Object error) {
+/// Shows why scheduling or changing a scheduled message failed, on
+/// [messenger].
+///
+/// One already sent or deleted is shown as a notice rather than an error, as
+/// there is nothing left to change.
+void showScheduleError(StreamSnackbarMessenger messenger, Object error, {required String fallback}) {
+  final description = describeScheduleError(error, fallback: fallback);
+  final variant = _isScheduledMessageGone(error) ? StreamSnackbarVariant.neutral : StreamSnackbarVariant.error;
+  messenger.show(StreamSnackbar(message: Text(description), variant: variant));
+}
+
+// Whether [error] says the scheduled message was already sent or deleted.
+bool _isScheduledMessageGone(Object error) {
   if (error is! StreamChatNetworkError) return false;
   if (error.scheduledMessageErrorReason == .scheduledMessageAlreadySent) return true;
   return error.isScheduledMessageNotFound;

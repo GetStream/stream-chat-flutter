@@ -52,25 +52,19 @@ class ScheduledMessagesPage extends StatefulWidget {
 
 class _ScheduledMessagesPageState extends State<ScheduledMessagesPage> {
   // The scheduled message being edited in the composer under the list.
-  ScheduledMessage? _editing;
+  _Edit? _editing;
 
-  void _startEdit(ScheduledMessage scheduledMessage) => setState(() => _editing = scheduledMessage);
+  void _startEdit(_Edit edit) => setState(() => _editing = edit);
 
   void _closeEdit() => setState(() => _editing = null);
 
   @override
   Widget build(BuildContext context) {
-    final client = StreamChat.of(context).client;
     final editing = _editing;
-    // The edit ends if its channel goes away.
-    final editChannel = switch (editing) {
-      final it? => client.state.channels[it.cid],
-      null => null,
-    };
 
     // Back ends an edit before it leaves the page.
     return PopScope(
-      canPop: editChannel == null,
+      canPop: editing == null,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _closeEdit();
       },
@@ -89,19 +83,23 @@ class _ScheduledMessagesPageState extends State<ScheduledMessagesPage> {
           ),
           // Shows the composer's notices above it, also once it has closed.
           StreamSnackbarPopup(
-            child: editing != null && editChannel != null
-                ? StreamChannel(
-                    key: ValueKey(editing.id),
-                    channel: editChannel,
-                    child: ScheduledMessageEditComposer(scheduledMessage: editing, onClose: _closeEdit),
-                  )
-                : const SizedBox.shrink(),
+            child: switch (editing) {
+              (:final scheduledMessage, :final channel) => StreamChannel(
+                key: ValueKey(scheduledMessage.id),
+                channel: channel,
+                child: ScheduledMessageEditComposer(scheduledMessage: scheduledMessage, onClose: _closeEdit),
+              ),
+              null => const SizedBox.shrink(),
+            },
           ),
         ],
       ),
     );
   }
 }
+
+// A scheduled message being edited, in the channel it is sent to.
+typedef _Edit = ({ScheduledMessage scheduledMessage, Channel channel});
 
 // Reloads the scheduled messages, showing why when it fails.
 Future<void> _refresh(BuildContext context) async {
@@ -112,15 +110,14 @@ Future<void> _refresh(BuildContext context) async {
   try {
     await client.loadScheduledMessages();
   } catch (error) {
-    final description = describeScheduleError(error, fallback: fallback);
-    messenger.show(StreamSnackbar(message: Text(description), variant: .error));
+    showScheduleError(messenger, error, fallback: fallback);
   }
 }
 
 Future<void> _openScheduledMessageActions(
   BuildContext context,
   ScheduledMessage scheduledMessage,
-  ValueSetter<ScheduledMessage> startEdit,
+  ValueSetter<_Edit> startEdit,
 ) async {
   // A message being sent has no actions, so its sheet wouldn't open.
   final actions = StreamScheduledMessageActionsBuilder.buildActions(
@@ -145,7 +142,7 @@ Future<void> _openScheduledMessageActions(
 Future<void> _onScheduledMessageAction(
   BuildContext context,
   ScheduledMessageAction action,
-  ValueSetter<ScheduledMessage> startEdit,
+  ValueSetter<_Edit> startEdit,
 ) async {
   return switch (action) {
     EditScheduledMessage(:final scheduledMessage) => _edit(context, scheduledMessage, startEdit),
@@ -167,8 +164,7 @@ Future<void> _run(BuildContext context, Future<String> Function() call) async {
     final done = await call();
     messenger.show(StreamSnackbar(message: Text(done), variant: .success));
   } catch (error) {
-    final description = describeScheduleError(error, fallback: fallback);
-    messenger.show(StreamSnackbar(message: Text(description), variant: .error));
+    showScheduleError(messenger, error, fallback: fallback);
   }
 }
 
@@ -176,7 +172,7 @@ Future<void> _run(BuildContext context, Future<String> Function() call) async {
 Future<void> _edit(
   BuildContext context,
   ScheduledMessage scheduledMessage,
-  ValueSetter<ScheduledMessage> startEdit,
+  ValueSetter<_Edit> startEdit,
 ) async {
   final client = StreamChat.of(context).client;
   final messenger = StreamSnackbarMessenger.of(context);
@@ -186,10 +182,10 @@ Future<void> _edit(
   if (channel == null || !context.mounted) return;
 
   try {
-    startEdit(await _withMentionedUsers(client, scheduledMessage));
+    final withMentionedUsers = await _withMentionedUsers(client, scheduledMessage);
+    startEdit((scheduledMessage: withMentionedUsers, channel: channel));
   } catch (error) {
-    final description = describeScheduleError(error, fallback: fallback);
-    messenger.show(StreamSnackbar(message: Text(description), variant: .error));
+    showScheduleError(messenger, error, fallback: fallback);
   }
 }
 
@@ -220,20 +216,16 @@ Future<Channel?> _loadChannel(BuildContext context, ScheduledMessage scheduledMe
   final [type, id] = cid.split(':');
   final channel = client.channel(type, id: id);
 
-  void showError(String description) {
-    messenger.show(StreamSnackbar(message: Text(description), variant: .error));
-  }
-
   try {
     await channel.query();
   } catch (error) {
-    showError(describeScheduleError(error, fallback: fallback));
+    showScheduleError(messenger, error, fallback: fallback);
     return null;
   }
 
   // Offline, a query can answer from the cache without loading the channel.
   if (channel.state == null) {
-    showError(fallback);
+    messenger.show(StreamSnackbar(message: Text(fallback), variant: .error));
     return null;
   }
 
@@ -313,16 +305,6 @@ Future<void> _maybeDelete(BuildContext context, ScheduledMessage scheduledMessag
     await client.deleteScheduledMessage(scheduledMessage);
     messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.deleted), variant: .success));
   } catch (error) {
-    // Sent at its time, or deleted elsewhere.
-    if (isScheduledMessageGone(error)) {
-      final isSent =
-          error is StreamChatNetworkError && error.scheduledMessageErrorReason == .scheduledMessageAlreadySent;
-      final gone = isSent ? ScheduledMessagesStrings.alreadySent : ScheduledMessagesStrings.sentOrDeleted;
-      messenger.show(StreamSnackbar(message: Text(gone)));
-      return;
-    }
-
-    final description = describeScheduleError(error, fallback: translations.genericErrorText);
-    messenger.show(StreamSnackbar(message: Text(description), variant: .error));
+    showScheduleError(messenger, error, fallback: translations.genericErrorText);
   }
 }

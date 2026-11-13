@@ -38,8 +38,7 @@ Future<void> scheduleOnSendLongPress(
     controller.reset();
     if (typed != null) controller.text = typed;
   } catch (error) {
-    final description = describeScheduleError(error, fallback: fallback);
-    messenger.show(StreamSnackbar(message: Text(description), variant: .error));
+    showScheduleError(messenger, error, fallback: fallback);
   }
 }
 

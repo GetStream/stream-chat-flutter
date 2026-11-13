@@ -11,7 +11,6 @@ abstract final class ScheduledMessagesStrings {
   static const sendingNow = 'Sending message';
   static const copied = 'Message copied';
   static const deleted = 'Scheduled message deleted';
-  static const alreadySent = "Already sent. It's in the channel now.";
   static const deleteQuestion = 'Delete scheduled message?';
   static const pickFutureTime = 'Pick a time in the future';
   static const pickEarlierTime = 'Pick an earlier time';

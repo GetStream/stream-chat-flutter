@@ -49,13 +49,6 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
     final scheduledMessage = widget.scheduledMessage;
     final edited = _controller.value;
 
-    void showError(Object error) {
-      final description = describeScheduleError(error, fallback: fallback);
-      // Nothing is left to edit, which isn't an error.
-      final variant = isScheduledMessageGone(error) ? StreamSnackbarVariant.neutral : StreamSnackbarVariant.error;
-      messenger.show(StreamSnackbar(message: Text(description), variant: variant));
-    }
-
     final quotesDeletedMessage = ScheduledMessageRules.quotesDeletedMessage(edited, channel);
 
     // A failed one can't be changed, unless only its edit failed, so the edit
@@ -87,7 +80,7 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
         final scheduledAt = scheduledMessage.scheduledAt;
         await client.updateScheduledMessage(scheduledMessage, edited, scheduledAt: scheduledAt);
       } catch (error) {
-        showError(error);
+        showScheduleError(messenger, error, fallback: fallback);
       }
       return;
     }
@@ -109,7 +102,7 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
     try {
       await channel.scheduleMessage(message, scheduledAt: scheduledAt);
     } catch (error) {
-      showError(error);
+      showScheduleError(messenger, error, fallback: fallback);
       return;
     }
 
