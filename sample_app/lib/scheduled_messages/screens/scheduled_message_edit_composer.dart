@@ -75,9 +75,13 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
     if (!isScheduledAgain) {
       widget.onClose();
       try {
-        // A failed reschedule left the new time on it, so saving retries the
-        // move too.
-        final scheduledAt = scheduledMessage.scheduledAt;
+        // A failed reschedule left its new time on it, so saving retries the
+        // move too. Any other keeps the time the list has for it now.
+        final listed = client.state.scheduledMessages.where((it) => it.id == scheduledMessage.id).firstOrNull;
+        final scheduledAt = switch (listed) {
+          final it? when it.failureReason == .updateFailed => it.scheduledAt,
+          _ => null,
+        };
         await client.updateScheduledMessage(scheduledMessage.id, edited, scheduledAt: scheduledAt);
       } catch (error) {
         showScheduleError(messenger, error, fallback: fallback);
@@ -93,9 +97,16 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
       text: edited.text,
       attachments: [...edited.attachments.where((it) => it.uploadState.isSuccess)],
       mentionedUsers: edited.mentionedUsers,
+      mentionedChannel: edited.mentionedChannel,
+      mentionedHere: edited.mentionedHere,
+      mentionedRoles: edited.mentionedRoles,
+      mentionedGroupIds: edited.mentionedGroupIds,
       quotedMessageId: quotesDeletedMessage ? null : edited.quotedMessageId,
       parentId: edited.parentId,
       showInChannel: edited.showInChannel,
+      silent: edited.silent,
+      pollId: edited.pollId,
+      restrictedVisibility: edited.restrictedVisibility,
       extraData: edited.extraData,
     );
 

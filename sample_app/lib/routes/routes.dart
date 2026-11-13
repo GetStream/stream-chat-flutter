@@ -41,6 +41,6 @@ class ChannelRouteConfig extends RouteConfig {
 
   Map<String, String> queryParams(Message message) => {
     'mid': message.id,
-    if (message.parentId != null) 'pid': message.parentId!,
+    if (message.parentId != null) 'parentId': message.parentId!,
   };
 }

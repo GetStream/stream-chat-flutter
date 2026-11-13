@@ -31,6 +31,8 @@ Future<void> scheduleOnSendLongPress(
 
   try {
     await _schedule(channel, message, scheduledAt);
+    if (!context.mounted) return;
+
     // Text typed while it was being scheduled stays in the composer, with its
     // own ID, as the scheduled message took the old one. Its attachments,
     // quote and mentions were scheduled, so they go.

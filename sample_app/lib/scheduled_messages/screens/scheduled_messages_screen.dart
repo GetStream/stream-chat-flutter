@@ -119,14 +119,17 @@ Future<void> _openScheduledMessageActions(
   ScheduledMessage scheduledMessage,
   ValueSetter<_Edit> startEdit,
 ) async {
-  // A message being sent has no actions, so its sheet wouldn't open.
+  // A message being sent or saved has no actions, so its sheet wouldn't open.
   final actions = StreamScheduledMessageActionsBuilder.buildActions(
     context: context,
     scheduledMessage: scheduledMessage,
   );
   if (actions.isEmpty) {
+    // One already scheduled is being saved, any other is being sent.
+    final isSaving = scheduledMessage.status == .preparingToSchedule && scheduledMessage.remoteCreatedAt != null;
+    final busy = isSaving ? ScheduledMessagesStrings.stillSaving : ScheduledMessagesStrings.stillSending;
     final messenger = StreamSnackbarMessenger.of(context);
-    messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.stillSending)));
+    messenger.show(StreamSnackbar(message: Text(busy)));
     return;
   }
 
@@ -183,6 +186,8 @@ Future<void> _edit(
 
   try {
     final withMentionedUsers = await _withMentionedUsers(client, scheduledMessage);
+    if (!context.mounted) return;
+
     startEdit((scheduledMessage: withMentionedUsers, channel: channel));
   } catch (error) {
     showScheduleError(messenger, error, fallback: fallback);
