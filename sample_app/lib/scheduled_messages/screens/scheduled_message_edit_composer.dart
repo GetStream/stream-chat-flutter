@@ -79,45 +79,45 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
       return;
     }
 
-    if (isScheduledAgain) {
-      final scheduledAt = await showStreamScheduleTimeSheet(context: context, channel: channel, message: edited);
-      if (scheduledAt == null || !mounted) return;
-
+    if (!isScheduledAgain) {
       widget.onClose();
-      final message = Message(
-        text: edited.text,
-        attachments: [...edited.attachments.where((it) => it.uploadState.isSuccess)],
-        mentionedUsers: edited.mentionedUsers,
-        quotedMessageId: quotesDeletedMessage ? null : edited.quotedMessageId,
-        parentId: edited.parentId,
-        showInChannel: edited.showInChannel,
-        extraData: edited.extraData,
-      );
-
       try {
-        await channel.scheduleMessage(message, scheduledAt: scheduledAt);
+        // A failed reschedule left the new time on it, so saving retries the
+        // move too.
+        final scheduledAt = scheduledMessage.scheduledAt;
+        await client.updateScheduledMessage(scheduledMessage, edited, scheduledAt: scheduledAt);
       } catch (error) {
         showError(error);
-        return;
-      }
-
-      try {
-        await client.deleteScheduledMessage(scheduledMessage);
-      } catch (_) {
-        const notRemoved = Text(ScheduledMessagesStrings.failedOneNotRemoved);
-        messenger.show(StreamSnackbar(message: notRemoved, variant: .error));
       }
       return;
     }
 
+    final scheduledAt = await showStreamScheduleTimeSheet(context: context, channel: channel, message: edited);
+    if (scheduledAt == null || !mounted) return;
+
     widget.onClose();
+    final message = Message(
+      text: edited.text,
+      attachments: [...edited.attachments.where((it) => it.uploadState.isSuccess)],
+      mentionedUsers: edited.mentionedUsers,
+      quotedMessageId: quotesDeletedMessage ? null : edited.quotedMessageId,
+      parentId: edited.parentId,
+      showInChannel: edited.showInChannel,
+      extraData: edited.extraData,
+    );
+
     try {
-      // A failed reschedule left the new time on it, so saving retries the
-      // move too.
-      final scheduledAt = scheduledMessage.scheduledAt;
-      await client.updateScheduledMessage(scheduledMessage, edited, scheduledAt: scheduledAt);
+      await channel.scheduleMessage(message, scheduledAt: scheduledAt);
     } catch (error) {
       showError(error);
+      return;
+    }
+
+    try {
+      await client.deleteScheduledMessage(scheduledMessage);
+    } catch (_) {
+      const notRemoved = Text(ScheduledMessagesStrings.failedOneNotRemoved);
+      messenger.show(StreamSnackbar(message: notRemoved, variant: .error));
     }
   }
 
