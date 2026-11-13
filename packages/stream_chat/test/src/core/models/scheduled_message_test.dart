@@ -158,7 +158,6 @@ void main() {
   test('ScheduledMessageStatus.isPending is true until the message is sent or fails', () {
     expect(ScheduledMessageStatus.preparingToSchedule.isPending, isTrue);
     expect(ScheduledMessageStatus.scheduled.isPending, isTrue);
-    expect(ScheduledMessageStatus.updating.isPending, isTrue);
     expect(ScheduledMessageStatus.sending.isPending, isTrue);
     expect(ScheduledMessageStatus.failed.isPending, isFalse);
     expect(ScheduledMessageStatus.canceled.isPending, isFalse);

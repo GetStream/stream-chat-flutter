@@ -450,7 +450,7 @@ void main() {
   });
 
   test('deleteScheduledMessage asks the server to delete one being scheduled', () async {
-    final local = fakeScheduledMessage('a', status: ScheduledMessageStatus.preparingToSchedule);
+    final local = fakeScheduledMessage('a', status: ScheduledMessageStatus.preparingToSchedule, isOnServer: false);
     await harness.hold([local]);
     when(() => harness.api.scheduledMessages.deleteScheduledMessage('a')).thenAnswer((_) async => fakeDelete(local));
 

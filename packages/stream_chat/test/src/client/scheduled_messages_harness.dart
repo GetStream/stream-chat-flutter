@@ -35,6 +35,8 @@ const scheduledMessageCanceledCode = 124;
 // A scheduled message in a channel other than [testCid].
 final elsewhere = fakeScheduledMessage('there', cid: 'messaging:other', scheduledAt: DateTime.utc(2026, 11, 3));
 
+// A scheduled message as the server returns it, or, unless [isOnServer], one
+// never on the server, which has no server dates.
 ScheduledMessage fakeScheduledMessage(
   String id, {
   String cid = testCid,
@@ -44,6 +46,7 @@ ScheduledMessage fakeScheduledMessage(
   String? parentId,
   ScheduledMessageStatus status = ScheduledMessageStatus.scheduled,
   ScheduledMessageFailureReason? failureReason,
+  bool isOnServer = true,
 }) => ScheduledMessage(
   id: id,
   cid: cid,
@@ -52,8 +55,8 @@ ScheduledMessage fakeScheduledMessage(
   scheduledAt: scheduledAt ?? DateTime.utc(2026, 11, 2, 9),
   status: status,
   failureReason: failureReason,
-  createdAt: DateTime.utc(2026, 10, 29),
-  updatedAt: updatedAt ?? DateTime.utc(2026, 10, 29),
+  createdAt: isOnServer ? DateTime.utc(2026, 10, 29) : null,
+  updatedAt: isOnServer ? updatedAt ?? DateTime.utc(2026, 10, 29) : null,
 );
 
 QueryScheduledMessagesResponse fakePage(List<ScheduledMessage> messages, {String? next}) {

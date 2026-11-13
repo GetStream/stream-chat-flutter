@@ -186,9 +186,9 @@ class EventType {
   /// Event sent when the current user edits or reschedules a scheduled message.
   ///
   /// The client also sends one with [Event.isLocal] true for its own
-  /// requests: while an edit is saved, as [ScheduledMessageStatus.updating],
-  /// once a request succeeds, and when one fails and leaves the scheduled
-  /// message failed or being sent.
+  /// requests: while an edit is saved, as
+  /// [ScheduledMessageStatus.preparingToSchedule], once a request succeeds, and
+  /// when one fails and leaves the scheduled message failed or being sent.
   static const String scheduledMessageUpdated = 'scheduled_message.updated';
 
   /// Event sent when the current user deletes a scheduled message.

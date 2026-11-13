@@ -115,7 +115,7 @@ void main() {
     await request;
     await settle();
 
-    expect(updates.map((it) => it.scheduledMessage?.status), [ScheduledMessageStatus.updating]);
+    expect(updates.map((it) => it.scheduledMessage?.status), [ScheduledMessageStatus.preparingToSchedule]);
   });
 
   test('updateScheduledMessage refuses an attachment that is not uploaded', () async {

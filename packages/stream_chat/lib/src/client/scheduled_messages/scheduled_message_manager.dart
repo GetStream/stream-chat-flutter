@@ -274,8 +274,8 @@ class ScheduledMessageManager {
   ///
   /// Its message is replaced with [message], and it is moved to [scheduledAt]
   /// if given. The edit is listed right away as
-  /// [ScheduledMessageStatus.updating]. If the request fails, it stays listed
-  /// as failed with [ScheduledMessageFailureReason.updateFailed].
+  /// [ScheduledMessageStatus.preparingToSchedule]. If the request fails, it
+  /// stays listed as failed with [ScheduledMessageFailureReason.updateFailed].
   ///
   /// Throws a [StreamChatNetworkError] if the request fails, even when the
   /// scheduled message is already gone. If it is, an
@@ -475,15 +475,15 @@ class ScheduledMessageManager {
     Future<UpdateScheduledMessageResponse> Function() request,
   ) async {
     final generation = _generation;
-    final updating = edited.copyWith(
-      status: .updating,
+    final saving = edited.copyWith(
+      status: .preparingToSchedule,
       failureReason: null,
       localUpdatedAt: clock.now(),
     );
 
-    _emitEvent(EventType.scheduledMessageUpdated, updating, generation);
+    _emitEvent(EventType.scheduledMessageUpdated, saving, generation);
 
-    final failed = updating.copyWith(
+    final failed = saving.copyWith(
       status: .failed,
       failureReason: ScheduledMessageFailureReason.updateFailed,
     );

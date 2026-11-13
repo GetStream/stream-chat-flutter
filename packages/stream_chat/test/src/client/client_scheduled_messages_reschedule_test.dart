@@ -32,7 +32,7 @@ void main() {
     stubReschedule(() async => fakeUpdate(moved));
 
     expect(await reschedule(), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.updating),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
     ]);
     expect(harness.client.state.scheduledMessages, [moved]);
@@ -42,7 +42,7 @@ void main() {
     stubReschedule(() async => throw offline);
 
     expect(await reschedule(), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.updating),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.failed),
     ]);
     final [failed] = harness.client.state.scheduledMessages;
@@ -54,7 +54,7 @@ void main() {
     stubReschedule(() async => throw tooFar);
 
     expect(await reschedule(), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.updating),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.failed),
     ]);
     expect(harness.client.state.scheduledMessages.single.scheduledAt, later);
@@ -64,7 +64,7 @@ void main() {
     stubReschedule(() async => throw sendingError);
 
     expect(await reschedule(), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.updating),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.sending),
     ]);
     expect(harness.client.state.scheduledMessages.single.scheduledAt, original.scheduledAt);
@@ -74,7 +74,7 @@ void main() {
     stubReschedule(() async => throw missingError);
 
     expect(await reschedule(), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.updating),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
     ]);
     expect(harness.client.state.scheduledMessages, isEmpty);

@@ -41,7 +41,7 @@ void main() {
     stubUpdate(() async => fakeUpdate(saved));
 
     expect(await update(), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.updating),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
     ]);
     expect(harness.client.state.scheduledMessages, [saved]);
@@ -56,7 +56,7 @@ void main() {
     await settle();
 
     final [updating] = harness.client.state.scheduledMessages;
-    expect(updating.status, ScheduledMessageStatus.updating);
+    expect(updating.status, ScheduledMessageStatus.preparingToSchedule);
     expect(updating.message.text, 'Good evening');
   });
 
@@ -72,7 +72,7 @@ void main() {
     stubUpdate(() async => throw tooLong);
 
     expect(await update(), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.updating),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.failed),
     ]);
     final [failed] = harness.client.state.scheduledMessages;
@@ -84,7 +84,7 @@ void main() {
     stubUpdate(() async => throw sendingError);
 
     expect(await update(), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.updating),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.sending),
     ]);
     expect(harness.client.state.scheduledMessages.single.message.text, 'Good morning');
@@ -94,7 +94,7 @@ void main() {
     stubUpdate(() async => throw missingError);
 
     expect(await update(), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.updating),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
     ]);
     expect(harness.client.state.scheduledMessages, isEmpty);
@@ -177,7 +177,7 @@ void main() {
 
     await harness.receive(EventType.scheduledMessageUpdated, original);
 
-    expect(harness.client.state.scheduledMessages.single.status, ScheduledMessageStatus.updating);
+    expect(harness.client.state.scheduledMessages.single.status, ScheduledMessageStatus.preparingToSchedule);
   });
 
   test('updateScheduledMessage keeps a failed edit over a server copy of the same version', () async {
@@ -225,5 +225,28 @@ void main() {
 
     final currentUser = harness.client.state.currentUser!;
     expect(harness.client.state.users[currentUser.id]?.name, currentUser.name);
+  });
+
+  test('a complete load drops an edit being saved that the server no longer has', () async {
+    final answer = Completer<UpdateScheduledMessageResponse>();
+    stubUpdate(() => answer.future);
+    await harness.hold([original]);
+    harness.client.updateScheduledMessage(original, edited).ignore();
+    await settle();
+    harness.stubQuery(fakePage(const []));
+
+    await harness.client.loadScheduledMessages();
+
+    expect(harness.client.state.scheduledMessages, isEmpty);
+  });
+
+  test('a complete load keeps a new message being scheduled, which the server never had', () async {
+    final local = fakeScheduledMessage('b', status: ScheduledMessageStatus.preparingToSchedule, isOnServer: false);
+    await harness.hold([local]);
+    harness.stubQuery(fakePage(const []));
+
+    await harness.client.loadScheduledMessages();
+
+    expect(harness.client.state.scheduledMessages, [local]);
   });
 }

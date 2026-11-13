@@ -186,14 +186,17 @@ class ScheduledMessageListStateNotifier {
 
 extension on ScheduledMessage {
   // Whether it is still being scheduled, or scheduling it failed and can be
-  // retried.
+  // retried. Either way, the API doesn't have it.
   bool get isLocal {
-    if (status == .preparingToSchedule) return true;
+    if (status == .preparingToSchedule) return remoteCreatedAt == null;
     return failureReason == .requestFailed;
   }
 
-  // Whether it holds an edit not saved yet.
-  bool get isLocalEdit => status == .updating || failureReason == .updateFailed;
+  // Whether it holds an unsaved edit of a message already scheduled.
+  bool get isLocalEdit {
+    if (status == .preparingToSchedule) return remoteCreatedAt != null;
+    return failureReason == .updateFailed;
+  }
 
   // Whether it is kept when [loaded] replaces the list: it isn't on the server
   // yet, or it holds an edit of one still there.

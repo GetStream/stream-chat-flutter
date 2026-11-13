@@ -207,18 +207,13 @@ final class ScheduledMessage extends Equatable {
 /// A status without a constant here can still be named by wrapping its value:
 /// `ScheduledMessageStatus('paused')`.
 extension type const ScheduledMessageStatus(String _) implements String {
-  /// Being scheduled from this device.
+  /// Being scheduled, edited or rescheduled from this device.
   ///
-  /// Only set until the request to schedule it completes.
+  /// Only set until the request completes.
   static const preparingToSchedule = ScheduledMessageStatus('preparing_to_schedule');
 
   /// Waiting for its time.
   static const scheduled = ScheduledMessageStatus('scheduled');
-
-  /// Being edited from this device.
-  ///
-  /// Only set until the request to edit it completes.
-  static const updating = ScheduledMessageStatus('updating');
 
   /// Being sent.
   ///
@@ -240,9 +235,9 @@ extension type const ScheduledMessageStatus(String _) implements String {
   /// Sent to its channel.
   static const sent = ScheduledMessageStatus('sent');
 
-  /// Whether the message is still to be sent: being scheduled, waiting for its
-  /// time, being edited, or being sent.
-  bool get isPending => this == preparingToSchedule || this == scheduled || this == updating || this == sending;
+  /// Whether the message is still to be sent: being scheduled or changed,
+  /// waiting for its time, or being sent.
+  bool get isPending => this == preparingToSchedule || this == scheduled || this == sending;
 }
 
 /// The reason a [ScheduledMessage] could not be sent.
