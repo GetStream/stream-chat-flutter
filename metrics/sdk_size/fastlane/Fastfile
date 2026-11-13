@@ -1,0 +1,254 @@
+require 'json'
+require 'shellwords'
+
+skip_docs
+
+GITHUB_REPO = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-chat-flutter'
+RESULTS_DIR = File.expand_path('../../../build/sdk_size/results', __dir__)
+# Where show_sdk_size clones GetStream/stream-internal-metrics. Actions run from
+# metrics/sdk_size, the lane's own Ruby from metrics/sdk_size/fastlane.
+METRICS_DIR = File.expand_path('../metrics', __dir__)
+PLATFORMS = %w[android ios pub].freeze
+SIZE_HEADER = '## SDK Size'
+BREAKDOWN_HEADER = '## Size Breakdown'
+# Rows smaller than this, on the branch and in the diff, are folded into "other".
+BREAKDOWN_MIN_BYTES = 1024
+BREAKDOWN_MAX_ROWS = 15
+
+# Reports the sizes measure.dart wrote, against the base branch's benchmark in
+# GetStream/stream-internal-metrics. On a push to the base branch, the new
+# sizes become the benchmark.
+lane :sdk_size do
+  base_branch = ENV['BASE_BRANCH'] || git_branch
+  sha = ENV['HEAD_SHA'] || sh('git rev-parse HEAD', log: false).strip
+  # Platforms this run doesn't measure, such as `ios` on a pull request.
+  skipped = ENV['SKIPPED_PLATFORMS'].to_s.split(',').map(&:strip).reject(&:empty?)
+
+  results = {}
+  PLATFORMS.each do |platform|
+    platform_sizes = read_results("sizes-#{platform}.json")
+    next unless platform_sizes
+
+    results[platform] = {
+      'sizes' => platform_sizes,
+      'breakdown' => read_results("breakdown-#{platform}.json")
+    }
+  end
+  UI.user_error!("No sizes found in #{RESULTS_DIR}") if results.empty?
+  missing = PLATFORMS - skipped - results.keys
+  if is_ci && !missing.empty?
+    UI.user_error!("Every platform that isn't skipped is needed, missing: #{missing.join(', ')}")
+  end
+
+  sizes = {}
+  results.each do |platform, data|
+    data['sizes'].each { |name, kb| sizes["#{platform}_#{name}"] = kb }
+  end
+
+  # Clones the metrics repo into METRICS_DIR, and pushes the sizes on a push to
+  # the base branch.
+  show_sdk_size(branch_sizes: sizes, github_repo: GITHUB_REPO, base_branch: base_branch)
+  add_commit_note(sha)
+
+  show_size_breakdown(base_branch, results, skipped, sha)
+end
+
+README_PATH = File.expand_path('../../../README.md', __dir__)
+
+# Writes the base branch's benchmark into the size badges of the root README.
+# The `stream_chat_flutter` and `stream_chat_persistence` badges show what they
+# add on top of `stream_chat`. The `stream_chat_localizations` badge shows its
+# pub.dev archive size.
+lane :update_readme_badges do
+  base_branch = ENV['BASE_BRANCH'] || 'master'
+  repo = GITHUB_REPO.split('/').last
+
+  FileUtils.rm_rf(METRICS_DIR)
+  sh("git clone --depth 1 git@github.com:GetStream/stream-internal-metrics.git #{METRICS_DIR.shellescape}")
+  benchmark = JSON.parse(File.read(File.join(METRICS_DIR, "#{repo}-size.json")))[base_branch]
+  UI.user_error!("No benchmark for #{base_branch} in stream-internal-metrics") unless benchmark
+
+  size = lambda do |key|
+    benchmark.fetch(key) { UI.user_error!("The #{base_branch} benchmark has no #{key}") }
+  end
+  badges = {}
+  %w[android ios].each do |platform|
+    llc = size.call("#{platform}_stream_chat")
+    badges["#{platform}:stream_chat"] = llc
+    %w[stream_chat_flutter stream_chat_persistence].each do |package|
+      badges["#{platform}:#{package}"] = size.call("#{platform}_#{package}") - llc
+    end
+  end
+  badges['stream_chat_localizations'] = size.call('pub_stream_chat_localizations')
+
+  readme = File.read(README_PATH)
+  badges.each do |label, kb|
+    pattern = %r{(https://img\.shields\.io/badge/#{Regexp.escape(label)}-)[^"]*?(-blue")}
+    UI.user_error!("No #{label} badge in README.md") unless readme.match?(pattern)
+
+    readme = readme.sub(pattern) { "#{Regexp.last_match(1)}#{badge_size(kb)}#{Regexp.last_match(2)}" }
+    UI.message("#{label}: #{badge_size(kb).sub('%20', ' ')}")
+  end
+  File.write(README_PATH, readme)
+end
+
+def badge_size(kb)
+  return "#{(kb / 1024.0).round(1)}%20MB" if kb >= 1024
+
+  "#{kb.round}%20KB"
+end
+
+def show_size_breakdown(base_branch, results, skipped, sha)
+  repo = GITHUB_REPO.split('/').last
+  benchmark_file = "flutter-breakdown/#{repo}/#{base_branch}.json"
+  benchmark_path = File.join(METRICS_DIR, benchmark_file)
+  benchmark = File.exist?(benchmark_path) ? JSON.parse(File.read(benchmark_path)) : nil
+
+  breakdown = results.slice('android', 'ios').transform_values { |data| data['breakdown'] }.compact
+  return UI.important('No breakdown found, skipping it.') if breakdown.empty?
+
+  markdown = render_breakdown(breakdown, benchmark, base_branch, skipped, sha)
+  UI.message(markdown)
+  summary = ENV['GITHUB_STEP_SUMMARY']
+  File.write(summary, "#{markdown}\n", mode: 'a') if summary
+
+  return unless is_ci
+
+  if push_event? && git_branch == base_branch
+    FileUtils.mkdir_p(File.dirname(benchmark_path))
+    File.write(benchmark_path, "#{JSON.pretty_generate(breakdown)}\n")
+    Dir.chdir(METRICS_DIR) do
+      if sh('git status -s').to_s.empty?
+        UI.important('No changes in the size breakdown.')
+      else
+        sh('git add -A')
+        sh("git commit -m 'Update #{benchmark_file}'")
+        push_metrics
+      end
+    end
+  end
+
+  pr_comment(text: markdown, edit_last_comment_with_text: BREAKDOWN_HEADER)
+end
+
+def push_event?
+  ENV['GITHUB_EVENT_NAME'] == 'push'
+end
+
+# Other repositories push to the metrics repo too, so a push can be rejected
+# until it is rebased on theirs.
+def push_metrics(attempts: 3)
+  attempt = 0
+  begin
+    attempt += 1
+    sh('git pull --rebase')
+    sh('git push')
+  rescue FastlaneCore::Interface::FastlaneShellError
+    raise if attempt >= attempts
+
+    UI.important("Pushing the size breakdown failed, retrying (#{attempt}/#{attempts}).")
+    retry
+  end
+end
+
+# Adds the measured commit under the `## SDK Size` table, which show_sdk_size
+# renders.
+def add_commit_note(sha)
+  pr = ENV['GITHUB_PR_NUM'].to_s
+  return if pr.empty? || !is_ci
+
+  comment = latest_comment(pr, SIZE_HEADER)
+  return UI.important('No SDK size comment found to add the commit to.') unless comment
+
+  body = "#{comment['body'].rstrip}\n\n#{commit_note(sha)}\n"
+  sh("gh api --method PATCH repos/#{GITHUB_REPO}/issues/comments/#{comment['id']} " \
+     "-f body=#{Shellwords.escape(body)} --silent", log: false)
+end
+
+def latest_comment(pr, header)
+  json = sh("gh api --paginate repos/#{GITHUB_REPO}/issues/#{pr}/comments " \
+            "--jq '.[] | select(.body | startswith(\"#{header}\")) | {id, body}'", log: false)
+  json.lines.map(&:strip).reject(&:empty?).map { |line| JSON.parse(line) }.last
+end
+
+def commit_note(sha)
+  "Measured on #{commit_link(sha)}."
+end
+
+def run_link
+  return 'the workflow run' unless ENV['GITHUB_RUN_ID']
+
+  "[this run](#{ENV['GITHUB_SERVER_URL']}/#{GITHUB_REPO}/actions/runs/#{ENV['GITHUB_RUN_ID']})"
+end
+
+def commit_link(sha)
+  "[`#{sha[0, 7]}`](#{ENV['GITHUB_SERVER_URL'] || 'https://github.com'}/#{GITHUB_REPO}/commit/#{sha})"
+end
+
+def read_results(name)
+  path = File.join(RESULTS_DIR, name)
+  File.exist?(path) ? JSON.parse(File.read(path)) : nil
+end
+
+# One collapsible table per platform and variant: what the variant adds on top
+# of an empty app, per component, with the change against the base branch.
+def render_breakdown(breakdown, benchmark, base_branch, skipped, sha)
+  lines = [BREAKDOWN_HEADER, '']
+  artifacts = ENV['GITHUB_RUN_ID'] ? "the `sdk-size-analysis` artifacts of #{run_link}" : 'the analysis files'
+  lines << 'What each SDK adds to an empty release app, per Dart package and native library. ' \
+           "Dart sizes are uncompressed symbol sizes. Open #{artifacts} " \
+           'in the DevTools App Size tool to drill down further.'
+  lines << ''
+  notes = []
+  notes << "This run does not measure #{skipped.join(', ')}." unless skipped.empty?
+  notes << "No `#{base_branch}` benchmark for the breakdown yet." unless benchmark
+  notes.each { |note| lines << note << '' }
+  lines << commit_note(sha)
+  lines << ''
+  breakdown.each do |platform, variants|
+    variants.each do |variant, components|
+      # Without a benchmark for this variant, there is nothing to compare to.
+      base = benchmark&.dig(platform, variant)
+      total = components.values.sum
+      total_delta = base ? " (#{format_delta(total - base.values.sum)})" : ' (new)'
+      lines << "<details><summary><b>#{platform}</b> · <code>#{variant}</code>: " \
+               "#{format_size(total)}#{total_delta}</summary>"
+      lines << ''
+      lines << "| Component | Size | Δ vs `#{base_branch}` |"
+      lines << '| - | -: | -: |'
+
+      rows = (components.keys | (base || {}).keys).map do |key|
+        [key, components[key] || 0, base && ((components[key] || 0) - (base[key] || 0))]
+      end
+      shown, folded = rows.sort_by { |_, size, _| -size }.partition do |_, size, delta|
+        size.abs >= BREAKDOWN_MIN_BYTES || delta.to_i.abs >= BREAKDOWN_MIN_BYTES
+      end
+      folded += shown.drop(BREAKDOWN_MAX_ROWS)
+      shown.take(BREAKDOWN_MAX_ROWS).each do |key, size, delta|
+        lines << "| `#{key}` | #{format_size(size)} | #{format_delta(delta)} |"
+      end
+      unless folded.empty?
+        folded_delta = base && folded.sum { |_, _, d| d }
+        lines << "| other (#{folded.size}) | #{format_size(folded.sum { |_, s, _| s })} | " \
+                 "#{format_delta(folded_delta)} |"
+      end
+      lines << ''
+      lines << '</details>'
+      lines << ''
+    end
+  end
+  lines.join("\n")
+end
+
+def format_size(bytes)
+  return "#{(bytes / 1024.0 / 1024.0).round(2)} MB" if bytes.abs >= 1024 * 1024
+
+  "#{(bytes / 1024.0).round(1)} KB"
+end
+
+def format_delta(bytes)
+  return 'n/a' if bytes.nil?
+  return '0' if bytes.zero?
+
+  "#{bytes.positive? ? '+' : '-'}#{format_size(bytes.abs)}"
+end

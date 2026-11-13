@@ -1,0 +1,52 @@
+name: update_size_badges
+
+# Writes the latest SDK size benchmark into the README badges and commits them
+# to the branch the workflow runs on. The release-pr skill runs it on the
+# release branch, so the badges ship with the release:
+#
+#   gh workflow run update_size_badges.yml --ref release/v<version> -f base_branch=master
+on:
+  workflow_dispatch:
+    inputs:
+      base_branch:
+        description: "Branch whose benchmark the badges show: master or v11."
+        required: true
+        default: master
+
+permissions:
+  contents: write
+
+jobs:
+  update_size_badges:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v7
+        with:
+          # Bot token so the pushed commit can re-trigger CI on the branch.
+          token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
+
+      - name: 🔑 Connect Bot
+        uses: webfactory/ssh-agent@v0.10.0
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+
+      - name: 💎 Set up Ruby
+        uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: metrics/sdk_size
+
+      - name: 📏 Update Badges
+        working-directory: metrics/sdk_size
+        env:
+          BASE_BRANCH: ${{ inputs.base_branch }}
+        run: bundle exec fastlane update_readme_badges
+
+      - name: 📤 Commit Changes
+        uses: stefanzweifel/git-auto-commit-action@v7
+        with:
+          commit_message: "chore(repo): update the SDK size badges"
+          file_pattern: README.md
+          commit_user_name: "Stream SDK Bot"
+          commit_user_email: "60655709+Stream-SDK-Bot@users.noreply.github.com"
