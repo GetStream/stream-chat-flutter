@@ -247,7 +247,7 @@ Future<void> _reschedule(BuildContext context, ScheduledMessage scheduledMessage
   if (scheduledAt == null || !context.mounted) return;
 
   return _run(context, () async {
-    await client.rescheduleMessage(scheduledMessage, scheduledAt: scheduledAt);
+    await client.rescheduleMessage(scheduledMessage.id, scheduledAt: scheduledAt);
     return ScheduledMessagesStrings.rescheduled;
   });
 }
@@ -258,7 +258,7 @@ Future<void> _retry(BuildContext context, ScheduledMessage scheduledMessage) {
   final isEdit = scheduledMessage.failureReason == .updateFailed;
 
   return _run(context, () async {
-    final scheduled = await client.retryScheduledMessage(scheduledMessage);
+    final scheduled = await client.resendScheduledMessage(scheduledMessage.id);
     // Null when its time had passed and it was sent right away.
     if (scheduled == null) return ScheduledMessagesStrings.sendingNow;
     return isEdit ? ScheduledMessagesStrings.updated : ScheduledMessagesStrings.scheduled;
@@ -269,7 +269,7 @@ Future<void> _sendNow(BuildContext context, ScheduledMessage scheduledMessage) {
   final client = StreamChat.of(context).client;
 
   return _run(context, () async {
-    await client.sendScheduledMessageNow(scheduledMessage);
+    await client.sendScheduledMessageNow(scheduledMessage.id);
     return ScheduledMessagesStrings.sendingNow;
   });
 }
@@ -302,7 +302,7 @@ Future<void> _maybeDelete(BuildContext context, ScheduledMessage scheduledMessag
   if (confirmed != true) return;
 
   try {
-    await client.deleteScheduledMessage(scheduledMessage);
+    await client.deleteScheduledMessage(scheduledMessage.id);
     messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.deleted), variant: .success));
   } catch (error) {
     showScheduleError(messenger, error, fallback: translations.genericErrorText);

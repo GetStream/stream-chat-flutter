@@ -78,7 +78,7 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
         // A failed reschedule left the new time on it, so saving retries the
         // move too.
         final scheduledAt = scheduledMessage.scheduledAt;
-        await client.updateScheduledMessage(scheduledMessage, edited, scheduledAt: scheduledAt);
+        await client.updateScheduledMessage(scheduledMessage.id, edited, scheduledAt: scheduledAt);
       } catch (error) {
         showScheduleError(messenger, error, fallback: fallback);
       }
@@ -107,7 +107,7 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
     }
 
     try {
-      await client.deleteScheduledMessage(scheduledMessage);
+      await client.deleteScheduledMessage(scheduledMessage.id);
     } catch (_) {
       const notRemoved = Text(ScheduledMessagesStrings.failedOneNotRemoved);
       messenger.show(StreamSnackbar(message: notRemoved, variant: .error));
