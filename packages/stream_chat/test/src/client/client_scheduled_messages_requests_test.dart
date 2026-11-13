@@ -16,12 +16,13 @@ void main() {
   final a = fakeScheduledMessage('a');
 
   test('rescheduleMessage asks for only the time', () async {
+    await harness.hold([a]);
     final scheduledAt = DateTime.utc(2026, 11, 3, 9);
     when(
       () => harness.api.scheduledMessages.updateScheduledMessage('a', scheduledAt: scheduledAt),
     ).thenAnswer((_) async => fakeUpdate(fakeScheduledMessage('a', scheduledAt: scheduledAt)));
 
-    await harness.client.rescheduleMessage(a, scheduledAt: scheduledAt);
+    await harness.client.rescheduleMessage(a.id, scheduledAt: scheduledAt);
 
     verify(() => harness.api.scheduledMessages.updateScheduledMessage('a', scheduledAt: scheduledAt)).called(1);
   });
@@ -34,7 +35,7 @@ void main() {
       () => harness.api.scheduledMessages.updateScheduledMessage('a', scheduledAt: scheduledAt),
     ).thenAnswer((_) async => fakeUpdate(moved));
 
-    await harness.client.rescheduleMessage(a, scheduledAt: scheduledAt);
+    await harness.client.rescheduleMessage(a.id, scheduledAt: scheduledAt);
     await settle();
 
     expect(harness.client.state.scheduledMessages, [moved]);
@@ -54,7 +55,7 @@ void main() {
     final subscription = harness.client.state.scheduledMessagesStream.skip(1).listen(emitted.add);
     addTearDown(subscription.cancel);
 
-    await harness.client.rescheduleMessage(a, scheduledAt: scheduledAt);
+    await harness.client.rescheduleMessage(a.id, scheduledAt: scheduledAt);
     await settle();
     final before = emitted.length;
     await harness.receive(EventType.scheduledMessageUpdated, moved());
@@ -64,13 +65,14 @@ void main() {
   });
 
   test('updateScheduledMessage sends the message and time', () async {
+    await harness.hold([a]);
     final edited = Message(id: 'a', text: 'Good evening');
     final scheduledAt = DateTime.utc(2026, 11, 3, 9);
     when(
       () => harness.api.scheduledMessages.updateScheduledMessage('a', message: edited, scheduledAt: scheduledAt),
     ).thenAnswer((_) async => fakeUpdate(a));
 
-    await harness.client.updateScheduledMessage(a, edited, scheduledAt: scheduledAt);
+    await harness.client.updateScheduledMessage(a.id, edited, scheduledAt: scheduledAt);
 
     verify(
       () => harness.api.scheduledMessages.updateScheduledMessage('a', message: edited, scheduledAt: scheduledAt),
@@ -91,7 +93,7 @@ void main() {
       () => harness.api.scheduledMessages.updateScheduledMessage('a', message: edited, scheduledAt: scheduledAt),
     ).thenAnswer((_) async => fakeUpdate(updated));
 
-    await harness.client.updateScheduledMessage(a, edited, scheduledAt: scheduledAt);
+    await harness.client.updateScheduledMessage(a.id, edited, scheduledAt: scheduledAt);
     await settle();
 
     expect(harness.client.state.scheduledMessages, [updated]);
@@ -107,7 +109,7 @@ void main() {
     final updates = <Event>[];
     final subscription = harness.client.on(EventType.scheduledMessageUpdated).listen(updates.add);
     addTearDown(subscription.cancel);
-    final request = harness.client.updateScheduledMessage(a, edited);
+    final request = harness.client.updateScheduledMessage(a.id, edited);
 
     await harness.client.disconnectUser();
     await harness.client.connectUser(testUser, testToken);
@@ -119,6 +121,7 @@ void main() {
   });
 
   test('updateScheduledMessage refuses an attachment that is not uploaded', () async {
+    await harness.hold([a]);
     final edited = Message(
       id: 'a',
       text: 'Good evening',
@@ -130,7 +133,7 @@ void main() {
       ],
     );
 
-    await expectLater(harness.client.updateScheduledMessage(a, edited), throwsA(isA<ArgumentError>()));
+    await expectLater(harness.client.updateScheduledMessage(a.id, edited), throwsA(isA<ArgumentError>()));
 
     verifyNever(
       () => harness.api.scheduledMessages.updateScheduledMessage(
@@ -147,7 +150,7 @@ void main() {
       () => harness.api.scheduledMessages.deleteScheduledMessage('a'),
     ).thenAnswer((_) async => fakeDelete(fakeScheduledMessage('a', status: ScheduledMessageStatus.canceled)));
 
-    await harness.client.deleteScheduledMessage(a);
+    await harness.client.deleteScheduledMessage(a.id);
     await settle();
 
     expect(harness.client.state.scheduledMessages, isEmpty);
@@ -164,7 +167,7 @@ void main() {
       () => harness.api.scheduledMessages.sendScheduledMessageNow('a'),
     ).thenAnswer((_) async => fakeSendNow(sending));
 
-    await harness.client.sendScheduledMessageNow(a);
+    await harness.client.sendScheduledMessageNow(a.id);
     await settle();
 
     final [listed] = harness.client.state.scheduledMessages;
@@ -178,28 +181,28 @@ void main() {
       (FakeChatApi api, StreamChatNetworkError error) => when(
         () => api.scheduledMessages.updateScheduledMessage('a', message: any(named: 'message')),
       ).thenAnswer((_) async => throw error),
-      (StreamChatClient client) => client.updateScheduledMessage(a, Message(id: 'a')),
+      (StreamChatClient client) => client.updateScheduledMessage(a.id, Message(id: 'a')),
     ),
     (
       'rescheduleMessage',
       (FakeChatApi api, StreamChatNetworkError error) => when(
         () => api.scheduledMessages.updateScheduledMessage('a', scheduledAt: any(named: 'scheduledAt')),
       ).thenAnswer((_) async => throw error),
-      (StreamChatClient client) => client.rescheduleMessage(a, scheduledAt: DateTime.utc(2026, 11, 3)),
+      (StreamChatClient client) => client.rescheduleMessage(a.id, scheduledAt: DateTime.utc(2026, 11, 3)),
     ),
     (
       'deleteScheduledMessage',
       (FakeChatApi api, StreamChatNetworkError error) => when(
         () => api.scheduledMessages.deleteScheduledMessage('a'),
       ).thenAnswer((_) async => throw error),
-      (StreamChatClient client) => client.deleteScheduledMessage(a),
+      (StreamChatClient client) => client.deleteScheduledMessage(a.id),
     ),
     (
       'sendScheduledMessageNow',
       (FakeChatApi api, StreamChatNetworkError error) => when(
         () => api.scheduledMessages.sendScheduledMessageNow('a'),
       ).thenAnswer((_) async => throw error),
-      (StreamChatClient client) => client.sendScheduledMessageNow(a),
+      (StreamChatClient client) => client.sendScheduledMessageNow(a.id),
     ),
   ];
 
@@ -242,7 +245,7 @@ void main() {
     final error = StreamChatNetworkError.raw(code: scheduledMessageSendingCode, message: 'Sending', statusCode: 409);
     when(() => harness.api.scheduledMessages.sendScheduledMessageNow('a')).thenAnswer((_) async => throw error);
 
-    await expectLater(harness.client.sendScheduledMessageNow(a), throwsA(error));
+    await expectLater(harness.client.sendScheduledMessageNow(a.id), throwsA(error));
     await settle();
 
     expect(idsOf(harness.client.state.scheduledMessages), ['a']);
@@ -253,7 +256,7 @@ void main() {
     final error = StreamChatNetworkError(ChatErrorCode.inputError, statusCode: 400);
     when(() => harness.api.scheduledMessages.sendScheduledMessageNow('a')).thenAnswer((_) async => throw error);
 
-    await expectLater(harness.client.sendScheduledMessageNow(a), throwsA(error));
+    await expectLater(harness.client.sendScheduledMessageNow(a.id), throwsA(error));
     await settle();
 
     expect(idsOf(harness.client.state.scheduledMessages), ['a']);

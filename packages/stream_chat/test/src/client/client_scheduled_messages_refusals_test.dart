@@ -119,7 +119,7 @@ void main() {
     await harness.hold([a]);
 
     await expectLater(
-      harness.client.updateScheduledMessage(a, a.message.copyWith(text: '/giphy cats')),
+      harness.client.updateScheduledMessage(a.id, a.message.copyWith(text: '/giphy cats')),
       throwsA(refusedFor(.slashCommand)),
     );
 
@@ -148,7 +148,7 @@ void main() {
     await harness.hold([a]);
     final edited = a.message.copyWith(quotedMessageId: 'quoted', quotedMessage: deleted);
 
-    await expectLater(harness.client.updateScheduledMessage(a, edited), throwsA(refusedFor(.quotedMessageDeleted)));
+    await expectLater(harness.client.updateScheduledMessage(a.id, edited), throwsA(refusedFor(.quotedMessageDeleted)));
 
     verifyNotUpdated();
   });
@@ -160,7 +160,7 @@ void main() {
     await harness.hold([quoting]);
 
     await expectLater(
-      harness.client.rescheduleMessage(quoting, scheduledAt: DateTime.utc(2026, 11, 3)),
+      harness.client.rescheduleMessage(quoting.id, scheduledAt: DateTime.utc(2026, 11, 3)),
       throwsA(refusedFor(.quotedMessageDeleted)),
     );
 
@@ -176,7 +176,7 @@ void main() {
       () => harness.api.scheduledMessages.updateScheduledMessage('a', scheduledAt: quoting.scheduledAt),
     ).thenAnswer((_) async => fakeUpdate(quoting));
 
-    await harness.client.rescheduleMessage(quoting, scheduledAt: quoting.scheduledAt);
+    await harness.client.rescheduleMessage(quoting.id, scheduledAt: quoting.scheduledAt);
 
     verify(
       () => harness.api.scheduledMessages.updateScheduledMessage('a', scheduledAt: quoting.scheduledAt),
@@ -190,10 +190,137 @@ void main() {
     await harness.hold([quoting]);
 
     await expectLater(
-      harness.client.sendScheduledMessageNow(quoting),
+      harness.client.sendScheduledMessageNow(quoting.id),
       throwsA(refusedFor(.quotedMessageDeleted)),
     );
 
     verifyNever(() => harness.api.scheduledMessages.sendScheduledMessageNow(any()));
+  });
+
+  test(
+    'rescheduleMessage refuses moving one that is a command in a channel that has commands, without a request',
+    () async {
+      loadChannel(commands: [giphy]);
+      final a = fakeScheduledMessage('a');
+      final command = a.copyWith(message: a.message.copyWith(text: '/giphy cats'));
+      await harness.hold([command]);
+
+      await expectLater(
+        harness.client.rescheduleMessage(command.id, scheduledAt: DateTime.utc(2026, 11, 3)),
+        throwsA(refusedFor(.slashCommand)),
+      );
+
+      verifyNotUpdated();
+    },
+  );
+
+  test("rescheduleMessage doesn't refuse keeping a command at its time", () async {
+    loadChannel(commands: [giphy]);
+    final a = fakeScheduledMessage('a');
+    final command = a.copyWith(message: a.message.copyWith(text: '/giphy cats'));
+    await harness.hold([command]);
+    when(
+      () => harness.api.scheduledMessages.updateScheduledMessage('a', scheduledAt: command.scheduledAt),
+    ).thenAnswer((_) async => fakeUpdate(command));
+
+    await harness.client.rescheduleMessage(command.id, scheduledAt: command.scheduledAt);
+
+    verify(
+      () => harness.api.scheduledMessages.updateScheduledMessage('a', scheduledAt: command.scheduledAt),
+    ).called(1);
+  });
+
+  group('a scheduled message that is not listed', () {
+    final missing = fakeScheduledMessage('missing');
+    final saved = fakeScheduledMessage('missing', text: 'Good evening', updatedAt: DateTime.utc(2026, 10, 30));
+
+    // The events [run] emits, and the list just before its request answers.
+    Future<(List<(String, ScheduledMessageStatus?)>, List<ScheduledMessage>)> requestWith(
+      Future<void> Function() run,
+      void Function(Future<void> Function() answered) stub,
+    ) async {
+      late List<ScheduledMessage> listedBeforeAnswer;
+      stub(() async => listedBeforeAnswer = harness.client.state.scheduledMessages);
+      final events = await harness.eventsDuring(run);
+      return (events, listedBeforeAnswer);
+    }
+
+    test('updateScheduledMessage makes the request, then lists the server copy', () async {
+      final edited = Message(id: 'missing', text: 'Good evening');
+      final (events, listedBeforeAnswer) = await requestWith(
+        () => harness.client.updateScheduledMessage(missing.id, edited),
+        (answered) =>
+            when(
+              () => harness.api.scheduledMessages.updateScheduledMessage('missing', message: edited),
+            ).thenAnswer((_) async {
+              await answered();
+              return fakeUpdate(saved);
+            }),
+      );
+
+      expect(listedBeforeAnswer, isEmpty);
+      expect(events, [(EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled)]);
+      expect(harness.client.state.scheduledMessages, [saved]);
+    });
+
+    test('rescheduleMessage makes the request, then lists the server copy', () async {
+      final later = DateTime.utc(2026, 11, 3, 9);
+      final moved = fakeScheduledMessage('missing', scheduledAt: later, updatedAt: DateTime.utc(2026, 10, 30));
+      final (events, listedBeforeAnswer) = await requestWith(
+        () => harness.client.rescheduleMessage(missing.id, scheduledAt: later),
+        (answered) =>
+            when(
+              () => harness.api.scheduledMessages.updateScheduledMessage('missing', scheduledAt: later),
+            ).thenAnswer((_) async {
+              await answered();
+              return fakeUpdate(moved);
+            }),
+      );
+
+      expect(listedBeforeAnswer, isEmpty);
+      expect(events, [(EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled)]);
+      expect(harness.client.state.scheduledMessages, [moved]);
+    });
+
+    test('sendScheduledMessageNow makes the request without changing the list', () async {
+      when(
+        () => harness.api.scheduledMessages.sendScheduledMessageNow('missing'),
+      ).thenAnswer((_) async => fakeSendNow(missing));
+
+      final events = await harness.eventsDuring(() => harness.client.sendScheduledMessageNow(missing.id));
+
+      expect(events, isEmpty);
+      expect(harness.client.state.scheduledMessages, isEmpty);
+      verify(() => harness.api.scheduledMessages.sendScheduledMessageNow('missing')).called(1);
+    });
+
+    test('resendScheduledMessage has nothing to resend, so it throws without a request', () async {
+      await expectLater(harness.client.resendScheduledMessage(missing.id), throwsStateError);
+
+      verifyNotScheduled();
+      verifyNotUpdated();
+    });
+
+    test('deleteScheduledMessage asks the server to delete it, without an event', () async {
+      final deleted = fakeDelete(missing);
+      when(() => harness.api.scheduledMessages.deleteScheduledMessage('missing')).thenAnswer((_) async => deleted);
+
+      late DeleteScheduledMessageResponse response;
+      final events = await harness.eventsDuring(() async {
+        response = await harness.client.deleteScheduledMessage(missing.id);
+      });
+
+      expect(response, same(deleted));
+      expect(events, isEmpty);
+      verify(() => harness.api.scheduledMessages.deleteScheduledMessage('missing')).called(1);
+    });
+
+    test('deleteScheduledMessage rethrows when the server no longer has it either', () async {
+      when(
+        () => harness.api.scheduledMessages.deleteScheduledMessage('missing'),
+      ).thenAnswer((_) async => throw missingError);
+
+      await expectLater(harness.client.deleteScheduledMessage(missing.id), throwsA(missingError));
+    });
   });
 }

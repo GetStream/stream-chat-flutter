@@ -229,7 +229,7 @@ class ScheduledMessageManager {
     }
   }
 
-  /// Makes the request of [scheduledMessage] again after it failed.
+  /// Makes the request of the scheduled message [id] again after it failed.
   ///
   /// One whose scheduling failed is scheduled again, keeping its ID so it is
   /// never scheduled twice. One whose edit failed is saved again with its
@@ -241,17 +241,20 @@ class ScheduledMessageManager {
   /// Throws a [StreamChatNetworkError] if the request fails, or an
   /// [ArgumentError] if an attachment of its message is not uploaded.
   ///
-  /// Throws a [StateError] if no user is connected when it is scheduled
-  /// again.
-  Future<ScheduledMessage?> retryMessage(ScheduledMessage scheduledMessage) async {
+  /// Throws a [StateError] if [id] isn't listed, as there is no failed request
+  /// to make again, or if no user is connected when it is scheduled again.
+  Future<ScheduledMessage?> resendMessage(String id) async {
+    final scheduledMessage = _listedScheduledMessage(id);
+    if (scheduledMessage == null) throw StateError('No scheduled message $id to resend.');
+
     assert(
       scheduledMessage.failureReason?.isRetriable ?? false,
-      'Only a scheduled message whose request failed can be retried.',
+      'Only a scheduled message whose request failed can be resent.',
     );
 
     if (scheduledMessage.failureReason == .updateFailed) {
       final response = await updateMessage(
-        scheduledMessage,
+        id,
         scheduledMessage.message,
         scheduledAt: scheduledMessage.scheduledAt,
       );
@@ -270,7 +273,7 @@ class ScheduledMessageManager {
     return response.scheduledMessage;
   }
 
-  /// Edits [scheduledMessage].
+  /// Edits the scheduled message [id].
   ///
   /// Its message is replaced with [message], and it is moved to [scheduledAt]
   /// if given. The edit is listed right away as
@@ -285,36 +288,37 @@ class ScheduledMessageManager {
   /// Throws a [ScheduledMessageRefusedError] without making the request when
   /// [message] is a command in a channel that has commands, or quotes a
   /// deleted message.
+  /// If it isn't listed, the request is made without these checks or changing
+  /// the list first, then lists the copy it answers with.
   ///
   /// Throws an [ArgumentError] if an attachment of [message] is not uploaded
   /// yet.
   Future<UpdateScheduledMessageResponse> updateMessage(
-    ScheduledMessage scheduledMessage,
+    String id,
     Message message, {
     DateTime? scheduledAt,
   }) async {
     if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
-      throw ArgumentError.value(
-        message,
-        'message',
-        'Attachments must be uploaded before updating',
-      );
+      throw ArgumentError.value(message, 'message', 'Attachments must be uploaded before updating');
     }
+
+    Future<UpdateScheduledMessageResponse> request() {
+      return _api.updateScheduledMessage(id, message: message, scheduledAt: scheduledAt);
+    }
+
+    final scheduledMessage = _listedScheduledMessage(id);
+    if (scheduledMessage == null) return _updateUnlisted(request);
 
     _refuseUnschedulable(scheduledMessage.cid, message);
 
     return _edit(
       scheduledMessage,
       scheduledMessage.copyWith(message: message, scheduledAt: scheduledAt),
-      () => _api.updateScheduledMessage(
-        scheduledMessage.id,
-        message: message,
-        scheduledAt: scheduledAt,
-      ),
+      request,
     );
   }
 
-  /// Moves [scheduledMessage] to [scheduledAt].
+  /// Moves the scheduled message [id] to [scheduledAt].
   ///
   /// Its message stays as it is. It is listed at its new time right away, as
   /// with [updateMessage].
@@ -325,24 +329,34 @@ class ScheduledMessageManager {
   /// listing it.
   ///
   /// Throws a [ScheduledMessageRefusedError] without making the request when
-  /// it is moved to another time but quotes a deleted message.
+  /// it is moved to another time but is a command in a channel that has
+  /// commands, or quotes a deleted message.
+  /// If it isn't listed, the request is made without these checks or changing
+  /// the list first, then lists the copy it answers with.
   Future<UpdateScheduledMessageResponse> rescheduleMessage(
-    ScheduledMessage scheduledMessage, {
+    String id, {
     required DateTime scheduledAt,
   }) async {
+    Future<UpdateScheduledMessageResponse> request() {
+      return _api.updateScheduledMessage(id, scheduledAt: scheduledAt);
+    }
+
+    final scheduledMessage = _listedScheduledMessage(id);
+    if (scheduledMessage == null) return _updateUnlisted(request);
+
     // A message kept at its time isn't checked again.
     if (!scheduledAt.isAtSameMomentAs(scheduledMessage.scheduledAt)) {
-      _refuseUnschedulable(scheduledMessage.cid, scheduledMessage.message, includeCommand: false);
+      _refuseUnschedulable(scheduledMessage.cid, scheduledMessage.message);
     }
 
     return _edit(
       scheduledMessage,
       scheduledMessage.copyWith(scheduledAt: scheduledAt),
-      () => _api.updateScheduledMessage(scheduledMessage.id, scheduledAt: scheduledAt),
+      request,
     );
   }
 
-  /// Sends [scheduledMessage] right away.
+  /// Sends the scheduled message [id] right away.
   ///
   /// It is listed as [ScheduledMessageStatus.sending] once the request
   /// succeeds, until it is sent.
@@ -353,11 +367,13 @@ class ScheduledMessageManager {
   /// listing it.
   ///
   /// Throws a [ScheduledMessageRefusedError] without making the request when
-  /// it quotes a deleted message, which would fail it once sent.
-  Future<SendScheduledMessageNowResponse> sendMessageNow(
-    ScheduledMessage scheduledMessage,
-  ) async {
-    _refuseUnschedulable(scheduledMessage.cid, scheduledMessage.message, includeCommand: false);
+  /// it quotes a deleted message, which would fail it once sent. If it isn't
+  /// listed, the request is made without these checks or changing the list.
+  Future<SendScheduledMessageNowResponse> sendMessageNow(String id) async {
+    final scheduledMessage = _listedScheduledMessage(id);
+    if (scheduledMessage == null) return _api.sendScheduledMessageNow(id);
+
+    _refuseDeletedQuote(scheduledMessage.cid, scheduledMessage.message);
 
     final generation = _generation;
     final response = await _request(
@@ -367,32 +383,31 @@ class ScheduledMessageManager {
     );
 
     // Its sent event can arrive first, which stops listing it.
-    final isListed = state.scheduledMessages.any((it) => it.id == scheduledMessage.id);
+    final isListed = _listedScheduledMessage(id) != null;
     if (isListed) {
-      final sending = response.scheduledMessage.copyWith(
-        status: .sending,
-        localUpdatedAt: clock.now(),
-      );
+      final sending = response.scheduledMessage.copyWith(status: .sending, localUpdatedAt: clock.now());
       _emitEvent(EventType.scheduledMessageUpdated, sending, generation);
     }
 
     return response;
   }
 
-  /// Deletes [scheduledMessage].
+  /// Deletes the scheduled message [id].
   ///
-  /// It stops being listed right away, and is listed again if the request
-  /// fails, unless it is already gone. One whose scheduling failed is deleted
-  /// even if scheduling it never went through.
+  /// A listed one stops being listed right away, and is listed again if the
+  /// request fails, unless it is already gone. One whose scheduling failed is
+  /// deleted even if scheduling it never went through. One not listed is
+  /// deleted without changing the list.
   ///
   /// The returned scheduled message has the status it had when it was
   /// deleted.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails. Deleting one
   /// already gone throws too, unless its own scheduling had failed.
-  Future<DeleteScheduledMessageResponse> deleteMessage(
-    ScheduledMessage scheduledMessage,
-  ) async {
+  Future<DeleteScheduledMessageResponse> deleteMessage(String id) async {
+    final scheduledMessage = _listedScheduledMessage(id);
+    if (scheduledMessage == null) return _api.deleteScheduledMessage(id);
+
     final generation = _generation;
     if (scheduledMessage.failureReason == .requestFailed) {
       try {
@@ -529,16 +544,40 @@ class ScheduledMessageManager {
     }
   }
 
+  // The scheduled message with [id] in the client's list, if it is listed.
+  ScheduledMessage? _listedScheduledMessage(String id) {
+    return state.scheduledMessages.where((it) => it.id == id).firstOrNull;
+  }
+
+  // Makes [request] to change a scheduled message that isn't listed, so
+  // nothing is listed before it, then lists the copy it answers with.
+  Future<UpdateScheduledMessageResponse> _updateUnlisted(
+    Future<UpdateScheduledMessageResponse> Function() request,
+  ) async {
+    final generation = _generation;
+    final response = await request();
+    _emitEvent(EventType.scheduledMessageUpdated, response.scheduledMessage, generation);
+    return response;
+  }
+
   // Refuses [message] in the channel [cid] when it can't be scheduled: when
-  // it quotes a deleted message, or, unless [includeCommand] is false, when
-  // it is a command.
-  void _refuseUnschedulable(String cid, Message message, {bool includeCommand = true}) {
+  // it quotes a deleted message, or when it is a command.
+  void _refuseUnschedulable(String cid, Message message) {
+    _refuseDeletedQuote(cid, message);
+
+    final channel = _client.state.channels[cid];
+    if (ScheduledMessageRules.isCommand(message, channel)) {
+      throw const ScheduledMessageRefusedError(.slashCommand, "Commands can't be scheduled");
+    }
+  }
+
+  // Refuses [message] in the channel [cid] when it quotes a deleted message.
+  // Sending now checks only this: the API doesn't check the rest of the
+  // content again, but a deleted quote would fail it once sent.
+  void _refuseDeletedQuote(String cid, Message message) {
     final channel = _client.state.channels[cid];
     if (ScheduledMessageRules.quotesDeletedMessage(message, channel)) {
       throw const ScheduledMessageRefusedError(.quotedMessageDeleted, "Can't quote a deleted message");
-    }
-    if (includeCommand && ScheduledMessageRules.isCommand(message, channel)) {
-      throw const ScheduledMessageRefusedError(.slashCommand, "Commands can't be scheduled");
     }
   }
 

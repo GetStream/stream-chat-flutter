@@ -27,7 +27,7 @@ void main() {
 
   Future<List<(String, ScheduledMessageStatus?)>> update() async {
     await harness.hold([original]);
-    return harness.eventsDuring(() => harness.client.updateScheduledMessage(original, edited));
+    return harness.eventsDuring(() => harness.client.updateScheduledMessage(original.id, edited));
   }
 
   // Edits [original] while the server can't be reached.
@@ -52,7 +52,7 @@ void main() {
     stubUpdate(() => answer.future);
     await harness.hold([original]);
 
-    harness.client.updateScheduledMessage(original, edited).ignore();
+    harness.client.updateScheduledMessage(original.id, edited).ignore();
     await settle();
 
     final [updating] = harness.client.state.scheduledMessages;
@@ -101,11 +101,11 @@ void main() {
   });
 
   group('with a failed edit', () {
-    test('retryScheduledMessage saves a failed edit again, with its message and time', () async {
+    test('resendScheduledMessage saves a failed edit again, with its message and time', () async {
       final failed = await editUnreachable();
       stubUpdate(() async => fakeUpdate(saved), scheduledAt: original.scheduledAt);
 
-      final scheduled = await harness.client.retryScheduledMessage(failed);
+      final scheduled = await harness.client.resendScheduledMessage(failed.id);
       await settle();
 
       expect(scheduled, saved);
@@ -126,7 +126,7 @@ void main() {
         () => harness.api.scheduledMessages.deleteScheduledMessage('a'),
       ).thenAnswer((_) async => fakeDelete(original));
 
-      await harness.client.deleteScheduledMessage(failed);
+      await harness.client.deleteScheduledMessage(failed.id);
       await settle();
 
       verify(() => harness.api.scheduledMessages.deleteScheduledMessage('a')).called(1);
@@ -137,7 +137,7 @@ void main() {
       final failed = await editUnreachable();
       when(() => harness.api.scheduledMessages.deleteScheduledMessage('a')).thenAnswer((_) async => throw missingError);
 
-      await expectLater(harness.client.deleteScheduledMessage(failed), throwsA(missingError));
+      await expectLater(harness.client.deleteScheduledMessage(failed.id), throwsA(missingError));
     });
 
     test('a complete load keeps a failed edit over the copy the server had', () async {
@@ -172,7 +172,7 @@ void main() {
     final answer = Completer<UpdateScheduledMessageResponse>();
     stubUpdate(() => answer.future);
     await harness.hold([original]);
-    harness.client.updateScheduledMessage(original, edited).ignore();
+    harness.client.updateScheduledMessage(original.id, edited).ignore();
     await settle();
 
     await harness.receive(EventType.scheduledMessageUpdated, original);
@@ -206,7 +206,7 @@ void main() {
     final subscription = harness.client.on(EventType.scheduledMessageUpdated).listen(events.add);
     addTearDown(subscription.cancel);
 
-    harness.client.updateScheduledMessage(original, edited).ignore();
+    harness.client.updateScheduledMessage(original.id, edited).ignore();
     await settle();
 
     expect(events.single.user, harness.client.state.currentUser);
@@ -215,12 +215,12 @@ void main() {
   test("updateScheduledMessage doesn't overwrite the current user with the message's older copy of them", () async {
     final answer = Completer<UpdateScheduledMessageResponse>();
     stubUpdate(() => answer.future);
-    await harness.hold([original]);
     final stale = original.copyWith(
       user: User(id: testUser.id, name: 'Old name'),
     );
+    await harness.hold([stale]);
 
-    harness.client.updateScheduledMessage(stale, edited).ignore();
+    harness.client.updateScheduledMessage(stale.id, edited).ignore();
     await settle();
 
     final currentUser = harness.client.state.currentUser!;
@@ -231,7 +231,7 @@ void main() {
     final answer = Completer<UpdateScheduledMessageResponse>();
     stubUpdate(() => answer.future);
     await harness.hold([original]);
-    harness.client.updateScheduledMessage(original, edited).ignore();
+    harness.client.updateScheduledMessage(original.id, edited).ignore();
     await settle();
     harness.stubQuery(fakePage(const []));
 

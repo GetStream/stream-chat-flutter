@@ -22,7 +22,7 @@ void main() {
 
   Future<List<(String, ScheduledMessageStatus?)>> sendNow() async {
     await harness.hold([original]);
-    return harness.eventsDuring(() => harness.client.sendScheduledMessageNow(original));
+    return harness.eventsDuring(() => harness.client.sendScheduledMessageNow(original.id));
   }
 
   test('sendScheduledMessageNow lists it as sending once the server accepts', () async {
@@ -41,7 +41,7 @@ void main() {
       return fakeSendNow(accepted);
     });
 
-    await harness.client.sendScheduledMessageNow(original);
+    await harness.client.sendScheduledMessageNow(original.id);
     await settle();
 
     expect(harness.client.state.scheduledMessages, isEmpty);

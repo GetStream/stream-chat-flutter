@@ -23,7 +23,7 @@ void main() {
 
   Future<List<(String, ScheduledMessageStatus?)>> delete() async {
     await harness.hold([original]);
-    return harness.eventsDuring(() => harness.client.deleteScheduledMessage(original));
+    return harness.eventsDuring(() => harness.client.deleteScheduledMessage(original.id));
   }
 
   test('deleteScheduledMessage stops listing it right away', () async {
@@ -31,7 +31,7 @@ void main() {
     stubDelete(() => answer.future);
     await harness.hold([original]);
 
-    harness.client.deleteScheduledMessage(original).ignore();
+    harness.client.deleteScheduledMessage(original.id).ignore();
     await settle();
 
     expect(harness.client.state.scheduledMessages, isEmpty);
@@ -81,7 +81,7 @@ void main() {
     stubDelete(() async => throw missingError);
     await harness.hold([original]);
 
-    await expectLater(harness.client.deleteScheduledMessage(original), throwsA(missingError));
+    await expectLater(harness.client.deleteScheduledMessage(original.id), throwsA(missingError));
     await settle();
 
     expect(harness.client.state.scheduledMessages, isEmpty);

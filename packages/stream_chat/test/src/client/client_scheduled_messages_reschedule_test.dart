@@ -25,7 +25,7 @@ void main() {
 
   Future<List<(String, ScheduledMessageStatus?)>> reschedule() async {
     await harness.hold([original]);
-    return harness.eventsDuring(() => harness.client.rescheduleMessage(original, scheduledAt: later));
+    return harness.eventsDuring(() => harness.client.rescheduleMessage(original.id, scheduledAt: later));
   }
 
   test('rescheduleMessage reports it at its new time as updating, then the saved copy', () async {
@@ -86,7 +86,7 @@ void main() {
     ).thenAnswer((_) async => fakeUpdate(original));
     await harness.hold([original]);
 
-    await harness.client.rescheduleMessage(original, scheduledAt: original.scheduledAt);
+    await harness.client.rescheduleMessage(original.id, scheduledAt: original.scheduledAt);
     await settle();
 
     expect(harness.client.state.scheduledMessages.single.status, ScheduledMessageStatus.scheduled);
