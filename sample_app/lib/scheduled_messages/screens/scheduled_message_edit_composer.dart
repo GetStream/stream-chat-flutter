@@ -10,7 +10,11 @@ import '../scheduled_messages_utils.dart';
 /// ✓ saves it at its time, or schedules a failed one again at a time picked in
 /// a sheet. [onClose] is called once the edit is done or canceled.
 class ScheduledMessageEditComposer extends StatefulWidget {
-  const ScheduledMessageEditComposer({super.key, required this.scheduledMessage, required this.onClose});
+  const ScheduledMessageEditComposer({
+    super.key,
+    required this.scheduledMessage,
+    required this.onClose,
+  });
 
   /// The scheduled message being edited.
   final ScheduledMessage scheduledMessage;
@@ -93,21 +97,13 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
     if (scheduledAt == null || !mounted) return;
 
     widget.onClose();
-    final message = Message(
-      text: edited.text,
+    // A new message, with a new ID, that keeps the failed one's content. A failed
+    // message can't be changed, only deleted, which happens once this is scheduled.
+    final message = edited.copyWith(
+      id: const Uuid().v4(),
       attachments: [...edited.attachments.where((it) => it.uploadState.isSuccess)],
-      mentionedUsers: edited.mentionedUsers,
-      mentionedChannel: edited.mentionedChannel,
-      mentionedHere: edited.mentionedHere,
-      mentionedRoles: edited.mentionedRoles,
-      mentionedGroupIds: edited.mentionedGroupIds,
+      quotedMessage: quotesDeletedMessage ? null : edited.quotedMessage,
       quotedMessageId: quotesDeletedMessage ? null : edited.quotedMessageId,
-      parentId: edited.parentId,
-      showInChannel: edited.showInChannel,
-      silent: edited.silent,
-      pollId: edited.pollId,
-      restrictedVisibility: edited.restrictedVisibility,
-      extraData: edited.extraData,
     );
 
     try {

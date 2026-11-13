@@ -87,7 +87,10 @@ class _ScheduledMessagesPageState extends State<ScheduledMessagesPage> {
               (:final scheduledMessage, :final channel) => StreamChannel(
                 key: ValueKey(scheduledMessage.id),
                 channel: channel,
-                child: ScheduledMessageEditComposer(scheduledMessage: scheduledMessage, onClose: _closeEdit),
+                child: ScheduledMessageEditComposer(
+                  scheduledMessage: scheduledMessage,
+                  onClose: _closeEdit,
+                ),
               ),
               null => const SizedBox.shrink(),
             },
