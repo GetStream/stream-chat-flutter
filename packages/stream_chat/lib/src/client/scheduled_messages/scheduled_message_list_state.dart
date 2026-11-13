@@ -164,21 +164,12 @@ class ScheduledMessageListStateNotifier {
     return isLocalChange ? original : updated;
   }
 
-  // [listed] with [incoming] merged in by ID, keeping the newer of two. On a
-  // tie, an edit made on this device is kept.
+  // [listed] with [incoming] merged in by ID, keeping the newer of two.
   static Iterable<ScheduledMessage> _merged(
     Iterable<ScheduledMessage> listed,
     Iterable<ScheduledMessage> incoming,
   ) {
-    return listed.merge(
-      incoming,
-      key: (it) => it.id,
-      update: (original, updated) {
-        final isNewer = updated.updatedAt.isAfter(original.updatedAt);
-        if (original.isLocalEdit && !isNewer) return original;
-        return _newer(original, updated);
-      },
-    );
+    return listed.merge(incoming, key: (it) => it.id, update: _newer);
   }
 
   static List<ScheduledMessage> _sorted(

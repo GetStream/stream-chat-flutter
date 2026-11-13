@@ -360,31 +360,23 @@ class ScheduledMessageManager {
     _refuseUnschedulable(scheduledMessage.cid, scheduledMessage.message, includeCommand: false);
 
     final generation = _generation;
-    try {
-      final response = await _request(
-        scheduledMessage,
-        generation,
-        () => _api.sendScheduledMessageNow(scheduledMessage.id),
+    final response = await _request(
+      scheduledMessage,
+      generation,
+      () => _api.sendScheduledMessageNow(scheduledMessage.id),
+    );
+
+    // Its sent event can arrive first, which stops listing it.
+    final isListed = state.scheduledMessages.any((it) => it.id == scheduledMessage.id);
+    if (isListed) {
+      final sending = response.scheduledMessage.copyWith(
+        status: .sending,
+        localUpdatedAt: clock.now(),
       );
-
-      // Its sent event can arrive first, which stops listing it.
-      final isListed = state.scheduledMessages.any((it) => it.id == scheduledMessage.id);
-      if (isListed) {
-        final sending = response.scheduledMessage.copyWith(
-          status: .sending,
-          localUpdatedAt: clock.now(),
-        );
-        _emitEvent(EventType.scheduledMessageUpdated, sending, generation);
-      }
-
-      return response;
-    } catch (error) {
-      if (_isRefusedAsSending(error)) {
-        _emitEvent(EventType.scheduledMessageUpdated, _sending(scheduledMessage), generation);
-      }
-
-      rethrow;
+      _emitEvent(EventType.scheduledMessageUpdated, sending, generation);
     }
+
+    return response;
   }
 
   /// Deletes [scheduledMessage].
@@ -418,21 +410,12 @@ class ScheduledMessageManager {
 
     _emitEvent(EventType.scheduledMessageDeleted, _canceled(scheduledMessage), generation);
 
-    try {
-      return await _request(
-        scheduledMessage,
-        generation,
-        () => _api.deleteScheduledMessage(scheduledMessage.id),
-      );
-    } catch (error) {
-      if (error case StreamChatNetworkError(isScheduledMessageNotFound: true)) rethrow;
-
-      final isSending = _isRefusedAsSending(error);
-      final relisted = isSending ? _sending(scheduledMessage) : scheduledMessage;
-
-      _emitEvent(EventType.scheduledMessageUpdated, relisted, generation);
-      rethrow;
-    }
+    return _request(
+      scheduledMessage,
+      generation,
+      () => _api.deleteScheduledMessage(scheduledMessage.id),
+      relistOnFailure: scheduledMessage,
+    );
   }
 
   /// Replaces the scheduled messages of each channel in [channelStates] with
@@ -500,46 +483,46 @@ class ScheduledMessageManager {
 
     _emitEvent(EventType.scheduledMessageUpdated, updating, generation);
 
-    try {
-      final response = await _request(scheduledMessage, generation, request);
+    final failed = updating.copyWith(
+      status: .failed,
+      failureReason: ScheduledMessageFailureReason.updateFailed,
+    );
 
-      // The API answers a move to the same time with the version it already had.
-      // Mark it as changed here, so it still replaces the copy being saved.
-      final saved = response.scheduledMessage;
-      final isSameVersion = saved.remoteUpdatedAt == scheduledMessage.remoteUpdatedAt;
-      final listed = isSameVersion ? saved.copyWith(localUpdatedAt: clock.now()) : saved;
-      _emitEvent(EventType.scheduledMessageUpdated, listed, generation);
-      return response;
-    } catch (error) {
-      // Already reported deleted.
-      if (error case StreamChatNetworkError(isScheduledMessageNotFound: true)) rethrow;
+    final response = await _request(
+      scheduledMessage,
+      generation,
+      request,
+      relistOnFailure: failed,
+    );
 
-      final failed = updating.copyWith(
-        status: .failed,
-        failureReason: ScheduledMessageFailureReason.updateFailed,
-        localUpdatedAt: clock.now(),
-      );
-
-      final isSending = _isRefusedAsSending(error);
-      final listed = isSending ? _sending(scheduledMessage) : failed;
-
-      _emitEvent(EventType.scheduledMessageUpdated, listed, generation);
-      rethrow;
-    }
+    // The API answers a move to the same time with the version it already had.
+    // Mark it as changed here, so it still replaces the copy being saved.
+    final saved = response.scheduledMessage;
+    final isSameVersion = saved.remoteUpdatedAt == scheduledMessage.remoteUpdatedAt;
+    final listed = isSameVersion ? saved.copyWith(localUpdatedAt: clock.now()) : saved;
+    _emitEvent(EventType.scheduledMessageUpdated, listed, generation);
+    return response;
   }
 
-  // Runs [request] on [scheduledMessage]. One the request finds gone is
-  // reported deleted: its own event may have been missed.
+  // Runs [request] on [scheduledMessage]. If it fails, one the request finds
+  // gone is reported deleted, as its own event may have been missed; one
+  // being sent is listed as sending; any other lists [relistOnFailure], if
+  // given.
   Future<T> _request<T>(
     ScheduledMessage scheduledMessage,
     int generation,
-    Future<T> Function() request,
-  ) async {
+    Future<T> Function() request, {
+    ScheduledMessage? relistOnFailure,
+  }) async {
     try {
       return await request();
-    } on StreamChatNetworkError catch (error) {
-      if (error.isScheduledMessageNotFound) {
+    } catch (error) {
+      if (error case StreamChatNetworkError(isScheduledMessageNotFound: true)) {
         _emitEvent(EventType.scheduledMessageDeleted, _canceled(scheduledMessage), generation);
+      } else if (_isRefusedAsSending(error)) {
+        _emitEvent(EventType.scheduledMessageUpdated, _sending(scheduledMessage), generation);
+      } else if (relistOnFailure != null) {
+        _emitEvent(EventType.scheduledMessageUpdated, relistOnFailure, generation);
       }
 
       rethrow;
