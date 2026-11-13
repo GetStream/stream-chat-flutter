@@ -184,7 +184,7 @@ void main() {
         initialScheduledAt: DateTime(2026, 10, 23, 9),
       );
 
-      await tester.tap(confirmButton(), warnIfMissed: false);
+      await tester.tap(confirmButton());
       await tester.pumpAndSettle();
 
       expect(results, [DateTime(2026, 10, 23, 9)]);
@@ -252,7 +252,7 @@ void main() {
         initialScheduledAt: DateTime(2026, 10, 23, 9),
       );
 
-      await tester.tap(confirmButton(), warnIfMissed: false);
+      await tester.tap(confirmButton());
       await tester.pumpAndSettle();
 
       expect(results, [DateTime(2026, 10, 23, 9)]);

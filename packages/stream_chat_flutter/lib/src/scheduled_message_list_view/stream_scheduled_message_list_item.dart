@@ -382,7 +382,7 @@ class _ScheduledMessageStatusLine extends core.NullableStatelessWidget {
       );
     }
 
-    // An edit being saved shows as it was until it is saved.
+    // An edit in flight keeps showing the scheduled message.
     final isBeingScheduled = status == .preparingToSchedule && scheduledMessage.remoteCreatedAt == null;
     if (!isBeingScheduled && status != .sending) return null;
 

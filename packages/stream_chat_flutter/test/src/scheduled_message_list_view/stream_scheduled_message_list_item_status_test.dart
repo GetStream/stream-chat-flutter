@@ -41,6 +41,15 @@ void main() {
     expect(find.text('Sending…'), findsOneWidget);
   });
 
+  testWidgets('StreamScheduledMessageListItem says it is sending while a new message is scheduled', (tester) async {
+    final scheduling = fakeScheduledMessage(status: ScheduledMessageStatus.preparingToSchedule);
+
+    await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: scheduling)));
+
+    expect(find.byType(StreamLoadingSpinner), findsOneWidget);
+    expect(find.text('Sending…'), findsOneWidget);
+  });
+
   testWidgets('StreamScheduledMessageListItem says it is uploading while its attachments upload', (tester) async {
     await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: uploading())));
 

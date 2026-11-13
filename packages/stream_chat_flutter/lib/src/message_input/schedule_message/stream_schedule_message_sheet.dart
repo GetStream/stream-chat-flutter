@@ -80,7 +80,8 @@ class _ScheduleMessageSheet extends StatelessWidget {
                   for (final preset in presets)
                     _ScheduleOptionRow(
                       label: Text(_presetLabel(translations, preset)),
-                      // A preset the channel doesn't allow is shown, but can't be picked.
+                      // Shown, but can't be picked, when the channel doesn't
+                      // allow it.
                       enabled: !isLimitReached && bounds.contains(preset),
                       onTap: () => Navigator.of(context).pop(preset),
                     ),

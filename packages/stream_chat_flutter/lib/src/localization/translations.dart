@@ -838,8 +838,8 @@ abstract class Translations {
   /// The [scheduledAt] is shown in local time.
   String scheduledMessageScheduledForText({required DateTime scheduledAt});
 
-  /// The status of a scheduled message while it is being sent, such as
-  /// "Sending…".
+  /// The status of a scheduled message while it is being scheduled or sent,
+  /// such as "Sending…".
   String get scheduledMessageSendingLabel;
 
   /// The status of a scheduled message while its attachments upload, such as

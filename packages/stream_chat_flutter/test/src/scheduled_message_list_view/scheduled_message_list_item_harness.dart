@@ -4,6 +4,7 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../mocks.dart';
 
+// A scheduled message; with [createdAt], one already on the server.
 ScheduledMessage fakeScheduledMessage({
   String text = 'Can you review the venue shortlist?',
   ScheduledMessageStatus status = ScheduledMessageStatus.scheduled,
