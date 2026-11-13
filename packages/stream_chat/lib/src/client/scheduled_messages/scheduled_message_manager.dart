@@ -164,11 +164,7 @@ class ScheduledMessageManager {
     if (user == null) throw StateError('Connect a user before scheduling messages.');
 
     if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
-      throw ArgumentError.value(
-        message,
-        'message',
-        'Attachments must be uploaded before scheduling',
-      );
+      throw ArgumentError.value(message, 'message', 'Attachments must be uploaded before scheduling');
     }
 
     _refuseUnschedulable('$channelType:$channelId', message);
