@@ -84,7 +84,6 @@ class _ScheduledMessagesPageState extends State<ScheduledMessagesPage> {
                 parentId: widget.parentId,
                 physics: const AlwaysScrollableScrollPhysics(),
                 onScheduledMessageTap: (it) => _openScheduledMessageActions(context, it, _startEdit),
-                emptyBuilder: (context) => const _NoScheduledMessages(),
               ),
             ),
           ),
@@ -99,37 +98,6 @@ class _ScheduledMessagesPageState extends State<ScheduledMessagesPage> {
                 : const SizedBox.shrink(),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// The empty list, with a hint on how to schedule a message.
-class _NoScheduledMessages extends StatelessWidget {
-  const _NoScheduledMessages();
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = context.streamTextTheme;
-    final colorScheme = context.streamColorScheme;
-
-    return Center(
-      child: StreamScrollViewEmptyWidget(
-        emptyIcon: Icon(context.streamIcons.clock),
-        emptyTitle: Column(
-          mainAxisSize: .min,
-          children: [
-            Text(
-              context.translations.noScheduledMessagesText,
-              style: textTheme.bodyEmphasis.copyWith(color: colorScheme.textPrimary),
-            ),
-            Text(
-              ScheduledMessagesStrings.emptyDescription,
-              textAlign: .center,
-              style: textTheme.bodyDefault.copyWith(color: colorScheme.textSecondary),
-            ),
-          ],
-        ),
       ),
     );
   }
