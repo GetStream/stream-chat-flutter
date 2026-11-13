@@ -198,7 +198,7 @@ void main() {
     expect(harness.client.state.scheduledMessages, [saved]);
   });
 
-  test('updateScheduledMessage reports its local events with the scheduled message owner', () async {
+  test('updateScheduledMessage reports its local events with the current user', () async {
     final answer = Completer<UpdateScheduledMessageResponse>();
     stubUpdate(() => answer.future);
     await harness.hold([original]);
@@ -209,6 +209,21 @@ void main() {
     harness.client.updateScheduledMessage(original, edited).ignore();
     await settle();
 
-    expect(events.single.user, original.user);
+    expect(events.single.user, harness.client.state.currentUser);
+  });
+
+  test("updateScheduledMessage doesn't overwrite the current user with the message's older copy of them", () async {
+    final answer = Completer<UpdateScheduledMessageResponse>();
+    stubUpdate(() => answer.future);
+    await harness.hold([original]);
+    final stale = original.copyWith(
+      user: User(id: testUser.id, name: 'Old name'),
+    );
+
+    harness.client.updateScheduledMessage(stale, edited).ignore();
+    await settle();
+
+    final currentUser = harness.client.state.currentUser!;
+    expect(harness.client.state.users[currentUser.id]?.name, currentUser.name);
   });
 }

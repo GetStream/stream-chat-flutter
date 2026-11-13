@@ -610,7 +610,9 @@ class ScheduledMessageManager {
     final event = Event(
       type: type,
       cid: scheduledMessage.cid,
-      user: scheduledMessage.user,
+      // The owner is the current user, whose latest data a replayed copy
+      // could otherwise overwrite.
+      user: _client.state.currentUser,
       messageId: messageId,
       scheduledMessage: scheduledMessage,
     );
