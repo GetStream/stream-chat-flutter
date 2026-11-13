@@ -507,8 +507,8 @@ class ScheduledMessageManager {
     try {
       final response = await _request(scheduledMessage, generation, request);
 
-      // A move to the same time answers with the version it had, which must
-      // still replace the copy being saved.
+      // The API answers a move to the same time with the version it already had.
+      // Mark it as changed here, so it still replaces the copy being saved.
       final saved = response.scheduledMessage;
       final isSameVersion = saved.remoteUpdatedAt == scheduledMessage.remoteUpdatedAt;
       final listed = isSameVersion ? saved.copyWith(localUpdatedAt: clock.now()) : saved;
