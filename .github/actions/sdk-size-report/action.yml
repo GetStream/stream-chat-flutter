@@ -1,0 +1,38 @@
+name: SDK Size Report
+description: "Downloads the sdk_size results and reports them with the fastlane `sdk_size` lane in metrics/sdk_size."
+
+inputs:
+  ssh-private-key:
+    description: "SSH key with access to GetStream/stream-internal-metrics."
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - name: 📥 Download results
+      uses: actions/download-artifact@v8
+      with:
+        pattern: sdk-size-results-*
+        path: build/sdk_size/results
+        merge-multiple: true
+
+    - name: 🔑 Connect Bot
+      uses: webfactory/ssh-agent@v0.10.0
+      with:
+        ssh-private-key: ${{ inputs.ssh-private-key }}
+
+    - name: 💎 Set up Ruby
+      uses: ./.github/actions/setup-ruby
+      with:
+        working-directory: metrics/sdk_size
+
+    - name: 🔧 Configure Git
+      shell: bash
+      run: |
+        git config --global user.name "Stream Bot"
+        git config --global user.email "ci@getstream.io"
+
+    - name: 📏 Report sizes
+      shell: bash
+      working-directory: metrics/sdk_size
+      run: bundle exec fastlane sdk_size

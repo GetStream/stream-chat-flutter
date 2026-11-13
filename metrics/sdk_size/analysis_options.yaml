@@ -1,0 +1,7 @@
+include: ../../analysis_options.yaml
+
+analyzer:
+  errors:
+    # A variant's dependencies live in dependencies.yaml; measure.dart writes
+    # them into the generated app's pubspec.
+    depend_on_referenced_packages: ignore

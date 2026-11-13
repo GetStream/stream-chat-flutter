@@ -1,0 +1,164 @@
+name: sdk_size
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+      - ready_for_review
+    paths:
+      - "packages/**"
+      - "metrics/sdk_size/**"
+      - "melos.yaml"
+      - ".github/workflows/sdk_size.yml"
+      - ".github/actions/sdk-size-report/**"
+  push:
+    branches:
+      - master
+      - v11
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  # A push stores the benchmark, so it always runs to the end.
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  measure-android:
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-flutter
+
+      - uses: ./.github/actions/install-android-ndk
+
+      - name: Measure app size
+        run: dart run metrics/sdk_size/tool/measure.dart --platform android
+
+      # Release branches depend on package versions that aren't on pub.dev yet,
+      # so the packages resolve each other from their paths.
+      - name: Bootstrap Workspace
+        run: |
+          flutter pub global activate melos
+          melos bootstrap
+
+      - name: Measure pub archives
+        run: dart run metrics/sdk_size/tool/measure.dart --platform pub
+
+      - name: Upload results
+        uses: actions/upload-artifact@v7
+        with:
+          name: sdk-size-results-android
+          path: build/sdk_size/results/*.json
+
+      - name: Upload size analysis
+        uses: actions/upload-artifact@v7
+        with:
+          name: sdk-size-analysis-android
+          path: build/sdk_size/results/analysis/
+          retention-days: 90
+
+  # Pull requests don't measure iOS, except release pull requests. Pushes do,
+  # for the benchmark.
+  measure-ios:
+    if: >-
+      github.event_name != 'pull_request'
+      || (startsWith(github.head_ref, 'release/') && github.event.pull_request.draft == false)
+    timeout-minutes: 60
+    # Pinned, so a runner image update doesn't change the iOS numbers.
+    runs-on: macos-26
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-xcode
+        with:
+          xcode-version: "26.6"
+
+      - uses: ./.github/actions/setup-flutter
+
+      - name: Measure app size
+        run: dart run metrics/sdk_size/tool/measure.dart --platform ios
+
+      - name: Upload results
+        uses: actions/upload-artifact@v7
+        with:
+          name: sdk-size-results-ios
+          path: build/sdk_size/results/*.json
+
+      - name: Upload size analysis
+        uses: actions/upload-artifact@v7
+        with:
+          name: sdk-size-analysis-ios
+          path: build/sdk_size/results/analysis/
+          retention-days: 90
+
+  # Reports a pull request from this repository, without iOS. Release pull
+  # requests go through `report` instead.
+  report-android:
+    needs: measure-android
+    if: >-
+      github.event_name == 'pull_request'
+      && github.event.pull_request.head.repo.full_name == github.repository
+      && !startsWith(github.head_ref, 'release/')
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
+      BASE_BRANCH: ${{ github.base_ref || github.ref_name }}
+      GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+      # On a pull request, github.sha is the merge commit, not the pushed one.
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+      SKIPPED_PLATFORMS: ios
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - name: Report sizes
+        uses: ./.github/actions/sdk-size-report
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+
+  # Reports every platform: a push stores it as the benchmark, a release pull
+  # request as the `release` benchmark.
+  report:
+    needs: [measure-android, measure-ios]
+    if: >-
+      !cancelled()
+      && needs.measure-android.result == 'success'
+      && needs.measure-ios.result == 'success'
+      && (github.event_name != 'pull_request'
+        || (github.event.pull_request.head.repo.full_name == github.repository
+          && startsWith(github.head_ref, 'release/')))
+    timeout-minutes: 15
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
+      BASE_BRANCH: ${{ github.base_ref || github.ref_name }}
+      GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
+      # On a pull request, github.sha is the merge commit, not the pushed one.
+      HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Git Checkout
+        uses: actions/checkout@v7
+
+      - name: Report sizes
+        uses: ./.github/actions/sdk-size-report
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}

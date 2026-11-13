@@ -149,3 +149,5 @@ gradle-wrapper.jar
 !/sample_app/web/sql-wasm.js
 !/sample_app/web/sql-wasm.wasm
 !/sample_app/android/app/google-services.json
+# SDK size: the stream-internal-metrics clone the fastlane lanes make
+metrics/sdk_size/metrics/

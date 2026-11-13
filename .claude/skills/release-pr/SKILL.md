@@ -2,7 +2,7 @@
 name: release-pr
 description: >
   Open a release PR: bumps versions in melos.yaml and pubspecs, finalises CHANGELOGs, opens a PR with auto-generated
-  release notes against master (stable) or v10.0.0 (beta).
+  release notes against master (stable) or v10.0.0 (beta). Updates the SDK size badges for stable releases.
 disable-model-invocation: true
 argument-hint: "[version]"
 arguments: [version]
@@ -59,6 +59,8 @@ Run these checks. **If any fail, stop the skill, surface the failing check to th
 - `gh pr list --head release/v<version> --state all --json number` returns `[]`.
 - Latest CI on the base-branch tip is green: `gh run list --branch <base> --limit 5` — no failures on the most
   recent runs.
+- Stable only: the latest `sdk_size` run on `master` finished successfully, so the size benchmark matches what is
+  released: `gh run list --workflow sdk_size.yml --branch master --limit 1`.
 - No publishable package depends on `stream_core_flutter` by git ref or path — pub.dev rejects both, and
   `release_publish.yml` publishes in dependency order, so the earlier packages go live and only
   `stream_chat_flutter` fails, leaving the version half-published:
@@ -165,7 +167,7 @@ git commit -m "chore(repo): release v<version>"
 artifacts into the release commit. If a release ever does need a genuinely new tracked file, add it by path — the
 `git diff --stat` comparison in step 2 is what catches the omission.
 
-Single commit. The message format is load-bearing: `release_tag.yml` parses `vX.Y.Z` from it after merge — and it
+One release commit (step 5b may add a badge commit on top). The message format is load-bearing: `release_tag.yml` parses `vX.Y.Z` from it after merge — and it
 gates on the **tip** commit of `master`, so the PR must be **squash-merged**. A merge commit would leave
 `Merge pull request #…` at the tip and the tag job would silently never fire.
 
@@ -194,6 +196,27 @@ If it fails, surface to the user and stop — don't push.
 ```bash
 git push -u origin release/v<version>
 ```
+
+### 5b. Update the SDK size badges
+
+Stable releases only. The size badges in the root `README.md` show the latest `master` benchmark from the `sdk_size`
+workflow. The `update_size_badges` workflow writes them and commits `chore(repo): update the SDK size badges` to the
+release branch:
+
+```bash
+gh workflow run update_size_badges.yml --ref release/v<version> -f base_branch=master
+```
+
+See the run through before opening the PR:
+
+```bash
+gh run list --workflow update_size_badges.yml --branch release/v<version> --limit 1 --json databaseId,status
+gh run watch <run-id> --exit-status
+git pull --ff-only
+```
+
+If the badges already matched, the workflow commits nothing and the pull is a no-op. If the run fails, surface it to
+the user and stop.
 
 ### 6. Generate the PR body
 
