@@ -12,7 +12,7 @@ import '../mocks.dart';
 ScheduledMessage scheduledMessage({String? parentId}) {
   return ScheduledMessage(
     id: 'scheduled-id',
-    cid: 'test-chanel-type:test-channel-id',
+    cid: 'test-channel-type:test-channel-id',
     user: User(id: 'user-id'),
     message: Message(id: 'scheduled-id', text: 'Later', parentId: parentId),
     scheduledAt: DateTime(2026, 10, 23, 9),
@@ -47,8 +47,7 @@ Future<void> pumpThreadPage(
   VoidCallback? onBackPressed,
   bool pushOntoARoute = false,
   List<ScheduledMessage> scheduledMessages = const [],
-  Stream<List<ScheduledMessage>>? scheduledMessagesStream,
-  StreamScheduledMessagesViewAllCallback? onScheduledMessagesViewAllPressed,
+  StreamScheduledMessagesBannerTapCallback? onScheduledMessagesBannerTap,
 }) async {
   final originalRecordPlatform = RecordPlatform.instance;
   RecordPlatform.instance = FakeRecordPlatform();
@@ -118,14 +117,14 @@ Future<void> pumpThreadPage(
   when(() => clientState.scheduledMessages).thenReturn(scheduledMessages);
   when(
     () => clientState.scheduledMessagesStream,
-  ).thenAnswer((_) => scheduledMessagesStream ?? Stream.value(scheduledMessages));
+  ).thenAnswer((_) => Stream.value(scheduledMessages));
 
   final page = StreamThreadPage(
     parent: parentMessage,
     onViewInChannelTap: onViewInChannelTap,
     automaticallyImplyLeading: automaticallyImplyLeading,
     onBackPressed: onBackPressed,
-    onScheduledMessagesViewAllPressed: onScheduledMessagesViewAllPressed,
+    onScheduledMessagesBannerTap: onScheduledMessagesBannerTap,
   );
 
   await tester.pumpWidget(

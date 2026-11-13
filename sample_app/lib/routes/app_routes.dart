@@ -44,7 +44,7 @@ final appRoutes = [
             pageBuilder: (context, state) {
               final channel = _resolveChannel(context, state);
               final messageId = state.uri.queryParameters['mid'];
-              final parentId = state.uri.queryParameters['pid'];
+              final parentId = state.uri.queryParameters['parentId'];
 
               // Thread deep-links require the parent message to already be in
               // channel state, unless the caller passes it as `extra`. On cold
@@ -79,7 +79,7 @@ final appRoutes = [
                         builder: (context, parent) => StreamThreadPage(
                           parent: parent,
                           automaticallyImplyLeading: showBackButton,
-                          onScheduledMessagesViewAllPressed: _openScheduledMessages,
+                          onScheduledMessagesBannerTap: _openScheduledMessages,
                           onViewInChannelTap: (message) {
                             GoRouter.of(context).goNamed(
                               Routes.CHANNEL_PAGE.name,
@@ -93,7 +93,7 @@ final appRoutes = [
 
                     return StreamChannelPage(
                       automaticallyImplyLeading: showBackButton,
-                      onScheduledMessagesViewAllPressed: _openScheduledMessages,
+                      onScheduledMessagesBannerTap: _openScheduledMessages,
                       onChannelAvatarPressed: (context, channel) {
                         final isOneToOne = channel.isOneToOne;
                         final currentUserId = StreamChat.of(context).currentUser?.id;
@@ -161,7 +161,7 @@ final appRoutes = [
                 path: Routes.SCHEDULED_MESSAGES.path,
                 builder: (BuildContext context, GoRouterState state) {
                   // A thread's replies are listed by its parent alone.
-                  if (state.uri.queryParameters['pid'] case final parentId?) {
+                  if (state.uri.queryParameters['parentId'] case final parentId?) {
                     return ScheduledMessagesScreen(parentId: parentId);
                   }
 
@@ -222,6 +222,6 @@ void _openScheduledMessages(BuildContext context, Channel channel, Message? pare
   GoRouter.of(context).pushNamed(
     Routes.SCHEDULED_MESSAGES.name,
     pathParameters: Routes.SCHEDULED_MESSAGES.params(channel),
-    queryParameters: {if (parent != null) 'pid': parent.id},
+    queryParameters: {if (parent != null) 'parentId': parent.id},
   );
 }

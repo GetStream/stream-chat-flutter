@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_chat_message_input.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
+import '../message_input/schedule_message/schedule_message_harness.dart' show bannerPill;
 import 'channel_page_harness.dart';
 
 void main() {
@@ -34,12 +35,12 @@ void main() {
     expect(find.byType(StreamScheduledMessagesBanner), findsNothing);
   });
 
-  testWidgets("tapping the banner's link invokes onScheduledMessagesViewAllPressed with no parent", (tester) async {
+  testWidgets("tapping the banner's link invokes onScheduledMessagesBannerTap with no parent", (tester) async {
     final parents = <Message?>[];
     await pumpChannelPage(
       tester,
       scheduledMessages: [scheduledMessage()],
-      onScheduledMessagesViewAllPressed: (_, _, parent) => parents.add(parent),
+      onScheduledMessagesBannerTap: (_, _, parent) => parents.add(parent),
     );
 
     await tester.tap(find.text('View'));
@@ -88,20 +89,20 @@ void main() {
     expect(tester.widget<Text>(find.text(_scheduledForLabel)), same(countBefore));
   });
 
-  testWidgets('passes onScheduledMessagesViewAllPressed to the thread pages it opens', (tester) async {
-    void onViewAllPressed(BuildContext context, Channel channel, Message? parent) {}
+  testWidgets('passes onScheduledMessagesBannerTap to the thread pages it opens', (tester) async {
+    void onTap(BuildContext context, Channel channel, Message? parent) {}
     final parentMessage = Message(id: 'parent-id', text: 'Hello world!');
 
-    await pumpChannelPage(tester, onScheduledMessagesViewAllPressed: onViewAllPressed);
+    await pumpChannelPage(tester, onScheduledMessagesBannerTap: onTap);
     final context = tester.element(find.byType(StreamMessageListView));
     final thread = messageListView(tester).threadBuilder!(context, parentMessage);
 
     expect(
       thread,
       isA<StreamThreadPage>().having(
-        (it) => it.onScheduledMessagesViewAllPressed,
-        'onScheduledMessagesViewAllPressed',
-        onViewAllPressed,
+        (it) => it.onScheduledMessagesBannerTap,
+        'onScheduledMessagesBannerTap',
+        onTap,
       ),
     );
   });

@@ -15,7 +15,7 @@ class PageComposer extends StatelessWidget {
     required this.controller,
     required this.composer,
     this.parentId,
-    this.onScheduledMessagesViewAllPressed,
+    this.onScheduledMessagesBannerTap,
   });
 
   /// The controller of [composer], whose editing hides the banner.
@@ -29,10 +29,10 @@ class PageComposer extends StatelessWidget {
   /// When null, the banner counts the channel's scheduled messages.
   final String? parentId;
 
-  /// Called when "View all" on the banner is tapped.
+  /// Called when the banner is tapped.
   ///
-  /// When null, "View all" isn't shown.
-  final VoidCallback? onScheduledMessagesViewAllPressed;
+  /// When null, the banner's link isn't shown.
+  final VoidCallback? onScheduledMessagesBannerTap;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +50,7 @@ class PageComposer extends StatelessWidget {
           // Built once, so typing doesn't rebuild it.
           child: StreamScheduledMessagesBanner(
             parentId: parentId,
-            onViewAllPressed: onScheduledMessagesViewAllPressed,
+            onTap: onScheduledMessagesBannerTap,
             margin: EdgeInsetsDirectional.fromSTEB(spacing.md, 0, spacing.md, bottom),
           ),
         ),

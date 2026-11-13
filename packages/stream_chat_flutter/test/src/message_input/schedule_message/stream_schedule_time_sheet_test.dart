@@ -45,14 +45,18 @@ void main() {
     });
   });
 
-  testWidgets('showStreamScheduleTimeSheet is headed for rescheduling only when it starts at a time', (tester) async {
+  testWidgets('showStreamScheduleTimeSheet is headed for scheduling without a time to start at', (tester) async {
     await withClock(Clock.fixed(wednesday), () async {
       await showTimeSheet(tester, scheduleChannel());
-      expect(find.text('Schedule message'), findsOneWidget);
 
-      // A fresh app, so the first sheet is gone.
-      await tester.pumpWidget(const SizedBox.shrink());
+      expect(find.text('Schedule message'), findsOneWidget);
+    });
+  });
+
+  testWidgets('showStreamScheduleTimeSheet is headed for rescheduling when it starts at a time', (tester) async {
+    await withClock(Clock.fixed(wednesday), () async {
       await showTimeSheet(tester, scheduleChannel(), initialScheduledAt: DateTime(2026, 10, 23, 9));
+
       expect(find.text('Reschedule message'), findsOneWidget);
     });
   });
@@ -202,6 +206,18 @@ void main() {
       await showTimeSheet(tester, scheduleChannel(config: config, scheduledMessages: pending));
 
       expect(find.text('Limit reached (2 max)'), findsOneWidget);
+    });
+  });
+
+  testWidgets("showStreamScheduleTimeSheet can't schedule a new message while the channel holds its limit", (
+    tester,
+  ) async {
+    final config = ChannelConfig(scheduledMessagesMaxPerChannel: 2);
+    final pending = [scheduledMessage('a'), scheduledMessage('b')];
+
+    await withClock(Clock.fixed(wednesday), () async {
+      await showTimeSheet(tester, scheduleChannel(config: config, scheduledMessages: pending));
+
       expect(scheduleButton(tester).props.onPressed, isNull);
     });
   });

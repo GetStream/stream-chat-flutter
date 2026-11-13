@@ -2012,14 +2012,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   }
 
   @override
-  String scheduledMessagesFailedCountText({required int count}) {
-    return Intl.plural(
-      count,
-      one: '$count failed to send',
-      other: '$count failed to send',
-      locale: 'en',
-    );
-  }
+  String scheduledMessagesFailedCountText({required int count}) => '$count failed to send';
 
   @override
   String scheduledMessagesLimitText({required int count, required int limit}) {

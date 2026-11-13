@@ -32,9 +32,9 @@ class StreamScheduledMessagesBanner extends StatelessWidget {
   StreamScheduledMessagesBanner({
     super.key,
     String? parentId,
-    VoidCallback? onViewAllPressed,
+    VoidCallback? onTap,
     EdgeInsetsGeometry? margin,
-  }) : props = .new(parentId: parentId, onViewAllPressed: onViewAllPressed, margin: margin);
+  }) : props = .new(parentId: parentId, onTap: onTap, margin: margin);
 
   /// Creates a banner from pre-built [props].
   const StreamScheduledMessagesBanner.fromProps({
@@ -63,7 +63,7 @@ class StreamScheduledMessagesBannerProps {
   /// Creates properties for a scheduled messages banner.
   const StreamScheduledMessagesBannerProps({
     this.parentId,
-    this.onViewAllPressed,
+    this.onTap,
     this.margin,
   });
 
@@ -72,10 +72,10 @@ class StreamScheduledMessagesBannerProps {
   /// When null, the channel's own scheduled messages are counted.
   final String? parentId;
 
-  /// Called when the user taps "View all".
+  /// Called when the banner is tapped.
   ///
-  /// When null, "View all" isn't shown.
-  final VoidCallback? onViewAllPressed;
+  /// The link label, such as "View all", shows only when it is set.
+  final VoidCallback? onTap;
 
   /// Empty space to surround the banner.
   ///
@@ -86,12 +86,12 @@ class StreamScheduledMessagesBannerProps {
   /// given fields replaced with new values.
   StreamScheduledMessagesBannerProps copyWith({
     String? parentId,
-    VoidCallback? onViewAllPressed,
+    VoidCallback? onTap,
     EdgeInsetsGeometry? margin,
   }) {
     return StreamScheduledMessagesBannerProps(
       parentId: parentId ?? this.parentId,
-      onViewAllPressed: onViewAllPressed ?? this.onViewAllPressed,
+      onTap: onTap ?? this.onTap,
       margin: margin ?? this.margin,
     );
   }
@@ -165,7 +165,7 @@ class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamSche
         channel: channel,
         counts: counts,
         isThread: widget.props.parentId != null,
-        onViewAllPressed: widget.props.onViewAllPressed,
+        onTap: widget.props.onTap,
         margin: widget.props.margin,
       ),
     );
@@ -177,14 +177,14 @@ class _ScheduledMessagesBanner extends StatelessWidget {
     required this.channel,
     required this.counts,
     required this.isThread,
-    this.onViewAllPressed,
+    this.onTap,
     this.margin,
   });
 
   final Channel channel;
   final ScheduledMessageCounts counts;
   final bool isThread;
-  final VoidCallback? onViewAllPressed;
+  final VoidCallback? onTap;
   final EdgeInsetsGeometry? margin;
 
   @override
@@ -198,21 +198,19 @@ class _ScheduledMessagesBanner extends StatelessWidget {
 
     if (!channel.canScheduleMessage) return const SizedBox.shrink();
 
-    final ScheduledMessageCounts(:failed, :pending, :channelPending) = counts;
-    final isFailed = counts.hasFailed;
-    final isPending = counts.hasPending;
-    if (!isFailed && !isPending) return const SizedBox.shrink();
+    final ScheduledMessageCounts(:failed, :pending, :channelPending, :hasFailed, :hasPending) = counts;
+    if (!hasFailed && !hasPending) return const SizedBox.shrink();
 
     final limit = channel.config?.scheduledMessagesMaxPerChannel;
     final isAtLimit = limit != null && channelPending >= limit;
     // A channel's only scheduled message is named by when it is sent.
     final onlyScheduledAt = switch (counts.nextScheduledAt) {
-      final scheduledAt? when !isFailed && !isThread && !isAtLimit && pending == 1 => scheduledAt,
+      final scheduledAt? when !hasFailed && !isThread && !isAtLimit && pending == 1 => scheduledAt,
       _ => null,
     };
 
     String label() {
-      if (isFailed) return translations.scheduledMessagesFailedCountText(count: failed);
+      if (hasFailed) return translations.scheduledMessagesFailedCountText(count: failed);
       if (isThread) return translations.scheduledRepliesCountText(count: pending);
       if (limit != null && isAtLimit) {
         return translations.scheduledMessagesLimitText(count: channelPending, limit: limit);
@@ -229,10 +227,9 @@ class _ScheduledMessagesBanner extends StatelessWidget {
       _ => translations.viewLabel,
     };
 
-    final effectiveIconColor = switch (isFailed) {
-      true => theme.failedIconColor ?? defaults.failedIconColor,
-      false => theme.iconColor ?? defaults.iconColor,
-    };
+    final effectiveIconColor = hasFailed
+        ? theme.failedIconColor ?? defaults.failedIconColor
+        : theme.iconColor ?? defaults.iconColor;
 
     final effectiveCountStyle = theme.countStyle ?? defaults.countStyle;
     final effectiveViewAllStyle = theme.viewAllStyle ?? defaults.viewAllStyle;
@@ -241,7 +238,7 @@ class _ScheduledMessagesBanner extends StatelessWidget {
     final effectivePadding = theme.padding ?? defaults.padding;
     final effectiveBackgroundColor = theme.backgroundColor ?? defaults.backgroundColor;
 
-    final onViewAllPressed = this.onViewAllPressed;
+    final onTap = this.onTap;
 
     final banner = Material(
       color: effectiveBackgroundColor,
@@ -249,7 +246,7 @@ class _ScheduledMessagesBanner extends StatelessWidget {
       shape: effectiveShape,
       child: InkWell(
         customBorder: effectiveShape,
-        onTap: onViewAllPressed,
+        onTap: onTap,
         child: ConstrainedBox(
           constraints: const BoxConstraints(minHeight: 44),
           child: Padding(
@@ -258,7 +255,7 @@ class _ScheduledMessagesBanner extends StatelessWidget {
               spacing: spacing.sm,
               children: [
                 Icon(
-                  isFailed ? icons.exclamationCircle : icons.clock,
+                  hasFailed ? icons.exclamationCircle : icons.clock,
                   size: 20,
                   color: effectiveIconColor,
                 ),
@@ -270,7 +267,7 @@ class _ScheduledMessagesBanner extends StatelessWidget {
                     overflow: .ellipsis,
                   ),
                 ),
-                if (onViewAllPressed != null) Text(linkLabel, style: effectiveViewAllStyle),
+                if (onTap != null) Text(linkLabel, style: effectiveViewAllStyle),
               ],
             ),
           ),
@@ -282,7 +279,7 @@ class _ScheduledMessagesBanner extends StatelessWidget {
     final result = Semantics(
       container: true,
       liveRegion: true,
-      button: onViewAllPressed != null,
+      button: onTap != null,
       child: banner,
     );
 

@@ -72,8 +72,11 @@ void main() {
     expect(_fullTheme(), isNot(_fullTheme().copyWith(backgroundColor: Colors.blue)));
   });
 
-  test('StreamScheduledMessagesBannerThemeData with a different shape or elevation are not equal', () {
+  test('StreamScheduledMessagesBannerThemeData with a different shape are not equal', () {
     expect(_fullTheme(), isNot(_fullTheme().copyWith(shape: const StadiumBorder())));
+  });
+
+  test('StreamScheduledMessagesBannerThemeData with a different elevation are not equal', () {
     expect(_fullTheme(), isNot(_fullTheme().copyWith(elevation: 6)));
   });
 
@@ -139,7 +142,7 @@ void main() {
 
     expect(lerped.backgroundColor, Color.lerp(Colors.black, Colors.white, 0.5));
     expect(lerped.shape, ShapeBorder.lerp(_lerpStart.shape, _lerpEnd.shape, 0.5));
-    expect(lerped.elevation, 4);
+    expect(lerped.elevation, (2 + 6) / 2);
   });
 }
 

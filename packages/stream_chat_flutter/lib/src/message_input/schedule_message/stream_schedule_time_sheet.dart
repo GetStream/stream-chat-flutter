@@ -12,11 +12,13 @@ import 'scheduled_message_counts.dart';
 /// Shows a sheet to pick the date and time [message] is sent at in [channel],
 /// which must be initialized.
 ///
-/// The sheet starts at [initialScheduledAt], or an hour from now. With
-/// [initialScheduledAt] set, it is headed "Reschedule message" and its
-/// too-soon error is the one for rescheduling. A time sooner or further ahead
-/// than the channel allows shows an error, and can't be picked; the sheet
-/// returns the picked time, or null when dismissed.
+/// The sheet starts at [initialScheduledAt], or an hour from now. A time
+/// sooner or further ahead than the channel allows shows an error, and can't
+/// be picked. With [initialScheduledAt] set, the sheet reschedules a message:
+/// it is headed for rescheduling, and the channel's and user's limits aren't
+/// checked.
+///
+/// Returns the picked time, or null when dismissed.
 Future<DateTime?> showStreamScheduleTimeSheet({
   required BuildContext context,
   required Channel channel,
@@ -101,19 +103,13 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
         children: [
           StreamSheetHeader(
             title: Text(
-              switch (_isRescheduling) {
-                true => translations.rescheduleMessageLabel,
-                false => translations.scheduleMessageLabel,
-              },
+              _isRescheduling ? translations.rescheduleMessageLabel : translations.scheduleMessageLabel,
             ),
             trailing: StreamButton.icon(
               type: .solid,
               tooltip: translations.scheduleLabel,
               icon: Icon(icons.checkmark),
-              onPressed: switch (canSchedule) {
-                true => _confirm,
-                false => null,
-              },
+              onPressed: canSchedule ? _confirm : null,
             ),
           ),
           Padding(
@@ -179,10 +175,6 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
     return DateTime(now.year, now.month, now.day, now.hour, now.minute);
   }
 
-  void _setScheduledAt(DateTime scheduledAt) {
-    setState(() => _scheduledAt = scheduledAt);
-  }
-
   Future<void> _pickDate() async {
     // Measured when the picker opens, as the sheet may have been open a while.
     final bounds = ScheduleMessageBounds.fromConfig(widget.channel.config);
@@ -205,7 +197,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
     if (date == null || !mounted) return;
 
     final time = _scheduledAt;
-    _setScheduledAt(DateTime(date.year, date.month, date.day, time.hour, time.minute));
+    setState(() => _scheduledAt = DateTime(date.year, date.month, date.day, time.hour, time.minute));
   }
 
   Future<void> _pickTime() async {
@@ -219,7 +211,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
     if (time == null || !mounted) return;
 
     final date = _scheduledAt;
-    _setScheduledAt(DateTime(date.year, date.month, date.day, time.hour, time.minute));
+    setState(() => _scheduledAt = DateTime(date.year, date.month, date.day, time.hour, time.minute));
   }
 
   // Picks the time, unless the sheet stayed open until it was no longer
@@ -229,7 +221,11 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
     final bounds = ScheduleMessageBounds.fromConfig(channel.config);
     final scheduledMessages = channel.client.state.scheduledMessages;
     final counts = ScheduledMessageCounts.of(scheduledMessages, cid: channel.cid!);
-    if (_errorText(bounds, counts) != null) return setState(() {});
+    if (_errorText(bounds, counts) != null) {
+      // The bounds or counts changed while the sheet was open.
+      setState(() {});
+      return;
+    }
 
     Navigator.of(context).pop(_scheduledAt);
   }

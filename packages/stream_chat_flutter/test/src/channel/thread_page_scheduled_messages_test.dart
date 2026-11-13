@@ -3,7 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_chat_message_input.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import 'channel_page_harness.dart' show bannerPill;
+import '../message_input/schedule_message/schedule_message_harness.dart' show bannerPill;
 import 'thread_page_harness.dart';
 
 void main() {
@@ -12,7 +12,7 @@ void main() {
 
     final banner = bannerPill(tester);
     final input = tester.getRect(find.byType(StreamChatMessageInput));
-    expect(find.text('1 scheduled reply'), findsOneWidget);
+    expect(find.text(DefaultTranslations.instance.scheduledRepliesCountText(count: 1)), findsOneWidget);
     expect(banner.bottom, lessThanOrEqualTo(input.top));
   });
 
@@ -27,12 +27,12 @@ void main() {
     expect(find.byType(StreamScheduledMessagesBanner), findsNothing);
   });
 
-  testWidgets('tapping View all invokes onScheduledMessagesViewAllPressed with the parent message', (tester) async {
+  testWidgets('tapping View all invokes onScheduledMessagesBannerTap with the parent message', (tester) async {
     final parents = <Message?>[];
     await pumpThreadPage(
       tester,
       scheduledMessages: [scheduledMessage(parentId: 'parent-id')],
-      onScheduledMessagesViewAllPressed: (_, _, parent) => parents.add(parent),
+      onScheduledMessagesBannerTap: (_, _, parent) => parents.add(parent),
     );
 
     await tester.tap(find.text('View all'));

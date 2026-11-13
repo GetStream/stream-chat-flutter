@@ -17,9 +17,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final banner = tester.getRect(find.byType(StreamScheduledMessagesBanner));
-    final pill = tester.getRect(
-      find.descendant(of: find.byType(StreamScheduledMessagesBanner), matching: find.byType(Material)).first,
-    );
+    final pill = bannerPill(tester);
     expect(pill, banner);
   });
 
@@ -33,9 +31,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final banner = tester.getRect(find.byType(StreamScheduledMessagesBanner));
-    final pill = tester.getRect(
-      find.descendant(of: find.byType(StreamScheduledMessagesBanner), matching: find.byType(Material)).first,
-    );
+    final pill = bannerPill(tester);
     expect(pill.left - banner.left, 4);
     expect(pill.top - banner.top, 8);
     expect(banner.right - pill.right, 12);
@@ -54,12 +50,12 @@ void main() {
     expect(tester.getSize(find.byType(StreamScheduledMessagesBanner)), Size.zero);
   });
 
-  testWidgets('StreamScheduledMessagesBanner calls onViewAllPressed when View all is tapped', (tester) async {
+  testWidgets('StreamScheduledMessagesBanner calls onTap when View all is tapped', (tester) async {
     var taps = 0;
 
     await tester.pumpWidget(
       wrapWithMaterialApp(
-        StreamScheduledMessagesBanner(onViewAllPressed: () => taps += 1),
+        StreamScheduledMessagesBanner(onTap: () => taps += 1),
         channel: scheduleChannel(scheduledMessages: [scheduledMessage('a'), scheduledMessage('b')]),
       ),
     );
@@ -69,12 +65,12 @@ void main() {
     expect(taps, 1);
   });
 
-  testWidgets('StreamScheduledMessagesBanner calls onViewAllPressed when the count is tapped', (tester) async {
+  testWidgets('StreamScheduledMessagesBanner calls onTap when the count is tapped', (tester) async {
     var taps = 0;
 
     await tester.pumpWidget(
       wrapWithMaterialApp(
-        StreamScheduledMessagesBanner(onViewAllPressed: () => taps += 1),
+        StreamScheduledMessagesBanner(onTap: () => taps += 1),
         channel: scheduleChannel(scheduledMessages: [scheduledMessage('a'), scheduledMessage('b')]),
       ),
     );
@@ -84,7 +80,7 @@ void main() {
     expect(taps, 1);
   });
 
-  testWidgets('StreamScheduledMessagesBanner hides View all without onViewAllPressed', (tester) async {
+  testWidgets('StreamScheduledMessagesBanner hides View all without onTap', (tester) async {
     await tester.pumpWidget(
       wrapWithMaterialApp(
         StreamScheduledMessagesBanner(),
@@ -115,39 +111,45 @@ void main() {
 
   testWidgets('StreamScheduledMessagesBanner announces the count as one tappable live region', (tester) async {
     final handle = tester.ensureSemantics();
+    // Cleaned up in the test, as the handle is checked before teardown runs.
+    try {
+      await tester.pumpWidget(
+        wrapWithMaterialApp(
+          StreamScheduledMessagesBanner(onTap: () {}),
+          channel: scheduleChannel(scheduledMessages: [scheduledMessage('a'), scheduledMessage('b')]),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.pumpWidget(
-      wrapWithMaterialApp(
-        StreamScheduledMessagesBanner(onViewAllPressed: () {}),
-        channel: scheduleChannel(scheduledMessages: [scheduledMessage('a'), scheduledMessage('b')]),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    final banner = find.bySemanticsLabel(RegExp('2 scheduled messages.*View all', dotAll: true));
-    expect(
-      tester.getSemantics(banner),
-      isSemantics(isLiveRegion: true, isButton: true, hasTapAction: true),
-    );
-    handle.dispose();
+      final banner = find.bySemanticsLabel(RegExp('2 scheduled messages.*View all', dotAll: true));
+      expect(
+        tester.getSemantics(banner),
+        isSemantics(isLiveRegion: true, isButton: true, hasTapAction: true),
+      );
+    } finally {
+      handle.dispose();
+    }
   });
 
-  testWidgets('StreamScheduledMessagesBanner is not tappable without onViewAllPressed', (tester) async {
+  testWidgets('StreamScheduledMessagesBanner is not tappable without onTap', (tester) async {
     final handle = tester.ensureSemantics();
+    // Cleaned up in the test, as the handle is checked before teardown runs.
+    try {
+      await tester.pumpWidget(
+        wrapWithMaterialApp(
+          StreamScheduledMessagesBanner(),
+          channel: scheduleChannel(scheduledMessages: [scheduledMessage('a'), scheduledMessage('b')]),
+        ),
+      );
+      await tester.pumpAndSettle();
 
-    await tester.pumpWidget(
-      wrapWithMaterialApp(
-        StreamScheduledMessagesBanner(),
-        channel: scheduleChannel(scheduledMessages: [scheduledMessage('a'), scheduledMessage('b')]),
-      ),
-    );
-    await tester.pumpAndSettle();
-
-    expect(
-      tester.getSemantics(find.bySemanticsLabel('2 scheduled messages')),
-      isSemantics(isLiveRegion: true, isButton: false, hasTapAction: false),
-    );
-    handle.dispose();
+      expect(
+        tester.getSemantics(find.bySemanticsLabel('2 scheduled messages')),
+        isSemantics(isLiveRegion: true, isButton: false, hasTapAction: false),
+      );
+    } finally {
+      handle.dispose();
+    }
   });
 
   test('StreamScheduledMessagesBannerProps.copyWith replaces parentId', () {
@@ -156,11 +158,11 @@ void main() {
     expect(props.copyWith(parentId: 'other').parentId, 'other');
   });
 
-  test('StreamScheduledMessagesBannerProps.copyWith keeps onViewAllPressed', () {
-    void onViewAllPressed() {}
-    final props = StreamScheduledMessagesBannerProps(onViewAllPressed: onViewAllPressed);
+  test('StreamScheduledMessagesBannerProps.copyWith keeps onTap', () {
+    void onTap() {}
+    final props = StreamScheduledMessagesBannerProps(onTap: onTap);
 
-    expect(props.copyWith(parentId: 'other').onViewAllPressed, onViewAllPressed);
+    expect(props.copyWith(parentId: 'other').onTap, onTap);
   });
 
   testWidgets("StreamScheduledMessagesBanner doesn't rebuild when a change leaves its counts as they are", (

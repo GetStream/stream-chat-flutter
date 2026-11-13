@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:record/record.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import '../fakes.dart';
 import 'message_composer_harness.dart';
 
 void main() {
@@ -45,9 +43,7 @@ void main() {
   });
 
   testWidgets('still follows the deprecated composer validator', (tester) async {
-    final originalRecordPlatform = RecordPlatform.instance;
-    RecordPlatform.instance = FakeRecordPlatform();
-    addTearDown(() => RecordPlatform.instance = originalRecordPlatform);
+    useFakeRecordPlatform();
 
     await pumpComposer(
       tester,
@@ -60,9 +56,7 @@ void main() {
   });
 
   testWidgets('re-enables send when the deprecated validator goes back to the default', (tester) async {
-    final originalRecordPlatform = RecordPlatform.instance;
-    RecordPlatform.instance = FakeRecordPlatform();
-    addTearDown(() => RecordPlatform.instance = originalRecordPlatform);
+    useFakeRecordPlatform();
 
     final channel = await pumpComposer(
       tester,
@@ -84,9 +78,7 @@ void main() {
   });
 
   testWidgets("sends what the app's own controller accepts", (tester) async {
-    final originalRecordPlatform = RecordPlatform.instance;
-    RecordPlatform.instance = FakeRecordPlatform();
-    addTearDown(() => RecordPlatform.instance = originalRecordPlatform);
+    useFakeRecordPlatform();
     final controller = composerController(validator: (_) => true);
 
     final channel = await pumpComposer(

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 import 'package:stream_core_flutter/chat.dart';
 
 /// Wraps [child], a Material date or time picker, in a theme of the design
 /// system's colors and type.
 ///
 /// Used as the `builder` of [showDatePicker] and [showTimePicker].
+@internal
 Widget buildSchedulePickerTheme(BuildContext context, Widget? child) {
   final theme = Theme.of(context);
   final colorScheme = context.streamColorScheme;
@@ -106,12 +108,6 @@ Widget buildSchedulePickerTheme(BuildContext context, Widget? child) {
     textTheme: theme.textTheme.apply(
       bodyColor: colorScheme.textPrimary,
       displayColor: colorScheme.textPrimary,
-    ),
-    // Without this the fields keep the app's own cursor and selection colors.
-    textSelectionTheme: TextSelectionThemeData(
-      cursorColor: colorScheme.accentPrimary,
-      selectionColor: colorScheme.accentPrimary.withValues(alpha: 0.4),
-      selectionHandleColor: colorScheme.accentPrimary,
     ),
     datePickerTheme: datePickerTheme,
     timePickerTheme: timePickerTheme,

@@ -31,8 +31,12 @@ Future<void> scheduleOnSendLongPress(
 
   try {
     await _schedule(channel, message, scheduledAt);
-    // Text typed while it was being scheduled stays in the composer.
-    if (controller.value == message) controller.reset();
+    // Text typed while it was being scheduled stays in the composer, with its
+    // own ID, as the scheduled message took the old one. Its attachments,
+    // quote and mentions were scheduled, so they go.
+    final typed = controller.value == message ? null : controller.text;
+    controller.reset();
+    if (typed != null) controller.text = typed;
   } catch (error) {
     final description = describeScheduleError(error, fallback: fallback);
     messenger.show(StreamSnackbar(message: Text(description), variant: .error));

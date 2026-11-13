@@ -11,8 +11,8 @@ import 'scheduled_message_counts.dart';
 /// The sheet offers tomorrow morning and afternoon, the next Monday morning,
 /// and a custom time, which opens [showStreamScheduleTimeSheet]. A preset the
 /// channel doesn't allow isn't offered, and none can be picked once the
-/// channel holds its limit. Returns the chosen time, or null when the sheet is
-/// dismissed.
+/// channel or the user holds its limit. Returns the chosen time, or null when
+/// the sheet is dismissed.
 Future<DateTime?> showStreamScheduleMessageSheet({
   required BuildContext context,
   required Channel channel,
@@ -50,8 +50,8 @@ class _ScheduleMessageSheet extends StatelessWidget {
     final bounds = ScheduleMessageBounds.fromConfig(config);
     final presets = schedulePresets();
 
-    // Messages that failed don't count toward the channel's or the user's
-    // limit.
+    // Messages that failed to schedule don't count toward the channel's or the
+    // user's limit.
     final scheduledMessages = channel.client.state.scheduledMessages;
     final counts = ScheduledMessageCounts.of(scheduledMessages, cid: channel.cid!);
     final reachedLimit = switch ((config?.scheduledMessagesMaxPerChannel, config?.scheduledMessagesMaxPerUser)) {
@@ -100,10 +100,9 @@ class _ScheduleMessageSheet extends StatelessWidget {
   }
 
   String _presetLabel(Translations translations, DateTime preset) {
-    return switch (preset.isTomorrow) {
-      true => translations.scheduleTomorrowText(scheduledAt: preset),
-      false => translations.scheduleWeekdayText(scheduledAt: preset),
-    };
+    return preset.isTomorrow
+        ? translations.scheduleTomorrowText(scheduledAt: preset)
+        : translations.scheduleWeekdayText(scheduledAt: preset);
   }
 
   Future<void> _pickCustomTime(BuildContext context) async {

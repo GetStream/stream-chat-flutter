@@ -10,7 +10,7 @@ import '../../mocks.dart';
 final wednesday = DateTime(2026, 10, 21, 10);
 
 /// The cid of the [scheduleChannel].
-const scheduleCid = 'test-chanel-type:test-channel-id';
+const scheduleCid = 'test-channel-type:test-channel-id';
 
 /// The message the sheets schedule.
 Message messageToSchedule() {
@@ -104,6 +104,12 @@ Widget wrapWithMaterialApp(
       ),
     ),
   );
+}
+
+/// The visible pill of the scheduled messages banner, inside its margin.
+Rect bannerPill(WidgetTester tester) {
+  final pill = find.descendant(of: find.byType(StreamScheduledMessagesBanner), matching: find.byType(Material));
+  return tester.getRect(pill.first);
 }
 
 /// A button labeled "Open" that calls [onPressed], for opening a sheet.

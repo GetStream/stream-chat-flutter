@@ -153,7 +153,9 @@ void main() {
     });
   });
 
-  testWidgets('showStreamScheduleMessageSheet keeps preset hours across a daylight saving change', (tester) async {
+  testWidgets('showStreamScheduleMessageSheet keeps preset hours across a daylight saving change, where there is one', (
+    tester,
+  ) async {
     // In zones that observe it, 2026-10-25 is the day clocks go back an hour.
     await withClock(Clock.fixed(DateTime(2026, 10, 24, 10)), () async {
       final results = await showMessageSheet(tester, scheduleChannel());
@@ -186,6 +188,7 @@ void main() {
     await withClock(Clock.fixed(wednesday), () async {
       await showMessageSheet(tester, scheduleChannel(config: config, scheduledMessages: pending));
 
+      expect(rowsEnabled(tester), isNotEmpty);
       expect(rowsEnabled(tester), everyElement(isFalse));
     });
   });

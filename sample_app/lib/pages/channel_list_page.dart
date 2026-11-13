@@ -107,9 +107,7 @@ class _ChannelListPageState extends State<ChannelListPage> {
     final selected = enabledTabs.firstWhere((t) => t.tab == _selectedTab, orElse: () => enabledTabs.first);
     final currentIndex = enabledTabs.indexOf(selected);
 
-    // The keyboard covers the nav bar's place, so it would ride up between
-    // the keyboard and a field above it. The bar is hidden in place, as
-    // dropping the scaffold's bottom would rebuild the body and lose its focus.
+    // Hidden in place, so the body keeps its focus.
     final isKeyboardOpen = MediaQuery.viewInsetsOf(context).bottom > 0;
 
     return StreamScaffold(

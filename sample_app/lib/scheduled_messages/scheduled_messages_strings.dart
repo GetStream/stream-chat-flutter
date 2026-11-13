@@ -7,8 +7,8 @@ abstract final class ScheduledMessagesStrings {
   static const emptyDescription = 'Long press the send button in a channel to schedule a message.';
   static const stillSending = 'Still sending. Try again in a moment.';
   static const scheduled = 'Message scheduled';
-  static const rescheduled = 'Message rescheduled';
   static const updated = 'Scheduled message updated';
+  static const rescheduled = 'Message rescheduled';
   static const sendingNow = 'Sending message';
   static const copied = 'Message copied';
   static const deleted = 'Scheduled message deleted';

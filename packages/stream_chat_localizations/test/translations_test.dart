@@ -467,7 +467,7 @@ void main() {
       expect(localizations.scheduleTomorrowText(scheduledAt: scheduledAt), contains(presetTime));
       final weekdayText = localizations.scheduleWeekdayText(scheduledAt: scheduledAt);
       expect(weekdayText, contains(presetTime));
-      expect(weekdayText.toLowerCase(), contains(weekday.toLowerCase()));
+      expect(weekdayText, contains(toBeginningOfSentenceCase(weekday, language)));
       expect(localizations.messageToLabel(channelName: 'Maya'), contains('Maya'));
       expect(localizations.dateLabel, isNotEmpty);
       expect(localizations.timeLabel, isNotEmpty);

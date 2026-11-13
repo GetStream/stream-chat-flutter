@@ -14,6 +14,7 @@ void useFakeRecordPlatform() {
   addTearDown(() => RecordPlatform.instance = originalRecordPlatform);
 }
 
+/// A composer controller checked by [validator], disposed after the test.
 StreamMessageComposerController composerController({
   MessageValidator validator = StreamMessageComposerController.defaultValidator,
 }) {
@@ -22,6 +23,8 @@ StreamMessageComposerController composerController({
   return controller;
 }
 
+/// Shows the composer's trailing send button for [controller], with a
+/// microphone when [withMicrophone] is true.
 Future<void> pumpTrailing(
   WidgetTester tester, {
   required StreamMessageComposerController controller,
@@ -54,6 +57,8 @@ Future<void> pumpTrailing(
   );
 }
 
+/// Shows [composer] in [channel], or a [composerChannel], and returns the
+/// channel.
 Future<MockChannel> pumpComposer(WidgetTester tester, {required Widget composer, MockChannel? channel}) async {
   channel ??= composerChannel();
 
@@ -74,6 +79,7 @@ Future<MockChannel> pumpComposer(WidgetTester tester, {required Widget composer,
   return channel;
 }
 
+/// A loaded channel the current user has [capabilities] in.
 MockChannel composerChannel({
   List<ChannelCapability> capabilities = const [
     ChannelCapability.sendMessage,
@@ -130,6 +136,7 @@ MockChannel schedulingChannel() {
   return channel;
 }
 
+/// The composer's send button.
 StreamButton sendButton(WidgetTester tester) {
   return tester.widget<StreamButton>(find.byKey(const ValueKey('send_key')));
 }

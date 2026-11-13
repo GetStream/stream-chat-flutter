@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
@@ -53,19 +52,25 @@ class ScheduledMessagesPage extends StatefulWidget {
 
 class _ScheduledMessagesPageState extends State<ScheduledMessagesPage> {
   // The scheduled message being edited in the composer under the list.
-  _Edit? _edit;
+  ScheduledMessage? _editing;
 
-  void _startEdit(_Edit edit) => setState(() => _edit = edit);
+  void _startEdit(ScheduledMessage scheduledMessage) => setState(() => _editing = scheduledMessage);
 
-  void _closeEdit() => setState(() => _edit = null);
+  void _closeEdit() => setState(() => _editing = null);
 
   @override
   Widget build(BuildContext context) {
-    final edit = _edit;
+    final client = StreamChat.of(context).client;
+    final editing = _editing;
+    // The edit ends if its channel goes away.
+    final editChannel = switch (editing) {
+      final it? => client.state.channels[it.cid],
+      null => null,
+    };
 
     // Back ends an edit before it leaves the page.
     return PopScope(
-      canPop: edit == null,
+      canPop: editChannel == null,
       onPopInvokedWithResult: (didPop, _) {
         if (!didPop) _closeEdit();
       },
@@ -83,30 +88,21 @@ class _ScheduledMessagesPageState extends State<ScheduledMessagesPage> {
               ),
             ),
           ),
-          if (edit != null)
-            ScheduledMessageEditComposer(
-              key: ValueKey(edit.scheduledMessage.id),
-              channel: edit.channel,
-              scheduledMessage: edit.scheduledMessage,
-              message: edit.message,
-              onSave: edit.onSave,
-              onSaveLongPress: edit.onSaveLongPress,
-              onClose: _closeEdit,
-            ),
+          // Shows the composer's notices above it, also once it has closed.
+          StreamSnackbarPopup(
+            child: editing != null && editChannel != null
+                ? StreamChannel(
+                    key: ValueKey(editing.id),
+                    channel: editChannel,
+                    child: ScheduledMessageEditComposer(scheduledMessage: editing, onClose: _closeEdit),
+                  )
+                : const SizedBox.shrink(),
+          ),
         ],
       ),
     );
   }
 }
-
-// An edit of a scheduled message in the composer under the list.
-typedef _Edit = ({
-  Channel channel,
-  ScheduledMessage scheduledMessage,
-  Message message,
-  ScheduledMessageEditCallback onSave,
-  ScheduledMessageEditCallback onSaveLongPress,
-});
 
 // The empty list, with a hint on how to schedule a message.
 class _NoScheduledMessages extends StatelessWidget {
@@ -147,8 +143,7 @@ Future<void> _refresh(BuildContext context) async {
 
   try {
     await client.loadScheduledMessages();
-  } catch (error, stackTrace) {
-    debugPrint('Could not load the scheduled messages: $error\n$stackTrace');
+  } catch (error) {
     final description = describeScheduleError(error, fallback: fallback);
     messenger.show(StreamSnackbar(message: Text(description), variant: .error));
   }
@@ -157,7 +152,7 @@ Future<void> _refresh(BuildContext context) async {
 Future<void> _openScheduledMessageActions(
   BuildContext context,
   ScheduledMessage scheduledMessage,
-  void Function(_Edit edit) startEdit,
+  ValueSetter<ScheduledMessage> startEdit,
 ) async {
   // A message being sent has no actions, so its sheet wouldn't open.
   final actions = StreamScheduledMessageActionsBuilder.buildActions(
@@ -182,12 +177,12 @@ Future<void> _openScheduledMessageActions(
 Future<void> _onScheduledMessageAction(
   BuildContext context,
   ScheduledMessageAction action,
-  void Function(_Edit edit) startEdit,
+  ValueSetter<ScheduledMessage> startEdit,
 ) async {
   return switch (action) {
-    EditScheduledMessage(:final scheduledMessage) => _editScheduledMessage(context, scheduledMessage, startEdit),
+    EditScheduledMessage(:final scheduledMessage) => _edit(context, scheduledMessage, startEdit),
     RetryScheduledMessage(:final scheduledMessage) => _retry(context, scheduledMessage),
-    EditAndRescheduleMessage(:final scheduledMessage) => _editAndReschedule(context, scheduledMessage, startEdit),
+    EditAndRescheduleMessage(:final scheduledMessage) => _edit(context, scheduledMessage, startEdit),
     RescheduleMessage(:final scheduledMessage) => _reschedule(context, scheduledMessage),
     SendScheduledMessageNow(:final scheduledMessage) => _sendNow(context, scheduledMessage),
     CopyScheduledMessageText(:final scheduledMessage) => _copyText(context, scheduledMessage),
@@ -203,80 +198,46 @@ Future<void> _run(BuildContext context, Future<String> Function() call) async {
   try {
     final done = await call();
     messenger.show(StreamSnackbar(message: Text(done), variant: .success));
-  } catch (error, stackTrace) {
-    debugPrint('Scheduled message action failed: $error\n$stackTrace');
+  } catch (error) {
     final description = describeScheduleError(error, fallback: fallback);
     messenger.show(StreamSnackbar(message: Text(description), variant: .error));
   }
 }
 
-Future<void> _editScheduledMessage(
+// Starts editing [scheduledMessage] once its channel is loaded.
+Future<void> _edit(
   BuildContext context,
   ScheduledMessage scheduledMessage,
-  void Function(_Edit edit) startEdit,
+  ValueSetter<ScheduledMessage> startEdit,
 ) async {
   final client = StreamChat.of(context).client;
   final messenger = StreamSnackbarMessenger.of(context);
+  final fallback = context.translations.genericErrorText;
 
   final channel = await _loadChannel(context, scheduledMessage);
   if (channel == null || !context.mounted) return;
 
-  final message = await _prefill(context, client, scheduledMessage);
-  if (message == null || !context.mounted) return;
-
-  startEdit((
-    channel: channel,
-    scheduledMessage: scheduledMessage,
-    message: message,
-    // Keeps its time.
-    onSave: (context, edited) async {
-      await client.updateScheduledMessage(scheduledMessage, edited);
-      messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.updated), variant: .success));
-      return true;
-    },
-    // A long press also moves it to another time.
-    onSaveLongPress: (context, edited) async {
-      final scheduledAt = await showStreamScheduleTimeSheet(
-        context: context,
-        channel: channel,
-        message: edited,
-        initialScheduledAt: scheduledMessage.scheduledAt,
-      );
-      if (scheduledAt == null) return false;
-
-      await client.updateScheduledMessage(scheduledMessage, edited, scheduledAt: scheduledAt);
-      messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.rescheduled), variant: .success));
-      return true;
-    },
-  ));
-}
-
-// The content of [scheduledMessage] for the composer, with its mentioned
-// users and quoted message resolved. Shows why they couldn't be, and resolves
-// to null.
-Future<Message?> _prefill(
-  BuildContext context,
-  StreamChatClient client,
-  ScheduledMessage scheduledMessage,
-) async {
-  final messenger = StreamSnackbarMessenger.of(context);
-  final fallback = context.translations.genericErrorText;
-  final content = scheduledMessage.message;
-
   try {
-    final mentionedUsers = await _resolveMentionedUsers(client, content);
-    final quotedMessage = await _resolveQuotedMessage(client, scheduledMessage);
-    // The composer starts from a draft, not from a message already sent.
-    return content.copyWith(
-      mentionedUsers: mentionedUsers,
-      quotedMessage: quotedMessage,
-      state: const MessageState.initial(),
-    );
+    startEdit(await _withMentionedUsers(client, scheduledMessage));
   } catch (error) {
     final description = describeScheduleError(error, fallback: fallback);
     messenger.show(StreamSnackbar(message: Text(description), variant: .error));
-    return null;
   }
+}
+
+// [scheduledMessage] with the names of its mentioned users, which come with
+// only their IDs. A mention whose name isn't known is dropped when it is
+// saved, even if it is still in the text.
+//
+// TODO: Remove once scheduled messages come with their mentioned users resolved.
+Future<ScheduledMessage> _withMentionedUsers(StreamChatClient client, ScheduledMessage scheduledMessage) async {
+  final content = scheduledMessage.message;
+  final ids = [for (final user in content.mentionedUsers) user.id];
+  final missing = [...ids.where((id) => client.state.users[id] == null)];
+  if (missing.isNotEmpty) await client.queryUsers(filter: Filter.in_('id', missing));
+
+  final mentionedUsers = [for (final id in ids) client.state.users[id] ?? User(id: id)];
+  return scheduledMessage.copyWith(message: content.copyWith(mentionedUsers: mentionedUsers));
 }
 
 // The channel [scheduledMessage] is sent to, loaded without watching it when
@@ -288,7 +249,7 @@ Future<Channel?> _loadChannel(BuildContext context, ScheduledMessage scheduledMe
 
   final messenger = StreamSnackbarMessenger.of(context);
   final fallback = context.translations.genericErrorText;
-  final ChannelModel(:id, :type) = ChannelModel(cid: cid);
+  final [type, id] = cid.split(':');
   final channel = client.channel(type, id: id);
 
   void showError(String description) {
@@ -309,43 +270,6 @@ Future<Channel?> _loadChannel(BuildContext context, ScheduledMessage scheduledMe
   }
 
   return channel;
-}
-
-Future<void> _editAndReschedule(
-  BuildContext context,
-  ScheduledMessage scheduledMessage,
-  void Function(_Edit edit) startEdit,
-) async {
-  final client = StreamChat.of(context).client;
-  final messenger = StreamSnackbarMessenger.of(context);
-
-  final channel = await _loadChannel(context, scheduledMessage);
-  if (channel == null || !context.mounted) return;
-
-  final message = await _prefill(context, client, scheduledMessage);
-  if (message == null || !context.mounted) return;
-
-  Future<bool> scheduleAgain(BuildContext context, Message edited) async {
-    final scheduledAt = await showStreamScheduleTimeSheet(context: context, channel: channel, message: edited);
-    if (scheduledAt == null) return false;
-
-    final isFailedOneRemoved = await _scheduleAgain(client, channel, scheduledMessage, scheduledAt, edited);
-    messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.scheduled), variant: .success));
-    if (!isFailedOneRemoved) {
-      messenger.show(
-        StreamSnackbar(message: const Text(ScheduledMessagesStrings.failedOneNotRemoved), variant: .error),
-      );
-    }
-    return true;
-  }
-
-  startEdit((
-    channel: channel,
-    scheduledMessage: scheduledMessage,
-    message: message,
-    onSave: scheduleAgain,
-    onSaveLongPress: scheduleAgain,
-  ));
 }
 
 Future<void> _reschedule(BuildContext context, ScheduledMessage scheduledMessage) async {
@@ -371,9 +295,13 @@ Future<void> _reschedule(BuildContext context, ScheduledMessage scheduledMessage
 Future<void> _retry(BuildContext context, ScheduledMessage scheduledMessage) {
   final client = StreamChat.of(context).client;
 
+  final isEdit = scheduledMessage.failureReason == .updateFailed;
+
   return _run(context, () async {
-    await client.retryScheduledMessage(scheduledMessage);
-    return ScheduledMessagesStrings.scheduled;
+    final scheduled = await client.retryScheduledMessage(scheduledMessage);
+    // Null when its time had passed and it was sent right away.
+    if (scheduled == null) return ScheduledMessagesStrings.sendingNow;
+    return isEdit ? ScheduledMessagesStrings.updated : ScheduledMessagesStrings.scheduled;
   });
 }
 
@@ -416,93 +344,17 @@ Future<void> _maybeDelete(BuildContext context, ScheduledMessage scheduledMessag
   try {
     await client.deleteScheduledMessage(scheduledMessage);
     messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.deleted), variant: .success));
-  } catch (error, stackTrace) {
-    debugPrint('Could not delete the scheduled message: $error\n$stackTrace');
-    final goneMessage = switch (error) {
-      StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) =>
-        ScheduledMessagesStrings.alreadySent,
-      // Not found: sent at its time, or deleted elsewhere.
-      StreamChatNetworkError(statusCode: 404) => ScheduledMessagesStrings.sentOrDeleted,
-      _ => null,
-    };
-    if (goneMessage != null) {
-      messenger.show(StreamSnackbar(message: Text(goneMessage)));
+  } catch (error) {
+    // Sent at its time, or deleted elsewhere.
+    if (isScheduledMessageGone(error)) {
+      final isSent =
+          error is StreamChatNetworkError && error.scheduledMessageErrorReason == .scheduledMessageAlreadySent;
+      final gone = isSent ? ScheduledMessagesStrings.alreadySent : ScheduledMessagesStrings.sentOrDeleted;
+      messenger.show(StreamSnackbar(message: Text(gone)));
       return;
     }
 
     final description = describeScheduleError(error, fallback: translations.genericErrorText);
     messenger.show(StreamSnackbar(message: Text(description), variant: .error));
-  }
-}
-
-// A failed scheduled message can't be changed, so [edited] is scheduled as a
-// new message and the failed one is removed. Resolves to whether the failed
-// one was removed.
-Future<bool> _scheduleAgain(
-  StreamChatClient client,
-  Channel channel,
-  ScheduledMessage scheduledMessage,
-  DateTime scheduledAt,
-  Message edited,
-) async {
-  // A quoted message that was deleted can't be quoted again.
-  final quotedMessageId = switch (edited.quotedMessage) {
-    final quoted? when !quoted.isDeleted => quoted.id,
-    _ => null,
-  };
-
-  final message = Message(
-    text: edited.text,
-    attachments: edited.attachments,
-    mentionedUsers: edited.mentionedUsers,
-    quotedMessageId: quotedMessageId,
-    parentId: edited.parentId,
-    showInChannel: edited.showInChannel,
-    extraData: edited.extraData,
-  );
-
-  await channel.scheduleMessage(message, scheduledAt: scheduledAt);
-
-  try {
-    await client.deleteScheduledMessage(scheduledMessage);
-    return true;
-  } catch (error, stackTrace) {
-    // It is scheduled again either way; the failed one can be deleted later.
-    debugPrint('Could not delete the failed scheduled message: $error\n$stackTrace');
-    return false;
-  }
-}
-
-// A scheduled message's mentioned users can have only their IDs set. With
-// their names, a mention still in the text is kept when the message is sent
-// again, and one that was removed is dropped.
-Future<List<User>> _resolveMentionedUsers(StreamChatClient client, Message message) async {
-  final ids = [for (final user in message.mentionedUsers) user.id];
-  final missing = [...ids.where((id) => client.state.users[id] == null)];
-  if (missing.isNotEmpty) await client.queryUsers(filter: Filter.in_('id', missing));
-
-  return [for (final id in ids) client.state.users[id] ?? User(id: id)];
-}
-
-// A scheduled message's quoted message is identified by its ID only. It is
-// looked up among the channel's loaded messages and the thread's, and
-// fetched otherwise.
-Future<Message?> _resolveQuotedMessage(StreamChatClient client, ScheduledMessage scheduledMessage) async {
-  final content = scheduledMessage.message;
-  final quotedMessageId = content.quotedMessageId;
-  if (quotedMessageId == null) return null;
-
-  final state = client.state.channels[scheduledMessage.cid]?.state;
-  final loaded = [...?state?.messages, ...?state?.threads[content.parentId]];
-  if (loaded.firstWhereOrNull((it) => it.id == quotedMessageId) case final quoted?) return quoted;
-
-  try {
-    final response = await client.getMessage(quotedMessageId);
-    return response.message;
-  } on StreamChatNetworkError catch (error) {
-    // Only a quoted message that is gone is dropped; any other failure stops
-    // the edit, so a network error doesn't lose the quote.
-    if (error.statusCode == 404) return null;
-    rethrow;
   }
 }

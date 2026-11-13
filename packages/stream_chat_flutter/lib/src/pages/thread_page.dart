@@ -34,7 +34,7 @@ class StreamThreadPage extends StatefulWidget {
     this.onViewInChannelTap,
     this.automaticallyImplyLeading = true,
     this.onBackPressed,
-    this.onScheduledMessagesViewAllPressed,
+    this.onScheduledMessagesBannerTap,
   });
 
   /// The parent message of the thread.
@@ -60,10 +60,10 @@ class StreamThreadPage extends StatefulWidget {
   /// default is kept.
   final VoidCallback? onBackPressed;
 
-  /// Called when "View all" on the [StreamScheduledMessagesBanner] is tapped.
+  /// Called when the [StreamScheduledMessagesBanner] is tapped.
   ///
-  /// When null, "View all" isn't shown. It is called with [parent].
-  final StreamScheduledMessagesViewAllCallback? onScheduledMessagesViewAllPressed;
+  /// When null, the banner's link isn't shown. It is called with [parent].
+  final StreamScheduledMessagesBannerTapCallback? onScheduledMessagesBannerTap;
 
   @override
   State<StreamThreadPage> createState() => _StreamThreadPageState();
@@ -98,13 +98,13 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
     });
   }
 
-  // The page's "View all" callback, called with the page's channel and
+  // The page's banner tap callback, called with the page's channel and
   // parent message.
-  VoidCallback? _onScheduledMessagesViewAllPressed() {
-    final onViewAllPressed = widget.onScheduledMessagesViewAllPressed;
-    if (onViewAllPressed == null) return null;
+  VoidCallback? _onScheduledMessagesBannerTap() {
+    final onTap = widget.onScheduledMessagesBannerTap;
+    if (onTap == null) return null;
 
-    return () => onViewAllPressed(context, StreamChannel.of(context).channel, widget.parent);
+    return () => onTap(context, StreamChannel.of(context).channel, widget.parent);
   }
 
   @override
@@ -122,7 +122,7 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
         ? PageComposer(
             controller: _messageComposerController,
             parentId: widget.parent.id,
-            onScheduledMessagesViewAllPressed: _onScheduledMessagesViewAllPressed(),
+            onScheduledMessagesBannerTap: _onScheduledMessagesBannerTap(),
             composer: StreamMessageComposer(
               focusNode: _focusNode,
               messageComposerController: _messageComposerController,

@@ -33,6 +33,13 @@ String describeScheduleError(Object error, {required String fallback}) {
   };
 }
 
+/// Whether [error] says the scheduled message was already sent or deleted.
+bool isScheduledMessageGone(Object error) {
+  if (error is! StreamChatNetworkError) return false;
+  if (error.scheduledMessageErrorReason == .scheduledMessageAlreadySent) return true;
+  return error.isScheduledMessageNotFound;
+}
+
 /// The name of the channel [scheduledMessage] is sent to, or null when it has
 /// none.
 ///

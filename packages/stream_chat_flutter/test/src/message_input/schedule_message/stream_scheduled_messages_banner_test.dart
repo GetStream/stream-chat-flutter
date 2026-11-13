@@ -12,7 +12,7 @@ void main() {
       fileName: 'stream_scheduled_messages_banner_scheduled_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 412, height: 80),
       builder: () => wrapWithMaterialApp(
-        StreamScheduledMessagesBanner(onViewAllPressed: () {}),
+        StreamScheduledMessagesBanner(onTap: () {}),
         channel: scheduleChannel(scheduledMessages: [scheduledMessage('a'), scheduledMessage('b')]),
         brightness: brightness,
       ),
@@ -23,7 +23,7 @@ void main() {
       fileName: 'stream_scheduled_messages_banner_failed_${brightness.name}',
       constraints: const BoxConstraints.tightFor(width: 412, height: 80),
       builder: () => wrapWithMaterialApp(
-        StreamScheduledMessagesBanner(onViewAllPressed: () {}),
+        StreamScheduledMessagesBanner(onTap: () {}),
         channel: scheduleChannel(scheduledMessages: [scheduledMessage('a', status: ScheduledMessageStatus.failed)]),
         brightness: brightness,
       ),
@@ -150,18 +150,26 @@ void main() {
   });
 
   testWidgets("StreamScheduledMessagesBanner names when the channel's only scheduled message is sent", (tester) async {
-    final channel = scheduleChannel(scheduledMessages: [scheduledMessage('a')]);
+    final only = scheduledMessage('a');
+    final channel = scheduleChannel(scheduledMessages: [only]);
 
     await tester.pumpWidget(
-      wrapWithMaterialApp(StreamScheduledMessagesBanner(onViewAllPressed: () {}), channel: channel),
+      wrapWithMaterialApp(StreamScheduledMessagesBanner(onTap: () {}), channel: channel),
     );
     await tester.pumpAndSettle();
 
-    final scheduledAt = DateTime(2026, 10, 23, 9);
-    expect(
-      find.text(DefaultTranslations.instance.scheduledMessageScheduledForText(scheduledAt: scheduledAt)),
-      findsOne,
+    final label = DefaultTranslations.instance.scheduledMessageScheduledForText(scheduledAt: only.scheduledAt);
+    expect(find.text(label), findsOne);
+  });
+
+  testWidgets("StreamScheduledMessagesBanner links to the channel's only scheduled message as View", (tester) async {
+    final channel = scheduleChannel(scheduledMessages: [scheduledMessage('a')]);
+
+    await tester.pumpWidget(
+      wrapWithMaterialApp(StreamScheduledMessagesBanner(onTap: () {}), channel: channel),
     );
+    await tester.pumpAndSettle();
+
     expect(find.text('View'), findsOneWidget);
   });
 }

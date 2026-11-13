@@ -965,7 +965,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String messageToLabel({required String channelName}) => '$channelName님에게 보낼 메시지';
+  String messageToLabel({required String channelName}) => '$channelName에게 보낼 메시지';
 
   @override
   String get dateLabel => '날짜';

@@ -12,18 +12,12 @@ import '../mocks.dart';
 ScheduledMessage scheduledMessage() {
   return ScheduledMessage(
     id: 'scheduled-id',
-    cid: 'test-chanel-type:test-channel-id',
+    cid: 'test-channel-type:test-channel-id',
     user: User(id: 'user-id'),
     message: Message(id: 'scheduled-id', text: 'Later'),
     scheduledAt: DateTime(2026, 10, 23, 9),
     status: ScheduledMessageStatus.scheduled,
   );
-}
-
-/// The visible pill of the scheduled messages banner, inside its margin.
-Rect bannerPill(WidgetTester tester) {
-  final pill = find.descendant(of: find.byType(StreamScheduledMessagesBanner), matching: find.byType(Material));
-  return tester.getRect(pill.first);
 }
 
 /// The page's message list.
@@ -53,7 +47,7 @@ Future<void> pumpChannelPage(
   bool pushOntoARoute = false,
   List<ScheduledMessage> scheduledMessages = const [],
   Stream<List<ScheduledMessage>>? scheduledMessagesStream,
-  StreamScheduledMessagesViewAllCallback? onScheduledMessagesViewAllPressed,
+  StreamScheduledMessagesBannerTapCallback? onScheduledMessagesBannerTap,
 }) async {
   final originalRecordPlatform = RecordPlatform.instance;
   RecordPlatform.instance = FakeRecordPlatform();
@@ -114,7 +108,7 @@ Future<void> pumpChannelPage(
     onChannelAvatarPressed: onChannelAvatarPressed,
     automaticallyImplyLeading: automaticallyImplyLeading,
     onBackPressed: onBackPressed,
-    onScheduledMessagesViewAllPressed: onScheduledMessagesViewAllPressed,
+    onScheduledMessagesBannerTap: onScheduledMessagesBannerTap,
   );
 
   await tester.pumpWidget(

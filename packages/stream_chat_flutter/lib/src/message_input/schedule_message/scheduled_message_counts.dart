@@ -31,7 +31,8 @@ class ScheduledMessageCounts extends Equatable {
     var userPending = 0;
     DateTime? nextScheduledAt;
     for (final it in scheduledMessages) {
-      final isPending = it.status.isPending;
+      // A failed edit is still scheduled as it was before.
+      final isPending = it.status.isPending || it.failureReason == .updateFailed;
       if (isPending) userPending += 1;
       if (it.cid != cid) continue;
       if (isPending) channelPending += 1;
@@ -60,7 +61,7 @@ class ScheduledMessageCounts extends Equatable {
   /// The failed messages in the channel or thread.
   final int failed;
 
-  /// The scheduled and sending messages in the channel or thread.
+  /// The messages still to be sent in the channel or thread.
   final int pending;
 
   /// The pending messages of the whole channel, thread replies included.
@@ -76,10 +77,10 @@ class ScheduledMessageCounts extends Equatable {
   /// Whether any message failed.
   bool get hasFailed => failed > 0;
 
-  /// Whether any message is scheduled or sending.
+  /// Whether any message is still to be sent in the channel or thread.
   bool get hasPending => pending > 0;
 
-  /// Every field must be listed, or the banner skips rebuilds it needs.
+  // Every field must be listed, or the banner skips rebuilds it needs.
   @override
   List<Object?> get props => [failed, pending, channelPending, userPending, nextScheduledAt];
 }

@@ -36,6 +36,16 @@ void main() {
     expect(rowLabels(tester), ['Retry', 'Edit & Reschedule', 'Delete']);
   });
 
+  testWidgets('showStreamScheduledMessageActionsSheet offers retry, edit, reschedule and delete on a failed edit', (
+    tester,
+  ) async {
+    final failed = fakeScheduledMessage(status: .failed, failureReason: .updateFailed);
+
+    await showActions(tester, failed);
+
+    expect(rowLabels(tester), ['Retry', 'Edit Message', 'Reschedule', 'Delete']);
+  });
+
   testWidgets('showStreamScheduledMessageActionsSheet offers copy and delete on a message whose channel was deleted', (
     tester,
   ) async {
@@ -80,20 +90,30 @@ void main() {
     },
   );
 
-  testWidgets('showStreamScheduledMessageActionsSheet offers every action when the loaded channel can schedule', (
-    tester,
-  ) async {
-    final channels = {'messaging:general': loadedChannel()};
-    final failed = fakeScheduledMessage(status: .failed, failureReason: .requestFailed);
+  testWidgets(
+    'showStreamScheduledMessageActionsSheet offers every action on a scheduled message when the loaded channel can '
+    'schedule',
+    (tester) async {
+      final channels = {'messaging:general': loadedChannel()};
 
-    await showActions(tester, fakeScheduledMessage(), channels: channels);
-    expect(rowLabels(tester), ['Edit Message', 'Reschedule', 'Send Now', 'Delete']);
+      await showActions(tester, fakeScheduledMessage(), channels: channels);
 
-    // A fresh app, so the first sheet is gone.
-    await tester.pumpWidget(const SizedBox.shrink());
-    await showActions(tester, failed, channels: channels);
-    expect(rowLabels(tester), ['Retry', 'Edit & Reschedule', 'Delete']);
-  });
+      expect(rowLabels(tester), ['Edit Message', 'Reschedule', 'Send Now', 'Delete']);
+    },
+  );
+
+  testWidgets(
+    'showStreamScheduledMessageActionsSheet offers every action on a failed message when the loaded channel can '
+    'schedule',
+    (tester) async {
+      final channels = {'messaging:general': loadedChannel()};
+      final failed = fakeScheduledMessage(status: .failed, failureReason: .requestFailed);
+
+      await showActions(tester, failed, channels: channels);
+
+      expect(rowLabels(tester), ['Retry', 'Edit & Reschedule', 'Delete']);
+    },
+  );
 
   for (final status in [
     ScheduledMessageStatus.preparingToSchedule,
