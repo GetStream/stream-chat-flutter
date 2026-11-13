@@ -29,7 +29,18 @@ typedef OgPreviewFilter = bool Function(Uri matchedUri, String messageText);
 /// The [BuildContext] is the composer's, and [controller] holds the message the
 /// send button would have sent.
 typedef StreamSendLongPressCallback =
-    void Function(
+    FutureOr<void> Function(
+      BuildContext context,
+      StreamMessageComposerController controller,
+    );
+
+/// Signature for [MessageComposerProps.onSendMessage], called in place of
+/// sending or updating the message.
+///
+/// The [BuildContext] is the composer's, and [controller] holds the message to
+/// send or the edit to save.
+typedef StreamSendMessageCallback =
+    FutureOr<void> Function(
       BuildContext context,
       StreamMessageComposerController controller,
     );
@@ -82,6 +93,7 @@ class StreamMessageComposer extends StatelessWidget {
     super.key,
     void Function(Message)? onMessageSent,
     FutureOr<Message> Function(Message)? preMessageSending,
+    StreamSendMessageCallback? onSendMessage,
     StreamSendLongPressCallback? onSendLongPress,
     StreamMessageComposerController? messageComposerController,
     FocusNode? focusNode,
@@ -121,6 +133,7 @@ class StreamMessageComposer extends StatelessWidget {
   }) : props = .new(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
+         onSendMessage: onSendMessage,
          onSendLongPress: onSendLongPress,
          messageComposerController: messageComposerController,
          focusNode: focusNode,
@@ -198,6 +211,7 @@ class MessageComposerProps {
   const MessageComposerProps({
     this.onMessageSent,
     this.preMessageSending,
+    this.onSendMessage,
     this.onSendLongPress,
     this.messageComposerController,
     this.focusNode,
@@ -246,6 +260,15 @@ class MessageComposerProps {
   ///
   /// Use this to transform the message.
   final FutureOr<Message> Function(Message)? preMessageSending;
+
+  /// Called in place of sending a new message or saving an edit.
+  ///
+  /// The composer doesn't send, update or clear anything when it is set, so the
+  /// callback is responsible for the message and for resetting the controller.
+  /// [preMessageSending] and [onMessageSent] aren't called, and links aren't
+  /// checked against channels that don't allow them. The send button is still
+  /// enabled only while the message can be sent.
+  final StreamSendMessageCallback? onSendMessage;
 
   /// Called when the send button is long-pressed while it would send a new
   /// message.
@@ -484,6 +507,7 @@ class MessageComposerProps {
   MessageComposerProps copyWith({
     void Function(Message)? onMessageSent,
     FutureOr<Message> Function(Message)? preMessageSending,
+    StreamSendMessageCallback? onSendMessage,
     StreamSendLongPressCallback? onSendLongPress,
     StreamMessageComposerController? messageComposerController,
     FocusNode? focusNode,
@@ -523,6 +547,7 @@ class MessageComposerProps {
     return MessageComposerProps(
       onMessageSent: onMessageSent ?? this.onMessageSent,
       preMessageSending: preMessageSending ?? this.preMessageSending,
+      onSendMessage: onSendMessage ?? this.onSendMessage,
       onSendLongPress: onSendLongPress ?? this.onSendLongPress,
       messageComposerController: messageComposerController ?? this.messageComposerController,
       focusNode: focusNode ?? this.focusNode,
@@ -1649,6 +1674,10 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     if (!_effectiveController.canSend) return;
 
     _hidePicker();
+
+    if (widget.props.onSendMessage case final onSendMessage?) {
+      return onSendMessage(context, _effectiveController);
+    }
 
     final streamChannel = StreamChannel.maybeOf(context);
     if (streamChannel == null) return;
