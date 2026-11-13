@@ -462,7 +462,7 @@ void main() {
       final presetTime = DateFormat.jm(language).format(localScheduledAt);
       final weekday = DateFormat.EEEE(language).format(localScheduledAt);
       expect(localizations.scheduleMessageLabel, isNotEmpty);
-      expect(localizations.scheduleChannelLimitReachedLabel(limit: 10), contains('10'));
+      expect(localizations.scheduleLimitReachedLabel(limit: 10), contains('10'));
       expect(localizations.customTimeLabel, isNotEmpty);
       expect(localizations.scheduleTomorrowText(scheduledAt: scheduledAt), contains(presetTime));
       final weekdayText = localizations.scheduleWeekdayText(scheduledAt: scheduledAt);

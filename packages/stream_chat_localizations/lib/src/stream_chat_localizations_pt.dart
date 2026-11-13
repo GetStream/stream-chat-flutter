@@ -1016,7 +1016,7 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get scheduleTooFarError => 'Esse horário está além do que o aplicativo permite';
 
   @override
-  String scheduleChannelLimitReachedLabel({required int limit}) => 'Limite atingido (máx. $limit)';
+  String scheduleLimitReachedLabel({required int limit}) => 'Limite atingido (máx. $limit)';
 
   @override
   String scheduleUserLimitReachedError({required int limit}) => 'Você atingiu o limite de $limit mensagens agendadas.';

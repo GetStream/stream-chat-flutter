@@ -1019,7 +1019,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get scheduleTooFarError => "C'est plus loin que ce que l'application permet";
 
   @override
-  String scheduleChannelLimitReachedLabel({required int limit}) => 'Limite atteinte ($limit max.)';
+  String scheduleLimitReachedLabel({required int limit}) => 'Limite atteinte ($limit max.)';
 
   @override
   String scheduleUserLimitReachedError({required int limit}) =>

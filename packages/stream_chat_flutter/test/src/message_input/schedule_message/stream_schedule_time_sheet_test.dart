@@ -96,9 +96,16 @@ void main() {
 
   testWidgets("showStreamScheduleTimeSheet can't schedule a time too soon", (tester) async {
     await withClock(Clock.fixed(wednesday), () async {
-      await showTimeSheet(tester, scheduleChannel(), initialScheduledAt: wednesday.add(const Duration(seconds: 30)));
+      final results = await showTimeSheet(
+        tester,
+        scheduleChannel(),
+        initialScheduledAt: wednesday.add(const Duration(seconds: 30)),
+      );
 
-      expect(scheduleButton(tester).props.onPressed, isNull);
+      await tester.tap(confirmButton(), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(results, isEmpty);
     });
   });
 
@@ -120,13 +127,16 @@ void main() {
     final config = ChannelConfig(scheduledMessagesMaxLeadTime: const Duration(days: 7));
 
     await withClock(Clock.fixed(wednesday), () async {
-      await showTimeSheet(
+      final results = await showTimeSheet(
         tester,
         scheduleChannel(config: config),
         initialScheduledAt: wednesday.add(const Duration(days: 8)),
       );
 
-      expect(scheduleButton(tester).props.onPressed, isNull);
+      await tester.tap(confirmButton(), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(results, isEmpty);
     });
   });
 
@@ -154,9 +164,12 @@ void main() {
     final pending = [scheduledMessage('a'), scheduledMessage('b')];
 
     await withClock(Clock.fixed(wednesday), () async {
-      await showTimeSheet(tester, scheduleChannel(config: config, scheduledMessages: pending));
+      final results = await showTimeSheet(tester, scheduleChannel(config: config, scheduledMessages: pending));
 
-      expect(scheduleButton(tester).props.onPressed, isNull);
+      await tester.tap(confirmButton(), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(results, isEmpty);
     });
   });
 
@@ -165,13 +178,16 @@ void main() {
     final pending = [scheduledMessage('a'), scheduledMessage('b')];
 
     await withClock(Clock.fixed(wednesday), () async {
-      await showTimeSheet(
+      final results = await showTimeSheet(
         tester,
         scheduleChannel(config: config, scheduledMessages: pending),
         initialScheduledAt: DateTime(2026, 10, 23, 9),
       );
 
-      expect(scheduleButton(tester).props.onPressed, isNotNull);
+      await tester.tap(confirmButton(), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(results, [DateTime(2026, 10, 23, 9)]);
     });
   });
 
@@ -216,9 +232,12 @@ void main() {
     final pending = [scheduledMessage('a'), scheduledMessage('b')];
 
     await withClock(Clock.fixed(wednesday), () async {
-      await showTimeSheet(tester, scheduleChannel(config: config, scheduledMessages: pending));
+      final results = await showTimeSheet(tester, scheduleChannel(config: config, scheduledMessages: pending));
 
-      expect(scheduleButton(tester).props.onPressed, isNull);
+      await tester.tap(confirmButton(), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(results, isEmpty);
     });
   });
 
@@ -227,13 +246,16 @@ void main() {
     final pending = [scheduledMessage('a'), scheduledMessage('b')];
 
     await withClock(Clock.fixed(wednesday), () async {
-      await showTimeSheet(
+      final results = await showTimeSheet(
         tester,
         scheduleChannel(config: config, scheduledMessages: pending),
         initialScheduledAt: DateTime(2026, 10, 23, 9),
       );
 
-      expect(scheduleButton(tester).props.onPressed, isNotNull);
+      await tester.tap(confirmButton(), warnIfMissed: false);
+      await tester.pumpAndSettle();
+
+      expect(results, [DateTime(2026, 10, 23, 9)]);
     });
   });
 

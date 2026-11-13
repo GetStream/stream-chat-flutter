@@ -1028,7 +1028,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get scheduleTooFarError => "È più avanti di quanto consenta l'app";
 
   @override
-  String scheduleChannelLimitReachedLabel({required int limit}) => 'Limite raggiunto (max $limit)';
+  String scheduleLimitReachedLabel({required int limit}) => 'Limite raggiunto (max $limit)';
 
   @override
   String scheduleUserLimitReachedError({required int limit}) =>

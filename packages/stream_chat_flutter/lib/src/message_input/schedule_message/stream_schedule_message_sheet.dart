@@ -61,7 +61,7 @@ class _ScheduleMessageSheet extends StatelessWidget {
     };
     final isLimitReached = reachedLimit != null;
     final title = switch (reachedLimit) {
-      final limit? => translations.scheduleChannelLimitReachedLabel(limit: limit),
+      final limit? => translations.scheduleLimitReachedLabel(limit: limit),
       null => translations.scheduleMessageLabel,
     };
 
@@ -115,7 +115,7 @@ class _ScheduleMessageSheet extends StatelessWidget {
     );
 
     if (scheduledAt == null) return;
-    return navigator.pop(scheduledAt);
+    navigator.pop(scheduledAt);
   }
 }
 

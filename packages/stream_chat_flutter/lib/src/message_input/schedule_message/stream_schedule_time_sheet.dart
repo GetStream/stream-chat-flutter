@@ -239,7 +239,7 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
       final config = widget.channel.config;
       final channelLimit = config?.scheduledMessagesMaxPerChannel;
       if (channelLimit != null && counts.channelPending >= channelLimit) {
-        return translations.scheduleChannelLimitReachedLabel(limit: channelLimit);
+        return translations.scheduleLimitReachedLabel(limit: channelLimit);
       }
 
       final userLimit = config?.scheduledMessagesMaxPerUser;

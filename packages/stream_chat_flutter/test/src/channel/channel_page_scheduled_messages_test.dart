@@ -79,14 +79,25 @@ void main() {
   });
 
   testWidgets("doesn't rebuild the scheduled messages banner while typing", (tester) async {
-    await pumpChannelPage(tester, scheduledMessages: [scheduledMessage()]);
-    final countBefore = tester.widget<Text>(find.text(_scheduledForLabel));
+    var builds = 0;
+    await pumpChannelPage(
+      tester,
+      scheduledMessages: [scheduledMessage()],
+      componentBuilders: StreamComponentBuilders(
+        extensions: streamChatComponentBuilders(
+          scheduledMessagesBanner: (_, _) {
+            builds += 1;
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+    final buildsBeforeTyping = builds;
 
     await tester.enterText(find.byType(EditableText), 'Hello');
     await tester.pumpAndSettle();
 
-    // A rebuild would create a new Text.
-    expect(tester.widget<Text>(find.text(_scheduledForLabel)), same(countBefore));
+    expect(builds, buildsBeforeTyping);
   });
 
   testWidgets('passes onScheduledMessagesBannerTap to the thread pages it opens', (tester) async {

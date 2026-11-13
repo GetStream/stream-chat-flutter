@@ -997,7 +997,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get scheduleTooFarError => '앱에서 허용하는 기간보다 먼 시간입니다';
 
   @override
-  String scheduleChannelLimitReachedLabel({required int limit}) => '한도에 도달했습니다(최대 $limit개)';
+  String scheduleLimitReachedLabel({required int limit}) => '한도에 도달했습니다(최대 $limit개)';
 
   @override
   String scheduleUserLimitReachedError({required int limit}) => '예약 메시지 한도($limit개)에 도달했습니다.';

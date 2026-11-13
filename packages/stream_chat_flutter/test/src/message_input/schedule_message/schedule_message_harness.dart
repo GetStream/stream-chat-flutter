@@ -193,9 +193,3 @@ Finder backButton() => find.byTooltip('Back');
 
 /// The custom time sheet's confirm button.
 Finder confirmButton() => find.byTooltip('Schedule');
-
-/// The custom time sheet's confirm button, as a widget.
-StreamButton scheduleButton(WidgetTester tester) {
-  final button = find.ancestor(of: confirmButton(), matching: find.byType(StreamButton));
-  return tester.widget<StreamButton>(button.first);
-}

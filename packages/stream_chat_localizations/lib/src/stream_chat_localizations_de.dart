@@ -1015,7 +1015,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get scheduleTooFarError => 'Das liegt weiter in der Zukunft, als die App erlaubt';
 
   @override
-  String scheduleChannelLimitReachedLabel({required int limit}) => 'Limit erreicht (max. $limit)';
+  String scheduleLimitReachedLabel({required int limit}) => 'Limit erreicht (max. $limit)';
 
   @override
   String scheduleUserLimitReachedError({required int limit}) =>

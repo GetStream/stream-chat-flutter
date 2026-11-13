@@ -1017,7 +1017,7 @@ No es posible añadir más de $limit archivos adjuntos
   String get scheduleTooFarError => 'Está más adelante de lo que permite la aplicación';
 
   @override
-  String scheduleChannelLimitReachedLabel({required int limit}) => 'Límite alcanzado (máx. $limit)';
+  String scheduleLimitReachedLabel({required int limit}) => 'Límite alcanzado (máx. $limit)';
 
   @override
   String scheduleUserLimitReachedError({required int limit}) =>

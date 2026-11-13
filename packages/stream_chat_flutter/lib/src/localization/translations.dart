@@ -937,9 +937,9 @@ abstract class Translations {
   String get scheduleTooFarError;
 
   /// The title of the sheet of times a message can be scheduled for, and the
-  /// error shown when scheduling fails, when the channel holds its [limit] of
-  /// scheduled messages, such as "Limit reached (10 max)".
-  String scheduleChannelLimitReachedLabel({required int limit});
+  /// error shown when scheduling fails, when the channel or the user holds its
+  /// [limit] of scheduled messages, such as "Limit reached (10 max)".
+  String scheduleLimitReachedLabel({required int limit});
 
   /// The error shown when the current user holds their [limit] of scheduled
   /// messages, such as "You've reached your limit of 100 scheduled messages.".
@@ -1982,7 +1982,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get scheduleTooFarError => "That's further ahead than your app allows";
 
   @override
-  String scheduleChannelLimitReachedLabel({required int limit}) => 'Limit reached ($limit max)';
+  String scheduleLimitReachedLabel({required int limit}) => 'Limit reached ($limit max)';
 
   @override
   String scheduleUserLimitReachedError({required int limit}) =>
