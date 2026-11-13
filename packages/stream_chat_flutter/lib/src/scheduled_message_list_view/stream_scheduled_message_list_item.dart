@@ -382,7 +382,9 @@ class _ScheduledMessageStatusLine extends core.NullableStatelessWidget {
       );
     }
 
-    if (status != .preparingToSchedule && status != .sending) return null;
+    // An edit being saved shows as it was until it is saved.
+    final isBeingScheduled = status == .preparingToSchedule && scheduledMessage.remoteCreatedAt == null;
+    if (!isBeingScheduled && status != .sending) return null;
 
     final attachments = scheduledMessage.message.attachments;
     final isUploading = attachments.any((it) => !it.uploadState.isSuccess);

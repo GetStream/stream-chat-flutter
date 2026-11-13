@@ -16,6 +16,22 @@ void main() {
     expect(find.text('Sending…'), findsNothing);
   });
 
+  testWidgets('StreamScheduledMessageListItem shows nothing under the preview while an edit of it is saved', (
+    tester,
+  ) async {
+    // Already scheduled, so it has a server creation time.
+    final saving = fakeScheduledMessage(
+      status: ScheduledMessageStatus.preparingToSchedule,
+      createdAt: DateTime.utc(2026, 10, 20),
+    );
+
+    await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: saving)));
+
+    expect(find.byType(StreamLoadingSpinner), findsNothing);
+    expect(find.text('Sending…'), findsNothing);
+    expect(find.text('Uploading…'), findsNothing);
+  });
+
   testWidgets('StreamScheduledMessageListItem says it is sending while it is being sent', (tester) async {
     final sending = fakeScheduledMessage(status: ScheduledMessageStatus.sending);
 

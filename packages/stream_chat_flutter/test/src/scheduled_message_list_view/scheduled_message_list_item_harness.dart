@@ -13,6 +13,7 @@ ScheduledMessage fakeScheduledMessage({
   Message? quotedMessage,
   String? quotedMessageId,
   ChannelModel? channel,
+  DateTime? createdAt,
 }) {
   return ScheduledMessage(
     cid: 'messaging:general',
@@ -29,6 +30,7 @@ ScheduledMessage fakeScheduledMessage({
     scheduledAt: DateTime(2026, 10, 21, 8),
     status: status,
     failureReason: failureReason,
+    createdAt: createdAt,
   );
 }
 
