@@ -320,8 +320,9 @@ class ScheduledMessageManager {
 
   /// Moves the scheduled message [id] to [scheduledAt].
   ///
-  /// Its message stays as it is. It is listed at its new time right away, as
-  /// with [updateMessage].
+  /// Its message stays as it is; one whose edit failed has that edit saved
+  /// with the move. It is listed at its new time right away, as with
+  /// [updateMessage].
   ///
   /// Throws a [StreamChatNetworkError] if the request fails, even when the
   /// scheduled message is already gone. If it is, an
@@ -343,6 +344,11 @@ class ScheduledMessageManager {
 
     final scheduledMessage = _listedScheduledMessage(id);
     if (scheduledMessage == null) return _updateUnlisted(request);
+
+    // A failed edit isn't saved yet, so moving it saves the edit too.
+    if (scheduledMessage.failureReason == .updateFailed) {
+      return updateMessage(id, scheduledMessage.message, scheduledAt: scheduledAt);
+    }
 
     // A message kept at its time isn't checked again.
     if (!scheduledAt.isAtSameMomentAs(scheduledMessage.scheduledAt)) {
@@ -430,6 +436,7 @@ class ScheduledMessageManager {
       generation,
       () => _api.deleteScheduledMessage(scheduledMessage.id),
       relistOnFailure: scheduledMessage,
+      relistIfUnlisted: true,
     );
   }
 
@@ -515,7 +522,12 @@ class ScheduledMessageManager {
     final saved = response.scheduledMessage;
     final isSameVersion = saved.remoteUpdatedAt == scheduledMessage.remoteUpdatedAt;
     final listed = isSameVersion ? saved.copyWith(localUpdatedAt: clock.now()) : saved;
-    _emitEvent(EventType.scheduledMessageUpdated, listed, generation);
+
+    // It can be sent or deleted while the edit is saved.
+    if (_listedScheduledMessage(scheduledMessage.id) != null) {
+      _emitEvent(EventType.scheduledMessageUpdated, listed, generation);
+    }
+
     return response;
   }
 
@@ -528,13 +540,22 @@ class ScheduledMessageManager {
     int generation,
     Future<T> Function() request, {
     ScheduledMessage? relistOnFailure,
+    bool relistIfUnlisted = false,
   }) async {
     try {
       return await request();
     } catch (error) {
       if (error case StreamChatNetworkError(isScheduledMessageNotFound: true)) {
         _emitEvent(EventType.scheduledMessageDeleted, _canceled(scheduledMessage), generation);
-      } else if (_isRefusedAsSending(error)) {
+        rethrow;
+      }
+
+      // One sent or deleted while the request ran isn't listed again, unless
+      // [relistIfUnlisted], as for one taken out of the list before it.
+      final isListed = _listedScheduledMessage(scheduledMessage.id) != null;
+      if (!isListed && !relistIfUnlisted) rethrow;
+
+      if (_isRefusedAsSending(error)) {
         _emitEvent(EventType.scheduledMessageUpdated, _sending(scheduledMessage), generation);
       } else if (relistOnFailure != null) {
         _emitEvent(EventType.scheduledMessageUpdated, relistOnFailure, generation);
@@ -572,8 +593,7 @@ class ScheduledMessageManager {
   }
 
   // Refuses [message] in the channel [cid] when it quotes a deleted message.
-  // Sending now checks only this: the API doesn't check the rest of the
-  // content again, but a deleted quote would fail it once sent.
+  // Sending now checks only this, as a deleted quote would fail it once sent.
   void _refuseDeletedQuote(String cid, Message message) {
     final channel = _client.state.channels[cid];
     if (ScheduledMessageRules.quotesDeletedMessage(message, channel)) {

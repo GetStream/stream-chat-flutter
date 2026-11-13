@@ -2609,8 +2609,9 @@ class StreamChatClient {
 
   /// Moves the scheduled message [id] to [scheduledAt].
   ///
-  /// Its message stays as it is. The [scheduledAt] is rounded up to a whole
-  /// minute, at least [ChannelConfig.scheduledMessagesMinLeadTime] from now.
+  /// Its message stays as it is; one whose edit failed has that edit saved
+  /// with the move. The [scheduledAt] is rounded up to a whole minute, at
+  /// least [ChannelConfig.scheduledMessagesMinLeadTime] from now.
   ///
   /// [ClientState.scheduledMessages] lists it at its new time right away, as
   /// with [updateScheduledMessage].

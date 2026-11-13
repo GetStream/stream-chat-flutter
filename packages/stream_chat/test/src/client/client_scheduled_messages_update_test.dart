@@ -101,6 +101,21 @@ void main() {
   });
 
   group('with a failed edit', () {
+    test('rescheduleMessage saves the failed edit with the new time', () async {
+      final failed = await editUnreachable();
+      final later = DateTime.utc(2026, 11, 3, 9);
+      when(
+        () => harness.api.scheduledMessages.updateScheduledMessage('a', message: edited, scheduledAt: later),
+      ).thenAnswer((_) async => fakeUpdate(saved));
+
+      await harness.client.rescheduleMessage(failed.id, scheduledAt: later);
+
+      verify(
+        () => harness.api.scheduledMessages.updateScheduledMessage('a', message: edited, scheduledAt: later),
+      ).called(1);
+      verifyNever(() => harness.api.scheduledMessages.updateScheduledMessage('a', scheduledAt: later));
+    });
+
     test('resendScheduledMessage saves a failed edit again, with its message and time', () async {
       final failed = await editUnreachable();
       stubUpdate(() async => fakeUpdate(saved), scheduledAt: original.scheduledAt);
@@ -248,5 +263,35 @@ void main() {
     await harness.client.loadScheduledMessages();
 
     expect(harness.client.state.scheduledMessages, [local]);
+  });
+
+  test("updateScheduledMessage doesn't list it again when it was sent while the edit was saved", () async {
+    final answer = Completer<UpdateScheduledMessageResponse>();
+    stubUpdate(() => answer.future);
+    await harness.hold([original]);
+    final request = harness.client.updateScheduledMessage(original.id, edited);
+    await settle();
+
+    await harness.receive(EventType.scheduledMessageSent, original);
+    answer.complete(fakeUpdate(saved));
+    await request;
+    await settle();
+
+    expect(harness.client.state.scheduledMessages, isEmpty);
+  });
+
+  test("updateScheduledMessage doesn't list it as failed when it was sent while the edit was saved", () async {
+    final answer = Completer<UpdateScheduledMessageResponse>();
+    stubUpdate(() => answer.future);
+    await harness.hold([original]);
+    final request = harness.client.updateScheduledMessage(original.id, edited);
+    await settle();
+
+    await harness.receive(EventType.scheduledMessageSent, original);
+    answer.completeError(offline);
+    await expectLater(request, throwsA(offline));
+    await settle();
+
+    expect(harness.client.state.scheduledMessages, isEmpty);
   });
 }

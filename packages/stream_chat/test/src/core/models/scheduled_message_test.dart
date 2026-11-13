@@ -210,4 +210,41 @@ void main() {
     expect(failed.copyWith().failureReason, ScheduledMessageFailureReason.updateFailed);
     expect(failed.copyWith(failureReason: null).failureReason, isNull);
   });
+
+  test('ScheduledMessage.toMessage keeps whether it is silent, its poll, its mentions and who can see it', () {
+    final poll = Poll(
+      id: 'poll-id',
+      name: 'Lunch?',
+      options: const [PollOption(text: 'Pizza')],
+    );
+    final scheduledMessage = ScheduledMessage(
+      id: 'scheduled-id',
+      cid: 'messaging:general',
+      user: User(id: 'alice'),
+      message: Message(
+        id: 'message-id',
+        text: 'Good morning',
+        silent: true,
+        poll: poll,
+        restrictedVisibility: const ['bob'],
+        mentionedChannel: true,
+        mentionedHere: true,
+        mentionedRoles: const ['admin'],
+        mentionedGroupIds: const ['design'],
+      ),
+      scheduledAt: DateTime.utc(2026, 11, 2, 9),
+      status: ScheduledMessageStatus.scheduled,
+    );
+
+    final message = scheduledMessage.toMessage();
+
+    expect(message.silent, isTrue);
+    expect(message.poll, poll);
+    expect(message.pollId, 'poll-id');
+    expect(message.restrictedVisibility, ['bob']);
+    expect(message.mentionedChannel, isTrue);
+    expect(message.mentionedHere, isTrue);
+    expect(message.mentionedRoles, ['admin']);
+    expect(message.mentionedGroupIds, ['design']);
+  });
 }

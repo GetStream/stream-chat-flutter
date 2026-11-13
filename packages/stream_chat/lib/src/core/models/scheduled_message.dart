@@ -176,9 +176,17 @@ final class ScheduledMessage extends Equatable {
       text: message.text,
       attachments: message.attachments,
       mentionedUsers: message.mentionedUsers,
+      mentionedChannel: message.mentionedChannel,
+      mentionedHere: message.mentionedHere,
+      mentionedRoles: message.mentionedRoles,
+      mentionedGroupIds: message.mentionedGroupIds,
       quotedMessageId: message.quotedMessageId,
       parentId: message.parentId,
       showInChannel: message.showInChannel,
+      silent: message.silent,
+      poll: message.poll,
+      pollId: message.pollId,
+      restrictedVisibility: message.restrictedVisibility,
       extraData: message.extraData,
     );
   }
