@@ -97,8 +97,9 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
     if (scheduledAt == null || !mounted) return;
 
     widget.onClose();
-    // A new message, with a new ID, that keeps the failed one's content. A failed
-    // message can't be changed, only deleted, which happens once this is scheduled.
+    // A new message, with a new ID, that keeps the failed one's content. A
+    // failed message can't be changed, only deleted, which happens once this
+    // is scheduled.
     final message = edited.copyWith(
       id: const Uuid().v4(),
       attachments: [...edited.attachments.where((it) => it.uploadState.isSuccess)],
