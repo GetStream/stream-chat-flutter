@@ -110,6 +110,10 @@ class ChannelEventHandler {
         _onChannelTruncated(event);
       case EventType.channelUpdated:
         _onChannelUpdated(event);
+      case EventType.channelHidden:
+        _onChannelHidden(event);
+      case EventType.channelVisible:
+        _onChannelVisible(event);
     }
   }
 
@@ -121,6 +125,8 @@ class ChannelEventHandler {
         _onMemberAdded(event);
       case EventType.memberRemoved:
         _onMemberRemoved(event);
+      case EventType.notificationRemovedFromChannel:
+        _onRemovedFromChannel(event);
     }
   }
 
@@ -378,6 +384,14 @@ class ChannelEventHandler {
     return _mutations.onChannelUpdated(channel);
   }
 
+  void _onChannelHidden(Event event) {
+    return _mutations.onChannelVisibilityChanged(hidden: true);
+  }
+
+  void _onChannelVisible(Event event) {
+    return _mutations.onChannelVisibilityChanged(hidden: false);
+  }
+
   void _onChannelCounts(Event event) {
     final memberCount = event.channelMemberCount;
     final messageCount = event.channelMessageCount;
@@ -397,8 +411,17 @@ class ChannelEventHandler {
 
   void _onMemberRemoved(Event event) {
     final user = event.user!;
+    if (user.id == _client.state.currentUser?.id) {
+      return _mutations.onCurrentUserRemoved(user);
+    }
 
     return _mutations.onMemberRemoved(user);
+  }
+
+  void _onRemovedFromChannel(Event event) {
+    final user = event.user!;
+
+    return _mutations.onCurrentUserRemoved(user);
   }
 
   void _onMemberUserUpdated(Event event) {
