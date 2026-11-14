@@ -108,6 +108,10 @@ jobs:
     runs-on: ubuntu-latest
     if: needs.gate.outputs.should_run == 'true'
     timeout-minutes: 30
+    permissions:
+      contents: read
+      # Codecov authenticates the coverage upload with a GitHub OIDC token.
+      id-token: write
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v6
@@ -135,7 +139,7 @@ jobs:
       - name: "Upload Coverage"
         uses: codecov/codecov-action@v6
         with:
-          token: ${{secrets.CODECOV_TOKEN}}
+          use_oidc: true
           files: packages/*/coverage/lcov.info
       - name: "Stream Chat Coverage Check"
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
