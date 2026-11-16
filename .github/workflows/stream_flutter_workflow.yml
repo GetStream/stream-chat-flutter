@@ -14,9 +14,11 @@ on:
     branches:
       - master
 
+# Master runs are never cancelled: each master commit needs a full Codecov
+# upload for pull requests to carry skipped packages' coverage from.
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 permissions:
   contents: read
@@ -32,10 +34,15 @@ jobs:
   #
   # `push` events to master always run the full suite, matching the
   # previous `on.push.branches: [master]` behavior.
+  #
+  # On pull requests the test job only runs the changed packages and their
+  # dependents, unless a `shared` file changed: every package builds or
+  # tests against those, so they run the full suite.
   gate:
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ github.event_name == 'push' || (steps.filter.outputs.relevant == 'true' && github.event.pull_request.draft != true) }}
+      test_all: ${{ github.event_name == 'push' || steps.filter.outputs.shared == 'true' }}
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v7
@@ -45,12 +52,22 @@ jobs:
         id: filter
         with:
           filters: |
+            shared: &shared
+              - 'melos.yaml'
+              - 'pubspec.yaml'
+              - 'pubspec.lock'
+              - 'analysis_options.yaml'
+              - 'codecov.yml'
+              - 'tools/**'
+              - '.github/actions/**'
+              - '.github/workflows/scripts/**'
+              - '.github/workflows/stream_flutter_workflow.yml'
             relevant:
+              - *shared
               - 'docs/**'
               - 'packages/**'
               - 'sample_app/**'
               - 'e2e_app/**'
-              - '.github/workflows/stream_flutter_workflow.yml'
 
   analyze:
     needs: gate
@@ -122,40 +139,58 @@ jobs:
           flutter pub global activate remove_from_coverage
       - name: "Bootstrap Workspace"
         run: melos bootstrap
+      # A pull request checks out its merge commit, whose first parent is the
+      # base branch commit it merged onto. Melos only runs scripts in the
+      # packages listed in MELOS_PACKAGES, on top of each script's own
+      # filters. It stays unset, and the full suite runs, when no package
+      # changed.
+      - name: "Select Changed Packages"
+        if: needs.gate.outputs.test_all != 'true'
+        run: |
+          set -euo pipefail
+          base=$(git rev-parse HEAD^1)
+          echo "BASE_SHA=$base" >> "$GITHUB_ENV"
+          packages=$(melos list --diff="$base" --include-dependents --json | jq -r '.[].name' | paste -sd, -)
+          if [ -z "$packages" ]; then
+            echo "No package changed, testing all packages." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          echo "MELOS_PACKAGES=$packages" >> "$GITHUB_ENV"
+          echo "Changed packages and their dependents: ${packages//,/, }." >> "$GITHUB_STEP_SUMMARY"
       - name: "Flutter Test"
         run: melos run test:all
       - name: "Collect Coverage"
         run: melos run coverage:ignore-file --no-select
-      - name: "Upload Coverage"
-        uses: codecov/codecov-action@v7
+      - name: "Stream Chat Coverage"
+        uses: ./.github/actions/package-coverage
         with:
-          use_oidc: true
-          files: packages/*/coverage/lcov.info
-      - name: "Stream Chat Coverage Check"
-        uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
+          package: stream_chat
+          base-sha: ${{ env.BASE_SHA }}
+          min-coverage: 70
+      - name: "Stream Chat Localizations Coverage"
+        uses: ./.github/actions/package-coverage
         with:
-          path: packages/stream_chat/coverage/lcov.info
-          min_coverage: 70
-      - name: "Stream Chat Localizations Coverage Check"
-        uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
+          package: stream_chat_localizations
+          base-sha: ${{ env.BASE_SHA }}
+          min-coverage: 100
+      - name: "Stream Chat Persistence Coverage"
+        uses: ./.github/actions/package-coverage
         with:
-          path: packages/stream_chat_localizations/coverage/lcov.info
-          min_coverage: 100
-      - name: "Stream Chat Persistence Coverage Check"
-        uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
+          package: stream_chat_persistence
+          base-sha: ${{ env.BASE_SHA }}
+          min-coverage: 95
+      - name: "Stream Chat Flutter Core Coverage"
+        uses: ./.github/actions/package-coverage
         with:
-          path: packages/stream_chat_persistence/coverage/lcov.info
-          min_coverage: 95
-      - name: "Stream Chat Flutter Core Coverage Check"
-        uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
+          package: stream_chat_flutter_core
+          base-sha: ${{ env.BASE_SHA }}
+          min-coverage: 30
+      - name: "Stream Chat Flutter Coverage"
+        uses: ./.github/actions/package-coverage
         with:
-          path: packages/stream_chat_flutter_core/coverage/lcov.info
-          min_coverage: 30
-      - name: "Stream Chat Flutter Coverage Check"
-        uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
-        with:
-          path: packages/stream_chat_flutter/coverage/lcov.info
-          min_coverage: 44
+          package: stream_chat_flutter
+          base-sha: ${{ env.BASE_SHA }}
+          min-coverage: 44
 
   build:
     name: build (${{ matrix.platform }})

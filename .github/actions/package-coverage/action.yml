@@ -1,0 +1,36 @@
+name: 'Package Coverage'
+description: "Upload a package's coverage to Codecov and enforce its minimum. Does nothing when the package's tests did not run."
+inputs:
+  package:
+    description: 'The package directory name under packages/'
+    required: true
+  min-coverage:
+    description: 'The minimum line coverage, in percent'
+    required: true
+  base-sha:
+    description: 'The commit that skipped packages carry their coverage from. Empty uses the git parent.'
+    required: false
+    default: ''
+runs:
+  using: "composite"
+  steps:
+    - id: lcov
+      shell: bash
+      run: |
+        lcov="packages/${{ inputs.package }}/coverage/lcov.info"
+        if [ -f "$lcov" ]; then echo "path=$lcov" >> "$GITHUB_OUTPUT"; fi
+    # Each package uploads under its own flag, so Codecov carries forward
+    # the coverage of packages a run skipped from `base-sha`. See
+    # codecov.yml.
+    - if: steps.lcov.outputs.path != ''
+      uses: codecov/codecov-action@v7
+      with:
+        use_oidc: true
+        files: ${{ steps.lcov.outputs.path }}
+        flags: ${{ inputs.package }}
+        commit_parent: ${{ inputs.base-sha }}
+    - if: steps.lcov.outputs.path != ''
+      uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
+      with:
+        path: ${{ steps.lcov.outputs.path }}
+        min_coverage: ${{ inputs.min-coverage }}
