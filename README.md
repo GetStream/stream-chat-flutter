@@ -8,17 +8,20 @@
 </p>
 
 <p align="center">
-  <img id="android-stream-chat-label" alt="StreamChat" src="https://img.shields.io/badge/android:stream_chat-1.4%20MB-blue"/>
-  <img id="android-stream-chat-flutter-label" alt="StreamChatFlutter" src="https://img.shields.io/badge/android:stream_chat_flutter-8.2%20MB-blue"/>
-  <img id="android-stream-chat-persistence-label" alt="StreamChatPersistence" src="https://img.shields.io/badge/android:stream_chat_persistence-2.6%20MB-blue"/>
+  <img alt="StreamChat" src="https://img.shields.io/badge/android:stream__chat-1.4%20MB-blue"/>
+  <img alt="StreamChatFlutter" src="https://img.shields.io/badge/android:stream__chat__flutter-8.2%20MB-blue"/>
+  <img alt="StreamChatPersistence" src="https://img.shields.io/badge/android:stream__chat__persistence-2.6%20MB-blue"/>
 </p>
 <p align="center">
-  <img id="ios-stream-chat-label" alt="StreamChat" src="https://img.shields.io/badge/ios:stream_chat-1.6%20MB-blue"/>
-  <img id="ios-stream-chat-flutter-label" alt="StreamChatFlutter" src="https://img.shields.io/badge/ios:stream_chat_flutter-10.9%20MB-blue"/>
-  <img id="ios-stream-chat-persistence-label" alt="StreamChatPersistence" src="https://img.shields.io/badge/ios:stream_chat_persistence-3.6%20MB-blue"/>
+  <img alt="StreamChat" src="https://img.shields.io/badge/ios:stream__chat-1.6%20MB-blue"/>
+  <img alt="StreamChatFlutter" src="https://img.shields.io/badge/ios:stream__chat__flutter-10.9%20MB-blue"/>
+  <img alt="StreamChatPersistence" src="https://img.shields.io/badge/ios:stream__chat__persistence-3.6%20MB-blue"/>
 </p>
 <p align="center">
-  <img id="stream-chat-localizations-label" alt="StreamChatLocalizations" src="https://img.shields.io/badge/stream_chat_localizations-169%20KB-blue"/>
+  <img alt="StreamChatLocalizations" src="https://img.shields.io/badge/stream__chat__localizations-169%20KB-blue"/>
+</p>
+<p align="center">
+  <sub>What each package adds to an empty release app: the arm64 APK on Android, the uncompressed <code>Runner.app</code> on iOS, so the two platforms aren't comparable. See <a href="metrics/sdk_size">metrics/sdk_size</a>.</sub>
 </p>
 
 V10 brings a modern redesign, a unified design system shared across all Stream SDK platforms, and improved developer experience.

@@ -47,7 +47,15 @@ lane :sdk_size do
 
   # Clones the metrics repo into METRICS_DIR, and pushes the sizes on a push to
   # the base branch.
-  show_sdk_size(branch_sizes: sizes, github_repo: GITHUB_REPO, base_branch: base_branch)
+  show_sdk_size(
+    branch_sizes: sizes,
+    github_repo: GITHUB_REPO,
+    base_branch: base_branch,
+    # In KB: 🟡 from +50 KB and 🔴 from +100 KB, so the smaller packages can
+    # be flagged too.
+    fine_tolerance: 50,
+    max_tolerance: 100
+  )
   add_commit_note(sha)
 
   show_size_breakdown(base_branch, results, skipped, sha)
@@ -83,7 +91,8 @@ lane :update_readme_badges do
 
   readme = File.read(README_PATH)
   badges.each do |label, kb|
-    pattern = %r{(https://img\.shields\.io/badge/#{Regexp.escape(label)}-)[^"]*?(-blue")}
+    # shields.io reads `_` as a space, so the badges spell an underscore `__`.
+    pattern = %r{(https://img\.shields\.io/badge/#{Regexp.escape(label.gsub('_', '__'))}-)[^"]*?(-blue")}
     UI.user_error!("No #{label} badge in README.md") unless readme.match?(pattern)
 
     readme = readme.sub(pattern) { "#{Regexp.last_match(1)}#{badge_size(kb)}#{Regexp.last_match(2)}" }

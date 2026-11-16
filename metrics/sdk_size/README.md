@@ -19,9 +19,19 @@ with `flutter create --empty`, adds the variant's `dependencies.yaml` and
 - iOS: `Runner.app`, built with `--no-codesign`.
 
 Each variant's size is what it adds on top of `baseline`, an empty
-`MaterialApp`. A variant's `main.dart` has to use the SDK the way an app would.
-Otherwise tree shaking removes the Dart code, and only the native libraries are
-counted.
+`MaterialApp`. On Android it's the size of the APK, which compresses some files
+and stores others, such as the native libraries, as they are. On iOS it's the
+uncompressed size of `Runner.app`. Compare each platform with itself only.
+
+The breakdown lists each Dart package by its uncompressed size in the AOT
+snapshot, next to the APK's own sizes for native libraries and assets, so its
+total doesn't match the APK size in `## SDK Size`.
+
+A variant's `main.dart` has to use the SDK the way an app would. Otherwise tree
+shaking removes the Dart code, and only the native libraries are counted.
+
+The sizes also depend on the Flutter version, so `sdk_size.yml` pins it. Bump
+it on purpose: the next push to `master` then stores a new benchmark.
 
 The archive size is the `Total compressed archive size` that
 `flutter pub publish --dry-run` reports for each publishable package.

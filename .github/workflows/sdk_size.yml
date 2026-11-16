@@ -37,6 +37,10 @@ jobs:
         uses: actions/checkout@v7
 
       - uses: ./.github/actions/setup-flutter
+        with:
+          # Pinned, so a Flutter release doesn't change the sizes. Bump it on
+          # purpose; the next push to master then stores a new benchmark.
+          flutter-version: "3.50.0"
 
       - uses: ./.github/actions/install-android-ndk
 
@@ -84,6 +88,10 @@ jobs:
           xcode-version: "26.6"
 
       - uses: ./.github/actions/setup-flutter
+        with:
+          # Pinned, so a Flutter release doesn't change the sizes. Bump it on
+          # purpose; the next push to master then stores a new benchmark.
+          flutter-version: "3.50.0"
 
       - name: Measure app size
         run: dart run metrics/sdk_size/tool/measure.dart --platform ios
