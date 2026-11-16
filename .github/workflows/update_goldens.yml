@@ -118,10 +118,17 @@ jobs:
        needs.update_docs_goldens.outputs.changed == 'true')
     runs-on: ubuntu-latest
     steps:
+      - name: 🔑 Mint CI Bot Token
+        id: ci-bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+
       - name: 📚 Checkout branch
         uses: actions/checkout@v7
         with:
-          ssh-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+          token: ${{ steps.ci-bot-token.outputs.token }}
 
       - name: 📥 Download SDK goldens
         if: needs.update_sdk_goldens.outputs.changed == 'true'
@@ -149,5 +156,5 @@ jobs:
         with:
           commit_message: "chore: Update Goldens"
           file_pattern: "**/test/**/goldens/**/*.png"
-          commit_user_name: "Stream SDK Bot"
-          commit_user_email: "60655709+Stream-SDK-Bot@users.noreply.github.com"
+          commit_user_name: "stream-flutter-ci-bot[bot]"
+          commit_user_email: "357444665+stream-flutter-ci-bot[bot]@users.noreply.github.com"
