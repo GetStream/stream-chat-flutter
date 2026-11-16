@@ -1,1 +1,1 @@
-gem 'fastlane-plugin-stream_actions', '0.4.16'
+gem 'fastlane-plugin-stream_actions', '0.4.22'

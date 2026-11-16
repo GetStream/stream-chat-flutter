@@ -72,7 +72,7 @@ lane :update_readme_badges do
   repo = GITHUB_REPO.split('/').last
 
   FileUtils.rm_rf(METRICS_DIR)
-  sh("git clone --depth 1 git@github.com:GetStream/stream-internal-metrics.git #{METRICS_DIR.shellescape}")
+  clone_internal_metrics(path: METRICS_DIR)
   benchmark = JSON.parse(File.read(File.join(METRICS_DIR, "#{repo}-size.json")))[base_branch]
   UI.user_error!("No benchmark for #{base_branch} in stream-internal-metrics") unless benchmark
 
@@ -132,7 +132,7 @@ def show_size_breakdown(base_branch, results, skipped, sha)
       else
         sh('git add -A')
         sh("git commit -m 'Update #{benchmark_file}'")
-        push_metrics
+        Fastlane::Helper::MetricsHelper.push
       end
     end
   end
@@ -142,22 +142,6 @@ end
 
 def push_event?
   ENV['GITHUB_EVENT_NAME'] == 'push'
-end
-
-# Other repositories push to the metrics repo too, so a push can be rejected
-# until it is rebased on theirs.
-def push_metrics(attempts: 3)
-  attempt = 0
-  begin
-    attempt += 1
-    sh('git pull --rebase')
-    sh('git push')
-  rescue FastlaneCore::Interface::FastlaneShellError
-    raise if attempt >= attempts
-
-    UI.important("Pushing the size breakdown failed, retrying (#{attempt}/#{attempts}).")
-    retry
-  end
 end
 
 # Adds the measured commit under the `## SDK Size` table, which show_sdk_size

@@ -27,11 +27,6 @@ jobs:
           # Bot token so the pushed commit can re-trigger CI on the branch.
           token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
 
-      - name: 🔑 Connect Bot
-        uses: webfactory/ssh-agent@v0.10.0
-        with:
-          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
-
       - name: 💎 Set up Ruby
         uses: ./.github/actions/setup-ruby
         with:
@@ -41,6 +36,8 @@ jobs:
         working-directory: metrics/sdk_size
         env:
           BASE_BRANCH: ${{ inputs.base_branch }}
+          # Reads stream-internal-metrics.
+          GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
         run: bundle exec fastlane update_readme_badges
 
       - name: 📤 Commit Changes
