@@ -297,7 +297,7 @@ goldens moved — never write them.
 `update_goldens.yml` commits back to whatever branch you dispatch against, so **push the branch first**.
 
 > **Confirm with the user before running this.** It pushes a branch and dispatches a workflow that writes a commit
-> to the remote using `secrets.BOT_SSH_PRIVATE_KEY`. It is the one outward-facing action in this skill — never
+> to the remote with the `stream-flutter-ci-bot` app token. It is the one outward-facing action in this skill — never
 > dispatch it unprompted, and expect the branch to stay red on goldens until it has run.
 
 ```bash
