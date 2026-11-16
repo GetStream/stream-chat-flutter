@@ -200,54 +200,124 @@ def read_results(name)
   File.exist?(path) ? JSON.parse(File.read(path)) : nil
 end
 
-# One collapsible table per platform and variant: what the variant adds on top
-# of an empty app, per component, with the change against the base branch.
+# A summary of what changed against the base branch, the largest component
+# changes, and one collapsible table per platform and variant with what the
+# variant adds on top of an empty app.
 def render_breakdown(breakdown, benchmark, base_branch, skipped, sha)
   lines = [BREAKDOWN_HEADER, '']
+  lines.concat(render_summary(breakdown, benchmark, base_branch))
+  lines << ''
+  lines << "This run does not measure #{skipped.join(', ')}." << '' unless skipped.empty?
+  lines << commit_note(sha)
+  lines << ''
+
+  changes = largest_changes(breakdown, benchmark)
+  unless changes.empty?
+    lines << '### Largest changes' << ''
+    lines << "| Component | Variant | `#{base_branch}` | Branch | Δ |"
+    lines << '| - | - | -: | -: | -: |'
+    changes.each do |platform, variant, key, before, after|
+      lines << "| `#{key}` | #{platform} · `#{variant}` | #{format_size(before)} | " \
+               "#{format_size(after)} | #{format_delta(after - before)} |"
+    end
+    lines << ''
+  end
+
   artifacts = ENV['GITHUB_RUN_ID'] ? "the `sdk-size-analysis` artifacts of #{run_link}" : 'the analysis files'
+  lines << '<details><summary>Full breakdown</summary>' << ''
   lines << 'What each SDK adds to an empty release app, per Dart package and native library. ' \
            "Dart sizes are uncompressed symbol sizes. Open #{artifacts} " \
            'in the DevTools App Size tool to drill down further.'
   lines << ''
-  notes = []
-  notes << "This run does not measure #{skipped.join(', ')}." unless skipped.empty?
-  notes << "No `#{base_branch}` benchmark for the breakdown yet." unless benchmark
-  notes.each { |note| lines << note << '' }
-  lines << commit_note(sha)
-  lines << ''
   breakdown.each do |platform, variants|
     variants.each do |variant, components|
-      # Without a benchmark for this variant, there is nothing to compare to.
-      base = benchmark&.dig(platform, variant)
-      total = components.values.sum
-      total_delta = base ? " (#{format_delta(total - base.values.sum)})" : ' (new)'
-      lines << "<details><summary><b>#{platform}</b> · <code>#{variant}</code>: " \
-               "#{format_size(total)}#{total_delta}</summary>"
-      lines << ''
-      lines << "| Component | Size | Δ vs `#{base_branch}` |"
-      lines << '| - | -: | -: |'
-
-      rows = (components.keys | (base || {}).keys).map do |key|
-        [key, components[key] || 0, base && ((components[key] || 0) - (base[key] || 0))]
-      end
-      shown, folded = rows.sort_by { |_, size, _| -size }.partition do |_, size, delta|
-        size.abs >= BREAKDOWN_MIN_BYTES || delta.to_i.abs >= BREAKDOWN_MIN_BYTES
-      end
-      folded += shown.drop(BREAKDOWN_MAX_ROWS)
-      shown.take(BREAKDOWN_MAX_ROWS).each do |key, size, delta|
-        lines << "| `#{key}` | #{format_size(size)} | #{format_delta(delta)} |"
-      end
-      unless folded.empty?
-        folded_delta = base && folded.sum { |_, _, d| d }
-        lines << "| other (#{folded.size}) | #{format_size(folded.sum { |_, s, _| s })} | " \
-                 "#{format_delta(folded_delta)} |"
-      end
-      lines << ''
-      lines << '</details>'
-      lines << ''
+      lines.concat(render_variant(platform, variant, components, benchmark&.dig(platform, variant), base_branch))
     end
   end
+  lines << '</details>'
   lines.join("\n")
+end
+
+# One line per variant whose total changed, or a single line when none did.
+def render_summary(breakdown, benchmark, base_branch)
+  return ["📦 **First measurement**: there is no `#{base_branch}` benchmark to compare against yet."] unless benchmark
+
+  changed = []
+  breakdown.each do |platform, variants|
+    variants.each do |variant, components|
+      base = benchmark.dig(platform, variant)
+      total = components.values.sum
+      next changed << "- #{platform} · `#{variant}`: #{format_size(total)} (new)" unless base
+
+      delta = total - base.values.sum
+      next if delta.abs < BREAKDOWN_MIN_BYTES
+
+      changed << "- #{platform} · `#{variant}`: #{format_size(total)}, " \
+                 "**#{format_delta(delta)}** (#{format_percent(delta, base.values.sum)}) #{delta.positive? ? '📈' : '📉'}"
+    end
+  end
+  return ["📦 **No size change** against `#{base_branch}`."] if changed.empty?
+
+  ["📦 **Size change** against `#{base_branch}`:", '', *changed]
+end
+
+# The components that changed the most, once per platform: a package that
+# every variant includes is shown for the variant where it changed the most.
+def largest_changes(breakdown, benchmark)
+  return [] unless benchmark
+
+  rows = {}
+  breakdown.each do |platform, variants|
+    variants.each do |variant, components|
+      base = benchmark.dig(platform, variant)
+      next unless base
+
+      (components.keys | base.keys).each do |key|
+        before = base[key] || 0
+        after = components[key] || 0
+        next if (after - before).abs < BREAKDOWN_MIN_BYTES
+
+        current = rows[[platform, key]]
+        next if current && (current[4] - current[3]).abs >= (after - before).abs
+
+        rows[[platform, key]] = [platform, variant, key, before, after]
+      end
+    end
+  end
+  rows.values.sort_by { |row| -(row[4] - row[3]).abs }.take(BREAKDOWN_MAX_ROWS)
+end
+
+def render_variant(platform, variant, components, base, base_branch)
+  total = components.values.sum
+  total_delta = base ? " (#{format_delta(total - base.values.sum)})" : ' (new)'
+  lines = ["<details><summary><b>#{platform}</b> · <code>#{variant}</code>: " \
+           "#{format_size(total)}#{total_delta}</summary>", '']
+  lines << "| Component | Size | Δ vs `#{base_branch}` |"
+  lines << '| - | -: | -: |'
+
+  rows = (components.keys | (base || {}).keys).map do |key|
+    [key, components[key] || 0, base && ((components[key] || 0) - (base[key] || 0))]
+  end
+  shown, folded = rows.sort_by { |_, size, _| -size }.partition do |_, size, delta|
+    size.abs >= BREAKDOWN_MIN_BYTES || delta.to_i.abs >= BREAKDOWN_MIN_BYTES
+  end
+  folded += shown.drop(BREAKDOWN_MAX_ROWS)
+  shown.take(BREAKDOWN_MAX_ROWS).each do |key, size, delta|
+    lines << "| `#{key}` | #{format_size(size)} | #{format_delta(delta)} |"
+  end
+  unless folded.empty?
+    folded_delta = base && folded.sum { |_, _, d| d }
+    lines << "| other (#{folded.size}) | #{format_size(folded.sum { |_, s, _| s })} | " \
+             "#{format_delta(folded_delta)} |"
+  end
+  lines << '' << '</details>' << ''
+end
+
+def format_percent(delta, base)
+  percent = delta * 100.0 / base
+  return "#{delta.positive? ? '+' : '-'}<0.1%" if percent.abs < 0.1
+
+  "#{percent.positive? ? '+' : ''}#{percent.round(1)}%"
 end
 
 def format_size(bytes)
