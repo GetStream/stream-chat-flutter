@@ -27,6 +27,7 @@ runs:
       with:
         use_oidc: true
         files: ${{ steps.lcov.outputs.path }}
+        disable_search: true
         flags: ${{ inputs.package }}
         commit_parent: ${{ inputs.base-sha }}
     - if: steps.lcov.outputs.path != ''
