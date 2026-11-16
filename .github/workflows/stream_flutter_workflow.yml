@@ -181,10 +181,6 @@ jobs:
       - name: "Git Checkout"
         uses: actions/checkout@v7
       - uses: ./.github/actions/setup-flutter
-      # This step is needed due to https://github.com/actions/runner-images/issues/11279
-      - name: Install SQLite3
-        if: matrix.package == 'stream_chat_persistence'
-        run: sudo apt-get update && sudo apt-get install -y sqlite3 libsqlite3-dev
       - name: "Install Tools"
         run: |
           flutter pub global activate melos
