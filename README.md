@@ -2,16 +2,22 @@
 
 ![Stream Chat Flutter SDK hero image](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/images/sdk_hero_v10.png)
 
-[![CI](https://github.com/GetStream/stream-chat-flutter/actions/workflows/stream_flutter_workflow.yml/badge.svg?branch=master)](https://github.com/GetStream/stream-chat-flutter/actions/workflows/stream_flutter_workflow.yml)
-[![Melos](https://img.shields.io/badge/maintained%20with-melos-f700ff.svg?style=flat-square)](https://github.com/invertase/melos)
+<p align="center">
+  <a href="https://github.com/GetStream/stream-chat-flutter/actions/workflows/stream_flutter_workflow.yml"><img alt="CI" src="https://github.com/GetStream/stream-chat-flutter/actions/workflows/stream_flutter_workflow.yml/badge.svg?branch=master"/></a>
+  <a href="https://github.com/invertase/melos"><img alt="Melos" src="https://img.shields.io/badge/maintained%20with-melos-f700ff.svg?style=flat-square"/></a>
+</p>
 
 <p align="center">
   <img id="android-stream-chat-label" alt="StreamChat" src="https://img.shields.io/badge/android:stream_chat-1.4%20MB-blue"/>
   <img id="android-stream-chat-flutter-label" alt="StreamChatFlutter" src="https://img.shields.io/badge/android:stream_chat_flutter-8.2%20MB-blue"/>
   <img id="android-stream-chat-persistence-label" alt="StreamChatPersistence" src="https://img.shields.io/badge/android:stream_chat_persistence-2.6%20MB-blue"/>
+</p>
+<p align="center">
   <img id="ios-stream-chat-label" alt="StreamChat" src="https://img.shields.io/badge/ios:stream_chat-1.6%20MB-blue"/>
   <img id="ios-stream-chat-flutter-label" alt="StreamChatFlutter" src="https://img.shields.io/badge/ios:stream_chat_flutter-10.9%20MB-blue"/>
   <img id="ios-stream-chat-persistence-label" alt="StreamChatPersistence" src="https://img.shields.io/badge/ios:stream_chat_persistence-3.6%20MB-blue"/>
+</p>
+<p align="center">
   <img id="stream-chat-localizations-label" alt="StreamChatLocalizations" src="https://img.shields.io/badge/stream_chat_localizations-169%20KB-blue"/>
 </p>
 
