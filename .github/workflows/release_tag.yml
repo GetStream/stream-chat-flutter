@@ -17,11 +17,18 @@ jobs:
       contents: write  # Required to create and push tags
 
     steps:
+      - name: 🔑 Mint CI Bot Token
+        id: ci-bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+
       - name: 📚 Checkout branch
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+          token: ${{ steps.ci-bot-token.outputs.token }}
 
       - name: 🏷️ Extract Version Tag
         id: extract_tag
@@ -48,8 +55,8 @@ jobs:
       - name: 🚀 Create and Push Tag
         shell: bash
         run: |
-          git config user.name "Stream SDK Bot"
-          git config user.email "60655709+Stream-SDK-Bot@users.noreply.github.com"
+          git config user.name "stream-flutter-ci-bot[bot]"
+          git config user.email "357444665+stream-flutter-ci-bot[bot]@users.noreply.github.com"
           
           echo "Creating and pushing tag: ${{ steps.extract_tag.outputs.tag }}"
           git tag ${{ steps.extract_tag.outputs.tag }}

@@ -21,11 +21,18 @@ jobs:
       id-token: write # Required for authentication using OIDC
     runs-on: ubuntu-latest
     steps:
+      - name: 🔑 Mint CI Bot Token
+        id: ci-bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+
       - name: 📚 Checkout branch
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+          token: ${{ steps.ci-bot-token.outputs.token }}
 
       # Set up the Dart SDK and provision the OIDC token used for publishing.
       - name: 🎯 Setup Dart
@@ -68,4 +75,4 @@ jobs:
           generate_release_notes: true
           tag_name: ${{ steps.extract_version.outputs.tag }}
           prerelease: ${{ steps.extract_version.outputs.prerelease }}
-          token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+          token: ${{ steps.ci-bot-token.outputs.token }}
