@@ -14,11 +14,12 @@ on:
     branches:
       - master
 
-# Master runs are never cancelled: each master commit needs a full Codecov
-# upload for pull requests to carry skipped packages' coverage from.
+# Each master push gets its own group, so no run is cancelled or replaced
+# while pending: every master commit needs a full Codecov upload for pull
+# requests to carry skipped packages' coverage from.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.sha || github.ref }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
@@ -35,9 +36,8 @@ jobs:
   # `push` events to master always run the full suite, matching the
   # previous `on.push.branches: [master]` behavior.
   #
-  # On pull requests the test job only runs the changed packages and their
-  # dependents, unless a `shared` file changed: every package builds or
-  # tests against those, so they run the full suite.
+  # `test_all` tells `select` to test every package: on master pushes, and
+  # when a `shared` file that every package builds or tests against changed.
   gate:
     runs-on: ubuntu-latest
     outputs:
@@ -115,23 +115,78 @@ jobs:
         run: |
           ./.github/workflows/scripts/validate-formatting.sh
 
-  test:
+  # Picks the packages to test, with their minimum coverage. On pull requests
+  # that is the changed packages and their dependents; pushes to master and
+  # changes to shared files test every package.
+  select:
     needs: gate
-    runs-on: ubuntu-latest
     if: needs.gate.outputs.should_run == 'true'
-    timeout-minutes: 30
-    permissions:
-      contents: read
-      # Codecov authenticates the coverage upload with a GitHub OIDC token.
-      id-token: write
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      packages: ${{ steps.select.outputs.packages }}
+      base_sha: ${{ steps.select.outputs.base_sha }}
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: ./.github/actions/setup-flutter
+      - name: "Install Tools"
+        run: flutter pub global activate melos
+      - name: "Bootstrap Workspace"
+        run: melos bootstrap
+      # A pull request checks out its merge commit, whose first parent is the
+      # base branch commit it merged onto. An empty melos selection tests
+      # every package rather than none.
+      - name: "Select Packages"
+        id: select
+        env:
+          TEST_ALL: ${{ needs.gate.outputs.test_all }}
+          PACKAGES: |
+            [
+              { "package": "stream_chat", "path": "packages/stream_chat", "min-coverage": 70 },
+              { "package": "stream_chat_flutter", "path": "packages/stream_chat_flutter", "min-coverage": 44 },
+              { "package": "stream_chat_flutter_core", "path": "packages/stream_chat_flutter_core", "min-coverage": 30 },
+              { "package": "stream_chat_localizations", "path": "packages/stream_chat_localizations", "min-coverage": 100 },
+              { "package": "stream_chat_persistence", "path": "packages/stream_chat_persistence", "min-coverage": 95 },
+              { "package": "sample_app", "path": "sample_app" }
+            ]
+        run: |
+          set -euo pipefail
+          selected=$(jq -c . <<< "$PACKAGES")
+          if [ "$TEST_ALL" != "true" ]; then
+            base=$(git rev-parse HEAD^1)
+            echo "base_sha=$base" >> "$GITHUB_OUTPUT"
+            changed=$(melos list --diff="$base" --include-dependents --json | jq -c 'map(.name)')
+            if [ "$changed" != "[]" ]; then
+              selected=$(jq -c --argjson changed "$changed" 'map(select(.package | IN($changed[])))' <<< "$PACKAGES")
+            fi
+          fi
+          echo "packages=$selected" >> "$GITHUB_OUTPUT"
+          echo "Testing: $(jq -r 'map(.package) | join(", ")' <<< "$selected")" >> "$GITHUB_STEP_SUMMARY"
+
+  test-package:
+    name: test (${{ matrix.package }})
+    needs: select
+    if: needs.select.outputs.packages != '[]'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      # Codecov authenticates the coverage upload with a GitHub OIDC token.
+      id-token: write
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.select.outputs.packages) }}
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v7
+      - uses: ./.github/actions/setup-flutter
       # This step is needed due to https://github.com/actions/runner-images/issues/11279
       - name: Install SQLite3
+        if: matrix.package == 'stream_chat_persistence'
         run: sudo apt-get update && sudo apt-get install -y sqlite3 libsqlite3-dev
       - name: "Install Tools"
         run: |
@@ -139,58 +194,42 @@ jobs:
           flutter pub global activate remove_from_coverage
       - name: "Bootstrap Workspace"
         run: melos bootstrap
-      # A pull request checks out its merge commit, whose first parent is the
-      # base branch commit it merged onto. Melos only runs scripts in the
-      # packages listed in MELOS_PACKAGES, on top of each script's own
-      # filters. It stays unset, and the full suite runs, when no package
-      # changed.
-      - name: "Select Changed Packages"
-        if: needs.gate.outputs.test_all != 'true'
-        run: |
-          set -euo pipefail
-          base=$(git rev-parse HEAD^1)
-          echo "BASE_SHA=$base" >> "$GITHUB_ENV"
-          packages=$(melos list --diff="$base" --include-dependents --json | jq -r '.[].name' | paste -sd, -)
-          if [ -z "$packages" ]; then
-            echo "No package changed, testing all packages." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          echo "MELOS_PACKAGES=$packages" >> "$GITHUB_ENV"
-          echo "Changed packages and their dependents: ${packages//,/, }." >> "$GITHUB_STEP_SUMMARY"
       - name: "Flutter Test"
-        run: melos run test:all
+        working-directory: ${{ matrix.path }}
+        run: flutter test --coverage
       - name: "Collect Coverage"
-        run: melos run coverage:ignore-file --no-select
-      - name: "Stream Chat Coverage"
-        uses: ./.github/actions/package-coverage
+        if: matrix.min-coverage
+        working-directory: ${{ matrix.path }}
+        run: bash "$GITHUB_WORKSPACE/.github/workflows/scripts/remove-from-coverage.sh"
+      # Each package uploads under its own flag, so Codecov carries forward
+      # the coverage of packages a run skipped from the base commit. See
+      # codecov.yml.
+      - name: "Upload Coverage"
+        if: matrix.min-coverage
+        uses: codecov/codecov-action@v7
         with:
-          package: stream_chat
-          base-sha: ${{ env.BASE_SHA }}
-          min-coverage: 70
-      - name: "Stream Chat Localizations Coverage"
-        uses: ./.github/actions/package-coverage
+          use_oidc: true
+          files: ${{ matrix.path }}/coverage/lcov.info
+          disable_search: true
+          flags: ${{ matrix.package }}
+          commit_parent: ${{ needs.select.outputs.base_sha }}
+      - name: "Check Coverage"
+        if: matrix.min-coverage
+        uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
-          package: stream_chat_localizations
-          base-sha: ${{ env.BASE_SHA }}
-          min-coverage: 100
-      - name: "Stream Chat Persistence Coverage"
-        uses: ./.github/actions/package-coverage
-        with:
-          package: stream_chat_persistence
-          base-sha: ${{ env.BASE_SHA }}
-          min-coverage: 95
-      - name: "Stream Chat Flutter Core Coverage"
-        uses: ./.github/actions/package-coverage
-        with:
-          package: stream_chat_flutter_core
-          base-sha: ${{ env.BASE_SHA }}
-          min-coverage: 30
-      - name: "Stream Chat Flutter Coverage"
-        uses: ./.github/actions/package-coverage
-        with:
-          package: stream_chat_flutter
-          base-sha: ${{ env.BASE_SHA }}
-          min-coverage: 44
+          path: ${{ matrix.path }}/coverage/lcov.info
+          min_coverage: ${{ matrix.min-coverage }}
+
+  # The required check. It fails when any selected package's tests fail, and
+  # passes when no package needed testing.
+  test:
+    needs: [select, test-package]
+    if: ${{ !cancelled() && needs.select.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Check Results"
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
+        run: exit 1
 
   build:
     name: build (${{ matrix.platform }})
