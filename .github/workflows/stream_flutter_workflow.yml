@@ -44,10 +44,10 @@ jobs:
       should_run: ${{ github.event_name == 'push' || (steps.filter.outputs.relevant == 'true' && github.event.pull_request.draft != true) }}
       test_all: ${{ github.event_name == 'push' || steps.filter.outputs.shared == 'true' }}
     steps:
-      - name: "Git Checkout"
+      - name: 📚 Git Checkout
         uses: actions/checkout@v7
 
-      - name: "Detect Path Changes"
+      - name: 🛤️ Detect Path Changes
         uses: dorny/paths-filter@v4
         id: filter
         with:
@@ -71,49 +71,56 @@ jobs:
 
   analyze:
     needs: gate
-    timeout-minutes: 15
     if: needs.gate.outputs.should_run == 'true'
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
-      - name: "Git Checkout"
+      - name: 📚 Git Checkout
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: ./.github/actions/setup-flutter
-      - name: "Install Tools"
-        run: |
-          flutter pub global activate melos
-      - name: "Bootstrap Workspace"
+
+      - name: 🐦 Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: 📦 Install Tools
+        run: flutter pub global activate melos
+
+      - name: 🔧 Bootstrap Workspace
         run: melos bootstrap --verbose
-      - name: "Dart Analyze"
-        run: |
-          melos run analyze
-      - name: "Pub Check"
+
+      - name: 🔍 Dart Analyze
+        run: melos run analyze
+
+      - name: 📋 Pub Check
         if: github.base_ref == 'master'
-        run: |
-          melos run lint:pub
+        run: melos run lint:pub
 
   format:
     needs: gate
-    runs-on: ubuntu-latest
     if: needs.gate.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - name: "Git Checkout"
+      - name: 📚 Git Checkout
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: ./.github/actions/setup-flutter
-      - name: "Install Tools"
-        run: |
-          flutter pub global activate melos
-      - name: "Bootstrap Workspace"
+
+      - name: 🐦 Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: 📦 Install Tools
+        run: flutter pub global activate melos
+
+      - name: 🔧 Bootstrap Workspace
         run: melos bootstrap
-      - name: "Melos Format"
+
+      - name: 🎨 Melos Format
         run: melos run format
-      - name: "Validate Formatting"
-        run: |
-          ./.github/workflows/scripts/validate-formatting.sh
+
+      - name: ✅ Validate Formatting
+        run: ./.github/workflows/scripts/validate-formatting.sh
 
   # Picks the packages to test, with their minimum coverage. On pull requests
   # that is the changed packages and their dependents; pushes to master and
@@ -126,19 +133,24 @@ jobs:
     outputs:
       packages: ${{ steps.select.outputs.packages }}
     steps:
-      - name: "Git Checkout"
+      - name: 📚 Git Checkout
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: ./.github/actions/setup-flutter
-      - name: "Install Tools"
+
+      - name: 🐦 Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: 📦 Install Tools
         run: flutter pub global activate melos
-      - name: "Bootstrap Workspace"
+
+      - name: 🔧 Bootstrap Workspace
         run: melos bootstrap
+
       # A pull request checks out its merge commit, whose first parent is the
       # base branch commit it merged onto. An empty melos selection tests
       # every package rather than none.
-      - name: "Select Packages"
+      - name: 🎯 Select Packages
         id: select
         env:
           TEST_ALL: ${{ needs.gate.outputs.test_all }}
@@ -153,6 +165,7 @@ jobs:
             ]
         run: |
           set -euo pipefail
+
           selected=$(jq -c . <<< "$PACKAGES")
           if [ "$TEST_ALL" != "true" ]; then
             changed=$(melos list --diff="$(git rev-parse HEAD^1)" --include-dependents --json | jq -c 'map(.name)')
@@ -160,6 +173,7 @@ jobs:
               selected=$(jq -c --argjson changed "$changed" 'map(select(.package | IN($changed[])))' <<< "$PACKAGES")
             fi
           fi
+
           echo "packages=$selected" >> "$GITHUB_OUTPUT"
           echo "Testing: $(jq -r 'map(.package) | join(", ")' <<< "$selected")" >> "$GITHUB_STEP_SUMMARY"
 
@@ -178,25 +192,32 @@ jobs:
       matrix:
         include: ${{ fromJSON(needs.select.outputs.packages) }}
     steps:
-      - name: "Git Checkout"
+      - name: 📚 Git Checkout
         uses: actions/checkout@v7
-      - uses: ./.github/actions/setup-flutter
-      - name: "Install Tools"
+
+      - name: 🐦 Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: 📦 Install Tools
         run: |
           flutter pub global activate melos
           flutter pub global activate remove_from_coverage
-      - name: "Bootstrap Workspace"
+
+      - name: 🔧 Bootstrap Workspace
         run: melos bootstrap
-      - name: "Flutter Test"
+
+      - name: 🧪 Flutter Test
         working-directory: ${{ matrix.path }}
         run: flutter test --coverage
-      - name: "Collect Coverage"
+
+      - name: 🧹 Collect Coverage
         if: matrix.min-coverage
         working-directory: ${{ matrix.path }}
         run: bash "$GITHUB_WORKSPACE/.github/workflows/scripts/remove-from-coverage.sh"
+
       # Each package uploads under its own flag, so Codecov carries forward
       # the coverage of packages a run skipped. See codecov.yml.
-      - name: "Upload Coverage"
+      - name: 📤 Upload Coverage
         if: matrix.min-coverage
         uses: codecov/codecov-action@v7
         with:
@@ -204,7 +225,8 @@ jobs:
           files: ${{ matrix.path }}/coverage/lcov.info
           disable_search: true
           flags: ${{ matrix.package }}
-      - name: "Check Coverage"
+
+      - name: 📊 Check Coverage
         if: matrix.min-coverage
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
         with:
@@ -218,15 +240,15 @@ jobs:
     if: ${{ !cancelled() && needs.select.result != 'skipped' }}
     runs-on: ubuntu-latest
     steps:
-      - name: "Check Results"
+      - name: 🚨 Check Results
         if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
         run: exit 1
 
   build:
     name: build (${{ matrix.platform }})
     needs: gate
-    runs-on: ${{ matrix.os }}
     if: needs.gate.outputs.should_run == 'true' && github.event_name == 'pull_request'
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -240,24 +262,36 @@ jobs:
           #   os: xcode-27
           #   working-directory: sample_app/ios
           #   build-command: bundle exec fastlane build_ipa no_codesign:true
-
     steps:
-      - name: "Git Checkout"
+      - name: 📚 Git Checkout
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: ./.github/actions/setup-flutter
-      - uses: ./.github/actions/setup-xcode
+
+      - name: 🐦 Install Flutter
+        uses: ./.github/actions/setup-flutter
+
+      - name: 🍎 Setup Xcode
         if: matrix.platform == 'ios'
-      - uses: ./.github/actions/cache-gradle
+        uses: ./.github/actions/setup-xcode
+
+      - name: 💾 Cache Gradle
         if: matrix.platform == 'android'
-      - uses: ./.github/actions/install-android-ndk
+        uses: ./.github/actions/cache-gradle
+
+      - name: 🤖 Install Android NDK
         if: matrix.platform == 'android'
-      - name: "Install Tools"
+        uses: ./.github/actions/install-android-ndk
+
+      - name: 📦 Install Tools
         run: flutter pub global activate melos
-      - name: "Bootstrap Workspace"
+
+      - name: 🔧 Bootstrap Workspace
         run: melos bootstrap
-      - uses: ./.github/actions/setup-ruby
-      - name: "Build ${{ matrix.platform }} App"
+
+      - name: 💎 Setup Ruby
+        uses: ./.github/actions/setup-ruby
+
+      - name: 🏗️ Build ${{ matrix.platform }} App
         working-directory: ${{ matrix.working-directory }}
         run: ${{ matrix.build-command }}
