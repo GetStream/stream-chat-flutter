@@ -21,11 +21,21 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
+      # Reads stream-internal-metrics, and pushes the badge commit, which
+      # re-triggers CI on the branch.
+      - name: 🔑 Create bot token
+        id: bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.STREAM_FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.STREAM_FLUTTER_CI_BOT_PRIVATE_KEY }}
+          repositories: ${{ github.event.repository.name }},stream-internal-metrics
+          permission-contents: write
+
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
         with:
-          # Bot token so the pushed commit can re-trigger CI on the branch.
-          token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+          token: ${{ steps.bot-token.outputs.token }}
 
       - name: 💎 Set up Ruby
         uses: ./.github/actions/setup-ruby
@@ -36,8 +46,7 @@ jobs:
         working-directory: metrics/sdk_size
         env:
           BASE_BRANCH: ${{ inputs.base_branch }}
-          # Reads stream-internal-metrics.
-          GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.bot-token.outputs.token }}
         run: bundle exec fastlane update_readme_badges
 
       - name: 📤 Commit Changes

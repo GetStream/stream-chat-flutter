@@ -123,9 +123,6 @@ jobs:
       contents: read
       pull-requests: write
     env:
-      # Bot token: it reads and pushes stream-internal-metrics, and posts the
-      # PR comments.
-      GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
       GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
       BASE_BRANCH: ${{ github.base_ref || github.ref_name }}
       GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
@@ -138,6 +135,9 @@ jobs:
 
       - name: Report sizes
         uses: ./.github/actions/sdk-size-report
+        with:
+          client-id: ${{ vars.STREAM_FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.STREAM_FLUTTER_CI_BOT_PRIVATE_KEY }}
 
   # Reports every platform: a push stores it as the benchmark, a release pull
   # request as the `release` benchmark.
@@ -156,9 +156,6 @@ jobs:
       contents: read
       pull-requests: write
     env:
-      # Bot token: it reads and pushes stream-internal-metrics, and posts the
-      # PR comments.
-      GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
       GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
       BASE_BRANCH: ${{ github.base_ref || github.ref_name }}
       GIT_BRANCH: ${{ github.head_ref || github.ref_name }}
@@ -170,3 +167,6 @@ jobs:
 
       - name: Report sizes
         uses: ./.github/actions/sdk-size-report
+        with:
+          client-id: ${{ vars.STREAM_FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.STREAM_FLUTTER_CI_BOT_PRIVATE_KEY }}
