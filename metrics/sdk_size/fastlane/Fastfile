@@ -311,11 +311,11 @@ def render_variant(platform, variant, components, base, base_branch)
   lines << '' << '</details>' << ''
 end
 
-# ⚠️ for an increase, 📉 for a decrease, ✅ for a change too small to report.
+# ⚠️ for an increase, 🚀 for a decrease, ✅ for a change too small to report.
 def size_verdict(delta)
   return '✅' if delta.abs < BREAKDOWN_MIN_BYTES
 
-  delta.positive? ? '⚠️' : '📉'
+  delta.positive? ? '⚠️' : '🚀'
 end
 
 def format_percent(delta, base)
