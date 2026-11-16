@@ -127,11 +127,7 @@ jobs:
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
-          # fastlane match clones ios-certificates over SSH; this rewrites the clone
-          # to HTTPS with the app token.
-          GIT_CONFIG_COUNT: 1
-          GIT_CONFIG_KEY_0: url.https://x-access-token:${{ steps.certs-token.outputs.token }}@github.com/GetStream/ios-certificates.insteadOf
-          GIT_CONFIG_VALUE_0: git@github.com:GetStream/ios-certificates
+          MATCH_GIT_TOKEN: ${{ steps.certs-token.outputs.token }}
         run: bundle exec fastlane distribute_to_firebase
 
   ios_testflight:
@@ -173,9 +169,5 @@ jobs:
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
-          # fastlane match clones ios-certificates over SSH; this rewrites the clone
-          # to HTTPS with the app token.
-          GIT_CONFIG_COUNT: 1
-          GIT_CONFIG_KEY_0: url.https://x-access-token:${{ steps.certs-token.outputs.token }}@github.com/GetStream/ios-certificates.insteadOf
-          GIT_CONFIG_VALUE_0: git@github.com:GetStream/ios-certificates
+          MATCH_GIT_TOKEN: ${{ steps.certs-token.outputs.token }}
         run: bundle exec fastlane distribute_to_testflight_internal
