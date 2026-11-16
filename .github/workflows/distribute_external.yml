@@ -57,11 +57,6 @@ jobs:
     if: ${{ needs.determine_platforms.outputs.run_android == 'true' }}
     runs-on: ubuntu-latest
     steps:
-      - name: Connect Bot
-        uses: webfactory/ssh-agent@v0.10.0
-        with:
-          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
-
       - name: "Git Checkout"
         uses: actions/checkout@v7
         with:
@@ -86,10 +81,16 @@ jobs:
     runs-on: xcode-27
 
     steps:
-      - name: Connect Bot
-        uses: webfactory/ssh-agent@v0.10.0
+      - name: 🔑 Mint Certificates Token
+        id: certs-token
+        uses: actions/create-github-app-token@v3
         with:
-          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+          # fastlane match only reads the certificates.
+          owner: GetStream
+          repositories: ios-certificates
+          permission-contents: read
 
       - name: "Git Checkout"
         uses: actions/checkout@v7
@@ -107,4 +108,5 @@ jobs:
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
           APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
+          MATCH_GIT_TOKEN: ${{ steps.certs-token.outputs.token }}
         run: bundle exec fastlane distribute_to_testflight
