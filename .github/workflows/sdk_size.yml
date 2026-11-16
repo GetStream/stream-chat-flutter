@@ -136,8 +136,8 @@ jobs:
       - name: Report sizes
         uses: ./.github/actions/sdk-size-report
         with:
-          client-id: ${{ vars.STREAM_FLUTTER_CI_BOT_CLIENT_ID }}
-          private-key: ${{ secrets.STREAM_FLUTTER_CI_BOT_PRIVATE_KEY }}
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
 
   # Reports every platform: a push stores it as the benchmark, a release pull
   # request as the `release` benchmark.
@@ -168,5 +168,5 @@ jobs:
       - name: Report sizes
         uses: ./.github/actions/sdk-size-report
         with:
-          client-id: ${{ vars.STREAM_FLUTTER_CI_BOT_CLIENT_ID }}
-          private-key: ${{ secrets.STREAM_FLUTTER_CI_BOT_PRIVATE_KEY }}
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
