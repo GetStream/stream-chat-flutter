@@ -125,7 +125,6 @@ jobs:
     timeout-minutes: 10
     outputs:
       packages: ${{ steps.select.outputs.packages }}
-      base_sha: ${{ steps.select.outputs.base_sha }}
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v7
@@ -156,9 +155,7 @@ jobs:
           set -euo pipefail
           selected=$(jq -c . <<< "$PACKAGES")
           if [ "$TEST_ALL" != "true" ]; then
-            base=$(git rev-parse HEAD^1)
-            echo "base_sha=$base" >> "$GITHUB_OUTPUT"
-            changed=$(melos list --diff="$base" --include-dependents --json | jq -c 'map(.name)')
+            changed=$(melos list --diff="$(git rev-parse HEAD^1)" --include-dependents --json | jq -c 'map(.name)')
             if [ "$changed" != "[]" ]; then
               selected=$(jq -c --argjson changed "$changed" 'map(select(.package | IN($changed[])))' <<< "$PACKAGES")
             fi
@@ -202,8 +199,7 @@ jobs:
         working-directory: ${{ matrix.path }}
         run: bash "$GITHUB_WORKSPACE/.github/workflows/scripts/remove-from-coverage.sh"
       # Each package uploads under its own flag, so Codecov carries forward
-      # the coverage of packages a run skipped from the base commit. See
-      # codecov.yml.
+      # the coverage of packages a run skipped. See codecov.yml.
       - name: "Upload Coverage"
         if: matrix.min-coverage
         uses: codecov/codecov-action@v7
@@ -212,7 +208,6 @@ jobs:
           files: ${{ matrix.path }}/coverage/lcov.info
           disable_search: true
           flags: ${{ matrix.package }}
-          commit_parent: ${{ needs.select.outputs.base_sha }}
       - name: "Check Coverage"
         if: matrix.min-coverage
         uses: VeryGoodOpenSource/very_good_coverage@v3.0.0
