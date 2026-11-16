@@ -238,10 +238,20 @@ def render_breakdown(breakdown, benchmark, base_branch, skipped, sha)
            "Dart sizes are uncompressed symbol sizes. Open #{artifacts} " \
            'in the DevTools App Size tool to drill down further.'
   lines << ''
+  unchanged = []
   breakdown.each do |platform, variants|
     variants.each do |variant, components|
-      lines.concat(render_variant(platform, variant, components, benchmark&.dig(platform, variant), base_branch))
+      base = benchmark&.dig(platform, variant)
+      rendered = render_variant(platform, variant, components, base, base_branch)
+      next lines.concat(rendered) unless base && size_verdict(components.values.sum - base.values.sum) == '✓'
+
+      unchanged << rendered
     end
+  end
+  unless unchanged.empty?
+    lines << "<details><summary>Unchanged (#{unchanged.size})</summary>" << ''
+    unchanged.each { |rendered| lines.concat(rendered) }
+    lines << '</details>' << ''
   end
   lines << '</details>'
   lines.join("\n")
@@ -256,13 +266,13 @@ def render_summary(breakdown, benchmark, base_branch)
     variants.each do |variant, components|
       base = benchmark.dig(platform, variant)
       total = components.values.sum
-      next changed << "- #{platform} · `#{variant}`: #{format_size(total)} (new)" unless base
+      next changed << "- #{platform} · `#{variant}`: #{format_size(total)} 🆕" unless base
 
       delta = total - base.values.sum
       next if delta.abs < BREAKDOWN_MIN_BYTES
 
       changed << "- #{platform} · `#{variant}`: #{format_size(total)}, " \
-                 "**#{format_delta(delta)}** (#{format_percent(delta, base.values.sum)}) #{delta.positive? ? '📈' : '📉'}"
+                 "**#{format_delta(delta)}** (#{format_percent(delta, base.values.sum)}) #{size_verdict(delta)}"
     end
   end
   return ["📦 **No size change** against `#{base_branch}`."] if changed.empty?
@@ -298,7 +308,12 @@ end
 
 def render_variant(platform, variant, components, base, base_branch)
   total = components.values.sum
-  total_delta = base ? " (#{format_delta(total - base.values.sum)})" : ' (new)'
+  total_delta = if base
+                  delta = total - base.values.sum
+                  " (#{format_delta(delta)}) #{size_verdict(delta)}"
+                else
+                  ' 🆕'
+                end
   lines = ["<details><summary><b>#{platform}</b> · <code>#{variant}</code>: " \
            "#{format_size(total)}#{total_delta}</summary>", '']
   lines << "| Component | Size | Δ vs `#{base_branch}` |"
@@ -320,6 +335,13 @@ def render_variant(platform, variant, components, base, base_branch)
              "#{format_delta(folded_delta)} |"
   end
   lines << '' << '</details>' << ''
+end
+
+# ⚠️ for an increase, 📉 for a decrease, ✓ for a change too small to report.
+def size_verdict(delta)
+  return '✓' if delta.abs < BREAKDOWN_MIN_BYTES
+
+  delta.positive? ? '⚠️' : '📉'
 end
 
 def format_percent(delta, base)
