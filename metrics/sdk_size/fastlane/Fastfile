@@ -47,15 +47,16 @@ lane :sdk_size do
 
   # Clones the metrics repo into METRICS_DIR, and pushes the sizes on a push to
   # the base branch. Another repository's push can reject that push; a retry
-  # clones the metrics repo again.
+  # clones the metrics repo again. Any other failure isn't retried, since the
+  # benchmark may already hold this run's sizes.
   attempt = 0
   begin
     attempt += 1
     show_sdk_size(branch_sizes: sizes, github_repo: GITHUB_REPO, base_branch: base_branch)
   rescue FastlaneCore::Interface::FastlaneShellError
-    raise if attempt >= 3
+    raise if attempt >= 3 || !unpushed_benchmark?
 
-    UI.important("Reporting the SDK size failed, retrying (#{attempt}/3).")
+    UI.important("Pushing the SDK size benchmark failed, retrying (#{attempt}/3).")
     retry
   end
   add_commit_note(sha)
@@ -139,6 +140,14 @@ def show_size_breakdown(base_branch, results, skipped, sha)
   end
 
   pr_comment(text: markdown, edit_last_comment_with_text: BREAKDOWN_HEADER)
+end
+
+# Whether the metrics clone holds a benchmark commit that its push didn't
+# deliver.
+def unpushed_benchmark?
+  Dir.chdir(METRICS_DIR) { sh('git rev-list --count @{u}..HEAD', log: false).to_i.positive? }
+rescue FastlaneCore::Interface::FastlaneShellError, SystemCallError
+  false
 end
 
 def push_event?
