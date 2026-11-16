@@ -17,11 +17,18 @@ jobs:
       contents: write  # Required to create and push tags
 
     steps:
+      - name: Generate release bot token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.IOS_RELEASE_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.IOS_RELEASE_BOT_PRIVATE_KEY }}
+
       - name: 📚 Checkout branch
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: 🏷️ Extract Version Tag
         id: extract_tag
