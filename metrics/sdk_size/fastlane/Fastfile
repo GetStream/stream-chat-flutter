@@ -217,7 +217,7 @@ def render_breakdown(breakdown, benchmark, base_branch, skipped, sha)
     variants.each do |variant, components|
       base = benchmark&.dig(platform, variant)
       rendered = render_variant(platform, variant, components, base, base_branch)
-      next lines.concat(rendered) unless base && size_verdict(components.values.sum - base.values.sum) == '✓'
+      next lines.concat(rendered) unless base && size_verdict(components.values.sum - base.values.sum) == '✅'
 
       unchanged << rendered
     end
@@ -311,9 +311,9 @@ def render_variant(platform, variant, components, base, base_branch)
   lines << '' << '</details>' << ''
 end
 
-# ⚠️ for an increase, 📉 for a decrease, ✓ for a change too small to report.
+# ⚠️ for an increase, 📉 for a decrease, ✅ for a change too small to report.
 def size_verdict(delta)
-  return '✓' if delta.abs < BREAKDOWN_MIN_BYTES
+  return '✅' if delta.abs < BREAKDOWN_MIN_BYTES
 
   delta.positive? ? '⚠️' : '📉'
 end
