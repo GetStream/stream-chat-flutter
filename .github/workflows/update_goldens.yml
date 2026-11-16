@@ -12,9 +12,27 @@ on:
           - both
           - sdk
           - docs
+  # Run by the `/update-goldens` bot command, see bot_commands.yml.
+  workflow_call:
+    inputs:
+      target:
+        type: string
+        required: true
+      ref:
+        description: "Branch the goldens are pushed to"
+        type: string
+        required: true
+      sha:
+        description: "Commit the goldens are generated from; nothing is pushed if the branch moved past it"
+        type: string
+        required: true
+    outputs:
+      message:
+        description: "Reply to the command"
+        value: ${{ jobs.summarize.outputs.message }}
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   update_sdk_goldens:
@@ -22,9 +40,12 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       changed: ${{ steps.detect.outputs.changed }}
+      update: ${{ steps.update.outcome }}
     steps:
       - name: 📚 Checkout branch
         uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.sha }}
 
       - name: 🐦 Install Flutter
         uses: ./.github/actions/setup-flutter
@@ -36,6 +57,7 @@ jobs:
         run: melos bootstrap --verbose
 
       - name: 🖼️ Update SDK Goldens
+        id: update
         continue-on-error: true
         run: melos run update:goldens:sdk
 
@@ -67,9 +89,12 @@ jobs:
     runs-on: macos-latest
     outputs:
       changed: ${{ steps.detect.outputs.changed }}
+      update: ${{ steps.update.outcome }}
     steps:
       - name: 📚 Checkout branch
         uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.sha }}
 
       - name: 🐦 Install Flutter
         uses: ./.github/actions/setup-flutter
@@ -81,6 +106,7 @@ jobs:
         run: melos bootstrap --verbose
 
       - name: 🖼️ Update Docs Goldens
+        id: update
         continue-on-error: true
         run: melos run update:goldens:docs
 
@@ -117,6 +143,9 @@ jobs:
       (needs.update_sdk_goldens.outputs.changed == 'true' ||
        needs.update_docs_goldens.outputs.changed == 'true')
     runs-on: ubuntu-latest
+    outputs:
+      commit: ${{ steps.commit.outputs.commit_hash }}
+      moved: ${{ steps.verify.outputs.moved }}
     steps:
       - name: 🔑 Mint CI Bot Token
         id: ci-bot-token
@@ -128,33 +157,76 @@ jobs:
       - name: 📚 Checkout branch
         uses: actions/checkout@v7
         with:
+          ref: ${{ inputs.ref }}
           token: ${{ steps.ci-bot-token.outputs.token }}
 
+      - name: 🔍 Verify the branch has not moved
+        id: verify
+        env:
+          SHA: ${{ inputs.sha }}
+        run: |
+          if [[ -n "$SHA" && "$(git rev-parse HEAD)" != "$SHA" ]]; then
+            echo "moved=true" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: 📥 Download SDK goldens
-        if: needs.update_sdk_goldens.outputs.changed == 'true'
+        if: steps.verify.outputs.moved != 'true' && needs.update_sdk_goldens.outputs.changed == 'true'
         uses: actions/download-artifact@v8
         with:
           name: sdk-goldens
 
       - name: 📥 Download docs goldens
-        if: needs.update_docs_goldens.outputs.changed == 'true'
+        if: steps.verify.outputs.moved != 'true' && needs.update_docs_goldens.outputs.changed == 'true'
         uses: actions/download-artifact@v8
         with:
           name: docs-goldens
 
       - name: 📦 Extract goldens
+        if: steps.verify.outputs.moved != 'true'
         run: |
           for tgz in sdk-goldens.tgz docs-goldens.tgz; do
             if [[ -f "$tgz" ]]; then
-              tar -xzf "$tgz"
+              # The archive comes from the pull request's code, so only goldens are extracted.
+              tar -xzf "$tgz" --wildcards --wildcards-match-slash '*/goldens/*.png'
               rm "$tgz"
             fi
           done
 
       - name: 📤 Commit Changes
+        id: commit
+        if: steps.verify.outputs.moved != 'true'
         uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "chore: Update Goldens"
           file_pattern: "**/test/**/goldens/**/*.png"
           commit_user_name: "stream-flutter-ci-bot[bot]"
           commit_user_email: "357444665+stream-flutter-ci-bot[bot]@users.noreply.github.com"
+
+  summarize:
+    needs: [update_sdk_goldens, update_docs_goldens, commit_goldens]
+    if: always()
+    runs-on: ubuntu-latest
+    outputs:
+      message: ${{ steps.summarize.outputs.message }}
+    steps:
+      - name: 📝 Summarize
+        id: summarize
+        env:
+          COMMIT: ${{ needs.commit_goldens.outputs.commit }}
+          MOVED: ${{ needs.commit_goldens.outputs.moved }}
+          TESTS_FAILED: ${{ needs.update_sdk_goldens.outputs.update == 'failure' || needs.update_docs_goldens.outputs.update == 'failure' }}
+          RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          tests_note="some golden tests failed to run, see the [run]($RUN)."
+          if [[ "$MOVED" == "true" ]]; then
+            message="The branch moved while the goldens were updating, so nothing was pushed. Run the command again."
+          elif [[ -n "$COMMIT" && "$TESTS_FAILED" == "true" ]]; then
+            message="Updated the goldens in $COMMIT, but $tests_note"
+          elif [[ -n "$COMMIT" ]]; then
+            message="Updated the goldens in $COMMIT."
+          elif [[ "$TESTS_FAILED" == "true" ]]; then
+            message="No goldens changed, but $tests_note"
+          else
+            message="The goldens are already up to date ([run]($RUN))."
+          fi
+          echo "message=$message" >> "$GITHUB_OUTPUT"

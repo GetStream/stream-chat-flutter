@@ -1,0 +1,65 @@
+name: bot_commands
+
+# Runs `/<command> [argument]` from the first line of a pull request comment.
+#
+# To add a command:
+#   1. Write a workflow with a `workflow_call` trigger whose `ref` and `sha`
+#      inputs receive the pull request's branch and head commit, and whose
+#      `message` output is the reply posted back on the pull request.
+#   2. Add the command to `commands` in the `parse` job.
+#   3. Add a job calling the workflow below, and list it in `report.needs`.
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+
+jobs:
+  parse:
+    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '/')
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write # Required to react to and answer the comment
+    outputs:
+      command: ${{ steps.parse.outputs.command }}
+      argument: ${{ steps.parse.outputs.argument }}
+      ref: ${{ steps.parse.outputs.ref }}
+      sha: ${{ steps.parse.outputs.sha }}
+    steps:
+      # TODO: pin to a commit SHA of stream-core-flutter's main before merging.
+      - name: 🎯 Parse the command
+        id: parse
+        uses: GetStream/stream-core-flutter/.github/actions/bot-command-parse@ci/bot-commands
+        with:
+          commands: |
+            {
+              "update-goldens": {
+                "arguments": ["both", "sdk", "docs"],
+                "description": "Updates the SDK and docs goldens, or only one of them, on this branch and pushes them."
+              }
+            }
+
+  update_goldens:
+    needs: parse
+    if: needs.parse.outputs.command == 'update-goldens'
+    uses: ./.github/workflows/update_goldens.yml
+    secrets: inherit
+    with:
+      target: ${{ needs.parse.outputs.argument }}
+      ref: ${{ needs.parse.outputs.ref }}
+      sha: ${{ needs.parse.outputs.sha }}
+
+  report:
+    needs: [parse, update_goldens]
+    if: always() && needs.parse.outputs.command != ''
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write # Required to answer the comment
+    steps:
+      - name: 💬 Answer the comment
+        uses: GetStream/stream-core-flutter/.github/actions/bot-command-report@ci/bot-commands
+        with:
+          command: ${{ needs.parse.outputs.command }}
+          results: ${{ toJSON(needs) }}
