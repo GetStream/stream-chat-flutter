@@ -71,7 +71,7 @@ jobs:
   measure-ios:
     if: >-
       github.event_name != 'pull_request'
-      || (startsWith(github.head_ref, 'release/') && github.event.pull_request.draft == false)
+      || (contains(github.head_ref, 'release/') && github.event.pull_request.draft == false)
     timeout-minutes: 60
     # Pinned, so a runner image update doesn't change the iOS numbers.
     runs-on: macos-26
@@ -108,7 +108,7 @@ jobs:
     if: >-
       github.event_name == 'pull_request'
       && github.event.pull_request.head.repo.full_name == github.repository
-      && !startsWith(github.head_ref, 'release/')
+      && !contains(github.head_ref, 'release/')
     timeout-minutes: 15
     runs-on: ubuntu-latest
     permissions:
@@ -141,7 +141,7 @@ jobs:
       && needs.measure-ios.result == 'success'
       && (github.event_name != 'pull_request'
         || (github.event.pull_request.head.repo.full_name == github.repository
-          && startsWith(github.head_ref, 'release/')))
+          && contains(github.head_ref, 'release/')))
     timeout-minutes: 15
     runs-on: ubuntu-latest
     permissions:

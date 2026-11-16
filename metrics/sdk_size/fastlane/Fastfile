@@ -46,8 +46,18 @@ lane :sdk_size do
   end
 
   # Clones the metrics repo into METRICS_DIR, and pushes the sizes on a push to
-  # the base branch.
-  show_sdk_size(branch_sizes: sizes, github_repo: GITHUB_REPO, base_branch: base_branch)
+  # the base branch. Another repository's push can reject that push; a retry
+  # clones the metrics repo again.
+  attempt = 0
+  begin
+    attempt += 1
+    show_sdk_size(branch_sizes: sizes, github_repo: GITHUB_REPO, base_branch: base_branch)
+  rescue FastlaneCore::Interface::FastlaneShellError
+    raise if attempt >= 3
+
+    UI.important("Reporting the SDK size failed, retrying (#{attempt}/3).")
+    retry
+  end
   add_commit_note(sha)
 
   show_size_breakdown(base_branch, results, skipped, sha)
