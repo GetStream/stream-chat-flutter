@@ -25,7 +25,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           # Bot token so the pushed commit can re-trigger CI on the branch.
-          token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
+          token: ${{ secrets.CI_BOT_GITHUB_TOKEN }}
 
       - name: 🔑 Connect Bot
         uses: webfactory/ssh-agent@v0.10.0
