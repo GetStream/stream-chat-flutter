@@ -55,14 +55,6 @@ jobs:
               - 'packages/**'
               - 'sample_app/**'
               - 'e2e_app/**'
-              - 'melos.yaml'
-              - 'pubspec.yaml'
-              - 'pubspec.lock'
-              - 'analysis_options.yaml'
-              - 'codecov.yml'
-              - 'tools/**'
-              - '.github/actions/**'
-              - '.github/workflows/scripts/**'
               - '.github/workflows/stream_flutter_workflow.yml'
 
   analyze:
