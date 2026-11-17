@@ -14,7 +14,7 @@
 </p>
 <p align="center">
   <img alt="StreamChat" src="https://img.shields.io/badge/ios:stream__chat-1.6%20MB-blue"/>
-  <img alt="StreamChatFlutter" src="https://img.shields.io/badge/ios:stream__chat__flutter-10.9%20MB-blue"/>
+  <img alt="StreamChatFlutter" src="https://img.shields.io/badge/ios:stream__chat__flutter-99.9%20MB-blue"/>
   <img alt="StreamChatPersistence" src="https://img.shields.io/badge/ios:stream__chat__persistence-3.6%20MB-blue"/>
 </p>
 <p align="center">
