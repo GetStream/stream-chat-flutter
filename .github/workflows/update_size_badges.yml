@@ -14,7 +14,7 @@ on:
         default: master
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   update_size_badges:
@@ -34,8 +34,6 @@ jobs:
 
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
-        with:
-          token: ${{ steps.bot-token.outputs.token }}
 
       - name: 💎 Set up Ruby
         uses: ./.github/actions/setup-ruby
@@ -49,10 +47,22 @@ jobs:
           GITHUB_TOKEN: ${{ steps.bot-token.outputs.token }}
         run: bundle exec fastlane update_readme_badges
 
+      - name: 🔍 Detect badge changes
+        id: detect
+        run: |
+          if git diff --quiet -- README.md; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # TODO: pin to a commit SHA of stream-core-flutter's main before merging.
       - name: 📤 Commit Changes
-        uses: stefanzweifel/git-auto-commit-action@v7
+        if: steps.detect.outputs.changed == 'true'
+        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@ci/bot-commands
         with:
-          commit_message: "chore(repo): update the SDK size badges"
-          file_pattern: README.md
-          commit_user_name: "stream-flutter-ci-bot[bot]"
-          commit_user_email: "357444665+stream-flutter-ci-bot[bot]@users.noreply.github.com"
+          files: README.md
+          branch: ${{ github.ref_name }}
+          expected-head-sha: ${{ github.sha }}
+          message: "chore(repo): update the SDK size badges"
+          token: ${{ steps.bot-token.outputs.token }}
