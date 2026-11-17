@@ -14,11 +14,11 @@
 </p>
 <p align="center">
   <img alt="StreamChat" src="https://img.shields.io/badge/ios:stream__chat-1.6%20MB-blue"/>
-  <img alt="StreamChatFlutter" src="https://img.shields.io/badge/ios:stream__chat__flutter-99.9%20MB-blue"/>
-  <img alt="StreamChatPersistence" src="https://img.shields.io/badge/ios:stream__chat__persistence-3.6%20MB-blue"/>
+  <img alt="StreamChatFlutter" src="https://img.shields.io/badge/ios:stream__chat__flutter-11.0%20MB-blue"/>
+  <img alt="StreamChatPersistence" src="https://img.shields.io/badge/ios:stream__chat__persistence-3.8%20MB-blue"/>
 </p>
 <p align="center">
-  <img alt="StreamChatLocalizations" src="https://img.shields.io/badge/stream__chat__localizations-169%20KB-blue"/>
+  <img alt="StreamChatLocalizations" src="https://img.shields.io/badge/stream__chat__localizations-167%20KB-blue"/>
 </p>
 <p align="center">
   <sub>What each package adds to an empty release app: the arm64 APK on Android, the uncompressed <code>Runner.app</code> on iOS, so the two platforms aren't comparable. See <a href="metrics/sdk_size">metrics/sdk_size</a>.</sub>
