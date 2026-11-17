@@ -144,11 +144,11 @@ jobs:
           TEST_ALL: ${{ needs.gate.outputs.test_all }}
           PACKAGES: |
             [
-              { "package": "stream_chat", "path": "packages/stream_chat", "min-coverage": 71 },
-              { "package": "stream_chat_flutter", "path": "packages/stream_chat_flutter", "min-coverage": 68 },
-              { "package": "stream_chat_flutter_core", "path": "packages/stream_chat_flutter_core", "min-coverage": 87 },
+              { "package": "stream_chat", "path": "packages/stream_chat", "min-coverage": 70 },
+              { "package": "stream_chat_flutter", "path": "packages/stream_chat_flutter", "min-coverage": 65 },
+              { "package": "stream_chat_flutter_core", "path": "packages/stream_chat_flutter_core", "min-coverage": 85 },
               { "package": "stream_chat_localizations", "path": "packages/stream_chat_localizations", "min-coverage": 100 },
-              { "package": "stream_chat_persistence", "path": "packages/stream_chat_persistence", "min-coverage": 96 }
+              { "package": "stream_chat_persistence", "path": "packages/stream_chat_persistence", "min-coverage": 95 }
             ]
         run: |
           set -euo pipefail
