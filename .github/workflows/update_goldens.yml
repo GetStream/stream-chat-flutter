@@ -209,9 +209,12 @@ jobs:
           COMMIT: ${{ needs.commit_goldens.outputs.commit }}
           MOVED: ${{ needs.commit_goldens.outputs.moved }}
           TESTS_FAILED: ${{ needs.update_sdk_goldens.outputs.update == 'failure' || needs.update_docs_goldens.outputs.update == 'failure' }}
+          FAILED: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          if [[ "$MOVED" == "true" ]]; then
+          if [[ "$FAILED" == "true" ]]; then
+            message="Updating the goldens failed, see the [run]($RUN)."
+          elif [[ "$MOVED" == "true" ]]; then
             message="The branch moved while the goldens were updating, so nothing was pushed. Run the command again."
           elif [[ -n "$COMMIT" ]]; then
             message="Updated the goldens in $COMMIT."
