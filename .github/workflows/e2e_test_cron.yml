@@ -73,8 +73,8 @@ jobs:
           mkdir -p ~/.gradle
           echo 'kotlin.compiler.execution.strategy=in-process' >> ~/.gradle/gradle.properties
 
-      - name: Install Melos
-        uses: ./.github/actions/setup-melos
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
 
       - name: Bootstrap
         run: melos bootstrap
@@ -204,8 +204,8 @@ jobs:
           version: ${{ matrix.ios }}
           device: ${{ matrix.device }}
 
-      - name: Install Melos
-        uses: ./.github/actions/setup-melos
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
 
       - name: Bootstrap
         run: |

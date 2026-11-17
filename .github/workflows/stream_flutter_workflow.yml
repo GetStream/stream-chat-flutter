@@ -81,7 +81,7 @@ jobs:
         uses: ./.github/actions/setup-flutter
 
       - name: 📦 Install Tools
-        uses: ./.github/actions/setup-melos
+        uses: ./.github/actions/install-tools
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap --verbose
@@ -108,7 +108,7 @@ jobs:
         uses: ./.github/actions/setup-flutter
 
       - name: 📦 Install Tools
-        uses: ./.github/actions/setup-melos
+        uses: ./.github/actions/install-tools
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap
@@ -139,7 +139,7 @@ jobs:
         uses: ./.github/actions/setup-flutter
 
       - name: 📦 Install Tools
-        uses: ./.github/actions/setup-melos
+        uses: ./.github/actions/install-tools
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap
@@ -203,8 +203,8 @@ jobs:
       - name: 🐦 Install Flutter
         uses: ./.github/actions/setup-flutter
 
-      - name: 📦 Install Melos
-        uses: ./.github/actions/setup-melos
+      - name: 📦 Install Tools
+        uses: ./.github/actions/install-tools
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap
@@ -287,7 +287,7 @@ jobs:
         uses: ./.github/actions/install-android-ndk
 
       - name: 📦 Install Tools
-        uses: ./.github/actions/setup-melos
+        uses: ./.github/actions/install-tools
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap

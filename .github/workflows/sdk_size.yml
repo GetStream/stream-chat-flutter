@@ -49,8 +49,8 @@ jobs:
 
       # Release branches depend on package versions that aren't on pub.dev yet,
       # so the packages resolve each other from their paths.
-      - name: Install Melos
-        uses: ./.github/actions/setup-melos
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
 
       - name: Bootstrap Workspace
         run: melos bootstrap

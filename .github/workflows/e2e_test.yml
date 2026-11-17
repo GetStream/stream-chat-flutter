@@ -114,8 +114,8 @@ jobs:
 
       - uses: ./.github/actions/enable-kvm
 
-      - name: Install Melos
-        uses: ./.github/actions/setup-melos
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
 
       - name: Bootstrap
         run: melos bootstrap
@@ -189,8 +189,8 @@ jobs:
         with:
           working-directory: e2e_app
 
-      - name: Install Melos
-        uses: ./.github/actions/setup-melos
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
 
       - name: Bootstrap
         run: |
