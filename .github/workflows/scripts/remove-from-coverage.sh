@@ -3,4 +3,4 @@
 # Fast fail the script on failures.
 set -e
 
-flutter pub global run remove_from_coverage:remove_from_coverage -f coverage/lcov.info -r '\.g\.dart$' -r '\.freezed\.dart$'
+dart run remove_from_coverage@2.0.0 -f coverage/lcov.info -r '\.g\.dart$' -r '\.freezed\.dart$'

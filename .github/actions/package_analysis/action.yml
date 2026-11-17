@@ -5,8 +5,7 @@ runs:
   using: "composite"
   steps:
     - name: "Install Tools"
-      shell: bash
-      run: flutter pub global activate melos
+      uses: ./.github/actions/install-tools
 
     - name: "Bootstrap Workspace"
       shell: bash

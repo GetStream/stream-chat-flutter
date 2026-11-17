@@ -73,10 +73,11 @@ jobs:
           mkdir -p ~/.gradle
           echo 'kotlin.compiler.execution.strategy=in-process' >> ~/.gradle/gradle.properties
 
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
+
       - name: Bootstrap
-        run: |
-          flutter pub global activate melos
-          melos bootstrap
+        run: melos bootstrap
 
       - name: Launch Allure TestOps
         working-directory: e2e_app
@@ -203,10 +204,12 @@ jobs:
           version: ${{ matrix.ios }}
           device: ${{ matrix.device }}
 
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
+
       - name: Bootstrap
         run: |
           flutter precache --ios
-          flutter pub global activate melos
           melos bootstrap
 
       - name: Launch Allure TestOps
