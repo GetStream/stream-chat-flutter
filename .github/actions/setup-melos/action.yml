@@ -1,0 +1,10 @@
+name: 'Setup Melos'
+description: 'Activate the melos version pinned in pubspec.lock.'
+runs:
+  using: "composite"
+  steps:
+    - shell: bash
+      working-directory: ${{ github.workspace }}
+      run: |
+        version=$(awk '/^  melos:/ { found = 1 } found && /version:/ { gsub(/"/, "", $2); print $2; exit }' pubspec.lock)
+        flutter pub global activate melos "$version"
