@@ -2980,8 +2980,8 @@ class ClientState {
           )
           .listen((Event event) async {
             final eventChannel = event.channel!;
+            _channelRegistry.unlist(eventChannel.cid);
             await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
-            _channelRegistry[eventChannel.cid]?.dispose();
           }),
     );
   }
@@ -3198,12 +3198,12 @@ class ClientState {
 
   /// The current user's channels in memory as a stream, by cid.
   ///
-  /// Leaves out the channels they hid or were removed from.
+  /// Leaves out the channels they hid, were removed from, or that were deleted.
   Stream<Map<String, Channel>> get channelsStream => _channelRegistry.channelsStream;
 
   /// The current user's channels in memory, by cid.
   ///
-  /// Leaves out the channels they hid or were removed from.
+  /// Leaves out the channels they hid, were removed from, or that were deleted.
   Map<String, Channel> get channels => _channelRegistry.channels;
 
   @internal

@@ -9,10 +9,11 @@
 - Overrides of the channel query methods on `Channel` and `StreamChatClient` must add the new `includeScheduledMessages` parameter.
 - `ChannelState.copyWith(membership: null)` now clears the membership instead of keeping it, as it already did for `draft`.
 - Added `ChatPersistenceClient.deleteChannelQueriesByCids`, which takes hidden channels out of the cached channel lists. A persistence client that `implements` `ChatPersistenceClient` instead of extending it needs to add it.
+- A deleted `Channel` is no longer disposed, so `channel.state` stays set. Use `Channel.deletedAt` or `deletedAtStream` to tell when a channel is deleted.
 
 🐞 Fixed
 
-- Fixed a `Channel` becoming unusable after the current user hides it or is removed from it, for example by blocking the other member of a direct message.
+- Fixed a `Channel` becoming unusable after the current user hides it, is removed from it, or it is deleted, for example by blocking the other member of a direct message.
 - Fixed `Channel.hidden` not following the `channel.hidden` and `channel.visible` events, or turning false when a new message arrives.
 - Fixed the current user's membership staying on a channel after they are removed from it.
 

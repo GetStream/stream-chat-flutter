@@ -4,9 +4,9 @@ import 'channel/channel.dart';
 /// The live channels of a client.
 ///
 /// Only the listed ones are in [channels]. A channel the current user hides or
-/// is removed from is unlisted instead: it leaves [channels] but stays alive,
-/// so code still holding it keeps working until it is listed again, removed,
-/// or disposed with the rest.
+/// is removed from, or one that is deleted, is unlisted instead: it leaves
+/// [channels] but stays alive, so code still holding it keeps working until it
+/// is listed again, removed, or disposed with the rest.
 class ChannelRegistry {
   final _listed = ImmutableMapBehaviorSubject<String, Channel>.seeded(const {});
   final _unlisted = <String, Channel>{};

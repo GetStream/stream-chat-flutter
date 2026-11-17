@@ -105,6 +105,9 @@ class ChannelEventHandler {
       case EventType.messageDelivered:
         _onMessageDelivered(event);
       // channel events
+      case EventType.channelDeleted:
+      case EventType.notificationChannelDeleted:
+        _onChannelDeleted(event);
       case EventType.channelTruncated:
       case EventType.notificationChannelTruncated:
         _onChannelTruncated(event);
@@ -374,6 +377,12 @@ class ChannelEventHandler {
     if (event.isFromUser(userId: currentUser?.id)) {
       _client.channelDeliveryReporter.reconcileDelivery([_channel]);
     }
+  }
+
+  void _onChannelDeleted(Event event) {
+    final deletedAt = event.channel?.deletedAt ?? event.createdAt;
+
+    return _mutations.onChannelDeleted(deletedAt: deletedAt);
   }
 
   Future<void> _onChannelTruncated(Event event) async {

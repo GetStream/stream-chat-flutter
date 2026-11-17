@@ -300,18 +300,68 @@ void main() {
     expect(channel.state, isNull);
   });
 
-  test('channel.deleted disposes a hidden channel', () async {
-    final channel = _addChannel(client, 'messaging:hidden');
-    await _hide(client, 'messaging:hidden');
+  test('channel.deleted keeps the channel usable for code still holding it', () async {
+    final channel = _addChannel(client, 'messaging:deleted');
 
-    client.handleEvent(
-      Event(
-        type: EventType.channelDeleted,
-        cid: 'messaging:hidden',
-        channel: ChannelModel(cid: 'messaging:hidden'),
-      ),
+    await _delete(client, 'messaging:deleted');
+
+    expect(channel.state, isNotNull);
+  });
+
+  test('channel.deleted leaves the channel out of client.state.channels', () async {
+    _addChannel(client, 'messaging:deleted');
+
+    await _delete(client, 'messaging:deleted');
+
+    expect(client.state.channels, isNot(contains('messaging:deleted')));
+  });
+
+  test('channel.deleted marks the channel as deleted', () async {
+    final deletedAt = DateTime.utc(2026, 11, 17);
+    final channel = _addChannel(client, 'messaging:deleted');
+
+    await _delete(client, 'messaging:deleted', deletedAt: deletedAt);
+
+    expect(channel.deletedAt, deletedAt);
+  });
+
+  test('channel.deleted clears the messages', () async {
+    final channel = _addChannel(
+      client,
+      'messaging:deleted',
+      messages: [Message(id: 'message', text: 'Hi')],
     );
-    await Future<void>.delayed(Duration.zero);
+
+    await _delete(client, 'messaging:deleted');
+
+    expect(channel.state!.messages, isEmpty);
+  });
+
+  test('notification.channel_deleted marks the channel as deleted', () async {
+    final deletedAt = DateTime.utc(2026, 11, 17);
+    final channel = _addChannel(client, 'messaging:deleted');
+
+    await _delete(client, 'messaging:deleted', deletedAt: deletedAt, type: EventType.notificationChannelDeleted);
+
+    expect(channel.deletedAt, deletedAt);
+  });
+
+  test('channel.deleted deletes the channel from persistence', () async {
+    final persistence = _persistence();
+    when(() => persistence.deleteChannels(any())).thenAnswer((_) async {});
+    client.chatPersistenceClient = persistence;
+    _addChannel(client, 'messaging:deleted');
+
+    await _delete(client, 'messaging:deleted');
+
+    verify(() => persistence.deleteChannels(['messaging:deleted'])).called(1);
+  });
+
+  test('disposing the client state disposes a deleted channel', () async {
+    final channel = _addChannel(client, 'messaging:deleted');
+    await _delete(client, 'messaging:deleted');
+
+    client.state.dispose();
 
     expect(channel.state, isNull);
   });
@@ -387,6 +437,22 @@ Future<void> _hide(StreamChatClient client, String cid, {bool clearHistory = fal
       cid: cid,
       channel: ChannelModel(cid: cid),
       extraData: {'clear_history': clearHistory},
+    ),
+  );
+  await Future<void>.delayed(Duration.zero);
+}
+
+Future<void> _delete(
+  StreamChatClient client,
+  String cid, {
+  DateTime? deletedAt,
+  String type = EventType.channelDeleted,
+}) async {
+  client.handleEvent(
+    Event(
+      type: type,
+      cid: cid,
+      channel: ChannelModel(cid: cid, deletedAt: deletedAt),
     ),
   );
   await Future<void>.delayed(Duration.zero);

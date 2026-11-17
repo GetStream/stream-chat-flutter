@@ -413,6 +413,20 @@ class ChannelStateMutations {
     _state.updateRead([updatedRead]);
   }
 
+  /// Marks the channel as deleted at [deletedAt] and clears its messages.
+  void onChannelDeleted({required DateTime deletedAt}) {
+    _state.truncate();
+
+    final channel = _state.channelState.channel;
+    if (channel == null) return;
+
+    _state.updateChannelState(
+      _state.channelState.copyWith(
+        channel: channel.copyWith(deletedAt: deletedAt),
+      ),
+    );
+  }
+
   /// Clears the channel messages, applying the truncation system [message]
   /// when provided.
   void onChannelTruncated({Message? message}) {
