@@ -47,11 +47,11 @@ jobs:
       - name: Measure app size
         run: dart run metrics/sdk_size/tool/measure.dart --platform android
 
-      # Release branches depend on package versions that aren't on pub.dev yet,
-      # so the packages resolve each other from their paths.
       - name: Install Tools
         uses: ./.github/actions/install-tools
 
+      # Release branches depend on package versions that aren't on pub.dev yet,
+      # so the packages resolve each other from their paths.
       - name: Bootstrap Workspace
         run: melos bootstrap
 
