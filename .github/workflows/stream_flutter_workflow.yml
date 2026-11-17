@@ -206,9 +206,6 @@ jobs:
       - name: 📦 Install Melos
         uses: ./.github/actions/setup-melos
 
-      - name: 📦 Install Tools
-        run: flutter pub global activate remove_from_coverage
-
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap
 
