@@ -30,7 +30,7 @@ jobs:
         uses: ./.github/actions/setup-flutter
 
       - name: 📦 Install Tools
-        run: flutter pub global activate melos
+        uses: ./.github/actions/install-tools
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap --verbose
@@ -75,7 +75,7 @@ jobs:
         uses: ./.github/actions/setup-flutter
 
       - name: 📦 Install Tools
-        run: flutter pub global activate melos
+        uses: ./.github/actions/install-tools
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap --verbose
