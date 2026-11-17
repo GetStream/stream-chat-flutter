@@ -80,5 +80,5 @@ jobs:
       - name: 🚨 Enforce schema version bump
         if: steps.check_entities.outputs.has_changes == 'true' && steps.check_entities.outputs.version_bumped == 'false'
         run: |
-          echo "::error file=packages/stream_chat_persistence/lib/src/db/drift_chat_database.dart::Database entity files were modified but \`schemaVersion\` was not bumped. See the PR comment for the suggested change."
+          echo "::error file=packages/stream_chat_persistence/lib/src/db/drift_chat_database.dart::Database entity files were modified but \`schemaVersion\` was not bumped. See the job summary for the suggested change."
           exit 1
