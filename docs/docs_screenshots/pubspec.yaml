@@ -19,11 +19,7 @@ dependencies:
     sdk: flutter
   record: ">=6.2.0 <8.0.0"
   stream_chat_flutter: ^10.7.0
-  stream_core_flutter:
-    git:
-      url: https://github.com/GetStream/stream-core-flutter.git
-      ref: e5027fd8259941ee5600b2a5e9fd32d2514fda62
-      path: packages/stream_core_flutter
+  stream_core_flutter: ^0.5.4
 
 dev_dependencies:
   alchemist: ^0.14.0
@@ -39,12 +35,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
-dependency_overrides:
-  # Forces one source for `stream_core`; see `melos.yaml`.
-  # Repeated here because this block outranks `melos.yaml`'s `dependencyOverridePaths`.
-  stream_core:
-    git:
-      url: https://github.com/GetStream/stream-core-flutter.git
-      path: packages/stream_core
-      ref: e5027fd8259941ee5600b2a5e9fd32d2514fda62

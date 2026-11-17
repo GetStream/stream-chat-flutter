@@ -190,51 +190,15 @@ String _sdkConstraint() {
   return match.group(1)!.trim();
 }
 
-/// Path overrides for every repository package, plus the overrides the
-/// packages declare for other dependencies.
+/// Path overrides for every repository package.
 String _dependencyOverrides() {
-  final packages = _packages();
   final block = ['dependency_overrides:'];
-  for (final package in packages) {
+  for (final package in _packages()) {
     block
       ..add('  ${_name(package)}:')
       ..add('    path: ${package.path}');
   }
-
-  // Overrides only apply from the root pubspec, so the ones the packages
-  // declare, such as a git source for a dependency, are repeated here.
-  final names = {for (final package in packages) _name(package)};
-  for (final package in packages) {
-    final pubspec = File('${package.path}/pubspec.yaml').readAsStringSync();
-    for (final (:name, :lines) in _overrideEntries(pubspec)) {
-      if (!names.add(name)) continue;
-      block.addAll(lines);
-    }
-  }
   return '${block.join('\n')}\n';
-}
-
-/// The entries of the `dependency_overrides` block in [pubspec], each with its
-/// lines.
-List<({String name, List<String> lines})> _overrideEntries(String pubspec) {
-  final entries = <({String name, List<String> lines})>[];
-  var inBlock = false;
-  for (final line in const LineSplitter().convert(pubspec)) {
-    if (line.startsWith('dependency_overrides:')) {
-      inBlock = true;
-      continue;
-    }
-    if (!inBlock || line.trim().isEmpty || line.trimLeft().startsWith('#')) continue;
-    if (!line.startsWith(' ')) break;
-
-    final entry = RegExp(r'^  ([\w-]+):').firstMatch(line);
-    if (entry != null) {
-      entries.add((name: entry.group(1)!, lines: [line]));
-    } else if (entries.isNotEmpty) {
-      entries.last.lines.add(line);
-    }
-  }
-  return entries;
 }
 
 /// Every package under `packages/`.
