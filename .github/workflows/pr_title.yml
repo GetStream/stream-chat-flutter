@@ -1,6 +1,6 @@
 name: 'PR is Conventional and Semantic'
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - edited
