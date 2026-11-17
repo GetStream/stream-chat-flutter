@@ -73,7 +73,7 @@ jobs:
       - name: 📦 Bundle SDK goldens
         if: steps.detect.outputs.changed == 'true'
         run: |
-          find packages -path '*/test/*/goldens/*' -name '*.png' -print0 \
+          git ls-files -z --modified --others --exclude-standard -- 'packages/**/test/**/goldens/**/*.png' \
             | tar --null -czf sdk-goldens.tgz -T -
 
       - name: 📤 Upload SDK goldens artifact
@@ -122,7 +122,7 @@ jobs:
       - name: 📦 Bundle docs goldens
         if: steps.detect.outputs.changed == 'true'
         run: |
-          find docs -path '*/test/*/goldens/*' -name '*.png' -print0 \
+          git ls-files -z --modified --others --exclude-standard -- 'docs/**/test/**/goldens/**/*.png' \
             | tar --null -czf docs-goldens.tgz -T -
 
       - name: 📤 Upload docs goldens artifact
@@ -144,45 +144,22 @@ jobs:
        needs.update_docs_goldens.outputs.changed == 'true')
     runs-on: ubuntu-latest
     outputs:
-      commit: ${{ steps.commit.outputs.commit_hash }}
-      moved: ${{ steps.verify.outputs.moved }}
+      commit: ${{ steps.commit.outputs.commit }}
+      moved: ${{ steps.commit.outputs.moved }}
     steps:
-      - name: 🔑 Mint CI Bot Token
-        id: ci-bot-token
-        uses: actions/create-github-app-token@v3
-        with:
-          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
-          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
-
-      - name: 📚 Checkout branch
-        uses: actions/checkout@v7
-        with:
-          ref: ${{ inputs.ref }}
-          token: ${{ steps.ci-bot-token.outputs.token }}
-
-      - name: 🔍 Verify the branch has not moved
-        id: verify
-        env:
-          SHA: ${{ inputs.sha }}
-        run: |
-          if [[ -n "$SHA" && "$(git rev-parse HEAD)" != "$SHA" ]]; then
-            echo "moved=true" >> "$GITHUB_OUTPUT"
-          fi
-
       - name: 📥 Download SDK goldens
-        if: steps.verify.outputs.moved != 'true' && needs.update_sdk_goldens.outputs.changed == 'true'
+        if: needs.update_sdk_goldens.outputs.changed == 'true'
         uses: actions/download-artifact@v8
         with:
           name: sdk-goldens
 
       - name: 📥 Download docs goldens
-        if: steps.verify.outputs.moved != 'true' && needs.update_docs_goldens.outputs.changed == 'true'
+        if: needs.update_docs_goldens.outputs.changed == 'true'
         uses: actions/download-artifact@v8
         with:
           name: docs-goldens
 
       - name: 📦 Extract goldens
-        if: steps.verify.outputs.moved != 'true'
         run: |
           for tgz in sdk-goldens.tgz docs-goldens.tgz; do
             if [[ -f "$tgz" ]]; then
@@ -192,15 +169,52 @@ jobs:
             fi
           done
 
-      - name: 📤 Commit Changes
-        id: commit
-        if: steps.verify.outputs.moved != 'true'
-        uses: stefanzweifel/git-auto-commit-action@v7
+      - name: 🔑 Mint CI Bot Token
+        id: ci-bot-token
+        uses: actions/create-github-app-token@v3
         with:
-          commit_message: "chore: Update Goldens"
-          file_pattern: "**/test/**/goldens/**/*.png"
-          commit_user_name: "stream-flutter-ci-bot[bot]"
-          commit_user_email: "357444665+stream-flutter-ci-bot[bot]@users.noreply.github.com"
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+
+      # Committing through the API signs the commit, and `expectedHeadOid` refuses it
+      # if the branch moved past the commit the goldens were generated from.
+      - name: 📤 Commit the goldens
+        id: commit
+        uses: actions/github-script@v9
+        env:
+          BRANCH: ${{ inputs.ref || github.ref_name }}
+          SHA: ${{ inputs.sha || github.sha }}
+        with:
+          github-token: ${{ steps.ci-bot-token.outputs.token }}
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+            const files = await (await glob.create('**/goldens/**/*.png')).glob();
+            const additions = files.map((file) => ({
+              path: path.relative(process.env.GITHUB_WORKSPACE, file),
+              contents: fs.readFileSync(file).toString('base64'),
+            }));
+
+            try {
+              const { createCommitOnBranch: { commit } } = await github.graphql(`
+                mutation($input: CreateCommitOnBranchInput!) {
+                  createCommitOnBranch(input: $input) { commit { oid } }
+                }`, {
+                input: {
+                  branch: {
+                    repositoryNameWithOwner: `${context.repo.owner}/${context.repo.repo}`,
+                    branchName: process.env.BRANCH,
+                  },
+                  expectedHeadOid: process.env.SHA,
+                  message: { headline: 'chore: Update Goldens' },
+                  fileChanges: { additions },
+                },
+              });
+              core.setOutput('commit', commit.oid);
+            } catch (error) {
+              if (!/expected branch to point to/i.test(error.message)) throw error;
+              core.setOutput('moved', 'true');
+            }
 
   summarize:
     needs: [update_sdk_goldens, update_docs_goldens, commit_goldens]
@@ -217,16 +231,17 @@ jobs:
           TESTS_FAILED: ${{ needs.update_sdk_goldens.outputs.update == 'failure' || needs.update_docs_goldens.outputs.update == 'failure' }}
           RUN: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
-          tests_note="some golden tests failed to run, see the [run]($RUN)."
           if [[ "$MOVED" == "true" ]]; then
             message="The branch moved while the goldens were updating, so nothing was pushed. Run the command again."
-          elif [[ -n "$COMMIT" && "$TESTS_FAILED" == "true" ]]; then
-            message="Updated the goldens in $COMMIT, but $tests_note"
           elif [[ -n "$COMMIT" ]]; then
             message="Updated the goldens in $COMMIT."
           elif [[ "$TESTS_FAILED" == "true" ]]; then
-            message="No goldens changed, but $tests_note"
+            message="No goldens changed."
           else
-            message="The goldens are already up to date ([run]($RUN))."
+            message="The goldens are already up to date."
           fi
+          if [[ "$TESTS_FAILED" == "true" ]]; then
+            message="$message Some golden tests could not run, see the [run]($RUN)."
+          fi
+          echo "$message" >> "$GITHUB_STEP_SUMMARY"
           echo "message=$message" >> "$GITHUB_OUTPUT"
