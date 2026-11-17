@@ -1,8 +1,5 @@
 name: stream_flutter_workflow
 
-env:
-  ACTIONS_ALLOW_UNSECURE_COMMANDS: 'true'
-
 on:
   pull_request:
     types:
@@ -84,7 +81,7 @@ jobs:
         uses: ./.github/actions/setup-flutter
 
       - name: 📦 Install Tools
-        run: flutter pub global activate melos
+        uses: ./.github/actions/install-tools
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap --verbose
@@ -111,7 +108,7 @@ jobs:
         uses: ./.github/actions/setup-flutter
 
       - name: 📦 Install Tools
-        run: flutter pub global activate melos
+        uses: ./.github/actions/install-tools
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap
@@ -142,15 +139,16 @@ jobs:
         uses: ./.github/actions/setup-flutter
 
       - name: 📦 Install Tools
-        run: flutter pub global activate melos
+        uses: ./.github/actions/install-tools
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap
 
-      # Every package with tests must be in the table, or it would never be
-      # tested. A pull request checks out its merge commit, whose first parent
-      # is the base branch commit it merged onto. An empty melos selection
-      # tests every package rather than none.
+      # The table must list exactly the packages with tests: a missing one
+      # would never be tested, and a stale one would only fail on master. A
+      # pull request checks out its merge commit, whose first parent is the
+      # base branch commit it merged onto. An empty melos selection tests
+      # every package rather than none.
       - name: 🎯 Select Packages
         id: select
         env:
@@ -171,6 +169,11 @@ jobs:
           missing=$(jq -r --argjson tested "$tested" '$tested - map(.package) | join(", ")' <<< "$PACKAGES")
           if [ -n "$missing" ]; then
             echo "::error::Add these packages to the PACKAGES table: $missing"
+            exit 1
+          fi
+          stale=$(jq -r --argjson tested "$tested" 'map(.package) - $tested | join(", ")' <<< "$PACKAGES")
+          if [ -n "$stale" ]; then
+            echo "::error::Remove these packages from the PACKAGES table: $stale"
             exit 1
           fi
 
@@ -207,9 +210,7 @@ jobs:
         uses: ./.github/actions/setup-flutter
 
       - name: 📦 Install Tools
-        run: |
-          flutter pub global activate melos
-          flutter pub global activate remove_from_coverage
+        uses: ./.github/actions/install-tools
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap
@@ -292,7 +293,7 @@ jobs:
         uses: ./.github/actions/install-android-ndk
 
       - name: 📦 Install Tools
-        run: flutter pub global activate melos
+        uses: ./.github/actions/install-tools
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap
