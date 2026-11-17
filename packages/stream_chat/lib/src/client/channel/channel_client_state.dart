@@ -628,6 +628,7 @@ class ChannelClientState {
   /// Call this instead of [updateChannelState] whenever [remoteState]
   /// genuinely comes from the network or offline storage.
   void updateChannelStateFromServer(ChannelState remoteState) {
+    _isPersisted = true;
     updateChannelState(_preserveLocalUnreadState(remoteState));
   }
 
@@ -676,7 +677,21 @@ class ChannelClientState {
 
   set _channelState(ChannelState v) {
     _channelStateController.safeAdd(v);
-    _debouncedUpdatePersistenceChannelState.call([v]);
+    if (_isPersisted) _debouncedUpdatePersistenceChannelState.call([v]);
+  }
+
+  // Whether changes are saved to the offline storage. Off once the channel is
+  // deleted or the current user is removed from it, until the server returns
+  // the channel again.
+  var _isPersisted = true;
+
+  /// Stops saving this channel to the offline storage, dropping any pending
+  /// saves, until the server returns the channel again.
+  @internal
+  void stopPersisting() {
+    _isPersisted = false;
+    _debouncedUpdatePersistenceChannelState.cancel();
+    _debouncedUpdatePersistenceChannelThreads.cancel();
   }
 
   late final _debouncedUpdatePersistenceChannelThreads = debounce(
@@ -714,7 +729,7 @@ class ChannelClientState {
   final _threadsController = BehaviorSubject.seeded(<String, List<Message>>{});
   set _threads(Map<String, List<Message>> threads) {
     _threadsController.safeAdd(threads);
-    _debouncedUpdatePersistenceChannelThreads.call([threads]);
+    if (_isPersisted) _debouncedUpdatePersistenceChannelThreads.call([threads]);
   }
 
   /// Clears all the replies in the thread identified by [parentId].

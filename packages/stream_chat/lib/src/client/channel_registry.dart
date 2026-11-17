@@ -11,6 +11,10 @@ class ChannelRegistry {
   final _listed = ImmutableMapBehaviorSubject<String, Channel>.seeded(const {});
   final _unlisted = <String, Channel>{};
 
+  // Unlisted channels another instance with the same cid replaced. They stay
+  // alive for code still holding them and are disposed with the rest.
+  final _replaced = <Channel>[];
+
   /// The listed channels, by cid.
   Map<String, Channel> get channels => _listed.value;
 
@@ -28,9 +32,18 @@ class ChannelRegistry {
 
   /// Lists exactly [channels], replacing the listed ones.
   ///
-  /// An unlisted channel among them is listed again.
+  /// An unlisted channel among them is listed again. An unlisted channel that a
+  /// different instance with the same cid replaces stops saving to the offline
+  /// storage and stays alive until [dispose].
   void setChannels(Map<String, Channel> channels) {
-    _unlisted.removeWhere((cid, _) => channels.containsKey(cid));
+    for (final MapEntry(key: cid, value: channel) in channels.entries) {
+      final unlisted = _unlisted.remove(cid);
+      if (unlisted == null || identical(unlisted, channel)) continue;
+
+      unlisted.state?.stopPersisting();
+      _replaced.add(unlisted);
+    }
+
     _listed.safeAdd(channels);
   }
 
@@ -69,7 +82,7 @@ class ChannelRegistry {
   /// Disposes every live channel and stops emitting [channelsStream].
   void dispose() {
     // Taken before closing, as disposing a channel removes it from here.
-    final remaining = live.toList();
+    final remaining = [...live, ..._replaced];
     _listed.close();
     for (final channel in remaining) {
       channel.dispose();

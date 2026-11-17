@@ -3198,12 +3198,14 @@ class ClientState {
 
   /// The current user's channels in memory as a stream, by cid.
   ///
-  /// Leaves out the channels they hid, were removed from, or that were deleted.
+  /// Leaves out the channels they hid or were removed from, and deleted ones,
+  /// until a later query or watch returns them.
   Stream<Map<String, Channel>> get channelsStream => _channelRegistry.channelsStream;
 
   /// The current user's channels in memory, by cid.
   ///
-  /// Leaves out the channels they hid, were removed from, or that were deleted.
+  /// Leaves out the channels they hid or were removed from, and deleted ones,
+  /// until a later query or watch returns them.
   Map<String, Channel> get channels => _channelRegistry.channels;
 
   @internal

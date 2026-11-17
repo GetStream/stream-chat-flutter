@@ -207,6 +207,10 @@ class ChannelEventHandler {
     // A new message shows a hidden channel again, unless it is shadowed.
     if (_channel.hidden && !message.shadowed) {
       _mutations.onChannelVisibilityChanged(hidden: false);
+
+      final cid = _channel.cid!;
+      final isListed = _client.state.channels.containsKey(cid);
+      if (!isListed) _client.state.addChannels({cid: _channel});
     }
   }
 

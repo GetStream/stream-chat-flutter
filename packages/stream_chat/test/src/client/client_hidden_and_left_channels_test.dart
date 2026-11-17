@@ -15,6 +15,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(const PaginationParams());
+    registerFallbackValue(const ChannelState());
   });
 
   setUp(() {
@@ -357,6 +358,85 @@ void main() {
     verify(() => persistence.deleteChannels(['messaging:deleted'])).called(1);
   });
 
+  test('channel.deleted stops saving the channel to persistence', () async {
+    final persistence = _persistence();
+    client.chatPersistenceClient = persistence;
+    _addChannel(client, 'messaging:deleted');
+
+    await _delete(client, 'messaging:deleted');
+    await Future<void>.delayed(_pastPersistenceDebounce);
+
+    verifyNever(() => persistence.updateChannelState(any()));
+  });
+
+  test('notification.removed_from_channel stops saving the channel to persistence', () async {
+    final persistence = _persistence();
+    client.chatPersistenceClient = persistence;
+    _addChannel(client, 'messaging:left', membership: _membershipOf(currentUser));
+
+    await _removeFromChannel(client, 'messaging:left', currentUser);
+    await Future<void>.delayed(_pastPersistenceDebounce);
+
+    verifyNever(() => persistence.updateChannelState(any()));
+  });
+
+  test('channel.hidden keeps saving the channel to persistence', () async {
+    final persistence = _persistence();
+    client.chatPersistenceClient = persistence;
+    _addChannel(client, 'messaging:hidden');
+
+    await _hide(client, 'messaging:hidden');
+    await Future<void>.delayed(_pastPersistenceDebounce);
+
+    verify(() => persistence.updateChannelState(any())).called(1);
+  });
+
+  test('watching a channel the user was removed from saves it again', () async {
+    final persistence = _persistence();
+    client.chatPersistenceClient = persistence;
+    final channel = _addChannel(client, 'messaging:left', membership: _membershipOf(currentUser));
+    await _removeFromChannel(client, 'messaging:left', currentUser);
+    _stubQueryChannel(api, 'messaging:left');
+
+    await channel.watch();
+    await Future<void>.delayed(_pastPersistenceDebounce);
+
+    verify(() => persistence.updateChannelState(any())).called(1);
+  });
+
+  test('a new message puts a hidden channel back in client.state.channels', () async {
+    _addChannel(client, 'messaging:hidden');
+    await _hide(client, 'messaging:hidden');
+
+    await _receiveMessage(client, 'messaging:hidden', Message(id: 'message', text: 'Hi', user: otherUser));
+
+    expect(client.state.channels, contains('messaging:hidden'));
+  });
+
+  test('disposing the client state disposes a hidden channel another instance replaced', () async {
+    final replaced = _addChannel(client, 'messaging:hidden');
+    await _hide(client, 'messaging:hidden');
+    _addChannel(client, 'messaging:hidden');
+
+    client.state.dispose();
+
+    expect(replaced.state, isNull);
+  });
+
+  test('a hidden channel another instance replaced stops saving to persistence', () async {
+    final persistence = _persistence();
+    client.chatPersistenceClient = persistence;
+    final replaced = _addChannel(client, 'messaging:hidden');
+    await _hide(client, 'messaging:hidden');
+    _addChannel(client, 'messaging:hidden');
+
+    replaced.state!.unreadCount = 3;
+    await Future<void>.delayed(_pastPersistenceDebounce);
+
+    // Only the replacing instance saves.
+    verify(() => persistence.updateChannelState(any())).called(1);
+  });
+
   test('disposing the client state disposes a deleted channel', () async {
     final channel = _addChannel(client, 'messaging:deleted');
     await _delete(client, 'messaging:deleted');
@@ -423,10 +503,15 @@ Channel _addChannel(
 
 Member _membershipOf(User user) => Member(userId: user.id, user: user);
 
+// Longer than the delay before a channel saves its state to persistence.
+const _pastPersistenceDebounce = Duration(milliseconds: 1100);
+
 MockPersistenceClient _persistence() {
   final persistence = MockPersistenceClient();
   when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => {});
   when(() => persistence.deleteChannelQueriesByCids(any())).thenAnswer((_) async {});
+  when(() => persistence.deleteChannels(any())).thenAnswer((_) async {});
+  when(() => persistence.updateChannelState(any())).thenAnswer((_) async {});
   return persistence;
 }
 
