@@ -47,8 +47,13 @@ jobs:
         with:
           ref: ${{ inputs.sha }}
 
+      # The pull request's code runs in this job, so it neither loads actions from
+      # the checkout nor writes caches the default branch would restore.
       - name: 🐦 Install Flutter
-        uses: ./.github/actions/setup-flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.x"
+          channel: stable
 
       - name: 📦 Install Tools
         run: flutter pub global activate melos
@@ -96,8 +101,13 @@ jobs:
         with:
           ref: ${{ inputs.sha }}
 
+      # The pull request's code runs in this job, so it neither loads actions from
+      # the checkout nor writes caches the default branch would restore.
       - name: 🐦 Install Flutter
-        uses: ./.github/actions/setup-flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.x"
+          channel: stable
 
       - name: 📦 Install Tools
         run: flutter pub global activate melos
