@@ -1,14 +1,14 @@
 name: check_db_entities
 
 on:
-  pull_request_target:
+  pull_request:
 
 concurrency:
-  # Use PR number — github.ref is the base branch under pull_request_target.
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-# pull_request_target needs explicit perms; fork PRs default to read-only.
+# Fork pull requests get a read-only token: they skip the comment and read
+# the suggested change in the job summary instead.
 permissions:
   contents: read
   issues: write
@@ -55,8 +55,12 @@ jobs:
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: ./.github/workflows/scripts/check-db-entities.sh
 
-      - name: 🔍 Find Comment
+      - name: 📝 Write Job Summary
         if: steps.check_entities.outputs.has_changes == 'true'
+        run: cat comment_body.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: 🔍 Find Comment
+        if: steps.check_entities.outputs.has_changes == 'true' && github.event.pull_request.head.repo.full_name == github.repository
         uses: peter-evans/find-comment@v4
         id: find_comment
         with:
@@ -65,7 +69,7 @@ jobs:
           body-includes: Database Entity Files Modified
 
       - name: 💬 Create or Update Comment
-        if: steps.check_entities.outputs.has_changes == 'true'
+        if: steps.check_entities.outputs.has_changes == 'true' && github.event.pull_request.head.repo.full_name == github.repository
         uses: peter-evans/create-or-update-comment@v5
         with:
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
