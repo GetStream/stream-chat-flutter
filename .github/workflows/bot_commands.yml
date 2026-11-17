@@ -1,6 +1,7 @@
 name: bot_commands
 
-# Runs `/<command> [argument]` from the first line of a pull request comment.
+# Runs `@stream-flutter-ci-bot <command> [argument]`, or `/<command> [argument]`,
+# from the first line of a pull request comment.
 #
 # To add a command:
 #   1. Write a workflow with a `workflow_call` trigger whose `ref` and `sha`
@@ -18,7 +19,9 @@ permissions:
 
 jobs:
   parse:
-    if: github.event.issue.pull_request && startsWith(github.event.comment.body, '/')
+    if: |
+      github.event.issue.pull_request &&
+      (startsWith(github.event.comment.body, '/') || startsWith(github.event.comment.body, '@stream-flutter-ci-bot'))
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write # Required to react to and answer the comment
@@ -27,6 +30,8 @@ jobs:
       argument: ${{ steps.parse.outputs.argument }}
       ref: ${{ steps.parse.outputs.ref }}
       sha: ${{ steps.parse.outputs.sha }}
+      request: ${{ steps.parse.outputs.request }}
+      reply-id: ${{ steps.parse.outputs.reply-id }}
     steps:
       # TODO: pin to a commit SHA of stream-core-flutter's main before merging.
       - name: 🎯 Parse the command
@@ -62,4 +67,6 @@ jobs:
         uses: GetStream/stream-core-flutter/.github/actions/bot-command-report@ci/bot-commands
         with:
           command: ${{ needs.parse.outputs.command }}
+          request: ${{ needs.parse.outputs.request }}
+          reply-id: ${{ needs.parse.outputs.reply-id }}
           results: ${{ toJSON(needs) }}
