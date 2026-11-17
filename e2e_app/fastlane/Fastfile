@@ -1,4 +1,5 @@
 opt_out_usage
+skip_docs
 
 require 'net/http'
 require 'shellwords'
