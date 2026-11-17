@@ -47,22 +47,10 @@ jobs:
           GITHUB_TOKEN: ${{ steps.bot-token.outputs.token }}
         run: bundle exec fastlane update_readme_badges
 
-      - name: 🔍 Detect badge changes
-        id: detect
-        run: |
-          if git diff --quiet -- README.md; then
-            echo "changed=false" >> "$GITHUB_OUTPUT"
-          else
-            echo "changed=true" >> "$GITHUB_OUTPUT"
-          fi
-
       # TODO: pin to a commit SHA of stream-core-flutter's main before merging.
       - name: 📤 Commit Changes
-        if: steps.detect.outputs.changed == 'true'
-        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@ci/bot-commands
+        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@ci/bot-commit-action
         with:
           files: README.md
-          branch: ${{ github.ref_name }}
-          expected-head-sha: ${{ github.sha }}
           message: "chore(repo): update the SDK size badges"
           token: ${{ steps.bot-token.outputs.token }}
