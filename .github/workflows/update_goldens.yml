@@ -188,13 +188,14 @@ jobs:
 
       - name: 📤 Commit the goldens
         id: commit
-        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@ci/bot-commands
+        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@68fdf0bf3c779f640dbb10a1ecf7945d872408f7
         with:
           files: "**/goldens/**/*.png"
           branch: ${{ inputs.ref || github.ref_name }}
           expected-head-sha: ${{ inputs.sha || github.sha }}
           message: "chore: Update Goldens"
           token: ${{ steps.ci-bot-token.outputs.token }}
+          detect-changes: false
 
   summarize:
     needs: [update_sdk_goldens, update_docs_goldens, commit_goldens]
