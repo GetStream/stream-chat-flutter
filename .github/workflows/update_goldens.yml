@@ -127,6 +127,8 @@ jobs:
 
       - name: 📚 Checkout branch
         uses: actions/checkout@v7
+        with:
+          persist-credentials: false
 
       - name: 📥 Download SDK goldens
         if: needs.update_sdk_goldens.outputs.changed == 'true'
@@ -150,7 +152,7 @@ jobs:
           done
 
       - name: 📤 Commit Changes
-        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@e371bd980d64c744cfd09437c34c1ee1c15c5dc5
+        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@68fdf0bf3c779f640dbb10a1ecf7945d872408f7
         with:
           files: "**/test/**/goldens/**/*.png"
           message: "chore: Update Goldens"
