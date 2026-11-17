@@ -33,14 +33,14 @@ jobs:
   # `push` events to master always run the full suite, matching the
   # previous `on.push.branches: [master]` behavior.
   #
-  # `test_all` tells `select-packages` to test every package: on master
-  # pushes, and when a `shared` file that every package builds or tests
-  # against changed.
+  # `test_all` tells `select-packages` to test every package on master
+  # pushes. Pull requests only test the packages they change and their
+  # dependents.
   gate:
     runs-on: ubuntu-latest
     outputs:
       should_run: ${{ github.event_name == 'push' || (steps.filter.outputs.relevant == 'true' && github.event.pull_request.draft != true) }}
-      test_all: ${{ github.event_name == 'push' || steps.filter.outputs.shared == 'true' }}
+      test_all: ${{ github.event_name == 'push' }}
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
@@ -50,7 +50,11 @@ jobs:
         id: filter
         with:
           filters: |
-            shared: &shared
+            relevant:
+              - 'docs/**'
+              - 'packages/**'
+              - 'sample_app/**'
+              - 'e2e_app/**'
               - 'melos.yaml'
               - 'pubspec.yaml'
               - 'pubspec.lock'
@@ -60,12 +64,6 @@ jobs:
               - '.github/actions/**'
               - '.github/workflows/scripts/**'
               - '.github/workflows/stream_flutter_workflow.yml'
-            relevant:
-              - *shared
-              - 'docs/**'
-              - 'packages/**'
-              - 'sample_app/**'
-              - 'e2e_app/**'
 
   analyze:
     needs: gate
@@ -120,9 +118,8 @@ jobs:
       - name: ✅ Validate Formatting
         run: ./.github/workflows/scripts/validate-formatting.sh
 
-  # Picks the packages to test, with their minimum coverage. On pull requests
-  # that is the changed packages and their dependents; pushes to master and
-  # changes to shared files test every package.
+  # Picks the packages to test, with their minimum coverage: on pull requests
+  # the changed packages and their dependents, on master pushes every package.
   select-packages:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
@@ -148,8 +145,7 @@ jobs:
       # The table must list exactly the packages with tests: a missing one
       # would never be tested, and a stale one would only fail on master. A
       # pull request checks out its merge commit, whose first parent is the
-      # base branch commit it merged onto. An empty melos selection tests
-      # every package rather than none.
+      # base branch commit it merged onto.
       - name: 🎯 Select Packages
         id: select
         env:
@@ -180,13 +176,11 @@ jobs:
           selected=$(jq -c . <<< "$PACKAGES")
           if [ "$TEST_ALL" != "true" ]; then
             changed=$(melos list --diff="$(git rev-parse HEAD^1)" --include-dependents --json | jq -c 'map(.name)')
-            if [ "$changed" != "[]" ]; then
-              selected=$(jq -c --argjson changed "$changed" 'map(select(.package | IN($changed[])))' <<< "$PACKAGES")
-            fi
+            selected=$(jq -c --argjson changed "$changed" 'map(select(.package | IN($changed[])))' <<< "$PACKAGES")
           fi
 
           echo "packages=$selected" >> "$GITHUB_OUTPUT"
-          echo "Testing: $(jq -r 'map(.package) | join(", ")' <<< "$selected")" >> "$GITHUB_STEP_SUMMARY"
+          echo "Testing: $(jq -r 'map(.package) | join(", ") | if . == "" then "nothing, no package changed" end' <<< "$selected")" >> "$GITHUB_STEP_SUMMARY"
 
   test-package:
     name: test (${{ matrix.package }})
