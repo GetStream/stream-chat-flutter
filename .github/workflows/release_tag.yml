@@ -57,9 +57,6 @@ jobs:
       - name: 🚀 Create and Push Tag
         shell: bash
         run: |
-          git config user.name "stream-flutter-ci-bot[bot]"
-          git config user.email "357444665+stream-flutter-ci-bot[bot]@users.noreply.github.com"
-          
           echo "Creating and pushing tag: ${{ steps.extract_tag.outputs.tag }}"
           git tag ${{ steps.extract_tag.outputs.tag }}
           git push origin ${{ steps.extract_tag.outputs.tag }}
