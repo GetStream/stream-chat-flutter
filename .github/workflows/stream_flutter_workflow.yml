@@ -33,8 +33,9 @@ jobs:
   # `push` events to master always run the full suite, matching the
   # previous `on.push.branches: [master]` behavior.
   #
-  # `test_all` tells `select` to test every package: on master pushes, and
-  # when a `shared` file that every package builds or tests against changed.
+  # `test_all` tells `select-packages` to test every package: on master
+  # pushes, and when a `shared` file that every package builds or tests
+  # against changed.
   gate:
     runs-on: ubuntu-latest
     outputs:
@@ -122,7 +123,7 @@ jobs:
   # Picks the packages to test, with their minimum coverage. On pull requests
   # that is the changed packages and their dependents; pushes to master and
   # changes to shared files test every package.
-  select:
+  select-packages:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
     runs-on: ubuntu-latest
@@ -190,8 +191,8 @@ jobs:
 
   test-package:
     name: test (${{ matrix.package }})
-    needs: select
-    if: needs.select.outputs.packages != '[]'
+    needs: select-packages
+    if: needs.select-packages.outputs.packages != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:
@@ -201,7 +202,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include: ${{ fromJSON(needs.select.outputs.packages) }}
+        include: ${{ fromJSON(needs.select-packages.outputs.packages) }}
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
@@ -245,7 +246,7 @@ jobs:
   # The required check. It fails when any selected package's tests fail or a
   # job before them fails, and passes when no package needed testing.
   test:
-    needs: [gate, select, test-package]
+    needs: [gate, select-packages, test-package]
     if: ${{ !cancelled() && (needs.gate.result != 'success' || needs.gate.outputs.should_run == 'true') }}
     runs-on: ubuntu-latest
     steps:
