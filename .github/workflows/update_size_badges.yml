@@ -47,9 +47,8 @@ jobs:
           GITHUB_TOKEN: ${{ steps.bot-token.outputs.token }}
         run: bundle exec fastlane update_readme_badges
 
-      # TODO: pin to a commit SHA of stream-core-flutter's main before merging.
       - name: 📤 Commit Changes
-        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@ci/bot-commit-action
+        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@e371bd980d64c744cfd09437c34c1ee1c15c5dc5
         with:
           files: README.md
           message: "chore(repo): update the SDK size badges"
