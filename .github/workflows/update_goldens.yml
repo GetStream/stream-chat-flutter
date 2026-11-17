@@ -15,8 +15,6 @@ jobs:
 
       - name: 📚 Checkout branch
         uses: actions/checkout@v6
-        with:
-          token: ${{ steps.ci-bot-token.outputs.token }}
 
       - name: 🐦 Install Flutter
         uses: subosito/flutter-action@v2
@@ -37,9 +35,8 @@ jobs:
         run: melos run update:goldens
 
       - name: 📤 Commit Changes
-        uses: stefanzweifel/git-auto-commit-action@v7
+        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@e371bd980d64c744cfd09437c34c1ee1c15c5dc5
         with:
-          commit_message: "chore: Update Goldens"
-          file_pattern: "**/test/**/goldens/*.png"
-          commit_user_name: "stream-flutter-ci-bot[bot]"
-          commit_user_email: "357444665+stream-flutter-ci-bot[bot]@users.noreply.github.com"
+          files: "**/test/**/goldens/**/*.png"
+          message: "chore: Update Goldens"
+          token: ${{ steps.ci-bot-token.outputs.token }}
