@@ -1,12 +1,14 @@
+import 'support/predefined_users.dart';
 import 'support/step.dart';
 import 'support/stream_test_case.dart';
 import 'support/stream_test_env.dart';
 
 // Each scenario connects with a token the mock server hands out (valid for
-// 5 s); the SDK refreshes it only once it expires.
+// 5 s); the SDK refreshes it only once it expires. The token is issued for
+// the mock server's own user, so every scenario logs in as that user.
 void main() {
   Future<void> login(StreamTestEnv env) async {
-    await env.userRobot.login();
+    await env.userRobot.login(PredefinedUsers.mockServerUser);
     await env.assertConnected();
   }
 
@@ -20,7 +22,7 @@ void main() {
       await env.backendRobot.invalidateToken();
 
       step('WHEN the user tries to log in');
-      await env.userRobot.login();
+      await env.userRobot.login(PredefinedUsers.mockServerUser);
 
       step('THEN the app requests a token refresh');
       await env.assertConnected();
@@ -54,7 +56,7 @@ void main() {
       await env.backendRobot.invalidateTokenDate();
 
       step('WHEN the user tries to log in');
-      await env.userRobot.login();
+      await env.userRobot.login(PredefinedUsers.mockServerUser);
 
       step('THEN the login fails without requesting another token');
       await env.userRobot.assertLoginFailed(code: 42);
@@ -92,7 +94,7 @@ void main() {
       await env.backendRobot.invalidateTokenSignature();
 
       step('WHEN the user tries to log in');
-      await env.userRobot.login();
+      await env.userRobot.login(PredefinedUsers.mockServerUser);
 
       step('THEN the login fails without requesting another token');
       await env.userRobot.assertLoginFailed(code: 43);
@@ -109,7 +111,7 @@ void main() {
       await env.backendRobot.revokeToken();
 
       step('WHEN the user tries to log in');
-      await env.userRobot.login();
+      await env.userRobot.login(PredefinedUsers.mockServerUser);
 
       step('THEN the app requests a token refresh');
       await env.assertConnected();

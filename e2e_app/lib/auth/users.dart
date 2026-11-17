@@ -27,4 +27,12 @@ const e2eUsers = [
     token:
         'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoicWF0ZXN0MiJ9.vSCqAEbs2WVmMWsOsa7065Fsjq-rsTih6qsHPynl7XM',
   ),
+  // The user the mock server's JWTs are issued for, so a test that connects
+  // with them logs in as the user the token names.
+  E2eUser(
+    id: 'luke_skywalker',
+    name: 'Luke Skywalker',
+    token:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibHVrZV9za3l3YWxrZXIifQ.HkFDKyXUrBhV1UV13UkjbXQjvD636P1cl96yeNzCA7U',
+  ),
 ];
