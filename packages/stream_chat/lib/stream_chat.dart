@@ -92,3 +92,5 @@ export 'src/db/chat_persistence_client.dart';
 export 'src/event_type.dart';
 export 'src/system_environment.dart';
 export 'src/ws/connection_status.dart';
+
+// Throwaway change to exercise scoped CI. Do not merge.
