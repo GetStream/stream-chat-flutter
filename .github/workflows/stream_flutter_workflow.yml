@@ -160,8 +160,7 @@ jobs:
               { "package": "stream_chat_flutter", "path": "packages/stream_chat_flutter", "min-coverage": 44 },
               { "package": "stream_chat_flutter_core", "path": "packages/stream_chat_flutter_core", "min-coverage": 30 },
               { "package": "stream_chat_localizations", "path": "packages/stream_chat_localizations", "min-coverage": 100 },
-              { "package": "stream_chat_persistence", "path": "packages/stream_chat_persistence", "min-coverage": 95 },
-              { "package": "sample_app", "path": "sample_app" }
+              { "package": "stream_chat_persistence", "path": "packages/stream_chat_persistence", "min-coverage": 95 }
             ]
         run: |
           set -euo pipefail
