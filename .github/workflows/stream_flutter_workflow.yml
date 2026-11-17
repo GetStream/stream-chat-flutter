@@ -147,9 +147,10 @@ jobs:
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap
 
-      # A pull request checks out its merge commit, whose first parent is the
-      # base branch commit it merged onto. An empty melos selection tests
-      # every package rather than none.
+      # Every package with tests must be in the table, or it would never be
+      # tested. A pull request checks out its merge commit, whose first parent
+      # is the base branch commit it merged onto. An empty melos selection
+      # tests every package rather than none.
       - name: 🎯 Select Packages
         id: select
         env:
@@ -165,6 +166,13 @@ jobs:
             ]
         run: |
           set -euo pipefail
+
+          tested=$(melos list --dir-exists=test --ignore="docs_*" --json | jq -c 'map(.name)')
+          missing=$(jq -r --argjson tested "$tested" '$tested - map(.package) | join(", ")' <<< "$PACKAGES")
+          if [ -n "$missing" ]; then
+            echo "::error::Add these packages to the PACKAGES table: $missing"
+            exit 1
+          fi
 
           selected=$(jq -c . <<< "$PACKAGES")
           if [ "$TEST_ALL" != "true" ]; then
@@ -233,11 +241,11 @@ jobs:
           path: ${{ matrix.path }}/coverage/lcov.info
           min_coverage: ${{ matrix.min-coverage }}
 
-  # The required check. It fails when any selected package's tests fail, and
-  # passes when no package needed testing.
+  # The required check. It fails when any selected package's tests fail or a
+  # job before them fails, and passes when no package needed testing.
   test:
-    needs: [select, test-package]
-    if: ${{ !cancelled() && needs.select.result != 'skipped' }}
+    needs: [gate, select, test-package]
+    if: ${{ !cancelled() && (needs.gate.result != 'success' || needs.gate.outputs.should_run == 'true') }}
     runs-on: ubuntu-latest
     steps:
       - name: 🚨 Check Results
