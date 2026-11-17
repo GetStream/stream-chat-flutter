@@ -200,6 +200,11 @@ class ChannelEventHandler {
     };
 
     _mutations.onMessageNew(message, watcherCount: watcherCount);
+
+    // A new message shows a hidden channel again, unless it is shadowed.
+    if (_channel.hidden && !message.shadowed) {
+      _mutations.onChannelVisibilityChanged(hidden: false);
+    }
   }
 
   void _onMessageDeleted(Event event) {
@@ -384,8 +389,14 @@ class ChannelEventHandler {
     return _mutations.onChannelUpdated(channel);
   }
 
-  void _onChannelHidden(Event event) {
-    return _mutations.onChannelVisibilityChanged(hidden: true);
+  Future<void> _onChannelHidden(Event event) async {
+    _mutations.onChannelVisibilityChanged(hidden: true);
+
+    final clearHistory = event.extraData['clear_history'].safeCast<bool>();
+    if (clearHistory != true) return;
+
+    await _client.chatPersistenceClient?.deleteMessageByCid(_channel.cid!);
+    _mutations.onChannelTruncated();
   }
 
   void _onChannelVisible(Event event) {

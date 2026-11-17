@@ -4,6 +4,10 @@
 
 - `Channel.activeMemberCount` is now kept in the local cache.
 
+🔄 Changed
+
+- Hiding a channel now keeps it in the offline cache, out of the cached channel lists.
+
 ## 10.6.0
 
 ✅ Added

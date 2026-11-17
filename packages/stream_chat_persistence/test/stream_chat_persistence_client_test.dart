@@ -913,10 +913,21 @@ void main() {
 
     test('deleteChannels', () async {
       const cids = <String>[];
+      when(() => mockDatabase.channelQueryDao.deleteChannelQueriesByCids(cids)).thenAnswer((_) async => 1);
       when(() => mockDatabase.channelDao.deleteChannelByCids(cids)).thenAnswer((_) async => 1);
 
       await client.deleteChannels(cids);
+      verify(() => mockDatabase.channelQueryDao.deleteChannelQueriesByCids(cids)).called(1);
       verify(() => mockDatabase.channelDao.deleteChannelByCids(cids)).called(1);
+    });
+
+    test('deleteChannelQueriesByCids', () async {
+      const cids = ['testCid'];
+      when(() => mockDatabase.channelQueryDao.deleteChannelQueriesByCids(cids)).thenAnswer((_) async => 1);
+
+      await client.deleteChannelQueriesByCids(cids);
+      verify(() => mockDatabase.channelQueryDao.deleteChannelQueriesByCids(cids)).called(1);
+      verifyNever(() => mockDatabase.channelDao.deleteChannelByCids(any()));
     });
 
     test('updateMessages', () async {

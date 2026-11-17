@@ -127,10 +127,18 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
-  Future<void> deleteChannels(List<String> cids) {
+  Future<void> deleteChannels(List<String> cids) async {
     assert(_debugIsConnected, '');
     _logger.info('deleteChannels');
-    return db!.channelDao.deleteChannelByCids(cids);
+    await db!.channelQueryDao.deleteChannelQueriesByCids(cids);
+    await db!.channelDao.deleteChannelByCids(cids);
+  }
+
+  @override
+  Future<void> deleteChannelQueriesByCids(List<String> cids) async {
+    assert(_debugIsConnected, '');
+    _logger.info('deleteChannelQueriesByCids');
+    await db!.channelQueryDao.deleteChannelQueriesByCids(cids);
   }
 
   @override

@@ -45,16 +45,73 @@ void main() {
     expect(channel.state, isNotNull);
   });
 
-  test('channel.hidden deletes the channel from persistence', () async {
-    final persistence = MockPersistenceClient();
-    when(() => persistence.deleteChannels(any())).thenAnswer((_) async {});
-    when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => {});
+  test('channel.hidden keeps the channel in persistence', () async {
+    final persistence = _persistence();
     client.chatPersistenceClient = persistence;
     _addChannel(client, 'messaging:hidden');
 
     await _hide(client, 'messaging:hidden');
 
-    verify(() => persistence.deleteChannels(['messaging:hidden'])).called(1);
+    verifyNever(() => persistence.deleteChannels(any()));
+  });
+
+  test('channel.hidden takes the channel out of the stored channel queries', () async {
+    final persistence = _persistence();
+    client.chatPersistenceClient = persistence;
+
+    await _hide(client, 'messaging:hidden');
+
+    verify(() => persistence.deleteChannelQueriesByCids(['messaging:hidden'])).called(1);
+  });
+
+  test('channel.hidden keeps the messages', () async {
+    final channel = _addChannel(
+      client,
+      'messaging:hidden',
+      messages: [Message(id: 'message', text: 'Hi')],
+    );
+
+    await _hide(client, 'messaging:hidden');
+
+    expect(channel.state!.messages, isNotEmpty);
+  });
+
+  test('channel.hidden with a cleared history clears the messages', () async {
+    final persistence = _persistence();
+    when(() => persistence.deleteMessageByCid(any())).thenAnswer((_) async {});
+    client.chatPersistenceClient = persistence;
+    final channel = _addChannel(
+      client,
+      'messaging:hidden',
+      messages: [Message(id: 'message', text: 'Hi')],
+    );
+
+    await _hide(client, 'messaging:hidden', clearHistory: true);
+
+    expect(channel.state!.messages, isEmpty);
+    verify(() => persistence.deleteMessageByCid('messaging:hidden')).called(1);
+  });
+
+  test('a new message shows a hidden channel again', () async {
+    final channel = _addChannel(client, 'messaging:hidden');
+    await _hide(client, 'messaging:hidden');
+
+    await _receiveMessage(client, 'messaging:hidden', Message(id: 'message', text: 'Hi', user: otherUser));
+
+    expect(channel.hidden, isFalse);
+  });
+
+  test('a new shadowed message keeps a hidden channel hidden', () async {
+    final channel = _addChannel(client, 'messaging:hidden');
+    await _hide(client, 'messaging:hidden');
+
+    await _receiveMessage(
+      client,
+      'messaging:hidden',
+      Message(id: 'message', text: 'Hi', user: otherUser, shadowed: true),
+    );
+
+    expect(channel.hidden, isTrue);
   });
 
   test('channel.hidden marks the channel as hidden', () async {
@@ -190,6 +247,16 @@ void main() {
     expect(client.state.channels, isNot(contains('messaging:hidden')));
   });
 
+  test('querying a hidden channel keeps it hidden', () async {
+    final channel = _addChannel(client, 'messaging:hidden');
+    await _hide(client, 'messaging:hidden');
+    _stubQueryChannel(api, 'messaging:hidden');
+
+    await channel.query(messagesPagination: const PaginationParams(limit: 20));
+
+    expect(channel.hidden, isTrue);
+  });
+
   test('querying channels brings back only the hidden channels the server returns', () async {
     _addChannel(client, 'messaging:returned');
     _addChannel(client, 'messaging:still-hidden');
@@ -286,12 +353,18 @@ void main() {
   });
 }
 
-Channel _addChannel(StreamChatClient client, String cid, {Member? membership}) {
+Channel _addChannel(
+  StreamChatClient client,
+  String cid, {
+  Member? membership,
+  List<Message> messages = const [],
+}) {
   final channel = Channel.fromState(
     client,
     ChannelState(
       channel: ChannelModel(cid: cid),
       membership: membership,
+      messages: messages,
     ),
   );
   client.state.addChannels({cid: channel});
@@ -300,12 +373,33 @@ Channel _addChannel(StreamChatClient client, String cid, {Member? membership}) {
 
 Member _membershipOf(User user) => Member(userId: user.id, user: user);
 
-Future<void> _hide(StreamChatClient client, String cid) async {
+MockPersistenceClient _persistence() {
+  final persistence = MockPersistenceClient();
+  when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => {});
+  when(() => persistence.deleteChannelQueriesByCids(any())).thenAnswer((_) async {});
+  return persistence;
+}
+
+Future<void> _hide(StreamChatClient client, String cid, {bool clearHistory = false}) async {
   client.handleEvent(
     Event(
       type: EventType.channelHidden,
       cid: cid,
       channel: ChannelModel(cid: cid),
+      extraData: {'clear_history': clearHistory},
+    ),
+  );
+  await Future<void>.delayed(Duration.zero);
+}
+
+Future<void> _receiveMessage(StreamChatClient client, String cid, Message message) async {
+  client.handleEvent(
+    Event(
+      type: EventType.messageNew,
+      cid: cid,
+      channel: ChannelModel(cid: cid),
+      message: message,
+      user: message.user,
     ),
   );
   await Future<void>.delayed(Duration.zero);
