@@ -28,9 +28,9 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_slidable: ^3.1.1
-  stream_chat_flutter: ^10.6.0
-  stream_chat_localizations: ^10.6.0
-  stream_chat_persistence: ^10.6.0
+  stream_chat_flutter: ^10.7.0
+  stream_chat_localizations: ^10.7.0
+  stream_chat_persistence: ^10.7.0
 
 dev_dependencies:
   flutter_test:
@@ -42,12 +42,3 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
-dependency_overrides:
-  # stream_core_flutter at its git ref needs a stream_core newer than the
-  # published one, so stream_core comes from the same ref.
-  stream_core:
-    git:
-      url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 74a65f0d9730f91236f467c7cb18580cbfdc582a
-      path: packages/stream_core

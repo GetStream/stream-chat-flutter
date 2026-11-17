@@ -1,5 +1,15 @@
 ## Upcoming
 
+✅ Added
+
+- Added the scheduled message strings for all supported locales.
+
+🔄 Changed
+
+- A language added by subclassing `GlobalStreamChatLocalizations` must add the scheduled message strings.
+
+## 10.7.0
+
 🐞 Fixed
 
 - Fixed German mute strings showing Dutch text, and the German "Mute user" action not switching to "unmute" for an already-muted user.

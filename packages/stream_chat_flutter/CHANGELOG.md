@@ -2,6 +2,21 @@
 
 ✅ Added
 
+- Added `StreamScheduledMessageListView` to list the current user's scheduled messages.
+- Added `showStreamScheduledMessageActionsSheet` to act on a scheduled message.
+
+🔄 Changed
+
+- A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
+
+🐞 Fixed
+
+- Fixed the channel page crashing after its channel is hidden or the user is removed from it, for example by blocking the other member of a direct message.
+
+## 10.7.0
+
+✅ Added
+
 - Added a next action to the poll creator's option fields, which moves to the next option or adds a new one from the last.
 - Added `StreamMessagePreviewTextTheme` and `StreamChatThemeData.messagePreviewTextTheme`, to style the "Draft:" and sender prefixes, the deleted message and the icons in message previews.
 - Added `messagePreviewTextTheme` to `StreamQuotedMessageThemeData`, `StreamChannelListItemThemeData` and `StreamThreadListTileThemeData`, to style parts of the message preview on each.
@@ -17,7 +32,6 @@
 🐞 Fixed
 
 - Fixed swiping a message starting a reply in a channel that doesn't allow quoting or while the message is still being sent.
-- Fixed the channel page crashing after its channel is hidden or the user is removed from it, for example by blocking the other member of a direct message.
 - Fixed a web address written without `https://`, such as `youtube.com`, not being tappable in a message.
 - Fixed a web address right after a quote or Chinese or Japanese text not being tappable in a message.
 - Fixed `StreamThreadPage` hiding the composer for a deleted parent message that already has replies, which can still be replied to.

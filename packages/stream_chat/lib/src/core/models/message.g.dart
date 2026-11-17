@@ -20,9 +20,7 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
       .toList(),
   mentionedHere: json['mentioned_here'] as bool?,
   mentionedRoles: (json['mentioned_roles'] as List<dynamic>?)?.map((e) => e as String).toList(),
-  mentionedUsers:
-      (json['mentioned_users'] as List<dynamic>?)?.map((e) => User.fromJson(e as Map<String, dynamic>)).toList() ??
-      const [],
+  mentionedUsers: json['mentioned_users'] == null ? const [] : User.fromIdsOrJson(json['mentioned_users'] as List?),
   silent: json['silent'] as bool? ?? false,
   shadowed: json['shadowed'] as bool? ?? false,
   reactionGroups: (Message._reactionGroupsReadValue(json, 'reaction_groups') as Map<String, dynamic>?)?.map(

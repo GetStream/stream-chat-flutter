@@ -95,6 +95,13 @@ class SampleAppConfigScreen extends StatelessWidget {
                       onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableReminderActions: v)),
                     ),
                     SettingsSwitchRow(
+                      icon: icons.clock,
+                      title: 'Scheduled Messages',
+                      subtitle: 'List and manage scheduled messages',
+                      value: config.enableScheduledMessages,
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableScheduledMessages: v)),
+                    ),
+                    SettingsSwitchRow(
                       icon: icons.delete,
                       title: 'Delete for Me',
                       subtitle: 'Delete message for current user',

@@ -892,6 +892,46 @@ class Channel {
     }
   }
 
+  /// Schedules [message] to be sent to this channel at [scheduledAt].
+  ///
+  /// Until it is sent, the message is not among this channel's messages.
+  /// [ChannelClientState.scheduledMessages] lists it instead, or
+  /// [ChannelClientState.scheduledThreadReplies] for a thread reply.
+  ///
+  /// The [scheduledAt] is rounded up to a whole minute, at least
+  /// [ChannelConfig.scheduledMessagesMinLeadTime] from now. If it has passed by
+  /// the time the message is scheduled, the message is sent right away: it is
+  /// no longer listed, it arrives in this channel like any other message, and
+  /// [ScheduleMessageResponse.scheduledMessage] is null.
+  ///
+  /// Also stops the current user's typing.
+  ///
+  /// Throws a [StreamChatNetworkError] if the request fails. If it fails in a
+  /// way that can be retried, the message stays listed as failed with
+  /// [ScheduledMessageFailureReason.requestFailed].
+  ///
+  /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
+  /// attachment of [message] is not uploaded yet. A message to send right
+  /// away goes through [sendMessage].
+  Future<ScheduleMessageResponse> scheduleMessage(
+    Message message, {
+    required DateTime scheduledAt,
+    bool skipPush = false,
+    bool skipEnrichUrl = false,
+  }) {
+    _checkInitialized();
+    _keyStrokeHandler.cancel();
+
+    return _client.scheduleMessage(
+      message,
+      id!,
+      type,
+      scheduledAt: scheduledAt,
+      skipPush: skipPush,
+      skipEnrichUrl: skipEnrichUrl,
+    );
+  }
+
   Message _markMessageAsSent(Message message) {
     if (state == null) return message.copyWith(state: MessageState.sent);
 
@@ -2092,11 +2132,16 @@ class Channel {
   }
 
   /// Loads the initial channel state and watches for changes.
+  ///
+  /// If [includeScheduledMessages] is true, the current user's scheduled
+  /// messages in this channel are loaded too. [ClientState.scheduledMessages]
+  /// then lists this channel's current ones, thread replies included.
   Future<ChannelState> watch({
     bool presence = false,
     PaginationParams? messagesPagination,
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
+    bool includeScheduledMessages = false,
   }) {
     return query(
       watch: true,
@@ -2104,6 +2149,7 @@ class Channel {
       messagesPagination: messagesPagination,
       membersPagination: membersPagination,
       watchersPagination: watchersPagination,
+      includeScheduledMessages: includeScheduledMessages,
     );
   }
 
@@ -2192,10 +2238,15 @@ class Channel {
   /// Creates a new channel.
   Future<ChannelState> create() => query(state: false);
 
-  /// Query the API, get messages, members or other channel fields.
+  /// Queries this channel's messages, members and other fields.
   ///
-  /// Set [preferOffline] to true to avoid the API call if the data is already
-  /// in the offline storage.
+  /// If [preferOffline] is true, the channel state is read from the offline
+  /// storage when it has messages for this channel, without an API call.
+  ///
+  /// If [includeScheduledMessages] is true and the state comes from the API,
+  /// the current user's scheduled messages in this channel are loaded too.
+  /// [ClientState.scheduledMessages] then lists this channel's current ones,
+  /// thread replies included.
   Future<ChannelState> query({
     bool state = true,
     bool watch = false,
@@ -2204,6 +2255,7 @@ class Channel {
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
     bool preferOffline = false,
+    bool includeScheduledMessages = false,
   }) async {
     // A prior failed init left the completer errored; reset it so this attempt
     // owns the `initialized` result. Must stay before the first `await` so a
@@ -2244,6 +2296,7 @@ class Channel {
         messagesPagination: messagesPagination,
         membersPagination: membersPagination,
         watchersPagination: watchersPagination,
+        includeScheduledMessages: includeScheduledMessages,
       );
 
       if (_id == null) {

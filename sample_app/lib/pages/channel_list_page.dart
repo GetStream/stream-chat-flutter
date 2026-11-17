@@ -10,6 +10,7 @@ import '../auth/auth_controller.dart';
 import '../config/sample_app_config.dart';
 import '../config/sample_app_config_screen.dart';
 import '../routes/routes.dart';
+import '../scheduled_messages/screens/scheduled_messages_screen.dart';
 import '../utils/location_provider.dart';
 import '../utils/platform_support.dart';
 import '../utils/shared_location_service.dart';
@@ -83,6 +84,15 @@ class _ChannelListPageState extends State<ChannelListPage> {
         ),
         page: const RemindersPage(),
         enabled: config.enableReminderActions,
+      ),
+      _TabDef(
+        navItem: StreamBottomNavBarItem(
+          icon: Icon(icons.clock),
+          selectedIcon: Icon(icons.clock),
+          label: 'Scheduled',
+        ),
+        page: const ScheduledMessagesPage(),
+        enabled: config.enableScheduledMessages,
       ),
     ];
 

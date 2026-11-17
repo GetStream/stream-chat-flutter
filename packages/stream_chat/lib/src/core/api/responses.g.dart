@@ -369,6 +369,52 @@ QueryRemindersResponse _$QueryRemindersResponseFromJson(
       []
   ..next = json['next'] as String?;
 
+QueryScheduledMessagesResponse _$QueryScheduledMessagesResponseFromJson(
+  Map<String, dynamic> json,
+) => QueryScheduledMessagesResponse()
+  ..duration = json['duration'] as String?
+  ..scheduledMessages =
+      (json['scheduled_messages'] as List<dynamic>?)
+          ?.map((e) => ScheduledMessage.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      []
+  ..next = json['next'] as String?;
+
+ScheduleMessageResponse _$ScheduleMessageResponseFromJson(
+  Map<String, dynamic> json,
+) => ScheduleMessageResponse()
+  ..duration = json['duration'] as String?
+  ..message = Message.fromJson(json['message'] as Map<String, dynamic>)
+  ..scheduledMessage = json['scheduled_message'] == null
+      ? null
+      : ScheduledMessage.fromJson(
+          json['scheduled_message'] as Map<String, dynamic>,
+        );
+
+UpdateScheduledMessageResponse _$UpdateScheduledMessageResponseFromJson(
+  Map<String, dynamic> json,
+) => UpdateScheduledMessageResponse()
+  ..duration = json['duration'] as String?
+  ..scheduledMessage = ScheduledMessage.fromJson(
+    json['scheduled_message'] as Map<String, dynamic>,
+  );
+
+DeleteScheduledMessageResponse _$DeleteScheduledMessageResponseFromJson(
+  Map<String, dynamic> json,
+) => DeleteScheduledMessageResponse()
+  ..duration = json['duration'] as String?
+  ..scheduledMessage = ScheduledMessage.fromJson(
+    json['scheduled_message'] as Map<String, dynamic>,
+  );
+
+SendScheduledMessageNowResponse _$SendScheduledMessageNowResponseFromJson(
+  Map<String, dynamic> json,
+) => SendScheduledMessageNowResponse()
+  ..duration = json['duration'] as String?
+  ..scheduledMessage = ScheduledMessage.fromJson(
+    json['scheduled_message'] as Map<String, dynamic>,
+  );
+
 GetUnreadCountResponse _$GetUnreadCountResponseFromJson(
   Map<String, dynamic> json,
 ) => GetUnreadCountResponse()

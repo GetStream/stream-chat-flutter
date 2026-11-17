@@ -350,6 +350,21 @@ class ChannelClientState {
   Stream<List<Location>> get activeLiveLocationsStream =>
       channelStateStream.map((cs) => cs.activeLiveLocations ?? <Location>[]).distinct(const ListEquality().equals);
 
+  /// The current user's unsent scheduled messages in this channel.
+  ///
+  /// They are the ones in [ClientState.scheduledMessages] in this channel, in
+  /// the same order. Replies in its threads are in [scheduledThreadReplies].
+  List<ScheduledMessage> get scheduledMessages {
+    return _client.state.scheduledChannelMessages(_channel.cid!);
+  }
+
+  /// The [scheduledMessages] as they change.
+  ///
+  /// Emits the current value on listen, then a new value each time they change.
+  Stream<List<ScheduledMessage>> get scheduledMessagesStream {
+    return _client.state.scheduledChannelMessagesStream(_channel.cid!);
+  }
+
   /// Channel draft.
   Draft? get draft => _channelState.draft;
 
@@ -596,6 +611,7 @@ class ChannelClientState {
       pendingMessages: updatedState.pendingMessages,
       pushPreferences: updatedState.pushPreferences,
       activeLiveLocations: updatedState.activeLiveLocations,
+      scheduledMessages: updatedState.scheduledMessages,
     );
   }
 
@@ -679,6 +695,22 @@ class ChannelClientState {
 
   /// The channel threads related to this channel as a stream.
   Stream<Map<String, List<Message>>> get threadsStream => _threadsController;
+
+  /// The current user's unsent scheduled replies in the thread of [parentId].
+  ///
+  /// They are the ones in [ClientState.scheduledMessages] replying to it, in
+  /// the same order.
+  List<ScheduledMessage> scheduledThreadReplies(String parentId) {
+    return _client.state.scheduledThreadReplies(parentId);
+  }
+
+  /// The [scheduledThreadReplies] of [parentId] as they change.
+  ///
+  /// Emits the current value on listen, then a new value each time they change.
+  Stream<List<ScheduledMessage>> scheduledThreadRepliesStream(String parentId) {
+    return _client.state.scheduledThreadRepliesStream(parentId);
+  }
+
   final _threadsController = BehaviorSubject.seeded(<String, List<Message>>{});
   set _threads(Map<String, List<Message>> threads) {
     _threadsController.safeAdd(threads);

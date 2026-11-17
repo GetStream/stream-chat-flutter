@@ -2,21 +2,34 @@
 
 ✅ Added
 
-- Added quiet hours to push preferences, set and cleared through `PushPreferenceInput` and reported on `PushPreference.schedule`.
-- Added `includeActiveMemberCount` to the channel queries, which fills the new `Channel.activeMemberCount`: the number of members who are neither deactivated nor deleted.
+- Added scheduled messages: schedule one with `Channel.scheduleMessage`, and read the current user's unsent ones from `ClientState.scheduledMessages` after `StreamChatClient.loadScheduledMessages`, or those in one channel or thread with `ClientState.scheduledChannelMessages` and `ClientState.scheduledThreadReplies`.
 
 🔄 Changed
 
+- Overrides of the channel query methods on `Channel` and `StreamChatClient` must add the new `includeScheduledMessages` parameter.
 - `ChannelState.copyWith(membership: null)` now clears the membership instead of keeping it, as it already did for `draft`.
 - Added `ChatPersistenceClient.deleteChannelQueriesByCids`, which takes hidden channels out of the cached channel lists. A persistence client that `implements` `ChatPersistenceClient` instead of extending it needs to add it.
-- `Attachment.type` is now `url_preview` for every attachment scraped from a link in the message text, including a link to an image or file. Use `Attachment.rawType` to read the type it was created or received with.
-- `Attachment.toJson` keeps the original `type` of an attachment scraped from a link, such as `video` or `image`, instead of writing `url_preview`.
 
 🐞 Fixed
 
 - Fixed a `Channel` becoming unusable after the current user hides it or is removed from it, for example by blocking the other member of a direct message.
 - Fixed `Channel.hidden` not following the `channel.hidden` and `channel.visible` events, or turning false when a new message arrives.
 - Fixed the current user's membership staying on a channel after they are removed from it.
+
+## 10.7.0
+
+✅ Added
+
+- Added quiet hours to push preferences, set and cleared through `PushPreferenceInput` and reported on `PushPreference.schedule`.
+- Added `includeActiveMemberCount` to the channel queries, which fills the new `Channel.activeMemberCount`: the number of members who are neither deactivated nor deleted.
+
+🔄 Changed
+
+- `Attachment.type` is now `url_preview` for every attachment scraped from a link in the message text, including a link to an image or file. Use `Attachment.rawType` to read the type it was created or received with.
+- `Attachment.toJson` keeps the original `type` of an attachment scraped from a link, such as `video` or `image`, instead of writing `url_preview`.
+
+🐞 Fixed
+
 - Fixed the connection getting stuck while connecting, and requests never completing, when the token provider throws while refreshing an expired token.
 - Fixed sending, updating and deleting a message not retrying when the server answers with a timeout (408), a rate limit (429) or a server error (5xx).
 - Fixed hard-deleting an unread message not lowering the channel's unread count.

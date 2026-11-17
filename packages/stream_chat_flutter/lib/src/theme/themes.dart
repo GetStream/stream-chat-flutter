@@ -13,5 +13,6 @@ export 'poll_question_style.dart';
 export 'poll_results_sheet_theme.dart';
 export 'quoted_message_theme.dart';
 export 'stream_channel_list_item_theme.dart';
+export 'stream_scheduled_message_list_item_theme.dart';
 export 'thread_list_tile_theme.dart';
 export 'voice_recording_attachment_theme.dart';

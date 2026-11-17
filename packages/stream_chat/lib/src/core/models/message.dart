@@ -149,7 +149,7 @@ class Message extends Equatable implements ComparableFieldProvider {
   final List<String>? mentionedRoles;
 
   /// The list of user mentioned in the message.
-  @JsonKey(toJson: User.toIds)
+  @JsonKey(fromJson: User.fromIdsOrJson, toJson: User.toIds)
   final List<User> mentionedUsers;
 
   static Object? _reactionGroupsReadValue(

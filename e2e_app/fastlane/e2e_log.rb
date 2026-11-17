@@ -34,6 +34,10 @@ module E2ELog
   # not build. It is not a test, so it is neither owed a result nor a `--name`.
   LOAD_FAILURE = /\Aloading \S+\.dart\z/
 
+  # The `github` reporter's collapsible header around the tests that passed. It
+  # names a group of tests, not a test, so it is owed no result.
+  PASSING_GROUP = 'Passing tests'
+
   class << self
     # The tests that reported a failure — what a retry should narrow to.
     def failed_test_names(log)
@@ -49,7 +53,7 @@ module E2ELog
     def phantom_test_names(log)
       accounted = read(log).scan(REPORTED_TEST).flatten
                            .map { |name| name.delete_suffix(POST_COMPLETION_SUFFIX).delete_suffix(FAILED_SUFFIX).strip }
-                           .reject { |name| name.match?(LOAD_FAILURE) }
+                           .reject { |name| name.match?(LOAD_FAILURE) || name == PASSING_GROUP }
                            .uniq
       return [] if accounted.empty?
 

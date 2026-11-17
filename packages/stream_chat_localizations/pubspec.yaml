@@ -1,6 +1,6 @@
 name: stream_chat_localizations
 description: The Official localizations for Stream Chat Flutter, a service for building chat applications
-version: 10.6.0
+version: 10.7.0
 homepage: https://github.com/GetStream/stream-chat-flutter
 repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
@@ -27,18 +27,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
-  stream_chat_flutter: ^10.6.0
+  stream_chat_flutter: ^10.7.0
 
 dev_dependencies:
   clock: ^1.1.2
   flutter_test:
     sdk: flutter
-
-dependency_overrides:
-  # stream_core_flutter at its git ref needs a stream_core newer than the
-  # published one, so stream_core comes from the same ref.
-  stream_core:
-    git:
-      url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 74a65f0d9730f91236f467c7cb18580cbfdc582a
-      path: packages/stream_core

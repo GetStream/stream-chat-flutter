@@ -249,3 +249,70 @@ StreamChatNetworkErrorType _networkErrorTypeFromDio(DioExceptionType type) {
     _ => StreamChatNetworkErrorType.unknown,
   };
 }
+
+/// The reason a request to schedule or change a scheduled message was refused.
+///
+/// Read from
+/// [StreamChatNetworkErrorScheduledMessages.scheduledMessageErrorReason].
+extension type const ScheduledMessageErrorReason(String _) implements String {
+  /// Scheduled messages are turned off for the app.
+  static const scheduledMessagesDisabled = ScheduledMessageErrorReason('scheduled_messages_disabled');
+
+  /// The new time of a change to a scheduled message is not in the future.
+  static const scheduledAtTooSoon = ScheduledMessageErrorReason('scheduled_at_too_soon');
+
+  /// The time is too far ahead.
+  ///
+  /// The limit is [ChannelConfig.scheduledMessagesMaxLeadTime].
+  static const scheduledAtTooFar = ScheduledMessageErrorReason('scheduled_at_too_far');
+
+  /// The user has reached the limit of scheduled messages in the channel.
+  ///
+  /// The limit is [ChannelConfig.scheduledMessagesMaxPerChannel].
+  static const scheduledLimitChannel = ScheduledMessageErrorReason('scheduled_limit_channel');
+
+  /// The user has reached the limit of scheduled messages across channels.
+  ///
+  /// The limit is [ChannelConfig.scheduledMessagesMaxPerUser].
+  static const scheduledLimitUser = ScheduledMessageErrorReason('scheduled_limit_user');
+
+  /// The ID already belongs to another scheduled message.
+  static const scheduledMessageIdTaken = ScheduledMessageErrorReason('scheduled_message_id_taken');
+
+  /// The scheduled message failed and can only be deleted.
+  static const scheduledMessageNotEditable = ScheduledMessageErrorReason('scheduled_message_not_editable');
+
+  /// The scheduled message is being sent.
+  static const scheduledMessageSending = ScheduledMessageErrorReason('scheduled_message_sending');
+
+  /// The scheduled message was changed by another request at the same time.
+  static const scheduledMessageConflict = ScheduledMessageErrorReason('scheduled_message_conflict');
+
+  /// The scheduled message was already sent.
+  static const scheduledMessageAlreadySent = ScheduledMessageErrorReason('scheduled_message_already_sent');
+
+  /// The scheduled message was deleted.
+  static const scheduledMessageCanceled = ScheduledMessageErrorReason('scheduled_message_canceled');
+}
+
+const _scheduledMessageErrorReasons = {
+  114: ScheduledMessageErrorReason.scheduledMessagesDisabled,
+  115: ScheduledMessageErrorReason.scheduledAtTooSoon,
+  116: ScheduledMessageErrorReason.scheduledAtTooFar,
+  117: ScheduledMessageErrorReason.scheduledLimitChannel,
+  118: ScheduledMessageErrorReason.scheduledLimitUser,
+  119: ScheduledMessageErrorReason.scheduledMessageIdTaken,
+  120: ScheduledMessageErrorReason.scheduledMessageNotEditable,
+  121: ScheduledMessageErrorReason.scheduledMessageSending,
+  122: ScheduledMessageErrorReason.scheduledMessageConflict,
+  123: ScheduledMessageErrorReason.scheduledMessageAlreadySent,
+  124: ScheduledMessageErrorReason.scheduledMessageCanceled,
+};
+
+/// Scheduled message refusal reasons of a [StreamChatNetworkError].
+extension StreamChatNetworkErrorScheduledMessages on StreamChatNetworkError {
+  /// The reason a scheduled message request was refused.
+  ///
+  /// Null when this error has another cause.
+  ScheduledMessageErrorReason? get scheduledMessageErrorReason => _scheduledMessageErrorReasons[code];
+}

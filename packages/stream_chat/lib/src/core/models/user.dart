@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 
 import '../util/extension.dart';
 import '../util/serializer.dart';
@@ -148,6 +149,13 @@ class User extends Equatable implements ComparableFieldProvider {
 
   /// List of users to list of userIds.
   static List<String>? toIds(List<User>? users) => users?.map((u) => u.id).toList();
+
+  /// Creates users from [json], whose entries are user objects or user IDs.
+  @internal
+  static List<User> fromIdsOrJson(List<Object?>? json) => [
+    for (final user in json ?? const [])
+      if (user is String) User(id: user) else User.fromJson(user as Map<String, dynamic>),
+  ];
 
   /// Serialize to json.
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(

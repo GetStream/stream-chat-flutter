@@ -69,12 +69,15 @@ jobs:
           free -m
           # Flutter's own Gradle plugin is an included build, which ignores e2e_app's
           # gradle.properties; without this it starts a Kotlin daemon with Gradle's 4 GB heap.
+          # ~/.gradle is missing when the Gradle cache misses.
+          mkdir -p ~/.gradle
           echo 'kotlin.compiler.execution.strategy=in-process' >> ~/.gradle/gradle.properties
 
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
+
       - name: Bootstrap
-        run: |
-          flutter pub global activate melos
-          melos bootstrap
+        run: melos bootstrap
 
       - name: Launch Allure TestOps
         working-directory: e2e_app
@@ -201,10 +204,12 @@ jobs:
           version: ${{ matrix.ios }}
           device: ${{ matrix.device }}
 
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
+
       - name: Bootstrap
         run: |
           flutter precache --ios
-          flutter pub global activate melos
           melos bootstrap
 
       - name: Launch Allure TestOps

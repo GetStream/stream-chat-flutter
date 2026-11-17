@@ -2,6 +2,12 @@
 
 ✅ Added
 
+- Added `StreamChannelListController.includeScheduledMessages`, to load the current user's scheduled messages with the channels.
+
+## 10.7.0
+
+✅ Added
+
 - Added `StreamChannelListController.includeActiveMemberCount`, which fills `Channel.activeMemberCount` on every page the controller loads.
 - Added `StreamMessageComposerController.skipEnrichUrl` and a `dismissed` parameter to `StreamMessageComposerController.clearOGAttachment`, to send a message without a link preview the user removed.
 
