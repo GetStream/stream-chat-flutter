@@ -2,9 +2,9 @@ name: 'Allure Launch'
 description: 'Create an Allure TestOps launch and expose its id'
 inputs:
   working-directory:
-    description: 'Platform fastlane directory to run the lane from'
+    description: 'Directory to run the fastlane lane from'
     required: false
-    default: sample_app/android
+    default: e2e_app
 outputs:
   launch_id:
     description: 'The created launch id; empty when the e2e check was not required'
@@ -13,6 +13,8 @@ runs:
   using: "composite"
   steps:
     - uses: ./.github/actions/setup-ruby
+      with:
+        working-directory: ${{ inputs.working-directory }}
 
     - name: Launch Allure TestOps
       shell: bash

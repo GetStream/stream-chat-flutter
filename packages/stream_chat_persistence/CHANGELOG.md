@@ -20,7 +20,13 @@
 - Truncating a channel no longer removes the stored messages sent after its truncation time.
 - A message left sending, updating or deleting when the app was closed no longer comes back from the local cache still in progress; it comes back failed, so it is retried.
 
-## Upcoming
+## 10.7.0
+
+✅ Added
+
+- `Channel.activeMemberCount` is now kept in the local cache.
+
+## 10.6.0
 
 ✅ Added
 

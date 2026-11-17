@@ -32,6 +32,11 @@ mixin _$StreamChannelListItemThemeData {
     return StreamChannelListItemThemeData(
       titleStyle: TextStyle.lerp(a.titleStyle, b.titleStyle, t),
       subtitleStyle: TextStyle.lerp(a.subtitleStyle, b.subtitleStyle, t),
+      messagePreviewTextTheme: StreamMessagePreviewTextThemeData.lerp(
+        a.messagePreviewTextTheme,
+        b.messagePreviewTextTheme,
+        t,
+      ),
       timestampStyle: TextStyle.lerp(a.timestampStyle, b.timestampStyle, t),
       backgroundColor: WidgetStateProperty.lerp<Color?>(
         a.backgroundColor,
@@ -47,6 +52,7 @@ mixin _$StreamChannelListItemThemeData {
   StreamChannelListItemThemeData copyWith({
     TextStyle? titleStyle,
     TextStyle? subtitleStyle,
+    StreamMessagePreviewTextThemeData? messagePreviewTextTheme,
     TextStyle? timestampStyle,
     WidgetStateProperty<Color?>? backgroundColor,
     Color? borderColor,
@@ -57,6 +63,8 @@ mixin _$StreamChannelListItemThemeData {
     return StreamChannelListItemThemeData(
       titleStyle: titleStyle ?? _this.titleStyle,
       subtitleStyle: subtitleStyle ?? _this.subtitleStyle,
+      messagePreviewTextTheme:
+          messagePreviewTextTheme ?? _this.messagePreviewTextTheme,
       timestampStyle: timestampStyle ?? _this.timestampStyle,
       backgroundColor: backgroundColor ?? _this.backgroundColor,
       borderColor: borderColor ?? _this.borderColor,
@@ -80,6 +88,9 @@ mixin _$StreamChannelListItemThemeData {
       subtitleStyle:
           _this.subtitleStyle?.merge(other.subtitleStyle) ??
           other.subtitleStyle,
+      messagePreviewTextTheme:
+          _this.messagePreviewTextTheme?.merge(other.messagePreviewTextTheme) ??
+          other.messagePreviewTextTheme,
       timestampStyle:
           _this.timestampStyle?.merge(other.timestampStyle) ??
           other.timestampStyle,
@@ -104,6 +115,7 @@ mixin _$StreamChannelListItemThemeData {
 
     return _other.titleStyle == _this.titleStyle &&
         _other.subtitleStyle == _this.subtitleStyle &&
+        _other.messagePreviewTextTheme == _this.messagePreviewTextTheme &&
         _other.timestampStyle == _this.timestampStyle &&
         _other.backgroundColor == _this.backgroundColor &&
         _other.borderColor == _this.borderColor &&
@@ -118,6 +130,7 @@ mixin _$StreamChannelListItemThemeData {
       runtimeType,
       _this.titleStyle,
       _this.subtitleStyle,
+      _this.messagePreviewTextTheme,
       _this.timestampStyle,
       _this.backgroundColor,
       _this.borderColor,

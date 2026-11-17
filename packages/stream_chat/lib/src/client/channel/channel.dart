@@ -508,6 +508,24 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.messageCount).distinct();
   }
 
+  /// The number of members whose users are neither deactivated nor deleted.
+  ///
+  /// Null until a channel query made with `includeActiveMemberCount` loads this
+  /// channel. Once set, it keeps its last value until another such query
+  /// refreshes it.
+  int? get activeMemberCount {
+    _checkInitialized();
+    return state!.channelState.channel?.activeMemberCount;
+  }
+
+  /// The [activeMemberCount] of this channel as a stream.
+  ///
+  /// Emits the current value on listen, then a new value each time it changes.
+  Stream<int?> get activeMemberCountStream {
+    _checkInitialized();
+    return state!.channelStateStream.map((cs) => cs.channel?.activeMemberCount).distinct();
+  }
+
   /// List of filter tags applied to this channel.
   ///
   /// Generally used for filtering channels while querying.
@@ -864,6 +882,46 @@ class Channel {
 
       rethrow;
     }
+  }
+
+  /// Schedules [message] to be sent to this channel at [scheduledAt].
+  ///
+  /// Until it is sent, the message is not among this channel's messages.
+  /// [ChannelClientState.scheduledMessages] lists it instead, or
+  /// [ChannelClientState.scheduledThreadReplies] for a thread reply.
+  ///
+  /// The [scheduledAt] is rounded up to a whole minute, at least
+  /// [ChannelConfig.scheduledMessagesMinLeadTime] from now. If it has passed by
+  /// the time the message is scheduled, the message is sent right away: it is
+  /// no longer listed, it arrives in this channel like any other message, and
+  /// [ScheduleMessageResponse.scheduledMessage] is null.
+  ///
+  /// Also stops the current user's typing.
+  ///
+  /// Throws a [StreamChatException] if the request fails. If it fails in a
+  /// way that can be retried, the message stays listed as failed with
+  /// [ScheduledMessageFailureReason.requestFailed].
+  ///
+  /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
+  /// attachment of [message] is not uploaded yet. A message to send right
+  /// away goes through [sendMessage].
+  Future<ScheduleMessageResponse> scheduleMessage(
+    Message message, {
+    required DateTime scheduledAt,
+    bool skipPush = false,
+    bool skipEnrichUrl = false,
+  }) {
+    _checkInitialized();
+    _keyStrokeHandler.cancel();
+
+    return _client.scheduleMessage(
+      message,
+      id!,
+      type,
+      scheduledAt: scheduledAt,
+      skipPush: skipPush,
+      skipEnrichUrl: skipEnrichUrl,
+    );
   }
 
   Message _markMessageAsSent(Message message) {
@@ -1306,10 +1364,19 @@ class Channel {
   );
 
   /// Creates or updates a new [draft] for this channel.
+  ///
+  /// Updates the draft in [state] right away, even if the request fails.
   Future<CreateDraftResponse> createDraft(
     DraftMessage draft,
   ) {
     _checkInitialized();
+    final localDraft = Draft(
+      channelCid: cid!,
+      createdAt: DateTime.now(),
+      message: draft,
+      parentId: draft.parentId,
+    );
+    state!.updateDraft(localDraft);
     return _client.createDraft(draft, id!, type);
   }
 
@@ -1327,10 +1394,17 @@ class Channel {
   ///
   /// Optionally, provide a [parentId] to delete the draft for a specific
   /// thread.
+  ///
+  /// Removes the draft from [state], even if the request fails.
   Future<EmptyResponse> deleteDraft({
     String? parentId,
   }) {
     _checkInitialized();
+    final draft = switch (parentId) {
+      final parentId? => state!.threadDraft(parentId),
+      null => state!.draft,
+    };
+    if (draft != null) state!.deleteDraft(draft);
     return _client.deleteDraft(id!, type, parentId: parentId);
   }
 
@@ -2119,11 +2193,16 @@ class Channel {
   }
 
   /// Loads the initial channel state and watches for changes.
+  ///
+  /// If [includeScheduledMessages] is true, the current user's scheduled
+  /// messages in this channel are loaded too. [ClientState.scheduledMessages]
+  /// then lists this channel's current ones, thread replies included.
   Future<ChannelState> watch({
     bool presence = false,
     PaginationParams? messagesPagination,
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
+    bool includeScheduledMessages = false,
   }) {
     return query(
       watch: true,
@@ -2131,6 +2210,7 @@ class Channel {
       messagesPagination: messagesPagination,
       membersPagination: membersPagination,
       watchersPagination: watchersPagination,
+      includeScheduledMessages: includeScheduledMessages,
     );
   }
 
@@ -2219,10 +2299,15 @@ class Channel {
   /// Creates a new channel.
   Future<ChannelState> create() => query(state: false);
 
-  /// Query the API, get messages, members or other channel fields.
+  /// Queries this channel's messages, members and other fields.
   ///
-  /// Set [preferOffline] to true to avoid the API call if the data is already
-  /// in the offline storage.
+  /// If [preferOffline] is true, the channel state is read from the offline
+  /// storage when it has messages for this channel, without an API call.
+  ///
+  /// If [includeScheduledMessages] is true and the state comes from the API,
+  /// the current user's scheduled messages in this channel are loaded too.
+  /// [ClientState.scheduledMessages] then lists this channel's current ones,
+  /// thread replies included.
   Future<ChannelState> query({
     bool state = true,
     bool watch = false,
@@ -2231,6 +2316,7 @@ class Channel {
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
     bool preferOffline = false,
+    bool includeScheduledMessages = false,
   }) async {
     // A prior failed init left the completer errored; reset it so this attempt
     // owns the `initialized` result. Must stay before the first `await` so a
@@ -2271,6 +2357,7 @@ class Channel {
         messagesPagination: messagesPagination,
         membersPagination: membersPagination,
         watchersPagination: watchersPagination,
+        includeScheduledMessages: includeScheduledMessages,
       );
 
       if (_id == null) {

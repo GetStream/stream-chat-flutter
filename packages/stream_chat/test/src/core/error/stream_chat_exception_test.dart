@@ -196,4 +196,46 @@ void main() {
       expect(error.isMessageGoneError, isFalse);
     });
   });
+
+  group('scheduledMessageErrorReason', () {
+    const reasons = {
+      114: ScheduledMessageErrorReason.scheduledMessagesDisabled,
+      115: ScheduledMessageErrorReason.scheduledAtTooSoon,
+      116: ScheduledMessageErrorReason.scheduledAtTooFar,
+      117: ScheduledMessageErrorReason.scheduledLimitChannel,
+      118: ScheduledMessageErrorReason.scheduledLimitUser,
+      119: ScheduledMessageErrorReason.scheduledMessageIdTaken,
+      120: ScheduledMessageErrorReason.scheduledMessageNotEditable,
+      121: ScheduledMessageErrorReason.scheduledMessageSending,
+      122: ScheduledMessageErrorReason.scheduledMessageConflict,
+      123: ScheduledMessageErrorReason.scheduledMessageAlreadySent,
+      124: ScheduledMessageErrorReason.scheduledMessageCanceled,
+    };
+
+    for (final MapEntry(key: code, value: reason) in reasons.entries) {
+      test('is $reason for code $code', () {
+        final error = StreamApiException(message: 'Refused', statusCode: 400, code: StreamErrorCode(code));
+
+        expect(error.scheduledMessageErrorReason, reason);
+      });
+    }
+
+    test('is null when the message does not exist', () {
+      const error = StreamApiException(message: 'Not found', statusCode: 404, code: StreamErrorCode.notFound);
+
+      expect(error.scheduledMessageErrorReason, isNull);
+    });
+
+    test('is null for an error about something else', () {
+      const error = StreamApiException(message: 'Refused', statusCode: 400, code: StreamErrorCode.inputError);
+
+      expect(error.scheduledMessageErrorReason, isNull);
+    });
+
+    test('is null for a failure without a server answer', () {
+      const error = StreamNetworkException(message: 'No connection');
+
+      expect(error.scheduledMessageErrorReason, isNull);
+    });
+  });
 }

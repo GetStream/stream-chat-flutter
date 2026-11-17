@@ -7,6 +7,7 @@ import 'package:stream_chat/src/core/api/general_api.dart';
 import 'package:stream_chat/src/core/api/message_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/push_preferences_api.dart';
+import 'package:stream_chat/src/core/api/scheduled_messages_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/stream_chat.dart';
 
@@ -156,6 +157,11 @@ class FakeChatApi extends Fake implements StreamChatApi {
 
   @override
   GeneralApi get general => _general ??= MockGeneralApi();
+
+  ScheduledMessagesApi? _scheduledMessages;
+
+  @override
+  ScheduledMessagesApi get scheduledMessages => _scheduledMessages ??= MockScheduledMessagesApi();
 }
 
 /// Answers the `getApp` call `connectUser` makes on the generated client.

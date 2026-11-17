@@ -20,6 +20,54 @@ void main() {
       expect(json['channel_cid'], isNull);
     });
 
+    test('should serialize a quiet-hours schedule', () {
+      const input = PushPreferenceInput(
+        schedule: PushSchedule(
+          timezone: 'Europe/Amsterdam',
+          quietHours: [
+            QuietHoursRule(start: '22:00', end: '07:00', days: [QuietHoursDay.friday]),
+          ],
+        ),
+      );
+
+      expect(input.toJson(), {
+        'schedule': {
+          'timezone': 'Europe/Amsterdam',
+          'quiet_hours': [
+            {
+              'start': '22:00',
+              'end': '07:00',
+              'days': ['fri'],
+            },
+          ],
+        },
+      });
+    });
+
+    test('should serialize a rule without days as an empty list', () {
+      const input = PushPreferenceInput(
+        schedule: PushSchedule(
+          timezone: 'Europe/Amsterdam',
+          quietHours: [QuietHoursRule(start: '00:00', end: '24:00')],
+        ),
+      );
+
+      expect(input.toJson(), {
+        'schedule': {
+          'timezone': 'Europe/Amsterdam',
+          'quiet_hours': [
+            {'start': '00:00', 'end': '24:00', 'days': <String>[]},
+          ],
+        },
+      });
+    });
+
+    test('should serialize removing the schedule', () {
+      const input = PushPreferenceInput(removeSchedule: true);
+
+      expect(input.toJson(), {'remove_schedule': true});
+    });
+
     test('should serialize to json correctly for channel preferences', () {
       final input = PushPreferenceInput.channel(
         channelCid: 'messaging:general',
@@ -130,6 +178,131 @@ void main() {
         ChatPreferenceLevel.all,
       );
       expect(pushPreference.chatPreferences?.groupMentions, isNull);
+    });
+
+    test('should parse a quiet-hours schedule', () {
+      final pushPreference = PushPreference.fromJson(const {
+        'schedule': {
+          'timezone': 'Europe/Amsterdam',
+          'quiet_hours': [
+            {
+              'start': '22:00',
+              'end': '07:00',
+              'days': ['sat', 'sun'],
+            },
+          ],
+        },
+      });
+
+      expect(
+        pushPreference,
+        const PushPreference(
+          schedule: PushSchedule(
+            timezone: 'Europe/Amsterdam',
+            quietHours: [
+              QuietHoursRule(
+                start: '22:00',
+                end: '07:00',
+                days: [QuietHoursDay.saturday, QuietHoursDay.sunday],
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+
+    test('should parse a rule without days as every day', () {
+      final pushPreference = PushPreference.fromJson(const {
+        'schedule': {
+          'timezone': 'Europe/Amsterdam',
+          'quiet_hours': [
+            {'start': '12:00', 'end': '13:00'},
+          ],
+        },
+      });
+
+      expect(pushPreference.schedule?.quietHours.single.days, isEmpty);
+    });
+
+    test('should read back the schedule it writes', () {
+      const pushPreference = PushPreference(
+        schedule: PushSchedule(
+          timezone: 'Europe/Amsterdam',
+          quietHours: [
+            QuietHoursRule(start: '22:00', end: '07:00', days: [QuietHoursDay.friday]),
+          ],
+        ),
+      );
+
+      expect(PushPreference.fromJson(pushPreference.toJson()), pushPreference);
+    });
+
+    group('equality with quiet hours', () {
+      const rule = QuietHoursRule(start: '22:00', end: '07:00', days: [QuietHoursDay.friday]);
+      const preference = PushPreference(
+        schedule: PushSchedule(timezone: 'Europe/Amsterdam', quietHours: [rule]),
+      );
+
+      test('differs from a preference without a schedule', () {
+        expect(preference, isNot(const PushPreference()));
+      });
+
+      test('differs from a schedule in another time zone', () {
+        expect(
+          preference,
+          isNot(
+            const PushPreference(
+              schedule: PushSchedule(timezone: 'UTC', quietHours: [rule]),
+            ),
+          ),
+        );
+      });
+
+      test('differs from a rule on other days', () {
+        expect(
+          preference,
+          isNot(
+            const PushPreference(
+              schedule: PushSchedule(
+                timezone: 'Europe/Amsterdam',
+                quietHours: [QuietHoursRule(start: '22:00', end: '07:00')],
+              ),
+            ),
+          ),
+        );
+      });
+
+      test('differs from a rule with another start', () {
+        expect(
+          preference,
+          isNot(
+            const PushPreference(
+              schedule: PushSchedule(
+                timezone: 'Europe/Amsterdam',
+                quietHours: [
+                  QuietHoursRule(start: '23:00', end: '07:00', days: [QuietHoursDay.friday]),
+                ],
+              ),
+            ),
+          ),
+        );
+      });
+
+      test('differs from a rule with another end', () {
+        expect(
+          preference,
+          isNot(
+            const PushPreference(
+              schedule: PushSchedule(
+                timezone: 'Europe/Amsterdam',
+                quietHours: [
+                  QuietHoursRule(start: '22:00', end: '08:00', days: [QuietHoursDay.friday]),
+                ],
+              ),
+            ),
+          ),
+        );
+      });
     });
   });
 

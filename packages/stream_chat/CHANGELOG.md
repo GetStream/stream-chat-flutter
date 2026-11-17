@@ -186,6 +186,36 @@
 
 ✅ Added
 
+- Added scheduled messages: schedule one with `Channel.scheduleMessage`, and read the current user's unsent ones from `ClientState.scheduledMessages` after `StreamChatClient.loadScheduledMessages`, or those in one channel or thread with `ClientState.scheduledChannelMessages` and `ClientState.scheduledThreadReplies`.
+
+🔄 Changed
+
+- Overrides of the channel query methods on `Channel` and `StreamChatClient` must add the new `includeScheduledMessages` parameter.
+
+## 10.7.0
+
+✅ Added
+
+- Added quiet hours to push preferences, set and cleared through `PushPreferenceInput` and reported on `PushPreference.schedule`.
+- Added `includeActiveMemberCount` to the channel queries, which fills the new `Channel.activeMemberCount`: the number of members who are neither deactivated nor deleted.
+
+🔄 Changed
+
+- `Attachment.type` is now `url_preview` for every attachment scraped from a link in the message text, including a link to an image or file. Use `Attachment.rawType` to read the type it was created or received with.
+- `Attachment.toJson` keeps the original `type` of an attachment scraped from a link, such as `video` or `image`, instead of writing `url_preview`.
+
+🐞 Fixed
+
+- Fixed the connection getting stuck while connecting, and requests never completing, when the token provider throws while refreshing an expired token.
+- Fixed sending, updating and deleting a message not retrying when the server answers with a timeout (408), a rate limit (429) or a server error (5xx).
+- Fixed hard-deleting an unread message not lowering the channel's unread count.
+- Fixed a draft saved or deleted while offline not being kept.
+- Fixed a thread draft replacing the channel's draft when the thread's parent message isn't loaded.
+
+## 10.6.0
+
+✅ Added
+
 - Added `Poll.nameI18n`, `Poll.descriptionI18n`, `PollOption.textI18n` and `PollVote.answerTextI18n`, holding the server's translations of a poll.
 
 🔄 Changed

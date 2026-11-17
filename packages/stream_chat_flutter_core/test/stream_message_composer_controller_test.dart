@@ -550,6 +550,72 @@ void main() {
 
       expect(controller.attachments, isEmpty);
     });
+
+    test('skips url enrichment while the message has an OG attachment', () {
+      controller.addAttachment(Attachment(ogScrapeUrl: 'https://example.com'));
+
+      expect(controller.skipEnrichUrl, isTrue);
+    });
+
+    test('clearOGAttachment with dismissed removes the OG attachment and skips url enrichment', () {
+      controller.setOGAttachment(Attachment(ogScrapeUrl: 'https://example.com'));
+
+      controller.clearOGAttachment(dismissed: true);
+
+      expect(controller.ogAttachment, isNull);
+      expect(controller.skipEnrichUrl, isTrue);
+    });
+
+    test('clearOGAttachment forgets a dismissal', () {
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.clearOGAttachment();
+
+      expect(controller.skipEnrichUrl, isFalse);
+    });
+
+    test('clear forgets a dismissal', () {
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.clear();
+
+      expect(controller.skipEnrichUrl, isFalse);
+    });
+
+    test('editMessage does not carry the draft dismissal into the edit', () {
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.editMessage(Message(id: 'edited', text: 'See https://example.com'));
+
+      expect(controller.skipEnrichUrl, isFalse);
+    });
+
+    test('cancelEditMessage restores the draft dismissal', () {
+      controller.clearOGAttachment(dismissed: true);
+      controller.editMessage(Message(id: 'edited', text: 'See https://example.com'));
+
+      controller.cancelEditMessage();
+
+      expect(controller.skipEnrichUrl, isTrue);
+    });
+
+    test('editMessage keeps a dismissal made during the edit when called again', () {
+      final edited = Message(id: 'edited', text: 'See https://example.com');
+      controller.editMessage(edited);
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.editMessage(edited);
+
+      expect(controller.skipEnrichUrl, isTrue);
+    });
+
+    test('reset forgets a dismissal', () {
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.reset();
+
+      expect(controller.skipEnrichUrl, isFalse);
+    });
   });
 
   group('Poll Management', () {

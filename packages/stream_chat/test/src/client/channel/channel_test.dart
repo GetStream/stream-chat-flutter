@@ -183,6 +183,36 @@ void main() {
     tearDown(() {
       channel.dispose();
     });
+
+    test('`.query` reads the offline cache even when scheduled messages are asked for', () async {
+      final cached =
+          _generateChannelState(
+            channelId,
+            channelType,
+          ).copyWith(
+            messages: [Message(id: 'cached', text: 'From the cache')],
+          );
+      when(
+        () => client.chatPersistenceClient.getChannelStateByCid(
+          channelCid,
+          messagePagination: any(named: 'messagePagination'),
+        ),
+      ).thenAnswer((_) async => cached);
+      when(() => client.channelDeliveryReporter.submitForDelivery(any())).thenAnswer((_) async {});
+      await pumpEventQueue();
+
+      final channelState = await channel.query(preferOffline: true, includeScheduledMessages: true);
+
+      expect(channelState, same(cached));
+      verifyNever(
+        () => client.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: any(named: 'channelData'),
+          includeScheduledMessages: any(named: 'includeScheduledMessages'),
+        ),
+      );
+    });
   });
 
   group('Initialized Channel', () {
@@ -256,6 +286,78 @@ void main() {
 
     test('should throw if trying to set `name`', () {
       expect(() => channel.name = 'New name', throwsA(isA<StateError>()));
+    });
+
+    group('`.scheduleMessage`', () {
+      final scheduledAt = DateTime.utc(2026, 10, 31, 12);
+
+      ScheduledMessage scheduledMessageFor(Message message) => ScheduledMessage(
+        id: message.id,
+        cid: channelCid,
+        user: client.state.currentUser!,
+        message: message,
+        scheduledAt: scheduledAt,
+        status: ScheduledMessageStatus.scheduled,
+        createdAt: DateTime.utc(2026, 10, 29),
+        updatedAt: DateTime.utc(2026, 10, 29),
+      );
+
+      test('keeps a scheduled message out of the channel', () async {
+        final message = Message(id: 'scheduled-id', text: 'Good morning');
+        when(
+          () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer(
+          (_) async => ScheduleMessageResponse()
+            ..message = message
+            ..scheduledMessage = scheduledMessageFor(message),
+        );
+
+        final res = await channel.scheduleMessage(message, scheduledAt: scheduledAt);
+
+        expect(res.scheduledMessage?.id, message.id);
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test('keeps a scheduled thread reply out of the thread', () async {
+        final reply = Message(id: 'reply-id', text: 'Good morning', parentId: 'parent-id', showInChannel: true);
+        when(
+          () => client.scheduleMessage(reply, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer(
+          (_) async => ScheduleMessageResponse()
+            ..message = reply
+            ..scheduledMessage = scheduledMessageFor(reply),
+        );
+
+        await channel.scheduleMessage(reply, scheduledAt: scheduledAt);
+
+        expect(channel.state!.threads['parent-id'], isNull);
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test("a message sent right away isn't in the channel after scheduling", () async {
+        final message = Message(id: 'sent-id', text: 'Good morning');
+        when(
+          () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer((_) async => ScheduleMessageResponse()..message = message);
+
+        final res = await channel.scheduleMessage(message, scheduledAt: scheduledAt);
+
+        expect(res.scheduledMessage, isNull);
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test('the message.new event of a message sent right away adds it', () async {
+        final message = Message(id: 'sent-id', text: 'Good morning');
+        when(
+          () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer((_) async => ScheduleMessageResponse()..message = message);
+        await channel.scheduleMessage(message, scheduledAt: scheduledAt);
+
+        client.addEvent(Event(type: EventType.messageNew, cid: channel.cid, message: message));
+        await pumpEventQueue();
+
+        expect(channel.state!.messages.single.id, 'sent-id');
+      });
     });
 
     group('`.sendMessage`', () {
@@ -1418,6 +1520,56 @@ void main() {
             channelType,
           ),
         ).called(1);
+      });
+    });
+
+    group('`.createDraft` while offline', () {
+      final draftMessage = DraftMessage(text: 'Typed while offline');
+
+      setUp(() {
+        when(
+          () => client.createDraft(draftMessage, channelId, channelType),
+        ).thenAnswer((_) async => throw const StreamNetworkException(message: 'No connection'));
+      });
+
+      test('keeps the draft in the channel state', () async {
+        await expectLater(() => channel.createDraft(draftMessage), throwsA(isA<StreamNetworkException>()));
+
+        expect(channel.state!.draft?.message, draftMessage);
+      });
+
+      test('leaves the channel draft alone for a thread whose parent is not loaded', () async {
+        final threadDraft = DraftMessage(text: 'Thread reply', parentId: 'unloaded-parent-id');
+        when(
+          () => client.createDraft(threadDraft, channelId, channelType),
+        ).thenAnswer((_) async => throw const StreamNetworkException(message: 'No connection'));
+
+        await expectLater(() => channel.createDraft(threadDraft), throwsA(isA<StreamNetworkException>()));
+
+        expect(channel.state!.draft, isNull);
+      });
+    });
+
+    group('`.deleteDraft` while offline', () {
+      setUp(() {
+        when(
+          () => client.deleteDraft(channelId, channelType, parentId: any(named: 'parentId')),
+        ).thenAnswer((_) async => throw const StreamNetworkException(message: 'No connection'));
+      });
+
+      test('removes the draft from the channel state', () async {
+        channel.state!.updateDraft(
+          Draft(
+            channelCid: channelCid,
+            createdAt: DateTime.now(),
+            message: DraftMessage(text: 'Old draft'),
+          ),
+        );
+
+        await expectLater(() => channel.deleteDraft(), throwsA(isA<StreamNetworkException>()));
+        await Future<void>.delayed(Duration.zero);
+
+        expect(channel.state!.draft, isNull);
       });
     });
 
@@ -5768,6 +5920,74 @@ void main() {
       );
     });
 
+    test('a channel update without an active member count keeps the last one', () async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      final channelState = _generateChannelState(channelId, channelType);
+      final channel = Channel.fromState(
+        client,
+        channelState.copyWith(
+          channel: channelState.channel!.copyWith(activeMemberCount: 3),
+        ),
+      );
+      addTearDown(channel.dispose);
+
+      final emitted = <int?>[];
+      final subscription = channel.activeMemberCountStream.listen(emitted.add);
+      addTearDown(subscription.cancel);
+      await Future.delayed(Duration.zero);
+
+      client.addEvent(
+        Event(
+          cid: channel.cid,
+          type: EventType.channelUpdated,
+          channel: ChannelModel(id: channelId, type: channelType),
+        ),
+      );
+      await Future.delayed(Duration.zero);
+
+      expect(emitted, [3]);
+    });
+
+    test('activeMemberCountStream emits the new count when the channel state updates', () async {
+      final channelState = _generateChannelState('test-channel-id', 'test-channel-type');
+      final channel = Channel.fromState(
+        client,
+        channelState.copyWith(
+          channel: channelState.channel!.copyWith(activeMemberCount: 3),
+        ),
+      );
+      addTearDown(channel.dispose);
+
+      final emitted = <int?>[];
+      final subscription = channel.activeMemberCountStream.listen(emitted.add);
+      addTearDown(subscription.cancel);
+      await Future.delayed(Duration.zero);
+
+      final state = channel.state!;
+      state.updateChannelState(
+        state.channelState.copyWith(
+          channel: state.channelState.channel!.copyWith(activeMemberCount: 5),
+        ),
+      );
+      await Future.delayed(Duration.zero);
+
+      expect(emitted, [3, 5]);
+    });
+
+    test('activeMemberCount reads the count the channel was loaded with', () {
+      final channelState = _generateChannelState('test-channel-id', 'test-channel-type');
+      final channel = Channel.fromState(
+        client,
+        channelState.copyWith(
+          channel: channelState.channel!.copyWith(activeMemberCount: 3),
+        ),
+      );
+      addTearDown(channel.dispose);
+
+      expect(channel.activeMemberCount, 3);
+    });
+
     group('Channel member count events', () {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
@@ -6230,6 +6450,47 @@ void main() {
 
       channel.keyStroke().ignore();
       await channel.updateMessage(message);
+
+      verify(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).called(1);
+    });
+
+    test('.scheduleMessage stops typing when the user is typing', () async {
+      // The group shares one client mock.
+      addTearDown(() => clearInteractions(client));
+
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [ChannelCapability.typingEvents, ChannelCapability.sendMessage],
+      );
+
+      final channel = Channel.fromState(client, channelState);
+      addTearDown(channel.dispose);
+
+      final startTypingEvent = Event(type: EventType.typingStart);
+      final stopTypingEvent = Event(type: EventType.typingStop);
+      final message = Message(id: 'test-message-id', text: 'Good morning');
+      final scheduledAt = DateTime.utc(2026, 11, 2, 9);
+
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(startTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.scheduleMessage(
+          any(that: isSameMessageAs(message)),
+          channelId,
+          channelType,
+          scheduledAt: scheduledAt,
+        ),
+      ).thenAnswer((_) async => ScheduleMessageResponse()..message = message);
+
+      channel.keyStroke().ignore();
+      await channel.scheduleMessage(message, scheduledAt: scheduledAt);
 
       verify(
         () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),

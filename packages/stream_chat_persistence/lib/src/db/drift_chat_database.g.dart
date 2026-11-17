@@ -133,6 +133,17 @@ class $ChannelsTable extends Channels with TableInfo<$ChannelsTable, ChannelEnti
     type: DriftSqlType.int,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _activeMemberCountMeta = const VerificationMeta(
+    'activeMemberCount',
+  );
+  @override
+  late final GeneratedColumn<int> activeMemberCount = GeneratedColumn<int>(
+    'active_member_count',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _createdByIdMeta = const VerificationMeta(
     'createdById',
   );
@@ -278,6 +289,7 @@ class $ChannelsTable extends Channels with TableInfo<$ChannelsTable, ChannelEnti
     deletedAt,
     memberCount,
     messageCount,
+    activeMemberCount,
     createdById,
     filterTags,
     team,
@@ -372,6 +384,15 @@ class $ChannelsTable extends Channels with TableInfo<$ChannelsTable, ChannelEnti
         messageCount.isAcceptableOrUnknown(
           data['message_count']!,
           _messageCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('active_member_count')) {
+      context.handle(
+        _activeMemberCountMeta,
+        activeMemberCount.isAcceptableOrUnknown(
+          data['active_member_count']!,
+          _activeMemberCountMeta,
         ),
       );
     }
@@ -511,6 +532,10 @@ class $ChannelsTable extends Channels with TableInfo<$ChannelsTable, ChannelEnti
         DriftSqlType.int,
         data['${effectivePrefix}message_count'],
       ),
+      activeMemberCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}active_member_count'],
+      ),
       createdById: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}created_by_id'],
@@ -623,6 +648,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
   /// The count of messages in this channel
   final int? messageCount;
 
+  /// The number of members whose users are neither deactivated nor deleted.
+  final int? activeMemberCount;
+
   /// The id of the user that created this channel
   final String? createdById;
 
@@ -671,6 +699,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
     this.deletedAt,
     required this.memberCount,
     this.messageCount,
+    this.activeMemberCount,
     this.createdById,
     this.filterTags,
     this.team,
@@ -712,6 +741,9 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
     map['member_count'] = Variable<int>(memberCount);
     if (!nullToAbsent || messageCount != null) {
       map['message_count'] = Variable<int>(messageCount);
+    }
+    if (!nullToAbsent || activeMemberCount != null) {
+      map['active_member_count'] = Variable<int>(activeMemberCount);
     }
     if (!nullToAbsent || createdById != null) {
       map['created_by_id'] = Variable<String>(createdById);
@@ -778,6 +810,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
       memberCount: serializer.fromJson<int>(json['memberCount']),
       messageCount: serializer.fromJson<int?>(json['messageCount']),
+      activeMemberCount: serializer.fromJson<int?>(json['activeMemberCount']),
       createdById: serializer.fromJson<String?>(json['createdById']),
       filterTags: serializer.fromJson<List<String>?>(json['filterTags']),
       team: serializer.fromJson<String?>(json['team']),
@@ -812,6 +845,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       'deletedAt': serializer.toJson<DateTime?>(deletedAt),
       'memberCount': serializer.toJson<int>(memberCount),
       'messageCount': serializer.toJson<int?>(messageCount),
+      'activeMemberCount': serializer.toJson<int?>(activeMemberCount),
       'createdById': serializer.toJson<String?>(createdById),
       'filterTags': serializer.toJson<List<String>?>(filterTags),
       'team': serializer.toJson<String?>(team),
@@ -844,6 +878,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
     Value<DateTime?> deletedAt = const Value.absent(),
     int? memberCount,
     Value<int?> messageCount = const Value.absent(),
+    Value<int?> activeMemberCount = const Value.absent(),
     Value<String?> createdById = const Value.absent(),
     Value<List<String>?> filterTags = const Value.absent(),
     Value<String?> team = const Value.absent(),
@@ -869,6 +904,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
     deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
     memberCount: memberCount ?? this.memberCount,
     messageCount: messageCount.present ? messageCount.value : this.messageCount,
+    activeMemberCount: activeMemberCount.present ? activeMemberCount.value : this.activeMemberCount,
     createdById: createdById.present ? createdById.value : this.createdById,
     filterTags: filterTags.present ? filterTags.value : this.filterTags,
     team: team.present ? team.value : this.team,
@@ -898,6 +934,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
       deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
       memberCount: data.memberCount.present ? data.memberCount.value : this.memberCount,
       messageCount: data.messageCount.present ? data.messageCount.value : this.messageCount,
+      activeMemberCount: data.activeMemberCount.present ? data.activeMemberCount.value : this.activeMemberCount,
       createdById: data.createdById.present ? data.createdById.value : this.createdById,
       filterTags: data.filterTags.present ? data.filterTags.value : this.filterTags,
       team: data.team.present ? data.team.value : this.team,
@@ -932,6 +969,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           ..write('deletedAt: $deletedAt, ')
           ..write('memberCount: $memberCount, ')
           ..write('messageCount: $messageCount, ')
+          ..write('activeMemberCount: $activeMemberCount, ')
           ..write('createdById: $createdById, ')
           ..write('filterTags: $filterTags, ')
           ..write('team: $team, ')
@@ -962,6 +1000,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
     deletedAt,
     memberCount,
     messageCount,
+    activeMemberCount,
     createdById,
     filterTags,
     team,
@@ -991,6 +1030,7 @@ class ChannelEntity extends DataClass implements Insertable<ChannelEntity> {
           other.deletedAt == this.deletedAt &&
           other.memberCount == this.memberCount &&
           other.messageCount == this.messageCount &&
+          other.activeMemberCount == this.activeMemberCount &&
           other.createdById == this.createdById &&
           other.filterTags == this.filterTags &&
           other.team == this.team &&
@@ -1018,6 +1058,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
   final Value<DateTime?> deletedAt;
   final Value<int> memberCount;
   final Value<int?> messageCount;
+  final Value<int?> activeMemberCount;
   final Value<String?> createdById;
   final Value<List<String>?> filterTags;
   final Value<String?> team;
@@ -1044,6 +1085,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     this.deletedAt = const Value.absent(),
     this.memberCount = const Value.absent(),
     this.messageCount = const Value.absent(),
+    this.activeMemberCount = const Value.absent(),
     this.createdById = const Value.absent(),
     this.filterTags = const Value.absent(),
     this.team = const Value.absent(),
@@ -1071,6 +1113,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     this.deletedAt = const Value.absent(),
     this.memberCount = const Value.absent(),
     this.messageCount = const Value.absent(),
+    this.activeMemberCount = const Value.absent(),
     this.createdById = const Value.absent(),
     this.filterTags = const Value.absent(),
     this.team = const Value.absent(),
@@ -1101,6 +1144,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     Expression<DateTime>? deletedAt,
     Expression<int>? memberCount,
     Expression<int>? messageCount,
+    Expression<int>? activeMemberCount,
     Expression<String>? createdById,
     Expression<String>? filterTags,
     Expression<String>? team,
@@ -1128,6 +1172,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       if (deletedAt != null) 'deleted_at': deletedAt,
       if (memberCount != null) 'member_count': memberCount,
       if (messageCount != null) 'message_count': messageCount,
+      if (activeMemberCount != null) 'active_member_count': activeMemberCount,
       if (createdById != null) 'created_by_id': createdById,
       if (filterTags != null) 'filter_tags': filterTags,
       if (team != null) 'team': team,
@@ -1157,6 +1202,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     Value<DateTime?>? deletedAt,
     Value<int>? memberCount,
     Value<int?>? messageCount,
+    Value<int?>? activeMemberCount,
     Value<String?>? createdById,
     Value<List<String>?>? filterTags,
     Value<String?>? team,
@@ -1184,6 +1230,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
       deletedAt: deletedAt ?? this.deletedAt,
       memberCount: memberCount ?? this.memberCount,
       messageCount: messageCount ?? this.messageCount,
+      activeMemberCount: activeMemberCount ?? this.activeMemberCount,
       createdById: createdById ?? this.createdById,
       filterTags: filterTags ?? this.filterTags,
       team: team ?? this.team,
@@ -1242,6 +1289,9 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
     }
     if (messageCount.present) {
       map['message_count'] = Variable<int>(messageCount.value);
+    }
+    if (activeMemberCount.present) {
+      map['active_member_count'] = Variable<int>(activeMemberCount.value);
     }
     if (createdById.present) {
       map['created_by_id'] = Variable<String>(createdById.value);
@@ -1308,6 +1358,7 @@ class ChannelsCompanion extends UpdateCompanion<ChannelEntity> {
           ..write('deletedAt: $deletedAt, ')
           ..write('memberCount: $memberCount, ')
           ..write('messageCount: $messageCount, ')
+          ..write('activeMemberCount: $activeMemberCount, ')
           ..write('createdById: $createdById, ')
           ..write('filterTags: $filterTags, ')
           ..write('team: $team, ')
@@ -12785,6 +12836,7 @@ typedef $$ChannelsTableCreateCompanionBuilder =
       Value<DateTime?> deletedAt,
       Value<int> memberCount,
       Value<int?> messageCount,
+      Value<int?> activeMemberCount,
       Value<String?> createdById,
       Value<List<String>?> filterTags,
       Value<String?> team,
@@ -12813,6 +12865,7 @@ typedef $$ChannelsTableUpdateCompanionBuilder =
       Value<DateTime?> deletedAt,
       Value<int> memberCount,
       Value<int?> messageCount,
+      Value<int?> activeMemberCount,
       Value<String?> createdById,
       Value<List<String>?> filterTags,
       Value<String?> team,
@@ -12989,6 +13042,11 @@ class $$ChannelsTableFilterComposer extends Composer<_$DriftChatDatabase, $Chann
 
   ColumnFilters<int> get messageCount => $composableBuilder(
     column: $table.messageCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get activeMemberCount => $composableBuilder(
+    column: $table.activeMemberCount,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -13241,6 +13299,11 @@ class $$ChannelsTableOrderingComposer extends Composer<_$DriftChatDatabase, $Cha
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get activeMemberCount => $composableBuilder(
+    column: $table.activeMemberCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get createdById => $composableBuilder(
     column: $table.createdById,
     builder: (column) => ColumnOrderings(column),
@@ -13344,6 +13407,11 @@ class $$ChannelsTableAnnotationComposer extends Composer<_$DriftChatDatabase, $C
 
   GeneratedColumn<int> get messageCount => $composableBuilder(
     column: $table.messageCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get activeMemberCount => $composableBuilder(
+    column: $table.activeMemberCount,
     builder: (column) => column,
   );
 
@@ -13554,6 +13622,7 @@ class $$ChannelsTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> memberCount = const Value.absent(),
                 Value<int?> messageCount = const Value.absent(),
+                Value<int?> activeMemberCount = const Value.absent(),
                 Value<String?> createdById = const Value.absent(),
                 Value<List<String>?> filterTags = const Value.absent(),
                 Value<String?> team = const Value.absent(),
@@ -13580,6 +13649,7 @@ class $$ChannelsTableTableManager
                 deletedAt: deletedAt,
                 memberCount: memberCount,
                 messageCount: messageCount,
+                activeMemberCount: activeMemberCount,
                 createdById: createdById,
                 filterTags: filterTags,
                 team: team,
@@ -13608,6 +13678,7 @@ class $$ChannelsTableTableManager
                 Value<DateTime?> deletedAt = const Value.absent(),
                 Value<int> memberCount = const Value.absent(),
                 Value<int?> messageCount = const Value.absent(),
+                Value<int?> activeMemberCount = const Value.absent(),
                 Value<String?> createdById = const Value.absent(),
                 Value<List<String>?> filterTags = const Value.absent(),
                 Value<String?> team = const Value.absent(),
@@ -13634,6 +13705,7 @@ class $$ChannelsTableTableManager
                 deletedAt: deletedAt,
                 memberCount: memberCount,
                 messageCount: messageCount,
+                activeMemberCount: activeMemberCount,
                 createdById: createdById,
                 filterTags: filterTags,
                 team: team,

@@ -1,3 +1,6 @@
+/// @docImport '../../client/channel/channel_client_state.dart';
+library;
+
 import 'package:json_annotation/json_annotation.dart';
 import 'package:stream_core/stream_core.dart'
     show Filter, FilterField, NullOrdering, Sort, SortDirection, SortField, Standard, normalizeStringForSort;
@@ -8,6 +11,7 @@ import 'member.dart';
 import 'message.dart';
 import 'push_preference.dart';
 import 'read.dart';
+import 'scheduled_message.dart';
 import 'user.dart';
 
 part 'channel_state.g.dart';
@@ -35,6 +39,7 @@ class ChannelState {
     this.pendingMessages,
     this.pushPreferences,
     this.activeLiveLocations,
+    this.scheduledMessages,
   });
 
   /// The channel to which this state belongs
@@ -92,6 +97,13 @@ class ChannelState {
   /// The list of active live locations in the channel.
   final List<Location>? activeLiveLocations;
 
+  /// The current user's scheduled messages in this channel when it was queried.
+  ///
+  /// Use [ChannelClientState.scheduledMessages] for the list as it changes.
+  /// Null when the query did not ask for them.
+  @JsonKey(includeToJson: false)
+  final List<ScheduledMessage>? scheduledMessages;
+
   /// Create a new instance from a json
   static ChannelState fromJson(Map<String, dynamic> json) => _$ChannelStateFromJson(json);
 
@@ -112,6 +124,7 @@ class ChannelState {
     List<Message>? pendingMessages,
     ChannelPushPreference? pushPreferences,
     List<Location>? activeLiveLocations,
+    List<ScheduledMessage>? scheduledMessages,
   }) => ChannelState(
     channel: channel ?? this.channel,
     messages: messages ?? this.messages,
@@ -125,6 +138,7 @@ class ChannelState {
     pendingMessages: pendingMessages ?? this.pendingMessages,
     pushPreferences: pushPreferences ?? this.pushPreferences,
     activeLiveLocations: activeLiveLocations ?? this.activeLiveLocations,
+    scheduledMessages: scheduledMessages ?? this.scheduledMessages,
   );
 }
 
