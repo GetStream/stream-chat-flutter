@@ -1,6 +1,6 @@
 name: 'PR is Conventional and Semantic'
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - edited
@@ -14,7 +14,6 @@ on:
       - v9
 
 concurrency:
-  # Use PR number — github.ref is the base branch under pull_request_target.
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
