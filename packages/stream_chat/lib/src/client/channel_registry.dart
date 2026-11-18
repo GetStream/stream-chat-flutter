@@ -1,78 +1,84 @@
 import '../core/util/immutable_collection_subjects.dart';
 import 'channel/channel.dart';
 
-/// The live channels of a client.
+/// The channels of a client, one per cid.
 ///
-/// Listed channels are in [channels]. Unlisted ones are hidden but still the
-/// client's channel for their cid. Detached ones are deleted, removed or
-/// replaced, and kept alive until [dispose].
+/// Listed channels are in [channels]. A hidden channel, or one that hasn't
+/// loaded yet, stays the client's channel for its cid without being listed. A
+/// deleted, removed or replaced channel is detached, and kept alive until
+/// [dispose].
 class ChannelRegistry {
+  final _channels = <String, Channel>{};
   final _listed = ImmutableMapBehaviorSubject<String, Channel>.seeded(const {});
-  final _unlisted = <String, Channel>{};
   final _detached = <Channel>[];
 
   /// The listed channels, by cid.
   Map<String, Channel> get channels => _listed.value;
 
-  /// The listed channels as a stream.
+  /// The listed channels by cid, as they change.
   ///
   /// Emits the current channels on listen, then a new map each time a channel
   /// is listed, unlisted or removed.
   Stream<Map<String, Channel>> get channelsStream => _listed.stream;
 
   /// Every channel the client holds for a cid, listed or not.
-  Iterable<Channel> get live => [..._listed.value.values, ..._unlisted.values];
+  Iterable<Channel> get live => [..._channels.values];
 
   /// The channel the client holds for [cid], listed or not.
-  Channel? operator [](String cid) => _listed.value[cid] ?? _unlisted[cid];
+  Channel? operator [](String cid) => _channels[cid];
+
+  /// The channel for [cid], created with [create] if there is none.
+  Channel putIfAbsent(String cid, Channel Function() create) {
+    return _channels.putIfAbsent(cid, create);
+  }
 
   /// Lists exactly [channels], replacing the listed ones.
   ///
-  /// An unlisted or detached channel among them is listed again. A different
-  /// channel the client held for one of their cids is detached.
+  /// A different channel the client held for one of their cids is detached.
+  /// A channel left out of [channels] stays the client's channel, unlisted.
   void setChannels(Map<String, Channel> channels) {
     for (final MapEntry(key: cid, value: channel) in channels.entries) {
-      _detached.remove(channel);
+      _detached.removeWhere((it) => identical(it, channel));
 
-      final current = this[cid];
-      _unlisted.remove(cid);
+      final current = _channels[cid];
       if (current != null && !identical(current, channel)) _detached.add(current);
+      _channels[cid] = channel;
     }
 
     _listed.safeAdd(channels);
   }
 
   /// Lists [channels] alongside the ones already listed.
-  ///
-  /// An unlisted or detached channel among them is listed again.
   void addChannels(Map<String, Channel> channels) {
     setChannels({..._listed.value, ...channels});
   }
 
-  /// Takes the channel with [cid] out of [channels], keeping it as the client's
-  /// channel for [cid].
+  /// Takes the channel with [cid] out of [channels].
+  ///
+  /// It stays the client's channel for [cid].
   void unlist(String cid) {
-    final channel = _listed.value[cid];
-    if (channel == null) return;
+    if (!_listed.value.containsKey(cid)) return;
 
     _listed.safeAdd({..._listed.value}..remove(cid));
-    _unlisted[cid] = channel;
   }
 
   /// Lists the channel with [cid] again after [unlist].
+  ///
+  /// Does nothing for a channel that hasn't loaded yet.
   void relist(String cid) {
-    final channel = _unlisted[cid];
-    if (channel == null) return;
+    final channel = _channels[cid];
+    if (channel == null || channel.state == null) return;
+    if (_listed.value.containsKey(cid)) return;
 
     addChannels({cid: channel});
   }
 
   /// Detaches the channel with [cid], listed or not, keeping it alive.
   void detach(String cid) {
-    final channel = this[cid];
+    final channel = _channels.remove(cid);
     if (channel == null) return;
 
-    _removeByCid(cid);
+    unlist(cid);
     _detached.add(channel);
   }
 
@@ -80,24 +86,18 @@ class ChannelRegistry {
   ///
   /// Another channel the client holds for the same cid stays in place.
   void remove(Channel channel) {
-    _detached.remove(channel);
+    _detached.removeWhere((it) => identical(it, channel));
 
     final cid = channel.cid;
-    if (cid == null || !identical(this[cid], channel)) return;
+    if (cid == null || !identical(_channels[cid], channel)) return;
 
-    _removeByCid(cid);
+    _channels.remove(cid);
+    unlist(cid);
   }
 
-  // Forgets the channel with [cid], listed or not, without disposing it.
-  void _removeByCid(String cid) {
-    _unlisted.remove(cid);
-    if (!_listed.value.containsKey(cid)) return;
-
-    _listed.safeAdd({..._listed.value}..remove(cid));
-  }
-
-  /// Disposes every channel, detached ones included, and stops emitting
-  /// [channelsStream].
+  /// Disposes every channel, detached ones included.
+  ///
+  /// [channelsStream] is closed afterwards.
   void dispose() {
     // Taken before closing, as disposing a channel removes it from here.
     final remaining = [...live, ..._detached];

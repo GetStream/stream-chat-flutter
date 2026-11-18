@@ -1056,17 +1056,22 @@ class StreamChatClient {
     for (final channelState in channelStates) {
       final cid = channelState.channel!.cid;
       final channel = state._channelRegistry[cid];
-      if (channel != null) {
-        channel.state?.updateChannelStateFromServer(channelState);
-        channels[cid] = channel;
-        newChannels.add(channel);
-      } else {
+      if (channel == null) {
         final newChannel = Channel.fromState(this, channelState);
         if (newChannel.cid != null) {
           channels[newChannel.cid!] = newChannel;
         }
         newChannels.add(newChannel);
+        continue;
       }
+
+      if (channel.state case final loaded?) {
+        loaded.updateChannelStateFromServer(channelState);
+      } else {
+        channel.loadState(channelState);
+      }
+      channels[cid] = channel;
+      newChannels.add(channel);
     }
     return MapEntry(channels, newChannels);
   }
@@ -1366,16 +1371,24 @@ class StreamChatClient {
   /// Get a development token
   Token devToken(String userId) => Token.development(userId);
 
-  /// Returns a channel client with the given type, id and custom data.
+  /// The [Channel] for [type] and [id], created on first call.
+  ///
+  /// Later calls with the same [type] and [id] return the same instance.
+  /// Until that channel has loaded, [extraData] is merged into its data;
+  /// afterwards it is ignored. Without an [id], every call creates a new
+  /// channel.
   Channel channel(
     String type, {
     String? id,
     Map<String, Object?>? extraData,
   }) {
-    if (id != null) {
-      if (state._channelRegistry['$type:$id'] case final channel?) return channel;
-    }
-    return Channel(this, type, id, extraData: extraData);
+    Channel create() => Channel(this, type, id, extraData: extraData);
+    if (id == null) return create();
+
+    final channel = state._channelRegistry.putIfAbsent('$type:$id', create);
+    if (channel.state == null && extraData != null) channel.extraData = extraData;
+
+    return channel;
   }
 
   /// Creates a new channel
@@ -3212,14 +3225,14 @@ class ClientState {
 
   /// The current user's loaded channels by cid, as they change.
   ///
-  /// Leaves out deleted channels, and channels the current user hid or was
-  /// removed from until they are queried, watched or shown again.
+  /// Deleted channels are left out. Channels the current user hid or was
+  /// removed from are left out until they are queried, watched or shown again.
   Stream<Map<String, Channel>> get channelsStream => _channelRegistry.channelsStream;
 
   /// The current user's loaded channels, by cid.
   ///
-  /// Leaves out deleted channels, and channels the current user hid or was
-  /// removed from until they are queried, watched or shown again.
+  /// Deleted channels are left out. Channels the current user hid or was
+  /// removed from are left out until they are queried, watched or shown again.
   Map<String, Channel> get channels => _channelRegistry.channels;
 
   @internal

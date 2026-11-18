@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -2123,9 +2124,15 @@ class Channel {
     return _client.markThreadUnread(id!, type, threadId);
   }
 
+  /// Initializes this channel with [channelState].
+  @internal
+  void loadState(ChannelState channelState) => _initState(channelState);
+
   void _initState(ChannelState channelState) {
     state = ChannelClientState(this, channelState);
-    _initializedCompleter.safeComplete(true);
+    // A failed load leaves the completer completed with its error.
+    if (_initializedCompleter.isCompleted) _initializedCompleter = Completer<bool>();
+    _initializedCompleter.complete(true);
 
     if (cid case final cid?) client.state.addChannels({cid: this});
     _client.logger.info('Channel ${channelState.channel?.cid} initialized');

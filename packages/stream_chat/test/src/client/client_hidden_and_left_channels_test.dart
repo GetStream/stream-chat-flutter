@@ -206,7 +206,7 @@ void main() {
     expect(channel.state!.channelState.membership, isNotNull);
   });
 
-  test('querying a channel whose response has no membership keeps the current one', () async {
+  test('querying channels keeps the current membership when the response has none', () async {
     final channel = _addChannel(client, 'messaging:group', membership: _membershipOf(currentUser));
     _stubQueryChannels(api, ['messaging:group']);
 
@@ -376,7 +376,6 @@ void main() {
 
   test('channel.deleted deletes the channel from persistence', () async {
     final persistence = _persistence();
-    when(() => persistence.deleteChannels(any())).thenAnswer((_) async {});
     client.chatPersistenceClient = persistence;
     _addChannel(client, 'messaging:deleted');
 
@@ -617,6 +616,88 @@ void main() {
 
     expect(channel.state!.messages, isEmpty);
   });
+
+  test('client.channel returns the same instance before it is watched', () {
+    final channel = client.channel('messaging', id: 'created');
+
+    expect(client.channel('messaging', id: 'created'), same(channel));
+  });
+
+  test("client.channel merges a later call's extra data before the channel is loaded", () {
+    client.channel('messaging', id: 'created', extraData: {'name': 'First'});
+
+    final channel = client.channel('messaging', id: 'created', extraData: {'name': 'Second'});
+
+    expect(channel.extraData['name'], 'Second');
+  });
+
+  test("client.channel ignores a later call's extra data once the channel is loaded", () {
+    final channel = _addChannel(client, 'messaging:loaded');
+
+    client.channel('messaging', id: 'loaded', extraData: {'name': 'Later'});
+
+    expect(channel.extraData['name'], isNull);
+  });
+
+  test('querying channels completes initialized after a failed first watch', () async {
+    final channel = client.channel('messaging', id: 'retry');
+    _stubQueryChannel(api, 'messaging:retry', failWhen: () => true);
+    final initializedFailure = expectLater(channel.initialized, throwsA(isA<StreamChatNetworkError>()));
+    await expectLater(channel.watch(), throwsA(isA<StreamChatNetworkError>()));
+    await initializedFailure;
+    _stubQueryChannels(api, ['messaging:retry']);
+
+    await client.queryChannelsOnline(waitForConnect: false);
+
+    expect(await channel.initialized, isTrue);
+  });
+
+  test('querying channels returns the instance client.channel created', () async {
+    final channel = client.channel('messaging', id: 'created');
+    _stubQueryChannels(api, ['messaging:created']);
+
+    final channels = await client.queryChannelsOnline(waitForConnect: false);
+
+    expect(channels.single, same(channel));
+  });
+
+  test('querying channels loads the instance client.channel created', () async {
+    final channel = client.channel('messaging', id: 'created');
+    _stubQueryChannels(api, ['messaging:created']);
+
+    await client.queryChannelsOnline(waitForConnect: false);
+
+    expect(channel.state, isNotNull);
+  });
+
+  test('a new message for a channel that was created but not watched leaves client.state.channels unchanged', () async {
+    client.channel('messaging', id: 'created');
+
+    await _receiveMessage(client, 'messaging:created', Message(id: 'message', text: 'Hi', user: otherUser));
+
+    expect(client.state.channels, isNot(contains('messaging:created')));
+  });
+
+  test('disposing a channel that was never watched makes client.channel return a new instance', () {
+    final channel = client.channel('messaging', id: 'created')..dispose();
+
+    expect(client.channel('messaging', id: 'created'), isNot(same(channel)));
+  });
+
+  test('watching a channel again after a failed first watch loads it', () async {
+    final channel = client.channel('messaging', id: 'retry');
+    var isOffline = true;
+    _stubQueryChannel(api, 'messaging:retry', failWhen: () => isOffline);
+    // The failed watch also fails `initialized`; listen so it isn't unhandled.
+    final initializedFailure = expectLater(channel.initialized, throwsA(isA<StreamChatNetworkError>()));
+    await expectLater(channel.watch(), throwsA(isA<StreamChatNetworkError>()));
+    await initializedFailure;
+    isOffline = false;
+
+    await channel.watch();
+
+    expect(channel.state, isNotNull);
+  });
 }
 
 Channel _addChannel(
@@ -703,7 +784,8 @@ Future<void> _removeFromChannel(StreamChatClient client, String cid, User user) 
   await Future<void>.delayed(Duration.zero);
 }
 
-void _stubQueryChannel(FakeChatApi api, String cid) {
+// Stubs [cid]'s query, failing while [failWhen] returns true.
+void _stubQueryChannel(FakeChatApi api, String cid, {bool Function()? failWhen}) {
   final [type, id] = cid.split(':');
   when(
     () => api.channel.queryChannel(
@@ -717,7 +799,10 @@ void _stubQueryChannel(FakeChatApi api, String cid) {
       membersPagination: any(named: 'membersPagination'),
       watchersPagination: any(named: 'watchersPagination'),
     ),
-  ).thenAnswer((_) async => ChannelState(channel: ChannelModel(cid: cid)));
+  ).thenAnswer((_) async {
+    if (failWhen?.call() ?? false) throw StreamChatNetworkError(ChatErrorCode.internalSystemError);
+    return ChannelState(channel: ChannelModel(cid: cid));
+  });
 }
 
 void _stubQueryChannels(FakeChatApi api, List<String> cids, {bool? hidden}) {
