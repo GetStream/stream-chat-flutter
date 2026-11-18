@@ -504,6 +504,64 @@ void main() {
     expect(client.state.channels['messaging:left'], same(current));
   });
 
+  test('a new shadowed message keeps a hidden channel out of client.state.channels', () async {
+    _addChannel(client, 'messaging:hidden');
+    await _hide(client, 'messaging:hidden');
+
+    await _receiveMessage(
+      client,
+      'messaging:hidden',
+      Message(id: 'message', text: 'Hi', user: otherUser, shadowed: true),
+    );
+
+    expect(client.state.channels, isNot(contains('messaging:hidden')));
+  });
+
+  test('a new system message keeps a hidden channel hidden', () async {
+    final channel = _addChannel(client, 'messaging:hidden');
+    await _hide(client, 'messaging:hidden');
+
+    await _receiveMessage(
+      client,
+      'messaging:hidden',
+      Message(id: 'message', text: 'Hi', user: otherUser, type: MessageType.system),
+    );
+
+    expect(channel.hidden, isTrue);
+    expect(client.state.channels, isNot(contains('messaging:hidden')));
+  });
+
+  test('a new message from a user the current user blocked keeps a hidden channel hidden', () async {
+    client.state.currentUser = OwnUser(id: currentUser.id, blockedUserIds: [otherUser.id]);
+    final channel = _addChannel(client, 'messaging:hidden');
+    await _hide(client, 'messaging:hidden');
+
+    await _receiveMessage(client, 'messaging:hidden', Message(id: 'message', text: 'Hi', user: otherUser));
+
+    expect(channel.hidden, isTrue);
+    expect(client.state.channels, isNot(contains('messaging:hidden')));
+  });
+
+  test('a new thread reply shows a hidden channel again', () async {
+    final channel = _addChannel(client, 'messaging:hidden');
+    await _hide(client, 'messaging:hidden');
+
+    await _receiveMessage(
+      client,
+      'messaging:hidden',
+      Message(id: 'reply', text: 'Hi', user: otherUser, parentId: 'parent', type: MessageType.reply),
+    );
+
+    expect(channel.hidden, isFalse);
+    expect(client.state.channels, contains('messaging:hidden'));
+  });
+
+  test('a new message for a channel that is not loaded leaves client.state.channels unchanged', () async {
+    await _receiveMessage(client, 'messaging:unknown', Message(id: 'message', text: 'Hi', user: otherUser));
+
+    expect(client.state.channels, isNot(contains('messaging:unknown')));
+  });
+
   test('a new message lists only the current instance of a hidden channel', () async {
     _addChannel(client, 'messaging:hidden');
     await _hide(client, 'messaging:hidden');

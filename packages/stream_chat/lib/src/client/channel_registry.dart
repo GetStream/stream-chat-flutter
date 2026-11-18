@@ -26,12 +26,6 @@ class ChannelRegistry {
   /// The channel the client holds for [cid], listed or not.
   Channel? operator [](String cid) => _listed.value[cid] ?? _unlisted[cid];
 
-  /// Whether [channel] is the channel the client holds for its cid.
-  bool isCurrent(Channel channel) {
-    final cid = channel.cid;
-    return cid != null && identical(this[cid], channel);
-  }
-
   /// Lists exactly [channels], replacing the listed ones.
   ///
   /// An unlisted or detached channel among them is listed again. A different

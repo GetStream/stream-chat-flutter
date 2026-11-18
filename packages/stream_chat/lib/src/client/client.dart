@@ -54,6 +54,7 @@ import '../core/util/extension.dart';
 import '../core/util/immutable_collection_subjects.dart';
 import '../core/util/in_flight_cache.dart';
 import '../core/util/list_extensions.dart';
+import '../core/util/message_rules.dart';
 import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
@@ -2860,6 +2861,7 @@ class ClientState {
     _listenChannelDeleted();
     _listenChannelHidden();
     _listenChannelVisible();
+    _listenMessageNew();
     // endregion
 
     // region USER EVENTS
@@ -2910,6 +2912,18 @@ class ClientState {
     _eventsSubscription?.add(
       _client.on(EventType.channelVisible).listen((event) {
         if (event.channel?.cid case final cid?) _channelRegistry.relist(cid);
+      }),
+    );
+  }
+
+  void _listenMessageNew() {
+    _eventsSubscription?.add(
+      _client.on(EventType.messageNew, EventType.notificationMessageNew).listen((event) {
+        final (cid, message) = (event.cid, event.message);
+        if (cid == null || message == null) return;
+
+        final showsChannel = MessageRules.canShowHiddenChannel(message, currentUser: currentUser);
+        if (showsChannel) _channelRegistry.relist(cid);
       }),
     );
   }
@@ -3226,10 +3240,6 @@ class ClientState {
   void removeChannel(Channel channel) {
     _channelRegistry.remove(channel);
   }
-
-  /// Whether [channel] is the instance the client holds for its cid.
-  @internal
-  bool isCurrentChannel(Channel channel) => _channelRegistry.isCurrent(channel);
 
   @internal
   set blockedUserIds(List<String> blockedUserIds) {

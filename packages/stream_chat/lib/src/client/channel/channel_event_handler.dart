@@ -204,15 +204,12 @@ class ChannelEventHandler {
 
     _mutations.onMessageNew(message, watcherCount: watcherCount);
 
-    // A new message shows a hidden channel again, unless it is shadowed.
-    if (!_channel.hidden || message.shadowed) return;
-    _mutations.onChannelVisibilityChanged(hidden: false);
+    if (!_channel.hidden) return;
 
-    final cid = _channel.cid!;
-    final isListed = _client.state.channels.containsKey(cid);
-    if (!isListed && _client.state.isCurrentChannel(_channel)) {
-      _client.state.addChannels({cid: _channel});
-    }
+    final currentUser = _client.state.currentUser;
+    if (!MessageRules.canShowHiddenChannel(message, currentUser: currentUser)) return;
+
+    _mutations.onChannelVisibilityChanged(hidden: false);
   }
 
   void _onMessageDeleted(Event event) {
