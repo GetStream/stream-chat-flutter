@@ -18,7 +18,7 @@ class UserRobot {
   final WidgetTester tester;
 
   Future<UserRobot> login([
-    UserCredentials user = PredefinedUsers.currentUser,
+    E2eUser user = PredefinedUsers.currentUser,
   ]) async {
     await tester.scrollToText(user.name);
     await tester.tapText(user.name);
@@ -724,7 +724,7 @@ class UserRobot {
 /// sequential `await`s. Each method mirrors the instance method above.
 extension UserRobotChain on Future<UserRobot> {
   Future<UserRobot> login([
-    UserCredentials user = PredefinedUsers.currentUser,
+    E2eUser user = PredefinedUsers.currentUser,
   ]) => then((it) => it.login(user));
 
   Future<UserRobot> waitForChannelListToLoad() => then((it) => it.waitForChannelListToLoad());
