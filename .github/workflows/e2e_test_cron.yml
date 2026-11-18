@@ -19,7 +19,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  mock_server_branch: ${{ github.event.inputs.mock_server_branch || 'main' }}
+  mock_server_branch: ${{ inputs.mock_server_branch || 'main' }}
   ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
