@@ -284,13 +284,6 @@ abstract class ChatPersistenceClient {
   /// Remove a channel by [channelId]
   Future<void> deleteChannels(List<String> cids);
 
-  /// Removes the channels with [cids] from every stored channel query, keeping
-  /// the channels themselves.
-  ///
-  /// By default it deletes the channels with [deleteChannels] instead. Override
-  /// it to keep them.
-  Future<void> deleteChannelQueriesByCids(List<String> cids) => deleteChannels(cids);
-
   /// Removes the draft message by matching [DraftMessages.channelCid] and
   /// [DraftMessages.parentId].
   Future<void> deleteDraftMessageByCid(String cid, {String? parentId});

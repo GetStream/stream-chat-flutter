@@ -1,9 +1,3 @@
-## Upcoming
-
-🔄 Changed
-
-- Hiding a channel now keeps it in the offline cache, out of the cached channel lists.
-
 ## 10.7.0
 
 ✅ Added

@@ -666,13 +666,17 @@ class ChannelClientState {
   ChannelState get channelState => _channelStateController.value;
   late BehaviorSubject<ChannelState> _channelStateController;
 
-  // Saves only while this is the client's channel for its cid, so a deleted,
-  // removed or replaced channel never writes back.
+  // Only the instance listed in the client's channels is saved, so a hidden,
+  // deleted, removed or replaced channel never writes back.
+  bool get _shouldPersist {
+    final cid = _channel.cid;
+    return cid != null && identical(_client.state.channels[cid], _channel);
+  }
+
   late final _debouncedUpdatePersistenceChannelState = debounce(
     (ChannelState state) {
       final persistenceClient = _client.chatPersistenceClient;
-      if (persistenceClient == null) return null;
-      if (!_client.state.isCurrentChannel(_channel)) return null;
+      if (persistenceClient == null || !_shouldPersist) return null;
 
       return persistenceClient.updateChannelState(state);
     },
@@ -690,8 +694,7 @@ class ChannelClientState {
       if (channelCid == null) return;
 
       final persistenceClient = _client.chatPersistenceClient;
-      if (persistenceClient == null) return;
-      if (!_client.state.isCurrentChannel(_channel)) return;
+      if (persistenceClient == null || !_shouldPersist) return;
 
       return persistenceClient.updateChannelThreads(channelCid, threads);
     },

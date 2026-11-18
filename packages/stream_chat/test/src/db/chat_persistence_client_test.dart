@@ -27,10 +27,8 @@ class TestPersistenceClient extends ChatPersistenceClient {
   @override
   Future<void> connect(String userId) => throw UnimplementedError();
 
-  final deletedChannelCids = <String>[];
-
   @override
-  Future<void> deleteChannels(List<String> cids) async => deletedChannelCids.addAll(cids);
+  Future<void> deleteChannels(List<String> cids) => throw UnimplementedError();
 
   @override
   Future<void> deleteMembersByCids(List<String> cids) => Future.value();
@@ -209,12 +207,6 @@ void main() {
     test('deletePinnedMessageByCid', () {
       const messageId = 'message-id';
       persistenceClient.deletePinnedMessageByCid(messageId);
-    });
-
-    test('deleteChannelQueriesByCids deletes the channels by default', () async {
-      await persistenceClient.deleteChannelQueriesByCids(['test:cid']);
-
-      expect(persistenceClient.deletedChannelCids, ['test:cid']);
     });
 
     test('getChannelStateByCid', () async {

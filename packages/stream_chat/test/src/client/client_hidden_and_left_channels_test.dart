@@ -46,23 +46,23 @@ void main() {
     expect(channel.state, isNotNull);
   });
 
-  test('channel.hidden keeps the channel in persistence', () async {
+  test('channel.hidden deletes the channel from persistence', () async {
     final persistence = _persistence();
     client.chatPersistenceClient = persistence;
     _addChannel(client, 'messaging:hidden');
 
     await _hide(client, 'messaging:hidden');
 
-    verifyNever(() => persistence.deleteChannels(any()));
+    verify(() => persistence.deleteChannels(['messaging:hidden'])).called(1);
   });
 
-  test('channel.hidden takes the channel out of the stored channel queries', () async {
+  test('hiding a channel that is not loaded deletes it from persistence', () async {
     final persistence = _persistence();
     client.chatPersistenceClient = persistence;
 
     await _hide(client, 'messaging:hidden');
 
-    verify(() => persistence.deleteChannelQueriesByCids(['messaging:hidden'])).called(1);
+    verify(() => persistence.deleteChannels(['messaging:hidden'])).called(1);
   });
 
   test('channel.hidden keeps the messages', () async {
@@ -396,12 +396,43 @@ void main() {
     verifyNever(() => persistence.updateChannelState(any()));
   });
 
-  test('channel.hidden keeps saving the channel to persistence', () async {
+  test('channel.hidden stops saving the channel to persistence', () async {
     final persistence = _persistence();
     client.chatPersistenceClient = persistence;
     _addChannel(client, 'messaging:hidden');
 
     await _hide(client, 'messaging:hidden');
+    await Future<void>.delayed(_pastPersistenceDebounce);
+
+    verifyNever(() => persistence.updateChannelState(any()));
+  });
+
+  test('a channel queried with hidden: true is saved to persistence', () async {
+    final persistence = _persistence();
+    when(
+      () => persistence.saveChannelQueries(
+        cids: any(named: 'cids'),
+        filter: any(named: 'filter'),
+        clearQueryCache: any(named: 'clearQueryCache'),
+      ),
+    ).thenAnswer((_) async {});
+    client.chatPersistenceClient = persistence;
+    _stubQueryChannels(api, ['messaging:hidden'], hidden: true);
+
+    await client.queryChannelsOnline(filter: Filter.equal('hidden', true), waitForConnect: false);
+    await Future<void>.delayed(_pastPersistenceDebounce);
+
+    verify(() => persistence.updateChannelState(any())).called(1);
+  });
+
+  test('a new message on a hidden channel saves it again', () async {
+    final persistence = _persistence();
+    client.chatPersistenceClient = persistence;
+    _addChannel(client, 'messaging:hidden');
+    await _hide(client, 'messaging:hidden');
+    await Future<void>.delayed(_pastPersistenceDebounce);
+
+    await _receiveMessage(client, 'messaging:hidden', Message(id: 'message', text: 'Hi', user: otherUser));
     await Future<void>.delayed(_pastPersistenceDebounce);
 
     verify(() => persistence.updateChannelState(any())).called(1);
@@ -439,12 +470,11 @@ void main() {
     expect(replaced.state, isNull);
   });
 
-  test('a hidden channel another instance replaced stops saving to persistence', () async {
+  test('a channel another instance replaced stops saving to persistence', () async {
     final persistence = _persistence();
     client.chatPersistenceClient = persistence;
-    final replaced = _addChannel(client, 'messaging:hidden');
-    await _hide(client, 'messaging:hidden');
-    _addChannel(client, 'messaging:hidden');
+    final replaced = _addChannel(client, 'messaging:replaced');
+    _addChannel(client, 'messaging:replaced');
 
     replaced.state!.unreadCount = 3;
     await Future<void>.delayed(_pastPersistenceDebounce);
@@ -546,7 +576,6 @@ const _pastPersistenceDebounce = Duration(milliseconds: 1100);
 MockPersistenceClient _persistence() {
   final persistence = MockPersistenceClient();
   when(() => persistence.getChannelThreads(any())).thenAnswer((_) async => {});
-  when(() => persistence.deleteChannelQueriesByCids(any())).thenAnswer((_) async {});
   when(() => persistence.deleteChannels(any())).thenAnswer((_) async {});
   when(() => persistence.updateChannelState(any())).thenAnswer((_) async {});
   return persistence;
@@ -622,7 +651,7 @@ void _stubQueryChannel(FakeChatApi api, String cid) {
   ).thenAnswer((_) async => ChannelState(channel: ChannelModel(cid: cid)));
 }
 
-void _stubQueryChannels(FakeChatApi api, List<String> cids) {
+void _stubQueryChannels(FakeChatApi api, List<String> cids, {bool? hidden}) {
   when(
     () => api.channel.queryChannels(
       filter: any(named: 'filter'),
@@ -637,7 +666,10 @@ void _stubQueryChannels(FakeChatApi api, List<String> cids) {
   ).thenAnswer(
     (_) async => QueryChannelsResponse()
       ..channels = [
-        for (final cid in cids) ChannelState(channel: ChannelModel(cid: cid)),
+        for (final cid in cids)
+          ChannelState(
+            channel: ChannelModel(cid: cid, hidden: hidden),
+          ),
       ],
   );
 }

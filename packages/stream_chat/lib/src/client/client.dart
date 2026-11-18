@@ -2901,7 +2901,7 @@ class ClientState {
       _client.on(EventType.channelHidden).listen((event) async {
         final eventChannel = event.channel!;
         _channelRegistry.unlist(eventChannel.cid);
-        await _client.chatPersistenceClient?.deleteChannelQueriesByCids([eventChannel.cid]);
+        await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
       }),
     );
   }
