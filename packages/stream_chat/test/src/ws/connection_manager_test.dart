@@ -42,7 +42,7 @@ void main() {
     final manager = _manager(
       server: server,
       tokenProvider: TokenProvider.dynamic((userId) async {
-        loads++;
+        loads += 1;
         // The server accepts the token the provider gives after the refused one.
         if (loads == 2) server.refusal = null;
         return testUserToken(userId);
@@ -62,7 +62,7 @@ void main() {
     final manager = _manager(
       server: server,
       tokenProvider: TokenProvider.dynamic((userId) async {
-        loads++;
+        loads += 1;
         return testUserToken(userId);
       }),
     );
@@ -79,12 +79,12 @@ void main() {
 
   test('ConnectionManager does not ask for another token when the server refuses one for another reason', () async {
     var loads = 0;
-    // A signature the server cannot verify: another token from the same signer is refused the same way.
-    final server = FakeChatServer()..refusal = connectionErrorFrame(code: 43);
+    final refusal = connectionErrorFrame(code: StreamErrorCode.tokenSignatureInvalid);
+    final server = FakeChatServer()..refusal = refusal;
     final manager = _manager(
       server: server,
       tokenProvider: TokenProvider.dynamic((userId) async {
-        loads++;
+        loads += 1;
         return testUserToken(userId);
       }),
     );

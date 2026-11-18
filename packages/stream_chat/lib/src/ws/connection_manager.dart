@@ -103,8 +103,8 @@ class ConnectionManager with Disposable {
   ///
   /// Completes with the attempt already under way when there is one for [user].
   ///
-  /// A connection refused because its token expired is tried once more with a new token from the
-  /// provider, unless the provider only has the one it gave. Any other refusal is not retried.
+  /// A connection refused because its token expired is tried once more with a new token, unless
+  /// the token provider is static. Any other refusal is not retried.
   ///
   /// Throws a [StateError] when a connection is already open, or one is being opened for another
   /// user, and a [StreamChatException] when the connection is refused.
@@ -165,8 +165,9 @@ class ConnectionManager with Disposable {
     user.id,
     () async {
       final session = _session;
+      var replacedToken = false;
 
-      for (var attempt = 1; ; attempt++) {
+      while (true) {
         // Subscribed before connecting: the frame that establishes the connection is the first
         // health check, and the only one carrying the signed-in user.
         final established = events.waitFor<HealthCheckEvent>();
@@ -180,10 +181,12 @@ class ConnectionManager with Disposable {
           // Otherwise it fails unobserved when the socket closes without a frame.
           established.ignore();
 
-          // Calling connect again would only ask the provider for another token, so the attempt
-          // after an expired one does that here. The refusal reaches [_buildOptions], which drops
-          // the refused token.
-          if (attempt == 1 && _canReplaceToken(source)) continue;
+          // The next attempt loads a new token in place of the refused one.
+          if (!replacedToken && _canReplaceToken(source)) {
+            replacedToken = true;
+            continue;
+          }
+
           _refuse(user, source);
         }
 
