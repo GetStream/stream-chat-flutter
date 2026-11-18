@@ -20,7 +20,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.mock_server_branch || 'main' }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.mock_server_branch || 'main' }}-${{ inputs.mock_check && 'mock-check' || 'full' }}
   cancel-in-progress: true
 
 env:
