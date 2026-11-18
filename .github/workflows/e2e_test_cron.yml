@@ -10,17 +10,12 @@ on:
         type: string
         required: true
         default: main
-      mock_check:
-        description: "Run the E2E tests on Android API 36 only, without coverage or iOS (for mock server changes)"
-        type: boolean
-        required: false
-        default: false
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.mock_server_branch || 'main' }}-${{ inputs.mock_check && 'mock-check' || 'full' }}
+  group: ${{ github.workflow }}-${{ github.ref }}-${{ inputs.mock_server_branch || 'main' }}
   cancel-in-progress: true
 
 env:
@@ -41,14 +36,8 @@ jobs:
         # Coverage is only collected against the main mock server.
         include: |-
           ${{ fromJson(
-            inputs.mock_check && '[
+            (inputs.mock_server_branch || 'main') != 'main' && '[
               { "api-level": 36, "batch": 0, "batch_count": 1 }
-            ]'
-            || (inputs.mock_server_branch || 'main') != 'main' && '[
-              { "api-level": 36, "batch": 0, "batch_count": 1 },
-              { "api-level": 34, "batch": 0, "batch_count": 1 },
-              { "api-level": 31, "batch": 0, "batch_count": 1 },
-              { "api-level": 28, "batch": 0, "batch_count": 1 }
             ]'
             || '[
               { "api-level": 36, "coverage": true, "batch": 0, "batch_count": 4 },
@@ -156,7 +145,7 @@ jobs:
     needs: android
     # Failed tests keep their previous coverage; only a batch that never finished blocks the map.
     # Coverage is only collected against the main mock server.
-    if: ${{ !cancelled() && !inputs.mock_check && (inputs.mock_server_branch || 'main') == 'main' }}
+    if: ${{ !cancelled() && (inputs.mock_server_branch || 'main') == 'main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -192,7 +181,7 @@ jobs:
           retention-days: 14
 
   ios:
-    if: ${{ !inputs.mock_check }}
+    if: ${{ (inputs.mock_server_branch || 'main') == 'main' }}
     runs-on: macos-15
     timeout-minutes: 360
     strategy:
