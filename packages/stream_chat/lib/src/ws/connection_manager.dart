@@ -103,6 +103,9 @@ class ConnectionManager with Disposable {
   ///
   /// Completes with the attempt already under way when there is one for [user].
   ///
+  /// A connection refused because its token expired is tried once more with a new token from the
+  /// provider, unless the provider only has the one it gave. Any other refusal is not retried.
+  ///
   /// Throws a [StateError] when a connection is already open, or one is being opened for another
   /// user, and a [StreamChatException] when the connection is refused.
   Future<HealthCheckEvent> connect(
@@ -163,29 +166,44 @@ class ConnectionManager with Disposable {
     () async {
       final session = _session;
 
-      // Subscribed before connecting: the frame that establishes the connection is the first health
-      // check, and the only one carrying the signed-in user.
-      final established = events.waitFor<HealthCheckEvent>();
+      for (var attempt = 1; ; attempt++) {
+        // Subscribed before connecting: the frame that establishes the connection is the first
+        // health check, and the only one carrying the signed-in user.
+        final established = events.waitFor<HealthCheckEvent>();
 
-      // Not awaited: the state has moved on by the time this returns, so the closure waited on
-      // below cannot be the one this attempt replaces.
-      unawaited(_ws.connect());
+        // Not awaited: the state has moved on by the time this returns, so the closure waited on
+        // below cannot be the one this attempt replaces.
+        unawaited(_ws.connect());
 
-      final settledState = await settled;
-      if (settledState case Disconnected(:final source)) {
-        // Otherwise it fails unobserved when the socket closes without a frame.
-        established.ignore();
-        _refuse(user, source);
+        final settledState = await settled;
+        if (settledState case Disconnected(:final source)) {
+          // Otherwise it fails unobserved when the socket closes without a frame.
+          established.ignore();
+
+          // Calling connect again would only ask the provider for another token, so the attempt
+          // after an expired one does that here. The refusal reaches [_buildOptions], which drops
+          // the refused token.
+          if (attempt == 1 && _canReplaceToken(source)) continue;
+          _refuse(user, source);
+        }
+
+        // Already on its way by the time the attempt settles. Kept for whoever asks for the
+        // connection it opened.
+        final event = await established;
+        session?.establishedWith(event);
+
+        return event;
       }
-
-      // Already on its way by the time the attempt settles. Kept for whoever asks for the
-      // connection it opened.
-      final event = await established;
-      session?.establishedWith(event);
-
-      return event;
     },
   );
+
+  // Whether [source] refused a token that has expired, and the provider can give another.
+  bool _canReplaceToken(DisconnectionSource source) {
+    if (_tokenManager.usesStaticProvider) return false;
+
+    final exception = source.exception;
+    return exception is StreamApiException && exception.isTokenExpired;
+  }
 
   // Raises why a connection was refused, the way a rejected request is raised.
   Never _refuse(OwnUser user, DisconnectionSource source) {

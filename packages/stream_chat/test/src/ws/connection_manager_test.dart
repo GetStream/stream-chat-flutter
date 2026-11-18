@@ -36,7 +36,27 @@ void main() {
     expect(manager.connectionState.value, isA<Disconnected>());
   });
 
-  test('ConnectionManager presents another token after the server refuses an expired one', () async {
+  test('ConnectionManager connects with another token after the server refuses an expired one', () async {
+    var loads = 0;
+    final server = FakeChatServer()..refusal = connectionErrorFrame();
+    final manager = _manager(
+      server: server,
+      tokenProvider: TokenProvider.dynamic((userId) async {
+        loads++;
+        // The server accepts the token the provider gives after the refused one.
+        if (loads == 2) server.refusal = null;
+        return testUserToken(userId);
+      }),
+    );
+    addTearDown(manager.dispose);
+
+    await manager.connect(_user());
+
+    expect(manager.connectionId, isNotNull);
+    expect(loads, 2);
+  });
+
+  test('ConnectionManager reports an expired token refused again after asking for another', () async {
     var loads = 0;
     final server = FakeChatServer()..refusal = connectionErrorFrame();
     final manager = _manager(
@@ -48,15 +68,32 @@ void main() {
     );
     addTearDown(manager.dispose);
 
-    await expectLater(manager.connect(_user()), throwsA(isA<StreamApiException>()));
-    expect(loads, 1);
-
-    // The refused token is dropped, so the attempt after it asks the provider for another rather
-    // than presenting the one the server just turned down.
-    server.refusal = null;
-    await manager.connect(_user());
+    await expectLater(
+      manager.connect(_user()),
+      throwsA(isA<StreamApiException>().having((it) => it.isTokenExpired, 'isTokenExpired', isTrue)),
+    );
 
     expect(loads, 2);
+    expect(server.sockets, hasLength(2));
+  });
+
+  test('ConnectionManager does not ask for another token when the server refuses one for another reason', () async {
+    var loads = 0;
+    // A signature the server cannot verify: another token from the same signer is refused the same way.
+    final server = FakeChatServer()..refusal = connectionErrorFrame(code: 43);
+    final manager = _manager(
+      server: server,
+      tokenProvider: TokenProvider.dynamic((userId) async {
+        loads++;
+        return testUserToken(userId);
+      }),
+    );
+    addTearDown(manager.dispose);
+
+    await expectLater(manager.connect(_user()), throwsA(isA<StreamApiException>()));
+
+    expect(loads, 1);
+    expect(server.sockets, hasLength(1));
   });
 
   test('ConnectionManager stays closed when the provider has no other token to give', () async {
