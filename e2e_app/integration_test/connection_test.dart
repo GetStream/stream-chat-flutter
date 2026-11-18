@@ -68,18 +68,16 @@ void main() {
       await env.userRobot.logout().assertStartPageIsShown();
 
       step('WHEN the user logs in as another user');
-      await env.backendRobot.setAppUser(id: PredefinedUsers.qaTest2.id, name: PredefinedUsers.qaTest2.name);
-      await env.userRobot.login(PredefinedUsers.qaTest2);
+      await env.backendRobot.setAppUser(id: PredefinedUsers.hanSolo.id, name: PredefinedUsers.hanSolo.name);
+      await env.userRobot.login(PredefinedUsers.hanSolo);
 
       step('THEN the user observes the channel list');
       await env.userRobot.waitForChannelListToLoad();
 
       step("AND the previous user's message is shown as someone else's");
-      // The mock server answered the first login as its own fixture user, which
-      // is what the native test asserts too.
       await env.userRobot.openChannel().assertMessageAuthor(
         firstUserMessage,
-        authorName: PredefinedUsers.mockServerUser.name,
+        authorName: PredefinedUsers.luke.name,
       );
 
       step('AND the user can send a message');
