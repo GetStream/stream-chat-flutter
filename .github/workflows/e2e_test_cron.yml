@@ -10,6 +10,11 @@ on:
         type: string
         required: true
         default: main
+      mock_check:
+        description: "Run the E2E tests on Android API 36 only, without coverage or iOS (for mock server changes)"
+        type: boolean
+        required: false
+        default: false
 
 permissions:
   contents: read
@@ -30,17 +35,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # Coverage runs every test in its own app process for the map that selects e2e tests on
-          # pull requests. That takes hours, longer than a hosted runner lasts under the emulator's
-          # load, so its tests are split across batches. coverage_map's batch_count must match.
-          - { api-level: 36, coverage: true, batch: 0, batch_count: 4 }
-          - { api-level: 36, coverage: true, batch: 1, batch_count: 4 }
-          - { api-level: 36, coverage: true, batch: 2, batch_count: 4 }
-          - { api-level: 36, coverage: true, batch: 3, batch_count: 4 }
-          - { api-level: 34, batch: 0, batch_count: 1 }
-          - { api-level: 31, batch: 0, batch_count: 1 }
-          - { api-level: 28, batch: 0, batch_count: 1 }
+        # Coverage runs every test in its own app process for the map that selects e2e tests on
+        # pull requests. That takes hours, longer than a hosted runner lasts under the emulator's
+        # load, so its tests are split across batches. coverage_map's batch_count must match.
+        include: ${{ fromJson(inputs.mock_check && '[{"api-level":36,"batch":0,"batch_count":1}]' || '[{"api-level":36,"coverage":true,"batch":0,"batch_count":4},{"api-level":36,"coverage":true,"batch":1,"batch_count":4},{"api-level":36,"coverage":true,"batch":2,"batch_count":4},{"api-level":36,"coverage":true,"batch":3,"batch_count":4},{"api-level":34,"batch":0,"batch_count":1},{"api-level":31,"batch":0,"batch_count":1},{"api-level":28,"batch":0,"batch_count":1}]') }}
     steps:
       - uses: actions/checkout@v7
 
@@ -136,7 +134,7 @@ jobs:
   coverage_map:
     needs: android
     # Failed tests keep their previous coverage; only a batch that never finished blocks the map.
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && !inputs.mock_check }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -172,6 +170,7 @@ jobs:
           retention-days: 14
 
   ios:
+    if: ${{ !inputs.mock_check }}
     runs-on: macos-15
     timeout-minutes: 360
     strategy:
