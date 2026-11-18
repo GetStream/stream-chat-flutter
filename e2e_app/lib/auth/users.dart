@@ -14,25 +14,18 @@ class E2eUser {
   User toUser() => User(id: id, name: name);
 }
 
+/// The users the other Stream SDKs' e2e apps offer, with the same tokens.
 const e2eUsers = [
-  E2eUser(
-    id: 'qatest1',
-    name: 'QA test 1',
-    token:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoicWF0ZXN0MSJ9.fnelU7HcP7QoEEsCGteNlF1fppofzNlrnpDQuIgeKCU',
-  ),
-  E2eUser(
-    id: 'qatest2',
-    name: 'QA test 2',
-    token:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoicWF0ZXN0MiJ9.vSCqAEbs2WVmMWsOsa7065Fsjq-rsTih6qsHPynl7XM',
-  ),
-  // The user the mock server's JWTs are issued for, so a test that connects
-  // with them logs in as the user the token names.
   E2eUser(
     id: 'luke_skywalker',
     name: 'Luke Skywalker',
     token:
-        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibHVrZV9za3l3YWxrZXIifQ.HkFDKyXUrBhV1UV13UkjbXQjvD636P1cl96yeNzCA7U',
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibHVrZV9za3l3YWxrZXIifQ.kFSLHRB5X62t0Zlc7nwczWUfsQMwfkpylC6jCUZ6Mc0',
+  ),
+  E2eUser(
+    id: 'han_solo',
+    name: 'Han Solo',
+    token:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiaGFuX3NvbG8ifQ.R6PkQeGPcusALmhvaST50lwroL_JkZnI3Q7hQ1Hvj3k',
   ),
 ];

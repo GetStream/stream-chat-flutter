@@ -5,14 +5,15 @@ class UserCredentials {
   final String name;
 }
 
+/// The users the e2e suite logs in as, the same ones the other Stream SDKs'
+/// e2e suites use.
+///
+/// The mock server's fixtures and JWTs are recorded for [luke], so he is the
+/// [currentUser]. [hanSolo] only connects after `backendRobot.setAppUser` makes
+/// the mock server answer as him.
 abstract final class PredefinedUsers {
-  static const qaTest1 = UserCredentials(id: 'qatest1', name: 'QA test 1');
-  static const qaTest2 = UserCredentials(id: 'qatest2', name: 'QA test 2');
+  static const luke = UserCredentials(id: 'luke_skywalker', name: 'Luke Skywalker');
+  static const hanSolo = UserCredentials(id: 'han_solo', name: 'Han Solo');
 
-  static const currentUser = qaTest1;
-
-  /// Who the mock server takes the logged-in user to be, whichever user was
-  /// picked: it answers every connect with its own fixture user, so this is
-  /// the id the app ends up with as its current user.
-  static const mockServerUser = UserCredentials(id: 'luke_skywalker', name: 'Luke Skywalker');
+  static const currentUser = luke;
 }
