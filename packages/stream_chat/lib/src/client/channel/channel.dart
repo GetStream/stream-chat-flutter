@@ -2599,7 +2599,7 @@ class Channel {
 
   /// Call this method to dispose the channel client.
   void dispose() {
-    client.state.removeChannel('$cid');
+    client.state.removeChannel(this);
     state?.dispose();
     state = null;
     _muteExpirationTimer?.cancel();

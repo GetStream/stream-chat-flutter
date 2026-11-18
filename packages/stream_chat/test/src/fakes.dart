@@ -224,8 +224,8 @@ class FakeClientState extends Fake implements ClientState {
   }
 
   @override
-  void removeChannel(String channelCid) {
-    _channels.remove(channelCid);
+  void removeChannel(Channel channel) {
+    _channels.remove(channel.cid);
   }
 }
 

@@ -2964,7 +2964,7 @@ class ClientState {
             final isCurrentUser = event.user!.id == currentUser!.id;
             if (isCurrentUser && event.channel != null) {
               final eventChannel = event.channel!;
-              _channelRegistry.unlist(eventChannel.cid);
+              _channelRegistry.detach(eventChannel.cid);
               await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
             }
           }),
@@ -2980,7 +2980,7 @@ class ClientState {
           )
           .listen((Event event) async {
             final eventChannel = event.channel!;
-            _channelRegistry.unlist(eventChannel.cid);
+            _channelRegistry.detach(eventChannel.cid);
             await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
           }),
     );
@@ -3219,11 +3219,18 @@ class ClientState {
     _channelRegistry.addChannels(channelMap);
   }
 
-  /// Removes the channel from the client, whether in [channels] or not.
+  /// Removes [channel] from the client, whether in [channels] or not.
+  ///
+  /// Another channel the client holds for the same cid stays in place.
   @internal
-  void removeChannel(String channelCid) {
-    _channelRegistry.removeChannel(channelCid);
+  void removeChannel(Channel channel) {
+    _channelRegistry.remove(channel);
   }
+
+  /// Whether [channel] is the client's channel for its cid, in [channels] or
+  /// not.
+  @internal
+  bool isCurrentChannel(Channel channel) => _channelRegistry.isCurrent(channel);
 
   @internal
   set blockedUserIds(List<String> blockedUserIds) {

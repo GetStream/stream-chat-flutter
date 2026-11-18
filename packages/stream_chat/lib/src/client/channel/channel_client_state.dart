@@ -628,7 +628,6 @@ class ChannelClientState {
   /// Call this instead of [updateChannelState] whenever [remoteState]
   /// genuinely comes from the network or offline storage.
   void updateChannelStateFromServer(ChannelState remoteState) {
-    _isPersisted = true;
     updateChannelState(_preserveLocalUnreadState(remoteState));
   }
 
@@ -667,31 +666,22 @@ class ChannelClientState {
   ChannelState get channelState => _channelStateController.value;
   late BehaviorSubject<ChannelState> _channelStateController;
 
+  // Saves only while this is the client's channel for its cid, so a deleted,
+  // removed or replaced channel never writes back.
   late final _debouncedUpdatePersistenceChannelState = debounce(
     (ChannelState state) {
       final persistenceClient = _client.chatPersistenceClient;
-      return persistenceClient?.updateChannelState(state);
+      if (persistenceClient == null) return null;
+      if (!_client.state.isCurrentChannel(_channel)) return null;
+
+      return persistenceClient.updateChannelState(state);
     },
     const Duration(seconds: 1),
   );
 
   set _channelState(ChannelState v) {
     _channelStateController.safeAdd(v);
-    if (_isPersisted) _debouncedUpdatePersistenceChannelState.call([v]);
-  }
-
-  // Whether changes are saved to the offline storage. Off once the channel is
-  // deleted or the current user is removed from it, until the server returns
-  // the channel again.
-  var _isPersisted = true;
-
-  /// Stops saving this channel to the offline storage, dropping any pending
-  /// saves, until the server returns the channel again.
-  @internal
-  void stopPersisting() {
-    _isPersisted = false;
-    _debouncedUpdatePersistenceChannelState.cancel();
-    _debouncedUpdatePersistenceChannelThreads.cancel();
+    _debouncedUpdatePersistenceChannelState.call([v]);
   }
 
   late final _debouncedUpdatePersistenceChannelThreads = debounce(
@@ -700,7 +690,10 @@ class ChannelClientState {
       if (channelCid == null) return;
 
       final persistenceClient = _client.chatPersistenceClient;
-      return persistenceClient?.updateChannelThreads(channelCid, threads);
+      if (persistenceClient == null) return;
+      if (!_client.state.isCurrentChannel(_channel)) return;
+
+      return persistenceClient.updateChannelThreads(channelCid, threads);
     },
     const Duration(seconds: 1),
   );
@@ -729,7 +722,7 @@ class ChannelClientState {
   final _threadsController = BehaviorSubject.seeded(<String, List<Message>>{});
   set _threads(Map<String, List<Message>> threads) {
     _threadsController.safeAdd(threads);
-    if (_isPersisted) _debouncedUpdatePersistenceChannelThreads.call([threads]);
+    _debouncedUpdatePersistenceChannelThreads.call([threads]);
   }
 
   /// Clears all the replies in the thread identified by [parentId].

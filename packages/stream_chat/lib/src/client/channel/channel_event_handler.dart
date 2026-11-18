@@ -210,7 +210,9 @@ class ChannelEventHandler {
 
       final cid = _channel.cid!;
       final isListed = _client.state.channels.containsKey(cid);
-      if (!isListed) _client.state.addChannels({cid: _channel});
+      if (!isListed && _client.state.isCurrentChannel(_channel)) {
+        _client.state.addChannels({cid: _channel});
+      }
     }
   }
 

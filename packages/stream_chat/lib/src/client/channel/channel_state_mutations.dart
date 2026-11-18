@@ -413,12 +413,9 @@ class ChannelStateMutations {
     _state.updateRead([updatedRead]);
   }
 
-  /// Marks the channel as deleted at [deletedAt], clears its messages and stops
-  /// saving it to the offline storage.
+  /// Marks the channel as deleted at [deletedAt] and clears its messages.
   void onChannelDeleted({required DateTime deletedAt}) {
-    _state
-      ..stopPersisting()
-      ..truncate();
+    _state.truncate();
 
     final channel = _state.channelState.channel;
     if (channel == null) return;
@@ -488,12 +485,10 @@ class ChannelStateMutations {
   void onMemberRemoved(User user) => _removeMember(user);
 
   /// Removes the current user from the channel's members, read state and
-  /// membership after they leave or are removed from it, and stops saving the
-  /// channel to the offline storage.
+  /// membership after they leave or are removed from it.
   void onCurrentUserRemoved(User user) {
     _removeMember(user);
     _clearMembership();
-    _state.stopPersisting();
   }
 
   /// Merges the updated [user] into the matching member and membership.

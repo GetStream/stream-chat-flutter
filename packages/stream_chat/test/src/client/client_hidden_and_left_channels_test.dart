@@ -228,6 +228,22 @@ void main() {
     expect(client.channel('messaging', id: 'hidden'), same(channel));
   });
 
+  test('client.channel returns a new instance for a deleted channel', () async {
+    final channel = _addChannel(client, 'messaging:deleted');
+
+    await _delete(client, 'messaging:deleted');
+
+    expect(client.channel('messaging', id: 'deleted'), isNot(same(channel)));
+  });
+
+  test('client.channel returns a new instance for a channel the user left', () async {
+    final channel = _addChannel(client, 'messaging:left');
+
+    await _removeFromChannel(client, 'messaging:left', currentUser);
+
+    expect(client.channel('messaging', id: 'left'), isNot(same(channel)));
+  });
+
   test('watching a hidden channel puts it back in client.state.channels', () async {
     final channel = _addChannel(client, 'messaging:hidden');
     await _hide(client, 'messaging:hidden');
@@ -435,6 +451,27 @@ void main() {
 
     // Only the replacing instance saves.
     verify(() => persistence.updateChannelState(any())).called(1);
+  });
+
+  test('disposing a detached channel keeps the current one for its cid', () async {
+    final detached = _addChannel(client, 'messaging:left');
+    await _removeFromChannel(client, 'messaging:left', currentUser);
+    final current = _addChannel(client, 'messaging:left');
+
+    detached.dispose();
+
+    expect(client.state.channels['messaging:left'], same(current));
+  });
+
+  test('a new message lists only the current instance of a hidden channel', () async {
+    _addChannel(client, 'messaging:hidden');
+    await _hide(client, 'messaging:hidden');
+    final current = _addChannel(client, 'messaging:hidden');
+    await _hide(client, 'messaging:hidden');
+
+    await _receiveMessage(client, 'messaging:hidden', Message(id: 'message', text: 'Hi', user: otherUser));
+
+    expect(client.state.channels['messaging:hidden'], same(current));
   });
 
   test('disposing the client state disposes a deleted channel', () async {
