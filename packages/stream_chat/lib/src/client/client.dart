@@ -3196,16 +3196,16 @@ class ClientState {
     return _client._scheduledMessageManager.stream.distinct();
   }
 
-  /// The current user's channels in memory as a stream, by cid.
+  /// The current user's loaded channels by cid, as they change.
   ///
-  /// Leaves out the channels they hid or were removed from, and deleted ones,
-  /// until a later query or watch returns them.
+  /// Leaves out deleted channels, and channels the current user hid or was
+  /// removed from until they are queried, watched or shown again.
   Stream<Map<String, Channel>> get channelsStream => _channelRegistry.channelsStream;
 
-  /// The current user's channels in memory, by cid.
+  /// The current user's loaded channels, by cid.
   ///
-  /// Leaves out the channels they hid or were removed from, and deleted ones,
-  /// until a later query or watch returns them.
+  /// Leaves out deleted channels, and channels the current user hid or was
+  /// removed from until they are queried, watched or shown again.
   Map<String, Channel> get channels => _channelRegistry.channels;
 
   @internal
@@ -3227,8 +3227,7 @@ class ClientState {
     _channelRegistry.remove(channel);
   }
 
-  /// Whether [channel] is the client's channel for its cid, in [channels] or
-  /// not.
+  /// Whether [channel] is the instance the client holds for its cid.
   @internal
   bool isCurrentChannel(Channel channel) => _channelRegistry.isCurrent(channel);
 
@@ -3276,6 +3275,6 @@ class ClientState {
     _activeLiveLocationsController.close();
     _locationExpirationScheduler.cancel();
 
-    _channelRegistry.dispose(); // Dispose any remaining channels in memory.
+    _channelRegistry.dispose();
   }
 }

@@ -911,7 +911,7 @@ void main() {
       verify(() => mockDatabase.pinnedMessageDao.deleteMessageByCids(cids)).called(1);
     });
 
-    test('deleteChannels', () async {
+    test('deleteChannels deletes the channels and their cached queries', () async {
       const cids = <String>[];
       when(() => mockDatabase.channelQueryDao.deleteChannelQueriesByCids(cids)).thenAnswer((_) async => 1);
       when(() => mockDatabase.channelDao.deleteChannelByCids(cids)).thenAnswer((_) async => 1);

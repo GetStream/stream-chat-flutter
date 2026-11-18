@@ -3,12 +3,9 @@ import 'channel/channel.dart';
 
 /// The live channels of a client.
 ///
-/// Only the listed ones are in [channels]. A channel the current user hides is
-/// unlisted instead: it leaves [channels] but stays the client's channel for
-/// its cid until it is listed again. A channel that is deleted, that the
-/// current user is removed from, or that another instance replaces is
-/// detached: it is no longer the client's channel, but stays alive so code
-/// still holding it keeps working until it is disposed with the rest.
+/// Listed channels are in [channels]. Unlisted ones are hidden but still the
+/// client's channel for their cid. Detached ones are deleted, removed or
+/// replaced, and kept alive until [dispose].
 class ChannelRegistry {
   final _listed = ImmutableMapBehaviorSubject<String, Channel>.seeded(const {});
   final _unlisted = <String, Channel>{};

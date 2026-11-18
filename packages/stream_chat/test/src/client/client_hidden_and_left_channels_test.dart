@@ -78,9 +78,6 @@ void main() {
   });
 
   test('channel.hidden with a cleared history clears the messages', () async {
-    final persistence = _persistence();
-    when(() => persistence.deleteMessageByCid(any())).thenAnswer((_) async {});
-    client.chatPersistenceClient = persistence;
     final channel = _addChannel(
       client,
       'messaging:hidden',
@@ -90,6 +87,20 @@ void main() {
     await _hide(client, 'messaging:hidden', clearHistory: true);
 
     expect(channel.state!.messages, isEmpty);
+  });
+
+  test('channel.hidden with a cleared history deletes the messages from persistence', () async {
+    final persistence = _persistence();
+    when(() => persistence.deleteMessageByCid(any())).thenAnswer((_) async {});
+    client.chatPersistenceClient = persistence;
+    _addChannel(
+      client,
+      'messaging:hidden',
+      messages: [Message(id: 'message', text: 'Hi')],
+    );
+
+    await _hide(client, 'messaging:hidden', clearHistory: true);
+
     verify(() => persistence.deleteMessageByCid('messaging:hidden')).called(1);
   });
 

@@ -484,8 +484,9 @@ class ChannelStateMutations {
   /// Removes the [user]'s membership and read state.
   void onMemberRemoved(User user) => _removeMember(user);
 
-  /// Removes the current user from the channel's members, read state and
-  /// membership after they leave or are removed from it.
+  /// Removes [user], the current user, from the channel.
+  ///
+  /// Clears their membership along with their member entry and read state.
   void onCurrentUserRemoved(User user) {
     _removeMember(user);
     _clearMembership();
