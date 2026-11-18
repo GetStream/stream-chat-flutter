@@ -27,7 +27,7 @@ class UserRobot {
 
   /// Asserts the login failed with the Stream error [code].
   Future<UserRobot> assertLoginFailed({required int code}) async {
-    final error = find.textContaining('Login failed: StreamWebSocketError(code: $code,');
+    final error = find.textContaining('Login failed (code $code)');
     await tester.waitUntilVisible(error);
     return this;
   }
