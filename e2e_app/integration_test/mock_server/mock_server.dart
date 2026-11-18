@@ -37,6 +37,10 @@ class MockServer {
 
   Future<void> stop() => _get('$url/stop').catchError((_) => '');
 
+  /// Sends a robot command, failing when the mock server rejects it.
+  ///
+  /// A rejected command would otherwise leave the scenario set up wrong and
+  /// fail later, away from its cause.
   Future<void> post(String endpoint, {String? body}) async {
     final client = HttpClient()..connectionTimeout = _httpTimeout;
     try {
@@ -46,7 +50,10 @@ class MockServer {
         req.write(body);
       }
       final res = await req.close().timeout(_httpTimeout);
-      await res.drain<void>();
+      final response = await res.transform(utf8.decoder).join().timeout(_httpTimeout);
+      if (res.statusCode < 200 || res.statusCode >= 300) {
+        throw StateError('Mock server rejected POST $endpoint (${res.statusCode}): $response');
+      }
     } finally {
       client.close(force: true);
     }
