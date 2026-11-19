@@ -1028,6 +1028,15 @@ No es posible añadir más de $limit archivos adjuntos
   String get scheduleMessageError => 'No se pudo programar el mensaje. Inténtalo de nuevo';
 
   @override
+  String get scheduleCommandRefusedError => 'Los comandos no se pueden programar. Quita el comando / para continuar.';
+
+  @override
+  String get scheduleQuotedMessageDeletedError => 'El mensaje citado se eliminó';
+
+  @override
+  String get scheduleMessageRefusedError => 'Este mensaje no se puede programar';
+
+  @override
   String scheduledMessagesCountText({required int count}) {
     return Intl.plural(
       count,
@@ -1083,6 +1092,9 @@ class _AccessibilityTranslationsEs extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'Grabar mensaje de voz';
+
+  @override
+  String get scheduleMessageHint => 'Programar mensaje';
 
   @override
   String get cancelRecordingTooltip => 'Cancelar grabación';

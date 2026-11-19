@@ -59,7 +59,7 @@ void main() {
 
     await harness.client.queryChannel('messaging', channelId: 'general', includeScheduledMessages: true);
 
-    expect(idsOf(harness.client.state.scheduledMessages), ['fresh', 'failed']);
+    expect(idsOf(harness.client.state.scheduledMessages), ['failed', 'fresh']);
   });
 
   test(

@@ -1026,6 +1026,16 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get scheduleMessageError => 'Nachricht konnte nicht geplant werden. Versuche es erneut';
 
   @override
+  String get scheduleCommandRefusedError =>
+      'Befehle können nicht geplant werden. Entferne den /-Befehl, um fortzufahren.';
+
+  @override
+  String get scheduleQuotedMessageDeletedError => 'Die zitierte Nachricht wurde gelöscht';
+
+  @override
+  String get scheduleMessageRefusedError => 'Diese Nachricht kann nicht geplant werden';
+
+  @override
   String scheduledMessagesCountText({required int count}) {
     return Intl.plural(
       count,
@@ -1081,6 +1091,9 @@ class _AccessibilityTranslationsDe extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'Sprachnachricht aufnehmen';
+
+  @override
+  String get scheduleMessageHint => 'Nachricht planen';
 
   @override
   String get cancelRecordingTooltip => 'Aufnahme abbrechen';

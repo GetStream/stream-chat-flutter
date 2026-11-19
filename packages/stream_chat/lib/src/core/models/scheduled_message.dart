@@ -166,34 +166,6 @@ final class ScheduledMessage extends Equatable {
     );
   }
 
-  /// Its [message], as a draft to edit.
-  ///
-  /// Its [Message.mentionedUsers] can have only their [User.id] set, and its
-  /// quoted message is identified by [Message.quotedMessageId] only.
-  Message toMessage() {
-    return Message(
-      id: id,
-      text: message.text,
-      attachments: message.attachments,
-      mentionedUsers: message.mentionedUsers,
-      mentionedChannel: message.mentionedChannel,
-      mentionedHere: message.mentionedHere,
-      mentionedRoles: message.mentionedRoles,
-      mentionedGroupIds: message.mentionedGroupIds,
-      quotedMessageId: message.quotedMessageId,
-      parentId: message.parentId,
-      showInChannel: message.showInChannel,
-      silent: message.silent,
-      pinned: message.pinned,
-      pinExpires: message.pinExpires,
-      poll: message.poll,
-      pollId: message.pollId,
-      restrictedVisibility: message.restrictedVisibility,
-      sharedLocation: message.sharedLocation,
-      extraData: message.extraData,
-    );
-  }
-
   // Only the channel's custom data, which holds its name and image, is
   // compared: two reads of the same channel model never compare equal.
   @override
@@ -233,11 +205,13 @@ extension type const ScheduledMessageStatus(String _) implements String {
   /// It cannot be edited, sent now or deleted until it is sent or fails.
   static const sending = ScheduledMessageStatus('sending');
 
-  /// Could not be sent.
+  /// Could not be sent, or an edit of it could not be saved.
   ///
-  /// The reason is [ScheduledMessage.failureReason]. One whose reason
-  /// [ScheduledMessageFailureReason.isRetriable] can be retried; any other can
-  /// only be deleted.
+  /// The reason is [ScheduledMessage.failureReason]. One whose edit failed,
+  /// with [ScheduledMessageFailureReason.updateFailed] or
+  /// [ScheduledMessageFailureReason.updateRejected], is still scheduled as it
+  /// was. One whose reason [ScheduledMessageFailureReason.isRetriable] can be
+  /// retried.
   static const failed = ScheduledMessageStatus('failed');
 
   /// Deleted before it was sent.
@@ -264,10 +238,11 @@ extension type const ScheduledMessageFailureReason(String _) implements String {
   /// [StreamChatClient.resendScheduledMessage] uploads it again.
   static const attachmentUploadFailed = ScheduledMessageFailureReason('attachment_upload_failed');
 
-  /// The request to edit it failed.
-  ///
-  /// The message is still scheduled as it was before the edit.
+  /// The request to edit it failed in a way that can be retried.
   static const updateFailed = ScheduledMessageFailureReason('update_failed');
+
+  /// The request to edit it was refused.
+  static const updateRejected = ScheduledMessageFailureReason('update_rejected');
 
   /// The user is banned from the channel.
   static const banned = ScheduledMessageFailureReason('banned');
@@ -304,4 +279,8 @@ extension type const ScheduledMessageFailureReason(String _) implements String {
 
   /// Whether the failed request can be made again.
   bool get isRetriable => this == requestFailed || this == attachmentUploadFailed || this == updateFailed;
+
+  /// Whether only an edit of the message failed, so it is still scheduled as
+  /// it was.
+  bool get isEditFailure => this == updateFailed || this == updateRejected;
 }

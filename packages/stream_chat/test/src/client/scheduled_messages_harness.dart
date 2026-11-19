@@ -27,8 +27,10 @@ final quoteDeletedError = StreamChatNetworkError.raw(
 final offline = StreamChatNetworkError.raw(code: -1, message: 'No connection');
 
 // The codes of the errors that refuse a scheduled message request because the
-// message is being sent, was already sent, or was deleted.
+// message is being sent, was changed at the same time, was already sent, or
+// was deleted.
 const scheduledMessageSendingCode = 121;
+const scheduledMessageConflictCode = 122;
 const scheduledMessageAlreadySentCode = 123;
 const scheduledMessageCanceledCode = 124;
 
@@ -111,7 +113,13 @@ ScheduledMessageHarness useScheduledMessageClient({bool loaded = true}) {
 
   setUp(() async {
     final api = harness.api = FakeChatApi();
-    final client = harness.client = StreamChatClient('test-api-key', chatApi: api, ws: FakeWebSocket());
+    harness.logs.clear();
+    final client = harness.client = StreamChatClient(
+      'test-api-key',
+      chatApi: api,
+      ws: FakeWebSocket(),
+      logHandlerFunction: (record) => harness.logs.add(record.message),
+    );
     when(() => api.general.getAppSettings()).thenAnswer(
       (_) async => GetAppSettingsResponse()..app = const AppSettings(name: 'test'),
     );
@@ -130,6 +138,9 @@ ScheduledMessageHarness useScheduledMessageClient({bool loaded = true}) {
 class ScheduledMessageHarness {
   late FakeChatApi api;
   late StreamChatClient client;
+
+  // The messages the client logged.
+  final logs = <String>[];
 
   // Loads an empty list, so the scheduled messages count as all loaded.
   Future<void> loadAllScheduledMessages() async {

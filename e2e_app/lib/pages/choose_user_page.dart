@@ -41,10 +41,17 @@ class _ChooseUserPageState extends State<ChooseUserPage> {
                 title: Text(user.name),
                 onTap: () => _login(user),
               ),
-            if (authController.value case Unauthenticated(:final error?)) Text('Login failed: $error'),
+            if (authController.value case Unauthenticated(:final error?)) Text(_loginFailedText(error)),
           ],
         ),
       ),
     );
   }
 }
+
+// Leads with the Stream error code of a refused login, so a test can match on
+// the code alone.
+String _loginFailedText(Object error) => switch (error) {
+  StreamWebSocketError(:final code?) => 'Login failed (code $code): $error',
+  _ => 'Login failed: $error',
+};

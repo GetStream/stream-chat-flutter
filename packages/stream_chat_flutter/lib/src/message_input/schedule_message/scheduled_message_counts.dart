@@ -32,7 +32,7 @@ class ScheduledMessageCounts extends Equatable {
     DateTime? nextScheduledAt;
     for (final it in scheduledMessages) {
       // A failed edit is still scheduled as it was before.
-      final isPending = it.status.isPending || it.failureReason == .updateFailed;
+      final isPending = it.status.isPending || (it.failureReason?.isEditFailure ?? false);
       if (isPending) userPending += 1;
       if (it.cid != cid) continue;
       if (isPending) channelPending += 1;

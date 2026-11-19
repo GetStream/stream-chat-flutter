@@ -5,6 +5,7 @@ import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../core/models/message.dart';
 import '../../core/models/scheduled_message.dart';
 import '../../core/util/extension.dart';
 import '../../core/util/list_extensions.dart';
@@ -28,7 +29,7 @@ final class ScheduledMessageListState extends Equatable {
 
   /// The current user's unsent scheduled messages known on this device.
   ///
-  /// Failed ones last, each group earliest first.
+  /// Earliest first, failed ones included.
   final List<ScheduledMessage> scheduledMessages;
 
   /// Whether every one of the current user's scheduled messages is listed.
@@ -127,6 +128,24 @@ class ScheduledMessageListStateNotifier {
     _emit(state.copyWith(scheduledMessages: remaining));
   }
 
+  /// Replaces the quote of each scheduled message that quotes [message] with
+  /// [message], as it was updated or deleted.
+  void onQuotedMessageUpdated(Message message) {
+    bool quotes(ScheduledMessage it) {
+      final quotedMessageId = it.message.quotedMessageId ?? it.message.quotedMessage?.id;
+      return quotedMessageId == message.id;
+    }
+
+    if (!_scheduledMessages.any(quotes)) return;
+
+    final updated = [
+      for (final it in _scheduledMessages)
+        if (quotes(it)) it.copyWith(message: it.message.copyWith(quotedMessage: message)) else it,
+    ];
+
+    _emit(state.copyWith(scheduledMessages: updated));
+  }
+
   /// Marks the list as possibly incomplete, as the connection was lost.
   void onConnectionLost() => _emit(state.copyWith(hasLoadedAll: false));
 
@@ -136,12 +155,8 @@ class ScheduledMessageListStateNotifier {
   /// Stops accepting changes to the [state].
   Future<void> dispose() => _state.close();
 
-  // Failed ones last, then by scheduledAt, earliest first, then by ID.
+  // By scheduledAt, earliest first, then by ID.
   static int _byScheduledAt(ScheduledMessage a, ScheduledMessage b) {
-    final isAFailed = a.status == .failed;
-    final isBFailed = b.status == .failed;
-    if (isAFailed != isBFailed) return isAFailed ? 1 : -1;
-
     final byScheduledAt = a.scheduledAt.compareTo(b.scheduledAt);
     if (byScheduledAt != 0) return byScheduledAt;
 
@@ -195,7 +210,7 @@ extension on ScheduledMessage {
   // Whether it holds an unsaved edit of a message already scheduled.
   bool get isLocalEdit {
     if (status == .preparingToSchedule) return remoteCreatedAt != null;
-    return failureReason == .updateFailed;
+    return failureReason?.isEditFailure ?? false;
   }
 
   // Whether it is kept when [loaded] replaces the list: it isn't on the server

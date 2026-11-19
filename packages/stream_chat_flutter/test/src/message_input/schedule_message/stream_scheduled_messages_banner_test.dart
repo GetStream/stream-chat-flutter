@@ -48,12 +48,52 @@ void main() {
     expect(find.text('2 scheduled messages'), findsOneWidget);
   });
 
+  testWidgets("StreamScheduledMessagesBanner names a thread's only scheduled reply by its time", (tester) async {
+    final reply = scheduledMessage('reply', parentId: 'parent');
+    final channel = scheduleChannel(
+      scheduledMessages: [scheduledMessage('a'), scheduledMessage('b'), reply],
+    );
+
+    await tester.pumpWidget(
+      wrapWithMaterialApp(
+        StreamScheduledMessagesBanner(parentId: 'parent', onTap: () {}),
+        channel: channel,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    final label = DefaultTranslations.instance.scheduledMessageScheduledForText(scheduledAt: reply.scheduledAt);
+    expect(find.text(label), findsOneWidget);
+    expect(find.text('View'), findsOneWidget);
+  });
+
   testWidgets("StreamScheduledMessagesBanner counts a thread's scheduled replies", (tester) async {
     final channel = scheduleChannel(
       scheduledMessages: [
         scheduledMessage('a'),
-        scheduledMessage('b'),
-        scheduledMessage('reply', parentId: 'parent'),
+        scheduledMessage('r0', parentId: 'parent'),
+        scheduledMessage('r1', parentId: 'parent'),
+      ],
+    );
+
+    await tester.pumpWidget(
+      wrapWithMaterialApp(
+        StreamScheduledMessagesBanner(parentId: 'parent', onTap: () {}),
+        channel: channel,
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('2 scheduled replies'), findsOneWidget);
+    expect(find.text('View all'), findsOneWidget);
+  });
+
+  testWidgets("StreamScheduledMessagesBanner doesn't show the channel's limit in a thread", (tester) async {
+    final channel = scheduleChannel(
+      config: ChannelConfig(scheduledMessagesMaxPerChannel: 2),
+      scheduledMessages: [
+        scheduledMessage('r0', parentId: 'parent'),
+        scheduledMessage('r1', parentId: 'parent'),
       ],
     );
 
@@ -62,7 +102,23 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('1 scheduled reply'), findsOneWidget);
+    expect(find.text('2 scheduled replies'), findsOneWidget);
+  });
+
+  testWidgets("StreamScheduledMessagesBanner shows a thread's failed replies first", (tester) async {
+    final channel = scheduleChannel(
+      scheduledMessages: [
+        scheduledMessage('r0', parentId: 'parent'),
+        scheduledMessage('r1', parentId: 'parent', status: ScheduledMessageStatus.failed),
+      ],
+    );
+
+    await tester.pumpWidget(
+      wrapWithMaterialApp(StreamScheduledMessagesBanner(parentId: 'parent'), channel: channel),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('1 failed to send'), findsOneWidget);
   });
 
   testWidgets('StreamScheduledMessagesBanner shows the failed count instead of the scheduled count', (tester) async {

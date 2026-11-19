@@ -958,6 +958,18 @@ abstract class Translations {
   /// "Couldn't schedule message. Try again".
   String get scheduleMessageError;
 
+  /// The error shown when a command can't be scheduled, such as "Commands
+  /// can't be scheduled. Remove the / command to continue.".
+  String get scheduleCommandRefusedError;
+
+  /// The error shown when the message quotes a deleted message, such as "The
+  /// quoted message was deleted".
+  String get scheduleQuotedMessageDeletedError;
+
+  /// The error shown when a message can't be scheduled, and trying again
+  /// won't help, such as "This message can't be scheduled".
+  String get scheduleMessageRefusedError;
+
   /// The count of scheduled messages in a channel, such as "3 scheduled
   /// messages".
   String scheduledMessagesCountText({required int count});
@@ -2006,6 +2018,15 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get scheduleMessageError => "Couldn't schedule message. Try again";
+
+  @override
+  String get scheduleCommandRefusedError => "Commands can't be scheduled. Remove the / command to continue.";
+
+  @override
+  String get scheduleQuotedMessageDeletedError => 'The quoted message was deleted';
+
+  @override
+  String get scheduleMessageRefusedError => "This message can't be scheduled";
 
   @override
   String scheduledMessagesCountText({required int count}) {

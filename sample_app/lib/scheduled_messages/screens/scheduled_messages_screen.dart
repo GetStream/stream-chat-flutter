@@ -108,12 +108,12 @@ typedef _Edit = ({ScheduledMessage scheduledMessage, Channel channel});
 Future<void> _refresh(BuildContext context) async {
   final client = StreamChat.of(context).client;
   final messenger = StreamSnackbarMessenger.of(context);
-  final fallback = context.translations.genericErrorText;
+  final texts = scheduleErrorTexts(context);
 
   try {
     await client.loadScheduledMessages();
   } catch (error) {
-    showScheduleError(messenger, error, fallback: fallback);
+    showScheduleError(messenger, error, texts);
   }
 }
 
@@ -122,17 +122,14 @@ Future<void> _openScheduledMessageActions(
   ScheduledMessage scheduledMessage,
   ValueSetter<_Edit> startEdit,
 ) async {
-  // A message being sent or saved has no actions, so its sheet wouldn't open.
+  // A message being sent has no actions, so its sheet wouldn't open.
   final actions = StreamScheduledMessageActionsBuilder.buildActions(
     context: context,
     scheduledMessage: scheduledMessage,
   );
   if (actions.isEmpty) {
-    // One already scheduled is being saved, any other is being sent.
-    final isSaving = scheduledMessage.status == .preparingToSchedule && scheduledMessage.remoteCreatedAt != null;
-    final busy = isSaving ? ScheduledMessagesStrings.stillSaving : ScheduledMessagesStrings.stillSending;
     final messenger = StreamSnackbarMessenger.of(context);
-    messenger.show(StreamSnackbar(message: Text(busy)));
+    messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.stillSending)));
     return;
   }
 
@@ -152,7 +149,6 @@ Future<void> _onScheduledMessageAction(
 ) async {
   return switch (action) {
     EditScheduledMessage(:final scheduledMessage) => _edit(context, scheduledMessage, startEdit),
-    RetryScheduledMessage(:final scheduledMessage) => _retry(context, scheduledMessage),
     EditAndRescheduleMessage(:final scheduledMessage) => _edit(context, scheduledMessage, startEdit),
     RescheduleMessage(:final scheduledMessage) => _reschedule(context, scheduledMessage),
     SendScheduledMessageNow(:final scheduledMessage) => _sendNow(context, scheduledMessage),
@@ -164,13 +160,13 @@ Future<void> _onScheduledMessageAction(
 // Runs [call], showing the text it resolves to, or why it failed.
 Future<void> _run(BuildContext context, Future<String> Function() call) async {
   final messenger = StreamSnackbarMessenger.of(context);
-  final fallback = context.translations.genericErrorText;
+  final texts = scheduleErrorTexts(context);
 
   try {
     final done = await call();
     messenger.show(StreamSnackbar(message: Text(done), variant: .success));
   } catch (error) {
-    showScheduleError(messenger, error, fallback: fallback);
+    showScheduleError(messenger, error, texts);
   }
 }
 
@@ -182,7 +178,7 @@ Future<void> _edit(
 ) async {
   final client = StreamChat.of(context).client;
   final messenger = StreamSnackbarMessenger.of(context);
-  final fallback = context.translations.genericErrorText;
+  final texts = scheduleErrorTexts(context);
 
   final channel = await _loadChannel(context, scheduledMessage);
   if (channel == null || !context.mounted) return;
@@ -193,7 +189,7 @@ Future<void> _edit(
 
     startEdit((scheduledMessage: withMentionedUsers, channel: channel));
   } catch (error) {
-    showScheduleError(messenger, error, fallback: fallback);
+    showScheduleError(messenger, error, texts);
   }
 }
 
@@ -220,20 +216,20 @@ Future<Channel?> _loadChannel(BuildContext context, ScheduledMessage scheduledMe
   if (client.state.channels[cid] case final channel?) return channel;
 
   final messenger = StreamSnackbarMessenger.of(context);
-  final fallback = context.translations.genericErrorText;
+  final texts = scheduleErrorTexts(context);
   final [type, id] = cid.split(':');
   final channel = client.channel(type, id: id);
 
   try {
     await channel.query();
   } catch (error) {
-    showScheduleError(messenger, error, fallback: fallback);
+    showScheduleError(messenger, error, texts);
     return null;
   }
 
   // Offline, a query can answer from the cache without loading the channel.
   if (channel.state == null) {
-    messenger.show(StreamSnackbar(message: Text(fallback), variant: .error));
+    messenger.show(StreamSnackbar(message: Text(texts.generic), variant: .error));
     return null;
   }
 
@@ -260,19 +256,6 @@ Future<void> _reschedule(BuildContext context, ScheduledMessage scheduledMessage
   });
 }
 
-Future<void> _retry(BuildContext context, ScheduledMessage scheduledMessage) {
-  final client = StreamChat.of(context).client;
-
-  final isEdit = scheduledMessage.failureReason == .updateFailed;
-
-  return _run(context, () async {
-    final scheduled = await client.resendScheduledMessage(scheduledMessage.id);
-    // Null when its time had passed and it was sent right away.
-    if (scheduled == null) return ScheduledMessagesStrings.sendingNow;
-    return isEdit ? ScheduledMessagesStrings.updated : ScheduledMessagesStrings.scheduled;
-  });
-}
-
 Future<void> _sendNow(BuildContext context, ScheduledMessage scheduledMessage) {
   final client = StreamChat.of(context).client;
 
@@ -292,6 +275,7 @@ Future<void> _copyText(BuildContext context, ScheduledMessage scheduledMessage) 
 Future<void> _maybeDelete(BuildContext context, ScheduledMessage scheduledMessage) async {
   final client = StreamChat.of(context).client;
   final translations = context.translations;
+  final texts = scheduleErrorTexts(context);
   final messenger = StreamSnackbarMessenger.of(context);
 
   final channelName = scheduledMessageChannelName(context, scheduledMessage);
@@ -313,6 +297,10 @@ Future<void> _maybeDelete(BuildContext context, ScheduledMessage scheduledMessag
     await client.deleteScheduledMessage(scheduledMessage.id);
     messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.deleted), variant: .success));
   } catch (error) {
-    showScheduleError(messenger, error, fallback: translations.genericErrorText);
+    if (isScheduledMessageGone(error)) {
+      messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.alreadySent)));
+    } else {
+      showScheduleError(messenger, error, texts);
+    }
   }
 }

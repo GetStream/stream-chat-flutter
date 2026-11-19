@@ -35,8 +35,11 @@ FocusNode composerFocusNode(WidgetTester tester) {
   return tester.widget<StreamChatMessageInput>(find.byType(StreamChatMessageInput)).focusNode!;
 }
 
-/// Pumps a [StreamChannelPage] for a channel holding [scheduledMessages].
-Future<void> pumpChannelPage(
+/// Pumps a [StreamChannelPage] for a channel holding [scheduledMessages], and
+/// returns the channel.
+///
+/// The current user can schedule messages in it, unless not [canSchedule].
+Future<MockChannel> pumpChannelPage(
   WidgetTester tester, {
   StreamSurfaceStyle surfaceStyle = StreamSurfaceStyle.regular,
   StreamSurfaceStyle? composerSurfaceStyle,
@@ -48,6 +51,8 @@ Future<void> pumpChannelPage(
   List<ScheduledMessage> scheduledMessages = const [],
   Stream<List<ScheduledMessage>>? scheduledMessagesStream,
   StreamScheduledMessagesBannerTapCallback? onScheduledMessagesBannerTap,
+  bool canSchedule = true,
+  StreamChatConfigurationData? configData,
 }) async {
   final originalRecordPlatform = RecordPlatform.instance;
   RecordPlatform.instance = FakeRecordPlatform();
@@ -59,7 +64,7 @@ Future<void> pumpChannelPage(
     ownCapabilities: [
       ChannelCapability.sendMessage,
       ChannelCapability.uploadFile,
-      ChannelCapability.scheduleMessage,
+      if (canSchedule) ChannelCapability.scheduleMessage,
     ],
   );
   final channelState = MockChannelState();
@@ -125,6 +130,7 @@ Future<void> pumpChannelPage(
         }
         return StreamChat(
           client: client,
+          configData: configData,
           themeData: switch (headerSurfaceStyle) {
             final surfaceStyle? => StreamChatThemeData(
               channelHeaderTheme: StreamAppBarThemeData(style: StreamAppBarStyle(surfaceStyle: surfaceStyle)),
@@ -145,4 +151,5 @@ Future<void> pumpChannelPage(
   );
 
   await tester.pumpAndSettle();
+  return channel;
 }

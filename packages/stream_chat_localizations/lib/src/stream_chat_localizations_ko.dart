@@ -1007,6 +1007,15 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get scheduleMessageError => '메시지를 예약하지 못했습니다. 다시 시도하세요';
 
   @override
+  String get scheduleCommandRefusedError => '명령어는 예약할 수 없습니다. 계속하려면 / 명령어를 삭제하세요.';
+
+  @override
+  String get scheduleQuotedMessageDeletedError => '인용한 메시지가 삭제되었습니다';
+
+  @override
+  String get scheduleMessageRefusedError => '이 메시지는 예약할 수 없습니다';
+
+  @override
   String scheduledMessagesCountText({required int count}) {
     return Intl.plural(
       count,
@@ -1061,6 +1070,9 @@ class _AccessibilityTranslationsKo extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => '음성 메시지 녹음';
+
+  @override
+  String get scheduleMessageHint => '메시지 예약';
 
   @override
   String get cancelRecordingTooltip => '녹음 취소';

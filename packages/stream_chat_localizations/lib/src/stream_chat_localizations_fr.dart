@@ -1030,6 +1030,16 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get scheduleMessageError => 'Impossible de programmer le message. Réessayez';
 
   @override
+  String get scheduleCommandRefusedError =>
+      'Les commandes ne peuvent pas être programmées. Supprimez la commande / pour continuer.';
+
+  @override
+  String get scheduleQuotedMessageDeletedError => 'Le message cité a été supprimé';
+
+  @override
+  String get scheduleMessageRefusedError => 'Ce message ne peut pas être programmé';
+
+  @override
   String scheduledMessagesCountText({required int count}) {
     return Intl.plural(
       count,
@@ -1085,6 +1095,9 @@ class _AccessibilityTranslationsFr extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'Enregistrer un message vocal';
+
+  @override
+  String get scheduleMessageHint => 'Programmer le message';
 
   @override
   String get cancelRecordingTooltip => "Annuler l'enregistrement";

@@ -302,6 +302,13 @@ extension type const ScheduledMessageErrorReason(String _) implements String {
 
   /// The message quotes a message that was deleted.
   static const quotedMessageDeleted = ScheduledMessageErrorReason('quoted_message_deleted');
+
+  /// The message's pin expires before the message is sent.
+  static const pinExpiresTooSoon = ScheduledMessageErrorReason('pin_expires_too_soon');
+
+  /// The location the message shares stops being shared too soon after the
+  /// message is sent.
+  static const locationEndsTooSoon = ScheduledMessageErrorReason('location_ends_too_soon');
 }
 
 /// A request to schedule or change a scheduled message, refused on this

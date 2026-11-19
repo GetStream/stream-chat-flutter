@@ -1009,6 +1009,15 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get scheduleMessageError => 'Kunne ikke planlegge meldingen. Prøv igjen';
 
   @override
+  String get scheduleCommandRefusedError => 'Kommandoer kan ikke planlegges. Fjern /-kommandoen for å fortsette.';
+
+  @override
+  String get scheduleQuotedMessageDeletedError => 'Den siterte meldingen ble slettet';
+
+  @override
+  String get scheduleMessageRefusedError => 'Denne meldingen kan ikke planlegges';
+
+  @override
   String scheduledMessagesCountText({required int count}) {
     return Intl.plural(
       count,
@@ -1064,6 +1073,9 @@ class _AccessibilityTranslationsNo extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'Ta opp talemelding';
+
+  @override
+  String get scheduleMessageHint => 'Planlegg melding';
 
   @override
   String get cancelRecordingTooltip => 'Avbryt opptak';

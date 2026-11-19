@@ -70,6 +70,21 @@ void main() {
     expect((counts.failed, counts.pending, counts.channelPending, counts.userPending), (1, 1, 1, 1));
   });
 
+  test('ScheduledMessageCounts.of counts a refused edit as failed and still pending', () {
+    final counts = ScheduledMessageCounts.of(
+      [
+        _scheduled(
+          'a',
+          status: ScheduledMessageStatus.failed,
+          failureReason: ScheduledMessageFailureReason.updateRejected,
+        ),
+      ],
+      cid: _cid,
+    );
+
+    expect((counts.failed, counts.pending, counts.channelPending, counts.userPending), (1, 1, 1, 1));
+  });
+
   test("ScheduledMessageCounts.of doesn't count sent messages", () {
     final counts = ScheduledMessageCounts.of(
       [_scheduled('a', status: ScheduledMessageStatus.sent)],

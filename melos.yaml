@@ -248,8 +248,10 @@ scripts:
       flutter: true
 
   coverage:ignore-file:
+    # One package at a time: the first run builds remove_from_coverage, and
+    # parallel first runs would replace each other's build.
     run: |
-      melos exec -c 5 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/remove-from-coverage.sh"
+      melos exec -c 1 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/remove-from-coverage.sh"
     description: Removes all the ignored files from the coverage report.
     packageFilters:
       dirExists: coverage

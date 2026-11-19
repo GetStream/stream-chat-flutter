@@ -1039,6 +1039,16 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get scheduleMessageError => 'Impossibile programmare il messaggio. Riprova';
 
   @override
+  String get scheduleCommandRefusedError =>
+      'I comandi non possono essere programmati. Rimuovi il comando / per continuare.';
+
+  @override
+  String get scheduleQuotedMessageDeletedError => 'Il messaggio citato è stato eliminato';
+
+  @override
+  String get scheduleMessageRefusedError => 'Questo messaggio non può essere programmato';
+
+  @override
   String scheduledMessagesCountText({required int count}) {
     return Intl.plural(
       count,
@@ -1094,6 +1104,9 @@ class _AccessibilityTranslationsIt extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'Registra messaggio vocale';
+
+  @override
+  String get scheduleMessageHint => 'Programma messaggio';
 
   @override
   String get cancelRecordingTooltip => 'Annulla registrazione';

@@ -70,9 +70,9 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
         final voiceRecordingCallback = props.voiceRecordingCallback;
         if (buttonState == .send || buttonState == .edit || buttonState == .command || voiceRecordingCallback == null) {
           final a11y = context.translations.accessibility;
-          final canSendLongPress = canSend && buttonState == .send;
+          final onSendLongPress = canSend && buttonState == .send ? props.onSendLongPress : null;
 
-          return StreamButton.icon(
+          final button = StreamButton.icon(
             key: _sendKey,
             icon: switch (buttonState) {
               .edit || .command => Icon(context.streamIcons.checkmark),
@@ -85,7 +85,13 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
               _ => a11y.sendMessageTooltip,
             },
             onPressed: canSend ? props.onSendPressed : null,
-            onLongPress: canSendLongPress ? props.onSendLongPress : null,
+            onLongPress: onSendLongPress,
+          );
+
+          if (onSendLongPress == null) return button;
+          // TODO: Use StreamButton's long-press hint once it has one (GetStream/stream-core-flutter#210).
+          return MergeSemantics(
+            child: Semantics(onLongPressHint: a11y.scheduleMessageHint, child: button),
           );
         }
 

@@ -1023,6 +1023,15 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get scheduleMessageError => "Couldn't schedule message. Try again";
 
   @override
+  String get scheduleCommandRefusedError => "Commands can't be scheduled. Remove the / command to continue.";
+
+  @override
+  String get scheduleQuotedMessageDeletedError => 'The quoted message was deleted';
+
+  @override
+  String get scheduleMessageRefusedError => "This message can't be scheduled";
+
+  @override
   String scheduledMessagesCountText({required int count}) {
     return Intl.plural(
       count,
@@ -1071,6 +1080,9 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'Record voice message';
+
+  @override
+  String get scheduleMessageHint => 'Schedule message';
 
   @override
   String get cancelRecordingTooltip => 'Cancel recording';

@@ -5,9 +5,6 @@
 abstract final class ScheduledMessagesStrings {
   static const title = 'Scheduled messages';
   static const stillSending = 'Still sending. Try again in a moment.';
-  static const stillSaving = 'Still saving. Try again in a moment.';
-  static const scheduled = 'Message scheduled';
-  static const updated = 'Scheduled message updated';
   static const rescheduled = 'Message rescheduled';
   static const sendingNow = 'Sending message';
   static const copied = 'Message copied';
@@ -22,10 +19,9 @@ abstract final class ScheduledMessagesStrings {
   static const alreadySending = 'This message is already being sent';
   static const conflict = 'This message just changed. Try again';
   static const alreadySentError = 'This message was already sent';
+  static const alreadySent = "Already sent. It's in the channel now.";
   static const canceled = 'This message was deleted';
   static const sentOrDeleted = 'This message was already sent or deleted';
-  static const commandNotSchedulable = "Commands can't be scheduled";
-  static const quotedMessageDeleted = 'The quoted message was deleted';
   static const failedOneNotRemoved = 'Scheduled. Delete the failed copy';
 
   static String deleteDescription(String? name) => switch (name) {

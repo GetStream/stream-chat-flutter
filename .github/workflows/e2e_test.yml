@@ -114,10 +114,11 @@ jobs:
 
       - uses: ./.github/actions/enable-kvm
 
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
+
       - name: Bootstrap
-        run: |
-          flutter pub global activate melos
-          melos bootstrap
+        run: melos bootstrap
 
       - uses: actions/download-artifact@v8
         with:
@@ -188,10 +189,12 @@ jobs:
         with:
           working-directory: e2e_app
 
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
+
       - name: Bootstrap
         run: |
           flutter precache --ios
-          flutter pub global activate melos
           melos bootstrap
 
       - uses: actions/download-artifact@v8

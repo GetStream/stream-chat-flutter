@@ -1,18 +1,15 @@
-class UserCredentials {
-  const UserCredentials({required this.id, required this.name});
+import 'package:e2e_app/auth/users.dart' as users;
 
-  final String id;
-  final String name;
-}
+export 'package:e2e_app/auth/users.dart' show E2eUser;
 
+/// The users the e2e suite logs in as, the same ones the login screen offers.
+///
+/// The mock server's fixtures and JWTs are recorded for [luke], so he is the
+/// [currentUser]. [hanSolo] only connects after `backendRobot.setAppUser` makes
+/// the mock server answer as him.
 abstract final class PredefinedUsers {
-  static const qaTest1 = UserCredentials(id: 'qatest1', name: 'QA test 1');
-  static const qaTest2 = UserCredentials(id: 'qatest2', name: 'QA test 2');
+  static const luke = users.luke;
+  static const hanSolo = users.hanSolo;
 
-  static const currentUser = qaTest1;
-
-  /// Who the mock server takes the logged-in user to be, whichever user was
-  /// picked: it answers every connect with its own fixture user, so this is
-  /// the id the app ends up with as its current user.
-  static const mockServerUser = UserCredentials(id: 'luke_skywalker', name: 'Luke Skywalker');
+  static const currentUser = luke;
 }

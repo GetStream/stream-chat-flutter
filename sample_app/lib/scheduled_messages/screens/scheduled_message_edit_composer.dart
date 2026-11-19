@@ -27,7 +27,7 @@ class ScheduledMessageEditComposer extends StatefulWidget {
 }
 
 class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditComposer> {
-  late final _controller = StreamMessageComposerController()..editMessage(widget.scheduledMessage.toMessage());
+  late final _controller = StreamMessageComposerController()..editMessage(widget.scheduledMessage.message);
 
   @override
   void initState() {
@@ -49,7 +49,7 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
     final client = StreamChat.of(context).client;
     final channel = StreamChannel.of(context).channel;
     final messenger = StreamSnackbarMessenger.of(context);
-    final fallback = context.translations.genericErrorText;
+    final texts = scheduleErrorTexts(context);
     final scheduledMessage = widget.scheduledMessage;
     final edited = _controller.value;
 
@@ -57,7 +57,8 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
 
     // A failed one can't be changed, unless only its edit failed, so the edit
     // is scheduled again as a new message and the failed one is deleted.
-    final isScheduledAgain = scheduledMessage.status == .failed && scheduledMessage.failureReason != .updateFailed;
+    final isEditFailed = scheduledMessage.failureReason?.isEditFailure ?? false;
+    final isScheduledAgain = scheduledMessage.status == .failed && !isEditFailed;
 
     // Refused before the composer closes, so the text can still be fixed.
     void showRefusal(String refusal) {
@@ -65,14 +66,14 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
     }
 
     if (ScheduledMessageRules.isCommand(edited, channel)) {
-      showRefusal(ScheduledMessagesStrings.commandNotSchedulable);
+      showRefusal(texts.commandRefused);
       return;
     }
 
     // A message scheduled again leaves a deleted quote out instead, as the
     // composer can't remove it while editing.
     if (quotesDeletedMessage && !isScheduledAgain) {
-      showRefusal(ScheduledMessagesStrings.quotedMessageDeleted);
+      showRefusal(texts.quotedMessageDeleted);
       return;
     }
 
@@ -83,12 +84,12 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
         // move too. Any other keeps the time the list has for it now.
         final listed = client.state.scheduledMessages.where((it) => it.id == scheduledMessage.id).firstOrNull;
         final scheduledAt = switch (listed) {
-          final it? when it.failureReason == .updateFailed => it.scheduledAt,
+          final it? when it.failureReason?.isEditFailure ?? false => it.scheduledAt,
           _ => null,
         };
         await client.updateScheduledMessage(scheduledMessage.id, edited, scheduledAt: scheduledAt);
       } catch (error) {
-        showScheduleError(messenger, error, fallback: fallback);
+        showScheduleError(messenger, error, texts);
       }
       return;
     }
@@ -109,7 +110,7 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
     try {
       await channel.scheduleMessage(message, scheduledAt: scheduledAt);
     } catch (error) {
-      showScheduleError(messenger, error, fallback: fallback);
+      showScheduleError(messenger, error, texts);
       return;
     }
 

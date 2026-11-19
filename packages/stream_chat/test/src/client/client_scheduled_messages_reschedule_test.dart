@@ -10,7 +10,15 @@ void main() {
   final original = fakeScheduledMessage('a');
   final later = DateTime.utc(2026, 11, 3, 9);
   final moved = fakeScheduledMessage('a', scheduledAt: later, updatedAt: DateTime.utc(2026, 10, 30));
-  final tooFar = StreamChatNetworkError.raw(code: 4, message: 'Too far ahead', statusCode: 400);
+  final tooFar = StreamChatNetworkError.raw(
+    code: 4,
+    message: 'Too far ahead',
+    statusCode: 400,
+    data: ErrorResponse()
+      ..code = 4
+      ..statusCode = 400
+      ..message = 'Too far ahead',
+  );
   final sendingError = StreamChatNetworkError.raw(
     code: scheduledMessageSendingCode,
     message: 'Sending',
@@ -59,15 +67,17 @@ void main() {
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.failed),
     ]);
-    expect(harness.client.state.scheduledMessages.single.scheduledAt, later);
+    final [failed] = harness.client.state.scheduledMessages;
+    expect(failed.failureReason, ScheduledMessageFailureReason.updateRejected);
+    expect(failed.scheduledAt, later);
   });
 
-  test('rescheduleMessage lists one being sent at its time, as sending', () async {
+  test('rescheduleMessage lists one being sent as it was, at its time', () async {
     stubReschedule(() async => throw sendingError);
 
     expect(await reschedule(throws: sendingError), [
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.sending),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
     ]);
     expect(harness.client.state.scheduledMessages.single.scheduledAt, original.scheduledAt);
   });

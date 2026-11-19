@@ -1025,6 +1025,15 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get scheduleMessageError => 'संदेश शेड्यूल नहीं हो सका। फिर से कोशिश करें';
 
   @override
+  String get scheduleCommandRefusedError => 'कमांड शेड्यूल नहीं किए जा सकते। जारी रखने के लिए / कमांड हटाएं।';
+
+  @override
+  String get scheduleQuotedMessageDeletedError => 'उद्धृत संदेश हटा दिया गया था';
+
+  @override
+  String get scheduleMessageRefusedError => 'यह संदेश शेड्यूल नहीं किया जा सकता';
+
+  @override
   String scheduledMessagesCountText({required int count}) {
     return Intl.plural(
       count,
@@ -1079,6 +1088,9 @@ class _AccessibilityTranslationsHi extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'वॉइस संदेश रिकॉर्ड करें';
+
+  @override
+  String get scheduleMessageHint => 'संदेश शेड्यूल करें';
 
   @override
   String get cancelRecordingTooltip => 'रिकॉर्डिंग रद्द करें';

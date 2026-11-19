@@ -14,6 +14,64 @@ void main() {
     expect(sendButton(tester).props.onLongPress, isNotNull);
   });
 
+  testWidgets('hints that a long press schedules a new message', (tester) async {
+    final handle = tester.ensureSemantics();
+    // Cleaned up in the test, as the handle is checked before teardown runs.
+    try {
+      final controller = composerController()..text = 'Hello';
+
+      await pumpTrailing(tester, controller: controller, onSendLongPress: () {});
+
+      expect(
+        tester.getSemantics(find.byType(StreamButton)),
+        containsSemantics(tooltip: 'Send message', hasLongPressAction: true, onLongPressHint: 'Schedule message'),
+      );
+    } finally {
+      handle.dispose();
+    }
+  });
+
+  testWidgets("doesn't hint at scheduling while editing", (tester) async {
+    final handle = tester.ensureSemantics();
+    // Cleaned up in the test, as the handle is checked before teardown runs.
+    try {
+      final controller = composerController()
+        ..editMessage(
+          Message(
+            id: 'message-id',
+            text: 'Hello',
+            createdAt: DateTime.utc(2026, 10, 29),
+          ),
+        );
+
+      await pumpTrailing(tester, controller: controller, onSendLongPress: () {});
+
+      expect(
+        tester.getSemantics(find.byType(StreamButton)),
+        isNot(containsSemantics(onLongPressHint: 'Schedule message')),
+      );
+    } finally {
+      handle.dispose();
+    }
+  });
+
+  testWidgets("doesn't hint at scheduling when there is nothing to send", (tester) async {
+    final handle = tester.ensureSemantics();
+    // Cleaned up in the test, as the handle is checked before teardown runs.
+    try {
+      final controller = composerController();
+
+      await pumpTrailing(tester, controller: controller, onSendLongPress: () {});
+
+      expect(
+        tester.getSemantics(find.byType(StreamButton)),
+        isNot(containsSemantics(onLongPressHint: 'Schedule message')),
+      );
+    } finally {
+      handle.dispose();
+    }
+  });
+
   testWidgets('offers no long press while editing', (tester) async {
     final controller = composerController()
       ..editMessage(

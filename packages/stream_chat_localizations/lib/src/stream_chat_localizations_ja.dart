@@ -1004,6 +1004,15 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get scheduleMessageError => 'メッセージを予約できませんでした。もう一度お試しください';
 
   @override
+  String get scheduleCommandRefusedError => 'コマンドは予約できません。続けるには / コマンドを削除してください。';
+
+  @override
+  String get scheduleQuotedMessageDeletedError => '引用されたメッセージは削除されました';
+
+  @override
+  String get scheduleMessageRefusedError => 'このメッセージは予約できません';
+
+  @override
   String scheduledMessagesCountText({required int count}) {
     return Intl.plural(
       count,
@@ -1058,6 +1067,9 @@ class _AccessibilityTranslationsJa extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'ボイスメッセージを録音';
+
+  @override
+  String get scheduleMessageHint => 'メッセージを予約';
 
   @override
   String get cancelRecordingTooltip => '録音をキャンセル';

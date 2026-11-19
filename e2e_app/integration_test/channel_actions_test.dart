@@ -131,7 +131,7 @@ void main() {
       await env.userRobot.login().openChannel();
 
       step('AND the user is removed from the channel while it is open');
-      await env.backendRobot.removeMember(PredefinedUsers.mockServerUser.id);
+      await env.backendRobot.removeMember(PredefinedUsers.currentUser.id);
       await env.userRobot.waitForMessageListToLoad();
 
       step('WHEN the user goes back to the channel list');
