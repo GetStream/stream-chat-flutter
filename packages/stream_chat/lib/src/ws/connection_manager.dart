@@ -55,6 +55,9 @@ class ConnectionManager with Disposable {
   // The attempt everyone opening a connection waits on, while one is under way.
   final _opening = InFlightCache<String, HealthCheckEvent>();
 
+  // Whether the connection being opened may still be tried again with a new token.
+  var _canRetryWithNewToken = false;
+
   /// Every frame received on the connection, as it arrives.
   EventEmitter<WsEvent> get events => _ws.events;
 
@@ -71,6 +74,11 @@ class ConnectionManager with Disposable {
   Stream<ConnectionStatus> get statusStream => connectionState.map(_statusOf).distinct();
 
   ConnectionStatus _statusOf(WebSocketConnectionState state) {
+    // A refusal the next attempt answers with a new token is still part of connecting.
+    if (state case Disconnecting(:final source) || Disconnected(:final source)) {
+      if (_willRetryWithNewToken(source)) return .connecting;
+    }
+
     return .fromState(state, isRecovering: _recovery.isRecovering);
   }
 
@@ -165,43 +173,54 @@ class ConnectionManager with Disposable {
     user.id,
     () async {
       final session = _session;
-      var replacedToken = false;
+      _canRetryWithNewToken = true;
 
-      while (true) {
-        // Subscribed before connecting: the frame that establishes the connection is the first
-        // health check, and the only one carrying the signed-in user.
-        final established = events.waitFor<HealthCheckEvent>();
-
-        // Not awaited: the state has moved on by the time this returns, so the closure waited on
-        // below cannot be the one this attempt replaces.
-        unawaited(_ws.connect());
-
-        final settledState = await settled;
-        if (settledState case Disconnected(:final source)) {
-          // Otherwise it fails unobserved when the socket closes without a frame.
-          established.ignore();
-
-          // The next attempt loads a new token in place of the refused one.
-          if (!replacedToken && _canReplaceToken(source)) {
-            replacedToken = true;
-            continue;
-          }
-
-          _refuse(user, source);
-        }
-
-        // Already on its way by the time the attempt settles. Kept for whoever asks for the
-        // connection it opened.
-        final event = await established;
-        session?.establishedWith(event);
-
-        return event;
+      try {
+        return await _attempt(user, session);
+      } finally {
+        _canRetryWithNewToken = false;
       }
     },
   );
 
-  // Whether [source] refused a token that has expired, and the provider can give another.
-  bool _canReplaceToken(DisconnectionSource source) {
+  // Opens the connection, answering with the frame that established it.
+  Future<HealthCheckEvent> _attempt(OwnUser user, _Session? session) async {
+    while (true) {
+      // Subscribed before connecting: the frame that establishes the connection is the first
+      // health check, and the only one carrying the signed-in user.
+      final established = events.waitFor<HealthCheckEvent>();
+
+      // Not awaited: the state has moved on by the time this returns, so the closure waited on
+      // below cannot be the one this attempt replaces.
+      unawaited(_ws.connect());
+
+      final settledState = await settled;
+      if (settledState case Disconnected(:final source)) {
+        // Otherwise it fails unobserved when the socket closes without a frame.
+        established.ignore();
+
+        // The next attempt loads a new token in place of the refused one.
+        if (_willRetryWithNewToken(source)) {
+          _canRetryWithNewToken = false;
+          continue;
+        }
+
+        _refuse(user, source);
+      }
+
+      // Already on its way by the time the attempt settles. Kept for whoever asks for the
+      // connection it opened.
+      final event = await established;
+      session?.establishedWith(event);
+
+      return event;
+    }
+  }
+
+  // Whether the connection being opened is tried again after [source], with a new token in place
+  // of an expired one the provider can replace.
+  bool _willRetryWithNewToken(DisconnectionSource source) {
+    if (!_canRetryWithNewToken) return false;
     if (_tokenManager.usesStaticProvider) return false;
 
     final exception = source.exception;

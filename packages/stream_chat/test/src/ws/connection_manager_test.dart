@@ -49,11 +49,15 @@ void main() {
       }),
     );
     addTearDown(manager.dispose);
+    final statuses = <ConnectionStatus>[];
+    manager.statusStream.listen(statuses.add);
 
     await manager.connect(_user());
 
     expect(manager.connectionId, isNotNull);
     expect(loads, 2);
+    // Replacing the token is part of connecting: the connection never reads as disconnected.
+    expect(statuses, [ConnectionStatus.disconnected, ConnectionStatus.connecting, ConnectionStatus.connected]);
   });
 
   test('ConnectionManager reports an expired token refused again after asking for another', () async {
@@ -67,6 +71,8 @@ void main() {
       }),
     );
     addTearDown(manager.dispose);
+    final statuses = <ConnectionStatus>[];
+    manager.statusStream.listen(statuses.add);
 
     await expectLater(
       manager.connect(_user()),
@@ -75,6 +81,7 @@ void main() {
 
     expect(loads, 2);
     expect(server.sockets, hasLength(2));
+    expect(statuses.last, ConnectionStatus.disconnected);
   });
 
   test('ConnectionManager does not ask for another token when the server refuses one for another reason', () async {
