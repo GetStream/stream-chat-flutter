@@ -97,13 +97,11 @@ class _PageComposerState extends State<PageComposer> {
   }
 }
 
-// Schedules the composer's message for a time picked from the schedule sheet,
-// then clears the composer. A refused one stays in the composer.
+// Schedules the composer's message for a time picked from the schedule sheet.
+// The composer is cleared right away, as sending does, and gets the message
+// back only when it is refused before it is listed.
 Future<void> _scheduleOnSendLongPress(BuildContext context, StreamMessageComposerController controller) async {
   final message = controller.value;
-  final isUploaded = message.attachments.every((it) => it.uploadState.isSuccess);
-  if (!isUploaded) return;
-
   final channel = StreamChannel.of(context).channel;
   final messenger = StreamSnackbarMessenger.of(context);
   final translations = context.translations;
@@ -111,30 +109,43 @@ Future<void> _scheduleOnSendLongPress(BuildContext context, StreamMessageCompose
   final scheduledAt = await showStreamScheduleMessageSheet(context: context, channel: channel, message: message);
   if (scheduledAt == null) return;
 
+  // The next message gets an ID of its own, as the scheduled one took this
+  // one's.
+  controller.reset();
+  final cleared = controller.value;
+
   try {
     await channel.scheduleMessage(message, scheduledAt: scheduledAt);
   } catch (error) {
-    // One the server couldn't be reached for is listed as failed, to schedule
-    // again from there, so it counts as scheduled.
-    final countsAsScheduled = switch (error) {
-      StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) => true,
-      StreamChatNetworkError(:final isRetriable) => isRetriable,
-      _ => false,
-    };
+    // Its failure is shown on the scheduled messages, to retry from there.
+    if (_isListedOnFailure(error)) return;
 
-    if (!countsAsScheduled) {
-      final text = _scheduleErrorText(translations, channel, error);
-      messenger.show(StreamSnackbar(message: Text(text), variant: .error));
-      return;
-    }
+    // Unless something was typed since, the composer gets it back to fix.
+    final isUntouched = controller.value == cleared;
+    if (_isRefusedBeforeListed(error) && isUntouched) controller.value = message;
+
+    final text = _scheduleErrorText(translations, channel, error);
+    messenger.show(StreamSnackbar(message: Text(text), variant: .error));
   }
+}
 
-  if (!context.mounted) return;
+// Whether the message stays listed as failed after [error], or was sent.
+bool _isListedOnFailure(Object error) {
+  return switch (error) {
+    StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) => true,
+    StreamChatNetworkError(:final isRetriable) => isRetriable,
+    _ => false,
+  };
+}
 
-  // Text typed while it was being scheduled stays, with an ID of its own.
-  final typed = controller.value == message ? null : controller.text;
-  controller.reset();
-  if (typed != null) controller.text = typed;
+// Whether [error] refused the message before it was listed, or stopped
+// listing it, so only the composer still has it.
+bool _isRefusedBeforeListed(Object error) {
+  return switch (error) {
+    ArgumentError() || StateError() || ScheduledMessageRefusedError() => true,
+    StreamChatNetworkError(:final isRetriable) => !isRetriable,
+    _ => false,
+  };
 }
 
 // Why scheduling failed with [error], in the words of [translations].
