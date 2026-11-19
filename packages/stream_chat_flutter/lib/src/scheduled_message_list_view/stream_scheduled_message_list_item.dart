@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
@@ -315,7 +314,7 @@ class _ScheduledMessagePreview extends StatelessWidget {
     final prefix = switch (message) {
       Message(parentId: _?) => translations.scheduledThreadReplyPrefixText,
       Message(quotedMessageId: _?) => translations.scheduledQuoteReplyPrefixText(
-        name: _quotedMessage(context, scheduledMessage)?.user?.name,
+        name: message.quotedMessage?.user?.name,
       ),
       _ => null,
     };
@@ -359,7 +358,7 @@ class _ScheduledMessageStatusLine extends core.NullableStatelessWidget {
     final status = scheduledMessage.status;
 
     if (status == .failed) {
-      final quoted = _quotedMessage(context, scheduledMessage);
+      final quoted = scheduledMessage.message.quotedMessage;
       final reason = translations.scheduledMessageFailureReasonText(
         reason: scheduledMessage.failureReason,
         isQuoteDeleted: quoted?.isDeleted ?? false,
@@ -401,25 +400,6 @@ class _ScheduledMessageStatusLine extends core.NullableStatelessWidget {
       ],
     );
   }
-}
-
-// The message a scheduled message quotes, when it is loaded in the channel or
-// in the thread the message is sent to.
-Message? _quotedMessage(
-  BuildContext context,
-  ScheduledMessage scheduledMessage,
-) {
-  final message = scheduledMessage.message;
-  if (message.quotedMessage case final quoted?) return quoted;
-
-  final quotedMessageId = message.quotedMessageId;
-  if (quotedMessageId == null) return null;
-
-  final client = StreamChat.of(context).client;
-  final state = client.state.channels[scheduledMessage.cid]?.state;
-  final loaded = [...?state?.messages, ...?state?.threads[message.parentId]];
-
-  return loaded.firstWhereOrNull((it) => it.id == quotedMessageId);
 }
 
 class _StreamScheduledMessageListItemThemeDefaults extends StreamScheduledMessageListItemThemeData {

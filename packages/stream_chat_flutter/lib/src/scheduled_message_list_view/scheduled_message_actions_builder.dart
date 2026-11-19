@@ -21,15 +21,17 @@ class StreamScheduledMessageActionsBuilder {
   /// and rescheduling are left out when the loaded channel doesn't allow
   /// scheduling.
   ///
-  /// Any other message has no actions.
+  /// One being saved can only be deleted until it is saved. Any other message
+  /// has no actions.
   static List<StreamScheduledMessageActionTile> buildActions({
     required BuildContext context,
     required ScheduledMessage scheduledMessage,
   }) {
     final isScheduled = scheduledMessage.status == .scheduled;
     final isFailed = scheduledMessage.status == .failed;
+    final isSaving = scheduledMessage.status == .preparingToSchedule;
 
-    if (!isScheduled && !isFailed) return [];
+    if (!isScheduled && !isFailed && !isSaving) return [];
 
     final icons = context.streamIcons;
     final translations = context.translations;

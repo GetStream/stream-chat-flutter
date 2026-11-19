@@ -126,8 +126,13 @@ void main() {
     },
   );
 
+  testWidgets('showStreamScheduledMessageActionsSheet offers only delete on a message being saved', (tester) async {
+    await showActions(tester, fakeScheduledMessage(status: .preparingToSchedule));
+
+    expect(rowLabels(tester), ['Delete']);
+  });
+
   for (final status in [
-    ScheduledMessageStatus.preparingToSchedule,
     ScheduledMessageStatus.sending,
     ScheduledMessageStatus.sent,
     ScheduledMessageStatus.canceled,
