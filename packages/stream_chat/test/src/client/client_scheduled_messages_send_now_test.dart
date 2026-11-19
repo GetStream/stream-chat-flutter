@@ -25,13 +25,24 @@ void main() {
     return harness.eventsDuring(() => expectRequest(harness.client.sendScheduledMessageNow(original.id), throws));
   }
 
-  test('sendScheduledMessageNow lists it as sending once the server accepts', () async {
+  test('sendScheduledMessageNow lists it as preparing while the request runs, then as the server answers', () async {
     stubSendNow(() async => fakeSendNow(accepted));
 
     expect(await sendNow(), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.sending),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
     ]);
-    expect(harness.client.state.scheduledMessages.single.status, ScheduledMessageStatus.sending);
+    expect(harness.client.state.scheduledMessages, [accepted]);
+  });
+
+  test('sendScheduledMessageNow lists the server copy of the version it had over the one being prepared', () async {
+    stubSendNow(() async => fakeSendNow(original));
+
+    await sendNow();
+
+    final [listed] = harness.client.state.scheduledMessages;
+    expect(listed.status, ScheduledMessageStatus.scheduled);
+    expect(listed.updatedAt, original.updatedAt);
   });
 
   test("sendScheduledMessageNow doesn't list it again when it was sent before the server answered", () async {
@@ -47,25 +58,31 @@ void main() {
     expect(harness.client.state.scheduledMessages, isEmpty);
   });
 
-  test('sendScheduledMessageNow reports nothing when the server is unreachable', () async {
+  test('sendScheduledMessageNow lists it as it was when the server is unreachable', () async {
     stubSendNow(() async => throw offline);
 
-    expect(await sendNow(throws: offline), isEmpty);
-    expect(harness.client.state.scheduledMessages, [original]);
+    expect(await sendNow(throws: offline), [
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
+    ]);
+    expect(harness.client.state.scheduledMessages.single.updatedAt, original.updatedAt);
   });
 
-  test('sendScheduledMessageNow reports nothing when the server refuses', () async {
+  test('sendScheduledMessageNow lists it as it was when the server refuses', () async {
     stubSendNow(() async => throw refused);
 
-    expect(await sendNow(throws: refused), isEmpty);
-    expect(harness.client.state.scheduledMessages, [original]);
+    expect(await sendNow(throws: refused), [
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
+    ]);
   });
 
-  test('sendScheduledMessageNow lists one already being sent as sending', () async {
+  test('sendScheduledMessageNow lists one already being sent as it was, until its own events', () async {
     stubSendNow(() async => throw sendingError);
 
     expect(await sendNow(throws: sendingError), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.sending),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
     ]);
   });
 
@@ -73,17 +90,9 @@ void main() {
     stubSendNow(() async => throw missingError);
 
     expect(await sendNow(throws: missingError), [
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
     ]);
     expect(harness.client.state.scheduledMessages, isEmpty);
-  });
-
-  test("sendScheduledMessageNow keeps it sending when the server's own update of that version arrives after", () async {
-    stubSendNow(() async => fakeSendNow(accepted));
-    await sendNow();
-
-    await harness.receive(EventType.scheduledMessageUpdated, accepted);
-
-    expect(harness.client.state.scheduledMessages.single.status, ScheduledMessageStatus.sending);
   });
 }

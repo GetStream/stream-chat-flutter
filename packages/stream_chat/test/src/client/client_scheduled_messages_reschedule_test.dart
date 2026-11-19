@@ -72,12 +72,12 @@ void main() {
     expect(failed.scheduledAt, later);
   });
 
-  test('rescheduleMessage lists one being sent at its time, as sending', () async {
+  test('rescheduleMessage lists one being sent as it was, at its time', () async {
     stubReschedule(() async => throw sendingError);
 
     expect(await reschedule(throws: sendingError), [
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.sending),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
     ]);
     expect(harness.client.state.scheduledMessages.single.scheduledAt, original.scheduledAt);
   });

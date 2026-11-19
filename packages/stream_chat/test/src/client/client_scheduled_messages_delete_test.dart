@@ -68,13 +68,13 @@ void main() {
     expect(harness.client.state.scheduledMessages, [original]);
   });
 
-  test('deleteScheduledMessage lists one being sent again, as sending', () async {
+  test("deleteScheduledMessage doesn't list one being sent again, as it may be sent by now", () async {
     stubDelete(() async => throw sendingError);
 
     expect(await delete(throws: sendingError), [
       (EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.sending),
     ]);
+    expect(harness.client.state.scheduledMessages, isEmpty);
   });
 
   test('deleteScheduledMessage keeps it unlisted and rethrows when the server no longer has it', () async {

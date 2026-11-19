@@ -50,6 +50,10 @@ class ScheduledMessageManager {
   // Bumped by clear, so a request that started before it is not applied.
   var _generation = 0;
 
+  // The scheduling of each new scheduled message, by ID, until it settles to
+  // whether the message was sent.
+  final _scheduling = <String, Future<bool>>{};
+
   /// The scheduled messages, and whether the complete list is loaded.
   ScheduledMessageListState get state => _stateNotifier.state;
 
@@ -187,6 +191,10 @@ class ScheduledMessageManager {
 
     _emitEvent(EventType.scheduledMessageCreated, local, generation);
 
+    final scheduling = Completer<bool>();
+    _scheduling[local.id] = scheduling.future;
+    var wasSent = false;
+
     try {
       final response = await _api.scheduleMessage(
         channelId,
@@ -197,10 +205,13 @@ class ScheduledMessageManager {
         skipEnrichUrl: skipEnrichUrl,
       );
 
+      // One taken out of the list meanwhile isn't listed again.
+      final isListed = _listedScheduledMessage(local.id) != null;
       if (response.scheduledMessage case final created?) {
-        _emitEvent(EventType.scheduledMessageCreated, created, generation);
+        if (isListed) _emitEvent(EventType.scheduledMessageCreated, created, generation);
       } else {
         // Its time had passed, so it was sent right away.
+        wasSent = true;
         final messageId = response.message.id;
         _emitEvent(EventType.scheduledMessageSent, _sent(local), generation, messageId: messageId);
       }
@@ -209,6 +220,7 @@ class ScheduledMessageManager {
     } on StreamChatNetworkError catch (error) {
       // Already sent: on a retry, the first attempt went through.
       if (error.scheduledMessageErrorReason == .scheduledMessageAlreadySent) {
+        wasSent = true;
         _emitEvent(EventType.scheduledMessageSent, _sent(local), generation);
         rethrow;
       }
@@ -224,11 +236,16 @@ class ScheduledMessageManager {
         localUpdatedAt: clock.now(),
       );
 
-      _emitEvent(EventType.scheduledMessageUpdated, failed, generation);
+      // One taken out of the list meanwhile isn't listed again.
+      final isListed = _listedScheduledMessage(local.id) != null;
+      if (isListed) _emitEvent(EventType.scheduledMessageUpdated, failed, generation);
       rethrow;
     } catch (_) {
       _emitEvent(EventType.scheduledMessageDeleted, _canceled(local), generation);
       rethrow;
+    } finally {
+      if (identical(_scheduling[local.id], scheduling.future)) _scheduling.remove(local.id);
+      scheduling.complete(wasSent);
     }
   }
 
@@ -381,8 +398,9 @@ class ScheduledMessageManager {
 
   /// Sends the scheduled message [id] right away.
   ///
-  /// It is listed as [ScheduledMessageStatus.sending] once the request
-  /// succeeds, until it is sent.
+  /// It is listed as [ScheduledMessageStatus.preparingToSchedule] while the
+  /// request runs, then as the server answers until it is sent, and as it
+  /// was if the request fails.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails, even when the
   /// scheduled message is already gone. If it is, an
@@ -399,17 +417,28 @@ class ScheduledMessageManager {
     _refuseDeletedQuote(scheduledMessage.cid, scheduledMessage.message);
 
     final generation = _generation;
+    final preparing = scheduledMessage.copyWith(
+      status: .preparingToSchedule,
+      failureReason: null,
+      localUpdatedAt: clock.now(),
+    );
+    _emitEvent(EventType.scheduledMessageUpdated, preparing, generation);
+
     final response = await _request(
       scheduledMessage,
       generation,
       () => _api.sendScheduledMessageNow(scheduledMessage.id),
+      relistOnFailure: (_) => _restored(scheduledMessage),
     );
 
     // Its sent event can arrive first, which stops listing it.
     final isListed = _listedScheduledMessage(id) != null;
     if (isListed) {
-      final sending = response.scheduledMessage.copyWith(status: .sending, localUpdatedAt: clock.now());
-      _emitEvent(EventType.scheduledMessageUpdated, sending, generation);
+      // A copy of the version it had replaces the one being prepared too.
+      final answered = response.scheduledMessage;
+      final isSameVersion = answered.remoteUpdatedAt == scheduledMessage.remoteUpdatedAt;
+      final listed = isSameVersion ? answered.copyWith(localUpdatedAt: clock.now()) : answered;
+      _emitEvent(EventType.scheduledMessageUpdated, listed, generation);
     }
 
     return response;
@@ -418,16 +447,34 @@ class ScheduledMessageManager {
   /// Deletes the scheduled message [id].
   ///
   /// A listed one stops being listed right away, and is listed again if the
-  /// request fails, unless it is already gone. One whose scheduling failed is
-  /// deleted even if scheduling it never went through. One not listed is
-  /// deleted without changing the list.
+  /// request fails, unless it is already gone. One still being scheduled is
+  /// deleted once scheduling it ends, so it isn't scheduled after it is
+  /// deleted; if scheduling it fails, it is only taken out of the list. One
+  /// whose scheduling failed is deleted even if scheduling it never went
+  /// through. One not listed is deleted without changing the list.
   ///
   /// The returned scheduled message has the status it had when it was
   /// deleted.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails. Deleting one
-  /// already gone throws too, unless its own scheduling had failed.
+  /// already gone throws too, unless its scheduling had failed. Deleting one
+  /// sent right away once scheduling it ends throws, with
+  /// [ScheduledMessageErrorReason.scheduledMessageAlreadySent].
   Future<DeleteScheduledMessageResponse> deleteMessage(String id) async {
+    if (_scheduling[id] case final scheduling?) {
+      final scheduled = _listedScheduledMessage(id);
+      final wasSent = await scheduling;
+
+      final isListed = _listedScheduledMessage(id) != null;
+      if (!isListed && scheduled != null) {
+        // Sent right away, as the server would answer deleting it.
+        if (wasSent) throw _alreadySentError(id);
+
+        // Scheduling it failed, so there is nothing left to delete.
+        return DeleteScheduledMessageResponse()..scheduledMessage = _canceled(scheduled);
+      }
+    }
+
     final scheduledMessage = _listedScheduledMessage(id);
     if (scheduledMessage == null) return _api.deleteScheduledMessage(id);
 
@@ -548,7 +595,8 @@ class ScheduledMessageManager {
 
   // Runs [request] on [scheduledMessage]. If it fails, one the request finds
   // gone is reported deleted, as its own event may have been missed; one
-  // being sent is listed as sending; any other lists what [relistOnFailure]
+  // being sent is listed again as it was, if it still is listed, until its
+  // own events tell how sending goes; any other lists what [relistOnFailure]
   // returns for the error, if given.
   Future<T> _request<T>(
     ScheduledMessage scheduledMessage,
@@ -578,7 +626,8 @@ class ScheduledMessageManager {
       if (!isListed && !relistIfUnlisted) rethrow;
 
       if (_isRefusedAsSending(error)) {
-        _emitEvent(EventType.scheduledMessageUpdated, _sending(scheduledMessage), generation);
+        // Not listed again if taken out of the list, as it may be sent by now.
+        if (isListed) _emitEvent(EventType.scheduledMessageUpdated, _restored(scheduledMessage), generation);
       } else if (relistOnFailure != null) {
         _emitEvent(EventType.scheduledMessageUpdated, relistOnFailure(error), generation);
       }
@@ -690,13 +739,24 @@ class ScheduledMessageManager {
     );
   }
 
-  // [scheduledMessage], marked being sent.
-  ScheduledMessage _sending(ScheduledMessage scheduledMessage) {
-    return scheduledMessage.copyWith(
-      status: .sending,
-      failureReason: null,
-      localUpdatedAt: clock.now(),
+  // The error the server answers with for a request to a scheduled message
+  // [id] that was already sent.
+  static StreamChatNetworkError _alreadySentError(String id) {
+    final message = 'scheduled message ID $id was already sent';
+    return StreamChatNetworkError.raw(
+      code: 123,
+      message: message,
+      statusCode: 400,
+      data: ErrorResponse()
+        ..code = 123
+        ..statusCode = 400
+        ..message = message,
     );
+  }
+
+  // [scheduledMessage] as it was, replacing any copy of it being prepared.
+  ScheduledMessage _restored(ScheduledMessage scheduledMessage) {
+    return scheduledMessage.copyWith(localUpdatedAt: clock.now());
   }
 
   // [scheduledMessage], marked canceled.

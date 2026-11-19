@@ -118,12 +118,31 @@ void main() {
     expect(failed.message.text, 'Good evening');
   });
 
-  test('updateScheduledMessage lists one being sent as it was, as sending', () async {
+  test('deleteScheduledMessage deletes one whose edit is being saved, which stays deleted once saved', () async {
+    final answer = Completer<UpdateScheduledMessageResponse>();
+    stubUpdate(() => answer.future);
+    await harness.hold([original]);
+    final request = harness.client.updateScheduledMessage(original.id, edited);
+    await settle();
+    when(
+      () => harness.api.scheduledMessages.deleteScheduledMessage('a'),
+    ).thenAnswer((_) async => fakeDelete(original.copyWith(status: ScheduledMessageStatus.canceled)));
+
+    await harness.client.deleteScheduledMessage('a');
+    answer.complete(fakeUpdate(saved));
+    await request;
+    await settle();
+
+    verify(() => harness.api.scheduledMessages.deleteScheduledMessage('a')).called(1);
+    expect(harness.client.state.scheduledMessages, isEmpty);
+  });
+
+  test('updateScheduledMessage lists one being sent as it was', () async {
     stubUpdate(() async => throw sendingError);
 
     expect(await update(throws: sendingError), [
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.sending),
+      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
     ]);
     expect(harness.client.state.scheduledMessages.single.message.text, 'Good morning');
   });
