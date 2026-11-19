@@ -3,19 +3,42 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'scheduled_messages_strings.dart';
 
+/// The SDK's strings that tell why a scheduled message request failed.
+///
+/// Read with [scheduleErrorTexts] before an await, as the error comes after
+/// it.
+typedef ScheduleErrorTexts = ({
+  String generic,
+  String commandRefused,
+  String quotedMessageDeleted,
+  String refused,
+});
+
+/// The [ScheduleErrorTexts] of [context].
+ScheduleErrorTexts scheduleErrorTexts(BuildContext context) {
+  final translations = context.translations;
+  return (
+    generic: translations.genericErrorText,
+    commandRefused: translations.scheduleCommandRefusedError,
+    quotedMessageDeleted: translations.scheduleQuotedMessageDeletedError,
+    refused: translations.scheduleMessageRefusedError,
+  );
+}
+
 /// Describes why scheduling or changing a scheduled message failed.
 ///
-/// Returns [fallback] when [error] has nothing more specific to say.
-String describeScheduleError(Object error, {required String fallback}) {
+/// Returns the generic one of [texts] when [error] has nothing more specific
+/// to say.
+String describeScheduleError(Object error, ScheduleErrorTexts texts) {
   if (error is ScheduledMessageRefusedError) {
     return switch (error.reason) {
-      .slashCommand => ScheduledMessagesStrings.commandNotSchedulable,
-      .quotedMessageDeleted => ScheduledMessagesStrings.quotedMessageDeleted,
-      _ => fallback,
+      .slashCommand => texts.commandRefused,
+      .quotedMessageDeleted => texts.quotedMessageDeleted,
+      _ => texts.refused,
     };
   }
 
-  if (error is! StreamChatNetworkError) return fallback;
+  if (error is! StreamChatNetworkError) return texts.generic;
 
   return switch (error.scheduledMessageErrorReason) {
     .scheduledMessagesDisabled => ScheduledMessagesStrings.scheduledMessagesDisabled,
@@ -29,7 +52,7 @@ String describeScheduleError(Object error, {required String fallback}) {
     .scheduledMessageAlreadySent => ScheduledMessagesStrings.alreadySentError,
     .scheduledMessageCanceled => ScheduledMessagesStrings.canceled,
     _ when error.isScheduledMessageNotFound => ScheduledMessagesStrings.sentOrDeleted,
-    _ => fallback,
+    _ => texts.generic,
   };
 }
 
@@ -38,14 +61,14 @@ String describeScheduleError(Object error, {required String fallback}) {
 ///
 /// One already sent or deleted is shown as a notice rather than an error, as
 /// there is nothing left to change.
-void showScheduleError(StreamSnackbarMessenger messenger, Object error, {required String fallback}) {
-  final description = describeScheduleError(error, fallback: fallback);
-  final variant = _isScheduledMessageGone(error) ? StreamSnackbarVariant.neutral : StreamSnackbarVariant.error;
+void showScheduleError(StreamSnackbarMessenger messenger, Object error, ScheduleErrorTexts texts) {
+  final description = describeScheduleError(error, texts);
+  final variant = isScheduledMessageGone(error) ? StreamSnackbarVariant.neutral : StreamSnackbarVariant.error;
   messenger.show(StreamSnackbar(message: Text(description), variant: variant));
 }
 
-// Whether [error] says the scheduled message was already sent or deleted.
-bool _isScheduledMessageGone(Object error) {
+/// Whether [error] says the scheduled message was already sent or deleted.
+bool isScheduledMessageGone(Object error) {
   if (error is! StreamChatNetworkError) return false;
   if (error.scheduledMessageErrorReason == .scheduledMessageAlreadySent) return true;
   return error.isScheduledMessageNotFound;
