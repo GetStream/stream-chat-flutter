@@ -27,7 +27,7 @@ class ScheduledMessageEditComposer extends StatefulWidget {
 }
 
 class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditComposer> {
-  late final _controller = StreamMessageComposerController()..editMessage(widget.scheduledMessage.toMessage());
+  late final _controller = StreamMessageComposerController()..editMessage(widget.scheduledMessage.message);
 
   @override
   void initState() {
