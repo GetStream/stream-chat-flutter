@@ -142,6 +142,18 @@ void main() {
     });
   });
 
+  test('deleteChannelQueriesByCids removes the channels from every cached query', () async {
+    final filter = Filter.in_('members', const ['testUserId']);
+    final otherFilter = Filter.equal('type', 'messaging');
+    await channelQueryDao.updateChannelQueries(filter, ['testCid1', 'testCid2']);
+    await channelQueryDao.updateChannelQueries(otherFilter, ['testCid1']);
+
+    await channelQueryDao.deleteChannelQueriesByCids(['testCid1']);
+
+    expect(await channelQueryDao.getCachedChannelCids(filter), ['testCid2']);
+    expect(await channelQueryDao.getCachedChannelCids(otherFilter), isEmpty);
+  });
+
   Future<void> _insertChannelsForCids(List<String> cids) async {
     final users = List.generate(cids.length, (i) => User(id: 'user_${cids[i]}'));
     final channelModels = List.generate(

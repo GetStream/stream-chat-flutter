@@ -54,6 +54,7 @@ import '../core/util/extension.dart';
 import '../core/util/immutable_collection_subjects.dart';
 import '../core/util/in_flight_cache.dart';
 import '../core/util/list_extensions.dart';
+import '../core/util/message_rules.dart';
 import '../core/util/utils.dart';
 import '../db/chat_persistence_client.dart';
 import '../event_type.dart';
@@ -62,6 +63,7 @@ import '../ws/connection_status.dart';
 import '../ws/websocket.dart';
 import 'channel/channel.dart';
 import 'channel_delivery_reporter.dart';
+import 'channel_registry.dart';
 import 'event_resolvers.dart' as event_resolvers;
 import 'live_location_expiration_scheduler.dart';
 import 'query_channels_result.dart';
@@ -1049,20 +1051,27 @@ class StreamChatClient {
   MapEntry<Map<String, Channel>, List<Channel>> _mapChannelStateToChannel(
     List<ChannelState> channelStates,
   ) {
-    final channels = {...state.channels};
+    final channels = <String, Channel>{};
     final newChannels = <Channel>[];
     for (final channelState in channelStates) {
-      final channel = channels[channelState.channel!.cid];
-      if (channel != null) {
-        channel.state?.updateChannelStateFromServer(channelState);
-        newChannels.add(channel);
-      } else {
+      final cid = channelState.channel!.cid;
+      final channel = state._channelRegistry[cid];
+      if (channel == null) {
         final newChannel = Channel.fromState(this, channelState);
         if (newChannel.cid != null) {
           channels[newChannel.cid!] = newChannel;
         }
         newChannels.add(newChannel);
+        continue;
       }
+
+      if (channel.state case final loaded?) {
+        loaded.updateChannelStateFromServer(channelState);
+      } else {
+        channel.loadState(channelState);
+      }
+      channels[cid] = channel;
+      newChannels.add(channel);
     }
     return MapEntry(channels, newChannels);
   }
@@ -1362,16 +1371,24 @@ class StreamChatClient {
   /// Get a development token
   Token devToken(String userId) => Token.development(userId);
 
-  /// Returns a channel client with the given type, id and custom data.
+  /// The [Channel] for [type] and [id], created on first call.
+  ///
+  /// Later calls with the same [type] and [id] return the same instance.
+  /// Until that channel has loaded, [extraData] is merged into its data;
+  /// afterwards it is ignored. Without an [id], every call creates a new
+  /// channel.
   Channel channel(
     String type, {
     String? id,
     Map<String, Object?>? extraData,
   }) {
-    if (id != null && state.channels.containsKey('$type:$id')) {
-      return state.channels['$type:$id']!;
-    }
-    return Channel(this, type, id, extraData: extraData);
+    Channel create() => Channel(this, type, id, extraData: extraData);
+    if (id == null) return create();
+
+    final channel = state._channelRegistry.putIfAbsent('$type:$id', create);
+    if (channel.state == null && extraData != null) channel.extraData = extraData;
+
+    return channel;
   }
 
   /// Creates a new channel
@@ -2856,6 +2873,8 @@ class ClientState {
     _listenChannelLeft();
     _listenChannelDeleted();
     _listenChannelHidden();
+    _listenChannelVisible();
+    _listenMessageNew();
     // endregion
 
     // region USER EVENTS
@@ -2896,8 +2915,28 @@ class ClientState {
     _eventsSubscription?.add(
       _client.on(EventType.channelHidden).listen((event) async {
         final eventChannel = event.channel!;
+        _channelRegistry.unlist(eventChannel.cid);
         await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
-        channels[eventChannel.cid]?.dispose();
+      }),
+    );
+  }
+
+  void _listenChannelVisible() {
+    _eventsSubscription?.add(
+      _client.on(EventType.channelVisible).listen((event) {
+        if (event.channel?.cid case final cid?) _channelRegistry.relist(cid);
+      }),
+    );
+  }
+
+  void _listenMessageNew() {
+    _eventsSubscription?.add(
+      _client.on(EventType.messageNew, EventType.notificationMessageNew).listen((event) {
+        final (cid, message) = (event.cid, event.message);
+        if (cid == null || message == null) return;
+
+        final showsChannel = MessageRules.canShowHiddenChannel(message, currentUser: currentUser);
+        if (showsChannel) _channelRegistry.relist(cid);
       }),
     );
   }
@@ -2934,7 +2973,7 @@ class ClientState {
         if (event.cid != null) return;
 
         // Update all channels' unread count to 0.
-        for (final channel in channels.values) {
+        for (final channel in _channelRegistry.live) {
           channel.state?.unreadCount = 0;
         }
       }),
@@ -2952,8 +2991,8 @@ class ClientState {
             final isCurrentUser = event.user!.id == currentUser!.id;
             if (isCurrentUser && event.channel != null) {
               final eventChannel = event.channel!;
+              _channelRegistry.detach(eventChannel.cid);
               await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
-              channels[eventChannel.cid]?.dispose();
             }
           }),
     );
@@ -2968,8 +3007,8 @@ class ClientState {
           )
           .listen((Event event) async {
             final eventChannel = event.channel!;
+            _channelRegistry.detach(eventChannel.cid);
             await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
-            channels[eventChannel.cid]?.dispose();
           }),
     );
   }
@@ -2984,8 +3023,8 @@ class ClientState {
 
         // Iterate through all the available channels and send the event
         // to be handled by the respective channel instances.
-        for (final cid in [...channels.keys]) {
-          final channelEvent = event.copyWith(cid: cid);
+        for (final channel in _channelRegistry.live) {
+          final channelEvent = event.copyWith(cid: channel.cid);
           _client.handleEvent(channelEvent);
         }
       }),
@@ -3184,29 +3223,35 @@ class ClientState {
     return _client._scheduledMessageManager.stream.distinct();
   }
 
-  /// The current list of channels in memory as a stream
-  Stream<Map<String, Channel>> get channelsStream => _channelsController.stream;
+  /// The current user's loaded channels by cid, as they change.
+  ///
+  /// Deleted channels are left out. Channels the current user hid or was
+  /// removed from are left out until they are queried, watched or shown again.
+  Stream<Map<String, Channel>> get channelsStream => _channelRegistry.channelsStream;
 
-  /// The current list of channels in memory
-  Map<String, Channel> get channels => _channelsController.value;
+  /// The current user's loaded channels, by cid.
+  ///
+  /// Deleted channels are left out. Channels the current user hid or was
+  /// removed from are left out until they are queried, watched or shown again.
+  Map<String, Channel> get channels => _channelRegistry.channels;
 
   @internal
   set channels(Map<String, Channel> newChannels) {
-    _channelsController.safeAdd(newChannels);
+    _channelRegistry.setChannels(newChannels);
   }
 
   /// Adds a list of channels to the current list of cached channels
   @internal
   void addChannels(Map<String, Channel> channelMap) {
-    final newChannels = {...channels, ...channelMap};
-    channels = newChannels;
+    _channelRegistry.addChannels(channelMap);
   }
 
-  /// Removes the channel from the cached list of [channels]
+  /// Removes [channel] from the client, whether in [channels] or not.
+  ///
+  /// Another channel the client holds for the same cid stays in place.
   @internal
-  void removeChannel(String channelCid) {
-    if (!channels.containsKey(channelCid)) return;
-    channels = {...channels}..remove(channelCid);
+  void removeChannel(Channel channel) {
+    _channelRegistry.remove(channel);
   }
 
   @internal
@@ -3234,7 +3279,7 @@ class ClientState {
     }
   }
 
-  final _channelsController = ImmutableMapBehaviorSubject<String, Channel>.seeded(const {});
+  final _channelRegistry = ChannelRegistry();
   final _currentUserController = BehaviorSubject<OwnUser?>();
   final _usersController = ImmutableMapBehaviorSubject<String, User>.seeded(const {});
   final _unreadChannelsController = BehaviorSubject<int>.seeded(0);
@@ -3253,9 +3298,6 @@ class ClientState {
     _activeLiveLocationsController.close();
     _locationExpirationScheduler.cancel();
 
-    _channelsController.close();
-    for (final channel in channels.values) {
-      channel.dispose(); // Dispose any remaining channels in memory.
-    }
+    _channelRegistry.dispose();
   }
 }

@@ -125,7 +125,6 @@ void main() {
   streamTestWithEnv(
     allureId: '12684',
     description: 'app does not crash when the user goes back after being removed from the open channel',
-    skip: 'https://linear.app/stream/issue/FLU-1085',
     body: (env) async {
       step('GIVEN the user opens a channel');
       await env.userRobot.login().openChannel();

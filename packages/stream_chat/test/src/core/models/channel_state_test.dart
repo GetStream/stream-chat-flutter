@@ -100,6 +100,26 @@ void main() {
       expect(channelState.draft, equals(draft));
     });
 
+    test('copyWith keeps the membership when it is left out', () {
+      final membership = Member(userId: 'current-user');
+      final channelState = ChannelState(membership: membership);
+
+      expect(channelState.copyWith().membership, membership);
+    });
+
+    test('copyWith replaces the membership with the given one', () {
+      final channelState = ChannelState(membership: Member(userId: 'current-user'));
+      final updated = Member(userId: 'current-user', pinnedAt: DateTime(2026));
+
+      expect(channelState.copyWith(membership: updated).membership, updated);
+    });
+
+    test('copyWith clears the membership when given null', () {
+      final channelState = ChannelState(membership: Member(userId: 'current-user'));
+
+      expect(channelState.copyWith(membership: null).membership, isNull);
+    });
+
     group('ComparableFieldProvider', () {
       test('should return ComparableField for channel.lastMessageAt', () {
         final channelState = createChannelState(
