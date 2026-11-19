@@ -107,12 +107,11 @@ class ConnectionManager with Disposable {
 
   /// Opens a connection for [user], completing with the health check that established it.
   ///
-  /// Set [includeUserDetails] to send the user's full details, which creates or updates the user.
-  ///
-  /// Completes with the attempt already under way when there is one for [user].
+  /// If [includeUserDetails] is true, the user's full details are sent, which creates or updates
+  /// the user. Completes with the attempt already under way when there is one for [user].
   ///
   /// A connection refused because its token expired is tried once more with a new token, unless
-  /// the token provider is static. Any other refusal is not retried.
+  /// the token provider is static.
   ///
   /// Throws a [StateError] when a connection is already open, or one is being opened for another
   /// user, and a [StreamChatException] when the connection is refused.
@@ -217,8 +216,7 @@ class ConnectionManager with Disposable {
     }
   }
 
-  // Whether the connection being opened is tried again after [source], with a new token in place
-  // of an expired one the provider can replace.
+  // Whether the attempt refused with [source] is tried again with a new token.
   bool _willRetryWithNewToken(DisconnectionSource source) {
     if (!_canRetryWithNewToken) return false;
     if (_tokenManager.usesStaticProvider) return false;
