@@ -151,7 +151,7 @@ jobs:
           key: ${{ steps.sdk.outputs.avd-key }}
 
       - name: Run e2e (Android emulator)
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         env:
           # So an emulator the run_e2e_test lane restarts boots from the snapshot too.
           E2E_EMULATOR_OPTIONS: -no-snapshot-save ${{ env.ANDROID_EMULATOR_OPTIONS }}
