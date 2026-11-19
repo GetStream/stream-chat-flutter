@@ -1,0 +1,21 @@
+name: PR Labels
+
+on:
+  pull_request:
+    types: [opened, reopened, edited, labeled, ready_for_review, converted_to_draft]
+  pull_request_review:
+    types: [submitted, dismissed]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  version_label:
+    uses: GetStream/stream-core-flutter/.github/workflows/pr_version_labels.yml@ci/shared-pr-labels
+    with:
+      version-file: packages/stream_chat/pubspec.yaml
+
+  review_labels:
+    uses: GetStream/stream-core-flutter/.github/workflows/pr_review_labels.yml@ci/shared-pr-labels
