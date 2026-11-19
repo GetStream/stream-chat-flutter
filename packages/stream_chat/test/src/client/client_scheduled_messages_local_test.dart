@@ -334,6 +334,39 @@ void main() {
     ]);
   });
 
+  test('scheduleMessage stops listing one whose sending right away is refused', () async {
+    final message = Message(id: 'a', text: 'Good morning');
+    final refused = Message(id: 'a', text: 'The channel is frozen', type: MessageType.error);
+    stubSchedule(message, () async => sentRightAway(refused));
+
+    final events = await harness.eventsDuring(() => schedule(message).then<void>((_) {}, onError: (_) {}));
+
+    expect(events, [
+      (EventType.scheduledMessageCreated, ScheduledMessageStatus.preparingToSchedule),
+      (EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
+    ]);
+  });
+
+  test('scheduleMessage throws when sending it right away is refused', () async {
+    final message = Message(id: 'a', text: 'Good morning');
+    final refused = Message(id: 'a', text: 'The channel is frozen', type: MessageType.error);
+    stubSchedule(message, () async => sentRightAway(refused));
+
+    await expectLater(schedule(message), throwsA(isA<StreamChatError>()));
+  });
+
+  test('resendScheduledMessage reports one whose first attempt was sent right away as sent', () async {
+    final message = Message(id: 'a', text: 'Good morning');
+    final failed = await scheduleUnreachable(message);
+    stubSchedule(message, () async => throw messageAlreadyExists('a'));
+
+    final events = await harness.eventsDuring(
+      () => harness.client.resendScheduledMessage(failed.id).then<void>((_) {}, onError: (_) {}),
+    );
+
+    expect(events.last, (EventType.scheduledMessageSent, ScheduledMessageStatus.sent));
+  });
+
   test("scheduleMessage reports the sent message's ID when it is sent right away", () async {
     final message = Message(id: 'a', text: 'Good morning');
     stubSchedule(message, () async => sentRightAway(message));
@@ -518,4 +551,19 @@ StreamChatNetworkError refusedWith(int code) {
 // The response for [message] when its time had passed and it was sent.
 ScheduleMessageResponse sentRightAway(Message message) {
   return ScheduleMessageResponse()..message = message;
+}
+
+// The error that refuses a message whose ID [id] is already taken by a sent
+// message.
+StreamChatNetworkError messageAlreadyExists(String id) {
+  final message = 'SendMessage failed with error: "a message with ID $id already exists"';
+  return StreamChatNetworkError.raw(
+    code: ChatErrorCode.inputError.code,
+    message: message,
+    statusCode: 400,
+    data: ErrorResponse()
+      ..code = ChatErrorCode.inputError.code
+      ..statusCode = 400
+      ..message = message,
+  );
 }

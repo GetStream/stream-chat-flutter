@@ -123,6 +123,9 @@ class ScheduledMessageManager {
   /// attachment of [message] is not uploaded yet. A message to send right
   /// away goes through [StreamChatClient.sendMessage].
   ///
+  /// Throws a [StreamChatError] if sending it right away is refused, for
+  /// example in a frozen channel.
+  ///
   /// Throws a [StateError] if no user is connected.
   Future<ScheduleMessageResponse> scheduleMessage(
     Message message,
@@ -196,6 +199,10 @@ class ScheduledMessageManager {
 
       if (response.scheduledMessage case final created?) {
         _emitEvent(EventType.scheduledMessageCreated, created, generation);
+      } else if (response.message.type == MessageType.error) {
+        // Its time had passed, but sending it right away was refused, for
+        // example in a frozen channel.
+        throw StreamChatError(response.message.text ?? 'The message was refused');
       } else {
         // Its time had passed, so it was sent right away.
         final messageId = response.message.id;
@@ -204,8 +211,10 @@ class ScheduledMessageManager {
 
       return response;
     } on StreamChatNetworkError catch (error) {
-      // Already sent: on a retry, the first attempt went through.
-      if (error.scheduledMessageErrorReason == .scheduledMessageAlreadySent) {
+      // Already sent: on a retry, the first attempt went through, scheduled
+      // or sent right away.
+      final isSent = error.scheduledMessageErrorReason == .scheduledMessageAlreadySent;
+      if (isSent || error.isMessageAlreadyExistsError) {
         _emitEvent(EventType.scheduledMessageSent, _sent(local), generation);
         rethrow;
       }

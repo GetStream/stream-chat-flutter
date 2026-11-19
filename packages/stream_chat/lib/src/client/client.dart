@@ -2516,6 +2516,9 @@ class StreamChatClient {
   /// attachment of [message] is not uploaded yet. A message to send right
   /// away goes through [sendMessage].
   ///
+  /// Throws a [StreamChatError] if sending it right away is refused, for
+  /// example in a frozen channel.
+  ///
   /// Throws a [StateError] if no user is connected.
   Future<ScheduleMessageResponse> scheduleMessage(
     Message message,
