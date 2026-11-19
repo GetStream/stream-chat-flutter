@@ -538,7 +538,17 @@ class ScheduledMessageManager {
 
     _refuseWhileScheduling(scheduledMessage);
     _refuseDeletedQuote(scheduledMessage.cid, scheduledMessage.message);
-    _cancelUploads(scheduledMessage.id);
+    final wasWaiting = _cancelUploads(scheduledMessage.id);
+
+    // An edit stopped while it uploaded is listed again as failed, to save it
+    // again or delete it.
+    final restored = wasWaiting
+        ? scheduledMessage.copyWith(
+            status: ScheduledMessageStatus.failed,
+            failureReason: ScheduledMessageFailureReason.updateFailed,
+            localUpdatedAt: clock.now(),
+          )
+        : _restored(scheduledMessage);
 
     final generation = _generation;
     final preparing = scheduledMessage.copyWith(
@@ -552,7 +562,7 @@ class ScheduledMessageManager {
       scheduledMessage,
       generation,
       () => _api.sendScheduledMessageNow(scheduledMessage.id),
-      relistOnFailure: (_) => _restored(scheduledMessage),
+      relistOnFailure: (_) => restored,
     );
 
     // Its sent event can arrive first, which stops listing it.

@@ -366,6 +366,25 @@ void main() {
     expect(listed.failureReason, ScheduledMessageFailureReason.updateFailed);
   });
 
+  test('sendScheduledMessageNow lists an edit stopped while it uploads as failed when the request fails', () async {
+    final scheduledMessage = fakeScheduledMessage('a');
+    await harness.hold([scheduledMessage]);
+    _stubUploadUntilCanceled(harness);
+    final error = StreamChatNetworkError(ChatErrorCode.internalSystemError);
+    when(
+      () => harness.api.scheduledMessages.sendScheduledMessageNow(any()),
+    ).thenAnswer((_) async => throw error);
+    final editing = _ignoringFailure(harness.client.updateScheduledMessage(scheduledMessage.id, _withImage(id: 'a')));
+    await settle();
+
+    await _ignoringFailure(harness.client.sendScheduledMessageNow(scheduledMessage.id));
+    await editing;
+    await settle();
+
+    final [listed] = harness.client.state.scheduledMessages;
+    expect(listed.failureReason, ScheduledMessageFailureReason.updateFailed);
+  });
+
   test('disconnecting cancels the attachment upload of one being scheduled', () async {
     final cancelTokens = _stubUploadUntilCanceled(harness);
     final scheduling = _ignoringFailure(schedule(_withImage()));
