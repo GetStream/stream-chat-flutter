@@ -114,7 +114,7 @@ void main() {
     _verifyNeverScheduled(harness);
   });
 
-  test('retryScheduledMessage uploads a failed attachment again', () async {
+  test('resendScheduledMessage uploads a failed attachment again', () async {
     var attempt = 0;
     _stubImageUpload(harness, (_) async {
       attempt += 1;
@@ -131,7 +131,7 @@ void main() {
     expect(sent.attachments.single.imageUrl, imageUrl);
   });
 
-  test('retryScheduledMessage does not upload an attachment that was uploaded', () async {
+  test('resendScheduledMessage does not upload an attachment that was uploaded', () async {
     final uploads = <String?>[];
     var failSecond = true;
     _stubImageUpload(harness, (invocation) async {

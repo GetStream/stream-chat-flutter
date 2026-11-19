@@ -13,8 +13,7 @@ typedef MessageUpdatedCallback = void Function(Message message);
 
 /// Message-level uploads for a [ChannelAttachmentUploader].
 extension MessageAttachmentUploader on ChannelAttachmentUploader {
-  /// Starts uploading the attachments of [message] that are not uploaded yet,
-  /// and returns the upload.
+  /// Starts uploading the attachments of [message] not uploaded yet.
   ///
   /// If [attachmentIds] is given, only those attachments are uploaded. Up to
   /// three are uploaded at a time, in the order of the message. A message
@@ -38,8 +37,9 @@ extension MessageAttachmentUploader on ChannelAttachmentUploader {
   }
 }
 
-/// The upload of a message's attachments, started by
-/// [MessageAttachmentUploader.uploadMessageAttachments].
+/// The upload of a message's attachments.
+///
+/// Started by [MessageAttachmentUploader.uploadMessageAttachments].
 final class MessageAttachmentsUpload {
   MessageAttachmentsUpload._(
     this._uploader,
@@ -77,10 +77,9 @@ final class MessageAttachmentsUpload {
   /// The reason given to [cancel], or null if it wasn't canceled with one.
   StreamChatError? get cancelReason => _canceled?.reason;
 
-  /// Cancels the upload of the attachment [attachmentId], which is then
-  /// removed from the message. The rest keep uploading.
+  /// Cancels the upload of [attachmentId] and removes it from the message.
   ///
-  /// Returns false if the attachment isn't uploading.
+  /// The rest keep uploading. Returns false if the attachment isn't uploading.
   bool cancelAttachment(String attachmentId, {String? reason}) {
     if (_isCanceled || _settled.contains(attachmentId)) return false;
 
@@ -95,14 +94,12 @@ final class MessageAttachmentsUpload {
     return _uploads[attachmentId]?.cancel(reason: reason) ?? false;
   }
 
-  /// Cancels every attachment upload that hasn't settled, for [reason] if
-  /// given.
+  /// Cancels the attachment uploads that haven't settled.
   ///
-  /// Returns at once, and can be called more than once; only the first call
-  /// counts. Uploads that already settled keep their outcome, and the
-  /// attachments still waiting for their turn are left as they were. The
-  /// upload ends as [MessageAttachmentsUploadCanceled], unless it had already
-  /// completed. Either way, [reason] becomes the [cancelReason].
+  /// Only the first call counts. Settled uploads keep their outcome and queued
+  /// attachments are left as they were. The upload ends as
+  /// [MessageAttachmentsUploadCanceled] unless it had already completed;
+  /// either way, [reason] becomes the [cancelReason].
   void cancel({StreamChatError? reason}) {
     if (_isCanceled) return;
     _canceled = (reason: reason);

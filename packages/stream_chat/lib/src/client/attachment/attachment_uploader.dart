@@ -105,8 +105,9 @@ final class ChannelAttachmentUploader {
   }
 }
 
-/// The upload of one attachment's file, started by
-/// [ChannelAttachmentUploader.upload].
+/// The upload of one attachment's file.
+///
+/// Started by [ChannelAttachmentUploader.upload].
 final class ChannelAttachmentUpload {
   ChannelAttachmentUpload._(this.attachment, this._cancelToken);
 
@@ -130,10 +131,8 @@ final class ChannelAttachmentUpload {
 
   /// Cancels the upload, for [reason] if given.
   ///
-  /// Its [result] completes with null right away. Can be called more than
-  /// once. An upload that has already settled keeps its [result].
-  ///
-  /// Returns false if the upload had already settled.
+  /// Completes [result] with null right away. Returns false, keeping
+  /// [result], if the upload had already settled.
   bool cancel({String? reason}) {
     if (_result.isCompleted) return false;
 

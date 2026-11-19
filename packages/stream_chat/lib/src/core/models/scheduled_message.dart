@@ -261,7 +261,7 @@ extension type const ScheduledMessageFailureReason(String _) implements String {
 
   /// An attachment failed to upload before it was scheduled.
   ///
-  /// Scheduling it again uploads the attachment again.
+  /// [StreamChatClient.resendScheduledMessage] uploads it again.
   static const attachmentUploadFailed = ScheduledMessageFailureReason('attachment_upload_failed');
 
   /// The request to edit it failed.

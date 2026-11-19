@@ -131,11 +131,10 @@ class ScheduledMessageManager {
   /// [ScheduledMessageFailureReason.requestFailed]; any other failure removes
   /// it.
   ///
-  /// The attachments of [message] that are not uploaded yet are uploaded
-  /// first, their progress shown on the listed message. If one fails to
-  /// upload, the message stays listed as failed with
-  /// [ScheduledMessageFailureReason.attachmentUploadFailed], with that
-  /// attachment's [Attachment.uploadState] failed.
+  /// The attachments of [message] not uploaded yet are uploaded first, with
+  /// their progress shown on the listed message. If one fails, its
+  /// [Attachment.uploadState] is failed and the message stays listed as failed
+  /// with [ScheduledMessageFailureReason.attachmentUploadFailed].
   ///
   /// Throws a [StreamChatNetworkError] if the request fails.
   ///
@@ -216,7 +215,7 @@ class ScheduledMessageManager {
       localUpdatedAt: now,
     );
 
-    // Cancelling previous scheduling in case it's called again in the process.
+    // Stops the attachment upload of an earlier call for the message.
     _cancelUploads(local.id);
 
     _emitEvent(EventType.scheduledMessageCreated, local, generation);
@@ -228,7 +227,6 @@ class ScheduledMessageManager {
         message = result.message;
         local = local.copyWith(message: message);
 
-        // Fail the whole message if any attachment failed to upload
         if (result is MessageAttachmentsUploadFailed) {
           throw _attachmentUploadFailed;
         }
@@ -257,8 +255,8 @@ class ScheduledMessageManager {
 
       return response;
     } catch (error) {
-      // Cancelled by a deletion or by a newer call for the same message, which
-      // now owns its state.
+      // Canceled by a deletion or a newer call for the message, which now owns
+      // its state.
       if (error == _uploadCanceled) rethrow;
 
       if (error is! StreamChatNetworkError && error != _attachmentUploadFailed) {
@@ -368,8 +366,8 @@ class ScheduledMessageManager {
   /// Throws an [ArgumentError] if it isn't listed and an attachment of
   /// [message] is not uploaded yet, as its channel to upload to is unknown.
   ///
-  /// Throws a [StateError] if its attachments are still uploading to schedule
-  /// it, as it isn't scheduled yet.
+  /// Throws a [StateError] while it is still uploading attachments to be
+  /// scheduled.
   Future<UpdateScheduledMessageResponse> updateMessage(
     String id,
     Message message, {
@@ -415,8 +413,8 @@ class ScheduledMessageManager {
   /// If it isn't listed, the request is made without these checks or changing
   /// the list first, then lists the copy it answers with.
   ///
-  /// Throws a [StateError] if its attachments are still uploading to schedule
-  /// it, as it isn't scheduled yet.
+  /// Throws a [StateError] while it is still uploading attachments to be
+  /// scheduled.
   Future<UpdateScheduledMessageResponse> rescheduleMessage(
     String id, {
     required DateTime scheduledAt,
@@ -461,8 +459,8 @@ class ScheduledMessageManager {
   /// it quotes a deleted message, which would fail it once sent. If it isn't
   /// listed, the request is made without these checks or changing the list.
   ///
-  /// Throws a [StateError] if its attachments are still uploading to schedule
-  /// it, as it isn't scheduled yet.
+  /// Throws a [StateError] while it is still uploading attachments to be
+  /// scheduled.
   Future<SendScheduledMessageNowResponse> sendMessageNow(String id) async {
     final scheduledMessage = _listedScheduledMessage(id);
     if (scheduledMessage == null) return _api.sendScheduledMessageNow(id);
@@ -490,10 +488,10 @@ class ScheduledMessageManager {
 
   /// Deletes the scheduled message [id].
   ///
-  /// One still uploading its attachments to be scheduled is removed without a
-  /// request, and its uploads are canceled. One whose attachments failed to
-  /// upload is removed without a request too. An edit still uploading its
-  /// attachments is stopped, and listed again as failed if the request fails.
+  /// One still uploading attachments to be scheduled, or whose upload failed,
+  /// is removed without a request, and its uploads are canceled. An edit
+  /// still uploading attachments is stopped, and listed again as failed if the
+  /// request fails.
   ///
   /// A listed one stops being listed right away, and is listed again if the
   /// request fails, unless it is already gone. One whose scheduling failed is
@@ -511,8 +509,7 @@ class ScheduledMessageManager {
 
     final generation = _generation;
 
-    // One still being scheduled, or whose attachments failed to upload, never
-    // reached the server.
+    // Neither has been scheduled yet.
     final wasWaiting = _cancelUploads(scheduledMessage.id);
     final isScheduling = wasWaiting && scheduledMessage.remoteCreatedAt == null;
     final isUploadFailed = scheduledMessage.failureReason == .attachmentUploadFailed;
@@ -614,7 +611,7 @@ class ScheduledMessageManager {
     ScheduledMessage edited,
     Future<UpdateScheduledMessageResponse> Function(Message message) request,
   ) async {
-    // Cancelling previous scheduling in case it's called again in the process.
+    // Stops the attachment upload of an earlier call for the message.
     _cancelUploads(scheduledMessage.id);
 
     final generation = _generation;
@@ -638,7 +635,6 @@ class ScheduledMessageManager {
       final result = await _uploadAttachments(saving, generation);
       saving = saving.copyWith(message: result.message);
 
-      // Fail the whole edit if any attachment failed to upload
       if (result is MessageAttachmentsUploadFailed) {
         final failed = saving.copyWith(
           status: .failed,

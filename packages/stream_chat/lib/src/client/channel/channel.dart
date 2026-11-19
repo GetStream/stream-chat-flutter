@@ -613,10 +613,12 @@ class Channel {
   // The attachment upload running for each message.
   final _attachmentUploads = <String, MessageAttachmentsUpload>{};
 
-  /// Cancels [attachmentId] upload request. Throws exception if the request
-  /// hasn't even started yet, or already completed or was canceled.
+  /// Cancels the upload of [attachmentId] and removes it from its message.
   ///
-  /// Optionally, provide a [reason] for the cancellation.
+  /// A [reason] can be given for the cancellation.
+  ///
+  /// Throws a [StreamChatError] if the attachment isn't uploading or waiting
+  /// to upload.
   void cancelAttachmentUpload(
     String attachmentId, {
     String? reason,
@@ -634,7 +636,7 @@ class Channel {
 
   /// Retries the failed [attachmentId] upload request.
   ///
-  /// Does nothing while the attachments of the message are uploading.
+  /// Does nothing while the attachments of [messageId] upload.
   Future<void> retryAttachmentUpload(String messageId, String attachmentId) async {
     if (_attachmentUploads.containsKey(messageId)) return;
 
@@ -650,11 +652,11 @@ class Channel {
     }
   }
 
-  // Uploads the attachments of [message] that are not uploaded yet, or only
-  // [attachmentIds] if given, showing their progress on it, and resolves to
-  // how the upload ended once they have settled.
+  // Uploads the attachments of [message] not uploaded yet, or only
+  // [attachmentIds], showing their progress on it, and resolves to how the
+  // upload ended.
   //
-  // Throws the reason they are canceled with, even once they have finished.
+  // Throws the cancel reason if canceled, even after they finished.
   Future<MessageAttachmentsUploadResult> _uploadAttachments(
     Message message, {
     Iterable<String>? attachmentIds,
@@ -669,8 +671,7 @@ class Channel {
     _attachmentUploads[message.id] = upload;
     final result = await upload.result;
 
-    // Deleted while they uploaded, or replaced by a newer call for the
-    // message, which canceled it with the error to throw.
+    // Canceled by a deletion or a newer call for the message.
     if (!identical(_attachmentUploads[message.id], upload)) {
       throw upload.cancelReason ?? _messageCancelled;
     }
@@ -705,8 +706,7 @@ class Channel {
     // Clean up stale error messages before sending a new message.
     state?.cleanUpStaleErrorMessages();
 
-    // Cancelling the attachment upload of an earlier call for the message,
-    // e.g. updating the message while the earlier call is in progress.
+    // Stops the attachment upload of an earlier call for the message.
     _attachmentUploads.remove(message.id)?.cancel(reason: _messageCancelled);
 
     final quotedMessage = state!.messages.firstWhereOrNull(
@@ -809,10 +809,10 @@ class Channel {
   /// no longer listed, it arrives in this channel like any other message, and
   /// [ScheduleMessageResponse.scheduledMessage] is null.
   ///
-  /// The attachments of [message] that are not uploaded yet are uploaded
-  /// first. If one fails to upload, the message stays listed as failed with
-  /// [ScheduledMessageFailureReason.attachmentUploadFailed], with that
-  /// attachment's [Attachment.uploadState] failed.
+  /// The attachments of [message] not uploaded yet are uploaded first. If one
+  /// fails, its [Attachment.uploadState] is failed and the message stays
+  /// listed as failed with
+  /// [ScheduledMessageFailureReason.attachmentUploadFailed].
   ///
   /// Also stops the current user's typing.
   ///
@@ -881,8 +881,7 @@ class Channel {
 
     _keyStrokeHandler.cancel();
 
-    // Cancelling the attachment upload of an earlier call for the message,
-    // e.g. updating the message while the earlier call is in progress.
+    // Stops the attachment upload of an earlier call for the message.
     _attachmentUploads.remove(message.id)?.cancel(reason: _messageCancelled);
 
     // ignore: parameter_assignments
@@ -967,8 +966,7 @@ class Channel {
   }) async {
     _checkInitialized();
 
-    // Cancelling the attachment upload of an earlier call for the message,
-    // e.g. updating the message while the earlier call is in progress.
+    // Stops the attachment upload of an earlier call for the message.
     _attachmentUploads.remove(message.id)?.cancel(reason: _messageCancelled);
 
     // ignore: parameter_assignments

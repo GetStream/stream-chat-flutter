@@ -64,7 +64,7 @@ void main() {
     await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatError>()));
   });
 
-  test('retrying an uploaded attachment does not send a message whose other attachment uploads', () async {
+  test('retryAttachmentUpload does not send the message while its other attachments upload', () async {
     final channel = _channel(
       imageUpload: (invocation) {
         final file = invocation.positionalArguments.first as AttachmentFile;
