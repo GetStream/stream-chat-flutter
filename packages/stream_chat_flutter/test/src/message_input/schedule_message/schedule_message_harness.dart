@@ -115,6 +115,7 @@ Widget wrapWithMaterialApp(
   StreamComponentBuilders? componentBuilders,
 }) {
   return MaterialApp(
+    debugShowCheckedModeBanner: false,
     theme: ThemeData(brightness: brightness),
     builder: (context, child) => StreamChat(
       client: channel.client,
