@@ -910,6 +910,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   }) {
     return switch (reason) {
       .requestFailed => '보내지 못했습니다. 다시 시도하세요',
+      .attachmentUploadFailed => '첨부 파일을 업로드하지 못했습니다',
       .internalError => '문제가 발생했습니다. 다시 시도하세요',
       .channelDeleted => '이 채널은 삭제되었습니다',
       .userDeleted => '계정이 삭제되었습니다',

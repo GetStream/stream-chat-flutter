@@ -928,6 +928,7 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   }) {
     return switch (reason) {
       .requestFailed => 'Não foi possível enviar. Tente novamente',
+      .attachmentUploadFailed => 'Não foi possível enviar o anexo',
       .internalError => 'Algo deu errado. Tente novamente',
       .channelDeleted => 'Este canal foi excluído',
       .userDeleted => 'Sua conta foi excluída',

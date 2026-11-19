@@ -910,6 +910,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   }) {
     return switch (reason) {
       .requestFailed => 'Kunne ikke sende. Prøv igjen',
+      .attachmentUploadFailed => 'Kunne ikke laste opp vedlegget',
       .internalError => 'Noe gikk galt. Prøv igjen',
       .channelDeleted => 'Denne kanalen ble slettet',
       .userDeleted => 'Kontoen din ble slettet',

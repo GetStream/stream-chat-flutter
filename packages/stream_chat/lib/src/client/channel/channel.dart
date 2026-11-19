@@ -8,6 +8,8 @@ import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../../stream_chat.dart';
+import '../attachment/attachment_uploader.dart';
+import '../attachment/message_attachment_uploader.dart';
 
 /// The maximum time the incoming [Event.typingStart] event is valid before a
 /// [Event.typingStop] event is emitted automatically.
@@ -602,28 +604,29 @@ class Channel {
   // Whether the channel is successfully initialized and not disposed.
   bool get _isInitialized => _initializedCompleter.isCompleted && state != null;
 
-  final _cancelableAttachmentUploadRequest = <String, CancelToken>{};
+  late final _attachmentUploader = ChannelAttachmentUploader(
+    client: _client,
+    channelId: id!,
+    channelType: type,
+  );
+
   final _messageAttachmentsUploadCompleter = <String, Completer<Message>>{};
 
   /// Cancels [attachmentId] upload request. Throws exception if the request
-  /// hasn't even started yet, Already completed or Already cancelled.
+  /// hasn't even started yet, or already completed or was canceled.
   ///
   /// Optionally, provide a [reason] for the cancellation.
   void cancelAttachmentUpload(
     String attachmentId, {
     String? reason,
   }) {
-    final cancelToken = _cancelableAttachmentUploadRequest[attachmentId];
-    if (cancelToken == null) {
-      throw const StreamChatError(
-        "Upload request for this Attachment hasn't started yet or maybe "
-        'Already completed',
-      );
-    }
-    if (cancelToken.isCancelled) {
-      throw const StreamChatError('Upload request already cancelled');
-    }
-    cancelToken.cancel(reason);
+    final canceled = _attachmentUploader.cancel(attachmentId, reason: reason);
+    if (canceled) return;
+
+    throw const StreamChatError(
+      "Upload request for this Attachment hasn't started yet or maybe "
+      'Already completed',
+    );
   }
 
   /// Retries the failed [attachmentId] upload request.
@@ -634,127 +637,25 @@ class Channel {
     String messageId,
     Iterable<String> attachmentIds,
   ) {
-    var message = _findMessageInLocalState(messageId);
-
+    final message = _findMessageInLocalState(messageId);
     if (message == null) {
       throw const StreamChatError('Error, Message not found');
     }
 
-    final attachments = message.attachments.where((it) {
-      if (it.uploadState.isSuccess) return false;
-      return attachmentIds.contains(it.id);
-    });
+    final upload = _attachmentUploader.uploadMessageAttachments(
+      message,
+      attachmentIds: attachmentIds,
+      // A message deleted mid-upload is left out of the state.
+      onUpdated: (it) => state?.updateMessage(it, upsert: false),
+    );
 
-    if (attachments.isEmpty) {
-      client.logger.info('No attachments available to upload');
-      if (message.attachments.every((it) => it.uploadState.isSuccess)) {
-        _messageAttachmentsUploadCompleter.remove(messageId)?.complete(message);
-      }
-      return Future.value();
-    }
-
-    client.logger.info('Found ${attachments.length} attachments');
-
-    void updateAttachment(Attachment attachment, {bool remove = false}) {
-      final index = message!.attachments.indexWhere(
-        (it) => it.id == attachment.id,
+    return upload.then((uploaded) {
+      // Another upload of the message is still running and completes it.
+      final isUploading = uploaded.attachments.any(
+        (it) => it.uploadState.isPreparing || it.uploadState.isInProgress,
       );
-      if (index != -1) {
-        // update or remove attachment from message.
-        final List<Attachment> newAttachments;
-        if (remove) {
-          newAttachments = [...message!.attachments]..removeAt(index);
-        } else {
-          newAttachments = [...message!.attachments]..[index] = attachment;
-        }
+      if (isUploading) return;
 
-        final updatedMessage = message!.copyWith(attachments: newAttachments);
-        // A message deleted mid-upload is left out of the state.
-        state?.updateMessage(updatedMessage, upsert: false);
-        // updating original message for next iteration
-        message = message!.merge(updatedMessage);
-      }
-    }
-
-    return Future.wait(
-      attachments.map((it) {
-        client.logger.info('Uploading ${it.id} attachment...');
-
-        final throttledUpdateAttachment = updateAttachment.throttled(
-          const Duration(milliseconds: 500),
-        );
-
-        void onSendProgress(int sent, int total) {
-          throttledUpdateAttachment([
-            it.copyWith(
-              uploadState: UploadState.inProgress(uploaded: sent, total: total),
-            ),
-          ]);
-        }
-
-        final isImage = it.type == AttachmentType.image;
-        final cancelToken = CancelToken();
-        Future<SendAttachmentResponse> future;
-        if (isImage) {
-          future = sendImage(
-            it.file!,
-            onSendProgress: onSendProgress,
-            cancelToken: cancelToken,
-            extraData: it.extraData,
-          );
-        } else {
-          future = sendFile(
-            it.file!,
-            onSendProgress: onSendProgress,
-            cancelToken: cancelToken,
-            extraData: it.extraData,
-          );
-        }
-        _cancelableAttachmentUploadRequest[it.id] = cancelToken;
-        return future
-            .then((response) {
-              client.logger.info('Attachment ${it.id} uploaded successfully...');
-
-              // If the response is SendFileResponse, then we might also be getting
-              // thumbUrl in case of video. So we need to update the attachment with
-              // both the assetUrl and thumbUrl.
-              if (response is SendFileResponse) {
-                updateAttachment(
-                  it.copyWith(
-                    assetUrl: response.file,
-                    thumbUrl: response.thumbUrl,
-                    uploadState: const UploadState.success(),
-                  ),
-                );
-              } else {
-                updateAttachment(
-                  it.copyWith(
-                    imageUrl: response.file,
-                    uploadState: const UploadState.success(),
-                  ),
-                );
-              }
-            })
-            .catchError((e, stk) {
-              if (e is StreamChatNetworkError && e.type == .cancel) {
-                client.logger.info('Attachment ${it.id} upload cancelled');
-
-                // remove attachment from message if cancelled.
-                updateAttachment(it, remove: true);
-                return;
-              }
-
-              client.logger.severe('error uploading the attachment', e, stk);
-              updateAttachment(
-                it.copyWith(uploadState: UploadState.failed(error: e.toString())),
-              );
-            })
-            .whenComplete(() {
-              throttledUpdateAttachment.cancel();
-              _cancelableAttachmentUploadRequest.remove(it.id);
-            });
-      }),
-    ).whenComplete(() {
       final completer = _messageAttachmentsUploadCompleter.remove(messageId);
       if (completer == null || completer.isCompleted) return;
 
@@ -762,7 +663,7 @@ class Channel {
       // success vs. partial failure by inspecting per-attachment upload
       // states. Cancellation is still surfaced via `completeError` from the
       // sendMessage/updateMessage/deleteMessage entry points.
-      completer.complete(message);
+      completer.complete(uploaded);
     });
   }
 
@@ -779,8 +680,7 @@ class Channel {
   ///
   /// If [skipPush] is true the message will not send a push notification.
   ///
-  /// Waits for a [_messageAttachmentsUploadCompleter] to complete
-  /// before actually sending the message.
+  /// Waits for the message's attachments to upload before sending it.
   Future<SendMessageResponse> sendMessage(
     Message message, {
     bool skipPush = false,
@@ -904,6 +804,11 @@ class Channel {
   /// no longer listed, it arrives in this channel like any other message, and
   /// [ScheduleMessageResponse.scheduledMessage] is null.
   ///
+  /// The attachments of [message] that are not uploaded yet are uploaded
+  /// first. If one fails to upload, the message stays listed as failed with
+  /// [ScheduledMessageFailureReason.attachmentUploadFailed], with that
+  /// attachment's [Attachment.uploadState] failed.
+  ///
   /// Also stops the current user's typing.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails. If it fails in a
@@ -914,12 +819,13 @@ class Channel {
   /// [message] is a command in a channel that has commands, or quotes a
   /// deleted message.
   ///
-  /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
-  /// attachment of [message] is not uploaded yet. A message to send right
-  /// away goes through [sendMessage].
+  /// Throws an [ArgumentError] if [scheduledAt] is not in the future. A
+  /// message to send right away goes through [sendMessage].
   ///
-  /// Throws a [StreamChatError] if sending it right away is refused, for
-  /// example in a frozen channel.
+  /// Throws a [StreamChatError] if an attachment fails to upload, if
+  /// [StreamChatClient.deleteScheduledMessage] deletes it while its
+  /// attachments upload, or if sending it right away is refused, for example
+  /// in a frozen channel.
   ///
   /// Throws a [StateError] if no user is connected.
   Future<ScheduleMessageResponse> scheduleMessage(
@@ -960,8 +866,7 @@ class Channel {
   ///
   /// Also stops the current user's typing.
   ///
-  /// Waits for a [_messageAttachmentsUploadCompleter] to complete
-  /// before actually updating the message.
+  /// Waits for the message's attachments to upload before updating it.
   Future<UpdateMessageResponse> updateMessage(
     Message message, {
     bool skipPush = false,
@@ -1230,9 +1135,7 @@ class Channel {
     // Stopping the attachment uploads still running for the message, and the
     // `sendMessage` or `updateMessage` waiting for them to complete.
     for (final attachment in message.attachments) {
-      final cancelToken = _cancelableAttachmentUploadRequest[attachment.id];
-      if (cancelToken == null || cancelToken.isCancelled) continue;
-      cancelToken.cancel();
+      _attachmentUploader.cancel(attachment.id);
     }
     final completer = _messageAttachmentsUploadCompleter.remove(message.id);
     completer?.completeError(_messageDeleted);

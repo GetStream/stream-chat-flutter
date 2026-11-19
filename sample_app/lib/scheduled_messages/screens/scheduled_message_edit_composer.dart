@@ -102,7 +102,6 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
     // is scheduled.
     final message = edited.copyWith(
       id: const Uuid().v4(),
-      attachments: [...edited.attachments.where((it) => it.uploadState.isSuccess)],
       quotedMessage: quotesDeletedMessage ? null : edited.quotedMessage,
       quotedMessageId: quotesDeletedMessage ? null : edited.quotedMessageId,
     );

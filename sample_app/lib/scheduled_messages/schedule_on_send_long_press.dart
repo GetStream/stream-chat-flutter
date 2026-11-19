@@ -7,7 +7,7 @@ import 'scheduled_messages_utils.dart';
 ///
 /// Opens the schedule sheet, schedules the message for the picked time, and
 /// clears the composer once it is scheduled. Does nothing when the channel
-/// doesn't allow scheduling, or while an attachment uploads.
+/// doesn't allow scheduling.
 Future<void> scheduleOnSendLongPress(
   BuildContext context,
   StreamMessageComposerController controller,
@@ -16,9 +16,6 @@ Future<void> scheduleOnSendLongPress(
   if (!channel.canScheduleMessage) return;
 
   final message = controller.value;
-  final isUploaded = message.attachments.every((it) => it.uploadState.isSuccess);
-  if (!isUploaded) return;
-
   final messenger = StreamSnackbarMessenger.of(context);
   final fallback = context.translations.scheduleMessageError;
 
