@@ -183,7 +183,7 @@ class ConnectionManager with Disposable {
     },
   );
 
-  // Opens the connection, answering with the frame that established it.
+  // Opens the connection, trying once more with a new token when an expired one is refused.
   Future<HealthCheckEvent> _attempt(OwnUser user, _Session? session) async {
     while (true) {
       // Subscribed before connecting: the frame that establishes the connection is the first
@@ -223,8 +223,10 @@ class ConnectionManager with Disposable {
     if (!_canRetryWithNewToken) return false;
     if (_tokenManager.usesStaticProvider) return false;
 
-    final exception = source.exception;
-    return exception is StreamApiException && exception.isTokenExpired;
+    return switch (source) {
+      ServerInitiated(error: StreamApiException(isTokenExpired: true)) => true,
+      _ => false,
+    };
   }
 
   // Raises why a connection was refused, the way a rejected request is raised.

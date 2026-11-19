@@ -103,6 +103,24 @@ void main() {
     expect(server.sockets, hasLength(1));
   });
 
+  test('ConnectionManager does not ask for another token when loading one fails as expired', () async {
+    var loads = 0;
+    final server = FakeChatServer();
+    final manager = _manager(
+      server: server,
+      tokenProvider: TokenProvider.dynamic((userId) async {
+        loads += 1;
+        throw apiException(code: StreamErrorCode.tokenExpired, statusCode: 401);
+      }),
+    );
+    addTearDown(manager.dispose);
+
+    await expectLater(manager.connect(_user()), throwsA(isA<StreamApiException>()));
+
+    expect(loads, 1);
+    expect(server.sockets, isEmpty);
+  });
+
   test('ConnectionManager stays closed when the provider has no other token to give', () async {
     final server = FakeChatServer()..refusal = connectionErrorFrame();
     final manager = _manager(server: server);
