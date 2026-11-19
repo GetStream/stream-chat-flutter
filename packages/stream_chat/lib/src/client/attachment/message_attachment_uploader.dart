@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:rate_limiter/rate_limiter.dart';
 
+import '../../core/error/stream_chat_error.dart';
 import '../../core/models/attachment.dart';
 import '../../core/models/attachment_file.dart';
 import '../../core/models/message.dart';
@@ -33,12 +34,7 @@ extension MessageAttachmentUploader on ChannelAttachmentUploader {
       return attachmentIds?.contains(it.id) ?? true;
     });
 
-    return MessageAttachmentsUpload._(
-      this,
-      message,
-      pending.toList(),
-      onUpdated,
-    );
+    return MessageAttachmentsUpload._(this, message, pending.toList(), onUpdated);
   }
 }
 
@@ -64,13 +60,12 @@ final class MessageAttachmentsUpload {
   final List<Attachment> _queued;
   final _uploads = <String, ChannelAttachmentUpload>{};
   final _settled = <String>{};
+
   // Set once the upload is canceled, with the reason it was given.
-  ({Object? reason})? _canceled;
+  ({StreamChatError? reason})? _canceled;
   bool get _isCanceled => _canceled != null;
 
-  late final _notifyProgress = _notify.throttled(
-    const Duration(milliseconds: 500),
-  );
+  late final _notifyProgress = _notify.throttled(const Duration(milliseconds: 500));
 
   /// How the upload ended, once every attachment's upload has settled.
   ///
@@ -78,6 +73,9 @@ final class MessageAttachmentsUpload {
   /// not throw.
   Future<MessageAttachmentsUploadResult> get result => _result;
   late final Future<MessageAttachmentsUploadResult> _result;
+
+  /// The reason given to [cancel], or null if it wasn't canceled with one.
+  StreamChatError? get cancelReason => _canceled?.reason;
 
   /// Cancels the upload of the attachment [attachmentId], which is then
   /// removed from the message. The rest keep uploading.
@@ -100,18 +98,18 @@ final class MessageAttachmentsUpload {
   /// Cancels every attachment upload that hasn't settled, for [reason] if
   /// given.
   ///
-  /// Returns at once, and can be called more than once. Uploads that already
-  /// settled keep their outcome, and the attachments still waiting for their
-  /// turn are left as they were. The upload ends as
-  /// [MessageAttachmentsUploadCanceled] with [reason], unless it had already
-  /// completed.
-  void cancel({Object? reason}) {
+  /// Returns at once, and can be called more than once; only the first call
+  /// counts. Uploads that already settled keep their outcome, and the
+  /// attachments still waiting for their turn are left as they were. The
+  /// upload ends as [MessageAttachmentsUploadCanceled], unless it had already
+  /// completed. Either way, [reason] becomes the [cancelReason].
+  void cancel({StreamChatError? reason}) {
     if (_isCanceled) return;
     _canceled = (reason: reason);
 
     _notifyProgress.cancel();
     for (final upload in _uploads.values) {
-      upload.cancel();
+      upload.cancel(reason: reason?.message);
     }
   }
 
@@ -120,16 +118,14 @@ final class MessageAttachmentsUpload {
     await Future.wait([for (var i = 0; i < workers; i++) _uploadQueued()]);
     _notifyProgress.cancel();
 
-    if (_canceled case (:final reason)?) {
-      return MessageAttachmentsUploadCanceled._(_message, reason);
-    }
+    if (_isCanceled) return MessageAttachmentsUploadCanceled._(_message);
 
     // Only the attachments this upload sent count, not ones that failed before.
     final hasFailed = _message.attachments.any(
       (it) => _uploads.containsKey(it.id) && it.uploadState.isFailed,
     );
-    if (hasFailed) return MessageAttachmentsUploadFailed._(_message);
 
+    if (hasFailed) return MessageAttachmentsUploadFailed._(_message);
     return MessageAttachmentsUploadCompleted._(_message);
   }
 
@@ -211,8 +207,5 @@ final class MessageAttachmentsUploadFailed extends MessageAttachmentsUploadResul
 
 /// The upload was canceled with [MessageAttachmentsUpload.cancel].
 final class MessageAttachmentsUploadCanceled extends MessageAttachmentsUploadResult {
-  const MessageAttachmentsUploadCanceled._(super.message, this.reason) : super._();
-
-  /// The reason given to [MessageAttachmentsUpload.cancel], if any.
-  final Object? reason;
+  const MessageAttachmentsUploadCanceled._(super.message) : super._();
 }

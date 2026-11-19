@@ -232,6 +232,22 @@ void main() {
     expect(sent.attachments.map((it) => it.id), ['1', '2', '3']);
   });
 
+  test('deleting a message whose attachment finished uploading makes its sending throw', () async {
+    final upload = Completer<SendImageResponse>();
+    final channel = _channel(imageUpload: (_) => upload.future);
+    final sending = expectLater(
+      channel.sendMessage(_withImage(text: 'Hello')),
+      throwsA(isA<StreamChatError>().having((it) => it.message, 'message', 'Message deleted')),
+    );
+    await pumpEventQueue();
+    final message = channel.state!.messages.single;
+
+    upload.complete(SendImageResponse()..file = 'https://example.com/image.png');
+    channel.deleteMessage(message).ignore();
+
+    await sending;
+  });
+
   test('retrying an attachment while the message uploads does not upload it again', () async {
     var uploads = 0;
     final channel = _channel(

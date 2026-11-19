@@ -635,18 +635,12 @@ class Channel {
   /// Retries the failed [attachmentId] upload request.
   ///
   /// Does nothing while the attachments of the message are uploading.
-  Future<void> retryAttachmentUpload(String messageId, String attachmentId) {
-    if (_attachmentUploads.containsKey(messageId)) return Future.value();
+  Future<void> retryAttachmentUpload(String messageId, String attachmentId) async {
+    if (_attachmentUploads.containsKey(messageId)) return;
 
     final message = _findMessageInLocalState(messageId);
-    if (message == null) {
-      throw const StreamChatError('Error, Message not found');
-    }
+    if (message == null) throw const StreamChatError('Error, Message not found');
 
-    return _retryAttachmentUpload(message, attachmentId);
-  }
-
-  Future<void> _retryAttachmentUpload(Message message, String attachmentId) async {
     try {
       await _uploadAttachments(message, attachmentIds: [attachmentId]);
     } on StreamChatError catch (error) {
@@ -675,12 +669,10 @@ class Channel {
     _attachmentUploads[message.id] = upload;
     final result = await upload.result;
 
-    // Deleted while they uploaded, or replaced by a newer call for the message.
+    // Deleted while they uploaded, or replaced by a newer call for the
+    // message, which canceled it with the error to throw.
     if (!identical(_attachmentUploads[message.id], upload)) {
-      throw switch (result) {
-        MessageAttachmentsUploadCanceled(reason: final StreamChatError reason) => reason,
-        _ => _messageCancelled,
-      };
+      throw upload.cancelReason ?? _messageCancelled;
     }
 
     _attachmentUploads.remove(message.id);
