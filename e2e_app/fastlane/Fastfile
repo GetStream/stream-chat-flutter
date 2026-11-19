@@ -593,6 +593,8 @@ lane :run_e2e_test do |options|
                            "started within #{STARTUP_LIMIT / 60} min")
               emulator[:suspect] = true if emulator
             },
+            # Unlike a stall, a hang leaves the emulator usable: the retry passes, and a restart per
+            # hang would use up the restarts and skip the rest of the batch.
             on_hung: -> {
               UI.important("#{target} (attempt #{attempt}/#{retries + 1}): stopped flutter test, silent for " \
                            "#{FINISHED_SILENCE_LIMIT} s after the runner gave up on the test file")

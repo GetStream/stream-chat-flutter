@@ -24,17 +24,12 @@ env:
   ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
-  # The Android emulator, shared by the snapshot job and the test batches. aosp_atd is the
-  # Automated Test Device image: no apps or services a test doesn't need, so less post-boot CPU
-  # churn.
+  # The Android emulator. Keep in sync with the android_avd job in e2e_test_cron.yml, which saves
+  # the snapshot the batches boot from.
   ANDROID_API_LEVEL: "36"
   ANDROID_TARGET: aosp_atd
   ANDROID_PROFILE: pixel_6
   ANDROID_CORES: "4"
-  # The runner's defaults minus -no-snapshot, plus -no-metrics: it answers the metrics prompt a
-  # future emulator release will block on. The test batches add -no-snapshot-save, so every batch
-  # boots from the same clean snapshot; the snapshot job leaves it out, so the emulator saves one on
-  # exit.
   ANDROID_EMULATOR_OPTIONS: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-metrics
 
 jobs:
@@ -96,72 +91,6 @@ jobs:
         with:
           working-directory: e2e_app
 
-  # Boots the emulator once, lets it settle and caches the AVD with its quick-boot snapshot. The
-  # batches don't wait for it: they boot from the snapshot when it's cached, and cold boot as before
-  # when it isn't yet (the first run after an emulator or image update).
-  android_avd:
-    if: (github.event_name != 'workflow_dispatch' || inputs.android) && needs.select.outputs.e2e_batches != '[]'
-    needs: select
-    runs-on: ubuntu-latest
-    timeout-minutes: 30
-    steps:
-      - uses: actions/checkout@v7
-
-      - uses: ./.github/actions/enable-kvm
-
-      - uses: ./.github/actions/android-sdk-packages
-        id: sdk
-        with:
-          api-level: ${{ env.ANDROID_API_LEVEL }}
-          target: ${{ env.ANDROID_TARGET }}
-          profile: ${{ env.ANDROID_PROFILE }}
-          cores: ${{ env.ANDROID_CORES }}
-          emulator-options: ${{ env.ANDROID_EMULATOR_OPTIONS }}
-
-      - name: Look up the AVD
-        id: avd
-        uses: actions/cache/restore@v5
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: ${{ steps.sdk.outputs.avd-key }}
-          lookup-only: true
-
-      - name: Create the AVD and its snapshot
-        if: steps.avd.outputs.cache-hit != 'true'
-        uses: reactivecircus/android-emulator-runner@v2
-        with:
-          api-level: ${{ env.ANDROID_API_LEVEL }}
-          target: ${{ env.ANDROID_TARGET }}
-          arch: x86_64
-          profile: ${{ env.ANDROID_PROFILE }}
-          cores: ${{ env.ANDROID_CORES }}
-          force-avd-creation: false
-          emulator-options: ${{ env.ANDROID_EMULATOR_OPTIONS }}
-          disable-animations: true
-          # Lets the post-boot work (dexopt) finish, so the snapshot holds a settled system. Each
-          # line runs on its own.
-          script: |
-            "$ANDROID_HOME/platform-tools/adb" -s emulator-5554 shell cmd package bg-dexopt-job > /dev/null 2>&1 || true
-            sleep 30
-
-      # adb emu kill returns before the emulator has written the snapshot. If it hasn't exited in
-      # 3 minutes, the step fails and the AVD isn't saved, so no batch restores a partial snapshot.
-      - name: Wait for the emulator to save the snapshot
-        if: steps.avd.outputs.cache-hit != 'true'
-        timeout-minutes: 3
-        run: while pgrep -f qemu-system > /dev/null; do sleep 1; done
-
-      - name: Save the AVD
-        if: steps.avd.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v5
-        with:
-          path: |
-            ~/.android/avd/*
-            ~/.android/adb*
-          key: ${{ steps.sdk.outputs.avd-key }}
-
   android:
     # Always on pull_request; opt-out via the checkbox on workflow_dispatch.
     if: (github.event_name != 'workflow_dispatch' || inputs.android) && needs.select.outputs.e2e_batches != '[]'
@@ -202,8 +131,7 @@ jobs:
           name: e2e-selection
           path: e2e_app/build
 
-      # The key comes from this runner's own installs: if the emulator was updated since the
-      # snapshot was saved, the lookup misses and the batch cold boots instead of loading a stale one.
+      # Saved by the nightly run. A miss (e.g. after an emulator update) cold boots as before.
       - uses: ./.github/actions/android-sdk-packages
         id: sdk
         with:
@@ -225,8 +153,7 @@ jobs:
       - name: Run e2e (Android emulator)
         uses: reactivecircus/android-emulator-runner@v2
         env:
-          # A dead emulator is restarted by the run_e2e_test lane with these options, so it comes
-          # back from the snapshot too.
+          # So an emulator the run_e2e_test lane restarts boots from the snapshot too.
           E2E_EMULATOR_OPTIONS: -no-snapshot-save ${{ env.ANDROID_EMULATOR_OPTIONS }}
         with:
           api-level: ${{ env.ANDROID_API_LEVEL }}
@@ -234,7 +161,6 @@ jobs:
           arch: x86_64
           profile: ${{ env.ANDROID_PROFILE }}
           cores: ${{ env.ANDROID_CORES }}
-          # Reuses a restored AVD and its snapshot; creates one when there is none.
           force-avd-creation: ${{ steps.avd.outputs.cache-hit != 'true' }}
           emulator-options: -no-snapshot-save ${{ env.ANDROID_EMULATOR_OPTIONS }}
           script: cd e2e_app && bundle exec fastlane run_e2e_test device:emulator-5554 selection:build/e2e_selection.json batch:${{ matrix.batch }} batch_count:${{ strategy.job-total }}
