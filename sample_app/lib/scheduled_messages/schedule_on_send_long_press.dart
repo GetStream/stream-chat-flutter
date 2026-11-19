@@ -5,9 +5,10 @@ import 'scheduled_messages_utils.dart';
 
 /// Schedules the composer's message when its send button is long-pressed.
 ///
-/// Opens the schedule sheet, schedules the message for the picked time, and
-/// clears the composer once it is scheduled. Does nothing when the channel
-/// doesn't allow scheduling.
+/// Opens the schedule sheet and schedules the message for the picked time.
+/// The composer is cleared right away, as it is when a message is sent, and
+/// gets the message back only when it is refused before it is listed. Does
+/// nothing when the channel doesn't allow scheduling.
 Future<void> scheduleOnSendLongPress(
   BuildContext context,
   StreamMessageComposerController controller,
@@ -26,29 +27,38 @@ Future<void> scheduleOnSendLongPress(
   );
   if (scheduledAt == null) return;
 
-  try {
-    await _schedule(channel, message, scheduledAt);
-    if (!context.mounted) return;
+  // The next message gets an ID of its own, as the scheduled one took this
+  // one's.
+  controller.reset();
+  final cleared = controller.value;
 
-    // Text typed while it was being scheduled stays in the composer, with its
-    // own ID, as the scheduled message took the old one. Its attachments,
-    // quote and mentions were scheduled, so they go.
-    final typed = controller.value == message ? null : controller.text;
-    controller.reset();
-    if (typed != null) controller.text = typed;
+  try {
+    await channel.scheduleMessage(message, scheduledAt: scheduledAt);
   } catch (error) {
+    // Its failure is shown on the scheduled messages, to retry from there.
+    if (_isListedOnFailure(error)) return;
+
+    // Unless something was typed since, the composer gets it back to fix.
+    final isUntouched = controller.value == cleared;
+    if (_isRefusedBeforeListed(error) && isUntouched) controller.value = message;
+
     showScheduleError(messenger, error, fallback: fallback);
   }
 }
 
-// A failure that leaves the message listed as failed counts as scheduled, so
-// it can be retried from the scheduled messages instead of scheduled twice.
-// Any other failure keeps the message in the composer.
-Future<void> _schedule(Channel channel, Message message, DateTime scheduledAt) async {
-  try {
-    await channel.scheduleMessage(message, scheduledAt: scheduledAt);
-  } on StreamChatNetworkError catch (error) {
-    final isAlreadySent = error.scheduledMessageErrorReason == .scheduledMessageAlreadySent;
-    if (!error.isRetriable && !isAlreadySent) rethrow;
-  }
+// Whether the message stays listed as failed after [error], or was sent.
+bool _isListedOnFailure(Object error) {
+  if (error is! StreamChatNetworkError) return false;
+  if (error.scheduledMessageErrorReason == .scheduledMessageAlreadySent) return true;
+  return error.isRetriable;
+}
+
+// Whether [error] refused the message before it was listed, or stopped
+// listing it, so only the composer still has it.
+bool _isRefusedBeforeListed(Object error) {
+  return switch (error) {
+    ArgumentError() || StateError() || ScheduledMessageRefusedError() => true,
+    StreamChatNetworkError(:final isRetriable) => !isRetriable,
+    _ => false,
+  };
 }
