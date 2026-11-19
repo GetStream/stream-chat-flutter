@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:stream_chat_flutter/src/message_input/stream_chat_message_input.dart';
@@ -62,43 +64,18 @@ void main() {
     expect(snackbar.bottom, lessThanOrEqualTo(banner.top));
   });
 
-  testWidgets("doesn't resubscribe to the scheduled messages while typing", (tester) async {
-    final scheduledMessages = [scheduledMessage()];
-    var listens = 0;
-    final stream = Stream<List<ScheduledMessage>>.multi((controller) {
-      listens += 1;
-      controller.add(scheduledMessages);
-    });
-    await pumpChannelPage(tester, scheduledMessages: scheduledMessages, scheduledMessagesStream: stream);
-    final listensBeforeTyping = listens;
-
+  testWidgets('updates the scheduled messages banner when the count changes while typing', (tester) async {
+    final updates = StreamController<List<ScheduledMessage>>();
+    addTearDown(updates.close);
+    final first = scheduledMessage();
+    await pumpChannelPage(tester, scheduledMessages: [first], scheduledMessagesStream: updates.stream);
     await tester.enterText(find.byType(EditableText), 'Hello');
     await tester.pumpAndSettle();
 
-    expect(listens, listensBeforeTyping);
-  });
-
-  testWidgets("doesn't rebuild the scheduled messages banner while typing", (tester) async {
-    var builds = 0;
-    await pumpChannelPage(
-      tester,
-      scheduledMessages: [scheduledMessage()],
-      componentBuilders: StreamComponentBuilders(
-        extensions: streamChatComponentBuilders(
-          scheduledMessagesBanner: (_, _) {
-            builds += 1;
-            return const SizedBox();
-          },
-        ),
-      ),
-    );
-    final buildsBeforeTyping = builds;
-    expect(buildsBeforeTyping, isPositive);
-
-    await tester.enterText(find.byType(EditableText), 'Hello');
+    updates.add([first, first.copyWith(id: 'other-id')]);
     await tester.pumpAndSettle();
 
-    expect(builds, buildsBeforeTyping);
+    expect(find.text('2 scheduled messages'), findsOneWidget);
   });
 
   testWidgets('passes onScheduledMessagesBannerTap to the thread pages it opens', (tester) async {

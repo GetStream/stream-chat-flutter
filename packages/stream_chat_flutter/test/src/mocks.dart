@@ -21,6 +21,7 @@ class MockChannel extends Mock implements Channel {
       ChannelCapability.uploadFile,
     ],
     Stream<Event>? eventStream,
+    this.capabilitiesUpdates,
   }) : _eventStream = eventStream ?? const Stream.empty() {
     registerFallbackValue(DraftMessage());
     when(() => createDraft(any())).thenAnswer((_) async => CreateDraftResponse());
@@ -46,9 +47,12 @@ class MockChannel extends Mock implements Channel {
   @override
   final List<ChannelCapability> ownCapabilities;
 
+  /// The capabilities [ownCapabilitiesStream] emits, when a test changes them.
+  final Stream<List<ChannelCapability>>? capabilitiesUpdates;
+
   @override
   Stream<List<ChannelCapability>> get ownCapabilitiesStream {
-    return Stream.value(ownCapabilities);
+    return capabilitiesUpdates ?? Stream.value(ownCapabilities);
   }
 
   @override

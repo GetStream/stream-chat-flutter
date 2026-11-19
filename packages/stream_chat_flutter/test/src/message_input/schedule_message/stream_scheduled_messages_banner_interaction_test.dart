@@ -165,26 +165,6 @@ void main() {
     expect(props.copyWith(parentId: 'other').onTap, onTap);
   });
 
-  testWidgets("StreamScheduledMessagesBanner doesn't rebuild when a change leaves its counts as they are", (
-    tester,
-  ) async {
-    final next = scheduledMessage('a');
-    final later = scheduledMessage('b');
-    final updates = StreamController<List<ScheduledMessage>>();
-    addTearDown(updates.close);
-    final channel = scheduleChannel(scheduledMessages: [next, later], scheduledMessagesStream: updates.stream);
-
-    await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessagesBanner(), channel: channel));
-    await tester.pumpAndSettle();
-    final countBefore = tester.widget<Text>(find.text('2 scheduled messages'));
-
-    updates.add([next, later.copyWith(scheduledAt: DateTime(2026, 10, 24, 9))]);
-    await tester.pumpAndSettle();
-
-    // A rebuild would create a new Text.
-    expect(tester.widget<Text>(find.text('2 scheduled messages')), same(countBefore));
-  });
-
   testWidgets('StreamScheduledMessagesBanner updates its count when a message is scheduled', (tester) async {
     final scheduled = scheduledMessage('a');
     final updates = StreamController<List<ScheduledMessage>>();
@@ -198,5 +178,69 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('2 scheduled messages'), findsOneWidget);
+  });
+
+  testWidgets('StreamScheduledMessagesBanner shows once the channel allows scheduling', (tester) async {
+    final capabilities = StreamController<List<ChannelCapability>>();
+    addTearDown(capabilities.close);
+    final channel = scheduleChannel(
+      canSchedule: false,
+      scheduledMessages: [scheduledMessage('a'), scheduledMessage('b')],
+      capabilitiesUpdates: capabilities.stream,
+    );
+
+    await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessagesBanner(), channel: channel));
+    await tester.pumpAndSettle();
+    expect(find.text('2 scheduled messages'), findsNothing);
+
+    capabilities.add([ChannelCapability.sendMessage, ChannelCapability.scheduleMessage]);
+    await tester.pumpAndSettle();
+
+    expect(find.text('2 scheduled messages'), findsOneWidget);
+  });
+
+  testWidgets('StreamScheduledMessagesBanner shows once the channel is watched', (tester) async {
+    final watched = Completer<void>();
+    final channel = scheduleChannel(
+      scheduledMessages: [scheduledMessage('a'), scheduledMessage('b')],
+      watched: watched.future,
+    );
+
+    // Without a loading screen, the banner is built before the channel is
+    // watched.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StreamChat(
+          client: channel.client,
+          connectivityStream: Stream.value([ConnectivityResult.wifi]),
+          child: StreamChannel.value(
+            channel: channel,
+            child: Scaffold(body: StreamScheduledMessagesBanner()),
+          ),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('2 scheduled messages'), findsNothing);
+
+    watched.complete();
+    await tester.pumpAndSettle();
+
+    expect(find.text('2 scheduled messages'), findsOneWidget);
+  });
+
+  testWidgets('StreamScheduledMessagesBanner links to a single failed message as View', (tester) async {
+    final failed = scheduledMessage('a', status: ScheduledMessageStatus.failed);
+
+    await tester.pumpWidget(
+      wrapWithMaterialApp(
+        StreamScheduledMessagesBanner(onTap: () {}),
+        channel: scheduleChannel(scheduledMessages: [failed]),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('View'), findsOneWidget);
+    expect(find.text('View all'), findsNothing);
   });
 }

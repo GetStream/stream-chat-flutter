@@ -870,18 +870,18 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String notifyRoleText(String role) => '$role 全員に通知';
 
   @override
-  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+  String scheduledMessageSendAtText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
-    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return '$date $time に送信';
   }
 
   @override
-  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+  String scheduledMessageScheduledForText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
-    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return '$date $time に予約済み';
   }
 
@@ -948,16 +948,16 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get customTimeLabel => '時間を指定';
 
   @override
-  String scheduleTomorrowText({required DateTime scheduledAt}) {
-    final time = DateFormat.jm(localeName).format(scheduledAt.toLocal());
+  String scheduleTomorrowText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final time = _formatTime(scheduledAt.toLocal(), use24HourFormat: use24HourFormat);
     return '明日 $time';
   }
 
   @override
-  String scheduleWeekdayText({required DateTime scheduledAt}) {
+  String scheduleWeekdayText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final local = scheduledAt.toLocal();
     final weekday = DateFormat.EEEE(localeName).format(local);
-    final time = DateFormat.jm(localeName).format(local);
+    final time = _formatTime(local, use24HourFormat: use24HourFormat);
     return '$weekday $time';
   }
 

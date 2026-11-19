@@ -149,4 +149,53 @@ void main() {
       controller.cancelCooldown();
     }
   });
+
+  testWidgets('reports an error onSendMessage throws to onError', (tester) async {
+    useFakeRecordPlatform();
+    final error = StateError('Could not save');
+    Object? reported;
+
+    await pumpComposer(
+      tester,
+      composer: StreamMessageComposer(
+        messageComposerController: composerController(),
+        enableVoiceRecording: false,
+        onSendMessage: (_, _) => throw error,
+        onError: (error, _) => reported = error,
+      ),
+    );
+    await tester.enterText(find.byType(EditableText), 'Hello');
+    await tester.pump();
+    await tester.tap(find.byKey(const ValueKey('send_key')));
+    await tester.pump();
+
+    expect(reported, same(error));
+  });
+
+  testWidgets("doesn't offer onSendLongPress to a custom trailing while a message is edited", (tester) async {
+    useFakeRecordPlatform();
+    final edited = Message(id: 'message-id', text: 'Hello', createdAt: DateTime.utc(2026, 10, 29));
+    final controller = composerController()..editMessage(edited);
+    final longPresses = <VoidCallback?>[];
+
+    await pumpComposer(
+      tester,
+      composer: StreamMessageComposer(
+        messageComposerController: controller,
+        enableVoiceRecording: false,
+        onSendLongPress: (_, _) {},
+      ),
+      componentBuilders: StreamComponentBuilders(
+        extensions: streamChatComponentBuilders(
+          messageComposerInputTrailing: (_, props) {
+            longPresses.add(props.onSendLongPress);
+            return const SizedBox();
+          },
+        ),
+      ),
+    );
+
+    expect(longPresses, isNotEmpty);
+    expect(longPresses.last, isNull);
+  });
 }

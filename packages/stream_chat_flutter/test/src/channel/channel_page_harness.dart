@@ -48,7 +48,6 @@ Future<void> pumpChannelPage(
   List<ScheduledMessage> scheduledMessages = const [],
   Stream<List<ScheduledMessage>>? scheduledMessagesStream,
   StreamScheduledMessagesBannerTapCallback? onScheduledMessagesBannerTap,
-  StreamComponentBuilders? componentBuilders,
 }) async {
   final originalRecordPlatform = RecordPlatform.instance;
   RecordPlatform.instance = FakeRecordPlatform();
@@ -126,7 +125,6 @@ Future<void> pumpChannelPage(
         }
         return StreamChat(
           client: client,
-          componentBuilders: componentBuilders,
           themeData: switch (headerSurfaceStyle) {
             final surfaceStyle? => StreamChatThemeData(
               channelHeaderTheme: StreamAppBarThemeData(style: StreamAppBarStyle(surfaceStyle: surfaceStyle)),

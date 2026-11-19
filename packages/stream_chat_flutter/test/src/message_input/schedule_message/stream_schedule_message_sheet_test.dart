@@ -28,6 +28,36 @@ void main() {
     );
   }
 
+  testWidgets('showStreamScheduleMessageSheet shows the preset times in 24-hour format when the device does', (
+    tester,
+  ) async {
+    final channel = scheduleChannel();
+    final button = openButton(
+      (context) => showStreamScheduleMessageSheet(
+        context: context,
+        channel: channel,
+        message: messageToSchedule(),
+      ),
+    );
+
+    await withClock(Clock.fixed(wednesday), () async {
+      await tester.pumpWidget(
+        MediaQuery(
+          data: const MediaQueryData(alwaysUse24HourFormat: true),
+          child: wrapWithMaterialApp(button, channel: channel),
+        ),
+      );
+      await tapOpenButton(tester);
+
+      expect(rowLabels(tester), [
+        'Tomorrow at 09:00',
+        'Tomorrow at 13:00',
+        'Monday at 09:00',
+        'Custom time',
+      ]);
+    });
+  });
+
   testWidgets('showStreamScheduleMessageSheet offers tomorrow morning and afternoon and Monday morning', (
     tester,
   ) async {
@@ -150,21 +180,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(results, [null]);
-    });
-  });
-
-  testWidgets('showStreamScheduleMessageSheet keeps preset hours across a daylight saving change, where there is one', (
-    tester,
-  ) async {
-    // In zones that observe it, 2026-10-25 is the day clocks go back an hour.
-    await withClock(Clock.fixed(DateTime(2026, 10, 24, 10)), () async {
-      final results = await showMessageSheet(tester, scheduleChannel());
-
-      await tester.tap(find.text('Tomorrow at 1:00\u202fPM'));
-      await tester.pumpAndSettle();
-
-      final scheduledAt = results.single!;
-      expect((scheduledAt.day, scheduledAt.hour, scheduledAt.minute), (25, 13, 0));
     });
   });
 

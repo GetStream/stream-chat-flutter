@@ -37,7 +37,8 @@ ScheduledMessage scheduledMessage(
 /// A channel named [name], "General" by default, whose user holds
 /// [scheduledMessages].
 ///
-/// Without [isCreated], the channel has no ID yet.
+/// Without [isCreated], the channel has no ID yet. With [watched], the
+/// channel has no state until it completes.
 MockChannel scheduleChannel({
   bool canSchedule = true,
   bool isCreated = true,
@@ -46,17 +47,24 @@ MockChannel scheduleChannel({
   List<Member> members = const [],
   String? name = 'General',
   Stream<List<ScheduledMessage>>? scheduledMessagesStream,
+  Stream<List<ChannelCapability>>? capabilitiesUpdates,
+  Future<void>? watched,
 }) {
   final client = MockClient();
   final clientState = MockClientState();
-  final channel = MockChannel(
-    // A channel that isn't created yet has no ID.
-    id: isCreated ? 'test-channel-id' : null,
-    ownCapabilities: [
-      ChannelCapability.sendMessage,
-      if (canSchedule) ChannelCapability.scheduleMessage,
-    ],
-  );
+  final ownCapabilities = [
+    ChannelCapability.sendMessage,
+    if (canSchedule) ChannelCapability.scheduleMessage,
+  ];
+  final channel = switch (watched) {
+    final watched? => _UnwatchedChannel(watched, ownCapabilities: ownCapabilities),
+    null => MockChannel(
+      // A channel that isn't created yet has no ID.
+      id: isCreated ? 'test-channel-id' : null,
+      ownCapabilities: ownCapabilities,
+      capabilitiesUpdates: capabilitiesUpdates,
+    ),
+  };
   final channelState = MockChannelState();
   final model = ChannelModel(
     cid: scheduleCid,
@@ -72,11 +80,30 @@ MockChannel scheduleChannel({
   ).thenAnswer((_) => scheduledMessagesStream ?? Stream.value(scheduledMessages));
   when(() => channel.client).thenReturn(client);
   when(() => channel.config).thenReturn(config ?? ChannelConfig());
-  when(() => channel.state).thenReturn(channelState);
+  var isWatched = watched == null;
+  watched?.then((_) => isWatched = true);
+  when(() => channel.state).thenAnswer((_) => isWatched ? channelState : null);
   when(() => channelState.channelState).thenReturn(ChannelState(channel: model));
   when(() => channelState.members).thenReturn(members);
 
   return channel;
+}
+
+// A channel with a cid that isn't watched until [watched] completes. Like a
+// real channel, it can't stream its capabilities before then.
+class _UnwatchedChannel extends MockChannel {
+  _UnwatchedChannel(this.watched, {super.ownCapabilities});
+
+  final Future<void> watched;
+
+  @override
+  Future<bool> get initialized => watched.then((_) => true);
+
+  @override
+  Stream<List<ChannelCapability>> get ownCapabilitiesStream {
+    if (state == null) throw StateError('The channel is not initialized.');
+    return super.ownCapabilitiesStream;
+  }
 }
 
 /// Wraps [widget] in an app with [channel] above its navigator, so the

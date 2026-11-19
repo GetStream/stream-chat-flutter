@@ -453,7 +453,10 @@ class _StreamScheduledMessageListItemThemeDefaults extends StreamScheduledMessag
   @override
   DateFormatter get scheduledAtFormatter {
     return (context, date) {
-      return context.translations.scheduledMessageSendAtText(scheduledAt: date);
+      return context.translations.scheduledMessageSendAtText(
+        scheduledAt: date,
+        use24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+      );
     };
   }
 

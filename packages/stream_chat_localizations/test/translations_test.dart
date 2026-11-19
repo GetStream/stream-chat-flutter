@@ -468,6 +468,17 @@ void main() {
       final weekdayText = localizations.scheduleWeekdayText(scheduledAt: scheduledAt);
       expect(weekdayText, contains(presetTime));
       expect(weekdayText, contains(toBeginningOfSentenceCase(weekday, language)));
+      final time24 = DateFormat.Hm(language).format(localScheduledAt);
+      expect(localizations.scheduleTomorrowText(scheduledAt: scheduledAt, use24HourFormat: true), contains(time24));
+      expect(localizations.scheduleWeekdayText(scheduledAt: scheduledAt, use24HourFormat: true), contains(time24));
+      expect(
+        localizations.scheduledMessageSendAtText(scheduledAt: scheduledAt, use24HourFormat: true),
+        contains(time24),
+      );
+      expect(
+        localizations.scheduledMessageScheduledForText(scheduledAt: scheduledAt, use24HourFormat: true),
+        contains(time24),
+      );
       expect(localizations.messageToLabel(channelName: 'Maya'), contains('Maya'));
       expect(localizations.dateLabel, isNotEmpty);
       expect(localizations.timeLabel, isNotEmpty);
@@ -701,6 +712,13 @@ void main() {
   test('every translation language has a display name in the default translations', () {
     const translations = DefaultTranslations.instance;
     expectEveryLanguageNamed(translations.translatedFromLanguageText, locale: 'default');
+  });
+
+  test('scheduleTomorrowText uses a 24-hour clock in en when asked to', () async {
+    final localizations = await GlobalStreamChatLocalizations.delegate.load(const Locale('en'));
+    final scheduledAt = DateTime(2026, 10, 22, 13);
+
+    expect(localizations.scheduleTomorrowText(scheduledAt: scheduledAt, use24HourFormat: true), 'Tomorrow at 13:00');
   });
 
   test('should throw if try to load locale which is not supported', () {

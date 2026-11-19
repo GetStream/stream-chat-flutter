@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../../stream_chat_flutter.dart';
-import '../../localization/translations.dart';
 import 'schedule_message_bounds.dart';
 import 'scheduled_message_counts.dart';
 
@@ -10,8 +9,8 @@ import 'scheduled_message_counts.dart';
 ///
 /// The sheet offers tomorrow morning and afternoon, the next Monday morning,
 /// and a custom time, which opens [showStreamScheduleTimeSheet]. A preset the
-/// channel doesn't allow isn't offered, and none can be picked once the
-/// channel or the user holds its limit. Returns the chosen time, or null when
+/// channel doesn't allow is disabled, and none can be picked once the channel
+/// or the user holds its limit. Returns the chosen time, or null when
 /// the sheet is dismissed.
 Future<DateTime?> showStreamScheduleMessageSheet({
   required BuildContext context,
@@ -79,7 +78,7 @@ class _ScheduleMessageSheet extends StatelessWidget {
                 children: [
                   for (final preset in presets)
                     _ScheduleOptionRow(
-                      label: Text(_presetLabel(translations, preset)),
+                      label: Text(_presetLabel(context, preset)),
                       // Shown, but can't be picked, when the channel doesn't
                       // allow it.
                       enabled: !isLimitReached && bounds.contains(preset),
@@ -100,10 +99,13 @@ class _ScheduleMessageSheet extends StatelessWidget {
     );
   }
 
-  String _presetLabel(Translations translations, DateTime preset) {
+  String _presetLabel(BuildContext context, DateTime preset) {
+    final translations = context.translations;
+    final use24HourFormat = MediaQuery.alwaysUse24HourFormatOf(context);
+
     return preset.isTomorrow
-        ? translations.scheduleTomorrowText(scheduledAt: preset)
-        : translations.scheduleWeekdayText(scheduledAt: preset);
+        ? translations.scheduleTomorrowText(scheduledAt: preset, use24HourFormat: use24HourFormat)
+        : translations.scheduleWeekdayText(scheduledAt: preset, use24HourFormat: use24HourFormat);
   }
 
   Future<void> _pickCustomTime(BuildContext context) async {

@@ -118,8 +118,10 @@ class DefaultStreamScheduledMessagesBanner extends StatefulWidget {
 
 class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamScheduledMessagesBanner> {
   Channel? _channel;
+  Future<bool>? _initialized;
   // Followed once the channel has a cid, and again when it or the thread
   // changes.
+  Stream<bool>? _canSchedule;
   Stream<ScheduledMessageCounts>? _counts;
 
   @override
@@ -129,6 +131,8 @@ class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamSche
     if (channel == _channel) return;
 
     _channel = channel;
+    _initialized = channel.initialized;
+    _canSchedule = null;
     _counts = null;
   }
 
@@ -151,23 +155,46 @@ class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamSche
   @override
   Widget build(BuildContext context) {
     final channel = _channel!;
-    // A channel that isn't created yet has no scheduled messages.
     final cid = channel.cid;
-    if (cid == null) return const SizedBox.shrink();
+    if (cid != null && channel.state != null) return _buildForChannel(channel, cid);
 
-    final clientState = channel.client.state;
-    final counts = _counts ??= clientState.scheduledMessagesStream.map((it) => _countsOf(it, cid));
+    // A channel that isn't created or watched yet has no scheduled messages
+    // to show. It has its cid and state once it is.
+    return FutureBuilder(
+      future: _initialized,
+      builder: (context, _) => switch (channel.cid) {
+        final cid? when channel.state != null => _buildForChannel(channel, cid),
+        _ => const SizedBox.shrink(),
+      },
+    );
+  }
 
-    return BetterStreamBuilder<ScheduledMessageCounts>(
-      stream: counts,
-      initialData: _countsOf(clientState.scheduledMessages, cid),
-      builder: (context, counts) => _ScheduledMessagesBanner(
-        channel: channel,
-        counts: counts,
-        isThread: widget.props.parentId != null,
-        onTap: widget.props.onTap,
-        margin: widget.props.margin,
-      ),
+  Widget _buildForChannel(Channel channel, String cid) {
+    final canSchedule = _canSchedule ??= channel.ownCapabilitiesStream.map(
+      (it) => it.contains(ChannelCapability.scheduleMessage),
+    );
+
+    return BetterStreamBuilder<bool>(
+      stream: canSchedule,
+      initialData: channel.canScheduleMessage,
+      builder: (context, canSchedule) {
+        if (!canSchedule) return const SizedBox.shrink();
+
+        final clientState = channel.client.state;
+        final counts = _counts ??= clientState.scheduledMessagesStream.map((it) => _countsOf(it, cid));
+
+        return BetterStreamBuilder<ScheduledMessageCounts>(
+          stream: counts,
+          initialData: _countsOf(clientState.scheduledMessages, cid),
+          builder: (context, counts) => _ScheduledMessagesBanner(
+            channel: channel,
+            counts: counts,
+            isThread: widget.props.parentId != null,
+            onTap: widget.props.onTap,
+            margin: widget.props.margin,
+          ),
+        );
+      },
     );
   }
 }
@@ -196,8 +223,6 @@ class _ScheduledMessagesBanner extends StatelessWidget {
     final theme = StreamScheduledMessagesBannerTheme.of(context);
     final defaults = _StreamScheduledMessagesBannerThemeDefaults(context);
 
-    if (!channel.canScheduleMessage) return const SizedBox.shrink();
-
     final ScheduledMessageCounts(:failed, :pending, :channelPending, :hasFailed, :hasPending) = counts;
     if (!hasFailed && !hasPending) return const SizedBox.shrink();
 
@@ -216,16 +241,18 @@ class _ScheduledMessagesBanner extends StatelessWidget {
         return translations.scheduledMessagesLimitText(count: channelPending, limit: limit);
       }
       if (onlyScheduledAt != null) {
-        return translations.scheduledMessageScheduledForText(scheduledAt: onlyScheduledAt);
+        return translations.scheduledMessageScheduledForText(
+          scheduledAt: onlyScheduledAt,
+          use24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+        );
       }
 
       return translations.scheduledMessagesCountText(count: pending);
     }
 
-    final linkLabel = switch (onlyScheduledAt) {
-      null => translations.viewAllLabel,
-      _ => translations.viewLabel,
-    };
+    // A single message is opened on its own.
+    final isSingle = onlyScheduledAt != null || failed == 1;
+    final linkLabel = isSingle ? translations.viewLabel : translations.viewAllLabel;
 
     final effectiveIconColor = hasFailed
         ? theme.failedIconColor ?? defaults.failedIconColor

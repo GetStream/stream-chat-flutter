@@ -77,7 +77,10 @@ class _ScheduleTimeSheetState extends State<_ScheduleTimeSheet> {
     final canSchedule = errorText == null;
 
     final previewTitle = switch (widget.initialScheduledAt) {
-      final scheduledAt? => translations.scheduledMessageScheduledForText(scheduledAt: scheduledAt),
+      final scheduledAt? => translations.scheduledMessageScheduledForText(
+        scheduledAt: scheduledAt,
+        use24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+      ),
       null => translations.messageToLabel(
         channelName:
             loadedChannelName(channel, currentUser: channel.client.state.currentUser) ?? translations.noTitleText,

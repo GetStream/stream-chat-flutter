@@ -890,18 +890,18 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String notifyRoleText(String role) => 'सभी $role सदस्यों को सूचित करें';
 
   @override
-  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+  String scheduledMessageSendAtText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
-    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return '$date को $time पर भेजें';
   }
 
   @override
-  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+  String scheduledMessageScheduledForText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
-    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return '$date को $time के लिए शेड्यूल किया गया';
   }
 
@@ -968,16 +968,16 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get customTimeLabel => 'कस्टम समय';
 
   @override
-  String scheduleTomorrowText({required DateTime scheduledAt}) {
-    final time = DateFormat.jm(localeName).format(scheduledAt.toLocal());
+  String scheduleTomorrowText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final time = _formatTime(scheduledAt.toLocal(), use24HourFormat: use24HourFormat);
     return 'कल $time पर';
   }
 
   @override
-  String scheduleWeekdayText({required DateTime scheduledAt}) {
+  String scheduleWeekdayText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final local = scheduledAt.toLocal();
     final weekday = DateFormat.EEEE(localeName).format(local);
-    final time = DateFormat.jm(localeName).format(local);
+    final time = _formatTime(local, use24HourFormat: use24HourFormat);
     return '$weekday $time पर';
   }
 

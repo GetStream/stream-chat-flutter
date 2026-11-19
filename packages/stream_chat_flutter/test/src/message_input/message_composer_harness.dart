@@ -59,13 +59,19 @@ Future<void> pumpTrailing(
 
 /// Shows [composer] in [channel], or a [composerChannel], and returns the
 /// channel.
-Future<MockChannel> pumpComposer(WidgetTester tester, {required Widget composer, MockChannel? channel}) async {
+Future<MockChannel> pumpComposer(
+  WidgetTester tester, {
+  required Widget composer,
+  MockChannel? channel,
+  StreamComponentBuilders? componentBuilders,
+}) async {
   channel ??= composerChannel();
 
   await tester.pumpWidget(
     MaterialApp(
       home: StreamChat(
         client: channel.client,
+        componentBuilders: componentBuilders,
         child: StreamChannel(
           channel: channel,
           child: Scaffold(body: composer),

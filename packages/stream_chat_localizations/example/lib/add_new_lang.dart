@@ -912,15 +912,17 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String notifyRoleText(String role) => 'Notify all $role members';
 
   @override
-  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+  String scheduledMessageSendAtText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final jiffy = Jiffy.parseFromDateTime(scheduledAt.toLocal());
-    return 'Send ${jiffy.MMMEd} at ${jiffy.jm}';
+    final time = use24HourFormat ? jiffy.Hm : jiffy.jm;
+    return 'Send ${jiffy.MMMEd} at $time';
   }
 
   @override
-  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+  String scheduledMessageScheduledForText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final jiffy = Jiffy.parseFromDateTime(scheduledAt.toLocal());
-    return 'Scheduled for ${jiffy.MMMEd} at ${jiffy.jm}';
+    final time = use24HourFormat ? jiffy.Hm : jiffy.jm;
+    return 'Scheduled for ${jiffy.MMMEd} at $time';
   }
 
   @override
@@ -986,16 +988,17 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   String get customTimeLabel => 'Custom time';
 
   @override
-  String scheduleTomorrowText({required DateTime scheduledAt}) {
-    final time = Jiffy.parseFromDateTime(scheduledAt.toLocal()).jm;
+  String scheduleTomorrowText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final jiffy = Jiffy.parseFromDateTime(scheduledAt.toLocal());
+    final time = use24HourFormat ? jiffy.Hm : jiffy.jm;
     return 'Tomorrow at $time';
   }
 
   @override
-  String scheduleWeekdayText({required DateTime scheduledAt}) {
+  String scheduleWeekdayText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final jiffy = Jiffy.parseFromDateTime(scheduledAt.toLocal());
     final weekday = jiffy.EEEE;
-    final time = jiffy.jm;
+    final time = use24HourFormat ? jiffy.Hm : jiffy.jm;
     return '$weekday at $time';
   }
 

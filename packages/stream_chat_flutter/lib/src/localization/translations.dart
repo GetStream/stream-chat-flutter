@@ -830,13 +830,17 @@ abstract class Translations {
   /// 8:00 AM".
   ///
   /// The [scheduledAt] is shown in local time.
-  String scheduledMessageSendAtText({required DateTime scheduledAt});
+  ///
+  /// With [use24HourFormat], the time is shown in 24-hour format.
+  String scheduledMessageSendAtText({required DateTime scheduledAt, bool use24HourFormat = false});
 
   /// The time a message is scheduled for, such as "Scheduled for Fri, Oct 23
   /// at 9:00 AM".
   ///
   /// The [scheduledAt] is shown in local time.
-  String scheduledMessageScheduledForText({required DateTime scheduledAt});
+  ///
+  /// With [use24HourFormat], the time is shown in 24-hour format.
+  String scheduledMessageScheduledForText({required DateTime scheduledAt, bool use24HourFormat = false});
 
   /// The status of a scheduled message while it is being scheduled or sent,
   /// such as "Sending…".
@@ -897,12 +901,16 @@ abstract class Translations {
   /// A preset time tomorrow, such as "Tomorrow at 9:00 AM".
   ///
   /// The [scheduledAt] is shown in local time.
-  String scheduleTomorrowText({required DateTime scheduledAt});
+  ///
+  /// With [use24HourFormat], the time is shown in 24-hour format.
+  String scheduleTomorrowText({required DateTime scheduledAt, bool use24HourFormat = false});
 
   /// A preset time on a day of the coming week, such as "Monday at 9:00 AM".
   ///
   /// The [scheduledAt] is shown in local time.
-  String scheduleWeekdayText({required DateTime scheduledAt});
+  ///
+  /// With [use24HourFormat], the time is shown in 24-hour format.
+  String scheduleWeekdayText({required DateTime scheduledAt, bool use24HourFormat = false});
 
   /// The label above a preview of a message sent to [channelName], such as
   /// "Message to Maya".
@@ -936,9 +944,10 @@ abstract class Translations {
   /// be scheduled for, such as "That's further ahead than your app allows".
   String get scheduleTooFarError;
 
-  /// The title of the sheet of times a message can be scheduled for, and the
-  /// error shown when scheduling fails, when the channel or the user holds its
-  /// [limit] of scheduled messages, such as "Limit reached (10 max)".
+  /// The title of the sheet of times a message can be scheduled for when the
+  /// channel or the user holds its [limit] of scheduled messages, and the
+  /// custom time sheet's error when the channel does, such as "Limit reached
+  /// (10 max)". It is shown before anything is sent.
   String scheduleLimitReachedLabel({required int limit});
 
   /// The error shown when the current user holds their [limit] of scheduled
@@ -972,6 +981,12 @@ class DefaultTranslations implements Translations {
 
   /// Singleton instance of [DefaultTranslations]
   static const instance = DefaultTranslations._();
+
+  // The time of [dateTime], in 24-hour format with [use24HourFormat].
+  String _formatTime(DateTime dateTime, {required bool use24HourFormat}) {
+    final format = use24HourFormat ? DateFormat.Hm('en_US') : DateFormat.jm('en_US');
+    return format.format(dateTime);
+  }
 
   @override
   AccessibilityTranslations get accessibility => const DefaultAccessibilityTranslations();
@@ -1858,18 +1873,18 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String notifyRoleText(String role) => 'Notify all $role members';
 
   @override
-  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+  String scheduledMessageSendAtText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd('en_US').format(localScheduledAt);
-    final time = DateFormat.jm('en_US').format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return 'Send $date at $time';
   }
 
   @override
-  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+  String scheduledMessageScheduledForText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd('en_US').format(localScheduledAt);
-    final time = DateFormat.jm('en_US').format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return 'Scheduled for $date at $time';
   }
 
@@ -1936,16 +1951,16 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get customTimeLabel => 'Custom time';
 
   @override
-  String scheduleTomorrowText({required DateTime scheduledAt}) {
-    final time = DateFormat.jm('en_US').format(scheduledAt.toLocal());
+  String scheduleTomorrowText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final time = _formatTime(scheduledAt.toLocal(), use24HourFormat: use24HourFormat);
     return 'Tomorrow at $time';
   }
 
   @override
-  String scheduleWeekdayText({required DateTime scheduledAt}) {
+  String scheduleWeekdayText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final local = scheduledAt.toLocal();
     final weekday = DateFormat.EEEE('en_US').format(local);
-    final time = DateFormat.jm('en_US').format(local);
+    final time = _formatTime(local, use24HourFormat: use24HourFormat);
     return '$weekday at $time';
   }
 

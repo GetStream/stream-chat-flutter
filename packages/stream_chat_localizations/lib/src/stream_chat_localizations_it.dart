@@ -902,18 +902,18 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String notifyRoleText(String role) => 'Notifica tutti i membri $role';
 
   @override
-  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+  String scheduledMessageSendAtText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
-    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return 'Invio il $date alle $time';
   }
 
   @override
-  String scheduledMessageScheduledForText({required DateTime scheduledAt}) {
+  String scheduledMessageScheduledForText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
-    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return 'Programmato per il $date alle $time';
   }
 
@@ -981,16 +981,16 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get customTimeLabel => 'Orario personalizzato';
 
   @override
-  String scheduleTomorrowText({required DateTime scheduledAt}) {
-    final time = DateFormat.jm(localeName).format(scheduledAt.toLocal());
+  String scheduleTomorrowText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final time = _formatTime(scheduledAt.toLocal(), use24HourFormat: use24HourFormat);
     return 'Domani alle $time';
   }
 
   @override
-  String scheduleWeekdayText({required DateTime scheduledAt}) {
+  String scheduleWeekdayText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final local = scheduledAt.toLocal();
     final weekday = toBeginningOfSentenceCase(DateFormat.EEEE(localeName).format(local), localeName);
-    final time = DateFormat.jm(localeName).format(local);
+    final time = _formatTime(local, use24HourFormat: use24HourFormat);
     return '$weekday alle $time';
   }
 

@@ -65,8 +65,8 @@ class MessageComposerComponentProps {
 
   /// The callback for when the send button is long-pressed.
   ///
-  /// Only offered while the button would send a new message, not while it
-  /// saves an edit or runs a command.
+  /// Null while a message is edited. The default trailing doesn't offer it
+  /// while the button runs a command either.
   final VoidCallback? onSendLongPress;
 
   /// The callback for when the microphone button is pressed.

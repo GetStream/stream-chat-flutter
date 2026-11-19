@@ -23,23 +23,12 @@ const _kMentionTrigger = '@';
 /// previewed as an OG Attachment.
 typedef OgPreviewFilter = bool Function(Uri matchedUri, String messageText);
 
-/// Signature for [MessageComposerProps.onSendLongPress], called when the send
-/// button is long-pressed while it would send a new message.
-///
-/// The [BuildContext] is the composer's, and [controller] holds the message the
-/// send button would have sent.
-typedef StreamSendLongPressCallback =
-    FutureOr<void> Function(
-      BuildContext context,
-      StreamMessageComposerController controller,
-    );
-
-/// Signature for [MessageComposerProps.onSendMessage], called in place of
-/// sending or updating the message.
+/// Signature for [MessageComposerProps.onSendMessage] and
+/// [MessageComposerProps.onSendLongPress].
 ///
 /// The [BuildContext] is the composer's, and [controller] holds the message to
-/// send or the edit to save.
-typedef StreamSendMessageCallback =
+/// send, or the edit to save.
+typedef StreamMessageComposerCallback =
     FutureOr<void> Function(
       BuildContext context,
       StreamMessageComposerController controller,
@@ -93,8 +82,8 @@ class StreamMessageComposer extends StatelessWidget {
     super.key,
     void Function(Message)? onMessageSent,
     FutureOr<Message> Function(Message)? preMessageSending,
-    StreamSendMessageCallback? onSendMessage,
-    StreamSendLongPressCallback? onSendLongPress,
+    StreamMessageComposerCallback? onSendMessage,
+    StreamMessageComposerCallback? onSendLongPress,
     StreamMessageComposerController? messageComposerController,
     FocusNode? focusNode,
     bool disableAttachments = false,
@@ -265,10 +254,12 @@ class MessageComposerProps {
   ///
   /// The composer doesn't send, update or clear anything when it is set, so the
   /// callback is responsible for the message and for resetting the controller.
-  /// [preMessageSending] and [onMessageSent] aren't called, and links aren't
-  /// checked against channels that don't allow them. The send button is still
+  /// It also skips [preMessageSending], [onMessageSent] and
+  /// [onQuotedMessageCleared], deleting the draft, checking links against
+  /// channels that don't allow them, reloading a stale channel, and moving the
+  /// focus. An error it throws goes to [onError]. The send button is still
   /// enabled only while the message can be sent.
-  final StreamSendMessageCallback? onSendMessage;
+  final StreamMessageComposerCallback? onSendMessage;
 
   /// Called when the send button is long-pressed while it would send a new
   /// message.
@@ -277,7 +268,7 @@ class MessageComposerProps {
   /// the message, such as scheduling it through
   /// [showStreamScheduleMessageSheet] and then resetting the controller. When
   /// null, the send button has no long press.
-  final StreamSendLongPressCallback? onSendLongPress;
+  final StreamMessageComposerCallback? onSendLongPress;
 
   /// The controller for the message composer.
   final StreamMessageComposerController? messageComposerController;
@@ -507,8 +498,8 @@ class MessageComposerProps {
   MessageComposerProps copyWith({
     void Function(Message)? onMessageSent,
     FutureOr<Message> Function(Message)? preMessageSending,
-    StreamSendMessageCallback? onSendMessage,
-    StreamSendLongPressCallback? onSendLongPress,
+    StreamMessageComposerCallback? onSendMessage,
+    StreamMessageComposerCallback? onSendLongPress,
     StreamMessageComposerController? messageComposerController,
     FocusNode? focusNode,
     bool? disableAttachments,
@@ -1676,7 +1667,12 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     _hidePicker();
 
     if (widget.props.onSendMessage case final onSendMessage?) {
-      return onSendMessage(context, _effectiveController);
+      try {
+        await onSendMessage(context, _effectiveController);
+      } catch (error, stackTrace) {
+        _reportSendError(error, stackTrace);
+      }
+      return;
     }
 
     final streamChannel = StreamChannel.maybeOf(context);
@@ -1748,25 +1744,29 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
       widget.props.onMessageSent?.call(resp.message);
     } catch (error, stackTrace) {
-      if (widget.props.onError case final onError?) {
-        return onError(error, stackTrace);
-      }
-
-      // The send button drops this future, so rethrowing would escape as an
-      // unhandled async error. Forward it through Flutter's error plumbing
-      // instead, so host apps (Crashlytics / Sentry / console) still see it.
-      // Connection failures are marked silent: the message is left in a failed
-      // state and retried on reconnect, so they are expected in release.
-      FlutterError.reportError(
-        FlutterErrorDetails(
-          exception: error,
-          stack: stackTrace,
-          library: 'stream_chat_flutter',
-          context: ErrorDescription('while sending a message'),
-          silent: error is StreamChatNetworkError,
-        ),
-      );
+      _reportSendError(error, stackTrace);
     }
+  }
+
+  void _reportSendError(Object error, StackTrace stackTrace) {
+    if (widget.props.onError case final onError?) {
+      return onError(error, stackTrace);
+    }
+
+    // The send button drops the send's future, so rethrowing would escape as
+    // an unhandled async error. Forward it through Flutter's error plumbing
+    // instead, so host apps (Crashlytics / Sentry / console) still see it.
+    // Connection failures are marked silent: the message is left in a failed
+    // state and retried on reconnect, so they are expected in release.
+    FlutterError.reportError(
+      FlutterErrorDetails(
+        exception: error,
+        stack: stackTrace,
+        library: 'stream_chat_flutter',
+        context: ErrorDescription('while sending a message'),
+        silent: error is StreamChatNetworkError,
+      ),
+    );
   }
 
   void _showErrorAlert(String description) {

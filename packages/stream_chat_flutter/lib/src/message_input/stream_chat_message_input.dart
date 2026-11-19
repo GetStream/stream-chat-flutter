@@ -254,7 +254,8 @@ class _StreamChatMessageInputContent extends StatelessWidget {
           isFloating: widget.isFloating,
           currentUserId: widget.currentUserId,
           onSendPressed: widget.onSendPressed,
-          onSendLongPress: widget.onSendLongPress,
+          // An edit has no new message to send.
+          onSendLongPress: inputController.isEditing ? null : widget.onSendLongPress,
           voiceRecordingCallback: _createVoiceRecordingCallback(context),
           onAttachmentButtonPressed: widget.onAttachmentButtonPressed,
           isPickerOpen: widget.isPickerOpen,
