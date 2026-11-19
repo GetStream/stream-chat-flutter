@@ -223,12 +223,13 @@ class ScheduledMessageManager {
 
     try {
       if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
+        final result = await _uploadAttachments(local, generation);
         // ignore: parameter_assignments
-        message = await _uploadAttachments(local, generation);
+        message = result.message;
         local = local.copyWith(message: message);
 
         // Fail the whole message if any attachment failed to upload
-        if (message.attachments.any((it) => it.uploadState.isFailed)) {
+        if (result is MessageAttachmentsUploadFailed) {
           throw _attachmentUploadFailed;
         }
       }
@@ -634,11 +635,11 @@ class ScheduledMessageManager {
     _emitEvent(EventType.scheduledMessageUpdated, saving, generation);
 
     if (saving.message.attachments.any((it) => !it.uploadState.isSuccess)) {
-      final uploaded = await _uploadAttachments(saving, generation);
-      saving = saving.copyWith(message: uploaded);
+      final result = await _uploadAttachments(saving, generation);
+      saving = saving.copyWith(message: result.message);
 
       // Fail the whole edit if any attachment failed to upload
-      if (uploaded.attachments.any((it) => it.uploadState.isFailed)) {
+      if (result is MessageAttachmentsUploadFailed) {
         final failed = saving.copyWith(
           status: .failed,
           failureReason: ScheduledMessageFailureReason.updateFailed,
@@ -677,11 +678,11 @@ class ScheduledMessageManager {
   }
 
   // Uploads the attachments of [scheduledMessage] that are not uploaded yet,
-  // showing their progress on it, and resolves to its message.
+  // showing their progress on it, and resolves to how the upload ended.
   //
   // Throws [_uploadCanceled] if [_cancelUploads] stops them, even once they
   // have finished.
-  Future<Message> _uploadAttachments(
+  Future<MessageAttachmentsUploadResult> _uploadAttachments(
     ScheduledMessage scheduledMessage,
     int generation,
   ) async {
@@ -704,7 +705,7 @@ class ScheduledMessageManager {
     if (!identical(_uploads[id], upload)) throw _uploadCanceled;
     _uploads.remove(id);
 
-    return result.message;
+    return result;
   }
 
   // Cancels the attachment uploads of the scheduled message [id], so what

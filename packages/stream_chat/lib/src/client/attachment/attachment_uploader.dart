@@ -12,7 +12,7 @@ import '../client.dart';
 ///
 /// It turns attachment files into remote URLs. Keeping the attachments and
 /// their progress somewhere is up to the caller.
-class ChannelAttachmentUploader {
+final class ChannelAttachmentUploader {
   /// Creates an uploader that sends files to the channel `channelId` of
   /// `channelType` through `client`.
   ChannelAttachmentUploader({

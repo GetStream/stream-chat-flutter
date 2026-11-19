@@ -658,10 +658,10 @@ class Channel {
 
   // Uploads the attachments of [message] that are not uploaded yet, or only
   // [attachmentIds] if given, showing their progress on it, and resolves to
-  // the message once they have settled.
+  // how the upload ended once they have settled.
   //
   // Throws the reason they are canceled with, even once they have finished.
-  Future<Message> _uploadAttachments(
+  Future<MessageAttachmentsUploadResult> _uploadAttachments(
     Message message, {
     Iterable<String>? attachmentIds,
   }) async {
@@ -684,7 +684,7 @@ class Channel {
     }
 
     _attachmentUploads.remove(message.id);
-    return result.message;
+    return result;
   }
 
   Message? _findMessageInLocalState(String messageId) {
@@ -738,11 +738,12 @@ class Channel {
 
     try {
       if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
+        final result = await _uploadAttachments(message);
         // ignore: parameter_assignments
-        message = await _uploadAttachments(message);
+        message = result.message;
 
         // Fail the whole message if any attachment failed to upload
-        if (message.attachments.any((it) => it.uploadState.isFailed)) {
+        if (result is MessageAttachmentsUploadFailed) {
           throw const StreamChatError('Failed to upload one or more attachments');
         }
       }
@@ -908,11 +909,12 @@ class Channel {
 
     try {
       if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
+        final result = await _uploadAttachments(message);
         // ignore: parameter_assignments
-        message = await _uploadAttachments(message);
+        message = result.message;
 
         // Fail the whole message if any attachment failed to upload
-        if (message.attachments.any((it) => it.uploadState.isFailed)) {
+        if (result is MessageAttachmentsUploadFailed) {
           throw const StreamChatError('Failed to upload one or more attachments');
         }
       }

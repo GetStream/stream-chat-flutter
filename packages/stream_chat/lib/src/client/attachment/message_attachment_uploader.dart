@@ -64,8 +64,9 @@ final class MessageAttachmentsUpload {
   final List<Attachment> _queued;
   final _uploads = <String, ChannelAttachmentUpload>{};
   final _settled = <String>{};
-  var _isCanceled = false;
-  Object? _cancelReason;
+  // Set once the upload is canceled, with the reason it was given.
+  ({Object? reason})? _canceled;
+  bool get _isCanceled => _canceled != null;
 
   late final _notifyProgress = _notify.throttled(
     const Duration(milliseconds: 500),
@@ -106,8 +107,7 @@ final class MessageAttachmentsUpload {
   /// completed.
   void cancel({Object? reason}) {
     if (_isCanceled) return;
-    _isCanceled = true;
-    _cancelReason = reason;
+    _canceled = (reason: reason);
 
     _notifyProgress.cancel();
     for (final upload in _uploads.values) {
@@ -120,9 +120,15 @@ final class MessageAttachmentsUpload {
     await Future.wait([for (var i = 0; i < workers; i++) _uploadQueued()]);
     _notifyProgress.cancel();
 
-    if (_isCanceled) {
-      return MessageAttachmentsUploadCanceled._(_message, _cancelReason);
+    if (_canceled case (:final reason)?) {
+      return MessageAttachmentsUploadCanceled._(_message, reason);
     }
+
+    // Only the attachments this upload sent count, not ones that failed before.
+    final hasFailed = _message.attachments.any(
+      (it) => _uploads.containsKey(it.id) && it.uploadState.isFailed,
+    );
+    if (hasFailed) return MessageAttachmentsUploadFailed._(_message);
 
     return MessageAttachmentsUploadCompleted._(_message);
   }
@@ -189,11 +195,18 @@ sealed class MessageAttachmentsUploadResult {
   final Message message;
 }
 
-/// Every attachment's upload settled on its own.
+/// Every attachment's upload settled on its own, and none failed.
 ///
-/// Some can have failed, or been canceled one by one.
+/// Some can have been canceled one by one.
 final class MessageAttachmentsUploadCompleted extends MessageAttachmentsUploadResult {
   const MessageAttachmentsUploadCompleted._(super.message) : super._();
+}
+
+/// Every attachment's upload settled on its own, and at least one failed.
+///
+/// The failed ones are in an [UploadState.failed].
+final class MessageAttachmentsUploadFailed extends MessageAttachmentsUploadResult {
+  const MessageAttachmentsUploadFailed._(super.message) : super._();
 }
 
 /// The upload was canceled with [MessageAttachmentsUpload.cancel].
