@@ -65,6 +65,7 @@ final class MessageAttachmentsUpload {
   final _uploads = <String, ChannelAttachmentUpload>{};
   final _settled = <String>{};
   var _isCanceled = false;
+  Object? _cancelReason;
 
   late final _notifyProgress = _notify.throttled(
     const Duration(milliseconds: 500),
@@ -95,15 +96,18 @@ final class MessageAttachmentsUpload {
     return _uploads[attachmentId]?.cancel(reason: reason) ?? false;
   }
 
-  /// Cancels every attachment upload that hasn't settled.
+  /// Cancels every attachment upload that hasn't settled, for [reason] if
+  /// given.
   ///
   /// Returns at once, and can be called more than once. Uploads that already
   /// settled keep their outcome, and the attachments still waiting for their
   /// turn are left as they were. The upload ends as
-  /// [MessageAttachmentsUploadCanceled], unless it had already completed.
-  void cancel() {
+  /// [MessageAttachmentsUploadCanceled] with [reason], unless it had already
+  /// completed.
+  void cancel({Object? reason}) {
     if (_isCanceled) return;
     _isCanceled = true;
+    _cancelReason = reason;
 
     _notifyProgress.cancel();
     for (final upload in _uploads.values) {
@@ -116,7 +120,10 @@ final class MessageAttachmentsUpload {
     await Future.wait([for (var i = 0; i < workers; i++) _uploadQueued()]);
     _notifyProgress.cancel();
 
-    if (_isCanceled) return MessageAttachmentsUploadCanceled._(_message);
+    if (_isCanceled) {
+      return MessageAttachmentsUploadCanceled._(_message, _cancelReason);
+    }
+
     return MessageAttachmentsUploadCompleted._(_message);
   }
 
@@ -191,5 +198,8 @@ final class MessageAttachmentsUploadCompleted extends MessageAttachmentsUploadRe
 
 /// The upload was canceled with [MessageAttachmentsUpload.cancel].
 final class MessageAttachmentsUploadCanceled extends MessageAttachmentsUploadResult {
-  const MessageAttachmentsUploadCanceled._(super.message) : super._();
+  const MessageAttachmentsUploadCanceled._(super.message, this.reason) : super._();
+
+  /// The reason given to [MessageAttachmentsUpload.cancel], if any.
+  final Object? reason;
 }

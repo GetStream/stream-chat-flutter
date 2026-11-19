@@ -610,10 +610,8 @@ class Channel {
     channelType: type,
   );
 
-  // The attachment upload running for each message, and the error the call
-  // waiting for each canceled one throws.
+  // The attachment upload running for each message.
   final _attachmentUploads = <String, MessageAttachmentsUpload>{};
-  final _attachmentUploadCancelErrors = Expando<StreamChatError>();
 
   /// Cancels [attachmentId] upload request. Throws exception if the request
   /// hasn't even started yet, or already completed or was canceled.
@@ -662,8 +660,7 @@ class Channel {
   // [attachmentIds] if given, showing their progress on it, and resolves to
   // the message once they have settled.
   //
-  // Throws the error [_cancelAttachmentUploads] stops them with, even once
-  // they have finished.
+  // Throws the reason they are canceled with, even once they have finished.
   Future<Message> _uploadAttachments(
     Message message, {
     Iterable<String>? attachmentIds,
@@ -678,22 +675,16 @@ class Channel {
     _attachmentUploads[message.id] = upload;
     final result = await upload.result;
 
+    // Deleted while they uploaded, or replaced by a newer call for the message.
     if (!identical(_attachmentUploads[message.id], upload)) {
-      throw _attachmentUploadCancelErrors[upload] ?? _messageCancelled;
+      throw switch (result) {
+        MessageAttachmentsUploadCanceled(reason: final StreamChatError reason) => reason,
+        _ => _messageCancelled,
+      };
     }
 
     _attachmentUploads.remove(message.id);
     return result.message;
-  }
-
-  // Cancels the attachment upload of the message [messageId], so the call
-  // waiting for it throws [error].
-  void _cancelAttachmentUploads(String messageId, StreamChatError error) {
-    final upload = _attachmentUploads.remove(messageId);
-    if (upload == null) return;
-
-    _attachmentUploadCancelErrors[upload] = error;
-    upload.cancel();
   }
 
   Message? _findMessageInLocalState(String messageId) {
@@ -724,7 +715,7 @@ class Channel {
 
     // Cancelling the attachment upload of an earlier call for the message,
     // e.g. updating the message while the earlier call is in progress.
-    _cancelAttachmentUploads(message.id, _messageCancelled);
+    _attachmentUploads.remove(message.id)?.cancel(reason: _messageCancelled);
 
     final quotedMessage = state!.messages.firstWhereOrNull(
       (m) => m.id == message.quotedMessageId,
@@ -899,7 +890,7 @@ class Channel {
 
     // Cancelling the attachment upload of an earlier call for the message,
     // e.g. updating the message while the earlier call is in progress.
-    _cancelAttachmentUploads(message.id, _messageCancelled);
+    _attachmentUploads.remove(message.id)?.cancel(reason: _messageCancelled);
 
     // ignore: parameter_assignments
     message = message.copyWith(
@@ -984,7 +975,7 @@ class Channel {
 
     // Cancelling the attachment upload of an earlier call for the message,
     // e.g. updating the message while the earlier call is in progress.
-    _cancelAttachmentUploads(message.id, _messageCancelled);
+    _attachmentUploads.remove(message.id)?.cancel(reason: _messageCancelled);
 
     // ignore: parameter_assignments
     message = message.copyWith(
@@ -1147,7 +1138,7 @@ class Channel {
 
     // Stopping the attachment uploads still running for the message, and the
     // `sendMessage` or `updateMessage` waiting for them.
-    _cancelAttachmentUploads(message.id, _messageDeleted);
+    _attachmentUploads.remove(message.id)?.cancel(reason: _messageDeleted);
 
     // Nothing else reports the deletion of a message that only exists locally.
     _client.handleEvent(
