@@ -27,8 +27,10 @@ final quoteDeletedError = StreamChatNetworkError.raw(
 final offline = StreamChatNetworkError.raw(code: -1, message: 'No connection');
 
 // The codes of the errors that refuse a scheduled message request because the
-// message is being sent, was already sent, or was deleted.
+// message is being sent, was changed at the same time, was already sent, or
+// was deleted.
 const scheduledMessageSendingCode = 121;
+const scheduledMessageConflictCode = 122;
 const scheduledMessageAlreadySentCode = 123;
 const scheduledMessageCanceledCode = 124;
 

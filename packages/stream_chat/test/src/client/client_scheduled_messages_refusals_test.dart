@@ -11,18 +11,23 @@ void main() {
   final now = DateTime.utc(2026, 10, 30, 12);
   final scheduledAt = now.add(const Duration(days: 1));
 
-  Future<ScheduleMessageResponse> schedule(Message message) {
+  Future<ScheduleMessageResponse> schedule(Message message, {DateTime? at}) {
     return withClock(
       Clock.fixed(now),
-      () => harness.client.scheduleMessage(message, 'general', 'messaging', scheduledAt: scheduledAt),
+      () => harness.client.scheduleMessage(message, 'general', 'messaging', scheduledAt: at ?? scheduledAt),
     );
   }
 
-  // Loads the channel [testCid], with [commands] and [messages].
-  void loadChannel({List<Command> commands = const [], List<Message> messages = const []}) {
+  // Loads the channel [testCid], with [commands], [messages] and
+  // [maxLeadTime].
+  void loadChannel({
+    List<Command> commands = const [],
+    List<Message> messages = const [],
+    Duration? maxLeadTime,
+  }) {
     final model = ChannelModel(
       cid: testCid,
-      config: ChannelConfig(commands: commands),
+      config: ChannelConfig(commands: commands, scheduledMessagesMaxLeadTime: maxLeadTime),
     );
     Channel.fromState(harness.client, ChannelState(channel: model, messages: messages));
   }
@@ -228,6 +233,109 @@ void main() {
     verify(
       () => harness.api.scheduledMessages.updateScheduledMessage('a', scheduledAt: command.scheduledAt),
     ).called(1);
+  });
+
+  group('the time of a scheduled message', () {
+    const maxLeadTime = Duration(days: 7);
+    final latest = now.add(maxLeadTime);
+
+    test("scheduleMessage refuses a time past the channel's maximum lead time, without a request", () async {
+      loadChannel(maxLeadTime: maxLeadTime);
+
+      await expectLater(
+        schedule(
+          Message(id: 'b', text: 'Hi'),
+          at: latest.add(const Duration(minutes: 2)),
+        ),
+        throwsA(refusedFor(.scheduledAtTooFar)),
+      );
+
+      verifyNotScheduled();
+    });
+
+    test('scheduleMessage schedules a time within a minute past the maximum lead time', () async {
+      loadChannel(maxLeadTime: maxLeadTime);
+      stubSchedule();
+
+      await schedule(
+        Message(id: 'b', text: 'Hi'),
+        at: latest.add(const Duration(seconds: 30)),
+      );
+
+      expect(idsOf(harness.client.state.scheduledMessages), ['b']);
+    });
+
+    test('scheduleMessage refuses a message whose pin expires before it is sent, without a request', () async {
+      final pinned = Message(id: 'b', text: 'Hi', pinned: true, pinExpires: scheduledAt);
+
+      await expectLater(schedule(pinned), throwsA(refusedFor(.pinExpiresTooSoon)));
+
+      verifyNotScheduled();
+    });
+
+    test('scheduleMessage refuses a location shared for less than a minute once sent, without a request', () async {
+      final location = Location(latitude: 52.37, longitude: 4.89, endAt: scheduledAt.add(const Duration(seconds: 30)));
+
+      await expectLater(
+        schedule(Message(id: 'b', text: 'Hi', sharedLocation: location)),
+        throwsA(refusedFor(.locationEndsTooSoon)),
+      );
+
+      verifyNotScheduled();
+    });
+
+    test('scheduleMessage schedules a location shared for a minute once sent', () async {
+      stubSchedule();
+      final location = Location(latitude: 52.37, longitude: 4.89, endAt: scheduledAt.add(const Duration(minutes: 1)));
+
+      await schedule(Message(id: 'b', text: 'Hi', sharedLocation: location));
+
+      expect(idsOf(harness.client.state.scheduledMessages), ['b']);
+    });
+
+    test('rescheduleMessage refuses moving one past the maximum lead time, without a request', () async {
+      loadChannel(maxLeadTime: maxLeadTime);
+      final a = fakeScheduledMessage('a');
+      await harness.hold([a]);
+
+      await expectLater(
+        withClock(
+          Clock.fixed(now),
+          () => harness.client.rescheduleMessage(a.id, scheduledAt: latest.add(const Duration(minutes: 2))),
+        ),
+        throwsA(refusedFor(.scheduledAtTooFar)),
+      );
+
+      verifyNotUpdated();
+    });
+
+    test('rescheduleMessage refuses moving one past the time its pin expires, without a request', () async {
+      final a = fakeScheduledMessage('a');
+      final pinned = a.copyWith(
+        message: a.message.copyWith(pinned: true, pinExpires: a.scheduledAt.add(const Duration(hours: 1))),
+      );
+      await harness.hold([pinned]);
+
+      await expectLater(
+        harness.client.rescheduleMessage(a.id, scheduledAt: a.scheduledAt.add(const Duration(hours: 2))),
+        throwsA(refusedFor(.pinExpiresTooSoon)),
+      );
+
+      verifyNotUpdated();
+    });
+
+    test('updateScheduledMessage refuses an edit whose pin expires before its time, without a request', () async {
+      final a = fakeScheduledMessage('a');
+      await harness.hold([a]);
+      final edited = a.message.copyWith(pinned: true, pinExpires: a.scheduledAt.subtract(const Duration(hours: 1)));
+
+      await expectLater(
+        harness.client.updateScheduledMessage(a.id, edited),
+        throwsA(refusedFor(.pinExpiresTooSoon)),
+      );
+
+      verifyNotUpdated();
+    });
   });
 
   group('a scheduled message that is not listed', () {

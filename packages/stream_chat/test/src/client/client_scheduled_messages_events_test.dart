@@ -68,4 +68,45 @@ void main() {
 
     expect(idsOf(harness.client.state.scheduledMessages), ['b', 'a']);
   });
+
+  group('an event of the message a scheduled message quotes', () {
+    final quoted = Message(id: 'quoted', text: 'See you there', createdAt: DateTime.utc(2026, 10, 28));
+    final quoting = fakeScheduledMessage('a').copyWith(
+      message: Message(id: 'a', text: 'Good morning', quotedMessageId: quoted.id, quotedMessage: quoted),
+    );
+
+    Future<void> receiveMessageEvent(String type, Message message) async {
+      harness.client.handleEvent(Event(type: type, cid: testCid, message: message, isLocal: false));
+      await settle();
+    }
+
+    test('updates the quote when the message is edited', () async {
+      await harness.hold([quoting, fakeScheduledMessage('b')]);
+
+      await receiveMessageEvent(EventType.messageUpdated, quoted.copyWith(text: 'See you at noon'));
+
+      final [a, b] = harness.client.state.scheduledMessages;
+      expect(a.message.quotedMessage?.text, 'See you at noon');
+      expect(b.message.quotedMessage, isNull);
+    });
+
+    test('marks the quote deleted when the message is deleted', () async {
+      await harness.hold([quoting]);
+
+      final deleted = quoted.copyWith(type: MessageType.deleted, deletedAt: DateTime.utc(2026, 10, 30));
+      await receiveMessageEvent(EventType.messageDeleted, deleted);
+
+      final [a] = harness.client.state.scheduledMessages;
+      expect(ScheduledMessageRules.quotesDeletedMessage(a.message, null), isTrue);
+    });
+
+    test('leaves the list as it was for a message no scheduled message quotes', () async {
+      await harness.hold([quoting]);
+      final before = harness.client.state.scheduledMessages;
+
+      await receiveMessageEvent(EventType.messageUpdated, Message(id: 'other', text: 'Hi'));
+
+      expect(identical(harness.client.state.scheduledMessages, before), isTrue);
+    });
+  });
 }

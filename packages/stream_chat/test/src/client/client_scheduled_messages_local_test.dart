@@ -188,17 +188,17 @@ void main() {
     final failed = fakeScheduledMessage('a', status: ScheduledMessageStatus.failed);
     await harness.hold([failed]);
 
-    expect(() => harness.client.resendScheduledMessage(failed.id), throwsA(isA<AssertionError>()));
+    expect(() => harness.client.resendScheduledMessage(failed.id), throwsA(isA<StateError>()));
   });
 
-  test('scheduledMessages lists failed ones after later scheduled ones', () async {
+  test('scheduledMessages lists failed ones by their time like the others', () async {
     await scheduleUnreachable(Message(id: 'a', text: 'Good morning'));
     await harness.hold([
       fakeScheduledMessage('server-failed', scheduledAt: now, status: ScheduledMessageStatus.failed),
       fakeScheduledMessage('later', scheduledAt: scheduledAt.add(const Duration(days: 1))),
     ]);
 
-    expect(idsOf(harness.client.state.scheduledMessages), ['later', 'server-failed', 'a']);
+    expect(idsOf(harness.client.state.scheduledMessages), ['server-failed', 'a', 'later']);
   });
 
   test('scheduledMessages lists the ones due at the same time by ID', () async {
@@ -219,7 +219,7 @@ void main() {
 
     await harness.client.loadScheduledMessages();
 
-    expect(idsOf(harness.client.state.scheduledMessages), ['b', 'a']);
+    expect(idsOf(harness.client.state.scheduledMessages), ['a', 'b']);
   });
 
   test('scheduleMessage reports it as created while preparing, then as created once scheduled', () async {

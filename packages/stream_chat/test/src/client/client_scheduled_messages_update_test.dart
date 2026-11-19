@@ -12,11 +12,28 @@ void main() {
   final original = fakeScheduledMessage('a');
   final edited = Message(id: 'a', text: 'Good evening');
   final saved = fakeScheduledMessage('a', text: 'Good evening', updatedAt: DateTime.utc(2026, 10, 30));
-  final tooLong = StreamChatNetworkError.raw(code: 4, message: 'Message is too long', statusCode: 400);
+  final tooLong = StreamChatNetworkError.raw(
+    code: 4,
+    message: 'Message is too long',
+    statusCode: 400,
+    data: ErrorResponse()
+      ..code = 4
+      ..statusCode = 400
+      ..message = 'Message is too long',
+  );
   final sendingError = StreamChatNetworkError.raw(
     code: scheduledMessageSendingCode,
     message: 'Sending',
     statusCode: 409,
+  );
+  final conflictError = StreamChatNetworkError.raw(
+    code: scheduledMessageConflictCode,
+    message: 'Changed at the same time',
+    statusCode: 409,
+    data: ErrorResponse()
+      ..code = scheduledMessageConflictCode
+      ..statusCode = 409
+      ..message = 'Changed at the same time',
   );
 
   void stubUpdate(Future<UpdateScheduledMessageResponse> Function() answer, {DateTime? scheduledAt}) {
@@ -30,6 +47,13 @@ void main() {
     return harness.eventsDuring(
       () => expectRequest(harness.client.updateScheduledMessage(original.id, edited), throws),
     );
+  }
+
+  // Edits [original] with an edit the server refuses.
+  Future<ScheduledMessage> editRefused() async {
+    stubUpdate(() async => throw tooLong);
+    await update(throws: tooLong);
+    return harness.client.state.scheduledMessages.single;
   }
 
   // Edits [original] while the server can't be reached.
@@ -62,21 +86,33 @@ void main() {
     expect(updating.message.text, 'Good evening');
   });
 
-  test('updateScheduledMessage keeps an edit that could not reach the server as failed', () async {
+  test('updateScheduledMessage keeps an edit that could not reach the server as failed, to retry', () async {
     final failed = await editUnreachable();
 
     expect(failed.status, ScheduledMessageStatus.failed);
     expect(failed.failureReason, ScheduledMessageFailureReason.updateFailed);
+    expect(failed.failureReason?.isRetriable, isTrue);
     expect(failed.message.text, 'Good evening');
   });
 
-  test('updateScheduledMessage keeps an edit the server refuses as failed', () async {
+  test('updateScheduledMessage keeps an edit the server refuses as failed, but not to retry', () async {
     stubUpdate(() async => throw tooLong);
 
     expect(await update(throws: tooLong), [
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.failed),
     ]);
+    final [failed] = harness.client.state.scheduledMessages;
+    expect(failed.failureReason, ScheduledMessageFailureReason.updateRejected);
+    expect(failed.failureReason?.isRetriable, isFalse);
+    expect(failed.message.text, 'Good evening');
+  });
+
+  test('updateScheduledMessage keeps an edit refused for a change made at the same time as failed, to retry', () async {
+    stubUpdate(() async => throw conflictError);
+
+    await update(throws: conflictError);
+
     final [failed] = harness.client.state.scheduledMessages;
     expect(failed.failureReason, ScheduledMessageFailureReason.updateFailed);
     expect(failed.message.text, 'Good evening');
@@ -137,6 +173,38 @@ void main() {
       verifyNever(() => harness.api.scheduledMessages.scheduleMessage(any(), any(), any(), any()));
     });
 
+    test('rescheduleMessage saves a refused edit with the new time', () async {
+      final refused = await editRefused();
+      final later = DateTime.utc(2026, 11, 3, 9);
+      when(
+        () => harness.api.scheduledMessages.updateScheduledMessage('a', message: edited, scheduledAt: later),
+      ).thenAnswer((_) async => fakeUpdate(saved));
+
+      await harness.client.rescheduleMessage(refused.id, scheduledAt: later);
+
+      verify(
+        () => harness.api.scheduledMessages.updateScheduledMessage('a', message: edited, scheduledAt: later),
+      ).called(1);
+      verifyNever(() => harness.api.scheduledMessages.updateScheduledMessage('a', scheduledAt: later));
+    });
+
+    test('resendScheduledMessage saves a refused edit again, for the server to refuse or save', () async {
+      final refused = await editRefused();
+      stubUpdate(() async => fakeUpdate(saved), scheduledAt: original.scheduledAt);
+
+      final scheduled = await harness.client.resendScheduledMessage(refused.id);
+
+      expect(scheduled, saved);
+      verify(
+        () => harness.api.scheduledMessages.updateScheduledMessage(
+          'a',
+          message: edited,
+          scheduledAt: original.scheduledAt,
+        ),
+      ).called(1);
+      verifyNever(() => harness.api.scheduledMessages.scheduleMessage(any(), any(), any(), any()));
+    });
+
     test('deleteScheduledMessage asks the server to delete a failed edit, which it still has', () async {
       final failed = await editUnreachable();
       when(
@@ -164,6 +232,17 @@ void main() {
       await harness.client.loadScheduledMessages();
 
       expect(harness.client.state.scheduledMessages, [failed]);
+    });
+
+    test('a complete load keeps a refused edit over the copy the server had', () async {
+      stubUpdate(() async => throw tooLong);
+      await update(throws: tooLong);
+      final [refused] = harness.client.state.scheduledMessages;
+      harness.stubQuery(fakePage([original]));
+
+      await harness.client.loadScheduledMessages();
+
+      expect(harness.client.state.scheduledMessages, [refused]);
     });
 
     test('a complete load replaces a failed edit with a newer copy from the server', () async {

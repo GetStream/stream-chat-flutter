@@ -13,6 +13,13 @@ class ScheduledMessageEventHandler {
 
   /// Applies [event] to [state].
   void handleEvent(Event event) {
+    // A scheduled message shows the latest copy of the message it quotes.
+    if (event.type == EventType.messageUpdated || event.type == EventType.messageDeleted) {
+      final message = event.message;
+      if (message != null) state.onQuotedMessageUpdated(message);
+      return;
+    }
+
     final scheduledMessage = event.scheduledMessage;
     if (scheduledMessage == null) return;
 
