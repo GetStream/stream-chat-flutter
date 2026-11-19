@@ -83,6 +83,16 @@ List<String> idsOf(List<ScheduledMessage>? messages) => [for (final it in messag
 Matcher pageAfter(String? next) => isA<ScheduledMessagesQuery>().having((q) => q.next, 'next', next);
 
 // Pumps the events the client emits for its own changes.
+// Awaits [request], expecting it to throw [throws] when given.
+Future<void> expectRequest(Future<Object?> request, Object? throws) async {
+  if (throws == null) {
+    await request;
+    return;
+  }
+
+  await expectLater(request, throwsA(throws));
+}
+
 Future<void> settle() => pumpEventQueue();
 
 // Gives each test a client connected as [testUser] on a fake API, with the
@@ -134,8 +144,8 @@ class ScheduledMessageHarness {
     await settle();
   }
 
-  // The scheduled message events while [run] runs, as type and status. A
-  // network error [run] throws is ignored.
+  // The scheduled message events while [run] runs, as type and status. What
+  // [run] throws is thrown, so a test of a failing request asserts it.
   Future<List<(String, ScheduledMessageStatus?)>> eventsDuring(Future<void> Function() run) async {
     final events = <(String, ScheduledMessageStatus?)>[];
     final subscription = client.on().where((it) => it.scheduledMessage != null).listen((it) {
@@ -144,12 +154,11 @@ class ScheduledMessageHarness {
 
     try {
       await run();
-    } on StreamChatNetworkError {
-      // The events are what is checked.
+      await settle();
+    } finally {
+      await subscription.cancel();
     }
 
-    await settle();
-    await subscription.cancel();
     return events;
   }
 

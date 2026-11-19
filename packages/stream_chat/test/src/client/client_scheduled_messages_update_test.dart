@@ -25,15 +25,17 @@ void main() {
     ).thenAnswer((_) => answer());
   }
 
-  Future<List<(String, ScheduledMessageStatus?)>> update() async {
+  Future<List<(String, ScheduledMessageStatus?)>> update({Object? throws}) async {
     await harness.hold([original]);
-    return harness.eventsDuring(() => harness.client.updateScheduledMessage(original.id, edited));
+    return harness.eventsDuring(
+      () => expectRequest(harness.client.updateScheduledMessage(original.id, edited), throws),
+    );
   }
 
   // Edits [original] while the server can't be reached.
   Future<ScheduledMessage> editUnreachable() async {
     stubUpdate(() async => throw offline);
-    await update();
+    await update(throws: offline);
     return harness.client.state.scheduledMessages.single;
   }
 
@@ -71,7 +73,7 @@ void main() {
   test('updateScheduledMessage keeps an edit the server refuses as failed', () async {
     stubUpdate(() async => throw tooLong);
 
-    expect(await update(), [
+    expect(await update(throws: tooLong), [
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.failed),
     ]);
@@ -83,7 +85,7 @@ void main() {
   test('updateScheduledMessage lists one being sent as it was, as sending', () async {
     stubUpdate(() async => throw sendingError);
 
-    expect(await update(), [
+    expect(await update(throws: sendingError), [
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.sending),
     ]);
@@ -93,7 +95,7 @@ void main() {
   test('updateScheduledMessage reports one the server no longer has as deleted', () async {
     stubUpdate(() async => throw missingError);
 
-    expect(await update(), [
+    expect(await update(throws: missingError), [
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
     ]);

@@ -211,7 +211,7 @@ void main() {
     expect(failed.copyWith(failureReason: null).failureReason, isNull);
   });
 
-  test('ScheduledMessage.toMessage keeps whether it is silent, its poll, its mentions and who can see it', () {
+  test('ScheduledMessage.toMessage keeps the fields the API replaces on an edit', () {
     final poll = Poll(
       id: 'poll-id',
       name: 'Lunch?',
@@ -231,6 +231,9 @@ void main() {
         mentionedHere: true,
         mentionedRoles: const ['admin'],
         mentionedGroupIds: const ['design'],
+        pinned: true,
+        pinExpires: DateTime.utc(2026, 11, 9),
+        sharedLocation: Location(latitude: 52.37, longitude: 4.89),
       ),
       scheduledAt: DateTime.utc(2026, 11, 2, 9),
       status: ScheduledMessageStatus.scheduled,
@@ -246,5 +249,8 @@ void main() {
     expect(message.mentionedHere, isTrue);
     expect(message.mentionedRoles, ['admin']);
     expect(message.mentionedGroupIds, ['design']);
+    expect(message.pinned, isTrue);
+    expect(message.pinExpires, DateTime.utc(2026, 11, 9));
+    expect(message.sharedLocation, scheduledMessage.message.sharedLocation);
   });
 }

@@ -238,7 +238,7 @@ void main() {
     final message = Message(id: 'a', text: 'Good morning');
     stubSchedule(message, () async => throw offline);
 
-    final events = await harness.eventsDuring(() => schedule(message));
+    final events = await harness.eventsDuring(() => expectRequest(schedule(message), offline));
 
     expect(events, [
       (EventType.scheduledMessageCreated, ScheduledMessageStatus.preparingToSchedule),
@@ -250,7 +250,7 @@ void main() {
     final message = Message(id: 'a', text: 'Good morning');
     stubSchedule(message, () async => throw rejected);
 
-    final events = await harness.eventsDuring(() => schedule(message));
+    final events = await harness.eventsDuring(() => expectRequest(schedule(message), rejected));
 
     expect(events, [
       (EventType.scheduledMessageCreated, ScheduledMessageStatus.preparingToSchedule),
@@ -299,7 +299,7 @@ void main() {
       final error = refusedWith(code);
       stubSchedule(message, () async => throw error);
 
-      final events = await harness.eventsDuring(() => schedule(message));
+      final events = await harness.eventsDuring(() => expectRequest(schedule(message), error));
 
       expect(events, [
         (EventType.scheduledMessageCreated, ScheduledMessageStatus.preparingToSchedule),
@@ -314,7 +314,9 @@ void main() {
       final error = refusedWith(code);
       stubSchedule(message, () async => throw error);
 
-      final events = await harness.eventsDuring(() => harness.client.resendScheduledMessage(failed.id));
+      final events = await harness.eventsDuring(
+        () => expectRequest(harness.client.resendScheduledMessage(failed.id), error),
+      );
 
       expect(events.last, (type, status));
     });

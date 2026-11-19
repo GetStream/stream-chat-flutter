@@ -545,7 +545,14 @@ class ScheduledMessageManager {
     try {
       return await request();
     } catch (error) {
-      if (error case StreamChatNetworkError(isScheduledMessageNotFound: true)) {
+      // Gone already, so it isn't listed again.
+      if (error case StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent)) {
+        _emitEvent(EventType.scheduledMessageSent, _sent(scheduledMessage), generation);
+        rethrow;
+      }
+      if (error
+          case StreamChatNetworkError(isScheduledMessageNotFound: true) ||
+              StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageCanceled)) {
         _emitEvent(EventType.scheduledMessageDeleted, _canceled(scheduledMessage), generation);
         rethrow;
       }

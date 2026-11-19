@@ -338,4 +338,52 @@ void main() {
       ),
     );
   });
+
+  group('a request answered that the message is already gone', () {
+    final alreadySent = StreamChatNetworkError.raw(
+      code: scheduledMessageAlreadySentCode,
+      message: 'Already sent',
+      statusCode: 400,
+    );
+    final canceled = StreamChatNetworkError.raw(
+      code: scheduledMessageCanceledCode,
+      message: 'Canceled',
+      statusCode: 400,
+    );
+
+    test('updateScheduledMessage stops listing one already sent', () async {
+      await harness.hold([a]);
+      final edited = Message(id: 'a', text: 'Good evening');
+      when(
+        () => harness.api.scheduledMessages.updateScheduledMessage('a', message: edited),
+      ).thenAnswer((_) async => throw alreadySent);
+
+      final events = await harness.eventsDuring(
+        () => expectRequest(harness.client.updateScheduledMessage(a.id, edited), alreadySent),
+      );
+
+      expect(events.last, (EventType.scheduledMessageSent, ScheduledMessageStatus.sent));
+      expect(harness.client.state.scheduledMessages, isEmpty);
+    });
+
+    test("deleteScheduledMessage doesn't list again one already canceled", () async {
+      await harness.hold([a]);
+      when(() => harness.api.scheduledMessages.deleteScheduledMessage('a')).thenAnswer((_) async => throw canceled);
+
+      await expectRequest(harness.client.deleteScheduledMessage(a.id), canceled);
+      await settle();
+
+      expect(harness.client.state.scheduledMessages, isEmpty);
+    });
+
+    test('sendScheduledMessageNow stops listing one already sent', () async {
+      await harness.hold([a]);
+      when(() => harness.api.scheduledMessages.sendScheduledMessageNow('a')).thenAnswer((_) async => throw alreadySent);
+
+      await expectRequest(harness.client.sendScheduledMessageNow(a.id), alreadySent);
+      await settle();
+
+      expect(harness.client.state.scheduledMessages, isEmpty);
+    });
+  });
 }

@@ -23,9 +23,11 @@ void main() {
     ).thenAnswer((_) => answer());
   }
 
-  Future<List<(String, ScheduledMessageStatus?)>> reschedule() async {
+  Future<List<(String, ScheduledMessageStatus?)>> reschedule({Object? throws}) async {
     await harness.hold([original]);
-    return harness.eventsDuring(() => harness.client.rescheduleMessage(original.id, scheduledAt: later));
+    return harness.eventsDuring(
+      () => expectRequest(harness.client.rescheduleMessage(original.id, scheduledAt: later), throws),
+    );
   }
 
   test('rescheduleMessage reports it at its new time as updating, then the saved copy', () async {
@@ -41,7 +43,7 @@ void main() {
   test('rescheduleMessage keeps it at its new time as failed when the server is unreachable', () async {
     stubReschedule(() async => throw offline);
 
-    expect(await reschedule(), [
+    expect(await reschedule(throws: offline), [
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.failed),
     ]);
@@ -53,7 +55,7 @@ void main() {
   test('rescheduleMessage keeps it at its new time as failed when the server refuses the move', () async {
     stubReschedule(() async => throw tooFar);
 
-    expect(await reschedule(), [
+    expect(await reschedule(throws: tooFar), [
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.failed),
     ]);
@@ -63,7 +65,7 @@ void main() {
   test('rescheduleMessage lists one being sent at its time, as sending', () async {
     stubReschedule(() async => throw sendingError);
 
-    expect(await reschedule(), [
+    expect(await reschedule(throws: sendingError), [
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.sending),
     ]);
@@ -73,7 +75,7 @@ void main() {
   test('rescheduleMessage reports one the server no longer has as deleted', () async {
     stubReschedule(() async => throw missingError);
 
-    expect(await reschedule(), [
+    expect(await reschedule(throws: missingError), [
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
       (EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
     ]);

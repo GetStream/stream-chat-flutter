@@ -184,9 +184,12 @@ final class ScheduledMessage extends Equatable {
       parentId: message.parentId,
       showInChannel: message.showInChannel,
       silent: message.silent,
+      pinned: message.pinned,
+      pinExpires: message.pinExpires,
       poll: message.poll,
       pollId: message.pollId,
       restrictedVisibility: message.restrictedVisibility,
+      sharedLocation: message.sharedLocation,
       extraData: message.extraData,
     );
   }

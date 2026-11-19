@@ -343,6 +343,8 @@ extension StreamChatNetworkErrorScheduledMessages on StreamChatNetworkError {
 
   /// Whether the scheduled message the request was for no longer exists.
   ///
+  /// It relies on the error's message text, as no error code identifies it.
+  ///
   /// Other errors that something was not found, such as a quoted message that
   /// was deleted, are false.
   bool get isScheduledMessageNotFound => statusCode == 404 && _scheduledMessageNotFound.hasMatch(message);

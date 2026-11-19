@@ -21,9 +21,9 @@ void main() {
     when(() => harness.api.scheduledMessages.deleteScheduledMessage('a')).thenAnswer((_) => answer());
   }
 
-  Future<List<(String, ScheduledMessageStatus?)>> delete() async {
+  Future<List<(String, ScheduledMessageStatus?)>> delete({Object? throws}) async {
     await harness.hold([original]);
-    return harness.eventsDuring(() => harness.client.deleteScheduledMessage(original.id));
+    return harness.eventsDuring(() => expectRequest(harness.client.deleteScheduledMessage(original.id), throws));
   }
 
   test('deleteScheduledMessage stops listing it right away', () async {
@@ -51,7 +51,7 @@ void main() {
   test('deleteScheduledMessage lists it again when the server is unreachable', () async {
     stubDelete(() async => throw offline);
 
-    expect(await delete(), [
+    expect(await delete(throws: offline), [
       (EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
     ]);
@@ -61,7 +61,7 @@ void main() {
   test('deleteScheduledMessage lists it again when the server refuses', () async {
     stubDelete(() async => throw refused);
 
-    expect(await delete(), [
+    expect(await delete(throws: refused), [
       (EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
     ]);
@@ -71,7 +71,7 @@ void main() {
   test('deleteScheduledMessage lists one being sent again, as sending', () async {
     stubDelete(() async => throw sendingError);
 
-    expect(await delete(), [
+    expect(await delete(throws: sendingError), [
       (EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.sending),
     ]);
