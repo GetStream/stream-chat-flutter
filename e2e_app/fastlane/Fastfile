@@ -228,8 +228,10 @@ def ensure_android_device(device:, avd:, state:, max_restarts: 3)
   return false if state[:count] >= max_restarts
 
   state[:count] += 1
-  state[:suspect] = false
-  restart_android_emulator(device: device, avd: avd)
+  # Stays suspect if the restart fails, so the restart limit above still rejects it.
+  restarted = restart_android_emulator(device: device, avd: avd)
+  state[:suspect] = false if restarted
+  restarted
 end
 
 # How long one `flutter test` may run before the lane kills it: a build plus a generous
