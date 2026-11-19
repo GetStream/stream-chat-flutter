@@ -14,7 +14,7 @@ on:
           - docs
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   update_sdk_goldens:
@@ -30,7 +30,7 @@ jobs:
         uses: ./.github/actions/setup-flutter
 
       - name: 📦 Install Tools
-        run: flutter pub global activate melos
+        uses: ./.github/actions/install-tools
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap --verbose
@@ -75,7 +75,7 @@ jobs:
         uses: ./.github/actions/setup-flutter
 
       - name: 📦 Install Tools
-        run: flutter pub global activate melos
+        uses: ./.github/actions/install-tools
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap --verbose
@@ -118,10 +118,17 @@ jobs:
        needs.update_docs_goldens.outputs.changed == 'true')
     runs-on: ubuntu-latest
     steps:
+      - name: 🔑 Mint CI Bot Token
+        id: ci-bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+
       - name: 📚 Checkout branch
         uses: actions/checkout@v7
         with:
-          ssh-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+          persist-credentials: false
 
       - name: 📥 Download SDK goldens
         if: needs.update_sdk_goldens.outputs.changed == 'true'
@@ -145,9 +152,8 @@ jobs:
           done
 
       - name: 📤 Commit Changes
-        uses: stefanzweifel/git-auto-commit-action@v7
+        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@c322b778cb789f4c45d8830dd1b5324584da378f
         with:
-          commit_message: "chore: Update Goldens"
-          file_pattern: "**/test/**/goldens/**/*.png"
-          commit_user_name: "Stream SDK Bot"
-          commit_user_email: "60655709+Stream-SDK-Bot@users.noreply.github.com"
+          files: "**/test/**/goldens/**/*.png"
+          message: "chore: Update Goldens"
+          token: ${{ steps.ci-bot-token.outputs.token }}

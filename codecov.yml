@@ -1,0 +1,6 @@
+# Pull requests only test the packages they change, and each package
+# uploads under its own flag. Carryforward keeps the last uploaded coverage
+# for the packages a run skipped.
+flag_management:
+  default_rules:
+    carryforward: true

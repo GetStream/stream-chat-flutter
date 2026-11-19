@@ -15,11 +15,11 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}:${{ inputs.mock_server_branch || 'main' }}
   cancel-in-progress: true
 
 env:
-  mock_server_branch: ${{ github.event.inputs.mock_server_branch || 'main' }}
+  mock_server_branch: ${{ inputs.mock_server_branch || 'main' }}
   ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -30,17 +30,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        include:
-          # Coverage runs every test in its own app process for the map that selects e2e tests on
-          # pull requests. That takes hours, longer than a hosted runner lasts under the emulator's
-          # load, so its tests are split across batches. coverage_map's batch_count must match.
-          - { api-level: 36, coverage: true, batch: 0, batch_count: 4 }
-          - { api-level: 36, coverage: true, batch: 1, batch_count: 4 }
-          - { api-level: 36, coverage: true, batch: 2, batch_count: 4 }
-          - { api-level: 36, coverage: true, batch: 3, batch_count: 4 }
-          - { api-level: 34, batch: 0, batch_count: 1 }
-          - { api-level: 31, batch: 0, batch_count: 1 }
-          - { api-level: 28, batch: 0, batch_count: 1 }
+        # Coverage runs every test in its own app process for the map that selects e2e tests on
+        # pull requests. That takes hours, longer than a hosted runner lasts under the emulator's
+        # load, so its tests are split across batches. coverage_map's batch_count must match.
+        # Coverage is only collected against the main mock server.
+        include: |-
+          ${{ fromJson(
+            (inputs.mock_server_branch || 'main') != 'main' && '[
+              { "api-level": 36, "batch": 0, "batch_count": 1 }
+            ]'
+            || '[
+              { "api-level": 36, "coverage": true, "batch": 0, "batch_count": 4 },
+              { "api-level": 36, "coverage": true, "batch": 1, "batch_count": 4 },
+              { "api-level": 36, "coverage": true, "batch": 2, "batch_count": 4 },
+              { "api-level": 36, "coverage": true, "batch": 3, "batch_count": 4 },
+              { "api-level": 34, "batch": 0, "batch_count": 1 },
+              { "api-level": 31, "batch": 0, "batch_count": 1 },
+              { "api-level": 28, "batch": 0, "batch_count": 1 }
+            ]'
+          ) }}
     steps:
       - uses: actions/checkout@v7
 
@@ -69,12 +77,15 @@ jobs:
           free -m
           # Flutter's own Gradle plugin is an included build, which ignores e2e_app's
           # gradle.properties; without this it starts a Kotlin daemon with Gradle's 4 GB heap.
+          # ~/.gradle is missing when the Gradle cache misses.
+          mkdir -p ~/.gradle
           echo 'kotlin.compiler.execution.strategy=in-process' >> ~/.gradle/gradle.properties
 
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
+
       - name: Bootstrap
-        run: |
-          flutter pub global activate melos
-          melos bootstrap
+        run: melos bootstrap
 
       - name: Launch Allure TestOps
         working-directory: e2e_app
@@ -133,7 +144,8 @@ jobs:
   coverage_map:
     needs: android
     # Failed tests keep their previous coverage; only a batch that never finished blocks the map.
-    if: ${{ !cancelled() }}
+    # Coverage is only collected against the main mock server.
+    if: ${{ !cancelled() && (inputs.mock_server_branch || 'main') == 'main' }}
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
@@ -169,6 +181,7 @@ jobs:
           retention-days: 14
 
   ios:
+    if: ${{ (inputs.mock_server_branch || 'main') == 'main' }}
     runs-on: macos-15
     timeout-minutes: 360
     strategy:
@@ -201,10 +214,12 @@ jobs:
           version: ${{ matrix.ios }}
           device: ${{ matrix.device }}
 
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
+
       - name: Bootstrap
         run: |
           flutter precache --ios
-          flutter pub global activate melos
           melos bootstrap
 
       - name: Launch Allure TestOps

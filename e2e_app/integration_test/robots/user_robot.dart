@@ -18,7 +18,7 @@ class UserRobot {
   final WidgetTester tester;
 
   Future<UserRobot> login([
-    UserCredentials user = PredefinedUsers.currentUser,
+    E2eUser user = PredefinedUsers.currentUser,
   ]) async {
     await tester.scrollToText(user.name);
     await tester.tapText(user.name);
@@ -27,7 +27,7 @@ class UserRobot {
 
   /// Asserts the login failed with the Stream error [code].
   Future<UserRobot> assertLoginFailed({required int code}) async {
-    final error = find.textContaining('Login failed: StreamWebSocketError(code: $code,');
+    final error = find.textContaining('Login failed (code $code)');
     await tester.waitUntilVisible(error);
     return this;
   }
@@ -724,7 +724,7 @@ class UserRobot {
 /// sequential `await`s. Each method mirrors the instance method above.
 extension UserRobotChain on Future<UserRobot> {
   Future<UserRobot> login([
-    UserCredentials user = PredefinedUsers.currentUser,
+    E2eUser user = PredefinedUsers.currentUser,
   ]) => then((it) => it.login(user));
 
   Future<UserRobot> waitForChannelListToLoad() => then((it) => it.waitForChannelListToLoad());
