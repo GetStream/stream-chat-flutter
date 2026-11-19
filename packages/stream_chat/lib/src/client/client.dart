@@ -2656,17 +2656,15 @@ class StreamChatClient {
   /// A failed scheduled message can only be deleted, unless only its edit
   /// failed. One with [ScheduledMessageFailureReason.requestFailed] is deleted
   /// even if scheduling it never went through. One still being scheduled is
-  /// deleted once scheduling it ends, so it isn't scheduled after it is
-  /// deleted; if scheduling it fails, it is only taken out of the list.
+  /// taken out of the list right away, deleted on the server once scheduling
+  /// it ends, and listed again if deleting it there fails.
   ///
   /// When [ClientState.scheduledMessages] lists it, it stops listing it right
   /// away, and lists it again if the request fails, unless it no longer
   /// exists. One not listed is deleted without changing the list.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, unless it is
-  /// already gone and its scheduling had failed. Deleting one sent right away
-  /// once scheduling it ends throws, with
-  /// [ScheduledMessageErrorReason.scheduledMessageAlreadySent].
+  /// Throws a [StreamChatNetworkError] if the request fails, including when it
+  /// is already gone, unless its scheduling had failed.
   Future<DeleteScheduledMessageResponse> deleteScheduledMessage(String id) {
     return _scheduledMessageManager.deleteMessage(id);
   }

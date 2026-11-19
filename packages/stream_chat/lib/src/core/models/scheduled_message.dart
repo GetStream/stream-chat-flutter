@@ -166,34 +166,6 @@ final class ScheduledMessage extends Equatable {
     );
   }
 
-  /// Its [message], as a draft to edit.
-  ///
-  /// Its [Message.mentionedUsers] can have only their [User.id] set, and its
-  /// quoted message is identified by [Message.quotedMessageId] only.
-  Message toMessage() {
-    return Message(
-      id: id,
-      text: message.text,
-      attachments: message.attachments,
-      mentionedUsers: message.mentionedUsers,
-      mentionedChannel: message.mentionedChannel,
-      mentionedHere: message.mentionedHere,
-      mentionedRoles: message.mentionedRoles,
-      mentionedGroupIds: message.mentionedGroupIds,
-      quotedMessageId: message.quotedMessageId,
-      parentId: message.parentId,
-      showInChannel: message.showInChannel,
-      silent: message.silent,
-      pinned: message.pinned,
-      pinExpires: message.pinExpires,
-      poll: message.poll,
-      pollId: message.pollId,
-      restrictedVisibility: message.restrictedVisibility,
-      sharedLocation: message.sharedLocation,
-      extraData: message.extraData,
-    );
-  }
-
   // Only the channel's custom data, which holds its name and image, is
   // compared: two reads of the same channel model never compare equal.
   @override

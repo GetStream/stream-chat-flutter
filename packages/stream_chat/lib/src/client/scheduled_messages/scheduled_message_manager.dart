@@ -50,9 +50,9 @@ class ScheduledMessageManager {
   // Bumped by clear, so a request that started before it is not applied.
   var _generation = 0;
 
-  // The scheduling of each new scheduled message, by ID, until it settles to
-  // whether the message was sent.
-  final _scheduling = <String, Future<bool>>{};
+  // The IDs of the new scheduled messages deleted while being scheduled, to
+  // delete on the server once scheduling them ends.
+  final _deletedWhileScheduling = <String>{};
 
   /// The scheduled messages, and whether the complete list is loaded.
   ScheduledMessageListState get state => _stateNotifier.state;
@@ -191,9 +191,8 @@ class ScheduledMessageManager {
 
     _emitEvent(EventType.scheduledMessageCreated, local, generation);
 
-    final scheduling = Completer<bool>();
-    _scheduling[local.id] = scheduling.future;
-    var wasSent = false;
+    // Whether it was deleted while it was being scheduled.
+    bool isDeleted() => _deletedWhileScheduling.contains(local.id);
 
     try {
       final response = await _api.scheduleMessage(
@@ -208,10 +207,15 @@ class ScheduledMessageManager {
       // One taken out of the list meanwhile isn't listed again.
       final isListed = _listedScheduledMessage(local.id) != null;
       if (response.scheduledMessage case final created?) {
-        if (isListed) _emitEvent(EventType.scheduledMessageCreated, created, generation);
+        if (isDeleted()) {
+          // Listed again if deleting it fails, so it can be deleted again.
+          final isGone = await _deleteScheduledOnServer(created.id);
+          if (!isGone) _emitEvent(EventType.scheduledMessageCreated, created, generation);
+        } else if (isListed) {
+          _emitEvent(EventType.scheduledMessageCreated, created, generation);
+        }
       } else {
         // Its time had passed, so it was sent right away.
-        wasSent = true;
         final messageId = response.message.id;
         _emitEvent(EventType.scheduledMessageSent, _sent(local), generation, messageId: messageId);
       }
@@ -220,13 +224,7 @@ class ScheduledMessageManager {
     } on StreamChatNetworkError catch (error) {
       // Already sent: on a retry, the first attempt went through.
       if (error.scheduledMessageErrorReason == .scheduledMessageAlreadySent) {
-        wasSent = true;
         _emitEvent(EventType.scheduledMessageSent, _sent(local), generation);
-        rethrow;
-      }
-
-      if (!error.isRetriable) {
-        _emitEvent(EventType.scheduledMessageDeleted, _canceled(local), generation);
         rethrow;
       }
 
@@ -236,16 +234,53 @@ class ScheduledMessageManager {
         localUpdatedAt: clock.now(),
       );
 
+      // A deleted one is already taken out of the list. Unless the server
+      // refused it, it may have stored it, so it is deleted there too, and
+      // listed as failed again if that fails, so it can be deleted again.
+      if (isDeleted()) {
+        if (error.isRetriable && !await _deleteScheduledOnServer(local.id)) {
+          _emitEvent(EventType.scheduledMessageUpdated, failed, generation);
+        }
+        rethrow;
+      }
+
+      if (!error.isRetriable) {
+        _emitEvent(EventType.scheduledMessageDeleted, _canceled(local), generation);
+        rethrow;
+      }
+
       // One taken out of the list meanwhile isn't listed again.
       final isListed = _listedScheduledMessage(local.id) != null;
       if (isListed) _emitEvent(EventType.scheduledMessageUpdated, failed, generation);
       rethrow;
     } catch (_) {
-      _emitEvent(EventType.scheduledMessageDeleted, _canceled(local), generation);
+      if (!isDeleted()) _emitEvent(EventType.scheduledMessageDeleted, _canceled(local), generation);
       rethrow;
     } finally {
-      if (identical(_scheduling[local.id], scheduling.future)) _scheduling.remove(local.id);
-      scheduling.complete(wasSent);
+      _deletedWhileScheduling.remove(local.id);
+    }
+  }
+
+  // Deletes the scheduled message [id] on the server after it was deleted
+  // while being scheduled, and returns whether it is gone. One the server no
+  // longer has, or already sent, is gone too.
+  Future<bool> _deleteScheduledOnServer(String id) async {
+    try {
+      await _api.deleteScheduledMessage(id);
+      return true;
+    } on StreamChatNetworkError catch (error, stackTrace) {
+      final isGone = switch (error) {
+        StreamChatNetworkError(isScheduledMessageNotFound: true) => true,
+        StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) => true,
+        StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageCanceled) => true,
+        _ => false,
+      };
+
+      if (!isGone) _logger?.warning('Failed to delete the scheduled message $id', error, stackTrace);
+      return isGone;
+    } catch (error, stackTrace) {
+      _logger?.warning('Failed to delete the scheduled message $id', error, stackTrace);
+      return false;
     }
   }
 
@@ -448,37 +483,32 @@ class ScheduledMessageManager {
   ///
   /// A listed one stops being listed right away, and is listed again if the
   /// request fails, unless it is already gone. One still being scheduled is
-  /// deleted once scheduling it ends, so it isn't scheduled after it is
-  /// deleted; if scheduling it fails, it is only taken out of the list. One
-  /// whose scheduling failed is deleted even if scheduling it never went
+  /// deleted on the server once scheduling it ends, without a request now,
+  /// and listed again if deleting it there fails.
+  /// One whose scheduling failed is deleted even if scheduling it never went
   /// through. One not listed is deleted without changing the list.
   ///
   /// The returned scheduled message has the status it had when it was
   /// deleted.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails. Deleting one
-  /// already gone throws too, unless its scheduling had failed. Deleting one
-  /// sent right away once scheduling it ends throws, with
-  /// [ScheduledMessageErrorReason.scheduledMessageAlreadySent].
+  /// Throws a [StreamChatNetworkError] if the request fails, including when it
+  /// is already gone, unless its scheduling had failed.
   Future<DeleteScheduledMessageResponse> deleteMessage(String id) async {
-    if (_scheduling[id] case final scheduling?) {
-      final scheduled = _listedScheduledMessage(id);
-      final wasSent = await scheduling;
-
-      final isListed = _listedScheduledMessage(id) != null;
-      if (!isListed && scheduled != null) {
-        // Sent right away, as the server would answer deleting it.
-        if (wasSent) throw _alreadySentError(id);
-
-        // Scheduling it failed, so there is nothing left to delete.
-        return DeleteScheduledMessageResponse()..scheduledMessage = _canceled(scheduled);
-      }
-    }
-
     final scheduledMessage = _listedScheduledMessage(id);
     if (scheduledMessage == null) return _api.deleteScheduledMessage(id);
 
     final generation = _generation;
+
+    // Still being scheduled, so it is deleted on the server once scheduling it
+    // ends.
+    final isBeingScheduled =
+        scheduledMessage.status == .preparingToSchedule && scheduledMessage.remoteCreatedAt == null;
+    if (isBeingScheduled) {
+      final canceled = _canceled(scheduledMessage);
+      _deletedWhileScheduling.add(id);
+      _emitEvent(EventType.scheduledMessageDeleted, canceled, generation);
+      return DeleteScheduledMessageResponse()..scheduledMessage = canceled;
+    }
     if (scheduledMessage.failureReason == .requestFailed) {
       try {
         final response = await _api.deleteScheduledMessage(scheduledMessage.id);
@@ -524,7 +554,14 @@ class ScheduledMessageManager {
   }
 
   void _onEvent(Event event) {
-    _eventHandler.handleEvent(event);
+    // The server can report one deleted while being scheduled before its
+    // scheduling ends; it isn't listed again meanwhile.
+    final isDeletedWhileScheduling = switch (event) {
+      Event(isLocal: false, :final scheduledMessage?) when _isCreatedOrUpdated(event.type) =>
+        _deletedWhileScheduling.contains(scheduledMessage.id),
+      _ => false,
+    };
+    if (!isDeletedWhileScheduling) _eventHandler.handleEvent(event);
 
     if (event.type == EventType.connectionChanged && event.online == false) {
       _onConnectionLost();
@@ -533,6 +570,11 @@ class ScheduledMessageManager {
     if (event.type == EventType.connectionRecovered) {
       _onConnectionRecovered().ignore();
     }
+  }
+
+  // Whether an event of [type] lists a scheduled message.
+  static bool _isCreatedOrUpdated(String type) {
+    return type == EventType.scheduledMessageCreated || type == EventType.scheduledMessageUpdated;
   }
 
   // Changes may be missed while the connection is down.
@@ -739,21 +781,6 @@ class ScheduledMessageManager {
     );
   }
 
-  // The error the server answers with for a request to a scheduled message
-  // [id] that was already sent.
-  static StreamChatNetworkError _alreadySentError(String id) {
-    final message = 'scheduled message ID $id was already sent';
-    return StreamChatNetworkError.raw(
-      code: 123,
-      message: message,
-      statusCode: 400,
-      data: ErrorResponse()
-        ..code = 123
-        ..statusCode = 400
-        ..message = message,
-    );
-  }
-
   // [scheduledMessage] as it was, replacing any copy of it being prepared.
   ScheduledMessage _restored(ScheduledMessage scheduledMessage) {
     return scheduledMessage.copyWith(localUpdatedAt: clock.now());
@@ -798,6 +825,7 @@ class ScheduledMessageManager {
   /// Used when the user disconnects.
   void clear() {
     _generation++;
+    _deletedWhileScheduling.clear();
     _loadCache = InFlightCache<String, ScheduledMessageListState>();
     _wasLoadedBeforeConnectionLost = false;
     _stateNotifier.clear();

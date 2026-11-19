@@ -406,84 +406,153 @@ void main() {
     final message = Message(id: 'a', text: 'Good morning');
     final server = fakeScheduledMessage('a', scheduledAt: scheduledAt);
 
-    test('deletes it on the server once it is scheduled, and lists it no more', () async {
-      final answer = Completer<ScheduleMessageResponse>();
+    void stubDelete(Future<DeleteScheduledMessageResponse> Function() answer) {
+      when(() => harness.api.scheduledMessages.deleteScheduledMessage('a')).thenAnswer((_) => answer());
+    }
+
+    // Schedules [message], with the server answering [answer], and deletes it
+    // before the server answers.
+    Future<(Future<ScheduleMessageResponse>, DeleteScheduledMessageResponse)> deleteWhileScheduling(
+      Completer<ScheduleMessageResponse> answer,
+    ) async {
       stubSchedule(message, () => answer.future);
       final request = schedule(message);
       await settle();
-      when(
-        () => harness.api.scheduledMessages.deleteScheduledMessage('a'),
-      ).thenAnswer((_) async => fakeDelete(server.copyWith(status: ScheduledMessageStatus.canceled)));
 
-      final delete = harness.client.deleteScheduledMessage('a');
-      await settle();
-      verifyNever(() => harness.api.scheduledMessages.deleteScheduledMessage('a'));
+      final deleted = await harness.client.deleteScheduledMessage('a');
+      return (request, deleted);
+    }
+
+    test('takes it out of the list at once, and deletes it on the server once it is scheduled', () async {
+      final listed = <List<(String, ScheduledMessageStatus)>>[];
+      final subscription = harness.client.state.scheduledMessagesStream.listen(
+        (it) => listed.add([for (final m in it) (m.id, m.status)]),
+      );
+      addTearDown(subscription.cancel);
+      stubDelete(() async => fakeDelete(server.copyWith(status: ScheduledMessageStatus.canceled)));
+      final answer = Completer<ScheduleMessageResponse>();
+
+      final (request, deleted) = await deleteWhileScheduling(answer);
+      expect(deleted.scheduledMessage.status, ScheduledMessageStatus.canceled);
+      expect(harness.client.state.scheduledMessages, isEmpty);
+      verifyNever(() => harness.api.scheduledMessages.deleteScheduledMessage(any()));
 
       answer.complete(scheduled(message, server));
       await request;
-      await delete;
+      await settle();
+
+      verify(() => harness.api.scheduledMessages.deleteScheduledMessage('a')).called(1);
+      expect(listed, [
+        <(String, ScheduledMessageStatus)>[],
+        [('a', ScheduledMessageStatus.preparingToSchedule)],
+        <(String, ScheduledMessageStatus)>[],
+      ]);
+    });
+
+    test('asks the server to delete it when scheduling it fails in a way the server may have stored', () async {
+      stubDelete(() async => throw missingError);
+      final answer = Completer<ScheduleMessageResponse>();
+
+      final (request, _) = await deleteWhileScheduling(answer);
+      answer.completeError(offline);
+      await expectLater(request, throwsA(offline));
       await settle();
 
       verify(() => harness.api.scheduledMessages.deleteScheduledMessage('a')).called(1);
       expect(harness.client.state.scheduledMessages, isEmpty);
+      expect(harness.logs, isNot(contains('Failed to delete the scheduled message a')));
     });
 
-    test('asks the server as for any failed one when scheduling it fails, and lists it no more', () async {
+    test('lists it as failed again when scheduling it fails and so does deleting it', () async {
+      stubDelete(() async => throw offline);
       final answer = Completer<ScheduleMessageResponse>();
-      stubSchedule(message, () => answer.future);
-      final request = schedule(message);
-      await settle();
-      when(() => harness.api.scheduledMessages.deleteScheduledMessage('a')).thenAnswer((_) async => throw missingError);
 
-      final delete = harness.client.deleteScheduledMessage('a');
+      final (request, _) = await deleteWhileScheduling(answer);
       answer.completeError(offline);
       await expectLater(request, throwsA(offline));
-      final response = await delete;
       await settle();
 
-      expect(response.scheduledMessage.status, ScheduledMessageStatus.canceled);
-      expect(harness.client.state.scheduledMessages, isEmpty);
+      final [listed] = harness.client.state.scheduledMessages;
+      expect(listed.failureReason, ScheduledMessageFailureReason.requestFailed);
     });
 
-    test('reports it already sent when it was sent right away', () async {
+    test("doesn't ask the server when the server refuses to schedule it", () async {
       final answer = Completer<ScheduleMessageResponse>();
-      stubSchedule(message, () => answer.future);
-      final request = schedule(message);
-      await settle();
 
-      final delete = expectLater(
-        harness.client.deleteScheduledMessage('a'),
-        throwsA(
-          isA<StreamChatNetworkError>().having(
-            (it) => it.scheduledMessageErrorReason,
-            'scheduledMessageErrorReason',
-            ScheduledMessageErrorReason.scheduledMessageAlreadySent,
-          ),
-        ),
-      );
-      answer.complete(ScheduleMessageResponse()..message = message);
-      await request;
-      await delete;
-
-      verifyNever(() => harness.api.scheduledMessages.deleteScheduledMessage(any()));
-      expect(harness.client.state.scheduledMessages, isEmpty);
-    });
-
-    test('only takes it out of the list when the server refuses to schedule it', () async {
-      final answer = Completer<ScheduleMessageResponse>();
-      stubSchedule(message, () => answer.future);
-      final request = schedule(message);
-      await settle();
-
-      final delete = harness.client.deleteScheduledMessage('a');
+      final (request, _) = await deleteWhileScheduling(answer);
       answer.completeError(rejected);
       await expectLater(request, throwsA(rejected));
-      final response = await delete;
       await settle();
 
       verifyNever(() => harness.api.scheduledMessages.deleteScheduledMessage(any()));
-      expect(response.scheduledMessage.status, ScheduledMessageStatus.canceled);
       expect(harness.client.state.scheduledMessages, isEmpty);
+    });
+
+    test('lists nothing when it was sent right away', () async {
+      final answer = Completer<ScheduleMessageResponse>();
+
+      final (request, _) = await deleteWhileScheduling(answer);
+      answer.complete(ScheduleMessageResponse()..message = message);
+      await request;
+      await settle();
+
+      verifyNever(() => harness.api.scheduledMessages.deleteScheduledMessage(any()));
+      expect(harness.client.state.scheduledMessages, isEmpty);
+    });
+
+    test('lists it again, and still schedules, when deleting it on the server fails', () async {
+      stubDelete(() async => throw offline);
+      final answer = Completer<ScheduleMessageResponse>();
+
+      final (request, _) = await deleteWhileScheduling(answer);
+      answer.complete(scheduled(message, server));
+      final response = await request;
+      await settle();
+
+      expect(response.scheduledMessage, server);
+      expect(harness.logs, contains('Failed to delete the scheduled message a'));
+      expect(harness.client.state.scheduledMessages, [server]);
+    });
+
+    test('keeps it out of the list when the server no longer has it', () async {
+      stubDelete(() async => throw missingError);
+      final answer = Completer<ScheduleMessageResponse>();
+
+      final (request, _) = await deleteWhileScheduling(answer);
+      answer.complete(scheduled(message, server));
+      await request;
+      await settle();
+
+      expect(harness.logs, isNot(contains('Failed to delete the scheduled message a')));
+      expect(harness.client.state.scheduledMessages, isEmpty);
+    });
+
+    test("doesn't list it again for the server's own created event before scheduling it ends", () async {
+      stubDelete(() async => fakeDelete(server.copyWith(status: ScheduledMessageStatus.canceled)));
+      final answer = Completer<ScheduleMessageResponse>();
+
+      final (request, _) = await deleteWhileScheduling(answer);
+      await harness.receive(EventType.scheduledMessageCreated, server);
+
+      expect(harness.client.state.scheduledMessages, isEmpty);
+
+      answer.complete(scheduled(message, server));
+      await request;
+      await settle();
+
+      expect(harness.client.state.scheduledMessages, isEmpty);
+    });
+
+    test("doesn't delete it on the server for a user who disconnected meanwhile", () async {
+      final answer = Completer<ScheduleMessageResponse>();
+
+      final (request, _) = await deleteWhileScheduling(answer);
+      await harness.client.disconnectUser();
+      answer.complete(scheduled(message, server));
+      await request;
+      await settle();
+
+      verifyNever(() => harness.api.scheduledMessages.deleteScheduledMessage(any()));
     });
   });
 
@@ -540,14 +609,15 @@ void main() {
     expect(harness.client.state.scheduledMessages, [failed]);
   });
 
-  test('deleteScheduledMessage asks the server to delete one being scheduled', () async {
+  test('deleteScheduledMessage takes one being scheduled out of the list without a request', () async {
     final local = fakeScheduledMessage('a', status: ScheduledMessageStatus.preparingToSchedule, isOnServer: false);
     await harness.hold([local]);
-    when(() => harness.api.scheduledMessages.deleteScheduledMessage('a')).thenAnswer((_) async => fakeDelete(local));
 
     await harness.client.deleteScheduledMessage(local.id);
+    await settle();
 
-    verify(() => harness.api.scheduledMessages.deleteScheduledMessage('a')).called(1);
+    verifyNever(() => harness.api.scheduledMessages.deleteScheduledMessage(any()));
+    expect(harness.client.state.scheduledMessages, isEmpty);
   });
 
   test(

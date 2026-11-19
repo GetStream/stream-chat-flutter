@@ -164,39 +164,6 @@ void main() {
     expect(ScheduledMessageStatus.sent.isPending, isFalse);
   });
 
-  test('ScheduledMessage.toMessage carries the content to edit', () {
-    final scheduledMessage = ScheduledMessage(
-      id: 'scheduled-id',
-      cid: 'messaging:general',
-      user: User(id: 'alice'),
-      message: Message(
-        id: 'message-id',
-        text: 'Good morning @bob',
-        attachments: [Attachment(type: 'image', imageUrl: 'https://example.com/a.png')],
-        mentionedUsers: [User(id: 'bob')],
-        quotedMessageId: 'quoted-id',
-        parentId: 'parent-id',
-        showInChannel: true,
-        extraData: const {'mood': 'happy'},
-        state: MessageState.sent,
-      ),
-      scheduledAt: DateTime.utc(2026, 11, 2, 9),
-      status: ScheduledMessageStatus.scheduled,
-    );
-
-    final message = scheduledMessage.toMessage();
-
-    expect(message.id, 'scheduled-id');
-    expect(message.text, 'Good morning @bob');
-    expect(message.attachments, scheduledMessage.message.attachments);
-    expect(message.mentionedUsers, [User(id: 'bob')]);
-    expect(message.quotedMessageId, 'quoted-id');
-    expect(message.parentId, 'parent-id');
-    expect(message.showInChannel, isTrue);
-    expect(message.extraData, {'mood': 'happy'});
-    expect(message.state, const MessageState.initial());
-  });
-
   test('ScheduledMessage.copyWith clears the failure reason only when told to', () {
     final failed = ScheduledMessage(
       cid: 'messaging:general',
@@ -209,48 +176,5 @@ void main() {
 
     expect(failed.copyWith().failureReason, ScheduledMessageFailureReason.updateFailed);
     expect(failed.copyWith(failureReason: null).failureReason, isNull);
-  });
-
-  test('ScheduledMessage.toMessage keeps the fields the API replaces on an edit', () {
-    final poll = Poll(
-      id: 'poll-id',
-      name: 'Lunch?',
-      options: const [PollOption(text: 'Pizza')],
-    );
-    final scheduledMessage = ScheduledMessage(
-      id: 'scheduled-id',
-      cid: 'messaging:general',
-      user: User(id: 'alice'),
-      message: Message(
-        id: 'message-id',
-        text: 'Good morning',
-        silent: true,
-        poll: poll,
-        restrictedVisibility: const ['bob'],
-        mentionedChannel: true,
-        mentionedHere: true,
-        mentionedRoles: const ['admin'],
-        mentionedGroupIds: const ['design'],
-        pinned: true,
-        pinExpires: DateTime.utc(2026, 11, 9),
-        sharedLocation: Location(latitude: 52.37, longitude: 4.89),
-      ),
-      scheduledAt: DateTime.utc(2026, 11, 2, 9),
-      status: ScheduledMessageStatus.scheduled,
-    );
-
-    final message = scheduledMessage.toMessage();
-
-    expect(message.silent, isTrue);
-    expect(message.poll, poll);
-    expect(message.pollId, 'poll-id');
-    expect(message.restrictedVisibility, ['bob']);
-    expect(message.mentionedChannel, isTrue);
-    expect(message.mentionedHere, isTrue);
-    expect(message.mentionedRoles, ['admin']);
-    expect(message.mentionedGroupIds, ['design']);
-    expect(message.pinned, isTrue);
-    expect(message.pinExpires, DateTime.utc(2026, 11, 9));
-    expect(message.sharedLocation, scheduledMessage.message.sharedLocation);
   });
 }
