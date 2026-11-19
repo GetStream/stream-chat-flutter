@@ -6,17 +6,17 @@ import 'scheduled_message_actions_sheet_harness.dart';
 
 void main() {
   testWidgets(
-    'showStreamScheduledMessageActionsSheet resolves RetryScheduledMessage carrying the message when tapped',
+    'showStreamScheduledMessageActionsSheet resolves EditAndRescheduleMessage carrying the message when tapped',
     (
       tester,
     ) async {
       final failed = fakeScheduledMessage(status: .failed, failureReason: .requestFailed);
       final results = await showActions(tester, failed);
 
-      await tester.tap(find.text('Retry'));
+      await tester.tap(find.text('Edit & Reschedule'));
       await tester.pumpAndSettle();
 
-      expect(results.single, isA<RetryScheduledMessage>());
+      expect(results.single, isA<EditAndRescheduleMessage>());
       expect(results.single?.scheduledMessage, failed);
     },
   );

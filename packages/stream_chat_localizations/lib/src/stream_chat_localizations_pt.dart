@@ -1025,6 +1025,15 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get scheduleMessageError => 'Não foi possível agendar a mensagem. Tente novamente';
 
   @override
+  String get scheduleCommandRefusedError => 'Comandos não podem ser agendados. Remova o comando / para continuar.';
+
+  @override
+  String get scheduleQuotedMessageDeletedError => 'A mensagem citada foi excluída';
+
+  @override
+  String get scheduleMessageRefusedError => 'Esta mensagem não pode ser agendada';
+
+  @override
   String scheduledMessagesCountText({required int count}) {
     return Intl.plural(
       count,
@@ -1080,6 +1089,9 @@ class _AccessibilityTranslationsPt extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'Gravar mensagem de voz';
+
+  @override
+  String get scheduleMessageHint => 'Agendar mensagem';
 
   @override
   String get cancelRecordingTooltip => 'Cancelar gravação';

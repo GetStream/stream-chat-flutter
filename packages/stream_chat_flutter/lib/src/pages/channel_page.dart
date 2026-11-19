@@ -153,10 +153,11 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
     final composer = PageComposer(
       controller: _messageComposerController,
       onScheduledMessagesBannerTap: _onScheduledMessagesBannerTap(),
-      composer: StreamMessageComposer(
+      builder: (context, onSendLongPress) => StreamMessageComposer(
         focusNode: _focusNode,
         messageComposerController: _messageComposerController,
         onQuotedMessageCleared: _messageComposerController.clearQuotedMessage,
+        onSendLongPress: onSendLongPress,
         enableVoiceRecording: true,
       ),
     );

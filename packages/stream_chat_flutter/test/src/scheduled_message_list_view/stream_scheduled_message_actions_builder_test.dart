@@ -26,24 +26,35 @@ void main() {
     expect(rowLabels(tester), ['Edit & Reschedule', 'Delete']);
   });
 
-  testWidgets('showStreamScheduledMessageActionsSheet also offers retry on a message whose request failed', (
-    tester,
-  ) async {
-    final failed = fakeScheduledMessage(status: .failed, failureReason: .requestFailed);
+  testWidgets(
+    'showStreamScheduledMessageActionsSheet offers edit and reschedule, and delete, on a message whose request failed',
+    (tester) async {
+      final failed = fakeScheduledMessage(status: .failed, failureReason: .requestFailed);
 
-    await showActions(tester, failed);
+      await showActions(tester, failed);
 
-    expect(rowLabels(tester), ['Retry', 'Edit & Reschedule', 'Delete']);
-  });
+      expect(rowLabels(tester), ['Edit & Reschedule', 'Delete']);
+    },
+  );
 
-  testWidgets('showStreamScheduledMessageActionsSheet offers retry, edit, reschedule and delete on a failed edit', (
+  testWidgets('showStreamScheduledMessageActionsSheet offers edit, reschedule and delete on a failed edit', (
     tester,
   ) async {
     final failed = fakeScheduledMessage(status: .failed, failureReason: .updateFailed);
 
     await showActions(tester, failed);
 
-    expect(rowLabels(tester), ['Retry', 'Edit Message', 'Reschedule', 'Delete']);
+    expect(rowLabels(tester), ['Edit Message', 'Reschedule', 'Delete']);
+  });
+
+  testWidgets('showStreamScheduledMessageActionsSheet offers edit, reschedule and delete on a refused edit', (
+    tester,
+  ) async {
+    final failed = fakeScheduledMessage(status: .failed, failureReason: .updateRejected);
+
+    await showActions(tester, failed);
+
+    expect(rowLabels(tester), ['Edit Message', 'Reschedule', 'Delete']);
   });
 
   testWidgets('showStreamScheduledMessageActionsSheet offers copy and delete on a message whose channel was deleted', (
@@ -111,7 +122,7 @@ void main() {
 
       await showActions(tester, failed, channels: channels);
 
-      expect(rowLabels(tester), ['Retry', 'Edit & Reschedule', 'Delete']);
+      expect(rowLabels(tester), ['Edit & Reschedule', 'Delete']);
     },
   );
 

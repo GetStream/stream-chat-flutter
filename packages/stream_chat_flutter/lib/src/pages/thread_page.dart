@@ -123,9 +123,10 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
             controller: _messageComposerController,
             parentId: widget.parent.id,
             onScheduledMessagesBannerTap: _onScheduledMessagesBannerTap(),
-            composer: StreamMessageComposer(
+            builder: (context, onSendLongPress) => StreamMessageComposer(
               focusNode: _focusNode,
               messageComposerController: _messageComposerController,
+              onSendLongPress: onSendLongPress,
               enableVoiceRecording: true,
             ),
           )

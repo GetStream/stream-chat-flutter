@@ -1024,6 +1024,15 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get scheduleMessageError => "No s'ha pogut programar el missatge. Torna-ho a provar";
 
   @override
+  String get scheduleCommandRefusedError => "Les ordres no es poden programar. Elimina l'ordre / per continuar.";
+
+  @override
+  String get scheduleQuotedMessageDeletedError => "El missatge citat s'ha suprimit";
+
+  @override
+  String get scheduleMessageRefusedError => 'Aquest missatge no es pot programar';
+
+  @override
   String scheduledMessagesCountText({required int count}) {
     return Intl.plural(
       count,
@@ -1079,6 +1088,9 @@ class _AccessibilityTranslationsCa extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'Enregistra un missatge de veu';
+
+  @override
+  String get scheduleMessageHint => 'Programa el missatge';
 
   @override
   String get cancelRecordingTooltip => "Cancel·la l'enregistrament";

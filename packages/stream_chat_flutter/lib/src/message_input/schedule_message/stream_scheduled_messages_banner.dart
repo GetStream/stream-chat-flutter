@@ -226,17 +226,17 @@ class _ScheduledMessagesBanner extends StatelessWidget {
     final ScheduledMessageCounts(:failed, :pending, :channelPending, :hasFailed, :hasPending) = counts;
     if (!hasFailed && !hasPending) return const SizedBox.shrink();
 
-    final limit = channel.config?.scheduledMessagesMaxPerChannel;
+    // The channel's limit isn't shown in a thread.
+    final limit = isThread ? null : channel.config?.scheduledMessagesMaxPerChannel;
     final isAtLimit = limit != null && channelPending >= limit;
-    // A channel's only scheduled message is named by when it is sent.
+    // The only scheduled message, or reply, is named by when it is sent.
     final onlyScheduledAt = switch (counts.nextScheduledAt) {
-      final scheduledAt? when !hasFailed && !isThread && !isAtLimit && pending == 1 => scheduledAt,
+      final scheduledAt? when !hasFailed && !isAtLimit && pending == 1 => scheduledAt,
       _ => null,
     };
 
     String label() {
       if (hasFailed) return translations.scheduledMessagesFailedCountText(count: failed);
-      if (isThread) return translations.scheduledRepliesCountText(count: pending);
       if (limit != null && isAtLimit) {
         return translations.scheduledMessagesLimitText(count: channelPending, limit: limit);
       }
@@ -246,6 +246,7 @@ class _ScheduledMessagesBanner extends StatelessWidget {
           use24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
         );
       }
+      if (isThread) return translations.scheduledRepliesCountText(count: pending);
 
       return translations.scheduledMessagesCountText(count: pending);
     }

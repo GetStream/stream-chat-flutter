@@ -489,6 +489,9 @@ void main() {
       expect(localizations.scheduleTooFarError, isNotEmpty);
       expect(localizations.scheduleUserLimitReachedError(limit: 100), contains('100'));
       expect(localizations.scheduleMessageError, isNotEmpty);
+      expect(localizations.scheduleCommandRefusedError, isNotEmpty);
+      expect(localizations.scheduleQuotedMessageDeletedError, isNotEmpty);
+      expect(localizations.scheduleMessageRefusedError, isNotEmpty);
       expect(localizations.rescheduleMessageLabel, isNotEmpty);
       expect(localizations.scheduledMessagesCountText(count: 3), contains('3'));
       expect(localizations.scheduledRepliesCountText(count: 2), contains('2'));
@@ -515,6 +518,7 @@ void main() {
       expect(a11y.slowModeTooltip(seconds: 30), isNotNull);
       // Composer: voice recorder
       expect(a11y.recordVoiceRecordingLabel, isNotNull);
+      expect(a11y.scheduleMessageHint, isNotEmpty);
       expect(a11y.cancelRecordingTooltip, isNotNull);
       expect(a11y.stopRecordingTooltip, isNotNull);
       expect(a11y.sendRecordingTooltip, isNotNull);

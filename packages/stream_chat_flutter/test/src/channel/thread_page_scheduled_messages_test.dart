@@ -8,11 +8,13 @@ import 'thread_page_harness.dart';
 
 void main() {
   testWidgets('shows the scheduled messages banner above the composer', (tester) async {
-    await pumpThreadPage(tester, scheduledMessages: [scheduledMessage(parentId: 'parent-id')]);
+    final reply = scheduledMessage(parentId: 'parent-id');
+    await pumpThreadPage(tester, scheduledMessages: [reply]);
 
     final banner = bannerPill(tester);
     final input = tester.getRect(find.byType(StreamChatMessageInput));
-    expect(find.text(DefaultTranslations.instance.scheduledRepliesCountText(count: 1)), findsOneWidget);
+    final label = DefaultTranslations.instance.scheduledMessageScheduledForText(scheduledAt: reply.scheduledAt);
+    expect(find.text(label), findsOneWidget);
     expect(banner.bottom, lessThanOrEqualTo(input.top));
   });
 
@@ -27,7 +29,7 @@ void main() {
     expect(find.byType(StreamScheduledMessagesBanner), findsNothing);
   });
 
-  testWidgets('tapping View all invokes onScheduledMessagesBannerTap with the parent message', (tester) async {
+  testWidgets("tapping the banner's link invokes onScheduledMessagesBannerTap with the parent message", (tester) async {
     final parents = <Message?>[];
     await pumpThreadPage(
       tester,
@@ -35,7 +37,7 @@ void main() {
       onScheduledMessagesBannerTap: (_, _, parent) => parents.add(parent),
     );
 
-    await tester.tap(find.text('View all'));
+    await tester.tap(find.text('View'));
 
     expect(parents.map((it) => it?.id), ['parent-id']);
   });
