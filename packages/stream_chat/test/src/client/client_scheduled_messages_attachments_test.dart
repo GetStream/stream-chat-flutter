@@ -31,14 +31,25 @@ void main() {
     expect(listed.message.attachments.single.uploadState, const UploadState.preparing());
   });
 
-  test('scheduleMessage lists the upload progress of its attachment', () async {
+  test('scheduleMessage lists the upload progress of its attachment against the size of its file', () async {
     _stubImageUpload(harness, (invocation) {
+      // The request is larger than the file, as it also sends the framing.
       final onSendProgress = invocation.namedArguments[#onSendProgress] as ProgressCallback;
-      onSendProgress(50, 100);
+      onSendProgress(60, 120);
       return Completer<SendImageResponse>().future;
     });
+    final message = Message(
+      id: 'message',
+      attachments: [
+        Attachment(
+          id: 'image',
+          type: AttachmentType.image,
+          file: AttachmentFile(size: 100, path: 'image.png'),
+        ),
+      ],
+    );
 
-    schedule(_withImage()).ignore();
+    schedule(message).ignore();
     await settle();
 
     final [listed] = harness.client.state.scheduledMessages;
@@ -364,6 +375,21 @@ void main() {
     await scheduling;
 
     expect(cancelTokens.single.isCancelled, isTrue);
+  });
+
+  test('deleteScheduledMessage of one whose attachment finished uploading does not schedule it', () async {
+    final upload = Completer<SendImageResponse>();
+    _stubImageUpload(harness, (_) => upload.future);
+    _stubSchedule(harness);
+    final scheduling = _ignoringFailure(schedule(_withImage()));
+    await settle();
+    final listed = harness.client.state.scheduledMessages.single;
+
+    upload.complete(SendImageResponse()..file = imageUrl);
+    harness.client.deleteScheduledMessage(listed.id).ignore();
+    await scheduling;
+
+    _verifyNeverScheduled(harness);
   });
 
   test('updateScheduledMessage refuses an attachment not uploaded yet for one not listed', () async {

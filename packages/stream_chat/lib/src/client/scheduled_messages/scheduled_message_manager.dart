@@ -15,6 +15,7 @@ import '../../core/util/in_flight_cache.dart';
 import '../../core/util/scheduled_message_rules.dart';
 import '../../event_type.dart';
 import '../attachment/attachment_uploader.dart';
+import '../attachment/message_attachment_uploader.dart';
 import '../attachment/scheduled_message_attachment_uploader.dart';
 import '../client.dart';
 import 'scheduled_message_event_handler.dart';
@@ -56,16 +57,16 @@ class ScheduledMessageManager {
   // The attachment uploaders, one per channel cid.
   final _uploaders = <String, ChannelAttachmentUploader>{};
 
-  // Each scheduled message waiting for its attachments to upload, with the
-  // copy whose attachments are uploading.
-  final _uploads = <String, ({Completer<Message> completer, ScheduledMessage uploading})>{};
+  // The attachment upload of each scheduled message waiting for it.
+  final _uploads = <String, MessageAttachmentsUpload>{};
 
   static const _attachmentUploadFailed = StreamChatError(
     'Failed to upload one or more attachments',
   );
 
-  static const _messageCancelled = StreamChatError('Message cancelled');
-  static const _messageDeleted = StreamChatError('Message deleted');
+  static const _uploadCanceled = StreamChatError(
+    'The attachment uploads were canceled',
+  );
 
   /// The scheduled messages, and whether the complete list is loaded.
   ScheduledMessageListState get state => _stateNotifier.state;
@@ -216,7 +217,7 @@ class ScheduledMessageManager {
     );
 
     // Cancelling previous scheduling in case it's called again in the process.
-    _cancelUploads(local.id, _messageCancelled);
+    _cancelUploads(local.id);
 
     _emitEvent(EventType.scheduledMessageCreated, local, generation);
 
@@ -257,7 +258,7 @@ class ScheduledMessageManager {
     } catch (error) {
       // Cancelled by a deletion or by a newer call for the same message, which
       // now owns its state.
-      if (error == _messageCancelled || error == _messageDeleted) rethrow;
+      if (error == _uploadCanceled) rethrow;
 
       if (error is! StreamChatNetworkError && error != _attachmentUploadFailed) {
         _emitEvent(EventType.scheduledMessageDeleted, _canceled(local), generation);
@@ -467,7 +468,7 @@ class ScheduledMessageManager {
 
     _refuseWhileScheduling(scheduledMessage);
     _refuseDeletedQuote(scheduledMessage.cid, scheduledMessage.message);
-    _cancelUploads(scheduledMessage.id, _messageCancelled);
+    _cancelUploads(scheduledMessage.id);
 
     final generation = _generation;
     final response = await _request(
@@ -511,7 +512,7 @@ class ScheduledMessageManager {
 
     // One still being scheduled, or whose attachments failed to upload, never
     // reached the server.
-    final wasWaiting = _cancelUploads(scheduledMessage.id, _messageDeleted);
+    final wasWaiting = _cancelUploads(scheduledMessage.id);
     final isScheduling = wasWaiting && scheduledMessage.remoteCreatedAt == null;
     final isUploadFailed = scheduledMessage.failureReason == .attachmentUploadFailed;
     if (isScheduling || isUploadFailed) {
@@ -613,7 +614,7 @@ class ScheduledMessageManager {
     Future<UpdateScheduledMessageResponse> Function(Message message) request,
   ) async {
     // Cancelling previous scheduling in case it's called again in the process.
-    _cancelUploads(scheduledMessage.id, _messageCancelled);
+    _cancelUploads(scheduledMessage.id);
 
     final generation = _generation;
     var saving = edited.copyWith(
@@ -678,19 +679,13 @@ class ScheduledMessageManager {
   // Uploads the attachments of [scheduledMessage] that are not uploaded yet,
   // showing their progress on it, and resolves to its message.
   //
-  // Throws the error [_cancelUploads] stops it with.
+  // Throws [_uploadCanceled] if [_cancelUploads] stops them, even once they
+  // have finished.
   Future<Message> _uploadAttachments(
     ScheduledMessage scheduledMessage,
     int generation,
-  ) {
-    final completer = Completer<Message>();
-    _uploads[scheduledMessage.id] = (completer: completer, uploading: scheduledMessage);
-
+  ) async {
     void onUpdated(ScheduledMessage scheduledMessage) {
-      // One deleted or replaced no longer waits for these uploads.
-      final waiting = _uploads[scheduledMessage.id]?.completer;
-      if (!identical(waiting, completer)) return;
-
       final updated = scheduledMessage.copyWith(localUpdatedAt: clock.now());
       _emitEvent(EventType.scheduledMessageUpdated, updated, generation);
     }
@@ -701,33 +696,25 @@ class ScheduledMessageManager {
       onUpdated: onUpdated,
     );
 
-    upload.then((uploaded) {
-      // One deleted or replaced was already completed with an error.
-      if (completer.isCompleted) return;
+    final id = scheduledMessage.id;
+    _uploads[id] = upload;
+    final result = await upload.result;
 
-      _uploads.remove(uploaded.id);
-      completer.complete(uploaded.message);
-    }).ignore();
+    // Deleted, replaced or cleared while it waited.
+    if (!identical(_uploads[id], upload)) throw _uploadCanceled;
+    _uploads.remove(id);
 
-    return completer.future;
+    return result.message;
   }
 
-  // Stops the attachment uploads of the scheduled message [id], failing what
-  // waits for them with [error].
+  // Cancels the attachment uploads of the scheduled message [id], so what
+  // waits for them throws.
   //
   // Returns whether it was waiting for them.
-  bool _cancelUploads(String id, StreamChatError error) {
-    final waiting = _uploads.remove(id);
-    if (waiting == null) return false;
-
-    final uploading = waiting.uploading;
-    final uploader = _uploaders[uploading.cid];
-    for (final attachment in uploading.message.attachments) {
-      uploader?.cancel(attachment.id);
-    }
-
-    waiting.completer.completeError(error);
-    return true;
+  bool _cancelUploads(String id) {
+    final upload = _uploads.remove(id);
+    upload?.cancel();
+    return upload != null;
   }
 
   // Refuses to change [scheduledMessage] while it is first being scheduled,
@@ -890,9 +877,10 @@ class ScheduledMessageManager {
   /// Used when the user disconnects.
   void clear() {
     _generation++;
-    for (final id in [..._uploads.keys]) {
-      _cancelUploads(id, _messageCancelled);
+    for (final upload in _uploads.values) {
+      upload.cancel();
     }
+    _uploads.clear();
     _loadCache = InFlightCache<String, ScheduledMessageListState>();
     _wasLoadedBeforeConnectionLost = false;
     _stateNotifier.clear();

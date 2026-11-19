@@ -105,6 +105,148 @@ void main() {
 
     expect(cancelTokens.single.isCancelled, isTrue);
   });
+
+  test('deleting a message while its attachment uploads makes its sending throw', () async {
+    final channel = _channel(imageUpload: _uploadUntilCanceled);
+    final sending = expectLater(
+      channel.sendMessage(_withImage(text: 'Hello')),
+      throwsA(isA<StreamChatError>().having((it) => it.message, 'message', 'Message deleted')),
+    );
+    await pumpEventQueue();
+
+    await channel.deleteMessage(channel.state!.messages.single);
+
+    await sending;
+  });
+
+  test('sending a message again while its attachment uploads makes the first sending throw', () async {
+    final channel = _channel(imageUpload: _uploadUntilCanceled);
+    final first = expectLater(
+      channel.sendMessage(_withImage(text: 'Hello')),
+      throwsA(isA<StreamChatError>().having((it) => it.message, 'message', 'Message cancelled')),
+    );
+    await pumpEventQueue();
+
+    channel.sendMessage(_withImage(text: 'Hello')).ignore();
+
+    await first;
+  });
+
+  test('sending a message again while its attachment uploads cancels the first upload', () async {
+    final cancelTokens = <CancelToken>[];
+    final channel = _channel(
+      imageUpload: (invocation) {
+        cancelTokens.add(invocation.namedArguments[#cancelToken] as CancelToken);
+        return _uploadUntilCanceled(invocation);
+      },
+    );
+    final first = _ignoringFailure(channel.sendMessage(_withImage(text: 'Hello')));
+    await pumpEventQueue();
+
+    channel.sendMessage(_withImage(text: 'Hello')).ignore();
+    await first;
+
+    expect(cancelTokens.first.isCancelled, isTrue);
+  });
+
+  test('deleting a message whose attachment finished uploading does not send it', () async {
+    final upload = Completer<SendImageResponse>();
+    final channel = _channel(imageUpload: (_) => upload.future);
+    final sending = _ignoringFailure(channel.sendMessage(_withImage(text: 'Hello')));
+    await pumpEventQueue();
+    final message = channel.state!.messages.single;
+
+    upload.complete(SendImageResponse()..file = 'https://example.com/image.png');
+    channel.deleteMessage(message).ignore();
+    await sending;
+
+    verifyNever(
+      () => channel.client.sendMessage(
+        any(),
+        any(),
+        any(),
+        skipPush: any(named: 'skipPush'),
+        skipEnrichUrl: any(named: 'skipEnrichUrl'),
+      ),
+    );
+  });
+
+  test('sending a message uploads at most three of its attachments at a time', () async {
+    var uploads = 0;
+    final channel = _channel(
+      imageUpload: (_) {
+        uploads += 1;
+        return Completer<SendImageResponse>().future;
+      },
+    );
+
+    channel.sendMessage(_withImages(['1', '2', '3', '4', '5'])).ignore();
+    await pumpEventQueue();
+
+    expect(uploads, 3);
+  });
+
+  test('sending a message uploads its next attachment once one finishes', () async {
+    final uploaded = <String?>[];
+    final first = Completer<SendImageResponse>();
+    final channel = _channel(
+      imageUpload: (invocation) {
+        final file = invocation.positionalArguments.first as AttachmentFile;
+        uploaded.add(file.path);
+        if (file.path == '1.png') return first.future;
+        return Completer<SendImageResponse>().future;
+      },
+    );
+    channel.sendMessage(_withImages(['1', '2', '3', '4'])).ignore();
+    await pumpEventQueue();
+
+    first.complete(SendImageResponse()..file = 'https://example.com/1.png');
+    await pumpEventQueue();
+
+    expect(uploaded.last, '4.png');
+  });
+
+  test('canceling an attachment waiting for its turn sends the message without it', () async {
+    final channel = _channel(
+      imageUpload: (invocation) async {
+        final file = invocation.positionalArguments.first as AttachmentFile;
+        return SendImageResponse()..file = 'https://example.com/${file.path}';
+      },
+    );
+    final sending = channel.sendMessage(_withImages(['1', '2', '3', '4']));
+
+    channel.cancelAttachmentUpload('4');
+    await sending;
+
+    final sent =
+        verify(
+              () => channel.client.sendMessage(
+                captureAny(),
+                any(),
+                any(),
+                skipPush: any(named: 'skipPush'),
+                skipEnrichUrl: any(named: 'skipEnrichUrl'),
+              ),
+            ).captured.single
+            as Message;
+    expect(sent.attachments.map((it) => it.id), ['1', '2', '3']);
+  });
+
+  test('retrying an attachment while the message uploads does not upload it again', () async {
+    var uploads = 0;
+    final channel = _channel(
+      imageUpload: (_) {
+        uploads += 1;
+        return Completer<SendImageResponse>().future;
+      },
+    );
+    channel.sendMessage(_withImage(text: 'Hello')).ignore();
+    await pumpEventQueue();
+
+    await channel.retryAttachmentUpload('message', 'image');
+
+    expect(uploads, 1);
+  });
 }
 
 // A message with [text] and an image still to be uploaded.

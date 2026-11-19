@@ -610,7 +610,10 @@ class Channel {
     channelType: type,
   );
 
-  final _messageAttachmentsUploadCompleter = <String, Completer<Message>>{};
+  // The attachment upload running for each message, and the error the call
+  // waiting for each canceled one throws.
+  final _attachmentUploads = <String, MessageAttachmentsUpload>{};
+  final _attachmentUploadCancelErrors = Expando<StreamChatError>();
 
   /// Cancels [attachmentId] upload request. Throws exception if the request
   /// hasn't even started yet, or already completed or was canceled.
@@ -620,8 +623,10 @@ class Channel {
     String attachmentId, {
     String? reason,
   }) {
-    final canceled = _attachmentUploader.cancel(attachmentId, reason: reason);
-    if (canceled) return;
+    for (final upload in _attachmentUploads.values) {
+      final canceled = upload.cancelAttachment(attachmentId, reason: reason);
+      if (canceled) return;
+    }
 
     throw const StreamChatError(
       "Upload request for this Attachment hasn't started yet or maybe "
@@ -630,18 +635,39 @@ class Channel {
   }
 
   /// Retries the failed [attachmentId] upload request.
-  Future<void> retryAttachmentUpload(String messageId, String attachmentId) =>
-      _uploadAttachments(messageId, [attachmentId]);
+  ///
+  /// Does nothing while the attachments of the message are uploading.
+  Future<void> retryAttachmentUpload(String messageId, String attachmentId) {
+    if (_attachmentUploads.containsKey(messageId)) return Future.value();
 
-  Future<void> _uploadAttachments(
-    String messageId,
-    Iterable<String> attachmentIds,
-  ) {
     final message = _findMessageInLocalState(messageId);
     if (message == null) {
       throw const StreamChatError('Error, Message not found');
     }
 
+    return _retryAttachmentUpload(message, attachmentId);
+  }
+
+  Future<void> _retryAttachmentUpload(Message message, String attachmentId) async {
+    try {
+      await _uploadAttachments(message, attachmentIds: [attachmentId]);
+    } on StreamChatError catch (error) {
+      // Stopped by a newer call for the message, or its deletion.
+      if (error == _messageCancelled || error == _messageDeleted) return;
+      rethrow;
+    }
+  }
+
+  // Uploads the attachments of [message] that are not uploaded yet, or only
+  // [attachmentIds] if given, showing their progress on it, and resolves to
+  // the message once they have settled.
+  //
+  // Throws the error [_cancelAttachmentUploads] stops them with, even once
+  // they have finished.
+  Future<Message> _uploadAttachments(
+    Message message, {
+    Iterable<String>? attachmentIds,
+  }) async {
     final upload = _attachmentUploader.uploadMessageAttachments(
       message,
       attachmentIds: attachmentIds,
@@ -649,22 +675,25 @@ class Channel {
       onUpdated: (it) => state?.updateMessage(it, upsert: false),
     );
 
-    return upload.then((uploaded) {
-      // Another upload of the message is still running and completes it.
-      final isUploading = uploaded.attachments.any(
-        (it) => it.uploadState.isPreparing || it.uploadState.isInProgress,
-      );
-      if (isUploading) return;
+    _attachmentUploads[message.id] = upload;
+    final result = await upload.result;
 
-      final completer = _messageAttachmentsUploadCompleter.remove(messageId);
-      if (completer == null || completer.isCompleted) return;
+    if (!identical(_attachmentUploads[message.id], upload)) {
+      throw _attachmentUploadCancelErrors[upload] ?? _messageCancelled;
+    }
 
-      // Always complete with the latest message view so callers can decide
-      // success vs. partial failure by inspecting per-attachment upload
-      // states. Cancellation is still surfaced via `completeError` from the
-      // sendMessage/updateMessage/deleteMessage entry points.
-      completer.complete(uploaded);
-    });
+    _attachmentUploads.remove(message.id);
+    return result.message;
+  }
+
+  // Cancels the attachment upload of the message [messageId], so the call
+  // waiting for it throws [error].
+  void _cancelAttachmentUploads(String messageId, StreamChatError error) {
+    final upload = _attachmentUploads.remove(messageId);
+    if (upload == null) return;
+
+    _attachmentUploadCancelErrors[upload] = error;
+    upload.cancel();
   }
 
   Message? _findMessageInLocalState(String messageId) {
@@ -693,9 +722,9 @@ class Channel {
     // Clean up stale error messages before sending a new message.
     state?.cleanUpStaleErrorMessages();
 
-    // Cancelling previous completer in case it's called again in the process
-    // Eg. Updating the message while the previous call is in progress.
-    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(_messageCancelled);
+    // Cancelling the attachment upload of an earlier call for the message,
+    // e.g. updating the message while the earlier call is in progress.
+    _cancelAttachmentUploads(message.id, _messageCancelled);
 
     final quotedMessage = state!.messages.firstWhereOrNull(
       (m) => m.id == message.quotedMessageId,
@@ -718,16 +747,8 @@ class Channel {
 
     try {
       if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
-        final attachmentsUploadCompleter = Completer<Message>();
-        _messageAttachmentsUploadCompleter[message.id] = attachmentsUploadCompleter;
-
-        _uploadAttachments(
-          message.id,
-          message.attachments.map((it) => it.id),
-        );
-
         // ignore: parameter_assignments
-        message = await attachmentsUploadCompleter.future;
+        message = await _uploadAttachments(message);
 
         // Fail the whole message if any attachment failed to upload
         if (message.attachments.any((it) => it.uploadState.isFailed)) {
@@ -876,9 +897,9 @@ class Channel {
 
     _keyStrokeHandler.cancel();
 
-    // Cancelling previous completer in case it's called again in the process
-    // Eg. Updating the message while the previous call is in progress.
-    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(_messageCancelled);
+    // Cancelling the attachment upload of an earlier call for the message,
+    // e.g. updating the message while the earlier call is in progress.
+    _cancelAttachmentUploads(message.id, _messageCancelled);
 
     // ignore: parameter_assignments
     message = message.copyWith(
@@ -896,16 +917,8 @@ class Channel {
 
     try {
       if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
-        final attachmentsUploadCompleter = Completer<Message>();
-        _messageAttachmentsUploadCompleter[message.id] = attachmentsUploadCompleter;
-
-        _uploadAttachments(
-          message.id,
-          message.attachments.map((it) => it.id),
-        );
-
         // ignore: parameter_assignments
-        message = await attachmentsUploadCompleter.future;
+        message = await _uploadAttachments(message);
 
         // Fail the whole message if any attachment failed to upload
         if (message.attachments.any((it) => it.uploadState.isFailed)) {
@@ -969,9 +982,9 @@ class Channel {
   }) async {
     _checkInitialized();
 
-    // Cancelling previous completer in case it's called again in the process
-    // Eg. Updating the message while the previous call is in progress.
-    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(_messageCancelled);
+    // Cancelling the attachment upload of an earlier call for the message,
+    // e.g. updating the message while the earlier call is in progress.
+    _cancelAttachmentUploads(message.id, _messageCancelled);
 
     // ignore: parameter_assignments
     message = message.copyWith(
@@ -1133,12 +1146,8 @@ class Channel {
     state?.deleteMessage(deletedMessage, hardDelete: true);
 
     // Stopping the attachment uploads still running for the message, and the
-    // `sendMessage` or `updateMessage` waiting for them to complete.
-    for (final attachment in message.attachments) {
-      _attachmentUploader.cancel(attachment.id);
-    }
-    final completer = _messageAttachmentsUploadCompleter.remove(message.id);
-    completer?.completeError(_messageDeleted);
+    // `sendMessage` or `updateMessage` waiting for them.
+    _cancelAttachmentUploads(message.id, _messageDeleted);
 
     // Nothing else reports the deletion of a message that only exists locally.
     _client.handleEvent(

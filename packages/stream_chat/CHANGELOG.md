@@ -7,6 +7,10 @@
 🔄 Changed
 
 - Overrides of the channel query methods on `Channel` and `StreamChatClient` must add the new `includeScheduledMessages` parameter.
+- A message's attachments now upload at most three at a time, in order.
+- `UploadState.inProgress` now reports the bytes of the attachment's file.
+- Sending or updating a message again while its attachments upload restarts their upload.
+- `Channel.retryAttachmentUpload` does nothing while the message's attachments upload.
 
 ## 10.7.0
 
