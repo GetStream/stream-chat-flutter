@@ -28,9 +28,13 @@ const kStreamBaseUrl = String.fromEnvironment('STREAM_BASE_URL');
 /// `--dart-define=WEB_STORAGE_PREFIX=chat_beta_`.
 ///
 /// The web demos on flutter.getstream.io share one origin, so one browser
-/// storage. The deploy workflows give prod, beta and pull request builds each
+/// storage. The deploy jobs give prod, beta and every pull request build each
 /// their own prefix. Empty — the default — keeps the keys unprefixed.
 const kWebStoragePrefix = String.fromEnvironment('WEB_STORAGE_PREFIX');
+
+/// The pull request a web build was made for:
+/// `--dart-define=WEB_PR_NUMBER=3229`. Empty for every other build.
+const kWebPrNumber = String.fromEnvironment('WEB_PR_NUMBER');
 
 /// Name of the server-side predefined filter backing the channel list.
 ///
