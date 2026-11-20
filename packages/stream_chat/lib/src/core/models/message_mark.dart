@@ -12,7 +12,7 @@ part 'message_mark.g.dart';
 ///
 /// See also:
 ///
-///  * [MessageMark], a mark of this type on a message.
+///  * [MessageMark], which records one mark of this type on a message.
 ///  * [Channel.sendMessageMark], which puts a mark on a message.
 extension type const MessageMarkType(String _) implements String {
   /// A recipient played the audio or video of a message.
@@ -25,8 +25,9 @@ extension type const MessageMarkType(String _) implements String {
 ///
 /// See also:
 ///
-///  * [Message.markGroups], the users who marked a message of the current user.
-///  * [Message.ownMarks], the current user's marks on a message.
+///  * [Message.markGroups], which groups the marks on the current user's
+///    messages by type.
+///  * [Message.ownMarks], which lists the current user's marks on a message.
 ///  * [StreamChatClient.queryMessageMarks], which lists the marks on a message.
 @JsonSerializable()
 class MessageMark extends Equatable {
