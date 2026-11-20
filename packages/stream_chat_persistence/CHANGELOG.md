@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added `StreamChatPersistenceClient.databaseNamePrefix` to keep the databases of apps that share storage apart, such as two web apps on one origin.
+
 ## 10.7.0
 
 ✅ Added

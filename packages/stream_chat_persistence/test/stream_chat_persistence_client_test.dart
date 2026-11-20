@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_redundant_argument_values, deprecated_member_use
 
+import 'dart:io';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -44,6 +46,33 @@ void main() {
       addTearDown(() async {
         await client.disconnect();
       });
+    });
+  });
+
+  group('databaseNamePrefix', () {
+    // On macOS and Linux, the test host, the database is a file in the
+    // working directory named after the database.
+    test('is prepended to the database name', () async {
+      const userId = 'prefixTestUser';
+      final file = File('test_prefix_db_$userId.sqlite');
+      final client = StreamChatPersistenceClient(databaseNamePrefix: 'test_prefix_');
+      addTearDown(() async {
+        await client.disconnect();
+        if (file.existsSync()) file.deleteSync();
+      });
+
+      await client.connect(userId);
+      // The database opens on its first query.
+      await client.updateLastSyncAt(DateTime.now());
+
+      expect(file.existsSync(), isTrue);
+    }, testOn: 'mac-os || linux');
+
+    test('rejects characters that are not valid in a file name', () {
+      expect(
+        () => StreamChatPersistenceClient(databaseNamePrefix: '../chat'),
+        throwsAssertionError,
+      );
     });
   });
 
