@@ -32,6 +32,10 @@ Message _$MessageFromJson(Map<String, dynamic> json) => Message(
   ownReactions: (json['own_reactions'] as List<dynamic>?)
       ?.map((e) => Reaction.fromJson(e as Map<String, dynamic>))
       .toList(),
+  markGroups: (json['mark_groups'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, MarkGroup.fromJson(e as Map<String, dynamic>)),
+  ),
+  ownMarks: (json['own_marks'] as List<dynamic>?)?.map((e) => OwnMark.fromJson(e as Map<String, dynamic>)).toList(),
   parentId: json['parent_id'] as String?,
   quotedMessage: json['quoted_message'] == null
       ? null

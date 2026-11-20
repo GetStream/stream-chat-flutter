@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Message marks are now kept in the local cache.
+
 ## 10.7.0
 
 ✅ Added

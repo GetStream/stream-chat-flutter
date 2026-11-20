@@ -4687,6 +4687,56 @@ void main() {
       verifyNoMoreInteractions(api.message);
     });
 
+    test('`.sendMessageMark` returns the mark on the message', () async {
+      const messageId = 'test-message-id';
+      final mark = MessageMark(
+        type: MessageMarkType.played,
+        messageId: messageId,
+        userId: 'listener',
+        createdAt: DateTime.utc(2026, 11, 20),
+      );
+
+      when(
+        () => api.message.sendMessageMark(messageId, MessageMarkType.played),
+      ).thenAnswer(
+        (_) async => SendMessageMarkResponse()
+          ..mark = mark
+          ..created = true,
+      );
+
+      final res = await client.sendMessageMark(messageId, MessageMarkType.played);
+      expect(res.mark, mark);
+      expect(res.created, isTrue);
+
+      verify(
+        () => api.message.sendMessageMark(messageId, MessageMarkType.played),
+      ).called(1);
+      verifyNoMoreInteractions(api.message);
+    });
+
+    test('`.queryMessageMarks` returns the page of marks', () async {
+      const query = MessageMarksQuery(messageId: 'test-message-id');
+      final mark = MessageMark(
+        type: MessageMarkType.played,
+        messageId: 'test-message-id',
+        userId: 'listener',
+        createdAt: DateTime.utc(2026, 11, 20),
+      );
+
+      when(() => api.message.queryMessageMarks(query)).thenAnswer(
+        (_) async => QueryMessageMarksResponse()
+          ..marks = [mark]
+          ..next = 'page-2',
+      );
+
+      final res = await client.queryMessageMarks(query);
+      expect(res.marks, [mark]);
+      expect(res.next, 'page-2');
+
+      verify(() => api.message.queryMessageMarks(query)).called(1);
+      verifyNoMoreInteractions(api.message);
+    });
+
     test('`.deleteReaction`', () async {
       const messageId = 'test-message-id';
       const reactionType = 'like';

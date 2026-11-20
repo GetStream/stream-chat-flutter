@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added scheduled messages: schedule one with `Channel.scheduleMessage`, and read the current user's unsent ones from `ClientState.scheduledMessages` after `StreamChatClient.loadScheduledMessages`, or those in one channel or thread with `ClientState.scheduledChannelMessages` and `ClientState.scheduledThreadReplies`.
+- Added message marks, such as a voice recording being played: send them with `Channel.sendMessageMark`, read them from `Message.markGroups` and `Message.ownMarks`, and list them with `Channel.queryMessageMarks`.
 
 🔄 Changed
 

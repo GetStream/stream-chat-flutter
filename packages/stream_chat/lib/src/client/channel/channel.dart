@@ -2213,6 +2213,34 @@ class Channel {
     pagination: pagination,
   );
 
+  /// Puts a mark of [type] on [message], such as [MessageMarkType.played].
+  ///
+  /// A user marks a message at most once per type, and marking a message the
+  /// user wrote changes nothing. The mark appears in the message's
+  /// [Message.ownMarks] once [EventType.messageMarkAdded] arrives for it.
+  ///
+  /// See also:
+  ///
+  ///  * [ChannelCapabilityCheck.canSendMessageMark], which tells whether the
+  ///    current user can mark messages in this channel.
+  Future<SendMessageMarkResponse> sendMessageMark(
+    Message message,
+    MessageMarkType type,
+  ) {
+    _checkInitialized();
+    return _client.sendMessageMark(message.id, type);
+  }
+
+  /// Returns the page of marks the [query] asks for, newest first.
+  ///
+  /// Only the author of the message can query its marks.
+  Future<QueryMessageMarksResponse> queryMessageMarks(
+    MessageMarksQuery query,
+  ) {
+    _checkInitialized();
+    return _client.queryMessageMarks(query);
+  }
+
   /// Retrieves a list of messages by given [messageIDs].
   Future<GetMessagesByIdResponse> getMessagesById(
     List<String> messageIDs,
