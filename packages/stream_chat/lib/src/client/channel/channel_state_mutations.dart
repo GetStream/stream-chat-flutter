@@ -2,9 +2,6 @@ import 'package:collection/collection.dart';
 
 import '../../../stream_chat.dart';
 
-// The most markers a mark group lists.
-const _latestByLimit = 100;
-
 /// Applies channel event payloads as [ChannelClientState] mutations.
 ///
 /// Each method computes the new state from the current one and the given
@@ -120,44 +117,14 @@ class ChannelStateMutations {
     final message = messages.firstWhereOrNull((it) => it.id == mark.messageId);
     if (message == null) return;
 
-    final updated = _addMark(message, mark, currentUserId: currentUserId);
-    if (updated == null) return;
+    final updated = switch (currentUserId) {
+      final userId when message.user?.id == userId => message.addMark(mark),
+      final userId when mark.userId == userId => message.addMyMark(mark),
+      _ => null,
+    };
+    if (updated == null || identical(updated, message)) return;
 
     return _state.updateMessage(updated, upsert: false);
-  }
-
-  // Returns [message] with [mark] added, or null when [mark] changes nothing.
-  Message? _addMark(
-    Message message,
-    MessageMark mark, {
-    required String currentUserId,
-  }) {
-    if (message.user?.id == currentUserId) {
-      final group = message.markGroups?[mark.type] ?? const MarkGroup();
-      if (group.latestBy.any((it) => it.userId == mark.userId)) return null;
-
-      final marker = MessageMarker(
-        userId: mark.userId,
-        createdAt: mark.createdAt,
-      );
-      final latestBy = [marker, ...group.latestBy].take(_latestByLimit);
-      final updatedGroup = group.copyWith(
-        count: group.count + 1,
-        latestBy: latestBy.toList(),
-      );
-
-      return message.copyWith(
-        markGroups: {...?message.markGroups, mark.type: updatedGroup},
-      );
-    }
-
-    if (mark.userId != currentUserId) return null;
-
-    final ownMarks = message.ownMarks ?? const [];
-    if (ownMarks.any((it) => it.type == mark.type)) return null;
-
-    final ownMark = OwnMark(type: mark.type, createdAt: mark.createdAt);
-    return message.copyWith(ownMarks: [...ownMarks, ownMark]);
   }
 
   /// Applies the [eventMessage] carrying the new [eventReaction], preserving

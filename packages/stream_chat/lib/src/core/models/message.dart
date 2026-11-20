@@ -10,6 +10,7 @@ import 'comparable_field.dart';
 import 'draft.dart';
 import 'location.dart';
 import 'mark_group.dart';
+import 'message_mark.dart';
 import 'message_reminder.dart';
 import 'message_state.dart';
 import 'moderation.dart';
@@ -1071,5 +1072,48 @@ extension MessageReactionHelper on Message {
       latestReactions: latestReactions,
       reactionGroups: reactionGroups,
     );
+  }
+}
+
+// The most markers a [MarkGroup] lists.
+const _markGroupLatestByLimit = 100;
+
+/// Local updates of the marks on a [Message].
+///
+/// Each user is counted once per mark type.
+extension MessageMarkHelper on Message {
+  /// Adds the [mark] another user put on this message to [markGroups].
+  ///
+  /// A user already listed for the mark's type is not counted again. Returns
+  /// a new message, and does not contact the server.
+  Message addMark(MessageMark mark) {
+    final group = markGroups?[mark.type] ?? const MarkGroup();
+    if (group.latestBy.any((it) => it.userId == mark.userId)) return this;
+
+    final marker = MessageMarker(
+      userId: mark.userId,
+      createdAt: mark.createdAt,
+    );
+    final latestBy = [marker, ...group.latestBy].take(_markGroupLatestByLimit);
+    final updatedGroup = group.copyWith(
+      count: group.count + 1,
+      latestBy: latestBy.toList(),
+    );
+
+    return copyWith(
+      markGroups: {...?markGroups, mark.type: updatedGroup},
+    );
+  }
+
+  /// Adds the [mark] the current user put on this message to [ownMarks].
+  ///
+  /// A mark of a type the current user already has is ignored. Returns a new
+  /// message, and does not contact the server.
+  Message addMyMark(MessageMark mark) {
+    final ownMarks = this.ownMarks ?? const [];
+    if (ownMarks.any((it) => it.type == mark.type)) return this;
+
+    final ownMark = OwnMark(type: mark.type, createdAt: mark.createdAt);
+    return copyWith(ownMarks: [...ownMarks, ownMark]);
   }
 }

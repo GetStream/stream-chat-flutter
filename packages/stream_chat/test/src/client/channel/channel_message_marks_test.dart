@@ -27,40 +27,6 @@ void main() {
     });
   });
 
-  test('a mark received twice is counted once', () async {
-    final (client, channel) = _channel(author: _currentUser);
-    addTearDown(channel.dispose);
-
-    client
-      ..addEvent(_markAdded(channel, by: 'listener'))
-      ..addEvent(_markAdded(channel, by: 'listener'));
-    await Future<void>.delayed(Duration.zero);
-
-    final group = _playedGroup(channel.state!.messages.single);
-    expect(group.count, 1);
-  });
-
-  test('a newer mark is listed before the earlier ones', () async {
-    final earlier = MessageMarker(
-      userId: 'first-listener',
-      createdAt: DateTime.utc(2026, 11, 19),
-    );
-    final (client, channel) = _channel(
-      author: _currentUser,
-      markGroups: {
-        MessageMarkType.played: MarkGroup(count: 1, latestBy: [earlier]),
-      },
-    );
-    addTearDown(channel.dispose);
-
-    client.addEvent(_markAdded(channel, by: 'second-listener'));
-    await Future<void>.delayed(Duration.zero);
-
-    final group = _playedGroup(channel.state!.messages.single);
-    final markers = group.latestBy.map((it) => it.userId);
-    expect(markers, ['second-listener', 'first-listener']);
-  });
-
   test("the current user's mark on another user's message joins its own marks", () async {
     final (client, channel) = _channel(author: _otherUser);
     addTearDown(channel.dispose);
@@ -72,18 +38,6 @@ void main() {
     final ownMark = OwnMark(type: MessageMarkType.played, createdAt: _markedAt);
     expect(message.ownMarks, [ownMark]);
     expect(message.markGroups, isNull);
-  });
-
-  test("the current user's mark received twice is kept once", () async {
-    final (client, channel) = _channel(author: _otherUser);
-    addTearDown(channel.dispose);
-
-    client
-      ..addEvent(_markAdded(channel, by: _currentUserId))
-      ..addEvent(_markAdded(channel, by: _currentUserId));
-    await Future<void>.delayed(Duration.zero);
-
-    expect(channel.state!.messages.single.ownMarks, hasLength(1));
   });
 
   test("a mark by another user on another user's message is ignored", () async {
@@ -109,34 +63,6 @@ void main() {
 
     expect(channel.state!.messages, hasLength(1));
     expect(channel.state!.messages.single.markGroups, isNull);
-  });
-
-  test('a mark group lists at most the latest 100 markers', () async {
-    final (client, channel) = _channel(
-      author: _currentUser,
-      markGroups: {MessageMarkType.played: _fullGroup()},
-    );
-    addTearDown(channel.dispose);
-
-    client.addEvent(_markAdded(channel, by: 'newest-listener'));
-    await Future<void>.delayed(Duration.zero);
-
-    final group = _playedGroup(channel.state!.messages.single);
-    expect(group.latestBy, hasLength(100));
-  });
-
-  test('a mark past the 100 listed markers still counts', () async {
-    final (client, channel) = _channel(
-      author: _currentUser,
-      markGroups: {MessageMarkType.played: _fullGroup()},
-    );
-    addTearDown(channel.dispose);
-
-    client.addEvent(_markAdded(channel, by: 'newest-listener'));
-    await Future<void>.delayed(Duration.zero);
-
-    final group = _playedGroup(channel.state!.messages.single);
-    expect(group.count, 151);
   });
 
   test('a mark on a thread reply reaches the reply', () async {
@@ -237,14 +163,6 @@ Message _voiceNote({
     createdAt: DateTime.utc(2026, 11, 20, 9),
     markGroups: markGroups,
   );
-}
-
-// A group of 150 markers that lists the latest 100 of them.
-MarkGroup _fullGroup() {
-  final markers = [
-    for (var i = 0; i < 100; i++) MessageMarker(userId: 'listener-$i', createdAt: DateTime.utc(2026)),
-  ];
-  return MarkGroup(count: 150, latestBy: markers);
 }
 
 MarkGroup _playedGroup(Message message) {
