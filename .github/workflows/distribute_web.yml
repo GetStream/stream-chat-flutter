@@ -101,7 +101,7 @@ jobs:
 
       - name: Target
         id: target
-        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-target@ci/shared-web-deploy
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-target@e338514373956150868ee67d325c96efe1c758ec
         with:
           app: chat
           flavor: ${{ needs.flavor.outputs.flavor }}
@@ -115,7 +115,7 @@ jobs:
           flutter build web --release --wasm "${args[@]}"
 
       - name: Deploy
-        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-deploy@ci/shared-web-deploy
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-deploy@e338514373956150868ee67d325c96efe1c758ec
         with:
           path: ${{ steps.target.outputs.path }}
           service-account: ${{ steps.target.outputs.service-account }}
