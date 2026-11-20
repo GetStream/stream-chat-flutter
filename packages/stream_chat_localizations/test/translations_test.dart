@@ -420,6 +420,9 @@ void main() {
       final sendAt = localizations.scheduledMessageSendAtText(scheduledAt: scheduledAt);
       expect(sendAt, contains(DateFormat.MMMEd(language).format(localScheduledAt)));
       expect(sendAt, contains(DateFormat.jm(language).format(localScheduledAt)));
+      final scheduledFor = localizations.scheduledMessageScheduledForText(scheduledAt: scheduledAt);
+      expect(scheduledFor, contains(DateFormat.MMMEd(language).format(localScheduledAt)));
+      expect(scheduledFor, contains(DateFormat.jm(language).format(localScheduledAt)));
       expect(localizations.scheduledMessageSendingLabel, isNotNull);
       expect(localizations.scheduledMessageUploadingLabel, isNotNull);
       expect(localizations.scheduledThreadReplyPrefixText, isNotNull);
@@ -455,6 +458,48 @@ void main() {
       expect(localizations.editAndRescheduleLabel, isNotNull);
       expect(localizations.rescheduleLabel, isNotNull);
       expect(localizations.sendNowLabel, isNotNull);
+      // Scheduling a message.
+      final presetTime = DateFormat.jm(language).format(localScheduledAt);
+      final weekday = DateFormat.EEEE(language).format(localScheduledAt);
+      expect(localizations.scheduleMessageLabel, isNotEmpty);
+      expect(localizations.scheduleLimitReachedLabel(limit: 10), contains('10'));
+      expect(localizations.customTimeLabel, isNotEmpty);
+      expect(localizations.scheduleTomorrowText(scheduledAt: scheduledAt), contains(presetTime));
+      final weekdayText = localizations.scheduleWeekdayText(scheduledAt: scheduledAt);
+      expect(weekdayText, contains(presetTime));
+      expect(weekdayText, contains(toBeginningOfSentenceCase(weekday, language)));
+      final time24 = DateFormat.Hm(language).format(localScheduledAt);
+      expect(localizations.scheduleTomorrowText(scheduledAt: scheduledAt, use24HourFormat: true), contains(time24));
+      expect(localizations.scheduleWeekdayText(scheduledAt: scheduledAt, use24HourFormat: true), contains(time24));
+      expect(
+        localizations.scheduledMessageSendAtText(scheduledAt: scheduledAt, use24HourFormat: true),
+        contains(time24),
+      );
+      expect(
+        localizations.scheduledMessageScheduledForText(scheduledAt: scheduledAt, use24HourFormat: true),
+        contains(time24),
+      );
+      expect(localizations.messageToLabel(channelName: 'Maya'), contains('Maya'));
+      expect(localizations.dateLabel, isNotEmpty);
+      expect(localizations.timeLabel, isNotEmpty);
+      expect(localizations.scheduleLabel, isNotEmpty);
+      expect(localizations.sentInYourTimeZoneText(timeZone: 'GMT+2'), contains('GMT+2'));
+      expect(localizations.scheduleTooSoonError(minLeadTime: const Duration(minutes: 5)), contains('5'));
+      expect(localizations.rescheduleTooSoonError, isNotEmpty);
+      expect(localizations.scheduleTooFarError, isNotEmpty);
+      expect(localizations.scheduleUserLimitReachedError(limit: 100), contains('100'));
+      expect(localizations.scheduleMessageError, isNotEmpty);
+      expect(localizations.scheduleCommandRefusedError, isNotEmpty);
+      expect(localizations.scheduleQuotedMessageDeletedError, isNotEmpty);
+      expect(localizations.scheduleMessageRefusedError, isNotEmpty);
+      expect(localizations.rescheduleMessageLabel, isNotEmpty);
+      expect(localizations.scheduledMessagesCountText(count: 3), contains('3'));
+      expect(localizations.scheduledRepliesCountText(count: 2), contains('2'));
+      expect(localizations.scheduledMessagesFailedCountText(count: 2), contains('2'));
+      expect(
+        localizations.scheduledMessagesLimitText(count: 7, limit: 10),
+        allOf(contains('7'), contains('10')),
+      );
 
       // Accessibility translations
       final a11y = localizations.accessibility;
@@ -473,6 +518,7 @@ void main() {
       expect(a11y.slowModeTooltip(seconds: 30), isNotNull);
       // Composer: voice recorder
       expect(a11y.recordVoiceRecordingLabel, isNotNull);
+      expect(a11y.scheduleMessageHint, isNotEmpty);
       expect(a11y.cancelRecordingTooltip, isNotNull);
       expect(a11y.stopRecordingTooltip, isNotNull);
       expect(a11y.sendRecordingTooltip, isNotNull);
@@ -670,6 +716,13 @@ void main() {
   test('every translation language has a display name in the default translations', () {
     const translations = DefaultTranslations.instance;
     expectEveryLanguageNamed(translations.translatedFromLanguageText, locale: 'default');
+  });
+
+  test('scheduleTomorrowText uses a 24-hour clock in en when asked to', () async {
+    final localizations = await GlobalStreamChatLocalizations.delegate.load(const Locale('en'));
+    final scheduledAt = DateTime(2026, 10, 22, 13);
+
+    expect(localizations.scheduleTomorrowText(scheduledAt: scheduledAt, use24HourFormat: true), 'Tomorrow at 13:00');
   });
 
   test('should throw if try to load locale which is not supported', () {

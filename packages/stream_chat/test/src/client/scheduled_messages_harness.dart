@@ -11,18 +11,34 @@ const testCid = 'messaging:general';
 
 final testUser = User(id: 'test-user-id');
 final testToken = Token.development(testUser.id).rawValue;
-final missingError = StreamChatNetworkError(ChatErrorCode.doesNotExist, statusCode: 404);
+// The error a request on a scheduled message that no longer exists gets.
+final missingError = StreamChatNetworkError.raw(
+  code: ChatErrorCode.doesNotExist.code,
+  message: 'UpdateScheduledMessage failed with error: "scheduled message a not found"',
+  statusCode: 404,
+);
+
+// The error a request on a scheduled message quoting a deleted message gets.
+final quoteDeletedError = StreamChatNetworkError.raw(
+  code: ChatErrorCode.doesNotExist.code,
+  message: 'UpdateScheduledMessage failed with error: "Can\'t quote this message. The message has been deleted"',
+  statusCode: 404,
+);
 final offline = StreamChatNetworkError.raw(code: -1, message: 'No connection');
 
 // The codes of the errors that refuse a scheduled message request because the
-// message is being sent, was already sent, or was deleted.
+// message is being sent, was changed at the same time, was already sent, or
+// was deleted.
 const scheduledMessageSendingCode = 121;
+const scheduledMessageConflictCode = 122;
 const scheduledMessageAlreadySentCode = 123;
 const scheduledMessageCanceledCode = 124;
 
 // A scheduled message in a channel other than [testCid].
 final elsewhere = fakeScheduledMessage('there', cid: 'messaging:other', scheduledAt: DateTime.utc(2026, 11, 3));
 
+// A scheduled message as the server returns it, or, unless [isOnServer], one
+// never on the server, which has no server dates.
 ScheduledMessage fakeScheduledMessage(
   String id, {
   String cid = testCid,
@@ -32,6 +48,7 @@ ScheduledMessage fakeScheduledMessage(
   String? parentId,
   ScheduledMessageStatus status = ScheduledMessageStatus.scheduled,
   ScheduledMessageFailureReason? failureReason,
+  bool isOnServer = true,
 }) => ScheduledMessage(
   id: id,
   cid: cid,
@@ -40,8 +57,8 @@ ScheduledMessage fakeScheduledMessage(
   scheduledAt: scheduledAt ?? DateTime.utc(2026, 11, 2, 9),
   status: status,
   failureReason: failureReason,
-  createdAt: DateTime.utc(2026, 10, 29),
-  updatedAt: updatedAt ?? DateTime.utc(2026, 10, 29),
+  createdAt: isOnServer ? DateTime.utc(2026, 10, 29) : null,
+  updatedAt: isOnServer ? updatedAt ?? DateTime.utc(2026, 10, 29) : null,
 );
 
 QueryScheduledMessagesResponse fakePage(List<ScheduledMessage> messages, {String? next}) {
@@ -68,6 +85,16 @@ List<String> idsOf(List<ScheduledMessage>? messages) => [for (final it in messag
 Matcher pageAfter(String? next) => isA<ScheduledMessagesQuery>().having((q) => q.next, 'next', next);
 
 // Pumps the events the client emits for its own changes.
+// Awaits [request], expecting it to throw [throws] when given.
+Future<void> expectRequest(Future<Object?> request, Object? throws) async {
+  if (throws == null) {
+    await request;
+    return;
+  }
+
+  await expectLater(request, throwsA(throws));
+}
+
 Future<void> settle() => pumpEventQueue();
 
 // Gives each test a client connected as [testUser] on a fake API, with the
@@ -86,7 +113,13 @@ ScheduledMessageHarness useScheduledMessageClient({bool loaded = true}) {
 
   setUp(() async {
     final api = harness.api = FakeChatApi();
-    final client = harness.client = StreamChatClient('test-api-key', chatApi: api, ws: FakeWebSocket());
+    harness.logs.clear();
+    final client = harness.client = StreamChatClient(
+      'test-api-key',
+      chatApi: api,
+      ws: FakeWebSocket(),
+      logHandlerFunction: (record) => harness.logs.add(record.message),
+    );
     when(() => api.general.getAppSettings()).thenAnswer(
       (_) async => GetAppSettingsResponse()..app = const AppSettings(name: 'test'),
     );
@@ -106,6 +139,9 @@ class ScheduledMessageHarness {
   late FakeChatApi api;
   late StreamChatClient client;
 
+  // The messages the client logged.
+  final logs = <String>[];
+
   // Loads an empty list, so the scheduled messages count as all loaded.
   Future<void> loadAllScheduledMessages() async {
     stubQuery(fakePage(const []));
@@ -117,6 +153,24 @@ class ScheduledMessageHarness {
   Future<void> receive(String type, ScheduledMessage message) async {
     client.handleEvent(Event(type: type, cid: message.cid, scheduledMessage: message, isLocal: false));
     await settle();
+  }
+
+  // The scheduled message events while [run] runs, as type and status. What
+  // [run] throws is thrown, so a test of a failing request asserts it.
+  Future<List<(String, ScheduledMessageStatus?)>> eventsDuring(Future<void> Function() run) async {
+    final events = <(String, ScheduledMessageStatus?)>[];
+    final subscription = client.on().where((it) => it.scheduledMessage != null).listen((it) {
+      events.add((it.type, it.scheduledMessage?.status));
+    });
+
+    try {
+      await run();
+      await settle();
+    } finally {
+      await subscription.cancel();
+    }
+
+    return events;
   }
 
   // Makes the client hold [messages], as if each had just been scheduled.

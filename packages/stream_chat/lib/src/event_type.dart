@@ -185,19 +185,18 @@ class EventType {
 
   /// Event sent when the current user edits or reschedules a scheduled message.
   ///
-  /// The client also sends one with [Event.isLocal] true after
-  /// [StreamChatClient.updateScheduledMessage],
-  /// [StreamChatClient.rescheduleMessage] and
-  /// [StreamChatClient.sendScheduledMessageNow], and when the request to
-  /// schedule a message fails in a way that can be retried, as
-  /// [ScheduledMessageFailureReason.requestFailed].
+  /// The client also sends one with [Event.isLocal] true for its own
+  /// requests: while an edit is saved, as
+  /// [ScheduledMessageStatus.preparingToSchedule], once a request succeeds, and
+  /// when one fails and leaves the scheduled message failed or being sent.
   static const String scheduledMessageUpdated = 'scheduled_message.updated';
 
   /// Event sent when the current user deletes a scheduled message.
   ///
-  /// The client also sends one with [Event.isLocal] true when it finds a
-  /// scheduled message deleted or gone, or scheduling it fails in a way that
-  /// cannot be retried.
+  /// The client also sends one with [Event.isLocal] true before the request
+  /// of [StreamChatClient.deleteScheduledMessage], when it finds a scheduled
+  /// message deleted or gone, or when scheduling it fails in a way that cannot
+  /// be retried.
   static const String scheduledMessageDeleted = 'scheduled_message.deleted';
 
   /// Event sent when a scheduled message of the current user is sent.

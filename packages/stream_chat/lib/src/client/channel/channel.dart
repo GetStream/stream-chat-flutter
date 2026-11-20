@@ -910,9 +910,17 @@ class Channel {
   /// way that can be retried, the message stays listed as failed with
   /// [ScheduledMessageFailureReason.requestFailed].
   ///
+  /// Throws a [ScheduledMessageRefusedError] without making the request when
+  /// [message] is a command in a channel that has commands, quotes a deleted
+  /// message, or can't be sent at its time: one past the channel's
+  /// [ChannelConfig.scheduledMessagesMaxLeadTime], at or after its pin
+  /// expires, or less than a minute before its shared location ends.
+  ///
   /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
   /// attachment of [message] is not uploaded yet. A message to send right
   /// away goes through [sendMessage].
+  ///
+  /// Throws a [StateError] if no user is connected.
   Future<ScheduleMessageResponse> scheduleMessage(
     Message message, {
     required DateTime scheduledAt,

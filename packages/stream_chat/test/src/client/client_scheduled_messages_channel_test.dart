@@ -6,7 +6,7 @@ import 'scheduled_messages_harness.dart';
 void main() {
   final harness = useScheduledMessageClient();
 
-  final local = fakeScheduledMessage('local', status: ScheduledMessageStatus.preparingToSchedule);
+  final local = fakeScheduledMessage('local', status: ScheduledMessageStatus.preparingToSchedule, isOnServer: false);
 
   test("a channel's first query fills its state, keeping the ones not on the server yet", () async {
     await harness.hold([fakeScheduledMessage('gone'), local, elsewhere]);
@@ -59,7 +59,7 @@ void main() {
 
     await harness.client.queryChannel('messaging', channelId: 'general', includeScheduledMessages: true);
 
-    expect(idsOf(harness.client.state.scheduledMessages), ['fresh', 'failed']);
+    expect(idsOf(harness.client.state.scheduledMessages), ['failed', 'fresh']);
   });
 
   test(

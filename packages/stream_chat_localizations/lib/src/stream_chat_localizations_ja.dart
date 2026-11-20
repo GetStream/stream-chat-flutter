@@ -870,11 +870,19 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String notifyRoleText(String role) => '$role 全員に通知';
 
   @override
-  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+  String scheduledMessageSendAtText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
-    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return '$date $time に送信';
+  }
+
+  @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
+    return '$date $time に予約済み';
   }
 
   @override
@@ -929,6 +937,114 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
 
   @override
   String get sendNowLabel => '今すぐ送信';
+
+  @override
+  String get scheduleMessageLabel => 'メッセージを予約';
+
+  @override
+  String get rescheduleMessageLabel => 'メッセージの予約を変更';
+
+  @override
+  String get customTimeLabel => '時間を指定';
+
+  @override
+  String scheduleTomorrowText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final time = _formatTime(scheduledAt.toLocal(), use24HourFormat: use24HourFormat);
+    return '明日 $time';
+  }
+
+  @override
+  String scheduleWeekdayText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final local = scheduledAt.toLocal();
+    final weekday = DateFormat.EEEE(localeName).format(local);
+    final time = _formatTime(local, use24HourFormat: use24HourFormat);
+    return '$weekday $time';
+  }
+
+  @override
+  String messageToLabel({required String channelName}) => '$channelNameへのメッセージ';
+
+  @override
+  String get dateLabel => '日付';
+
+  @override
+  String get timeLabel => '時刻';
+
+  @override
+  String get scheduleLabel => '予約';
+
+  @override
+  String sentInYourTimeZoneText({required String timeZone}) => 'お使いのタイムゾーンで送信されます（$timeZone）';
+
+  @override
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: '$minutes分以上先の時刻を選んでください',
+      other: '$minutes分以上先の時刻を選んでください',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError => 'もっと後の時刻を選んでください。編集中はメッセージをすぐに送信できません。';
+
+  @override
+  String get scheduleTooFarError => 'アプリで許可されている期間より先です';
+
+  @override
+  String scheduleLimitReachedLabel({required int limit}) => '上限に達しました（最大$limit件）';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) => '予約メッセージの上限（$limit件）に達しました。';
+
+  @override
+  String get scheduleMessageError => 'メッセージを予約できませんでした。もう一度お試しください';
+
+  @override
+  String get scheduleCommandRefusedError => 'コマンドは予約できません。続けるには / コマンドを削除してください。';
+
+  @override
+  String get scheduleQuotedMessageDeletedError => '引用されたメッセージは削除されました';
+
+  @override
+  String get scheduleMessageRefusedError => 'このメッセージは予約できません';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count件の予約メッセージ',
+      other: '$count件の予約メッセージ',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count件の予約返信',
+      other: '$count件の予約返信',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count件の送信に失敗',
+      other: '$count件の送信に失敗',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$limit件中$count件の予約メッセージ';
+  }
 }
 
 class _AccessibilityTranslationsJa extends AccessibilityTranslations {
@@ -950,6 +1066,9 @@ class _AccessibilityTranslationsJa extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'ボイスメッセージを録音';
+
+  @override
+  String get scheduleMessageHint => 'メッセージを予約';
 
   @override
   String get cancelRecordingTooltip => '録音をキャンセル';

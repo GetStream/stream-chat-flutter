@@ -154,4 +154,27 @@ void main() {
     expect(scheduledMessage.createdAt, DateTime.utc(2026, 10, 29, 10));
     expect(scheduledMessage.updatedAt, DateTime.utc(2026, 10, 29, 10, 5));
   });
+
+  test('ScheduledMessageStatus.isPending is true until the message is sent or fails', () {
+    expect(ScheduledMessageStatus.preparingToSchedule.isPending, isTrue);
+    expect(ScheduledMessageStatus.scheduled.isPending, isTrue);
+    expect(ScheduledMessageStatus.sending.isPending, isTrue);
+    expect(ScheduledMessageStatus.failed.isPending, isFalse);
+    expect(ScheduledMessageStatus.canceled.isPending, isFalse);
+    expect(ScheduledMessageStatus.sent.isPending, isFalse);
+  });
+
+  test('ScheduledMessage.copyWith clears the failure reason only when told to', () {
+    final failed = ScheduledMessage(
+      cid: 'messaging:general',
+      user: User(id: 'alice'),
+      message: Message(id: 'message-id', text: 'Good morning'),
+      scheduledAt: DateTime.utc(2026, 11, 2, 9),
+      status: ScheduledMessageStatus.failed,
+      failureReason: ScheduledMessageFailureReason.updateFailed,
+    );
+
+    expect(failed.copyWith().failureReason, ScheduledMessageFailureReason.updateFailed);
+    expect(failed.copyWith(failureReason: null).failureReason, isNull);
+  });
 }

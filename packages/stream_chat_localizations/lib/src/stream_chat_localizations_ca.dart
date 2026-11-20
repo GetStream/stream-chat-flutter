@@ -890,11 +890,19 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String notifyRoleText(String role) => 'Notifica tots els membres $role';
 
   @override
-  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+  String scheduledMessageSendAtText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
-    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return 'Envia el $date a les $time';
+  }
+
+  @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
+    return 'Programat per al $date a les $time';
   }
 
   @override
@@ -949,6 +957,115 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String get sendNowLabel => 'Envia ara';
+
+  @override
+  String get scheduleMessageLabel => 'Programa el missatge';
+
+  @override
+  String get rescheduleMessageLabel => 'Reprograma el missatge';
+
+  @override
+  String get customTimeLabel => 'Hora personalitzada';
+
+  @override
+  String scheduleTomorrowText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final time = _formatTime(scheduledAt.toLocal(), use24HourFormat: use24HourFormat);
+    return 'Demà a les $time';
+  }
+
+  @override
+  String scheduleWeekdayText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final local = scheduledAt.toLocal();
+    final weekday = toBeginningOfSentenceCase(DateFormat.EEEE(localeName).format(local), localeName);
+    final time = _formatTime(local, use24HourFormat: use24HourFormat);
+    return '$weekday a les $time';
+  }
+
+  @override
+  String messageToLabel({required String channelName}) => 'Missatge per a $channelName';
+
+  @override
+  String get dateLabel => 'Data';
+
+  @override
+  String get timeLabel => 'Hora';
+
+  @override
+  String get scheduleLabel => 'Programa';
+
+  @override
+  String sentInYourTimeZoneText({required String timeZone}) => "S'envia a la teva zona horària ($timeZone)";
+
+  @override
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: "Tria una hora d'aquí a almenys $minutes minut",
+      other: "Tria una hora d'aquí a almenys $minutes minuts",
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError =>
+      'Tria una hora posterior. Quan edites, no pots enviar un missatge immediatament.';
+
+  @override
+  String get scheduleTooFarError => "És més endavant del que permet l'aplicació";
+
+  @override
+  String scheduleLimitReachedLabel({required int limit}) => 'Límit assolit (màx. $limit)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) => 'Has arribat al límit de $limit missatges programats.';
+
+  @override
+  String get scheduleMessageError => "No s'ha pogut programar el missatge. Torna-ho a provar";
+
+  @override
+  String get scheduleCommandRefusedError => "Les ordres no es poden programar. Elimina l'ordre / per continuar.";
+
+  @override
+  String get scheduleQuotedMessageDeletedError => "El missatge citat s'ha suprimit";
+
+  @override
+  String get scheduleMessageRefusedError => 'Aquest missatge no es pot programar';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count missatge programat',
+      other: '$count missatges programats',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count resposta programada',
+      other: '$count respostes programades',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: "$count no s'ha pogut enviar",
+      other: "$count no s'han pogut enviar",
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count de $limit missatges programats';
+  }
 }
 
 class _AccessibilityTranslationsCa extends AccessibilityTranslations {
@@ -971,6 +1088,9 @@ class _AccessibilityTranslationsCa extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'Enregistra un missatge de veu';
+
+  @override
+  String get scheduleMessageHint => 'Programa el missatge';
 
   @override
   String get cancelRecordingTooltip => "Cancel·la l'enregistrament";

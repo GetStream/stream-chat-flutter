@@ -379,5 +379,28 @@ void main() {
         expect(error.scheduledMessageErrorReason, isNull);
       });
     });
+
+    group('.isScheduledMessageNotFound', () {
+      test('is true when the scheduled message is not found', () {
+        final error = StreamChatNetworkError.raw(
+          code: 16,
+          message: 'UpdateScheduledMessage failed with error: "scheduled message a not found"',
+          statusCode: 404,
+        );
+
+        expect(error.isScheduledMessageNotFound, isTrue);
+      });
+
+      test('is false when the quoted message is not found', () {
+        final error = StreamChatNetworkError.raw(
+          code: 16,
+          message:
+              'UpdateScheduledMessage failed with error: "Can\'t quote this message. Message with id a could not be found"',
+          statusCode: 404,
+        );
+
+        expect(error.isScheduledMessageNotFound, isFalse);
+      });
+    });
   });
 }

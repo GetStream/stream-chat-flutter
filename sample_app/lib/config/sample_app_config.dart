@@ -211,9 +211,8 @@ class SampleAppConfigData {
   /// Whether reminder actions appear in the message context menu.
   final bool enableReminderActions;
 
-  /// Whether the scheduled messages tab and channel info entries appear.
-  ///
-  /// A tab then lists the scheduled ones.
+  /// Whether the scheduled messages banner, tab and channel info entries
+  /// appear.
   final bool enableScheduledMessages;
 
   /// Whether the "Delete for Me" action appears in the message context menu.

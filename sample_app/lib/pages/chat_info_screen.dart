@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../config/sample_app_config.dart';
-import '../scheduled_messages/screens/scheduled_messages_screen.dart';
+import '../routes/routes.dart';
 import 'channel_file_display_screen.dart';
 import 'channel_media_display_screen.dart';
 import 'pinned_messages_screen.dart';
@@ -152,7 +153,10 @@ class _MediaSection extends StatelessWidget {
             icon: Icon(icons.clock),
             label: const Text('Scheduled Messages'),
             trailing: Icon(icons.chevronRight),
-            onTap: () => _push(context, ScheduledMessagesScreen(cid: channel.cid)),
+            onTap: () => GoRouter.of(context).pushNamed(
+              Routes.SCHEDULED_MESSAGES.name,
+              pathParameters: Routes.SCHEDULED_MESSAGES.params(channel),
+            ),
           ),
         _Tile(
           icon: Icon(icons.image),
