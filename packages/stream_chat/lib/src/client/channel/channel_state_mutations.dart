@@ -1,6 +1,7 @@
 import 'package:collection/collection.dart';
 
 import '../../../stream_chat.dart';
+import 'channel_message_marks.dart';
 
 /// Applies channel event payloads as [ChannelClientState] mutations.
 ///
@@ -103,6 +104,23 @@ class ChannelStateMutations {
 
   /// Removes the deleted [draft].
   void onDraftDeleted(Draft draft) => _state.deleteDraft(draft);
+
+  /// Adds [mark] to the marked message, or to a thread reply under [parentId].
+  ///
+  /// A mark joins [Message.markGroups] on the current user's own message, or
+  /// [Message.ownMarks] when the current user marked another user's message.
+  /// A marker already listed for that type is not counted again.
+  void onMessageMarkAdded(MessageMark mark, {String? parentId}) {
+    final currentUserId = _client.state.currentUser?.id;
+    if (currentUserId == null) return;
+
+    return addMessageMark(
+      _state,
+      mark,
+      currentUserId: currentUserId,
+      parentId: parentId,
+    );
+  }
 
   /// Applies the [eventMessage] carrying the new [eventReaction], preserving
   /// the current user's own reactions.

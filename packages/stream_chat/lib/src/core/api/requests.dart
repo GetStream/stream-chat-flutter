@@ -1,6 +1,9 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../models/message_mark.dart';
+import 'responses.dart';
+
 part 'requests.g.dart';
 
 /// Pagination options.
@@ -205,6 +208,77 @@ class ThreadOptions extends Equatable {
 
   @override
   List<Object?> get props => [watch, replyLimit, participantLimit, memberLimit];
+}
+
+/// {@template messageMarksQuery}
+/// A query for the marks on one message, newest first.
+///
+/// ```dart
+/// const firstPage = MessageMarksQuery(
+///   messageId: 'voice-note',
+///   type: MessageMarkType.played,
+/// );
+/// final response = await client.queryMessageMarks(firstPage);
+///
+/// final nextPage = MessageMarksQuery(
+///   messageId: 'voice-note',
+///   type: MessageMarkType.played,
+///   next: response.next,
+/// );
+/// ```
+/// {@endtemplate}
+class MessageMarksQuery extends Equatable {
+  /// {@macro messageMarksQuery}
+  const MessageMarksQuery({
+    required this.messageId,
+    this.type,
+    this.limit,
+    this.next,
+  });
+
+  /// The ID of the message whose marks are queried.
+  final String messageId;
+
+  /// The type of the marks to return.
+  ///
+  /// Marks of every type are returned when null.
+  final MessageMarkType? type;
+
+  /// The most marks to return, between 1 and 100.
+  ///
+  /// 25 marks are returned when null.
+  final int? limit;
+
+  /// The cursor of the page to return, from a previous
+  /// [QueryMessageMarksResponse.next].
+  ///
+  /// The first page is returned when null.
+  final String? next;
+
+  /// Creates a copy of this query with the given fields replaced.
+  MessageMarksQuery copyWith({
+    String? messageId,
+    MessageMarkType? type,
+    int? limit,
+    String? next,
+  }) {
+    return MessageMarksQuery(
+      messageId: messageId ?? this.messageId,
+      type: type ?? this.type,
+      limit: limit ?? this.limit,
+      next: next ?? this.next,
+    );
+  }
+
+  /// Serializes this query to the json body of the request.
+  Map<String, dynamic> toJson() => {
+    if (type case final type?) 'filter': {'type': type},
+    'limit': ?limit,
+    'next': ?next,
+  };
+
+  @override
+  List<Object?> get props => [messageId, type, limit, next];
 }
 
 /// Payload for updating a member.

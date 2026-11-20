@@ -36,6 +36,9 @@ class EventType {
   /// Event sent when updating a reaction
   static const String reactionUpdated = 'reaction.updated';
 
+  /// Event sent when a user marks a message.
+  static const String messageMarkAdded = 'message.mark_added';
+
   /// Event sent when updating a message
   static const String messageUpdated = 'message.updated';
 

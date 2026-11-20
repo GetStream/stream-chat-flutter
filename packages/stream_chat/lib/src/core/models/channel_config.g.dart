@@ -37,6 +37,7 @@ ChannelConfig _$ChannelConfigFromJson(Map<String, dynamic> json) => ChannelConfi
   markMessagesPending: json['mark_messages_pending'] as bool? ?? false,
   deliveryEvents: json['delivery_events'] as bool? ?? false,
   sharedLocations: json['shared_locations'] as bool? ?? false,
+  markTypes: (json['mark_types'] as List<dynamic>?)?.map((e) => e as MessageMarkType).toList() ?? const [],
   scheduledMessagesMaxPerChannel: (json['scheduled_messages_max_per_channel'] as num?)?.toInt(),
   scheduledMessagesMaxPerUser: (json['scheduled_messages_max_per_user'] as num?)?.toInt(),
   scheduledMessagesMinLeadTime: _$JsonConverterFromJson<num, Duration>(
@@ -74,6 +75,7 @@ Map<String, dynamic> _$ChannelConfigToJson(ChannelConfig instance) => <String, d
   'mark_messages_pending': instance.markMessagesPending,
   'delivery_events': instance.deliveryEvents,
   'shared_locations': instance.sharedLocations,
+  'mark_types': instance.markTypes,
   'scheduled_messages_max_per_channel': instance.scheduledMessagesMaxPerChannel,
   'scheduled_messages_max_per_user': instance.scheduledMessagesMaxPerUser,
   'scheduled_messages_min_lead_time_seconds': _$JsonConverterToJson<num, Duration>(

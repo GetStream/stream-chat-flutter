@@ -10,6 +10,7 @@ import 'package:synchronized/synchronized.dart';
 import '../../../stream_chat.dart';
 import '../attachment/attachment_uploader.dart';
 import '../attachment/message_attachment_uploader.dart';
+import 'channel_message_marks.dart';
 
 /// The maximum time the incoming [Event.typingStart] event is valid before a
 /// [Event.typingStop] event is emitted automatically.
@@ -2118,6 +2119,49 @@ class Channel {
     messageId,
     pagination: pagination,
   );
+
+  /// Puts a mark of [type] on [message], such as [MessageMarkType.played].
+  ///
+  /// A user marks a message at most once per type, and marking a message the
+  /// user wrote changes nothing. Once the mark is written it appears in the
+  /// message's [Message.ownMarks].
+  ///
+  /// See also:
+  ///
+  ///  * [ChannelCapabilityCheck.canSendMessageMark], which tells whether the
+  ///    current user can mark messages in this channel.
+  Future<SendMessageMarkResponse> sendMessageMark(
+    Message message,
+    MessageMarkType type,
+  ) async {
+    _checkInitialized();
+
+    final response = await _client.sendMessageMark(message.id, type);
+
+    final currentUserId = _client.state.currentUser?.id;
+    if (currentUserId == null) return response;
+
+    if (state case final state?) {
+      addMessageMark(
+        state,
+        response.mark,
+        currentUserId: currentUserId,
+        parentId: message.parentId,
+      );
+    }
+
+    return response;
+  }
+
+  /// Returns the page of marks the [query] asks for, newest first.
+  ///
+  /// Only the author of the message can query its marks.
+  Future<QueryMessageMarksResponse> queryMessageMarks(
+    MessageMarksQuery query,
+  ) {
+    _checkInitialized();
+    return _client.queryMessageMarks(query);
+  }
 
   /// Retrieves a list of messages by given [messageIDs].
   Future<GetMessagesByIdResponse> getMessagesById(

@@ -38,6 +38,7 @@ import '../core/models/location_coordinates.dart';
 import '../core/models/member.dart';
 import '../core/models/message.dart';
 import '../core/models/message_delivery.dart';
+import '../core/models/message_mark.dart';
 import '../core/models/message_reminder.dart';
 import '../core/models/own_user.dart';
 import '../core/models/poll.dart';
@@ -2060,6 +2061,26 @@ class StreamChatClient {
     sort: sort,
     pagination: pagination,
   );
+
+  /// Puts a mark of [type] on the message with [messageId].
+  ///
+  /// A user marks a message at most once per type. Marking it again, or
+  /// marking a message the user wrote, changes nothing and returns
+  /// [SendMessageMarkResponse.created] as false.
+  ///
+  /// The channel must allow the type in [ChannelConfig.markTypes], and the
+  /// user needs [ChannelCapability.sendMessageMark].
+  Future<SendMessageMarkResponse> sendMessageMark(
+    String messageId,
+    MessageMarkType type,
+  ) => _chatApi.message.sendMessageMark(messageId, type);
+
+  /// Returns the page of marks the [query] asks for, newest first.
+  ///
+  /// Only the author of the message can query its marks.
+  Future<QueryMessageMarksResponse> queryMessageMarks(
+    MessageMarksQuery query,
+  ) => _chatApi.message.queryMessageMarks(query);
 
   /// Update the given message
   Future<UpdateMessageResponse> updateMessage(

@@ -319,6 +319,9 @@ extension type const ChannelCapability(String capability) implements String {
   /// Ability to send reactions.
   static const sendReaction = ChannelCapability('send-reaction');
 
+  /// Ability to mark other users' messages, such as marking a message played.
+  static const sendMessageMark = ChannelCapability('send-message-mark');
+
   /// Ability to attach links to messages.
   static const sendLinks = ChannelCapability('send-links');
 
