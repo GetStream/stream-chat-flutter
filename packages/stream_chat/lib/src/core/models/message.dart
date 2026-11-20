@@ -1075,13 +1075,12 @@ extension MessageReactionHelper on Message {
   }
 }
 
-// The most markers a [MarkGroup] lists.
-const _markGroupLatestByLimit = 100;
-
 /// Local updates of the marks on a [Message].
 ///
 /// Each user is counted once per mark type.
 extension MessageMarkHelper on Message {
+  static const _latestByLimit = 100;
+
   /// Adds the [mark] another user put on this message to [markGroups].
   ///
   /// A user already listed for the mark's type is not counted again. Returns
@@ -1094,7 +1093,7 @@ extension MessageMarkHelper on Message {
       userId: mark.userId,
       createdAt: mark.createdAt,
     );
-    final latestBy = [marker, ...group.latestBy].take(_markGroupLatestByLimit);
+    final latestBy = [marker, ...group.latestBy].take(_latestByLimit);
     final updatedGroup = group.copyWith(
       count: group.count + 1,
       latestBy: latestBy.toList(),

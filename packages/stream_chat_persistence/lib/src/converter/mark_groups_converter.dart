@@ -3,8 +3,7 @@ import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'package:stream_chat/stream_chat.dart';
 
-/// A [TypeConverter] that serializes [Message.markGroups] to a [String]
-/// column.
+/// Stores [Message.markGroups] as json in a [String] column.
 class MarkGroupsConverter extends TypeConverter<Map<String, MarkGroup>, String> {
   @override
   Map<String, MarkGroup> fromSql(String fromDb) {
