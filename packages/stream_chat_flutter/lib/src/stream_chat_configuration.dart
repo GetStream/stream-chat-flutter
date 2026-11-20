@@ -160,6 +160,7 @@ class StreamChatConfigurationData {
     ReactionIconResolver? reactionIconResolver,
     bool? enforceUniqueReactions,
     bool draftMessagesEnabled = true,
+    bool showMessageMarks = false,
     MessagePreviewFormatter? messagePreviewFormatter,
     StreamImageCDN imageCDN = const StreamImageCDN(),
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
@@ -172,6 +173,7 @@ class StreamChatConfigurationData {
       reactionIconResolver: reactionIconResolver ?? const DefaultReactionIconResolver(),
       enforceUniqueReactions: enforceUniqueReactions ?? false,
       draftMessagesEnabled: draftMessagesEnabled,
+      showMessageMarks: showMessageMarks,
       messagePreviewFormatter: messagePreviewFormatter ?? MessagePreviewFormatter(),
       imageCDN: imageCDN,
       attachmentBuilders: attachmentBuilders,
@@ -186,6 +188,7 @@ class StreamChatConfigurationData {
     required this.reactionIconResolver,
     required this.enforceUniqueReactions,
     required this.draftMessagesEnabled,
+    required this.showMessageMarks,
     required this.messagePreviewFormatter,
     required this.imageCDN,
     required this.attachmentBuilders,
@@ -201,6 +204,7 @@ class StreamChatConfigurationData {
     ReactionIconResolver? reactionIconResolver,
     bool? enforceUniqueReactions,
     bool? draftMessagesEnabled,
+    bool? showMessageMarks,
     MessagePreviewFormatter? messagePreviewFormatter,
     StreamImageCDN? imageCDN,
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
@@ -213,6 +217,7 @@ class StreamChatConfigurationData {
       reactionIconResolver: reactionIconResolver ?? this.reactionIconResolver,
       enforceUniqueReactions: enforceUniqueReactions ?? this.enforceUniqueReactions,
       draftMessagesEnabled: draftMessagesEnabled ?? this.draftMessagesEnabled,
+      showMessageMarks: showMessageMarks ?? this.showMessageMarks,
       messagePreviewFormatter: messagePreviewFormatter ?? this.messagePreviewFormatter,
       imageCDN: imageCDN ?? this.imageCDN,
       attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
@@ -227,6 +232,15 @@ class StreamChatConfigurationData {
   ///
   /// Defaults to False.
   final bool draftMessagesEnabled;
+
+  /// Whether the current user's voice recordings show whether they were
+  /// played, in channels whose [ChannelConfig.markTypes] allow it.
+  ///
+  /// Playing another user's voice recording marks it played either way, so
+  /// its sender sees it on any platform that shows marks.
+  ///
+  /// Defaults to false.
+  final bool showMessageMarks;
 
   /// The resolver used to convert reaction types into [StreamEmojiContent]
   /// models and to provide the list of supported/default reaction types.

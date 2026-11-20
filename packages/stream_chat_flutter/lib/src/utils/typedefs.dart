@@ -215,6 +215,28 @@ class ReactionTapDetails {
   final Reaction? reaction;
 }
 
+/// {@template onMessageMarkTap}
+/// The action to perform when a message's mark is tapped.
+///
+/// The mark is a label such as "Played by 3", the number of members who
+/// played a voice recording. The [BuildContext] is the context at the tapped
+/// message, useful for navigation or showing overlays relative to it.
+/// {@endtemplate}
+typedef OnMessageMarkTap = void Function(BuildContext context, MessageMarkTapDetails details);
+
+/// Details of a message mark tap, passed to [OnMessageMarkTap].
+@immutable
+class MessageMarkTapDetails {
+  /// Creates details for a message mark tap.
+  const MessageMarkTapDetails({required this.message, required this.type});
+
+  /// The message whose mark was tapped.
+  final Message message;
+
+  /// The tapped mark, such as [MessageMarkType.played].
+  final MessageMarkType type;
+}
+
 /// {@template onReactionLongPress}
 /// The action to perform when a message's reaction is long-pressed.
 ///

@@ -94,6 +94,15 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get editedMessageLabel => 'Bearbeitet';
 
   @override
+  String get messageNotPlayedLabel => 'Nicht abgespielt';
+
+  @override
+  String get messagePlayedLabel => 'Abgespielt';
+
+  @override
+  String messagePlayedByLabel(int count) => 'Abgespielt von $count';
+
+  @override
   String get messageReactionsLabel => 'Nachricht-Reaktionen';
 
   @override
