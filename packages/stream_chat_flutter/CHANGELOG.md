@@ -4,10 +4,11 @@
 
 - Added `StreamScheduledMessageListView` to list the current user's scheduled messages.
 - Added `showStreamScheduledMessageActionsSheet` to act on a scheduled message.
+- Added played marks to voice recordings, shown with `StreamChatConfigurationData.showMessageMarks`, and `onMessageMarkTap` to handle a tap on "Played by".
 
 🔄 Changed
 
-- A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
+- A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message and played mark strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
 
 ## 10.7.0
 

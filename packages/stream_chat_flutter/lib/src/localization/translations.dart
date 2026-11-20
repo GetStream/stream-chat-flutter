@@ -90,6 +90,15 @@ abstract class Translations {
   /// The label for showing the message is edited
   String get editedMessageLabel;
 
+  /// The mark on a one-to-one voice recording the other member has not played.
+  String get messageNotPlayedLabel;
+
+  /// The mark on a one-to-one voice recording the other member has played.
+  String get messagePlayedLabel;
+
+  /// The mark on a voice recording with the [count] of members who played it.
+  String messagePlayedByLabel(int count);
+
   /// The label for message reactions
   String get messageReactionsLabel;
 
@@ -972,6 +981,15 @@ class DefaultTranslations implements Translations {
 
   @override
   String get editedMessageLabel => 'Edited';
+
+  @override
+  String get messageNotPlayedLabel => 'Not played';
+
+  @override
+  String get messagePlayedLabel => 'Played';
+
+  @override
+  String messagePlayedByLabel(int count) => 'Played by $count';
 
   @override
   String get messageReactionsLabel => 'Message Reactions';

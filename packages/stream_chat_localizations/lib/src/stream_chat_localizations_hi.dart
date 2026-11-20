@@ -97,6 +97,15 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get editedMessageLabel => 'संपादित';
 
   @override
+  String get messageNotPlayedLabel => 'नहीं चलाया गया';
+
+  @override
+  String get messagePlayedLabel => 'चलाया गया';
+
+  @override
+  String messagePlayedByLabel(int count) => '$count ने चलाया';
+
+  @override
   String get messageReactionsLabel => 'संदेश प्रतिक्रियाएं';
 
   @override
