@@ -114,7 +114,22 @@ command:
       stream_chat_persistence: ^10.7.0
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
-      stream_core: ^0.5.2
+      # `stream_core` comes from a pinned commit until the fix for
+      # `--analyze-size` AOT builds crashing on sort fields is released
+      # (GetStream/stream-core-flutter#254). Pinned to a SHA rather than a
+      # branch: pub treats a branch ref and a resolved SHA as different
+      # sources, so a branch name fails to solve.
+      #
+      # `stream_core_flutter` declares a hosted `stream_core`, which names a
+      # second source for a package taken here from git — and pub allows a
+      # package only one. Every workspace package that sees both therefore
+      # overrides `stream_core` to this same ref. Restore the hosted constraint
+      # once the fix is released and the overrides go with it.
+      stream_core:
+        git:
+          url: https://github.com/GetStream/stream-core-flutter.git
+          path: packages/stream_core
+          ref: 6ba2aa6de64d6f6a7876bae6aa93b0ba03c50385
       stream_core_flutter: ^0.5.4
       stream_thumbnail: ^0.2.0
       synchronized: ^3.4.0
