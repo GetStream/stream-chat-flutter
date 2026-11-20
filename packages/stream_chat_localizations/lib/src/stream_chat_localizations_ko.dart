@@ -95,6 +95,15 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get editedMessageLabel => '편집됨';
 
   @override
+  String get messageNotPlayedLabel => '재생 안 됨';
+
+  @override
+  String get messagePlayedLabel => '재생됨';
+
+  @override
+  String messagePlayedByLabel(int count) => '$count명이 재생함';
+
+  @override
   String get messageReactionsLabel => '메시지에 대한 응답';
 
   @override

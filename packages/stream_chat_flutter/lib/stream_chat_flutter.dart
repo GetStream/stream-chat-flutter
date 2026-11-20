@@ -103,6 +103,7 @@ export 'src/message_widget/components/stream_message_content.dart';
 export 'src/message_widget/components/stream_message_footer.dart';
 export 'src/message_widget/components/stream_message_header.dart';
 export 'src/message_widget/components/stream_message_leading.dart';
+export 'src/message_widget/components/stream_message_played_mark.dart';
 export 'src/message_widget/message_translation_language.dart';
 export 'src/message_widget/stream_ephemeral_message.dart';
 export 'src/message_widget/stream_message_item.dart';

@@ -97,6 +97,15 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get editedMessageLabel => 'Redigert';
 
   @override
+  String get messageNotPlayedLabel => 'Ikke spilt av';
+
+  @override
+  String get messagePlayedLabel => 'Spilt av';
+
+  @override
+  String messagePlayedByLabel(int count) => 'Spilt av $count';
+
+  @override
   String get messageReactionsLabel => 'Reaksjoner på melding';
 
   @override

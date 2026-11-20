@@ -9,6 +9,7 @@
 - Added `onScheduledMessagesBannerTap` to `StreamChannelPage` and `StreamThreadPage`.
 - Added `onSendMessage` to `StreamMessageComposer`, a `StreamMessageComposerCallback` that replaces sending a message or saving an edit.
 - Added `onSendLongPress` to `StreamMessageComposer` and `StreamChatMessageInput`, called when send is long-pressed, such as to schedule the message.
+- Added played marks to voice recordings, shown with `StreamChatConfigurationData.showMessageMarks`, and `onMessageMarkTap` to handle a tap on "Played by".
 
 🔄 Changed
 
