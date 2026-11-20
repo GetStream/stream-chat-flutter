@@ -32,8 +32,22 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     /// that uses IndexedDB if the current browser supports it.
     /// Otherwise, falls back to the local storage based implementation.
     bool webUseExperimentalIndexedDb = false,
+
+    /// Prepended to the name of every database this client opens, which is
+    /// `db_<userId>` without it.
+    ///
+    /// Gives apps that share storage their own databases, such as two web
+    /// apps on one origin. It is part of a file name on native platforms, so
+    /// it may only contain letters, digits, `_` and `-`. Changing it starts
+    /// from an empty cache.
+    String databaseNamePrefix = '',
     LogHandlerFunction? logHandlerFunction,
-  }) : _webUseIndexedDbIfSupported = webUseExperimentalIndexedDb,
+  }) : assert(
+         RegExp(r'^[A-Za-z0-9_-]*$').hasMatch(databaseNamePrefix),
+         'databaseNamePrefix may only contain letters, digits, _ and -',
+       ),
+       _webUseIndexedDbIfSupported = webUseExperimentalIndexedDb,
+       _databaseNamePrefix = databaseNamePrefix,
        _logger = Logger.detached('💽')..level = logLevel {
     _logger.onRecord.listen(logHandlerFunction ?? _defaultLogHandler);
   }
@@ -45,6 +59,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   final Logger _logger;
   final ConnectionMode _connectionMode;
   final bool _webUseIndexedDbIfSupported;
+  final String _databaseNamePrefix;
 
   void _defaultLogHandler(LogRecord record) {
     print(
@@ -75,6 +90,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     userId,
     connectionMode: mode,
     webUseIndexedDbIfSupported: _webUseIndexedDbIfSupported,
+    databaseNamePrefix: _databaseNamePrefix,
   );
 
   @override

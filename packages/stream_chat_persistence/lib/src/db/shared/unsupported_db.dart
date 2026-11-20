@@ -10,6 +10,7 @@ class SharedDB {
     bool logStatements = false,
     ConnectionMode connectionMode = ConnectionMode.regular,
     bool webUseIndexedDbIfSupported = false,
+    String databaseNamePrefix = '',
   }) {
     throw UnsupportedError(
       'No implementation of the constructDatabase api provided',
