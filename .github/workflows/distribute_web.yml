@@ -4,11 +4,12 @@ name: distribute_web
 # stream-core-flutter:
 #
 #   - every push to master: https://flutter.getstream.io/chat/beta/
-#   - a release of the master line: https://flutter.getstream.io/chat/
+#   - a stable release of the master line: https://flutter.getstream.io/chat/
 #   - a manual run: the chosen flavor, from the chosen ref
 #
-# Releases of older lines (v9) are skipped: a release is the master line when
-# its major matches the version of packages/stream_chat on master.
+# Pre-releases and releases of older lines (v9) are skipped: a release is the
+# master line when its major matches the version of packages/stream_chat on
+# master.
 
 on:
   push:
@@ -47,11 +48,17 @@ jobs:
           EVENT: ${{ github.event_name }}
           INPUT_FLAVOR: ${{ inputs.flavor }}
           TAG: ${{ github.event.release.tag_name }}
+          PRERELEASE: ${{ github.event.release.prerelease }}
         run: |
           case $EVENT in
             push) flavor=beta ;;
             workflow_dispatch) flavor=$INPUT_FLAVOR ;;
             release)
+              if [[ $PRERELEASE == true ]]; then
+                echo "$TAG is a pre-release, skipping"
+                echo "flavor=" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
               master=$(gh api "repos/$GITHUB_REPOSITORY/contents/packages/stream_chat/pubspec.yaml?ref=master" \
                 --jq .content | base64 -d | sed -nE 's/^version:[[:space:]]*["'\'']?([0-9]+)\..*/\1/p')
               if [[ -z $master ]]; then
