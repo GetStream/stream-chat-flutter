@@ -106,6 +106,21 @@ SendReactionResponse _$SendReactionResponseFromJson(
   ..message = Message.fromJson(json['message'] as Map<String, dynamic>)
   ..reaction = Reaction.fromJson(json['reaction'] as Map<String, dynamic>);
 
+SendMessageMarkResponse _$SendMessageMarkResponseFromJson(
+  Map<String, dynamic> json,
+) => SendMessageMarkResponse()
+  ..duration = json['duration'] as String?
+  ..mark = MessageMark.fromJson(json['mark'] as Map<String, dynamic>)
+  ..created = json['created'] as bool;
+
+QueryMessageMarksResponse _$QueryMessageMarksResponseFromJson(
+  Map<String, dynamic> json,
+) => QueryMessageMarksResponse()
+  ..duration = json['duration'] as String?
+  ..marks =
+      (json['marks'] as List<dynamic>?)?.map((e) => MessageMark.fromJson(e as Map<String, dynamic>)).toList() ?? []
+  ..next = json['next'] as String?;
+
 ConnectGuestUserResponse _$ConnectGuestUserResponseFromJson(
   Map<String, dynamic> json,
 ) => ConnectGuestUserResponse()
