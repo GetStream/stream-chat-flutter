@@ -18,9 +18,11 @@ jobs:
   deploy:
     name: Build and Deploy
     # Any label change starts this workflow, so a `labeled` run only builds
-    # when the label added is `build`.
+    # when the label added is `build`. A closed pull request gets no build:
+    # no `closed` event would come to remove it.
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.state == 'open' &&
       github.event.action != 'closed' &&
       github.event.action != 'unlabeled' &&
       contains(github.event.pull_request.labels.*.name, 'build') &&
