@@ -8,6 +8,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../fakes.dart';
+import '../utils.dart';
 import 'scheduled_messages_harness.dart';
 
 void main() {
@@ -173,28 +174,28 @@ void main() {
   final requests = [
     (
       'updateScheduledMessage',
-      (FakeChatApi api, StreamChatNetworkError error) => when(
+      (FakeChatApi api, StreamChatException error) => when(
         () => api.scheduledMessages.updateScheduledMessage('a', message: any(named: 'message')),
       ).thenAnswer((_) async => throw error),
       (StreamChatClient client) => client.updateScheduledMessage(a, Message(id: 'a')),
     ),
     (
       'rescheduleMessage',
-      (FakeChatApi api, StreamChatNetworkError error) => when(
+      (FakeChatApi api, StreamChatException error) => when(
         () => api.scheduledMessages.updateScheduledMessage('a', scheduledAt: any(named: 'scheduledAt')),
       ).thenAnswer((_) async => throw error),
       (StreamChatClient client) => client.rescheduleMessage(a, scheduledAt: DateTime.utc(2026, 11, 3)),
     ),
     (
       'deleteScheduledMessage',
-      (FakeChatApi api, StreamChatNetworkError error) => when(
+      (FakeChatApi api, StreamChatException error) => when(
         () => api.scheduledMessages.deleteScheduledMessage('a'),
       ).thenAnswer((_) async => throw error),
       (StreamChatClient client) => client.deleteScheduledMessage(a),
     ),
     (
       'sendScheduledMessageNow',
-      (FakeChatApi api, StreamChatNetworkError error) => when(
+      (FakeChatApi api, StreamChatException error) => when(
         () => api.scheduledMessages.sendScheduledMessageNow('a'),
       ).thenAnswer((_) async => throw error),
       (StreamChatClient client) => client.sendScheduledMessageNow(a),
@@ -227,7 +228,11 @@ void main() {
 
   test('a request refused while the message is being sent keeps it', () async {
     await harness.hold([a]);
-    final error = StreamChatNetworkError.raw(code: scheduledMessageSendingCode, message: 'Sending', statusCode: 409);
+    const error = StreamApiException(
+      code: StreamErrorCode(scheduledMessageSendingCode),
+      message: 'Sending',
+      statusCode: 409,
+    );
     when(() => harness.api.scheduledMessages.sendScheduledMessageNow('a')).thenAnswer((_) async => throw error);
 
     await expectLater(harness.client.sendScheduledMessageNow(a), throwsA(error));
@@ -238,7 +243,7 @@ void main() {
 
   test('a request that fails otherwise keeps it', () async {
     await harness.hold([a]);
-    final error = StreamChatNetworkError(ChatErrorCode.inputError, statusCode: 400);
+    final error = apiException();
     when(() => harness.api.scheduledMessages.sendScheduledMessageNow('a')).thenAnswer((_) async => throw error);
 
     await expectLater(harness.client.sendScheduledMessageNow(a), throwsA(error));

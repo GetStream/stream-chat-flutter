@@ -1,5 +1,5 @@
-import '../../core/models/event.dart';
 import '../../event_type.dart';
+import '../../ws/events/event.dart';
 import 'scheduled_message_list_state.dart';
 
 /// A handler that applies scheduled message events to a

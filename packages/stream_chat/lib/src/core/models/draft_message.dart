@@ -4,6 +4,7 @@ import 'package:uuid/uuid.dart';
 
 import '../util/serializer.dart';
 import 'attachment.dart';
+import 'converters/v1_json_converters.dart';
 import 'message.dart';
 import 'poll.dart';
 import 'user.dart';
@@ -84,6 +85,7 @@ class DraftMessage extends Equatable {
 
   /// The poll associated with the message.
   @JsonKey(includeToJson: false)
+  @PollV1JsonConverter()
   final Poll? poll;
 
   /// The ID of the poll, if a poll is associated with the message.
@@ -182,10 +184,7 @@ class DraftMessage extends Equatable {
 
 /// Extension on [Message] to convert it to a [DraftMessage].
 extension MessageToDraftMessage on Message {
-  /// Converts this [DraftMessage] to a [Message].
-  ///
-  /// This is useful when you want to convert a message to a draft message
-  /// before sending it to the server.
+  /// Converts this [Message] to a [DraftMessage].
   DraftMessage toDraftMessage() {
     // Only include attachments that have been successfully uploaded.
     final uploadedAttachments = attachments.where((it) {

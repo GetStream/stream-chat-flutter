@@ -28,6 +28,7 @@ void main() {
         throttleDuration: const Duration(milliseconds: 100),
         onMarkChannelsDelivered: (deliveries) async {
           capturedDeliveries.addAll(deliveries);
+          return const Result.success(null);
         },
       );
     });
@@ -426,36 +427,87 @@ void main() {
         },
       );
 
-      test('should handle delivery errors gracefully', () async {
+      test('should keep the receipts of a failed delivery for the next batch', () async {
         var shouldFail = true;
         final errorReporter = ChannelDeliveryReporter(
           throttleDuration: const Duration(milliseconds: 50),
           onMarkChannelsDelivered: (deliveries) async {
             if (shouldFail) {
               shouldFail = false;
-              throw Exception('Network error');
+              return const Result.failure(StreamNetworkException(message: 'Network error'));
             }
             capturedDeliveries.addAll(deliveries);
+            return const Result.success(null);
           },
         );
 
         try {
-          final message = _createMessage((m) => m.copyWith(id: 'message-1'));
-          final channel = _createDeliverableChannel(
+          final channel1 = _createDeliverableChannel(
             client,
             cid: 'test:channel-1',
-            message: message,
+            message: _createMessage((m) => m.copyWith(id: 'message-1')),
+          );
+          final channel2 = _createDeliverableChannel(
+            client,
+            cid: 'test:channel-2',
+            message: _createMessage((m) => m.copyWith(id: 'message-2')),
           );
 
-          await errorReporter.submitForDelivery([channel]);
+          await errorReporter.submitForDelivery([channel1]);
           await delay(100);
 
           expect(capturedDeliveries, isEmpty);
 
-          await errorReporter.submitForDelivery([channel]);
+          await errorReporter.submitForDelivery([channel2]);
           await delay(100);
 
-          expect(capturedDeliveries, hasLength(1));
+          expect(
+            capturedDeliveries.map((it) => it.messageId),
+            unorderedEquals(['message-1', 'message-2']),
+          );
+        } finally {
+          errorReporter.cancel();
+        }
+      });
+
+      test('should keep the receipts of a delivery that throws for the next batch', () async {
+        var shouldFail = true;
+        final errorReporter = ChannelDeliveryReporter(
+          throttleDuration: const Duration(milliseconds: 50),
+          onMarkChannelsDelivered: (deliveries) async {
+            if (shouldFail) {
+              shouldFail = false;
+              throw const StreamNetworkException(message: 'Network error');
+            }
+            capturedDeliveries.addAll(deliveries);
+            return const Result.success(null);
+          },
+        );
+
+        try {
+          final channel1 = _createDeliverableChannel(
+            client,
+            cid: 'test:channel-1',
+            message: _createMessage((m) => m.copyWith(id: 'message-1')),
+          );
+          final channel2 = _createDeliverableChannel(
+            client,
+            cid: 'test:channel-2',
+            message: _createMessage((m) => m.copyWith(id: 'message-2')),
+          );
+
+          await errorReporter.submitForDelivery([channel1]);
+          await delay(100);
+
+          expect(capturedDeliveries, isEmpty);
+
+          await errorReporter.submitForDelivery([channel2]);
+          await delay(100);
+
+          expect(
+            capturedDeliveries.map((it) => it.messageId),
+            unorderedEquals(['message-1', 'message-2']),
+          );
         } finally {
           errorReporter.cancel();
         }
@@ -509,12 +561,6 @@ void main() {
 
 // region Test Helpers
 
-Logger _createLogger(String name) {
-  final logger = Logger.detached(name)..level = Level.ALL;
-  logger.onRecord.listen(print);
-  return logger;
-}
-
 StreamChatClient _createMockClient() {
   final client = MockStreamChatClient();
   final clientState = FakeClientState(
@@ -522,10 +568,6 @@ StreamChatClient _createMockClient() {
   );
 
   when(() => client.state).thenReturn(clientState);
-  when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-    return _createLogger(invocation.positionalArguments.first as String);
-  });
-  when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
   when(() => client.retryPolicy).thenReturn(
     RetryPolicy(shouldRetry: (_, __, ___) => false),
   );

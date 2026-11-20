@@ -210,7 +210,7 @@ class _ScheduledMessageBody extends StatelessWidget {
         switch (loadedChannel) {
           final loaded? => StreamChannelAvatar(channel: loaded, size: .xl),
           null => StreamAvatar(
-            imageUrl: summary?.extraData['image'].safeCast<String>(),
+            imageUrl: summary?.custom['image'].safeCast<String>(),
             size: .xl,
             placeholder: (context) => Icon(context.streamIcons.users),
           ),

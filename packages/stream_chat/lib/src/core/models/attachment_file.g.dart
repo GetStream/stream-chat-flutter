@@ -18,36 +18,43 @@ Map<String, dynamic> _$AttachmentFileToJson(AttachmentFile instance) => <String,
   'size': instance.size,
 };
 
-Preparing _$PreparingFromJson(Map<String, dynamic> json) => Preparing($type: json['runtimeType'] as String?);
+UploadStatePreparing _$UploadStatePreparingFromJson(
+  Map<String, dynamic> json,
+) => UploadStatePreparing($type: json['runtimeType'] as String?);
 
-Map<String, dynamic> _$PreparingToJson(Preparing instance) => <String, dynamic>{
-  'runtimeType': instance.$type,
-};
+Map<String, dynamic> _$UploadStatePreparingToJson(
+  UploadStatePreparing instance,
+) => <String, dynamic>{'runtimeType': instance.$type};
 
-InProgress _$InProgressFromJson(Map<String, dynamic> json) => InProgress(
+UploadStateInProgress _$UploadStateInProgressFromJson(
+  Map<String, dynamic> json,
+) => UploadStateInProgress(
   uploaded: (json['uploaded'] as num).toInt(),
   total: (json['total'] as num).toInt(),
   $type: json['runtimeType'] as String?,
 );
 
-Map<String, dynamic> _$InProgressToJson(InProgress instance) => <String, dynamic>{
+Map<String, dynamic> _$UploadStateInProgressToJson(
+  UploadStateInProgress instance,
+) => <String, dynamic>{
   'uploaded': instance.uploaded,
   'total': instance.total,
   'runtimeType': instance.$type,
 };
 
-Success _$SuccessFromJson(Map<String, dynamic> json) => Success($type: json['runtimeType'] as String?);
+UploadStateSuccess _$UploadStateSuccessFromJson(Map<String, dynamic> json) =>
+    UploadStateSuccess($type: json['runtimeType'] as String?);
 
-Map<String, dynamic> _$SuccessToJson(Success instance) => <String, dynamic>{
+Map<String, dynamic> _$UploadStateSuccessToJson(UploadStateSuccess instance) => <String, dynamic>{
   'runtimeType': instance.$type,
 };
 
-Failed _$FailedFromJson(Map<String, dynamic> json) => Failed(
+UploadStateFailed _$UploadStateFailedFromJson(Map<String, dynamic> json) => UploadStateFailed(
   error: json['error'] as String,
   $type: json['runtimeType'] as String?,
 );
 
-Map<String, dynamic> _$FailedToJson(Failed instance) => <String, dynamic>{
+Map<String, dynamic> _$UploadStateFailedToJson(UploadStateFailed instance) => <String, dynamic>{
   'error': instance.error,
   'runtimeType': instance.$type,
 };

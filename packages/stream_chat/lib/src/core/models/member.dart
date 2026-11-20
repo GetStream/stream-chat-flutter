@@ -1,8 +1,10 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:stream_core/stream_core.dart'
+    show Filter, FilterField, Standard, Sort, SortField, normalizeStringForSort;
 
+import '../util/extension.dart';
 import '../util/serializer.dart';
-import 'comparable_field.dart';
 import 'user.dart';
 
 part 'member.g.dart';
@@ -10,8 +12,8 @@ part 'member.g.dart';
 /// The class that contains the information about the user membership
 /// in a channel
 @JsonSerializable()
-class Member extends Equatable implements ComparableFieldProvider {
-  /// Constructor used for json serialization
+class Member extends Equatable {
+  /// Creates a member.
   Member({
     this.user,
     this.inviteAcceptedAt,
@@ -28,19 +30,24 @@ class Member extends Equatable implements ComparableFieldProvider {
     this.pinnedAt,
     this.archivedAt,
     this.deletedMessages = const [],
-    this.extraData = const {},
+    Map<String, Object?> custom = const {},
+    this.notificationsMuted,
+    this.status,
+    this.banFromFutureChannels,
+    this.futureChannelBanExpires,
+    this.deletedAt,
   }) : userId = userId ?? user?.id,
        createdAt = createdAt ?? DateTime.now(),
-       updatedAt = updatedAt ?? DateTime.now();
+       updatedAt = updatedAt ?? DateTime.now(),
+       custom = {...custom};
 
   /// Create a new instance from a json
   factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(
     Serializer.moveToExtraDataFromRoot(json, _topLevelFields),
   );
 
-  /// Known top level fields.
-  ///
-  /// Useful for [Serializer] methods.
+  // The JSON keys [Member.fromJson] reads into named fields; every other key is
+  // kept in [custom].
   static const _topLevelFields = [
     'user',
     'invite_accepted_at',
@@ -57,6 +64,11 @@ class Member extends Equatable implements ComparableFieldProvider {
     'pinned_at',
     'archived_at',
     'deleted_messages',
+    'notifications_muted',
+    'status',
+    'ban_from_future_channels',
+    'future_channel_ban_expires',
+    'deleted_at',
   ];
 
   /// The interested user
@@ -107,8 +119,36 @@ class Member extends Equatable implements ComparableFieldProvider {
   /// visible to other channel members.
   final List<String> deletedMessages;
 
-  /// Map of custom member extraData.
-  final Map<String, Object?> extraData;
+  /// This member's custom data.
+  @JsonKey(name: 'extra_data')
+  final Map<String, Object?> custom;
+
+  /// Whether this member muted notifications for the channel.
+  @JsonKey(includeToJson: false)
+  final bool? notificationsMuted;
+
+  /// The status of this membership, such as `member`, or `pending` while an
+  /// invite is outstanding.
+  @JsonKey(includeToJson: false)
+  final String? status;
+
+  /// Whether this member is banned from future channels.
+  ///
+  /// The ban covers the channels the channel's creator creates later.
+  @JsonKey(includeToJson: false)
+  final bool? banFromFutureChannels;
+
+  /// The date at which this member's ban from future channels expires.
+  ///
+  /// Null when there is no such ban or it has no expiry.
+  @JsonKey(includeToJson: false)
+  final DateTime? futureChannelBanExpires;
+
+  /// The date at which this membership was deleted.
+  ///
+  /// Null while the member belongs to the channel.
+  @JsonKey(includeToJson: false)
+  final DateTime? deletedAt;
 
   /// Creates a copy of [Member] with specified attributes overridden.
   Member copyWith({
@@ -128,7 +168,12 @@ class Member extends Equatable implements ComparableFieldProvider {
     DateTime? banExpires,
     bool? shadowBanned,
     List<String>? deletedMessages,
-    Map<String, Object?>? extraData,
+    Map<String, Object?>? custom,
+    bool? notificationsMuted,
+    String? status,
+    bool? banFromFutureChannels,
+    DateTime? futureChannelBanExpires,
+    DateTime? deletedAt,
   }) => Member(
     user: user ?? this.user,
     inviteAcceptedAt: inviteAcceptedAt ?? this.inviteAcceptedAt,
@@ -145,12 +190,25 @@ class Member extends Equatable implements ComparableFieldProvider {
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     deletedMessages: deletedMessages ?? this.deletedMessages,
-    extraData: extraData ?? this.extraData,
+    custom: custom ?? this.custom,
+    notificationsMuted: notificationsMuted ?? this.notificationsMuted,
+    status: status ?? this.status,
+    banFromFutureChannels: banFromFutureChannels ?? this.banFromFutureChannels,
+    futureChannelBanExpires: futureChannelBanExpires ?? this.futureChannelBanExpires,
+    deletedAt: deletedAt ?? this.deletedAt,
   );
 
-  /// Serialize to json
+  /// Serializes this member to JSON.
+  ///
+  /// Leaves out [notificationsMuted], [status], [banFromFutureChannels],
+  /// [futureChannelBanExpires] and [deletedAt], which only [Member.fromJson]
+  /// reads.
+  ///
+  /// Writes the entries of [custom] at the root, leaving out any named like one
+  /// of the member's own fields.
   Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
     _$MemberToJson(this),
+    topLevelFields: _topLevelFields,
   );
 
   @override
@@ -170,39 +228,240 @@ class Member extends Equatable implements ComparableFieldProvider {
     createdAt,
     updatedAt,
     deletedMessages,
-    extraData,
+    custom,
+    notificationsMuted,
+    status,
+    banFromFutureChannels,
+    futureChannelBanExpires,
+    deletedAt,
   ];
-
-  @override
-  ComparableField? getComparableField(String sortKey) {
-    final value = switch (sortKey) {
-      MemberSortKey.createdAt => createdAt,
-      MemberSortKey.userId => userId,
-      MemberSortKey.name => user?.name,
-      MemberSortKey.channelRole => channelRole,
-      _ => extraData[sortKey],
-    };
-
-    return ComparableField.fromValue(value);
-  }
 }
 
-/// Extension type representing sortable fields for [Member].
+/// A filter for a member query.
 ///
-/// This type provides type-safe keys that can be used for sorting members
-/// in queries. Each constant represents a field that can be sorted on.
-extension type const MemberSortKey(String key) implements String {
-  /// Sort members by their creation date in the channel.
-  static const createdAt = MemberSortKey('created_at');
+/// See [MemberFilterField] for the fields that can be filtered on.
+///
+/// ```dart
+/// final filter = MemberFilter.autoComplete(MemberFilterField.name, 'jo');
+/// ```
+typedef MemberFilter = Filter<Member>;
 
-  /// Sort members by the user ID.
-  static const userId = MemberSortKey('user_id');
+/// Represents a field that member queries can be filtered on.
+class MemberFilterField extends FilterField<Member> {
+  /// Creates a member filter field named [remote] in queries, reading its
+  /// value off an instance with [value].
+  MemberFilterField(super.remote, super.value);
 
-  /// Sort members by user name.
+  /// Creates a field the SDK does not model, read from [Member.custom].
   ///
-  /// Note: This requires additional database joins and might be slower.
-  static const name = MemberSortKey('name');
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`, `$contains`, `$q`, `$autocomplete`
+  factory MemberFilterField.custom(String remote) {
+    return MemberFilterField(remote, (it) => it.custom[remote]);
+  }
 
-  /// Sort members by the channel role.
-  static const channelRole = MemberSortKey('channel_role');
+  /// Filters members by their user id.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final userId = MemberFilterField(
+    'user_id',
+    (it) => it.userId,
+  );
+
+  /// Filters members by their name.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$q`, `$autocomplete`
+  static final name = MemberFilterField(
+    'name',
+    (it) => it.user?.name,
+  );
+
+  /// Filters members by their role in the channel.
+  ///
+  /// **Supported operators:** `$eq`, `$in`
+  static final channelRole = MemberFilterField(
+    'channel_role',
+    (it) => it.channelRole,
+  );
+
+  /// Filters members by whether they moderate the channel.
+  ///
+  /// **Supported operators:** `$eq`
+  static final isModerator = MemberFilterField(
+    'is_moderator',
+    (it) => it.isModerator,
+  );
+
+  /// Filters members by whether they are banned from the channel.
+  ///
+  /// **Supported operators:** `$eq`
+  static final banned = MemberFilterField(
+    'banned',
+    (it) => it.banned,
+  );
+
+  /// Filters members by the state of their invite.
+  ///
+  /// One of `pending`, `accepted` or `rejected`. A member who was never
+  /// invited has no invite state.
+  ///
+  /// **Supported operators:** `$eq`
+  static final invite = MemberFilterField(
+    'invite',
+    (it) => switch (it) {
+      Member(invited: false) => null,
+      Member(inviteAcceptedAt: != null) => 'accepted',
+      Member(inviteRejectedAt: != null) => 'rejected',
+      _ => 'pending',
+    },
+  );
+
+  /// Filters members by whether they have joined the channel.
+  ///
+  /// A member has joined when they were added directly, or accepted the
+  /// invite they were sent.
+  ///
+  /// **Supported operators:** `$eq`
+  static final joined = MemberFilterField(
+    'joined',
+    (it) => !it.invited || it.inviteAcceptedAt != null,
+  );
+
+  /// Filters members by when they were last online.
+  ///
+  /// **Supported operators:** `$eq`, `$gt`, `$gte`, `$lt`, `$lte`
+  static final lastActive = MemberFilterField(
+    'last_active',
+    (it) => it.user?.lastActive,
+  );
+
+  /// Filters members by their email address.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$q`, `$autocomplete`
+  static final userEmail = MemberFilterField(
+    'user.email',
+    (it) => it.user?.extraData['email'].safeCast<String>(),
+  );
+
+  /// Filters members by whether their user is deactivated.
+  ///
+  /// **Supported operators:** `$eq`
+  static final userDeactivated = MemberFilterField(
+    'user.nd_deactivated',
+    (it) => it.user?.extraData['nd_deactivated'].safeCast<bool>(),
+  );
+
+  /// Filters members by whether they muted notifications for the channel.
+  ///
+  /// **Supported operators:** `$eq`
+  static final notificationsMuted = MemberFilterField(
+    'notifications_muted',
+    (it) => it.notificationsMuted,
+  );
+
+  /// Filters members by when they joined the channel.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final createdAt = MemberFilterField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+
+  /// Filters members by when their membership last changed.
+  ///
+  /// **Supported operators:** `$eq`, `$in`, `$gt`, `$gte`, `$lt`, `$lte`,
+  /// `$exists`
+  static final updatedAt = MemberFilterField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
+}
+
+/// Represents a sorting operation for channel members.
+///
+/// See [MemberSortField] for the fields that can be sorted on.
+///
+/// ```dart
+/// final sort = [MemberSort.asc(MemberSortField.name)];
+/// ```
+class MemberSort extends Sort<Member> {
+  /// Sorts by [field], smallest first.
+  const MemberSort.asc(
+    MemberSortField super.field, {
+    super.nullOrdering,
+  }) : super.asc();
+
+  /// Sorts by [field], largest first.
+  const MemberSort.desc(
+    MemberSortField super.field, {
+    super.nullOrdering,
+  }) : super.desc();
+
+  /// An empty sort: the query carries no sort term, and a list keeps the
+  /// order it arrived in.
+  static const List<MemberSort> empty = [];
+
+  /// The ordering the API applies to a member query when none is given.
+  ///
+  /// Sorts by when the member joined, oldest first.
+  static final List<MemberSort> defaultSort = [
+    MemberSort.asc(MemberSortField.createdAt),
+  ];
+}
+
+/// Represents a field that member queries can be sorted on.
+class MemberSortField extends SortField<Member> {
+  /// Creates a field named [remote] in queries, reading its value off an
+  /// instance with `localValue`.
+  ///
+  /// For a name the SDK has not modelled; prefer the fields declared here.
+  MemberSortField(super.remote, super.localValue);
+
+  /// Creates a field the SDK does not model, read from [Member.custom].
+  ///
+  /// Declared only where the API accepts a custom sort field.
+  factory MemberSortField.custom(String remote) {
+    return MemberSortField(remote, (it) => it.custom[remote]);
+  }
+
+  /// Sorts members by their creation date in the channel.
+  static final createdAt = MemberSortField(
+    'created_at',
+    (it) => it.createdAt,
+  );
+
+  /// Sorts members by the user ID.
+  static final userId = MemberSortField(
+    'user_id',
+    (it) => it.userId,
+  );
+
+  /// Sorts members by user name.
+  ///
+  /// Compared with case, diacritics and ligatures folded away, so a list
+  /// sorted locally matches the order a query returns.
+  ///
+  /// Slower than the other member sorts.
+  static final name = MemberSortField(
+    'name',
+    // Reads the raw name rather than `User.name`, which falls back to the id.
+    (it) {
+      final name = it.user?.extraData['name'];
+      return name.safeCast<String>()?.let(normalizeStringForSort);
+    },
+  );
+
+  /// Sorts members by the channel role.
+  static final channelRole = MemberSortField(
+    'channel_role',
+    (it) => it.channelRole,
+  );
+
+  /// Sorts members by the date their membership was last updated.
+  static final updatedAt = MemberSortField(
+    'updated_at',
+    (it) => it.updatedAt,
+  );
 }

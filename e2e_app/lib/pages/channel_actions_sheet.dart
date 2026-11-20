@@ -49,7 +49,7 @@ class _ChannelActions extends StatelessWidget {
           ),
         ),
         if (otherMember case final user?) ...[
-          ListTile(title: const Text('Mute User'), onTap: () => run(() => client.muteUser(user.id))),
+          ListTile(title: const Text('Mute User'), onTap: () => run(() => client.moderation.muteUser(user.id))),
           ListTile(title: const Text('Block User'), onTap: () => run(() => client.blockUser(user.id))),
         ] else
           ListTile(

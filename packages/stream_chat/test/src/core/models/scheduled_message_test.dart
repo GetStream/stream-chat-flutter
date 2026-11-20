@@ -98,7 +98,7 @@ void main() {
   test('ScheduledMessage tells apart a renamed channel', () {
     ScheduledMessage inChannel(String name) => ScheduledMessage(
       cid: 'messaging:general',
-      channel: ChannelModel(cid: 'messaging:general', extraData: {'name': name}),
+      channel: ChannelModel(cid: 'messaging:general', custom: {'name': name}),
       user: User(id: 'alice'),
       message: Message(id: 'scheduled-id', text: 'Good morning'),
       scheduledAt: DateTime.utc(2026, 11, 2, 9),

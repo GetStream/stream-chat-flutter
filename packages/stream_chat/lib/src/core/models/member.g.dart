@@ -22,7 +22,14 @@ Member _$MemberFromJson(Map<String, dynamic> json) => Member(
   pinnedAt: json['pinned_at'] == null ? null : DateTime.parse(json['pinned_at'] as String),
   archivedAt: json['archived_at'] == null ? null : DateTime.parse(json['archived_at'] as String),
   deletedMessages: (json['deleted_messages'] as List<dynamic>?)?.map((e) => e as String).toList() ?? const [],
-  extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
+  custom: json['extra_data'] as Map<String, dynamic>? ?? const {},
+  notificationsMuted: json['notifications_muted'] as bool?,
+  status: json['status'] as String?,
+  banFromFutureChannels: json['ban_from_future_channels'] as bool?,
+  futureChannelBanExpires: json['future_channel_ban_expires'] == null
+      ? null
+      : DateTime.parse(json['future_channel_ban_expires'] as String),
+  deletedAt: json['deleted_at'] == null ? null : DateTime.parse(json['deleted_at'] as String),
 );
 
 Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
@@ -41,5 +48,5 @@ Map<String, dynamic> _$MemberToJson(Member instance) => <String, dynamic>{
   'created_at': instance.createdAt.toIso8601String(),
   'updated_at': instance.updatedAt.toIso8601String(),
   'deleted_messages': instance.deletedMessages,
-  'extra_data': instance.extraData,
+  'extra_data': instance.custom,
 };

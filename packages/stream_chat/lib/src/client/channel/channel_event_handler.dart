@@ -47,7 +47,11 @@ class ChannelEventHandler {
     try {
       region();
     } catch (error, stackTrace) {
-      _client.logger.warning('Error handling ${event.type} event in $stage', error, stackTrace);
+      _client.logger.w(
+        () => 'Error handling ${event.type} event in $stage',
+        error: error,
+        stackTrace: stackTrace,
+      );
     }
   }
 
@@ -367,9 +371,19 @@ class ChannelEventHandler {
 
   Future<void> _onChannelTruncated(Event event) async {
     final channel = event.channel!;
-    await _client.chatPersistenceClient?.deleteMessageByCid(channel.cid);
+    // A truncation of only some members leaves the channel's truncation time
+    // unchanged; a channel without one is cut at the event's own time.
+    final cutoff = channel.truncatedAt ?? event.createdAt;
+    await _client.chatPersistenceClient?.truncateChannel(
+      channel.cid,
+      truncatedAt: cutoff,
+    );
 
-    _mutations.onChannelTruncated(message: event.message);
+    _mutations.onChannelTruncated(
+      channel,
+      cutoff: cutoff,
+      message: event.message,
+    );
   }
 
   void _onChannelUpdated(Event event) {
@@ -419,7 +433,9 @@ class ChannelEventHandler {
     if (event.cid == null) return;
 
     final user = event.user!;
-    final member = await _channel.queryMembers(filter: Filter.equal('id', user.id)).then((it) => it.members.first);
+    final member = await _channel
+        .queryMembers(filter: .equal(MemberFilterField.userId, user.id))
+        .then((it) => it.members.first);
 
     _mutations.onMemberBanned(member);
   }
@@ -429,7 +445,9 @@ class ChannelEventHandler {
     if (event.cid == null) return;
 
     final user = event.user!;
-    final member = await _channel.queryMembers(filter: Filter.equal('id', user.id)).then((it) => it.members.first);
+    final member = await _channel
+        .queryMembers(filter: .equal(MemberFilterField.userId, user.id))
+        .then((it) => it.members.first);
 
     _mutations.onMemberUnbanned(member);
   }

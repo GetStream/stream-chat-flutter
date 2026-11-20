@@ -23,7 +23,7 @@ GetMessageResponse _makeSearchResult({
     ..channel = ChannelModel(
       id: 'ch-$messageId',
       type: 'messaging',
-      extraData: {'name': channelName},
+      custom: {'name': channelName},
     );
   return response;
 }
@@ -69,7 +69,7 @@ void main() {
       final controller = StreamMessageSearchListController.fromValue(
         PagedValue(items: results),
         client: client,
-        filter: Filter.equal('type', 'messaging'),
+        filter: .equal(ChannelFilterField.type, 'messaging'),
         searchQuery: 'flutter',
       );
 

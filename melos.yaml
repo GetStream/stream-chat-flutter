@@ -25,6 +25,12 @@ command:
     # Run `pub get` sequentially to avoid races on the shared git-dep cache.
     runPubGetInParallel: false
 
+    # Resolves `stream_core` from a sibling checkout when there is one, so the two repos can be
+    # worked on together without editing the ref below. Scoped to `stream_core` on purpose:
+    # `packages/**` would also capture `stream_core_flutter` and `stream_thumbnail`, which resolve elsewhere.
+    dependencyOverridePaths:
+      - '../stream-core-flutter/packages/stream_core'
+
     # Dart and Flutter environment used in the project.
     environment:
       sdk: ^3.12.0
@@ -77,10 +83,9 @@ command:
       intl: ^0.20.2
       jiffy: ^6.4.5
       jose: ^0.3.5+1
-      json_annotation: ^4.11.0
+      json_annotation: ^4.12.0
       just_audio: ^0.10.5
       latlong2: ^0.9.1
-      logging: ^1.3.0
       lottie: ^3.3.3
       markdown: ^7.3.0
       marionette_flutter: ^0.6.0
@@ -98,6 +103,7 @@ command:
       rate_limiter: ^1.1.0
       record: '>=6.2.0 <8.0.0'
       responsive_builder: ^0.7.0
+      retrofit: ^4.9.2
       rxdart: ^0.28.0
       share_plus: ">=12.0.2 <14.0.0"
       sqlite3_flutter_libs: ^0.5.26
@@ -108,17 +114,33 @@ command:
       stream_chat_persistence: ^10.7.0
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
+      # `stream_core` comes from a pinned commit until the fix for
+      # `--analyze-size` AOT builds crashing on sort fields is released
+      # (GetStream/stream-core-flutter#254). Pinned to a SHA rather than a
+      # branch: pub treats a branch ref and a resolved SHA as different
+      # sources, so a branch name fails to solve.
+      #
+      # `stream_core_flutter` declares a hosted `stream_core`, which names a
+      # second source for a package taken here from git — and pub allows a
+      # package only one. Every workspace package that sees both therefore
+      # overrides `stream_core` to this same ref. Restore the hosted constraint
+      # once the fix is released and the overrides go with it.
+      stream_core:
+        git:
+          url: https://github.com/GetStream/stream-core-flutter.git
+          path: packages/stream_core
+          ref: 340e010f186c5fc221b31d8e9b4102ba1530a2ef
       stream_core_flutter: ^0.5.4
       stream_thumbnail: ^0.2.0
       synchronized: ^3.4.0
       url_launcher: ^6.3.2
       uuid: ^4.5.3
       video_player: ^2.11.1
-      web_socket_channel: ^3.0.3
 
     # List of all the dev_dependencies used in the project.
     dev_dependencies:
       alchemist: ^0.14.0
+      benchmark_harness: ^2.4.0
       build_runner: ^2.15.0
       emojis: ^0.9.9
       substring_highlight: ^1.0.33
@@ -133,9 +155,11 @@ command:
       path: ^1.9.1
       path_provider_platform_interface: ^2.1.2
       plugin_platform_interface: ^2.1.8
+      retrofit_generator: ^10.2.6
       test: ^1.31.1
       theme_extensions_builder: ^7.3.0
       url_launcher_platform_interface: ^2.3.2
+      web_socket_channel: ^3.0.3
 
     hooks:
       # Updates the version.dart file after bootstrapping with the current version from pubspec.yaml
@@ -190,6 +214,10 @@ scripts:
   generate:flutter:
     run: melos exec -c 1 --depends-on="build_runner" --flutter -- "flutter pub run build_runner build --delete-conflicting-outputs"
     description: Build all generated files for Flutter packages in this project.
+
+  gen:openapi:
+    run: $MELOS_ROOT_PATH/scripts/generate.sh
+    description: Generate the Chat Dart client from the Chat OpenAPI spec.
 
   version:update:
     run: dart tools/generate_version.dart

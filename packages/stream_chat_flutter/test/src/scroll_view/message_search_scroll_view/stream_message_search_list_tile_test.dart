@@ -45,7 +45,7 @@ Future<void> _pumpTile(WidgetTester tester, {StreamChatThemeData? chatTheme}) as
       createdAt: DateTime(2026, 8, 26, 14),
       deletedAt: DateTime(2026, 8, 26, 15),
     )
-    ..channel = ChannelModel(cid: 'messaging:general', extraData: const {'name': 'General'});
+    ..channel = ChannelModel(cid: 'messaging:general', custom: const {'name': 'General'});
 
   await tester.pumpWidget(
     MaterialApp(

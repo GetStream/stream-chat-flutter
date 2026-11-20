@@ -1,9 +1,10 @@
 import 'package:stream_chat/src/core/models/channel_model.dart';
-import 'package:stream_chat/src/core/models/comparable_field.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:test/test.dart';
+
+import '../../utils.dart';
 
 void main() {
   group('Draft', () {
@@ -116,33 +117,17 @@ void main() {
       expect(draft.createdAt, equals(now));
     });
 
-    test('should implement ComparableFieldProvider interface', () {
-      // Test createdAt field
-      final createdAtField = draft.getComparableField(DraftSortKey.createdAt);
-      expect(createdAtField, isA<ComparableField>());
-      expect(createdAtField?.value, equals(now));
-
-      // Test extraData field from message
-      final draftWithExtraData = Draft(
-        channelCid: channelCid,
-        createdAt: now,
-        message: DraftMessage(
-          text: 'Hello, world!',
-          extraData: const {'priority': 'high'},
-        ),
+    test('createdAt orders older drafts first', () {
+      DraftMessage message() => DraftMessage(text: 'Hello, world!');
+      expectOrders(
+        DraftSortField.createdAt,
+        Draft(channelCid: channelCid, createdAt: DateTime(2023, 6, 10), message: message()),
+        Draft(channelCid: channelCid, createdAt: DateTime(2023, 6, 15), message: message()),
       );
-
-      final priorityField = draftWithExtraData.getComparableField('priority');
-      expect(priorityField, isA<ComparableField>());
-      expect(priorityField?.value, equals('high'));
-
-      // Test non-existent field
-      final nonExistentField = draft.getComparableField('non_existent');
-      expect(nonExistentField?.value, isNull);
     });
 
-    test('DraftSortKey should have defined constants', () {
-      expect(DraftSortKey.createdAt, equals('created_at'));
+    test('DraftSortField should name its remote fields', () {
+      expect(DraftSortField.createdAt.remote, equals('created_at'));
     });
   });
 }

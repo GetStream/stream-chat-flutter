@@ -4,10 +4,10 @@ library;
 import 'package:equatable/equatable.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:stream_core/stream_core.dart' show SortedListExtensions;
 
 import '../../core/models/scheduled_message.dart';
 import '../../core/util/extension.dart';
-import '../../core/util/list_extensions.dart';
 
 /// The scheduled messages a query returned for the channel `cid`.
 typedef ChannelScheduledMessages = ({
@@ -160,7 +160,7 @@ class ScheduledMessageListStateNotifier {
     Iterable<ScheduledMessage> listed,
     Iterable<ScheduledMessage> incoming,
   ) {
-    return listed.merge(incoming, key: (it) => it.id, update: _newer);
+    return listed.toList().merge(incoming, key: (it) => it.id, update: _newer);
   }
 
   static List<ScheduledMessage> _sorted(

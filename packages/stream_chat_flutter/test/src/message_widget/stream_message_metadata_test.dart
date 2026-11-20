@@ -197,7 +197,7 @@ void main() {
     });
 
     testWidgets('keeps the clock of a message still sending', (tester) async {
-      final sending = message().copyWith(state: MessageState.sending);
+      final sending = message().copyWith(state: MessageState.sending());
 
       await tester.pumpWidget(wrap(StreamMessageFooter(message: sending), readEvents: false));
       await tester.pumpAndSettle();

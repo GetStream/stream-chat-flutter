@@ -3,15 +3,12 @@ library;
 
 import 'dart:convert';
 
+import '../../ws/events/event.dart';
 import '../http/stream_http_client.dart';
 import '../models/channel_state.dart';
-import '../models/event.dart';
-import '../models/filter.dart';
 import '../models/message.dart';
-import '../models/message_delivery.dart';
 import 'requests.dart';
 import 'responses.dart';
-import 'sort_order.dart';
 
 /// Defines the api dedicated to channel operations
 class ChannelApi {
@@ -61,8 +58,9 @@ class ChannelApi {
   ///
   /// Either an inline [filter]/[sort] pair or a [predefinedFilter] identifier
   /// (optionally interpolated with [filterValues] and [sortValues]) can be
-  /// provided. With a predefined filter, the filter and sort it stands for are
-  /// returned on [QueryChannelsResponse].
+  /// provided. When a predefined filter is used,
+  /// [QueryChannelsResponse.predefinedFilter] carries the filter and sort it
+  /// resolved to.
   ///
   /// If [includeScheduledMessages] is true, each returned channel's
   /// [ChannelState.scheduledMessages] lists the current user's scheduled
@@ -71,8 +69,8 @@ class ChannelApi {
   /// If [includeActiveMemberCount] is true, each returned channel has its
   /// [ChannelModel.activeMemberCount] set.
   Future<QueryChannelsResponse> queryChannels({
-    Filter? filter,
-    SortOrder<ChannelState>? sort,
+    ChannelFilter? filter,
+    List<ChannelSort>? sort,
     String? predefinedFilter,
     Map<String, Object?>? filterValues,
     Map<String, Object?>? sortValues,
@@ -113,12 +111,6 @@ class ChannelApi {
     return QueryChannelsResponse.fromJson(response.data);
   }
 
-  /// Mark all channels for this user as read
-  Future<EmptyResponse> markAllRead() async {
-    final response = await _client.post('/channels/read', data: {});
-    return EmptyResponse.fromJson(response.data);
-  }
-
   /// Replaces the [channelId] of type [ChannelType] data with [data]
   Future<UpdateChannelResponse> updateChannel(
     String channelId,
@@ -134,54 +126,6 @@ class ChannelApi {
       },
     );
     return UpdateChannelResponse.fromJson(response.data);
-  }
-
-  /// Updates the [channelId] of type [ChannelType] data with [data]
-  Future<PartialUpdateChannelResponse> updateChannelPartial(
-    String channelId,
-    String channelType, {
-    Map<String, Object?>? set,
-    List<String>? unset,
-  }) async {
-    final response = await _client.patch(
-      _getChannelUrl(channelId, channelType),
-      data: {
-        if (set != null) 'set': set,
-        if (unset != null) 'unset': unset,
-      },
-    );
-    return PartialUpdateChannelResponse.fromJson(response.data);
-  }
-
-  /// Enable slowdown
-  Future<PartialUpdateChannelResponse> enableSlowdown(
-    String channelId,
-    String channelType,
-    int cooldown,
-  ) async {
-    final response = await updateChannelPartial(
-      channelId,
-      channelType,
-      set: {
-        'cooldown': cooldown,
-      },
-    );
-    return response;
-  }
-
-  /// Disable slowdown
-  Future<PartialUpdateChannelResponse> disableSlowdown(
-    String channelId,
-    String channelType,
-  ) async {
-    final response = await updateChannelPartial(
-      channelId,
-      channelType,
-      set: {
-        'cooldown': 0,
-      },
-    );
-    return response;
   }
 
   /// Accept invitation to the channel
@@ -287,17 +231,6 @@ class ChannelApi {
     return EmptyResponse.fromJson(response.data);
   }
 
-  /// Delete this channel. Messages are permanently removed.
-  Future<EmptyResponse> deleteChannel(
-    String channelId,
-    String channelType,
-  ) async {
-    final response = await _client.delete(
-      _getChannelUrl(channelId, channelType),
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
   /// Removes all messages from the channel
   Future<EmptyResponse> truncateChannel(
     String channelId,
@@ -317,104 +250,6 @@ class ChannelApi {
     return EmptyResponse.fromJson(response.data);
   }
 
-  /// Hides the channel from [StreamChatClient.queryChannels] for the user
-  /// until a message is added If [clearHistory] is set to true - all messages
-  /// will be removed for the user
-  Future<EmptyResponse> hideChannel(
-    String channelId,
-    String channelType, {
-    bool clearHistory = false,
-  }) async {
-    final response = await _client.post(
-      '${_getChannelUrl(channelId, channelType)}/hide',
-      data: {'clear_history': clearHistory},
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Removes the hidden status for the channel
-  Future<EmptyResponse> showChannel(
-    String channelId,
-    String channelType,
-  ) async {
-    final response = await _client.post(
-      '${_getChannelUrl(channelId, channelType)}/show',
-      data: {},
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Mark [channelId] of type [channelType] all messages as read
-  /// Optionally provide a [messageId] if you want to mark channel as
-  /// read from particular message onwards
-  Future<EmptyResponse> markRead(
-    String channelId,
-    String channelType, {
-    String? messageId,
-  }) async {
-    final response = await _client.post(
-      '${_getChannelUrl(channelId, channelType)}/read',
-      data: {if (messageId != null) 'message_id': messageId},
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Marks the channel as unread by a given [messageId].
-  ///
-  /// All messages from the provided message onwards will be marked as unread.
-  Future<EmptyResponse> markUnread(
-    String channelId,
-    String channelType,
-    String messageId,
-  ) async {
-    final response = await _client.post(
-      '${_getChannelUrl(channelId, channelType)}/unread',
-      data: {'message_id': messageId},
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Marks the channel as unread by a given [timestamp].
-  ///
-  /// All messages after the provided timestamp will be marked as unread.
-  Future<EmptyResponse> markUnreadByTimestamp(
-    String channelId,
-    String channelType,
-    DateTime timestamp,
-  ) async {
-    final response = await _client.post(
-      '${_getChannelUrl(channelId, channelType)}/unread',
-      data: {'message_timestamp': timestamp.toUtc().toIso8601String()},
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Mark the provided [threadId] of the channel as read.
-  Future<EmptyResponse> markThreadRead(
-    String channelId,
-    String channelType,
-    String threadId,
-  ) async {
-    final response = await _client.post(
-      '${_getChannelUrl(channelId, channelType)}/read',
-      data: {'thread_id': threadId},
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Mark the provided [threadId] of the channel as unread.
-  Future<EmptyResponse> markThreadUnread(
-    String channelId,
-    String channelType,
-    String threadId,
-  ) async {
-    final response = await _client.post(
-      '${_getChannelUrl(channelId, channelType)}/unread',
-      data: {'thread_id': threadId},
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
   /// Stop watching the channel
   Future<EmptyResponse> stopWatching(
     String channelId,
@@ -423,41 +258,6 @@ class ChannelApi {
     final response = await _client.post(
       '${_getChannelUrl(channelId, channelType)}/stop-watching',
       data: {},
-    );
-    return EmptyResponse.fromJson(response.data);
-  }
-
-  /// Updates some of the member data
-  Future<PartialUpdateMemberResponse> updateMemberPartial({
-    required String channelId,
-    required String channelType,
-    Map<String, Object?>? set,
-    List<String>? unset,
-  }) async {
-    final response = await _client.patch(
-      // Note: user_id is not required for client side Apis as it can be fetched
-      // directly from the user token but, for the api path is built with it
-      // so we need to pass it as a placeholder.
-      '${_getChannelUrl(channelId, channelType)}/member/{user_id}',
-      data: {
-        if (set != null) 'set': set,
-        if (unset != null) 'unset': unset,
-      },
-    );
-    return PartialUpdateMemberResponse.fromJson(response.data);
-  }
-
-  /// Sends delivery receipts for the latest messages in multiple channels.
-  ///
-  /// Accepts up to 100 channels per call.
-  Future<EmptyResponse> markChannelsDelivered(
-    List<MessageDelivery> deliveries,
-  ) async {
-    final response = await _client.post(
-      '/channels/delivered',
-      data: jsonEncode({
-        'latest_delivered_messages': deliveries,
-      }),
     );
     return EmptyResponse.fromJson(response.data);
   }

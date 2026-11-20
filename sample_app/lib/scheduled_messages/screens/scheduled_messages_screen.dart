@@ -244,10 +244,10 @@ Future<void> _maybeDelete(BuildContext context, ScheduledMessage scheduledMessag
   } catch (error, stackTrace) {
     debugPrint('Could not delete the scheduled message: $error\n$stackTrace');
     final goneMessage = switch (error) {
-      StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) =>
+      StreamChatException(scheduledMessageErrorReason: .scheduledMessageAlreadySent) =>
         ScheduledMessagesStrings.alreadySent,
       // Not found: sent at its time, or deleted elsewhere.
-      StreamChatNetworkError(statusCode: 404) => ScheduledMessagesStrings.sentOrDeleted,
+      StreamApiException(statusCode: 404) => ScheduledMessagesStrings.sentOrDeleted,
       _ => null,
     };
     if (goneMessage != null) {
@@ -307,7 +307,7 @@ Future<bool> _scheduleAgain(
 Future<List<User>> _resolveMentionedUsers(StreamChatClient client, Message message) async {
   final ids = [for (final user in message.mentionedUsers) user.id];
   final missing = [...ids.where((id) => client.state.users[id] == null)];
-  if (missing.isNotEmpty) await client.queryUsers(filter: Filter.in_('id', missing));
+  if (missing.isNotEmpty) await client.queryUsers(filter: UserFilter.in_(UserFilterField.id, missing));
 
   return [for (final id in ids) client.state.users[id] ?? User(id: id)];
 }
@@ -327,7 +327,7 @@ Future<Message?> _resolveQuotedMessage(StreamChatClient client, ScheduledMessage
   try {
     final response = await client.getMessage(quotedMessageId);
     return response.message;
-  } on StreamChatNetworkError catch (error) {
+  } on StreamApiException catch (error) {
     // Only a quoted message that is gone is dropped; any other failure stops
     // the edit, so a network error doesn't lose the quote.
     if (error.statusCode == 404) return null;

@@ -35,15 +35,17 @@ class StreamConnectionOverride {
 
 // One persistence client for every [StreamChatClient], so reconnecting does
 // not open a second SQLite connection.
-final _chatPersistenceClient = StreamChatPersistenceClient(logLevel: Level.SEVERE);
+final _chatPersistenceClient = StreamChatPersistenceClient();
 
 StreamChatClient _buildStreamChatClient(StreamConnectionOverride? connectionOverride) {
   return StreamChatClient(
       kStreamApiKey,
-      logLevel: kDebugMode ? Level.WARNING : Level.OFF,
+      logConfig: const StreamLogConfig(
+        priority: kDebugMode ? StreamLogPriority.warning : StreamLogPriority.none,
+      ),
       retryPolicy: RetryPolicy(
         maxRetryAttempts: 3,
-        shouldRetry: (client, attempt, error) => error is StreamChatNetworkError && error.isRetriable,
+        shouldRetry: (client, attempt, error) => error?.isRetriable ?? false,
       ),
       baseURL: connectionOverride?.baseURL,
       baseWsUrl: connectionOverride?.baseWsUrl,
@@ -137,7 +139,10 @@ class AuthController extends ValueNotifier<AuthState> {
 
     try {
       final ownUser = switch (debugConnectionOverride?.tokenProvider) {
-        final tokenProvider? => await client.connectUserWithProvider(user, tokenProvider),
+        final tokenProvider? => await client.connectUserWithProvider(
+          user,
+          TokenProvider.dynamic((userId) async => UserToken(await tokenProvider(userId))),
+        ),
         _ => await client.connectUser(user, token),
       };
       value = Authenticated(ownUser);

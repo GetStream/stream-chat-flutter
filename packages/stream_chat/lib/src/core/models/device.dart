@@ -1,25 +1,25 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-part 'device.g.dart';
+import 'push_provider.dart';
 
-/// The class that contains the information about a device
-@JsonSerializable()
-class Device {
-  /// Constructor used for json serialization
-  Device({
+part 'device.freezed.dart';
+
+/// A device registered to receive push notifications for the current user.
+///
+/// Returned by [StreamChatClient.getDevices] and carried in [OwnUser.devices].
+@freezed
+class Device with _$Device {
+  /// Creates a new [Device].
+  const Device({
     required this.id,
     required this.pushProvider,
   });
 
-  /// Create a new instance from a json
-  factory Device.fromJson(Map<String, dynamic> json) => _$DeviceFromJson(json);
-
-  /// The id of the device
+  /// The token the push provider issued for this device.
+  @override
   final String id;
 
-  /// The notification push provider
-  final String pushProvider;
-
-  /// Serialize to json
-  Map<String, dynamic> toJson() => _$DeviceToJson(this);
+  /// The provider that delivers pushes to this device.
+  @override
+  final PushProvider pushProvider;
 }

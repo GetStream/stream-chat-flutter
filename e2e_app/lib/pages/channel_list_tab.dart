@@ -24,13 +24,13 @@ class _ChannelListTabState extends State<ChannelListTab> {
 
   late final _channelListController = StreamChannelListController(
     client: _client,
-    filter: Filter.in_('members', [_userId]),
+    filter: ChannelFilter.in_(ChannelFilterField.members, [_userId]),
     limit: 30,
   );
 
   late final _messageSearchController = StreamMessageSearchListController(
     client: _client,
-    filter: Filter.in_('members', [_userId]),
+    filter: ChannelFilter.in_(ChannelFilterField.members, [_userId]),
     limit: 5,
     searchQuery: '',
   );
@@ -68,9 +68,9 @@ class _ChannelListTabState extends State<ChannelListTab> {
         _channelSearchController?.dispose();
         _channelSearchController = StreamChannelListController(
           client: _client,
-          filter: Filter.and([
-            Filter.in_('members', [_userId]),
-            Filter.autoComplete('name', query),
+          filter: ChannelFilter.and([
+            ChannelFilter.in_(ChannelFilterField.members, [_userId]),
+            ChannelFilter.autoComplete(ChannelFilterField.name, query),
           ]),
           limit: 30,
         );

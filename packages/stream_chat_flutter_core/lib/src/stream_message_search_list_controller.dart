@@ -80,16 +80,16 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   /// You can query on any of the custom fields you've defined on the [Channel].
   ///
   /// You can also filter other built-in channel fields.
-  final Filter filter;
-  Filter _activeFilter;
+  final ChannelFilter filter;
+  ChannelFilter _activeFilter;
 
   /// The message query filters to use.
   ///
   /// You can query on any of the custom fields you've defined on the [Message].
   ///
   /// You can also filter other built-in message fields.
-  final Filter? messageFilter;
-  Filter? _activeMessageFilter;
+  final MessageSearchFilter? messageFilter;
+  MessageSearchFilter? _activeMessageFilter;
 
   /// Message String to search on.
   final String? searchQuery;
@@ -101,8 +101,8 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder? sort;
-  SortOrder? _activeSort;
+  final List<MessageSearchSort>? sort;
+  List<MessageSearchSort>? _activeSort;
 
   /// The limit to apply to the message search. The default is set to
   /// [defaultMessageSearchPagedLimit].
@@ -115,7 +115,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
-  set filter(Filter value) => _activeFilter = value;
+  set filter(ChannelFilter value) => _activeFilter = value;
 
   /// Allows for the change of message filters used for message search queries.
   ///
@@ -124,7 +124,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
-  set messageFilter(Filter? value) => _activeMessageFilter = value;
+  set messageFilter(MessageSearchFilter? value) => _activeMessageFilter = value;
 
   /// Allows for the change of filters used for message search queries.
   ///
@@ -142,7 +142,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
-  set sort(SortOrder? value) => _activeSort = value;
+  set sort(List<MessageSearchSort>? value) => _activeSort = value;
 
   /// Searches messages whose text matches [query], debounced by its length.
   ///
@@ -156,7 +156,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
     final trimmed = query.trim();
     if (trimmed.isEmpty) return clearResults();
 
-    final searchFilter = Filter.autoComplete('text', trimmed);
+    final searchFilter = MessageSearchFilter.autoComplete(MessageSearchFilterField.text, trimmed);
 
     return searchWithFilter(searchFilter);
   }
@@ -169,7 +169,7 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
   /// [Filter.query]) the reload is debounced by that text's length; otherwise
   /// it reloads immediately. Rapidly superseded searches are dropped, so only
   /// the latest query's results are applied.
-  void searchWithFilter(Filter filter) {
+  void searchWithFilter(MessageSearchFilter filter) {
     _activeMessageFilter = filter;
     _activeSearchQuery = null;
     debouncedSearch(searchQueryLength(filter));
@@ -202,12 +202,12 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
         items: results,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       if (isStale(generation)) return;
       value = PagedValue.error(error);
     } catch (error) {
       if (isStale(generation)) return;
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load message search results', cause: error);
       value = PagedValue.error(chatError);
     }
   }
@@ -238,12 +238,12 @@ class StreamMessageSearchListController extends PagedValueNotifier<String, GetMe
         items: newItems,
         nextPageKey: nextKey,
       );
-    } on StreamChatError catch (error) {
+    } on StreamChatException catch (error) {
       if (isStale(generation)) return;
       value = previousValue.copyWith(error: error);
     } catch (error) {
       if (isStale(generation)) return;
-      final chatError = StreamChatError(error.toString());
+      final chatError = StreamClientException(message: 'Failed to load more message search results', cause: error);
       value = previousValue.copyWith(error: chatError);
     }
   }

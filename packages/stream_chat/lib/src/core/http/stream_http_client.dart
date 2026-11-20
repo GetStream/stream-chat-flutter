@@ -1,17 +1,22 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
-import 'package:logging/logging.dart';
 import 'package:meta/meta.dart';
-import '../error/error.dart';
-import 'connection_id_manager.dart';
+import 'package:stream_core/stream_core.dart'
+    show
+        ApiErrorInterceptor,
+        AuthInterceptor,
+        ConnectionIdGetter,
+        ConnectionIdInterceptor,
+        DioExceptionMapping,
+        HeadersInterceptor,
+        LoggingInterceptor,
+        Standard,
+        StreamCoreHttpClient,
+        SystemEnvironmentManager,
+        TokenManager;
+import '../error/stream_chat_exception.dart';
 import 'interceptor/additional_headers_interceptor.dart';
-import 'interceptor/auth_interceptor.dart';
-import 'interceptor/connection_id_interceptor.dart';
-import 'interceptor/logging_interceptor.dart';
-import 'stream_chat_dio_error.dart';
-import 'system_environment_manager.dart';
-import 'token_manager.dart';
 
 part 'stream_http_client_options.dart';
 
@@ -24,13 +29,12 @@ class StreamHttpClient {
     Dio? dio,
     StreamHttpClientOptions? options,
     TokenManager? tokenManager,
-    ConnectionIdManager? connectionIdManager,
+    ConnectionIdGetter? connectionId,
     SystemEnvironmentManager? systemEnvironmentManager,
-    Logger? logger,
     Iterable<Interceptor>? interceptors,
     HttpClientAdapter? httpClientAdapter,
   }) : _options = options ?? const StreamHttpClientOptions(),
-       httpClient = dio ?? Dio() {
+       httpClient = dio ?? StreamCoreHttpClient() {
     httpClient
       ..options.baseUrl = _options.baseUrl
       ..options.receiveTimeout = _options.receiveTimeout
@@ -45,28 +49,12 @@ class StreamHttpClient {
         ..._options.headers,
       }
       ..interceptors.addAll([
-        AdditionalHeadersInterceptor(systemEnvironmentManager),
-        if (tokenManager != null) AuthInterceptor(this, tokenManager),
-        if (connectionIdManager != null) ConnectionIdInterceptor(connectionIdManager),
-        ...interceptors ??
-            [
-              // Add a default logging interceptor if no interceptors are
-              // provided.
-              if (logger != null && logger.level != Level.OFF)
-                LoggingInterceptor(
-                  requestHeader: true,
-                  logPrint: (step, message) {
-                    switch (step) {
-                      case InterceptStep.request:
-                        return logger.info(message);
-                      case InterceptStep.response:
-                        return logger.info(message);
-                      case InterceptStep.error:
-                        return logger.severe(message);
-                    }
-                  },
-                ),
-            ],
+        const AdditionalHeadersInterceptor(),
+        ?systemEnvironmentManager?.let(HeadersInterceptor.new),
+        ?tokenManager?.let((it) => AuthInterceptor(httpClient, it, tag: 'SCh:HttpAuth')),
+        ?connectionId?.let(ConnectionIdInterceptor.new),
+        const ApiErrorInterceptor(),
+        ...interceptors ?? [LoggingInterceptor(requestHeader: true, tag: 'SCh:Http')],
       ]);
     if (httpClientAdapter != null) {
       httpClient.httpClientAdapter = httpClientAdapter;
@@ -97,12 +85,11 @@ class StreamHttpClient {
   /// calling [close] will throw an exception.
   void close({bool force = false}) => httpClient.close(force: force);
 
-  StreamChatNetworkError _parseError(DioException exception) {
-    // locally thrown dio error
-    if (exception is StreamChatDioError) return exception.error;
-    // real network request dio error
-    return StreamChatNetworkError.fromDioException(exception);
-  }
+  // Every failure leaving this client is one of the four `StreamException`
+  // kinds. `ApiErrorInterceptor` has usually mapped it already, and
+  // `toStreamException` unwraps that; a rejection raised past the pipeline is
+  // classified here instead.
+  StreamChatException _parseError(DioException exception) => exception.toStreamException();
 
   /// Handy method to make http GET request with error parsing.
   Future<Response<T>> get<T>(

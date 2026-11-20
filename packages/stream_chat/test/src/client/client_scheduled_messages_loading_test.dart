@@ -166,7 +166,7 @@ void main() {
     ]);
 
     await harness.client.queryChannelsOnline(
-      filter: Filter.in_('cid', const [testCid, 'messaging:other']),
+      filter: ChannelFilter.in_(ChannelFilterField.cid, const [testCid, 'messaging:other']),
       includeScheduledMessages: true,
     );
 

@@ -100,7 +100,7 @@ class StreamScheduledMessageListView extends StatefulWidget {
   final WidgetBuilder? loadingBuilder;
 
   /// A builder that is called to build the error state of the list.
-  final Widget Function(BuildContext, StreamChatError)? errorBuilder;
+  final Widget Function(BuildContext, StreamChatException)? errorBuilder;
 
   /// Called when the user taps a scheduled message.
   final void Function(ScheduledMessage)? onScheduledMessageTap;
@@ -222,7 +222,7 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
     try {
       await client.loadScheduledMessages();
     } catch (error, stackTrace) {
-      client.logger.warning('Could not load the scheduled messages', error, stackTrace);
+      client.logger.w(() => 'Could not load the scheduled messages', error: error, stackTrace: stackTrace);
       rethrow;
     }
   }
@@ -308,8 +308,8 @@ class _StreamScheduledMessageListViewState extends State<StreamScheduledMessageL
 
   Widget _buildError(BuildContext context, Object error) {
     final chatError = switch (error) {
-      final StreamChatError error => error,
-      _ => StreamChatError(error.toString()),
+      final StreamChatException error => error,
+      _ => StreamClientException(message: 'Failed to load scheduled messages', cause: error),
     };
 
     if (widget.errorBuilder?.call(context, chatError) case final custom?) return custom;

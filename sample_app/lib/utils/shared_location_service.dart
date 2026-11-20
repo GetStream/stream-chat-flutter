@@ -70,7 +70,7 @@ class SharedLocationService {
       _client.updateLiveLocation(
         messageId: messageId,
         createdByDeviceId: location.createdByDeviceId,
-        location: LocationCoordinates(
+        location: LocationCoordinate(
           latitude: position.latitude,
           longitude: position.longitude,
         ),

@@ -21,7 +21,7 @@ MockClient mockClient({
   );
 
   when(() => client.state).thenReturn(clientState);
-  when(() => client.logger).thenReturn(Logger.detached('test'));
+  when(() => client.logger).thenReturn(const StreamLogger('test'));
   when(client.loadScheduledMessages).thenAnswer((_) async => state);
   when(() => clientState.currentUser).thenReturn(OwnUser(id: 'current-user-id'));
   when(() => clientState.channels).thenReturn({});
@@ -48,7 +48,7 @@ ScheduledMessage fakeScheduledMessage(
 }) {
   return ScheduledMessage(
     cid: cid,
-    channel: ChannelModel(cid: cid, extraData: const {'name': 'General'}),
+    channel: ChannelModel(cid: cid, custom: const {'name': 'General'}),
     user: User(id: 'current-user-id'),
     message: Message(id: id, text: text, parentId: parentId),
     scheduledAt: DateTime(2026, 10, 21, 8),

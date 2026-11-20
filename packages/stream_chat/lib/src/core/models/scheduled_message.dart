@@ -1,6 +1,6 @@
 /// @docImport '../../client/client.dart';
 /// @docImport '../../event_type.dart';
-/// @docImport 'event.dart';
+/// @docImport '../../ws/events/event.dart';
 library;
 
 import 'package:clock/clock.dart';
@@ -163,7 +163,7 @@ final class ScheduledMessage extends Equatable {
   List<Object?> get props => [
     id,
     cid,
-    channel?.extraData,
+    channel?.custom,
     user,
     message,
     scheduledAt,

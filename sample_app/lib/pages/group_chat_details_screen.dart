@@ -65,7 +65,7 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
                       final channel = client.channel(
                         'messaging',
                         id: const Uuid().v4(),
-                        extraData: {
+                        custom: {
                           'members': [
                             client.state.currentUser!.id,
                             ...widget.groupChatState.users.map((e) => e.id),

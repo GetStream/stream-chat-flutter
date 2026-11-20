@@ -1,17 +1,11 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:collection/collection.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'paged_value_notifier.dart';
 
 /// The default channel page limit to load.
 const defaultPollVotePagedLimit = 10;
-
-/// The default sort used for the poll vote list.
-const defaultPollVoteListSort = [
-  SortOption<PollVote>.asc(PollVoteSortKey.createdAt),
-];
 
 const _kDefaultBackendPaginationLimit = 30;
 
@@ -33,12 +27,12 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
     required this.pollId,
     StreamPollVoteEventHandler? eventHandler,
     this.filter,
-    this.sort = defaultPollVoteListSort,
+    List<PollVoteSort>? sort,
     this.limit = defaultPollVotePagedLimit,
   }) : _eventHandler = eventHandler ?? StreamPollVoteEventHandler(),
        _scope = const _AllVotesScope(),
        _activeFilter = filter,
-       _activeSort = sort,
+       sort = sort ?? PollVoteSort.defaultSort,
        super(const PagedValue.loading());
 
   /// Creates a [StreamPollVoteListController] from the passed [value].
@@ -48,12 +42,12 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
     required this.pollId,
     StreamPollVoteEventHandler? eventHandler,
     this.filter,
-    this.sort = defaultPollVoteListSort,
+    List<PollVoteSort>? sort,
     this.limit = defaultPollVotePagedLimit,
   }) : _eventHandler = eventHandler ?? StreamPollVoteEventHandler(),
        _scope = const _AllVotesScope(),
        _activeFilter = filter,
-       _activeSort = sort;
+       sort = sort ?? PollVoteSort.defaultSort;
 
   /// Creates a Stream poll vote list controller that lists only the votes for
   /// the poll option with `optionId`.
@@ -86,9 +80,8 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   }) : _eventHandler = StreamPollVoteEventHandler(),
        _scope = scope,
        filter = scope.filter,
-       sort = defaultPollVoteListSort,
+       sort = PollVoteSort.defaultSort,
        _activeFilter = scope.filter,
-       _activeSort = defaultPollVoteListSort,
        limit = defaultPollVotePagedLimit,
        super(const PagedValue.loading());
 
@@ -108,8 +101,8 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   ///
   /// You can query on any of the custom fields you've defined on the
   /// [PollVote].
-  final Filter? filter;
-  Filter? _activeFilter;
+  final PollVoteFilter? filter;
+  PollVoteFilter? _activeFilter;
 
   /// The sorting used for the poll votes matching the filters.
   ///
@@ -117,8 +110,11 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   /// can be provided.
   ///
   /// Direction can be ascending or descending.
-  final SortOrder<PollVote>? sort;
-  SortOrder<PollVote>? _activeSort;
+  ///
+  /// Defaults to [PollVoteSort.defaultSort]; pass [PollVoteSort.empty] to leave the ordering
+  /// to the API.
+  final List<PollVoteSort> sort;
+  late List<PollVoteSort> _activeSort = sort;
 
   /// The limit to apply to the poll vote list. The default is set to
   /// [defaultPollVotePagedLimit].
@@ -131,7 +127,7 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new filter.
-  set filter(Filter? value) => _activeFilter = value;
+  set filter(PollVoteFilter? value) => _activeFilter = value;
 
   /// Allows for the change of the query sort used for poll vote queries.
   ///
@@ -140,19 +136,16 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   ///
   /// Note: This will not trigger a new query. make sure to call
   /// [doInitialLoad] after setting a new sort.
-  set sort(SortOrder<PollVote>? value) => _activeSort = value;
+  set sort(List<PollVoteSort> value) => _activeSort = value;
 
   @override
   set value(PagedValue<String, PollVote> newValue) {
-    super.value = switch (_activeSort) {
-      null => newValue,
-      final pollVoteSort => newValue.maybeMap(
-        orElse: () => newValue,
-        (success) => success.copyWith(
-          items: success.items.sorted(pollVoteSort.compare),
-        ),
+    super.value = newValue.maybeMap(
+      orElse: () => newValue,
+      (success) => success.copyWith(
+        items: success.items.sortedWith(_activeSort.compare),
       ),
-    };
+    );
   }
 
   @override
@@ -161,60 +154,56 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
       this.limit * defaultInitialPagedLimitMultiplier,
       _kDefaultBackendPaginationLimit,
     );
-    try {
-      final response = await channel.queryPollVotes(
-        pollId,
-        sort: _activeSort,
-        filter: _activeFilter,
-        pagination: PaginationParams(limit: limit),
-      );
+    final result = await _queryPollVotes(limit: limit);
 
-      final results = response.votes;
-      final nextKey = response.next;
-      value = PagedValue(
-        items: results,
-        nextPageKey: nextKey,
-      );
+    result.fold(
+      onSuccess: (response) {
+        value = PagedValue(
+          items: response.votes,
+          nextPageKey: response.next,
+        );
 
-      // start listening to events
-      if (disposed) return;
-      _subscribeToPollVoteEvents();
-    } on StreamChatError catch (error) {
-      value = PagedValue.error(error);
-    } catch (error) {
-      final chatError = StreamChatError(error.toString());
-      value = PagedValue.error(chatError);
-    }
+        if (disposed) return;
+        _subscribeToPollVoteEvents();
+      },
+      onFailure: (error, _) => value = PagedValue.error(_chatException(error, 'Failed to load poll votes')),
+    );
   }
 
   @override
   Future<void> loadMore(String nextPageKey) async {
     final previousValue = value.asSuccess;
 
-    try {
-      final response = await channel.queryPollVotes(
-        pollId,
-        sort: _activeSort,
-        filter: _activeFilter,
-        pagination: PaginationParams(limit: limit, next: nextPageKey),
-      );
+    final result = await _queryPollVotes(limit: limit, next: nextPageKey);
 
-      final results = response.votes;
-      final previousItems = previousValue.items;
-      final newItems = previousItems + results;
-      final next = response.next;
-      final nextKey = next != null && next.isNotEmpty ? next : null;
-      value = PagedValue(
-        items: newItems,
-        nextPageKey: nextKey,
-      );
-    } on StreamChatError catch (error) {
-      value = previousValue.copyWith(error: error);
-    } catch (error) {
-      final chatError = StreamChatError(error.toString());
-      value = previousValue.copyWith(error: chatError);
+    result.fold(
+      onSuccess: (response) {
+        final next = response.next;
+        value = PagedValue(
+          items: previousValue.items + response.votes,
+          nextPageKey: next != null && next.isNotEmpty ? next : null,
+        );
+      },
+      onFailure: (error, _) {
+        value = previousValue.copyWith(error: _chatException(error, 'Failed to load more poll votes'));
+      },
+    );
+  }
+
+  // Turns anything the channel throws, such as on a channel that is not
+  // initialized, into a failure.
+  Future<Result<QueryPollVotesResponse>> _queryPollVotes({required int limit, String? next}) async {
+    try {
+      return await channel.queryPollVotes(pollId, sort: _activeSort, filter: _activeFilter, limit: limit, next: next);
+    } catch (error, stackTrace) {
+      return Result.failure(error, stackTrace);
     }
   }
+
+  StreamChatException _chatException(Object error, String message) => switch (error) {
+    final StreamChatException error => error,
+    _ => StreamClientException(message: message, cause: error),
+  };
 
   @override
   Future<void> refresh({bool resetValue = true}) {
@@ -392,7 +381,7 @@ sealed class _PollVoteListScope {
   const _PollVoteListScope();
 
   // The query filter matching the votes in this scope, or null for every vote.
-  Filter? get filter;
+  PollVoteFilter? get filter;
 
   // Whether [vote] belongs in a list with this scope.
   bool includes(PollVote vote);
@@ -403,7 +392,7 @@ final class _AllVotesScope extends _PollVoteListScope {
   const _AllVotesScope();
 
   @override
-  Filter? get filter => null;
+  PollVoteFilter? get filter => null;
 
   @override
   bool includes(PollVote vote) => true;
@@ -416,7 +405,7 @@ final class _OptionVotesScope extends _PollVoteListScope {
   final String optionId;
 
   @override
-  Filter get filter => Filter.equal('option_id', optionId);
+  PollVoteFilter get filter => .equal(PollVoteFilterField.optionId, optionId);
 
   @override
   bool includes(PollVote vote) => vote.optionId == optionId;
@@ -427,7 +416,7 @@ final class _AnswersScope extends _PollVoteListScope {
   const _AnswersScope();
 
   @override
-  Filter get filter => Filter.equal('is_answer', true);
+  PollVoteFilter get filter => .equal(PollVoteFilterField.isAnswer, true);
 
   @override
   bool includes(PollVote vote) => vote.isAnswer;

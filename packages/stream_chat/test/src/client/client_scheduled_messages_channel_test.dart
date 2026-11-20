@@ -71,7 +71,7 @@ void main() {
       ]);
 
       await harness.client.queryChannelsOnline(
-        filter: Filter.equal('cid', testCid),
+        filter: ChannelFilter.equal(ChannelFilterField.cid, testCid),
         includeScheduledMessages: true,
       );
 
@@ -86,7 +86,7 @@ void main() {
     ]);
 
     final [channel] = await harness.client.queryChannelsOnline(
-      filter: Filter.equal('cid', testCid),
+      filter: ChannelFilter.equal(ChannelFilterField.cid, testCid),
       includeScheduledMessages: true,
     );
 
@@ -109,7 +109,7 @@ void main() {
     final subscription = harness.client.state.scheduledMessagesStream.skip(1).listen((_) => emissions++);
     addTearDown(subscription.cancel);
 
-    await harness.client.queryChannelsOnline(filter: const Filter.empty(), includeScheduledMessages: true);
+    await harness.client.queryChannelsOnline(includeScheduledMessages: true);
     await settle();
 
     expect(emissions, 1);
@@ -265,7 +265,10 @@ void main() {
     await harness.hold([fakeScheduledMessage('gone'), elsewhere]);
     harness.stubQueryChannels([carrying(const [])]);
 
-    await harness.client.queryChannelsOnline(filter: Filter.equal('cid', testCid), includeScheduledMessages: true);
+    await harness.client.queryChannelsOnline(
+      filter: ChannelFilter.equal(ChannelFilterField.cid, testCid),
+      includeScheduledMessages: true,
+    );
 
     expect(idsOf(harness.client.state.scheduledMessages), ['there']);
   });

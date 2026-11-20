@@ -17,7 +17,9 @@ void main() {
 
   testWidgets('sends without scraping links the composer already previewed', (tester) async {
     final (:client, :channel) = _channel();
-    when(() => client.enrichUrl(any())).thenAnswer((_) async => OGAttachmentResponse()..ogScrapeUrl = url);
+    when(
+      () => client.enrichUrl(any()),
+    ).thenAnswer((_) async => const Result.success(OGAttachmentResponse(duration: '1ms', ogScrapeUrl: url)));
     await _pumpComposer(tester, client: client, channel: channel);
 
     await _typeText(tester, 'look $url');
@@ -29,7 +31,9 @@ void main() {
 
   testWidgets('sends without scraping links once the user dismissed the preview', (tester) async {
     final (:client, :channel) = _channel();
-    when(() => client.enrichUrl(any())).thenAnswer((_) async => OGAttachmentResponse()..ogScrapeUrl = url);
+    when(
+      () => client.enrichUrl(any()),
+    ).thenAnswer((_) async => const Result.success(OGAttachmentResponse(duration: '1ms', ogScrapeUrl: url)));
     await _pumpComposer(tester, client: client, channel: channel);
 
     await _typeText(tester, 'look $url');
@@ -43,7 +47,8 @@ void main() {
 
   testWidgets('lets the server scrape links the composer could not preview', (tester) async {
     final (:client, :channel) = _channel();
-    when(() => client.enrichUrl(any())).thenAnswer((_) async => throw Exception('no og data'));
+    const error = StreamApiException(code: StreamErrorCode.inputError, message: 'no og data', statusCode: 400);
+    when(() => client.enrichUrl(any())).thenAnswer((_) async => const Result.failure(error));
     await _pumpComposer(tester, client: client, channel: channel);
 
     await _typeText(tester, 'look $url');

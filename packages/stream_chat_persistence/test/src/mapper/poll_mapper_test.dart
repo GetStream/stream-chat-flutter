@@ -56,10 +56,10 @@ void main() {
       votingVisibility: VotingVisibility.public,
       allowUserSuggestedOptions: true,
       options: const [
-        PollOption(id: 'option-1', text: 'Red'),
-        PollOption(id: 'option-2', text: 'Blue'),
-        PollOption(id: 'option-3', text: 'Green'),
-      ].map(jsonEncode).toList(),
+        '{"id":"option-1","text":"Red","custom":{"hex":"#f00"}}',
+        '{"id":"option-2","text":"Blue","custom":{}}',
+        '{"id":"option-3","text":"Green","custom":{}}',
+      ],
       voteCount: voteCountsByOption.values.reduce((a, b) => a + b),
       voteCountsByOption: voteCountsByOption,
       createdAt: DateTime.now(),
@@ -68,7 +68,7 @@ void main() {
       isClosed: false,
       allowAnswers: true,
       answersCount: latestAnswers.length,
-      extraData: {'test_extra_data': 'extraData'},
+      custom: {'test_extra_data': 'extraData'},
     );
     final poll = entity.toPoll(
       createdBy: currentUser,
@@ -88,14 +88,11 @@ void main() {
     expect(poll.enforceUniqueVote, entity.enforceUniqueVote);
     expect(poll.maxVotesAllowed, entity.maxVotesAllowed);
     expect(poll.allowUserSuggestedOptions, entity.allowUserSuggestedOptions);
-    for (var i = 0; i < poll.options.length; i++) {
-      final pollOption = poll.options[i];
-      final entityOptionJson = jsonDecode(entity.options[i]);
-      final entityOption = PollOption.fromJson(entityOptionJson);
-      expect(pollOption.id, entityOption.id);
-      expect(pollOption.text, entityOption.text);
-      expect(pollOption.extraData, entityOption.extraData);
-    }
+    expect(poll.options, const [
+      PollOption(id: 'option-1', text: 'Red', custom: {'hex': '#f00'}),
+      PollOption(id: 'option-2', text: 'Blue'),
+      PollOption(id: 'option-3', text: 'Green'),
+    ]);
     expect(poll.allowAnswers, entity.allowAnswers);
     expect(poll.answersCount, entity.answersCount);
     expect(poll.isClosed, entity.isClosed);
@@ -104,7 +101,7 @@ void main() {
     expect(poll.voteCountsByOption, entity.voteCountsByOption);
     expect(poll.voteCount, entity.voteCount);
     expect(poll.createdById, entity.createdById);
-    expect(poll.extraData, entity.extraData);
+    expect(poll.custom, entity.custom);
   });
 
   test('toEntity should map poll into PollEntity', () {
@@ -154,7 +151,7 @@ void main() {
       createdById: currentUser.id,
       allowUserSuggestedOptions: true,
       options: const [
-        PollOption(id: 'option-1', text: 'Red'),
+        PollOption(id: 'option-1', text: 'Red', custom: {'hex': '#f00'}),
         PollOption(id: 'option-2', text: 'Blue'),
         PollOption(id: 'option-3', text: 'Green'),
       ],
@@ -165,7 +162,7 @@ void main() {
       enforceUniqueVote: false,
       allowAnswers: true,
       answersCount: latestAnswers.length,
-      extraData: const {'test_extra_data': 'extraData'},
+      custom: const {'test_extra_data': 'extraData'},
     );
     final entity = poll.toEntity();
     expect(entity, isA<PollEntity>());
@@ -176,10 +173,11 @@ void main() {
     expect(entity.enforceUniqueVote, poll.enforceUniqueVote);
     expect(entity.maxVotesAllowed, poll.maxVotesAllowed);
     expect(entity.allowUserSuggestedOptions, poll.allowUserSuggestedOptions);
-    expect(
-      entity.options,
-      poll.options.map((it) => jsonEncode(it.toJson())).toList(),
-    );
+    expect(entity.options, const [
+      '{"id":"option-1","text":"Red","custom":{"hex":"#f00"}}',
+      '{"id":"option-2","text":"Blue","custom":{}}',
+      '{"id":"option-3","text":"Green","custom":{}}',
+    ]);
     expect(entity.allowAnswers, poll.allowAnswers);
     expect(entity.answersCount, poll.answersCount);
     expect(entity.isClosed, poll.isClosed);
@@ -188,7 +186,7 @@ void main() {
     expect(entity.voteCountsByOption, poll.voteCountsByOption);
     expect(entity.voteCount, poll.voteCount);
     expect(entity.createdById, poll.createdById);
-    expect(entity.extraData, poll.extraData);
+    expect(entity.custom, poll.custom);
   });
 
   test('a poll keeps the translations of its name, description and options through the cache', () {

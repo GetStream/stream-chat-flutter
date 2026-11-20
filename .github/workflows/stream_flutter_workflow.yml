@@ -10,9 +10,10 @@ on:
   push:
     branches:
       - master
+      - v11
 
-# Each master push gets its own group, so no run is cancelled or replaced
-# while pending: every master commit needs a full Codecov upload for pull
+# Each push gets its own group, so no run is cancelled or replaced while
+# pending: every commit on a base branch needs a full Codecov upload for pull
 # requests to carry skipped packages' coverage from.
 concurrency:
   group: ${{ github.workflow }}-${{ github.event_name == 'push' && github.sha || github.ref }}
@@ -30,10 +31,9 @@ jobs:
   # filtering, which hangs forever) — see
   # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
   #
-  # `push` events to master always run the full suite, matching the
-  # previous `on.push.branches: [master]` behavior.
+  # `push` events to a base branch always run the full suite.
   #
-  # `test_all` tells `select-packages` to test every package on master
+  # `test_all` tells `select-packages` to test every package on base branch
   # pushes. Pull requests only test the packages they change and their
   # dependents.
   gate:
@@ -111,7 +111,7 @@ jobs:
         run: ./.github/workflows/scripts/validate-formatting.sh
 
   # Picks the packages to test, with their minimum coverage: on pull requests
-  # the changed packages and their dependents, on master pushes every package.
+  # the changed packages and their dependents, on base branch pushes every package.
   select-packages:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'

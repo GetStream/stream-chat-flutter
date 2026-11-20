@@ -5,17 +5,12 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
+import '../utils.dart';
 import 'scheduled_messages_harness.dart';
 
 final now = DateTime.utc(2026, 10, 30, 12);
 final scheduledAt = now.add(const Duration(days: 1));
-final rejected = StreamChatNetworkError(
-  ChatErrorCode.inputError,
-  data: ErrorResponse()
-    ..code = 4
-    ..statusCode = 400
-    ..message = 'Too many scheduled messages',
-);
+final rejected = apiException(message: 'Too many scheduled messages');
 
 void main() {
   final harness = useScheduledMessageClient();
@@ -47,7 +42,7 @@ void main() {
 
     try {
       await run();
-    } on StreamChatNetworkError {
+    } on StreamChatException {
       // The events are what is checked.
     }
 
@@ -399,11 +394,7 @@ void main() {
   });
 
   test('scheduleMessage leaves one that fails with a retriable server error as failed', () async {
-    final unavailable = StreamChatNetworkError(
-      ChatErrorCode.internalSystemError,
-      statusCode: 503,
-      data: ErrorResponse()..statusCode = 503,
-    );
+    final unavailable = apiException(code: StreamErrorCode.internalError, statusCode: 503);
     final message = Message(id: 'a', text: 'Good morning');
     stubSchedule(message, () async => throw unavailable);
 
@@ -470,7 +461,7 @@ void main() {
 
   test('deleteScheduledMessage keeps one whose request failed when the server fails', () async {
     final failed = await scheduleUnreachable(Message(id: 'a', text: 'Good morning'));
-    final serverError = StreamChatNetworkError(ChatErrorCode.internalSystemError, statusCode: 500);
+    final serverError = apiException(code: StreamErrorCode.internalError, statusCode: 500);
     when(() => harness.api.scheduledMessages.deleteScheduledMessage('a')).thenAnswer((_) async => throw serverError);
 
     await expectLater(harness.client.deleteScheduledMessage(failed), throwsA(serverError));
@@ -527,16 +518,8 @@ ScheduleMessageResponse scheduled(Message message, ScheduledMessage scheduledMes
 }
 
 // The error that refuses a scheduled message request with [code].
-StreamChatNetworkError refusedWith(int code) {
-  return StreamChatNetworkError.raw(
-    code: code,
-    message: 'Refused',
-    statusCode: 400,
-    data: ErrorResponse()
-      ..code = code
-      ..statusCode = 400
-      ..message = 'Refused',
-  );
+StreamApiException refusedWith(int code) {
+  return apiException(code: StreamErrorCode(code), message: 'Refused');
 }
 
 // The response for [message] when its time had passed and it was sent.

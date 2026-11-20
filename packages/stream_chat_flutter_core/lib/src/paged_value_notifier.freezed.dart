@@ -9,7 +9,6 @@ part of 'paged_value_notifier.dart';
 // FreezedGenerator
 // **************************************************************************
 
-// dart format off
 T _$identity<T>(T value) => value;
 
 /// @nodoc
@@ -30,15 +29,21 @@ mixin _$PagedValue<Key, Value> {
 
 /// @nodoc
 class $PagedValueCopyWith<Key, Value, $Res> {
-  $PagedValueCopyWith(PagedValue<Key, Value> _, $Res Function(PagedValue<Key, Value>) __);
+  $PagedValueCopyWith(
+    PagedValue<Key, Value> _,
+    $Res Function(PagedValue<Key, Value>) __,
+  );
 }
 
 /// @nodoc
 
 class Success<Key, Value> extends PagedValue<Key, Value> {
-  const Success({required final List<Value> items, this.nextPageKey, this.error})
-      : _items = items,
-        super._();
+  const Success({
+    required final List<Value> items,
+    this.nextPageKey,
+    this.error,
+  }) : _items = items,
+       super._();
 
   /// List with all items loaded so far.
   final List<Value> _items;
@@ -54,7 +59,7 @@ class Success<Key, Value> extends PagedValue<Key, Value> {
   final Key? nextPageKey;
 
   /// The current error, if any.
-  final StreamChatError? error;
+  final StreamChatException? error;
 
   /// Create a copy of PagedValue
   /// with the given fields replaced by the non-null parameter values.
@@ -69,13 +74,20 @@ class Success<Key, Value> extends PagedValue<Key, Value> {
         (other.runtimeType == runtimeType &&
             other is Success<Key, Value> &&
             const DeepCollectionEquality().equals(other._items, _items) &&
-            const DeepCollectionEquality().equals(other.nextPageKey, nextPageKey) &&
-            (identical(other.error, error) || other.error == error));
+            const DeepCollectionEquality().equals(
+              other.nextPageKey,
+              nextPageKey,
+            ) &&
+            const DeepCollectionEquality().equals(other.error, error));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, const DeepCollectionEquality().hash(_items),
-      const DeepCollectionEquality().hash(nextPageKey), error);
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(_items),
+    const DeepCollectionEquality().hash(nextPageKey),
+    const DeepCollectionEquality().hash(error),
+  );
 
   @override
   String toString() {
@@ -85,9 +97,12 @@ class Success<Key, Value> extends PagedValue<Key, Value> {
 
 /// @nodoc
 abstract mixin class $SuccessCopyWith<Key, Value, $Res> implements $PagedValueCopyWith<Key, Value, $Res> {
-  factory $SuccessCopyWith(Success<Key, Value> value, $Res Function(Success<Key, Value>) _then) = _$SuccessCopyWithImpl;
+  factory $SuccessCopyWith(
+    Success<Key, Value> value,
+    $Res Function(Success<Key, Value>) _then,
+  ) = _$SuccessCopyWithImpl;
   @useResult
-  $Res call({List<Value> items, Key? nextPageKey, StreamChatError? error});
+  $Res call({List<Value> items, Key? nextPageKey, StreamChatException? error});
 }
 
 /// @nodoc
@@ -105,20 +120,22 @@ class _$SuccessCopyWithImpl<Key, Value, $Res> implements $SuccessCopyWith<Key, V
     Object? nextPageKey = freezed,
     Object? error = freezed,
   }) {
-    return _then(Success<Key, Value>(
-      items: null == items
-          ? _self._items
-          : items // ignore: cast_nullable_to_non_nullable
-              as List<Value>,
-      nextPageKey: freezed == nextPageKey
-          ? _self.nextPageKey
-          : nextPageKey // ignore: cast_nullable_to_non_nullable
-              as Key?,
-      error: freezed == error
-          ? _self.error
-          : error // ignore: cast_nullable_to_non_nullable
-              as StreamChatError?,
-    ));
+    return _then(
+      Success<Key, Value>(
+        items: null == items
+            ? _self._items
+            : items // ignore: cast_nullable_to_non_nullable
+                  as List<Value>,
+        nextPageKey: freezed == nextPageKey
+            ? _self.nextPageKey
+            : nextPageKey // ignore: cast_nullable_to_non_nullable
+                  as Key?,
+        error: freezed == error
+            ? _self.error
+            : error // ignore: cast_nullable_to_non_nullable
+                  as StreamChatException?,
+      ),
+    );
   }
 }
 
@@ -142,11 +159,27 @@ class Loading<Key, Value> extends PagedValue<Key, Value> {
 }
 
 /// @nodoc
+class $LoadingCopyWith<Key, Value, $Res> implements $PagedValueCopyWith<Key, Value, $Res> {
+  $LoadingCopyWith(
+    Loading<Key, Value> _,
+    $Res Function(Loading<Key, Value>) __,
+  );
+}
+
+/// @nodoc
+class _$LoadingCopyWithImpl<Key, Value, $Res> implements $LoadingCopyWith<Key, Value, $Res> {
+  _$LoadingCopyWithImpl(this._self, this._then);
+
+  final Loading<Key, Value> _self;
+  final $Res Function(Loading<Key, Value>) _then;
+}
+
+/// @nodoc
 
 class Error<Key, Value> extends PagedValue<Key, Value> {
   const Error(this.error) : super._();
 
-  final StreamChatError error;
+  final StreamChatException error;
 
   /// Create a copy of PagedValue
   /// with the given fields replaced by the non-null parameter values.
@@ -160,11 +193,11 @@ class Error<Key, Value> extends PagedValue<Key, Value> {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is Error<Key, Value> &&
-            (identical(other.error, error) || other.error == error));
+            const DeepCollectionEquality().equals(other.error, error));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, error);
+  int get hashCode => Object.hash(runtimeType, const DeepCollectionEquality().hash(error));
 
   @override
   String toString() {
@@ -174,9 +207,12 @@ class Error<Key, Value> extends PagedValue<Key, Value> {
 
 /// @nodoc
 abstract mixin class $ErrorCopyWith<Key, Value, $Res> implements $PagedValueCopyWith<Key, Value, $Res> {
-  factory $ErrorCopyWith(Error<Key, Value> value, $Res Function(Error<Key, Value>) _then) = _$ErrorCopyWithImpl;
+  factory $ErrorCopyWith(
+    Error<Key, Value> value,
+    $Res Function(Error<Key, Value>) _then,
+  ) = _$ErrorCopyWithImpl;
   @useResult
-  $Res call({StreamChatError error});
+  $Res call({StreamChatException error});
 }
 
 /// @nodoc
@@ -189,16 +225,14 @@ class _$ErrorCopyWithImpl<Key, Value, $Res> implements $ErrorCopyWith<Key, Value
   /// Create a copy of PagedValue
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
-  $Res call({
-    Object? error = null,
-  }) {
-    return _then(Error<Key, Value>(
-      null == error
-          ? _self.error
-          : error // ignore: cast_nullable_to_non_nullable
-              as StreamChatError,
-    ));
+  $Res call({Object? error = freezed}) {
+    return _then(
+      Error<Key, Value>(
+        freezed == error
+            ? _self.error
+            : error // ignore: cast_nullable_to_non_nullable
+                  as StreamChatException,
+      ),
+    );
   }
 }
-
-// dart format on

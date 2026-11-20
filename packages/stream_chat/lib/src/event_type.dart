@@ -1,6 +1,6 @@
 /// @docImport 'client/client.dart';
-/// @docImport 'core/models/event.dart';
 /// @docImport 'core/models/scheduled_message.dart';
+/// @docImport 'ws/events/event.dart';
 library;
 
 /// This class defines some basic event types
@@ -106,6 +106,9 @@ class EventType {
 
   /// Event sent when the connection is recovered
   static const String connectionRecovered = 'connection.recovered';
+
+  /// Event sent when the connection is refused, or closed with an error.
+  static const String connectionError = 'connection.error';
 
   /// Event sent when the user is accepts an invite
   static const String notificationInviteAccepted = 'notification.invite_accepted';

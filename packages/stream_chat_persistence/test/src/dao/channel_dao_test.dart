@@ -24,12 +24,17 @@ void main() {
     expect(channel, isNull);
 
     // Saving a dummy channel
+    final createdBy = User(id: 'creatorId');
+    final truncatedBy = User(id: 'truncatorId');
     final dummyChannel = ChannelModel(
       id: id,
       type: type,
       cid: cid,
       config: ChannelConfig(),
+      createdBy: createdBy,
+      truncatedBy: truncatedBy,
     );
+    await database.userDao.updateUsers([createdBy, truncatedBy]);
     await channelDao.updateChannels([dummyChannel]);
 
     // Should match the dummy channel
@@ -38,6 +43,8 @@ void main() {
     expect(updatedChannel!.id, id);
     expect(updatedChannel.cid, cid);
     expect(updatedChannel.type, type);
+    expect(updatedChannel.createdBy?.id, createdBy.id);
+    expect(updatedChannel.truncatedBy?.id, truncatedBy.id);
   });
 
   test('deleteChannelByCids', () async {

@@ -52,6 +52,6 @@ class _ChooseUserPageState extends State<ChooseUserPage> {
 // Leads with the Stream error code of a refused login, so a test can match on
 // the code alone.
 String _loginFailedText(Object error) => switch (error) {
-  StreamWebSocketError(:final code?) => 'Login failed (code $code): $error',
+  StreamApiException(:final code?) => 'Login failed (code $code): $error',
   _ => 'Login failed: $error',
 };

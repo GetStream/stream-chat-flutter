@@ -1,17 +1,16 @@
 import 'dart:async';
 
 import 'package:clock/clock.dart';
-import 'package:logging/logging.dart';
+import 'package:stream_core/stream_core.dart' show InFlightCache, StreamApiException, StreamLogger;
 
 import '../../core/api/responses.dart';
 import '../../core/api/scheduled_messages_api.dart';
-import '../../core/error/stream_chat_error.dart';
+import '../../core/error/stream_chat_exception.dart';
 import '../../core/models/channel_state.dart';
-import '../../core/models/event.dart';
 import '../../core/models/message.dart';
 import '../../core/models/scheduled_message.dart';
-import '../../core/util/in_flight_cache.dart';
 import '../../event_type.dart';
+import '../../ws/events/event.dart';
 import '../client.dart';
 import 'scheduled_message_event_handler.dart';
 import 'scheduled_message_list_state.dart';
@@ -24,16 +23,14 @@ import 'scheduled_messages_query.dart';
 /// its [state].
 class ScheduledMessageManager {
   /// Creates a manager for the scheduled messages of `client`.
-  ///
-  /// The `logger` logs its warnings.
-  ScheduledMessageManager(this._client, {this._logger}) {
+  ScheduledMessageManager(this._client) {
     _eventsSubscription = _client.eventStream.listen(_onEvent);
   }
 
   static const _pageSize = 100;
 
   final StreamChatClient _client;
-  final Logger? _logger;
+  static const _logger = StreamLogger('SCh:ScheduledMessages');
   ScheduledMessagesApi get _api => _client.chatApi.scheduledMessages;
 
   final _stateNotifier = ScheduledMessageListStateNotifier();
@@ -60,7 +57,7 @@ class ScheduledMessageManager {
   /// The page is added to [ScheduledMessageListState.scheduledMessages];
   /// nothing is removed.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails.
+  /// Throws a [StreamChatException] if the request fails.
   Future<QueryScheduledMessagesResponse> queryMessages(
     ScheduledMessagesQuery query,
   ) async {
@@ -112,7 +109,7 @@ class ScheduledMessageManager {
   /// [ScheduledMessageFailureReason.requestFailed]; any other failure removes
   /// it.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails.
+  /// Throws a [StreamChatException] if the request fails.
   ///
   /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
   /// attachment of [message] is not uploaded yet. A message to send right
@@ -201,7 +198,7 @@ class ScheduledMessageManager {
       }
 
       return response;
-    } on StreamChatNetworkError catch (error) {
+    } on StreamChatException catch (error) {
       if (local == null) rethrow;
 
       // Already sent: on a retry, the first attempt went through.
@@ -240,7 +237,7 @@ class ScheduledMessageManager {
   ///
   /// Its [ScheduledMessage.failureReason] must be retriable.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, or an
+  /// Throws a [StreamChatException] if the request fails, or an
   /// [ArgumentError] if an attachment of its message is not uploaded.
   Future<ScheduleMessageResponse> retryMessage(
     ScheduledMessage scheduledMessage,
@@ -264,7 +261,7 @@ class ScheduledMessageManager {
   /// Its message is replaced with [message], and it is moved to [scheduledAt]
   /// if given.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, even when the
+  /// Throws a [StreamChatException] if the request fails, even when the
   /// scheduled message is already gone. If it is, an
   /// [EventType.scheduledMessageDeleted] event reports it, so [state] stops
   /// listing it.
@@ -303,7 +300,7 @@ class ScheduledMessageManager {
   ///
   /// Its message stays as it is.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, even when the
+  /// Throws a [StreamChatException] if the request fails, even when the
   /// scheduled message is already gone. If it is, an
   /// [EventType.scheduledMessageDeleted] event reports it, so [state] stops
   /// listing it.
@@ -324,7 +321,7 @@ class ScheduledMessageManager {
 
   /// Sends [scheduledMessage] right away.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, even when the
+  /// Throws a [StreamChatException] if the request fails, even when the
   /// scheduled message is already gone. If it is, an
   /// [EventType.scheduledMessageDeleted] event reports it, so [state] stops
   /// listing it.
@@ -349,7 +346,7 @@ class ScheduledMessageManager {
   /// [EventType.scheduledMessageDeleted] event reports it, so [state] stops
   /// listing it.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, which leaves it
+  /// Throws a [StreamChatException] if the request fails, which leaves it
   /// listed unless it is already gone. Deleting one already gone throws too,
   /// unless its own request had failed.
   Future<DeleteScheduledMessageResponse> deleteMessage(
@@ -361,8 +358,8 @@ class ScheduledMessageManager {
         final response = await _api.deleteScheduledMessage(scheduledMessage.id);
         _emitEvent(EventType.scheduledMessageDeleted, response.scheduledMessage, generation);
         return response;
-      } on StreamChatNetworkError catch (error) {
-        if (error.statusCode != 404) rethrow;
+      } on StreamChatException catch (error) {
+        if (error is! StreamApiException || error.statusCode != 404) rethrow;
 
         final canceled = _canceled(scheduledMessage);
         _emitEvent(EventType.scheduledMessageDeleted, canceled, generation);
@@ -424,7 +421,7 @@ class ScheduledMessageManager {
       await loadMessages();
       _wasLoadedBeforeConnectionLost = false;
     } catch (error, stackTrace) {
-      _logger?.warning('Failed to reload the scheduled messages', error, stackTrace);
+      _logger.w(() => 'Failed to reload the scheduled messages', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -437,8 +434,8 @@ class ScheduledMessageManager {
   ) async {
     try {
       return await request();
-    } on StreamChatNetworkError catch (error) {
-      if (error.statusCode == 404) {
+    } on StreamChatException catch (error) {
+      if (error case StreamApiException(statusCode: 404)) {
         _emitEvent(EventType.scheduledMessageDeleted, _canceled(scheduledMessage), generation);
       }
 

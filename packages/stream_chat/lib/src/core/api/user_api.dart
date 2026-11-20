@@ -1,13 +1,12 @@
 import 'dart:convert';
 
+import 'package:stream_core/stream_core.dart' show LocationCoordinate;
+
 import '../http/stream_http_client.dart';
-import '../models/filter.dart';
 import '../models/location.dart';
-import '../models/location_coordinates.dart';
 import '../models/user.dart';
 import 'requests.dart';
 import 'responses.dart';
-import 'sort_order.dart';
 
 /// Defines the api dedicated to users operations
 class UserApi {
@@ -19,8 +18,8 @@ class UserApi {
   /// Requests users with a given query.
   Future<QueryUsersResponse> queryUsers({
     bool presence = false,
-    Filter? filter,
-    SortOrder<User>? sort,
+    UserFilter? filter,
+    List<UserSort>? sort,
     PaginationParams? pagination,
   }) async {
     final response = await _client.get(
@@ -29,7 +28,9 @@ class UserApi {
         'payload': jsonEncode({
           'presence': presence,
           if (sort != null) 'sort': sort,
-          if (filter != null) 'filter_conditions': filter,
+          // Sent even when empty: a query without it is rejected, where `{}`
+          // is accepted.
+          'filter_conditions': filter ?? const <String, Object?>{},
           if (pagination != null) ...pagination.toJson(),
         }),
       },
@@ -91,13 +92,6 @@ class UserApi {
     return BlockedUsersResponse.fromJson(response.data);
   }
 
-  /// Requests the unread count information for the current user.
-  Future<GetUnreadCountResponse> getUnreadCount() async {
-    final response = await _client.get('/unread');
-
-    return GetUnreadCountResponse.fromJson(response.data);
-  }
-
   /// Retrieves all the active live locations of the current user.
   Future<GetActiveLiveLocationsResponse> getActiveLiveLocations() async {
     final response = await _client.get(
@@ -111,7 +105,7 @@ class UserApi {
   Future<Location> updateLiveLocation({
     required String messageId,
     String? createdByDeviceId,
-    LocationCoordinates? location,
+    LocationCoordinate? location,
     DateTime? endAt,
   }) async {
     final response = await _client.put(

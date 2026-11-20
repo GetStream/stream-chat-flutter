@@ -1,18 +1,19 @@
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../fakes.dart';
+import '../utils.dart';
+import '../ws/fake_chat_server.dart';
 
 // Fixtures and a connected client shared by the scheduled message tests.
 
 const testCid = 'messaging:general';
 
 final testUser = User(id: 'test-user-id');
-final testToken = Token.development(testUser.id).rawValue;
-final missingError = StreamChatNetworkError(ChatErrorCode.doesNotExist, statusCode: 404);
-final offline = StreamChatNetworkError.raw(code: -1, message: 'No connection');
+final testToken = testUserToken(testUser.id).rawValue;
+final missingError = apiException(code: StreamErrorCode.notFound, statusCode: 404);
+const offline = StreamNetworkException(message: 'No connection');
 
 // The codes of the errors that refuse a scheduled message request because the
 // message is being sent, was already sent, or was deleted.
@@ -86,9 +87,11 @@ ScheduledMessageHarness useScheduledMessageClient({bool loaded = true}) {
 
   setUp(() async {
     final api = harness.api = FakeChatApi();
-    final client = harness.client = StreamChatClient('test-api-key', chatApi: api, ws: FakeWebSocket());
-    when(() => api.general.getAppSettings()).thenAnswer(
-      (_) async => GetAppSettingsResponse()..app = const AppSettings(name: 'test'),
+    final client = harness.client = StreamChatClient(
+      'test-api-key',
+      defaultApi: FakeDefaultApi(),
+      chatApi: api,
+      wsProvider: FakeChatServer().connect,
     );
     addTearDown(client.dispose);
     await client.connectUser(testUser, testToken);

@@ -16,7 +16,7 @@ ScheduledMessage fakeScheduledMessage({
 }) {
   return ScheduledMessage(
     cid: 'messaging:general',
-    channel: channel ?? ChannelModel(cid: 'messaging:general', extraData: const {'name': 'General'}),
+    channel: channel ?? ChannelModel(cid: 'messaging:general', custom: const {'name': 'General'}),
     user: User(id: 'current-user-id'),
     message: Message(
       id: 'scheduled-id',

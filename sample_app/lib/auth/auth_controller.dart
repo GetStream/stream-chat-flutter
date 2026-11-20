@@ -26,33 +26,41 @@ const _kAndroidPushProvider = PushProvider.firebase(name: 'firebase');
 
 /// Shared across every client so reconnecting doesn't need a second
 /// SQLite connection.
-final _chatPersistenceClient = StreamChatPersistenceClient(
-  logLevel: Level.SEVERE,
-);
+final _chatPersistenceClient = StreamChatPersistenceClient();
 
-Future<void> _sampleAppLogHandler(LogRecord record) async {
-  if (kDebugMode) StreamChatClient.defaultLogHandler(record);
+/// Prints records in debug builds and reports the ones carrying an error to
+/// Crashlytics.
+class _SampleAppLogHandler extends StreamLogHandler {
+  const _SampleAppLogHandler();
 
-  // report errors to Firebase Crashlytics
-  if (record.error != null || record.stackTrace != null) {
-    await FirebaseCrashlytics.instance.recordError(
-      record.error,
-      record.stackTrace,
-      reason: record.message,
-    );
+  @override
+  void handle(StreamLogRecord record) {
+    if (kDebugMode) const StreamLogHandler.console().handle(record);
+
+    // Report errors to Firebase Crashlytics, keyed on the priority rather than on an error being
+    // attached: a warning carries one too, and reconnecting while offline logs several per outage.
+    if (record.priority >= StreamLogPriority.error && (record.error != null || record.stackTrace != null)) {
+      FirebaseCrashlytics.instance
+          .recordError(
+            record.error,
+            record.stackTrace,
+            reason: record.message,
+          )
+          .ignore();
+    }
   }
 }
 
 StreamChatClient _buildStreamChatClient(String apiKey, {String? baseUrl}) {
   return StreamChatClient(
     apiKey,
-    logLevel: kDebugMode ? Level.INFO : Level.SEVERE,
-    logHandlerFunction: _sampleAppLogHandler,
+    logConfig: const StreamLogConfig(
+      priority: kDebugMode ? StreamLogPriority.debug : StreamLogPriority.error,
+      handler: _SampleAppLogHandler(),
+    ),
     retryPolicy: RetryPolicy(
       maxRetryAttempts: 3,
-      shouldRetry: (client, attempt, error) {
-        return error is StreamChatNetworkError && error.isRetriable;
-      },
+      shouldRetry: (client, attempt, error) => error?.isRetriable ?? false,
     ),
     baseURL: baseUrl,
   )..chatPersistenceClient = _chatPersistenceClient;

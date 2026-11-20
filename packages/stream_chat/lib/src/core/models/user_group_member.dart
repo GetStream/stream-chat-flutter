@@ -1,12 +1,16 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../db/data_serializable.dart';
+
+part 'user_group_member.freezed.dart';
 part 'user_group_member.g.dart';
 
-/// Class that defines a member of a user group.
-@JsonSerializable(includeIfNull: false)
-class UserGroupMember extends Equatable {
-  /// Create a new instance of [UserGroupMember].
+/// A user's membership in a [UserGroup].
+@freezed
+// TODO(openapi-migration): remove in group 10
+@DataSerializable(includeIfNull: false)
+class UserGroupMember with _$UserGroupMember {
+  /// Creates a new [UserGroupMember].
   const UserGroupMember({
     required this.createdAt,
     required this.groupId,
@@ -14,29 +18,29 @@ class UserGroupMember extends Equatable {
     required this.userId,
   });
 
-  /// Create a new instance from a json.
-  factory UserGroupMember.fromJson(Map<String, dynamic> json) => _$UserGroupMemberFromJson(json);
+  /// Creates a [UserGroupMember] from the offline-database format written by [toData].
+  ///
+  /// It is not a codec for API payloads.
+  factory UserGroupMember.fromData(Map<String, dynamic> json) => _$UserGroupMemberFromJson(json);
 
   /// The date when the member was added to the group.
+  @override
   final DateTime createdAt;
 
   /// The id of the group the member belongs to.
+  @override
   final String groupId;
 
   /// Whether the member is an admin of the group.
+  @override
   final bool isAdmin;
 
   /// The id of the member.
+  @override
   final String userId;
 
-  /// Serialize model to json.
-  Map<String, dynamic> toJson() => _$UserGroupMemberToJson(this);
-
-  @override
-  List<Object?> get props => [
-    createdAt,
-    groupId,
-    isAdmin,
-    userId,
-  ];
+  /// Serializes this member to the format `stream_chat_persistence` stores.
+  ///
+  /// It is not a codec for API payloads.
+  Map<String, dynamic> toData() => _$UserGroupMemberToJson(this);
 }

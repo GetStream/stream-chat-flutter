@@ -27,7 +27,7 @@ class SimpleMapView extends StatefulWidget {
 
   final MarkerSize markerSize;
 
-  final LocationCoordinates coordinates;
+  final LocationCoordinate coordinates;
 
   final bool showLocateMeButton;
 
@@ -148,6 +148,6 @@ class SimpleMapLocateMeButton extends StatelessWidget {
   }
 }
 
-extension on LocationCoordinates {
+extension on LocationCoordinate {
   LatLng toLatLng() => LatLng(latitude, longitude);
 }
