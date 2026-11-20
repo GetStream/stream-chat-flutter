@@ -931,6 +931,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   }) {
     return switch (reason) {
       .requestFailed => "Échec de l'envoi. Réessayez",
+      .attachmentUploadFailed => "Impossible d'envoyer la pièce jointe",
       .internalError => 'Une erreur est survenue. Réessayez',
       .channelDeleted => 'Ce canal a été supprimé',
       .userDeleted => 'Votre compte a été supprimé',

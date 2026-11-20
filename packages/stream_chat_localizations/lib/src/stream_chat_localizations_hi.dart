@@ -927,6 +927,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }) {
     return switch (reason) {
       .requestFailed => 'नहीं भेजा जा सका। फिर से कोशिश करें',
+      .attachmentUploadFailed => 'अटैचमेंट अपलोड नहीं हो सका',
       .internalError => 'कुछ गलत हो गया। फिर से कोशिश करें',
       .channelDeleted => 'यह चैनल हटा दिया गया था',
       .userDeleted => 'आपका खाता हटा दिया गया',

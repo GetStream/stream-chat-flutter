@@ -907,6 +907,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   }) {
     return switch (reason) {
       .requestFailed => '送信できませんでした。もう一度お試しください',
+      .attachmentUploadFailed => '添付ファイルをアップロードできませんでした',
       .internalError => '問題が発生しました。もう一度お試しください',
       .channelDeleted => 'このチャンネルは削除されました',
       .userDeleted => 'アカウントが削除されました',

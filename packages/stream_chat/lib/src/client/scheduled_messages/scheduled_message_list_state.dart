@@ -204,7 +204,7 @@ extension on ScheduledMessage {
   // retried. Either way, the API doesn't have it.
   bool get isLocal {
     if (status == .preparingToSchedule) return remoteCreatedAt == null;
-    return failureReason == .requestFailed;
+    return failureReason == .requestFailed || failureReason == .attachmentUploadFailed;
   }
 
   // Whether it holds an unsaved edit of a message already scheduled.

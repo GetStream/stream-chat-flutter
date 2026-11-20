@@ -233,6 +233,11 @@ extension type const ScheduledMessageFailureReason(String _) implements String {
   /// The request to schedule it failed in a way that can be retried.
   static const requestFailed = ScheduledMessageFailureReason('request_failed');
 
+  /// An attachment failed to upload before it was scheduled.
+  ///
+  /// [StreamChatClient.resendScheduledMessage] uploads it again.
+  static const attachmentUploadFailed = ScheduledMessageFailureReason('attachment_upload_failed');
+
   /// The request to edit it failed in a way that can be retried.
   static const updateFailed = ScheduledMessageFailureReason('update_failed');
 
@@ -273,7 +278,7 @@ extension type const ScheduledMessageFailureReason(String _) implements String {
   static const internalError = ScheduledMessageFailureReason('internal_error');
 
   /// Whether the failed request can be made again.
-  bool get isRetriable => this == requestFailed || this == updateFailed;
+  bool get isRetriable => this == requestFailed || this == attachmentUploadFailed || this == updateFailed;
 
   /// Whether only an edit of the message failed, so it is still scheduled as
   /// it was.

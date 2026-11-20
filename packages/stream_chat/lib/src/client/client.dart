@@ -2503,6 +2503,12 @@ class StreamChatClient {
   /// [ScheduledMessageFailureReason.requestFailed], to retry with
   /// [resendScheduledMessage] or delete with [deleteScheduledMessage].
   ///
+  /// The attachments of [message] not uploaded yet are uploaded first, with
+  /// their progress shown on the listed message. If one fails, its
+  /// [Attachment.uploadState] is failed and the message stays listed as failed
+  /// with [ScheduledMessageFailureReason.attachmentUploadFailed], to retry or
+  /// delete the same way.
+  ///
   /// Each of these changes is also reported on [on] as a scheduled message
   /// event with [Event.isLocal] true.
   ///
@@ -2514,9 +2520,12 @@ class StreamChatClient {
   /// [ChannelConfig.scheduledMessagesMaxLeadTime], at or after its pin
   /// expires, or less than a minute before its shared location ends.
   ///
-  /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
-  /// attachment of [message] is not uploaded yet. A message to send right
-  /// away goes through [sendMessage].
+  /// Throws an [ArgumentError] if [scheduledAt] is not in the future. A
+  /// message to send right away goes through [sendMessage].
+  ///
+  /// Throws a [StreamChatError] if an attachment fails to upload, if
+  /// [deleteScheduledMessage] deletes it while its attachments upload, or if
+  /// sending it right away is refused, for example in a frozen channel.
   ///
   /// Throws a [StateError] if no user is connected.
   Future<ScheduleMessageResponse> scheduleMessage(
@@ -2547,6 +2556,8 @@ class StreamChatClient {
   /// the scheduled message, or null when its time had passed and it was sent
   /// right away.
   ///
+  /// Its attachments that failed to upload are uploaded again.
+  ///
   /// It is reported on [on] with local events, as for [scheduleMessage]. If
   /// the first attempt had gone through and the message was sent, an
   /// [EventType.scheduledMessageSent] event reports it; if it had been deleted
@@ -2557,8 +2568,7 @@ class StreamChatClient {
   /// [ScheduledMessageErrorReason.scheduledMessageAlreadySent] or
   /// [ScheduledMessageErrorReason.scheduledMessageCanceled].
   ///
-  /// Throws an [ArgumentError] if an attachment of its message is not
-  /// uploaded yet.
+  /// Throws a [StreamChatError] if an attachment fails to upload again.
   ///
   /// Throws a [StateError] if [id] isn't in [ClientState.scheduledMessages],
   /// or failed in a way that can't be retried, as there is no failed request
@@ -2577,9 +2587,10 @@ class StreamChatClient {
   /// with [updateMessage].
   ///
   /// A failed scheduled message can't be edited, except one whose edit
-  /// failed. The edit is listed right away and stays listed if saving it
-  /// fails: as [ScheduledMessageFailureReason.updateFailed], to retry with
-  /// [resendScheduledMessage], when the error is temporary, or as
+  /// failed. The edit is listed right away, the attachments of [message] not
+  /// uploaded yet are uploaded first, and it stays listed if an upload or
+  /// saving it fails: as [ScheduledMessageFailureReason.updateFailed], to
+  /// retry with [resendScheduledMessage], when the error is temporary, or as
   /// [ScheduledMessageFailureReason.updateRejected] otherwise.
   ///
   /// If the scheduled message no longer exists, an
@@ -2600,8 +2611,13 @@ class StreamChatClient {
   /// without these checks or changing the list first, then lists the copy it
   /// answers with.
   ///
-  /// Throws an [ArgumentError] if an attachment of [message] is not uploaded
-  /// yet.
+  /// Throws a [StreamChatError] if an attachment of [message] fails to upload.
+  ///
+  /// Throws an [ArgumentError] if [ClientState.scheduledMessages] doesn't list
+  /// it and an attachment of [message] is not uploaded yet.
+  ///
+  /// Throws a [StateError] while it is still uploading attachments to be
+  /// scheduled.
   Future<UpdateScheduledMessageResponse> updateScheduledMessage(
     String id,
     Message message, {
@@ -2644,6 +2660,9 @@ class StreamChatClient {
   /// ends. If [ClientState.scheduledMessages] doesn't list it, the request is
   /// made without these checks or changing the list first, then lists the
   /// copy it answers with.
+  ///
+  /// Throws a [StateError] while it is still uploading attachments to be
+  /// scheduled.
   Future<UpdateScheduledMessageResponse> rescheduleMessage(
     String id, {
     required DateTime scheduledAt,
@@ -2662,6 +2681,16 @@ class StreamChatClient {
   /// When [ClientState.scheduledMessages] lists it, it stops listing it right
   /// away, and lists it again if the request fails, unless it no longer
   /// exists. One not listed is deleted without changing the list.
+  ///
+  /// One still uploading attachments to be scheduled, or whose upload failed
+  /// with [ScheduledMessageFailureReason.attachmentUploadFailed], is removed
+  /// without a request, and the [scheduleMessage] waiting on its uploads
+  /// throws a [StreamChatError].
+  ///
+  /// An edit still uploading attachments is stopped, so its
+  /// [updateScheduledMessage] throws a [StreamChatError]. If the request then
+  /// fails, the edit is listed again with
+  /// [ScheduledMessageFailureReason.updateFailed].
   ///
   /// Throws a [StreamChatNetworkError] if the request fails, including when it
   /// is already gone, unless its scheduling had failed.
@@ -2690,6 +2719,9 @@ class StreamChatClient {
   /// it quotes a deleted message, which would fail it once sent. If
   /// [ClientState.scheduledMessages] doesn't list it, the request is made
   /// without these checks or changing the list.
+  ///
+  /// Throws a [StateError] while it is still uploading attachments to be
+  /// scheduled.
   Future<SendScheduledMessageNowResponse> sendScheduledMessageNow(String id) {
     return _scheduledMessageManager.sendMessageNow(id);
   }

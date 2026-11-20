@@ -35,6 +35,48 @@ void main() {
     expect(controller.text, isEmpty);
   });
 
+  testWidgets('clears the composer while the message is scheduled', (tester) async {
+    final channel = await pumpChannelPage(tester);
+    stubSchedule(channel, () => Completer<ScheduleMessageResponse>().future);
+    await _type(tester, 'Hello');
+
+    await _scheduleWithPreset(tester);
+
+    expect(composerController(tester).text, isEmpty);
+  });
+
+  testWidgets('keeps the composer clear when scheduling fails in a way that can be retried', (tester) async {
+    final channel = await pumpChannelPage(tester);
+    stubSchedule(channel, () async => throw StreamChatNetworkError.raw(code: -1, message: 'Offline'));
+    await _type(tester, 'Hello');
+
+    await _scheduleWithPreset(tester);
+
+    expect(composerController(tester).text, isEmpty);
+  });
+
+  testWidgets('schedules a message whose attachment is not uploaded yet', (tester) async {
+    final channel = await pumpChannelPage(tester);
+    stubSchedule(channel, () async => ScheduleMessageResponse()..message = Message());
+    await _type(tester, 'Hello');
+    final attachment = Attachment(
+      id: 'image',
+      type: AttachmentType.image,
+      file: AttachmentFile(size: 1, path: 'image.png'),
+    );
+    composerController(tester).addAttachment(attachment);
+    await tester.pumpAndSettle();
+
+    await _scheduleWithPreset(tester);
+
+    final scheduled =
+        verify(
+              () => channel.scheduleMessage(captureAny(), scheduledAt: any(named: 'scheduledAt')),
+            ).captured.single
+            as Message;
+    expect(scheduled.attachments.single.id, 'image');
+  });
+
   testWidgets('keeps the text and the mentions in the composer when scheduling is refused', (tester) async {
     final channel = await pumpChannelPage(tester);
     stubSchedule(channel, () async => throw const ScheduledMessageRefusedError(.slashCommand, 'Refused'));

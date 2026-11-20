@@ -1922,6 +1922,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   }) {
     return switch (reason) {
       .requestFailed => "Couldn't send. Try again",
+      .attachmentUploadFailed => "Couldn't upload attachment",
       .internalError => 'Something went wrong. Try again',
       .channelDeleted => 'This channel was deleted',
       .userDeleted => 'Your account was deleted',

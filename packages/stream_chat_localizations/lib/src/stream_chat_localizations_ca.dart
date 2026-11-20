@@ -927,6 +927,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   }) {
     return switch (reason) {
       .requestFailed => "No s'ha pogut enviar. Torna-ho a provar",
+      .attachmentUploadFailed => "No s'ha pogut pujar el fitxer adjunt",
       .internalError => 'Alguna cosa ha anat malament. Torna-ho a provar',
       .channelDeleted => "Aquest canal s'ha eliminat",
       .userDeleted => "El teu compte s'ha eliminat",

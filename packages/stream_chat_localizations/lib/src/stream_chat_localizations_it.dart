@@ -939,6 +939,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
   }) {
     return switch (reason) {
       .requestFailed => 'Invio non riuscito. Riprova',
+      .attachmentUploadFailed => "Impossibile caricare l'allegato",
       .internalError => 'Si è verificato un errore. Riprova',
       .channelDeleted => 'Questo canale è stato eliminato',
       .userDeleted => 'Il tuo account è stato eliminato',

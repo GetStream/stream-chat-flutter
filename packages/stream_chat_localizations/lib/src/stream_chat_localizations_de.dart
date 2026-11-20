@@ -926,6 +926,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   }) {
     return switch (reason) {
       .requestFailed => 'Senden fehlgeschlagen. Versuche es erneut',
+      .attachmentUploadFailed => 'Anhang konnte nicht hochgeladen werden',
       .internalError => 'Etwas ist schiefgelaufen. Versuche es erneut',
       .channelDeleted => 'Dieser Kanal wurde gelöscht',
       .userDeleted => 'Dein Konto wurde gelöscht',
