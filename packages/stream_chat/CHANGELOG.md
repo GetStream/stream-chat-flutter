@@ -5,7 +5,7 @@
 - Added scheduled messages: schedule one with `Channel.scheduleMessage`, which uploads its attachments first, and read the current user's unsent ones from `ClientState.scheduledMessages` after `StreamChatClient.loadScheduledMessages`, or per channel and thread with `ClientState.scheduledChannelMessages` and `ClientState.scheduledThreadReplies`.
 - Added `ScheduledMessage.failure`, which says why a scheduled message failed, and `StreamChatClient.resendScheduledMessage` to retry one whose request failed.
 - Added `ScheduledMessageRefusedError`, thrown for a message that can't be scheduled, usually before any request, and `ScheduledMessageRules` to check up front.
-- Added message marks, such as a voice recording being played: send them with `Channel.sendMessageMark` and read them from `Message.markGroups` and `Message.ownMarks`.
+- Added message marks, such as a voice recording being played: send them with `Channel.sendMessageMark`, read them from `Message.markGroups` and `Message.ownMarks`, and list them with `Channel.queryMessageMarks`.
 
 🔄 Changed
 

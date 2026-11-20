@@ -270,7 +270,7 @@ class MessageMarksQuery extends Equatable {
     );
   }
 
-  /// Serializes this query to the json body of the request.
+  /// Serializes this query to json.
   Map<String, dynamic> toJson() => {
     if (type case final type?) 'filter': {'type': type},
     'limit': ?limit,
