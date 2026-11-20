@@ -23,19 +23,3 @@ class MarkGroupsConverter extends TypeConverter<Map<String, MarkGroup>, String> 
     return jsonEncode(json);
   }
 }
-
-/// A [TypeConverter] that serializes [Message.ownMarks] to a [String] column.
-class OwnMarksConverter extends TypeConverter<List<OwnMark>, String> {
-  @override
-  List<OwnMark> fromSql(String fromDb) {
-    final json = jsonDecode(fromDb) as List<dynamic>;
-    return [
-      for (final mark in json) OwnMark.fromJson(mark as Map<String, Object?>),
-    ];
-  }
-
-  @override
-  String toSql(List<OwnMark> value) {
-    return jsonEncode([for (final mark in value) mark.toJson()]);
-  }
-}
