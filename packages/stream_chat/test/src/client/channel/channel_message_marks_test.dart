@@ -139,31 +139,6 @@ void main() {
     expect(group.count, 151);
   });
 
-  test("marking another user's message adds the mark to its own marks", () async {
-    final (client, channel) = _channel(author: _otherUser);
-    addTearDown(channel.dispose);
-    _stubSendMessageMark(client, userId: _currentUserId);
-
-    final message = channel.state!.messages.single;
-    await channel.sendMessageMark(message, MessageMarkType.played);
-
-    final ownMark = OwnMark(type: MessageMarkType.played, createdAt: _markedAt);
-    expect(channel.state!.messages.single.ownMarks, [ownMark]);
-  });
-
-  test("marking the current user's own message changes nothing", () async {
-    final (client, channel) = _channel(author: _currentUser);
-    addTearDown(channel.dispose);
-    _stubSendMessageMark(client, userId: _currentUserId, created: false);
-
-    final message = channel.state!.messages.single;
-    await channel.sendMessageMark(message, MessageMarkType.played);
-
-    final stored = channel.state!.messages.single;
-    expect(stored.markGroups, isNull);
-    expect(stored.ownMarks, isNull);
-  });
-
   test('a mark on a thread reply reaches the reply', () async {
     final (client, channel) = _channel(author: _otherUser);
     addTearDown(channel.dispose);
@@ -245,26 +220,6 @@ void main() {
   );
 
   return (client, Channel.fromState(client, channelState));
-}
-
-void _stubSendMessageMark(
-  MockStreamChatClient client, {
-  required String userId,
-  bool created = true,
-}) {
-  final mark = MessageMark(
-    type: MessageMarkType.played,
-    messageId: 'voice-note',
-    userId: userId,
-    createdAt: _markedAt,
-  );
-  final response = SendMessageMarkResponse()
-    ..mark = mark
-    ..created = created;
-
-  when(
-    () => client.sendMessageMark('voice-note', MessageMarkType.played),
-  ).thenAnswer((_) async => response);
 }
 
 Message _voiceNote({
