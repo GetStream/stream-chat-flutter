@@ -3,10 +3,8 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:marionette_flutter/marionette_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
 import 'firebase_options.dart';
-import 'utils/app_config.dart';
 import 'utils/platform_support.dart';
 
 Future<void> main() async {
@@ -17,12 +15,6 @@ Future<void> main() async {
     MarionetteBinding.ensureInitialized();
   } else {
     WidgetsFlutterBinding.ensureInitialized();
-  }
-
-  // Before anything opens the preferences, which keep the prefix they were
-  // opened with.
-  if (kIsWeb && kWebStoragePrefix.isNotEmpty) {
-    SharedPreferences.setPrefix('flutter.$kWebStoragePrefix');
   }
 
   if (isFirebaseSupported) {
