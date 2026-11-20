@@ -1,6 +1,6 @@
 name: distribute_web
 
-# Deploys the sample app's web build through the shared workflow in
+# Deploys the sample app's web build through the shared actions in
 # stream-core-flutter:
 #
 #   - every push to master: https://flutter.getstream.io/chat/beta/
@@ -72,12 +72,44 @@ jobs:
     name: Deploy to flutter.getstream.io
     needs: flavor
     if: needs.flavor.outputs.flavor != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: flutter-web
+      url: ${{ steps.target.outputs.url }}
     permissions:
       contents: read
       id-token: write
-    uses: GetStream/stream-core-flutter/.github/workflows/web_deploy.yml@ci/shared-web-deploy
-    with:
-      app: chat
-      flavor: ${{ needs.flavor.outputs.flavor }}
-      working-directory: sample_app
-      bootstrap: true
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-flutter
+
+      - name: "Install Tools"
+        uses: ./.github/actions/install-tools
+
+      - name: "Bootstrap Workspace"
+        run: melos bootstrap
+
+      - name: Target
+        id: target
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-target@ci/shared-web-deploy
+        with:
+          app: chat
+          flavor: ${{ needs.flavor.outputs.flavor }}
+
+      - name: Build
+        working-directory: sample_app
+        env:
+          BUILD_ARGS: ${{ steps.target.outputs.build-args }}
+        run: |
+          read -ra args <<< "$BUILD_ARGS"
+          flutter build web --release --wasm "${args[@]}"
+
+      - name: Deploy
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-deploy@ci/shared-web-deploy
+        with:
+          path: ${{ steps.target.outputs.path }}
+          service-account: ${{ steps.target.outputs.service-account }}
+          build-dir: sample_app/build/web
