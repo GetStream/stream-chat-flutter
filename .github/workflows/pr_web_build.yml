@@ -1,0 +1,22 @@
+name: pr_web_build
+
+# Deploys the sample app of a pull request labeled `build` to
+# https://flutter.getstream.io/chat/pr/<number>/, through the shared workflow
+# in stream-core-flutter.
+
+on:
+  pull_request:
+    types: [labeled, unlabeled, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+jobs:
+  sample_app:
+    uses: GetStream/stream-core-flutter/.github/workflows/web_deploy_pr.yml@ci/shared-web-deploy
+    with:
+      app: chat
+      working-directory: sample_app
+      bootstrap: true

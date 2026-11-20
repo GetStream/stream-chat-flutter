@@ -28,6 +28,7 @@ const _kAndroidPushProvider = PushProvider.firebase(name: 'firebase');
 /// SQLite connection.
 final _chatPersistenceClient = StreamChatPersistenceClient(
   logLevel: Level.SEVERE,
+  databaseNamePrefix: kIsWeb ? kWebStoragePrefix : '',
 );
 
 Future<void> _sampleAppLogHandler(LogRecord record) async {
