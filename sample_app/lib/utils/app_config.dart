@@ -24,6 +24,14 @@ const kDefaultStreamApiKey = String.fromEnvironment(
 /// have to use.
 const kStreamBaseUrl = String.fromEnvironment('STREAM_BASE_URL');
 
+/// Prefix of every key a web build stores in the browser:
+/// `--dart-define=WEB_STORAGE_PREFIX=chat_beta_`.
+///
+/// The web demos on flutter.getstream.io share one origin, so one browser
+/// storage. The deploy workflows give prod, beta and pull request builds each
+/// their own prefix. Empty — the default — keeps the keys unprefixed.
+const kWebStoragePrefix = String.fromEnvironment('WEB_STORAGE_PREFIX');
+
 /// Name of the server-side predefined filter backing the channel list.
 ///
 /// Predefined filters are saved queries that live on the Stream app, so this
