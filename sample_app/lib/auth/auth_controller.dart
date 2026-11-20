@@ -26,10 +26,15 @@ const _kAndroidPushProvider = PushProvider.firebase(name: 'firebase');
 
 /// Shared across every client so reconnecting doesn't need a second
 /// SQLite connection.
-final _chatPersistenceClient = StreamChatPersistenceClient(
-  logLevel: Level.SEVERE,
-  databaseNamePrefix: kIsWeb ? kWebStoragePrefix : '',
-);
+///
+/// Pull request web builds keep no offline cache: nothing removes a build's
+/// browser storage, and every demo on flutter.getstream.io shares it.
+final _chatPersistenceClient = kIsWeb && kWebPrNumber.isNotEmpty
+    ? null
+    : StreamChatPersistenceClient(
+        logLevel: Level.SEVERE,
+        databaseNamePrefix: kIsWeb ? kWebStoragePrefix : '',
+      );
 
 Future<void> _sampleAppLogHandler(LogRecord record) async {
   if (kDebugMode) StreamChatClient.defaultLogHandler(record);
