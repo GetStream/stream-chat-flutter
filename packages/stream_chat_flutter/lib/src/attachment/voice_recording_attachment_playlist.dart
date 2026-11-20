@@ -86,7 +86,8 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
   /// [StreamVoiceRecordingAttachment] will be used.
   ///
   /// When provided, [itemDecorator] is ignored since the builder has full
-  /// control over the item widget.
+  /// control over the item widget. Playing a recording through a custom item
+  /// does not mark the message played.
   final IndexedWidgetBuilder? itemBuilder;
 
   /// Optional decorator that wraps each default voice recording item.
@@ -119,6 +120,10 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
 
 class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceRecordingAttachmentPlaylist>
     with WidgetsBindingObserver {
+  // Whether a played mark was already requested, so repeated plays send one.
+  // Cleared when the request fails, so the next play tries again.
+  var _markRequested = false;
+
   late final _controller = StreamAudioPlaylistController(
     widget.voiceRecordings.toPlaylist(),
   );
@@ -147,6 +152,29 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
     if (!const ListEquality().equals(newPlaylist, oldPlaylist)) {
       // If the playlist have changed, update the playlist.
       _controller.updatePlaylist(newPlaylist);
+    }
+  }
+
+  // Marks the message played the first time the current user plays another
+  // user's recording, when the channel lets them mark messages.
+  Future<void> _markPlayed() async {
+    if (_markRequested) return;
+
+    final channel = StreamChannel.maybeOf(context)?.channel;
+    if (channel == null || !channel.canSendMessageMark) return;
+
+    final message = widget.message;
+    final currentUserId = channel.client.state.currentUser?.id;
+    if (message.user?.id == currentUserId) return;
+
+    final ownMarks = message.ownMarks ?? const [];
+    if (ownMarks.any((it) => it.type == MessageMarkType.played)) return;
+
+    _markRequested = true;
+    try {
+      await channel.sendMessageMark(message, MessageMarkType.played);
+    } catch (_) {
+      _markRequested = false;
     }
   }
 
@@ -190,6 +218,7 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
                 onTrackPause: _controller.pause,
                 onChangeSpeed: _controller.setSpeed,
                 onTrackPlay: () async {
+                  _markPlayed().ignore();
                   // Play the track directly if it is already loaded.
                   if (state.currentIndex == index) return _controller.play();
                   // Otherwise, load the track first and then play it.

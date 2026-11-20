@@ -26,7 +26,12 @@ class StreamMessageFooter extends StatelessWidget {
     super.key,
     required Message message,
     bool excludeFromSemantics = false,
-  }) : props = .new(message: message, excludeFromSemantics: excludeFromSemantics);
+    VoidCallback? onMarkTap,
+  }) : props = .new(
+         message: message,
+         excludeFromSemantics: excludeFromSemantics,
+         onMarkTap: onMarkTap,
+       );
 
   /// Creates a message footer from pre-built [props].
   const StreamMessageFooter.fromProps({super.key, required this.props});
@@ -53,6 +58,7 @@ class StreamMessageFooterProps {
   const StreamMessageFooterProps({
     required this.message,
     this.excludeFromSemantics = false,
+    this.onMarkTap,
   });
 
   /// The message whose metadata to display.
@@ -67,30 +73,43 @@ class StreamMessageFooterProps {
   /// what a footer outside such a row needs.
   final bool excludeFromSemantics;
 
+  /// Called when the message's played mark is tapped.
+  ///
+  /// The mark is not tappable when this is null, in a one-to-one channel, or
+  /// before anyone has played the message.
+  final VoidCallback? onMarkTap;
+
   /// Returns a copy of this [StreamMessageFooterProps] with the given fields
   /// replaced with new values.
-  StreamMessageFooterProps copyWith({Message? message, bool? excludeFromSemantics}) {
+  StreamMessageFooterProps copyWith({
+    Message? message,
+    bool? excludeFromSemantics,
+    VoidCallback? onMarkTap,
+  }) {
     return StreamMessageFooterProps(
       message: message ?? this.message,
       excludeFromSemantics: excludeFromSemantics ?? this.excludeFromSemantics,
+      onMarkTap: onMarkTap ?? this.onMarkTap,
     );
   }
 }
 
 /// The default implementation of [StreamMessageFooter].
 ///
-/// The footer can show up to four pieces depending on the message:
+/// The footer can show up to five pieces depending on the message:
 ///
 ///  * **Username** — for messages from other users.
+///  * **Played mark** — for the current user's voice recordings, when
+///    [StreamChatConfigurationData.showMessageMarks] is set and the channel
+///    allows played marks.
 ///  * **Sending status** — for the current user's own messages, except
 ///    ephemeral ones.
 ///  * **Timestamp** — always shown, formatted as a short time string.
 ///  * **Edited label** — when the message text has been updated.
 ///
-/// With [StreamMessageFooterProps.excludeFromSemantics] set, none of the four
-/// contributes to the semantics tree: the enclosing row speaks them all as part
-/// of its composed label, so announcing them here as well would cost four extra
-/// focus stops per message that repeat what the row already said. Left unset —
+/// With [StreamMessageFooterProps.excludeFromSemantics] set, the pieces stay
+/// out of the semantics tree because the enclosing row already speaks them; a
+/// tappable played mark stays in so a screen reader can reach it. Left unset —
 /// [StreamGiphyEphemeralMessage], or a custom layout that uses this footer
 /// without a row-level label — they announce themselves, since nothing else
 /// would.
@@ -128,6 +147,15 @@ class DefaultStreamMessageFooter extends StatelessWidget {
       );
     }
 
+    Widget? markWidget;
+    if (StreamMessagePlayedMark.isShownFor(context, message)) {
+      markWidget = StreamMessagePlayedMark(
+        message: message,
+        onTap: props.onMarkTap,
+        excludeFromSemantics: excluding,
+      );
+    }
+
     final timestampWidget = ExcludeSemantics(
       excluding: excluding,
       child: StreamTimestamp(
@@ -148,6 +176,7 @@ class DefaultStreamMessageFooter extends StatelessWidget {
 
     return core.StreamMessageMetadata(
       username: usernameWidget,
+      mark: markWidget,
       status: statusWidget,
       timestamp: timestampWidget,
       edited: editedWidget,

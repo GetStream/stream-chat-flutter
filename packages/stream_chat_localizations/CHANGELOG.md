@@ -3,10 +3,11 @@
 ✅ Added
 
 - Added the scheduled message strings, including the schedule sheets, the scheduled messages banner and a failed attachment upload, for all supported locales.
+- Added the played mark strings for all supported locales.
 
 🔄 Changed
 
-- A language added by subclassing `GlobalStreamChatLocalizations` must add the scheduled message strings.
+- A language added by subclassing `GlobalStreamChatLocalizations` must add the scheduled message and played mark strings.
 
 ## 10.7.0
 
