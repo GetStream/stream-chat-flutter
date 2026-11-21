@@ -37,7 +37,8 @@ StreamChatPersistenceClient? _createPersistenceClient() {
   if (kWebPrNumber.isNotEmpty) return null;
   return StreamChatPersistenceClient(
     logLevel: Level.SEVERE,
-    databaseNamePrefix: kWebStoragePrefix,
+    // The client adds its own `_`: `chat_beta_` becomes `chat_beta`.
+    databaseNamePrefix: kWebStoragePrefix.replaceFirst(RegExp(r'_$'), ''),
     webUseExperimentalIndexedDb: true,
   );
 }
