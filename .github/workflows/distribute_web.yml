@@ -1,0 +1,122 @@
+name: distribute_web
+
+# Deploys the sample app's web build through the shared actions in
+# stream-core-flutter:
+#
+#   - every push to master: https://flutter.getstream.io/chat/beta/
+#   - a stable release of the master line: https://flutter.getstream.io/chat/
+#   - a manual run: the chosen flavor, from the chosen ref
+#
+# Pre-releases and releases of older lines (v9) are skipped: a release is the
+# master line when its major matches the version of packages/stream_chat on
+# master.
+
+on:
+  push:
+    branches:
+      - master
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      flavor:
+        description: Build flavor
+        type: choice
+        options:
+          - beta
+          - prod
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  flavor:
+    name: Pick Flavor
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      flavor: ${{ steps.flavor.outputs.flavor }}
+    steps:
+      - name: Pick Flavor
+        id: flavor
+        env:
+          GH_TOKEN: ${{ github.token }}
+          EVENT: ${{ github.event_name }}
+          INPUT_FLAVOR: ${{ inputs.flavor }}
+          TAG: ${{ github.event.release.tag_name }}
+          PRERELEASE: ${{ github.event.release.prerelease }}
+        run: |
+          case $EVENT in
+            push) flavor=beta ;;
+            workflow_dispatch) flavor=$INPUT_FLAVOR ;;
+            release)
+              if [[ $PRERELEASE == true ]]; then
+                echo "$TAG is a pre-release, skipping"
+                echo "flavor=" >> "$GITHUB_OUTPUT"
+                exit 0
+              fi
+              master=$(gh api "repos/$GITHUB_REPOSITORY/contents/packages/stream_chat/pubspec.yaml?ref=master" \
+                --jq .content | base64 -d | sed -nE 's/^version:[[:space:]]*["'\'']?([0-9]+)\..*/\1/p')
+              if [[ -z $master ]]; then
+                echo "::error::No version found in packages/stream_chat/pubspec.yaml on master"
+                exit 1
+              fi
+              if [[ $TAG =~ ^v([0-9]+)\. && ${BASH_REMATCH[1]} == "$master" ]]; then
+                flavor=prod
+              else
+                echo "$TAG is not a release of the master line (v$master), skipping"
+                flavor=
+              fi
+              ;;
+          esac
+          echo "flavor=$flavor" >> "$GITHUB_OUTPUT"
+
+  deploy:
+    name: Deploy to flutter.getstream.io
+    needs: flavor
+    if: needs.flavor.outputs.flavor != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment:
+      name: flutter-web
+      url: ${{ steps.target.outputs.url }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-flutter
+
+      - name: "Install Tools"
+        uses: ./.github/actions/install-tools
+
+      - name: "Bootstrap Workspace"
+        run: melos bootstrap
+
+      - name: Target
+        id: target
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-target@e338514373956150868ee67d325c96efe1c758ec
+        with:
+          app: chat
+          flavor: ${{ needs.flavor.outputs.flavor }}
+
+      - name: Build
+        working-directory: sample_app
+        env:
+          BUILD_ARGS: ${{ steps.target.outputs.build-args }}
+        run: |
+          read -ra args <<< "$BUILD_ARGS"
+          flutter build web --release --wasm "${args[@]}"
+
+      - name: Deploy
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-deploy@e338514373956150868ee67d325c96efe1c758ec
+        with:
+          path: ${{ steps.target.outputs.path }}
+          service-account: ${{ steps.target.outputs.service-account }}
+          build-dir: sample_app/build/web
