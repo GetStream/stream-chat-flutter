@@ -22,7 +22,14 @@ final _levelEmojiMapper = {
 
 /// A [DriftChatDatabase] based implementation of the [ChatPersistenceClient]
 class StreamChatPersistenceClient extends ChatPersistenceClient {
-  /// Creates a new instance of the stream chat persistence client
+  /// Creates a new instance of the stream chat persistence client.
+  ///
+  /// The `databaseNamePrefix` argument keeps this client's offline data apart
+  /// from other clients that share the same storage, such as two web apps
+  /// served from one origin. Clients with different prefixes never see each
+  /// other's data, and changing the prefix starts from an empty cache. It may
+  /// only contain letters, digits, `_` and `-`, and may not start or end with
+  /// `_`. Defaults to no prefix.
   StreamChatPersistenceClient({
     /// Connection mode on which the client will work
     this._connectionMode = ConnectionMode.regular,
@@ -32,8 +39,16 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     /// that uses IndexedDB if the current browser supports it.
     /// Otherwise, falls back to the local storage based implementation.
     bool webUseExperimentalIndexedDb = false,
+
+    String databaseNamePrefix = '',
     LogHandlerFunction? logHandlerFunction,
-  }) : _webUseIndexedDbIfSupported = webUseExperimentalIndexedDb,
+  }) : assert(
+         RegExp(r'^([A-Za-z0-9-]+(_[A-Za-z0-9-]+)*)?$').hasMatch(databaseNamePrefix),
+         'databaseNamePrefix may only contain letters, digits, _ and -, '
+         'and may not start or end with _',
+       ),
+       _webUseIndexedDbIfSupported = webUseExperimentalIndexedDb,
+       _databaseNamePrefix = databaseNamePrefix,
        _logger = Logger.detached('💽')..level = logLevel {
     _logger.onRecord.listen(logHandlerFunction ?? _defaultLogHandler);
   }
@@ -45,6 +60,7 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   final Logger _logger;
   final ConnectionMode _connectionMode;
   final bool _webUseIndexedDbIfSupported;
+  final String _databaseNamePrefix;
 
   void _defaultLogHandler(LogRecord record) {
     print(
@@ -75,6 +91,11 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     userId,
     connectionMode: mode,
     webUseIndexedDbIfSupported: _webUseIndexedDbIfSupported,
+    databaseName: [
+      if (_databaseNamePrefix.isNotEmpty) _databaseNamePrefix,
+      'db',
+      userId,
+    ].join('_'),
   );
 
   @override

@@ -1,3 +1,9 @@
+## Upcoming
+
+✅ Added
+
+- Added a `databaseNamePrefix` parameter to `StreamChatPersistenceClient` to keep the offline data of apps that share storage apart, such as two web apps on one origin.
+
 ## 10.7.0
 
 ✅ Added
