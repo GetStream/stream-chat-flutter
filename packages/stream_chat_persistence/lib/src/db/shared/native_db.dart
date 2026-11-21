@@ -21,16 +21,15 @@ class SharedDB {
     bool logStatements = false,
     ConnectionMode connectionMode = ConnectionMode.regular,
     bool webUseIndexedDbIfSupported = false, // Ignored on native
-    String databaseNamePrefix = '',
+    required String databaseName,
   }) async {
-    final dbName = '${databaseNamePrefix}db_$userId';
     if (connectionMode == ConnectionMode.background) {
       return DriftChatDatabase(
         userId,
         DatabaseConnection.delayed(
           Future(() async {
             final isolate = await _createDriftIsolate(
-              dbName,
+              databaseName,
               logStatements: logStatements,
             );
             return isolate.connect();
@@ -43,7 +42,7 @@ class SharedDB {
       userId,
       LazyDatabase(
         () async => _constructDatabase(
-          dbName,
+          databaseName,
           logStatements: logStatements,
         ),
       ),

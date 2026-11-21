@@ -15,11 +15,10 @@ class SharedDB {
     bool logStatements = false,
     ConnectionMode connectionMode = ConnectionMode.regular, // Ignored on web
     bool webUseIndexedDbIfSupported = false,
-    String databaseNamePrefix = '',
+    required String databaseName,
   }) async {
-    final dbName = '${databaseNamePrefix}db_$userId';
     final queryExecutor = await _getQueryExecutor(
-      dbName,
+      databaseName,
       useIndexedDbIfSupported: webUseIndexedDbIfSupported,
       logStatements: logStatements,
     );
