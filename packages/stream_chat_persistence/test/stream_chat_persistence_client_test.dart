@@ -49,31 +49,29 @@ void main() {
     });
   });
 
-  group('databaseNamePrefix', () {
-    // On macOS and Linux, the test host, the database is a file in the
-    // working directory named after the database.
-    test('is prepended to the database name', () async {
-      const userId = 'prefixTestUser';
-      final file = File('test_prefix_db_$userId.sqlite');
-      final client = StreamChatPersistenceClient(databaseNamePrefix: 'test_prefix_');
-      addTearDown(() async {
-        await client.disconnect();
-        if (file.existsSync()) file.deleteSync();
-      });
+  test('StreamChatPersistenceClient keeps the data of two prefixes apart', () async {
+    final syncedAt = DateTime.utc(2026, 11, 20);
+    final beta = await _connectedClient(databaseNamePrefix: 'beta');
+    await beta.updateLastSyncAt(syncedAt);
 
-      await client.connect(userId);
-      // The database opens on its first query.
-      await client.updateLastSyncAt(DateTime.now());
+    final prod = await _connectedClient(databaseNamePrefix: 'prod');
 
-      expect(file.existsSync(), isTrue);
-    }, testOn: 'mac-os || linux');
+    expect(await prod.getLastSyncAt(), isNull);
+    expect(await beta.getLastSyncAt(), syncedAt);
+  });
 
-    test('rejects characters that are not valid in a file name', () {
-      expect(
-        () => StreamChatPersistenceClient(databaseNamePrefix: '../chat'),
-        throwsAssertionError,
-      );
-    });
+  test('StreamChatPersistenceClient rejects a databaseNamePrefix ending in _', () {
+    expect(
+      () => StreamChatPersistenceClient(databaseNamePrefix: 'beta_'),
+      throwsAssertionError,
+    );
+  });
+
+  test('StreamChatPersistenceClient rejects a databaseNamePrefix with a path separator', () {
+    expect(
+      () => StreamChatPersistenceClient(databaseNamePrefix: '../chat'),
+      throwsAssertionError,
+    );
   });
 
   test('disconnect', () async {
@@ -1406,4 +1404,19 @@ void main() {
       await client.disconnect(flush: true);
     });
   });
+}
+
+Future<StreamChatPersistenceClient> _connectedClient({
+  required String databaseNamePrefix,
+}) async {
+  const userId = 'prefixTestUser';
+  final client = StreamChatPersistenceClient(databaseNamePrefix: databaseNamePrefix);
+  await client.connect(userId);
+  addTearDown(() async {
+    await client.disconnect();
+    // On macOS and Linux the database is a file in the working directory.
+    final file = File('${databaseNamePrefix}_db_$userId.sqlite');
+    if (file.existsSync()) file.deleteSync();
+  });
+  return client;
 }
