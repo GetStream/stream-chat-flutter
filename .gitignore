@@ -2,9 +2,11 @@
 *.class
 *.log
 *.pyc
-/sample_app/stream-chat-test-mock-server/
-/sample_app/allure-results/
-/sample_app/allurectl
+# e2e: the cloned mock server, Allure results and CLI, and the generated batch entrypoint
+stream-chat-test-mock-server/
+allure-results/
+allurectl
+/e2e_app/integration_test/e2e_batch.g.dart
 *.swp
 .DS_Store
 .atom/
@@ -40,6 +42,7 @@ pubspec_overrides.yaml
 devtools_options.yaml
 flutter_export_environment.sh
 generated_plugin_registrant.*
+generated_plugins.cmake
 GeneratedPluginRegistrant.*
 
 # Android related
@@ -146,3 +149,5 @@ gradle-wrapper.jar
 !/sample_app/web/sql-wasm.js
 !/sample_app/web/sql-wasm.wasm
 !/sample_app/android/app/google-services.json
+# SDK size: the stream-internal-metrics clone the fastlane lanes make
+metrics/sdk_size/metrics/

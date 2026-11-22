@@ -71,6 +71,7 @@ void main() {
     expect(channel.autoTranslationEnabled, isTrue);
     expect(channel.autoTranslationLanguage, 'fr');
     expect(channel.messageCount, 42);
+    expect(channel.activeMemberCount, 2);
     expect(channel.filterTags, ['support']);
   });
 
@@ -172,6 +173,10 @@ void main() {
     expect(config.markMessagesPending, isFalse);
     expect(config.deliveryEvents, isTrue);
     expect(config.sharedLocations, isFalse);
+    expect(config.scheduledMessagesMaxPerChannel, 20);
+    expect(config.scheduledMessagesMaxPerUser, 100);
+    expect(config.scheduledMessagesMinLeadTime, const Duration(minutes: 1));
+    expect(config.scheduledMessagesMaxLeadTime, const Duration(days: 30));
   });
 
   test('StreamChatClient.updateChannelPartial returns a null channel when the response has none', () async {
@@ -302,16 +307,17 @@ api.ChannelResponse _channelResponse({
     'topic': 'anything',
   },
 }) => api.ChannelResponse(
+  activeMemberCount: 2,
   autoTranslationEnabled: true,
   autoTranslationLanguage: 'fr',
   blocked: true,
   cid: 'messaging:general',
   config: api.ChannelConfigWithInfo(
     allowedFlagReasons: const ['spam'],
-    automod: api.ChannelConfigWithInfoAutomod.simple,
-    automodBehavior: api.ChannelConfigWithInfoAutomodBehavior.flag,
+    automod: api.AutomodMode.simple,
+    automodBehavior: api.ChannelModerationBehavior.flag,
     blocklist: 'profanity',
-    blocklistBehavior: api.ChannelConfigWithInfoBlocklistBehavior.block,
+    blocklistBehavior: api.ChannelModerationBehavior.block,
     chatPreferences: const api.ChatPreferences(
       channelMentions: 'all',
       defaultPreference: 'none',
@@ -348,13 +354,17 @@ api.ChannelResponse _channelResponse({
     partitionSize: 10,
     partitionTtl: '24h',
     polls: true,
-    pushLevel: api.ChannelConfigWithInfoPushLevel.directMentions,
+    pushLevel: api.PushLevel.directMentions,
     pushNotifications: false,
     quotes: true,
     reactions: true,
     readEvents: false,
     reminders: true,
     replies: true,
+    scheduledMessagesMaxLeadTimeSeconds: 2592000,
+    scheduledMessagesMaxPerChannel: 20,
+    scheduledMessagesMaxPerUser: 100,
+    scheduledMessagesMinLeadTimeSeconds: 60,
     search: false,
     sharedLocations: false,
     skipLastMsgUpdateForSystemMsgs: false,

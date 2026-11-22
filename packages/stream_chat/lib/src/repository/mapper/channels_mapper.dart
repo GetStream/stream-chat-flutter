@@ -46,6 +46,7 @@ extension ChannelResponseMapper on api.ChannelResponse {
     blocked: blocked,
     truncatedAt: truncatedAt,
     messageCount: messageCount,
+    activeMemberCount: activeMemberCount,
     filterTags: filterTags,
     truncatedBy: truncatedBy?.toModel(),
     autoTranslationEnabled: autoTranslationEnabled,
@@ -87,6 +88,10 @@ extension ChannelConfigWithInfoMapper on api.ChannelConfigWithInfo {
     markMessagesPending: markMessagesPending,
     deliveryEvents: deliveryEvents,
     sharedLocations: sharedLocations,
+    scheduledMessagesMaxPerChannel: scheduledMessagesMaxPerChannel,
+    scheduledMessagesMaxPerUser: scheduledMessagesMaxPerUser,
+    scheduledMessagesMinLeadTime: scheduledMessagesMinLeadTimeSeconds?.let((it) => Duration(seconds: it)),
+    scheduledMessagesMaxLeadTime: scheduledMessagesMaxLeadTimeSeconds?.let((it) => Duration(seconds: it)),
   );
 }
 

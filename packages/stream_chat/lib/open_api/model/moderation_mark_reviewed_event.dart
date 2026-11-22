@@ -3,20 +3,14 @@
 // coverage:ignore-file
 // ignore_for_file: unused_import, unnecessary_import, prefer_single_quotes, require_trailing_commas, unnecessary_raw_strings, public_member_api_docs, sort_constructors_first, provide_deprecation_message
 
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
-import 'package:stream_core/stream_core.dart' as core;
-
-import '../models.dart';
-
-part 'moderation_mark_reviewed_event.g.dart';
-part 'moderation_mark_reviewed_event.freezed.dart';
+part of 'events.dart';
 
 @freezed
 @immutable
 @JsonSerializable()
-class ModerationMarkReviewedEvent extends core.WsEvent with _$ModerationMarkReviewedEvent {
+class ModerationMarkReviewedEvent extends core.WsEvent
+    with _$ModerationMarkReviewedEvent
+    implements WSClientEvent, WSEvent {
   const ModerationMarkReviewedEvent({
     required this.createdAt,
     required this.custom,
@@ -52,6 +46,7 @@ class ModerationMarkReviewedEvent extends core.WsEvent with _$ModerationMarkRevi
   @JsonKey(name: 'type')
   final String type;
 
+  @override
   Map<String, dynamic> toJson() => _$ModerationMarkReviewedEventToJson(this);
 
   static ModerationMarkReviewedEvent fromJson(Map<String, dynamic> json) => _$ModerationMarkReviewedEventFromJson(json);

@@ -4,7 +4,9 @@ part 'unread_counts_channel_type.freezed.dart';
 
 /// The current user's unread count across the channels of one channel type.
 ///
-/// Listed in [GetUnreadCountResponse.channelType].
+/// See also:
+///
+///  * [GetUnreadCountResponse.channelType], which lists them.
 @freezed
 class UnreadCountsChannelType with _$UnreadCountsChannelType {
   /// Creates a new [UnreadCountsChannelType].

@@ -550,6 +550,72 @@ void main() {
 
       expect(controller.attachments, isEmpty);
     });
+
+    test('skips url enrichment while the message has an OG attachment', () {
+      controller.addAttachment(Attachment(ogScrapeUrl: 'https://example.com'));
+
+      expect(controller.skipEnrichUrl, isTrue);
+    });
+
+    test('clearOGAttachment with dismissed removes the OG attachment and skips url enrichment', () {
+      controller.setOGAttachment(Attachment(ogScrapeUrl: 'https://example.com'));
+
+      controller.clearOGAttachment(dismissed: true);
+
+      expect(controller.ogAttachment, isNull);
+      expect(controller.skipEnrichUrl, isTrue);
+    });
+
+    test('clearOGAttachment forgets a dismissal', () {
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.clearOGAttachment();
+
+      expect(controller.skipEnrichUrl, isFalse);
+    });
+
+    test('clear forgets a dismissal', () {
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.clear();
+
+      expect(controller.skipEnrichUrl, isFalse);
+    });
+
+    test('editMessage does not carry the draft dismissal into the edit', () {
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.editMessage(Message(id: 'edited', text: 'See https://example.com'));
+
+      expect(controller.skipEnrichUrl, isFalse);
+    });
+
+    test('cancelEditMessage restores the draft dismissal', () {
+      controller.clearOGAttachment(dismissed: true);
+      controller.editMessage(Message(id: 'edited', text: 'See https://example.com'));
+
+      controller.cancelEditMessage();
+
+      expect(controller.skipEnrichUrl, isTrue);
+    });
+
+    test('editMessage keeps a dismissal made during the edit when called again', () {
+      final edited = Message(id: 'edited', text: 'See https://example.com');
+      controller.editMessage(edited);
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.editMessage(edited);
+
+      expect(controller.skipEnrichUrl, isTrue);
+    });
+
+    test('reset forgets a dismissal', () {
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.reset();
+
+      expect(controller.skipEnrichUrl, isFalse);
+    });
   });
 
   group('Poll Management', () {
@@ -745,7 +811,7 @@ void main() {
       final existingMessage = Message(
         id: 'msg-1',
         text: 'Existing text',
-        state: MessageState.updating,
+        state: MessageState.updating(),
       );
 
       expect(
@@ -761,7 +827,7 @@ void main() {
       expect(editController.messageBeingEdited, isNull);
     });
 
-    test('editMessage sets state to MessageState.updating', () {
+    test('editMessage sets state to MessageState.updating()', () {
       final existingMessage = Message(id: 'msg-1', text: 'Original text');
       controller.editMessage(existingMessage);
 
@@ -1013,6 +1079,74 @@ void main() {
       },
     );
 
+    testWidgets('restores the mentioned users of a draft', (tester) async {
+      final stateKey = GlobalKey<_RestorableWidgetState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          restorationScopeId: 'app',
+          home: _RestorableWidget(key: stateKey),
+        ),
+      );
+
+      stateKey.currentState!.controller.value
+        ..text = 'Hi @Bob'
+        ..addMentionedUser(User(id: 'bob', name: 'Bob'));
+      await tester.pumpAndSettle();
+
+      await tester.restartAndRestore();
+
+      final mentionedUsers = stateKey.currentState!.controller.value.mentionedUsers;
+      expect(mentionedUsers.single.id, 'bob');
+      expect(mentionedUsers.single.name, 'Bob');
+    });
+
+    testWidgets('restores the mentioned users of a message being edited', (tester) async {
+      final stateKey = GlobalKey<_RestorableEditWidgetState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          restorationScopeId: 'app',
+          home: _RestorableEditWidget(key: stateKey),
+        ),
+      );
+
+      final messageBeingEdited = Message(
+        id: 'msg-1',
+        text: 'Hi @Alice',
+        mentionedUsers: [User(id: 'alice', name: 'Alice')],
+      );
+      stateKey.currentState!.controller.value
+        ..editMessage(messageBeingEdited)
+        ..addMentionedUser(User(id: 'carol', name: 'Carol'));
+      await tester.pumpAndSettle();
+
+      await tester.restartAndRestore();
+
+      final controller = stateKey.currentState!.controller.value;
+      expect(controller.messageBeingEdited!.mentionedUsers.map((it) => it.name), ['Alice']);
+      expect(controller.mentionedUsers.map((it) => it.name), ['Alice', 'Carol']);
+    });
+
+    testWidgets('restores the mentioned users of the draft from before an edit', (tester) async {
+      final stateKey = GlobalKey<_RestorableEditWidgetState>();
+      await tester.pumpWidget(
+        MaterialApp(
+          restorationScopeId: 'app',
+          home: _RestorableEditWidget(key: stateKey),
+        ),
+      );
+
+      stateKey.currentState!.controller.value
+        ..text = 'Hi @Bob'
+        ..addMentionedUser(User(id: 'bob', name: 'Bob'))
+        ..editMessage(Message(id: 'msg-1', text: 'Original'));
+      await tester.pumpAndSettle();
+
+      await tester.restartAndRestore();
+
+      final controller = stateKey.currentState!.controller.value..cancelEditMessage();
+      expect(controller.mentionedUsers.map((it) => it.name), ['Bob']);
+    });
+
     group('fromPrimitives', () {
       // fromPrimitives is a pure factory: it does not access `this.value`, so
       // it can be called directly without going through the Flutter restoration
@@ -1050,7 +1184,7 @@ void main() {
         // ignores it and always constructs with MessageState.initial().
         final controller = restore({
           'message': Message(text: 'Hi').toJson(),
-          'message_state': MessageState.sending.toJson(),
+          'message_state': MessageState.sending().toJson(),
         });
 
         expect(controller.message.state.isInitial, isTrue);
@@ -1064,7 +1198,7 @@ void main() {
           'message': messageBeingEdited
               .copyWith(
                 text: 'Edited text',
-                state: MessageState.updating,
+                state: MessageState.updating(),
               )
               .toJson(),
           'message_being_edited': messageBeingEdited.toJson(),
@@ -1084,7 +1218,7 @@ void main() {
           'message': messageBeingEdited
               .copyWith(
                 text: 'Edited text',
-                state: MessageState.updating,
+                state: MessageState.updating(),
               )
               .toJson(),
           'message_being_edited': messageBeingEdited.toJson(),

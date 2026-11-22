@@ -13,18 +13,14 @@ import '../models.dart';
 part 'llm_rule.g.dart';
 part 'llm_rule.freezed.dart';
 
-extension type const LLMRuleAction._(String _) implements String {
-  static const bounce = LLMRuleAction._('bounce');
-  static const bounceFlag = LLMRuleAction._('bounce_flag');
-  static const bounceRemove = LLMRuleAction._('bounce_remove');
-  static const flag = LLMRuleAction._('flag');
-  static const keep = LLMRuleAction._('keep');
-  static const remove = LLMRuleAction._('remove');
-  static const shadow = LLMRuleAction._('shadow');
-
-  factory LLMRuleAction.fromJson(String json) => LLMRuleAction._(json);
-
-  String toJson() => this;
+extension type const LLMRuleAction(String _) implements String {
+  static const bounce = LLMRuleAction('bounce');
+  static const bounceFlag = LLMRuleAction('bounce_flag');
+  static const bounceRemove = LLMRuleAction('bounce_remove');
+  static const flag = LLMRuleAction('flag');
+  static const keep = LLMRuleAction('keep');
+  static const remove = LLMRuleAction('remove');
+  static const shadow = LLMRuleAction('shadow');
 }
 
 @freezed

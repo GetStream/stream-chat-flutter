@@ -1,0 +1,9 @@
+name: 'Install Tools'
+description: 'Install the CLI tools the workflows run.'
+runs:
+  using: "composite"
+  steps:
+    # Any melos version works: it switches to the one pinned in the root
+    # pubspec.lock.
+    - shell: bash
+      run: flutter pub global activate melos

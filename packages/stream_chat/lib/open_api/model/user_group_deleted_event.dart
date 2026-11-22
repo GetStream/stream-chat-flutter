@@ -3,20 +3,12 @@
 // coverage:ignore-file
 // ignore_for_file: unused_import, unnecessary_import, prefer_single_quotes, require_trailing_commas, unnecessary_raw_strings, public_member_api_docs, sort_constructors_first, provide_deprecation_message
 
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
-import 'package:stream_core/stream_core.dart' as core;
-
-import '../models.dart';
-
-part 'user_group_deleted_event.g.dart';
-part 'user_group_deleted_event.freezed.dart';
+part of 'events.dart';
 
 @freezed
 @immutable
 @JsonSerializable()
-class UserGroupDeletedEvent extends core.WsEvent with _$UserGroupDeletedEvent {
+class UserGroupDeletedEvent extends core.WsEvent with _$UserGroupDeletedEvent implements WSClientEvent, WSEvent {
   const UserGroupDeletedEvent({
     required this.createdAt,
     required this.custom,
@@ -52,6 +44,7 @@ class UserGroupDeletedEvent extends core.WsEvent with _$UserGroupDeletedEvent {
   @JsonKey(name: 'user_group')
   final UserGroup? userGroup;
 
+  @override
   Map<String, dynamic> toJson() => _$UserGroupDeletedEventToJson(this);
 
   static UserGroupDeletedEvent fromJson(Map<String, dynamic> json) => _$UserGroupDeletedEventFromJson(json);

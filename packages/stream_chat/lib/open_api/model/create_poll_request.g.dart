@@ -20,11 +20,7 @@ CreatePollRequest _$CreatePollRequestFromJson(Map<String, dynamic> json) => Crea
       ?.map((e) => PollOptionInput.fromJson(e as Map<String, dynamic>))
       .toList(),
   team: json['team'] as String?,
-  votingVisibility: json['voting_visibility'] == null
-      ? null
-      : CreatePollRequestVotingVisibility.fromJson(
-          json['voting_visibility'] as String,
-        ),
+  votingVisibility: json['voting_visibility'] as VotingVisibility?,
 );
 
 Map<String, dynamic> _$CreatePollRequestToJson(CreatePollRequest instance) => <String, dynamic>{
@@ -39,5 +35,5 @@ Map<String, dynamic> _$CreatePollRequestToJson(CreatePollRequest instance) => <S
   'name': instance.name,
   'options': instance.options?.map((e) => e.toJson()).toList(),
   'team': instance.team,
-  'voting_visibility': instance.votingVisibility?.toJson(),
+  'voting_visibility': instance.votingVisibility,
 };

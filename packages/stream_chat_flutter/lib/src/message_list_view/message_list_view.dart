@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -10,12 +11,12 @@ import '../../scrollable_positioned_list/scrollable_positioned_list.dart';
 import '../../stream_chat_flutter.dart';
 import '../misc/empty_widget.dart';
 import '../misc/memoized_builder.dart';
-import '../utils/network_error_text.dart';
 import 'floating_date_divider.dart';
 import 'loading_indicator.dart';
 import 'message_list_unread_controller.dart';
 import 'mlv_utils.dart';
 import 'stream_message_list_empty_state.dart';
+import 'stream_message_list_error_state.dart';
 import 'stream_message_list_skeleton_loading.dart';
 import 'thread_separator.dart';
 
@@ -214,7 +215,9 @@ class StreamMessageListView extends StatefulWidget {
   /// [StreamMessageItem] in the list.
   ///
   /// When null (the default), tapping a quoted message scrolls to it in
-  /// the list, loading it if necessary.
+  /// the list, loading it if necessary. A reply that was only sent to its
+  /// thread opens that thread instead, when [threadBuilder] or [onThreadTap]
+  /// is set.
   final void Function(Message quotedMessage)? onQuotedMessageTap;
 
   /// Called when a link is tapped in message text.
@@ -300,11 +303,12 @@ class StreamMessageListView extends StatefulWidget {
   /// Defaults to [StreamMessageListViewBuilders] with no overrides.
   final StreamMessageListViewBuilders builders;
 
-  /// Whether this list pads its scrollable to avoid partial obstructions
+  /// Whether this list keeps its content clear of partial obstructions
   /// indicated by [MediaQuery]'s padding.
   ///
-  /// Content still scrolls through the obstructed area; only the scrollable's
-  /// limits are inset, so the first and last items come to rest clear of it.
+  /// Messages scroll under the top and bottom obstructions but come to rest
+  /// clear of them, and stay clear of the side ones. The loading, empty and
+  /// error states, including those from [builders], clear every obstruction.
   ///
   /// Defaults to false.
   final bool enableSafeArea;
@@ -355,6 +359,9 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   }();
 
   List<Message> messages = <Message>[];
+
+  // The thread reply to scroll to once [messages] include it.
+  String? _pendingThreadMessageId;
 
   // `generation` bumps on each highlight call so a re-highlight of the
   // same message restarts the fade animation.
@@ -414,12 +421,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       // that replay is checked against.
       _unreadController.attach();
 
-      final highlightInitialMessage = _config.highlightInitialMessage;
-      final highlightMessageId = switch ((highlightInitialMessage, _isThreadConversation)) {
-        (true, true) => _ThreadHighlightScope.of(context),
-        (true, false) => streamChannel?.initialMessageId,
-        _ => null,
-      };
+      // A thread opened for one of its replies scrolls to it once the replies
+      // include it. Highlighting it stays opt-in.
+      _pendingThreadMessageId = _isThreadConversation ? _ThreadHighlightScope.of(context) : null;
+
+      final highlightChannelMessage = _config.highlightInitialMessage && !_isThreadConversation;
+      final highlightMessageId = highlightChannelMessage ? streamChannel?.initialMessageId : null;
 
       if (highlightMessageId != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -603,37 +610,38 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     );
   }
 
-  // Safe-area insets injected into MediaQuery by the enclosing scaffold (a
-  // floating app bar / composer, or the system safe area). Read directly so the
-  // list self-insets without the caller threading padding in.
-  EdgeInsets get _scaffoldInsets => widget.enableSafeArea ? MediaQuery.paddingOf(context) : EdgeInsets.zero;
+  // The top and bottom insets, applied as scroll padding. [_safeArea] handles the sides.
+  EdgeInsets get _scaffoldInsets {
+    if (!widget.enableSafeArea) return .zero;
+    return MediaQuery.paddingOf(context).copyWith(left: 0, right: 0);
+  }
+
+  Widget _safeArea({bool top = true, bool bottom = true, required Widget child}) {
+    if (!widget.enableSafeArea) return child;
+    return StreamSafeArea(top: top, bottom: bottom, child: child);
+  }
 
   @override
   Widget build(BuildContext context) {
     Widget defaultLoadingBuilder(BuildContext context) {
-      if (widget.builders.loading case final builder?) return builder(context);
-      return const StreamMessageListSkeletonLoading();
+      if (widget.builders.loading case final builder?) return _safeArea(child: builder(context));
+      return _safeArea(child: const StreamMessageListSkeletonLoading());
     }
 
     Widget defaultEmptyBuilder(BuildContext context) {
-      if (widget.builders.empty case final builder?) return builder(context);
-      return const StreamMessageListEmptyState();
+      if (widget.builders.empty case final builder?) return _safeArea(child: builder(context));
+      return _safeArea(child: const StreamMessageListEmptyState());
     }
 
     Widget defaultErrorBuilder(BuildContext context, Object error) {
-      if (widget.builders.error case final builder?) return builder(context, error);
+      if (widget.builders.error case final builder?) return _safeArea(child: builder(context, error));
 
-      final translations = context.translations;
-      final text = resolveNetworkErrorText(context, error, fallbackTitle: translations.loadingMessagesError);
-
-      return Center(
-        child: StreamScrollViewErrorWidget(
-          errorTitle: Text(text.title),
-          errorSubtitle: Text(text.description),
-          retryButtonText: Text(translations.tryAgainLabel),
-          onRetryPressed: () => streamChannel?.reloadChannel(),
-        ),
+      final errorState = StreamMessageListErrorState(
+        error: error,
+        onRetryPressed: () => streamChannel?.reloadChannel(),
       );
+
+      return _safeArea(child: errorState);
     }
 
     Widget defaultMessageListBuilder(BuildContext context, List<Message> list) {
@@ -648,17 +656,20 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       labels: const [kPortalMessageListViewLabel],
       child: Portal(
         child: ScaffoldMessenger(
-          child: MessageListCore(
-            paginationLimit: _config.paginationLimit,
-            maximumMessageLimit: _config.maximumMessageLimit,
-            retentionTrimBuffer: _config.retentionTrimBuffer,
-            messageFilter: widget.messageFilter,
-            loadingBuilder: defaultLoadingBuilder,
-            emptyBuilder: defaultEmptyBuilder,
-            messageListBuilder: defaultMessageListBuilder,
-            messageListController: _messageListController,
-            parentMessage: widget.parentMessage,
-            errorBuilder: defaultErrorBuilder,
+          child: NotificationListener<UserScrollNotification>(
+            onNotification: _onUserScroll,
+            child: MessageListCore(
+              paginationLimit: _config.paginationLimit,
+              maximumMessageLimit: _config.maximumMessageLimit,
+              retentionTrimBuffer: _config.retentionTrimBuffer,
+              messageFilter: widget.messageFilter,
+              loadingBuilder: defaultLoadingBuilder,
+              emptyBuilder: defaultEmptyBuilder,
+              messageListBuilder: defaultMessageListBuilder,
+              messageListController: _messageListController,
+              parentMessage: widget.parentMessage,
+              errorBuilder: defaultErrorBuilder,
+            ),
           ),
         ),
       ),
@@ -667,6 +678,14 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   Widget _buildListView(List<Message> data) {
     messages = data;
+
+    if (_pendingThreadMessageId case final messageId? when messages.any((it) => it.id == messageId)) {
+      _pendingThreadMessageId = null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        _scrollToMessage(messageId: messageId, highlight: _config.highlightInitialMessage);
+      });
+    }
 
     // Top pagination may not have finished loading the unread boundary when
     // the baseline was first captured; retry once this frame's layout
@@ -730,17 +749,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                   reverse: _config.reverse,
                   shrinkWrap: _config.shrinkWrap,
                   itemCount: itemCount,
-                  itemKeyBuilder: (index) {
-                    // Layout (see comment block below): indices 0/1 and the
-                    // top 3 indices are fixed slots (footer, loaders,
-                    // header, parent message). Anything in between is a
-                    // message at `messages[index - 2]`.
-                    if (index < 2) return null;
-                    if (index >= itemCount - 3) return null;
-                    final messageIndex = index - 2;
-                    if (messageIndex >= messages.length) return null;
-                    return messages[messageIndex].id;
-                  },
+                  itemKeyBuilder: (index) => _messageAtItem(index)?.id,
 
                   // Item Count -> 8 (1 parent, 2 header+footer, 2 top+bottom, 3 messages)
                   // eg:     |Type|         rev(|Index(item)|)     rev(|Index(separator)|)    |Index(item)|    |Index(separator)|
@@ -847,10 +856,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
                     }
 
                     if (i == 1) {
-                      return _buildPaginationLoadingIndicator(
+                      final loader = _buildPaginationLoadingIndicator(
                         context: context,
                         direction: QueryDirection.bottom,
                       );
+                      if (!_config.showTypingIndicator) return loader;
+                      return _buildTypingIndicator(context, otherwise: loader);
                     }
 
                     if (i == 0) {
@@ -877,11 +888,10 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           Positioned(
             top: math.max(_scaffoldInsets.top, context.streamSpacing.sm),
             child: FloatingDateDivider(
-              itemCount: itemCount,
               reverse: _config.reverse,
               fadeNearInlineDivider: _config.fadeFloatingDateDividerNearInline,
               itemPositionListener: _itemPositionListener.itemPositions,
-              messages: messages,
+              messageAt: _messageAtItem,
               dateDividerBuilder: switch (widget.builders.floatingDateDivider) {
                 final builder? => builder,
                 _ => widget.builders.dateDivider,
@@ -954,6 +964,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       ],
     );
 
+    final content = _safeArea(top: false, bottom: false, child: child);
+
     final backgroundColor = StreamMessageListViewTheme.of(context).backgroundColor;
     final backgroundImage = StreamMessageListViewTheme.of(context).backgroundImage;
 
@@ -963,11 +975,11 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
           color: backgroundColor,
           image: backgroundImage,
         ),
-        child: child,
+        child: content,
       );
     }
 
-    return child;
+    return content;
   }
 
   // Default spacing widget between adjacent messages — mirrors the old
@@ -987,6 +999,31 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       direction: direction,
       onRetryPressed: () => _paginateData(direction),
       indicatorBuilder: widget.builders.paginationLoadingIndicator,
+    );
+  }
+
+  // Shows [otherwise] while nobody is typing, or until the newest messages
+  // are loaded.
+  Widget _buildTypingIndicator(
+    BuildContext context, {
+    required Widget otherwise,
+  }) {
+    return StreamTypingUsersBuilder(
+      channel: streamChannel!.channel,
+      parentId: widget.parentMessage?.id,
+      builder: (context, users) {
+        if (users.isEmpty) return otherwise;
+        if (!_isThreadConversation && !_upToDate) return otherwise;
+
+        final gap = context.streamSpacing.md;
+        return Padding(
+          padding: _config.reverse ? .only(top: gap) : .only(bottom: gap),
+          child: switch (widget.builders.typingIndicator) {
+            final builder? => builder(context, users),
+            _ => StreamMessageListTypingIndicator(users: users),
+          },
+        );
+      },
     );
   }
 
@@ -1054,7 +1091,8 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
   // The rules are evaluated in the following order:
   // - [SpacingType.timeDiff] — messages are more than a minute apart.
   // - [SpacingType.otherUser] — messages belong to different groups. A group
-  //   boundary is forced when either message is a system or moderated message.
+  //   boundary is forced when either message is a system or moderated message,
+  //   or when only one of them failed.
   // - [SpacingType.thread] — the current message is part of a thread.
   // - [SpacingType.deleted] — the current message has been deleted.
   List<SpacingType>? _resolveSpacingRules({
@@ -1075,8 +1113,13 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     // Moderated (non-bounced error) messages always form their own group.
     final isModerated = (message.isError && !message.isBounced) || (nextMessage.isError && !nextMessage.isBounced);
 
-    // Two messages are from the same user group only if neither is system/moderated and they share the same sender.
-    final isNextUserSame = !isSystem && !isModerated && message.user!.id == nextMessage.user?.id;
+    // A failed message never groups with one that did not fail.
+    final onlyOneFailed = message.state.isFailed != nextMessage.state.isFailed;
+
+    // Two messages are from the same user group only if they share the same
+    // sender and none of the checks above separates them.
+    final isSameSender = message.user!.id == nextMessage.user?.id;
+    final isNextUserSame = isSameSender && !isSystem && !isModerated && !onlyOneFailed;
 
     // Thread messages shown in channel are part of a thread.
     final isPartOfThread = message.replyCount! > 0 || message.showInChannel == true;
@@ -1089,6 +1132,17 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     ];
 
     return rules.isEmpty ? [SpacingType.defaultSpacing] : rules;
+  }
+
+  // The message shown by the list item at [index], or null for a fixed slot.
+  Message? _messageAtItem(int index) {
+    // Layout (see the comment block in [_buildListView]): indices 0/1 and the
+    // top 3 indices are fixed slots (footer, loaders, header, parent message).
+    // Anything in between is a message at `messages[index - 2]`.
+    final messageIndex = index - 2;
+    if (messageIndex < 0) return null;
+    if (messageIndex >= messages.length) return null;
+    return messages[messageIndex];
   }
 
   Widget _buildDateDivider(Message message) {
@@ -1244,7 +1298,7 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       onMessageLinkTap: widget.onMessageLinkTap,
       onUserMentionTap: widget.onUserMentionTap,
       onMentionTap: widget.onMentionTap,
-      onQuotedMessageTap: widget.onQuotedMessageTap ?? _scrollToQuotedMessage,
+      onQuotedMessageTap: widget.onQuotedMessageTap ?? _onQuotedMessageTap,
     );
 
     // The content kind follows from the message in [props], so it is resolved
@@ -1279,7 +1333,31 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
 
   // Methods rather than closures, so rows built from them compare equal.
   void _popToMessage(Message message) => Navigator.of(context).pop(message.id);
-  void _scrollToQuotedMessage(Message quoted) => _scrollToMessage(messageId: quoted.id).ignore();
+  void _onQuotedMessageTap(Message quoted) => _openQuotedMessage(quoted).ignore();
+
+  // A reply that lives only in its thread isn't in the channel list, so open
+  // the thread instead of scrolling.
+  Future<void> _openQuotedMessage(Message quoted) async {
+    final onThreadTap = _onThreadTap;
+    final parentId = quoted.parentId;
+    final isThreadOnlyReply = parentId != null && quoted.showInChannel != true;
+    if (onThreadTap != null && isThreadOnlyReply && !_isThreadConversation) {
+      final parent = await streamChannel!.getMessage(parentId);
+      if (!mounted) return;
+      onThreadTap(parent, quoted);
+      return;
+    }
+
+    await _scrollToMessage(messageId: quoted.id);
+  }
+
+  // A user scroll cancels the jump to a thread reply that hasn't loaded yet.
+  bool _onUserScroll(UserScrollNotification notification) {
+    final isListScroll = notification.depth == 0;
+    final isUserScroll = notification.direction != ScrollDirection.idle;
+    if (isListScroll && isUserScroll) _pendingThreadMessageId = null;
+    return false;
+  }
 
   void _handleItemPositionsChanged() {
     if (!mounted) return;
@@ -1315,10 +1393,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
       // The created callback will use widget.onThreadTap, passing the result
       // of widget.threadBuilder (if provided) as the second argument.
       (final onThreadTap?, final threadBuilder) => (Message parentMessage, Message? threadMessage) {
-        onThreadTap(
-          parentMessage,
-          threadBuilder?.call(context, parentMessage),
-        );
+        var threadPage = threadBuilder?.call(context, parentMessage);
+        if (threadPage != null && threadMessage != null) {
+          threadPage = _ThreadHighlightScope(messageId: threadMessage.id, child: threadPage);
+        }
+
+        onThreadTap(parentMessage, threadPage);
       },
       // Case 2: widget.onThreadTap is null, but widget.threadBuilder is provided.
       // The created callback will perform the default navigation action,

@@ -15,11 +15,46 @@
 
 - A list controller sorted each loaded page with an unstable sort, so rows it called equal — members sharing a `created_at`, say — were reordered on every page append. They keep the order they arrived in now.
 
+- `StreamThreadListController` no longer reorders a thread when a reply it does not hold is deleted.
+
 ## Upcoming
+
+✅ Added
+
+- Added `StreamChannelListController.includeScheduledMessages`, to load the current user's scheduled messages with the channels.
+
+## 10.7.0
+
+✅ Added
+
+- Added `StreamChannelListController.includeActiveMemberCount`, which fills `Channel.activeMemberCount` on every page the controller loads.
+- Added `StreamMessageComposerController.skipEnrichUrl` and a `dismissed` parameter to `StreamMessageComposerController.clearOGAttachment`, to send a message without a link preview the user removed.
+
+🔄 Changed
+
+- A subclass of `StreamMessageComposerController` that overrides `clearOGAttachment` must add the new `dismissed` parameter.
+
+🐞 Fixed
+
+- Fixed `StreamChannelState.getFirstUnreadMessage` returning no message when the current user's read state has unread messages but no last read message.
+
+## 10.6.0
+
+✅ Added
+
+- Added `StreamMessageComposerController.validator` and `canSend`, which decide whether the message being composed can be sent, and `StreamMessageComposerController.defaultValidator`.
+- Added `StreamPollVoteListController.forOption` and `StreamPollVoteListController.forAnswers`, which list only a poll's votes for one option or only its answers.
+
+🔄 Changed
+
+- A mocked `StreamMessageComposerController` passed to the composer must now stub `canSend`.
 
 🐞 Fixed
 
 - Fixed `StreamDraftListController.deleteDraft` removing the wrong draft.
+- Fixed `StreamPollVoteListController` adding votes and comments from other polls in the same channel.
+- Fixed `StreamThreadListController` reordering a thread when a reply it does not hold is deleted.
+- Fixed `StreamRestorableMessageComposerController` failing to restore a message that mentions users.
 
 ## 10.5.0
 
