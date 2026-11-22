@@ -58,29 +58,29 @@ class _GroupChatDetailsScreenState extends State<GroupChatDetailsScreen> {
             onPressed: _isGroupNameEmpty
                 ? null
                 : () async {
-                    try {
-                      final groupName = _groupNameController.text;
-                      final client = StreamChat.of(context).client;
-                      final router = GoRouter.of(context);
-                      final channel = client.channel(
-                        'messaging',
-                        id: const Uuid().v4(),
-                        custom: {
-                          'members': [
-                            client.state.currentUser!.id,
-                            ...widget.groupChatState.users.map((e) => e.id),
-                          ],
-                          'name': groupName,
-                        },
-                      );
-                      await channel.watch();
-                      router.goNamed(
-                        Routes.CHANNEL_PAGE.name,
-                        pathParameters: Routes.CHANNEL_PAGE.params(channel),
-                      );
-                    } catch (err) {
+                    final groupName = _groupNameController.text;
+                    final client = StreamChat.of(context).client;
+                    final router = GoRouter.of(context);
+                    final channel = client.channel(
+                      'messaging',
+                      id: const Uuid().v4(),
+                      data: CreateChannelData(
+                        members: [
+                          ChannelMemberData(userId: client.state.currentUser!.id),
+                          ...widget.groupChatState.users.map((e) => ChannelMemberData(userId: e.id)),
+                        ],
+                        custom: {'name': groupName},
+                      ),
+                    );
+                    if (await channel.watch() case Failure()) {
                       _showErrorAlert();
+                      return;
                     }
+
+                    router.goNamed(
+                      Routes.CHANNEL_PAGE.name,
+                      pathParameters: Routes.CHANNEL_PAGE.params(channel),
+                    );
                   },
           ),
         ),

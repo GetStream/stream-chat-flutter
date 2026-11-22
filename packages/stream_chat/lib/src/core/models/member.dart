@@ -1,18 +1,16 @@
-import 'package:equatable/equatable.dart';
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stream_core/stream_core.dart'
     show Filter, FilterField, Standard, Sort, SortField, normalizeStringForSort;
 
 import '../util/extension.dart';
-import '../util/serializer.dart';
 import 'user.dart';
 
-part 'member.g.dart';
+part 'member.freezed.dart';
 
 /// The class that contains the information about the user membership
 /// in a channel
-@JsonSerializable()
-class Member extends Equatable {
+@freezed
+class Member with _$Member {
   /// Creates a member.
   Member({
     this.user,
@@ -41,200 +39,99 @@ class Member extends Equatable {
        updatedAt = updatedAt ?? DateTime.now(),
        custom = {...custom};
 
-  /// Create a new instance from a json
-  factory Member.fromJson(Map<String, dynamic> json) => _$MemberFromJson(
-    Serializer.moveToExtraDataFromRoot(json, _topLevelFields),
-  );
-
-  // The JSON keys [Member.fromJson] reads into named fields; every other key is
-  // kept in [custom].
-  static const _topLevelFields = [
-    'user',
-    'invite_accepted_at',
-    'invite_rejected_at',
-    'invited',
-    'channel_role',
-    'user_id',
-    'is_moderator',
-    'banned',
-    'ban_expires',
-    'shadow_banned',
-    'created_at',
-    'updated_at',
-    'pinned_at',
-    'archived_at',
-    'deleted_messages',
-    'notifications_muted',
-    'status',
-    'ban_from_future_channels',
-    'future_channel_ban_expires',
-    'deleted_at',
-  ];
-
   /// The interested user
+  @override
   final User? user;
 
   /// The date in which the user accepted the invite to the channel
+  @override
   final DateTime? inviteAcceptedAt;
 
   /// The date in which the user rejected the invite to the channel
+  @override
   final DateTime? inviteRejectedAt;
 
   /// True if the user has been invited to the channel
+  @override
   final bool invited;
 
   /// The role of this member in the channel
+  @override
   final String? channelRole;
 
   /// The id of the interested user
+  @override
   final String? userId;
 
   /// True if the user is a moderator of the channel
+  @override
   final bool isModerator;
 
   /// True if the member is banned from the channel
+  @override
   final bool banned;
 
   /// The date at which the ban will expire.
+  @override
   final DateTime? banExpires;
 
   /// True if the member is shadow banned from the channel
+  @override
   final bool shadowBanned;
 
   /// The date at which the channel was pinned by the member
+  @override
   final DateTime? pinnedAt;
 
   /// The date at which the channel was archived by the member
+  @override
   final DateTime? archivedAt;
 
   /// The date of creation
+  @override
   final DateTime createdAt;
 
   /// The last date of update
+  @override
   final DateTime updatedAt;
 
   /// List of message ids deleted by this member only for himself.
   ///
   /// These messages are not visible to this member anymore, but are still
   /// visible to other channel members.
+  @override
   final List<String> deletedMessages;
 
   /// This member's custom data.
-  @JsonKey(name: 'extra_data')
+  @override
   final Map<String, Object?> custom;
 
   /// Whether this member muted notifications for the channel.
-  @JsonKey(includeToJson: false)
+  @override
   final bool? notificationsMuted;
 
   /// The status of this membership, such as `member`, or `pending` while an
   /// invite is outstanding.
-  @JsonKey(includeToJson: false)
+  @override
   final String? status;
 
   /// Whether this member is banned from future channels.
   ///
   /// The ban covers the channels the channel's creator creates later.
-  @JsonKey(includeToJson: false)
+  @override
   final bool? banFromFutureChannels;
 
   /// The date at which this member's ban from future channels expires.
   ///
   /// Null when there is no such ban or it has no expiry.
-  @JsonKey(includeToJson: false)
+  @override
   final DateTime? futureChannelBanExpires;
 
   /// The date at which this membership was deleted.
   ///
   /// Null while the member belongs to the channel.
-  @JsonKey(includeToJson: false)
-  final DateTime? deletedAt;
-
-  /// Creates a copy of [Member] with specified attributes overridden.
-  Member copyWith({
-    User? user,
-    DateTime? inviteAcceptedAt,
-    DateTime? inviteRejectedAt,
-    bool? invited,
-    String? role,
-    String? channelRole,
-    String? userId,
-    bool? isModerator,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-    DateTime? pinnedAt,
-    DateTime? archivedAt,
-    bool? banned,
-    DateTime? banExpires,
-    bool? shadowBanned,
-    List<String>? deletedMessages,
-    Map<String, Object?>? custom,
-    bool? notificationsMuted,
-    String? status,
-    bool? banFromFutureChannels,
-    DateTime? futureChannelBanExpires,
-    DateTime? deletedAt,
-  }) => Member(
-    user: user ?? this.user,
-    inviteAcceptedAt: inviteAcceptedAt ?? this.inviteAcceptedAt,
-    inviteRejectedAt: inviteRejectedAt ?? this.inviteRejectedAt,
-    invited: invited ?? this.invited,
-    banned: banned ?? this.banned,
-    banExpires: banExpires ?? this.banExpires,
-    shadowBanned: shadowBanned ?? this.shadowBanned,
-    channelRole: channelRole ?? this.channelRole,
-    userId: userId ?? this.userId,
-    isModerator: isModerator ?? this.isModerator,
-    pinnedAt: pinnedAt ?? this.pinnedAt,
-    archivedAt: archivedAt ?? this.archivedAt,
-    createdAt: createdAt ?? this.createdAt,
-    updatedAt: updatedAt ?? this.updatedAt,
-    deletedMessages: deletedMessages ?? this.deletedMessages,
-    custom: custom ?? this.custom,
-    notificationsMuted: notificationsMuted ?? this.notificationsMuted,
-    status: status ?? this.status,
-    banFromFutureChannels: banFromFutureChannels ?? this.banFromFutureChannels,
-    futureChannelBanExpires: futureChannelBanExpires ?? this.futureChannelBanExpires,
-    deletedAt: deletedAt ?? this.deletedAt,
-  );
-
-  /// Serializes this member to JSON.
-  ///
-  /// Leaves out [notificationsMuted], [status], [banFromFutureChannels],
-  /// [futureChannelBanExpires] and [deletedAt], which only [Member.fromJson]
-  /// reads.
-  ///
-  /// Writes the entries of [custom] at the root, leaving out any named like one
-  /// of the member's own fields.
-  Map<String, dynamic> toJson() => Serializer.moveFromExtraDataToRoot(
-    _$MemberToJson(this),
-    topLevelFields: _topLevelFields,
-  );
-
   @override
-  List<Object?> get props => [
-    user,
-    inviteAcceptedAt,
-    inviteRejectedAt,
-    invited,
-    channelRole,
-    userId,
-    isModerator,
-    banned,
-    banExpires,
-    shadowBanned,
-    pinnedAt,
-    archivedAt,
-    createdAt,
-    updatedAt,
-    deletedMessages,
-    custom,
-    notificationsMuted,
-    status,
-    banFromFutureChannels,
-    futureChannelBanExpires,
-    deletedAt,
-  ];
+  final DateTime? deletedAt;
 }
 
 /// A filter for a member query.

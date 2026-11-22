@@ -72,6 +72,7 @@ final class ScheduledMessage extends Equatable {
   ///
   /// Only set on scheduled messages returned by
   /// [StreamChatClient.queryScheduledMessages].
+  @JsonKey(fromJson: _channelSummaryFromJson)
   final ChannelModel? channel;
 
   /// The user this message is sent as.
@@ -253,4 +254,20 @@ extension type const ScheduledMessageFailureReason(String _) implements String {
 
   /// Whether the message can be scheduled again.
   bool get isRetriable => this == requestFailed;
+}
+
+// Reads the summary of the channel a scheduled message is sent to: its id and
+// type, and the name and image it has.
+ChannelModel? _channelSummaryFromJson(Map<String, dynamic>? json) {
+  if (json == null) return null;
+
+  return ChannelModel(
+    id: json['id'] as String?,
+    type: json['type'] as String?,
+    cid: json['cid'] as String?,
+    custom: {
+      if (json['name'] case final name?) 'name': name,
+      if (json['image'] case final image?) 'image': image,
+    },
+  );
 }

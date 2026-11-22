@@ -9,7 +9,7 @@ part of 'scheduled_message.dart';
 ScheduledMessage _$ScheduledMessageFromJson(Map<String, dynamic> json) => ScheduledMessage(
   id: json['id'] as String?,
   cid: json['cid'] as String,
-  channel: json['channel'] == null ? null : ChannelModel.fromJson(json['channel'] as Map<String, dynamic>),
+  channel: _channelSummaryFromJson(json['channel'] as Map<String, dynamic>?),
   user: User.fromJson(json['user'] as Map<String, dynamic>),
   message: Message.fromJson(json['message'] as Map<String, dynamic>),
   scheduledAt: DateTime.parse(json['scheduled_at'] as String),

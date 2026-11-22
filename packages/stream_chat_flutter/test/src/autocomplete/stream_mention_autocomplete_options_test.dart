@@ -561,7 +561,9 @@ void main() {
             pagination: any(named: 'pagination'),
           ),
         ).thenAnswer(
-          (_) async => QueryMembersResponse()..members = [buildMember('alice-id', 'Alice')],
+          (_) async => Result.success(
+            QueryMembersResponse(duration: '0.01ms', members: [buildMember('alice-id', 'Alice')]),
+          ),
         );
 
         await _pumpMentionOptions(
@@ -596,7 +598,9 @@ void main() {
             pagination: any(named: 'pagination'),
           ),
         ).thenAnswer(
-          (_) async => QueryMembersResponse()..members = [buildMember('alice-id', 'Alice')],
+          (_) async => Result.success(
+            QueryMembersResponse(duration: '0.01ms', members: [buildMember('alice-id', 'Alice')]),
+          ),
         );
 
         await _pumpMentionOptions(
@@ -677,12 +681,16 @@ void main() {
             pagination: any(named: 'pagination'),
           ),
         ).thenAnswer(
-          (_) async => QueryMembersResponse()
-            ..members = [
-              buildMember('c-id', 'Charlie'),
-              buildMember('a-id', 'Alice'),
-              buildMember('b-id', 'Bob'),
-            ],
+          (_) async => Result.success(
+            QueryMembersResponse(
+              duration: '0.01ms',
+              members: [
+                buildMember('c-id', 'Charlie'),
+                buildMember('a-id', 'Alice'),
+                buildMember('b-id', 'Bob'),
+              ],
+            ),
+          ),
         );
 
         await _pumpMentionOptions(
@@ -742,7 +750,7 @@ void main() {
     );
 
     testWidgets(
-      'queryMembers error is swallowed and does not blank the list',
+      'queryMembers failure gives no member suggestions and does not blank the list',
       (tester) async {
         final mocks = _setupMocks(
           ownCapabilities: const [ChannelCapability.notifyHere],
@@ -754,7 +762,7 @@ void main() {
             filter: any(named: 'filter'),
             pagination: any(named: 'pagination'),
           ),
-        ).thenThrow(StateError('test error'));
+        ).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'test error')));
 
         await _pumpMentionOptions(
           tester,
@@ -764,7 +772,7 @@ void main() {
         );
 
         expect(find.text('@here'), findsOneWidget);
-        expect(find.text('Alice'), findsNothing);
+        expect(find.text('Cached'), findsNothing);
       },
     );
   });

@@ -1,10 +1,13 @@
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat/open_api/api.dart' as api;
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../fakes.dart';
+import '../mocks.dart';
 import '../utils.dart';
 import '../ws/fake_chat_server.dart';
+import 'query_channels_fixtures.dart';
 
 // Fixtures and a connected client shared by the scheduled message tests.
 
@@ -83,13 +86,17 @@ ScheduledMessageHarness useScheduledMessageClient({bool loaded = true}) {
     registerFallbackValue(<ScheduledMessageStatus>[]);
     registerFallbackValue(DateTime.utc(2026));
     registerFallbackValue(<String, Object?>{});
+    registerFallbackValue(const api.ChannelGetOrCreateRequest());
+    registerFallbackValue(const api.QueryChannelsRequest());
   });
 
   setUp(() async {
     final api = harness.api = FakeChatApi();
+    final defaultApi = harness.defaultApi = MockDefaultApi();
+    when(defaultApi.getApp).thenAnswer((_) async => Result.success(fakeGetApplicationResponse()));
     final client = harness.client = StreamChatClient(
       'test-api-key',
-      defaultApi: FakeDefaultApi(),
+      defaultApi: defaultApi,
       chatApi: api,
       wsProvider: FakeChatServer().connect,
     );
@@ -107,6 +114,7 @@ ScheduledMessageHarness useScheduledMessageClient({bool loaded = true}) {
 // it. Each test gets a new client.
 class ScheduledMessageHarness {
   late FakeChatApi api;
+  late MockDefaultApi defaultApi;
   late StreamChatClient client;
 
   // Loads an empty list, so the scheduled messages count as all loaded.
@@ -146,32 +154,18 @@ class ScheduledMessageHarness {
   // Answers every query of the channel [testCid] with [channelState].
   void stubQueryChannel(ChannelState channelState) {
     when(
-      () => api.channel.queryChannel(
-        'messaging',
-        channelId: 'general',
-        channelData: any(named: 'channelData'),
-        state: any(named: 'state'),
-        watch: any(named: 'watch'),
-        presence: any(named: 'presence'),
-        messagesPagination: any(named: 'messagesPagination'),
-        membersPagination: any(named: 'membersPagination'),
-        watchersPagination: any(named: 'watchersPagination'),
-        includeScheduledMessages: any(named: 'includeScheduledMessages'),
+      () => defaultApi.getOrCreateChannel(
+        type: 'messaging',
+        id: 'general',
+        channelGetOrCreateRequest: any(named: 'channelGetOrCreateRequest'),
       ),
-    ).thenAnswer((_) async => channelState);
+    ).thenAnswer((_) async => Result.success(generatedChannelStateResponse(channelState)));
   }
 
   // Answers every channel list query with [channelStates].
   void stubQueryChannels(List<ChannelState> channelStates) {
     when(
-      () => api.channel.queryChannels(
-        filter: any(named: 'filter'),
-        state: any(named: 'state'),
-        watch: any(named: 'watch'),
-        presence: any(named: 'presence'),
-        includeScheduledMessages: any(named: 'includeScheduledMessages'),
-        paginationParams: any(named: 'paginationParams'),
-      ),
-    ).thenAnswer((_) async => QueryChannelsResponse()..channels = channelStates);
+      () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
+    ).thenAnswer((_) async => Result.success(generatedQueryChannelsResponse(channelStates)));
   }
 }

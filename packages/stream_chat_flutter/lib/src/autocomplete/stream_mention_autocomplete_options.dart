@@ -256,11 +256,11 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
   }
 
   Future<List<Member>> _queryMembers(String query) async {
-    final response = await widget.channel.queryMembers(
+    final result = await widget.channel.queryMembers(
       pagination: PaginationParams(limit: widget.limit),
       filter: query.isEmpty ? null : MemberFilter.autoComplete(MemberFilterField.name, query),
     );
-    return response.members;
+    return result.map((it) => it.members).getOrDefault(const []);
   }
 
   Future<List<User>> _queryUsers(String query) async {

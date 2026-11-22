@@ -408,7 +408,7 @@ Future<void> _openDirectChannel(BuildContext context, User user) async {
   final currentUser = chat.currentUser;
   if (currentUser == null) return;
 
-  final existing = await chat.client.queryChannelsOnline(
+  final result = await chat.client.queryChannelsOnline(
     state: false,
     watch: false,
     filter: .raw({
@@ -419,6 +419,10 @@ Future<void> _openDirectChannel(BuildContext context, User user) async {
     paginationParams: const PaginationParams(limit: 1),
   );
 
+  // A failed lookup falls back to the channel its members identify, which is
+  // the same distinct channel.
+  final existing = result.getOrDefault(const []);
+
   Channel channel;
   if (existing.isNotEmpty) {
     channel = existing.first;
@@ -426,9 +430,12 @@ Future<void> _openDirectChannel(BuildContext context, User user) async {
   } else {
     channel = chat.client.channel(
       'messaging',
-      custom: {
-        'members': [currentUser.id, user.id],
-      },
+      data: CreateChannelData(
+        members: [
+          ChannelMemberData(userId: currentUser.id),
+          ChannelMemberData(userId: user.id),
+        ],
+      ),
     );
     await channel.watch();
   }

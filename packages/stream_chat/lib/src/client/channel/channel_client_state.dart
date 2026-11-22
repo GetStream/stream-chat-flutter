@@ -95,7 +95,7 @@ class ChannelClientState {
     final existingWatchers = channelState.watchers ?? const <User>[];
     _channelState = channelState.copyWith(
       watchers: existingWatchers.where((user) => user.id != watcher.id).toList(),
-      watcherCount: watcherCount,
+      watcherCount: watcherCount ?? channelState.watcherCount,
     );
   }
 
@@ -325,15 +325,16 @@ class ChannelClientState {
   }
 
   /// Channel members list.
-  List<Member> get members =>
-      (_channelState.members ?? <Member>[]).map((e) => e.copyWith(user: _client.state.users[e.user!.id])).toList();
+  List<Member> get members => (_channelState.members ?? <Member>[])
+      .map((e) => e.copyWith(user: _client.state.users[e.user!.id] ?? e.user))
+      .toList();
 
   /// Channel members list as a stream.
   Stream<List<Member>> get membersStream =>
       CombineLatestStream.combine2<List<Member?>?, Map<String?, User?>, List<Member>>(
         channelStateStream.map((cs) => cs.members),
         _client.state.usersStream,
-        (members, users) => [...?members?.map((e) => e!.copyWith(user: users[e.user!.id]))],
+        (members, users) => [...?members?.map((e) => e!.copyWith(user: users[e.user!.id] ?? e.user))],
       ).distinct(const ListEquality().equals);
 
   /// Channel watcher count.
@@ -680,6 +681,7 @@ class ChannelClientState {
     );
 
     final newPinnedMessages = switch (updatedState.pinnedMessages) {
+      null => _channelState.pinnedMessages,
       // The stored list is already in pin order.
       final pinned when identical(pinned, _channelState.pinnedMessages) => pinned,
       final pinned => MessageMerging.sortPinnedMessages(pinned),
@@ -690,21 +692,15 @@ class ChannelClientState {
     // An older truncation time can't bring back messages a later one removed.
     final truncatedAt = [channel?.truncatedAt, newChannel?.truncatedAt].nonNulls.maxOrNull;
 
-    _channelState = _channelState.copyWith(
-      messages: newMessages,
-      channel: newChannel?.copyWith(truncatedAt: truncatedAt),
-      watchers: newWatchers,
-      watcherCount: updatedState.watcherCount,
-      members: updatedState.members,
-      membership: updatedState.membership,
-      read: newReads,
-      draft: updatedState.draft,
-      pinnedMessages: newPinnedMessages,
-      pendingMessages: updatedState.pendingMessages,
-      pushPreferences: updatedState.pushPreferences,
-      activeLiveLocations: updatedState.activeLiveLocations,
-      scheduledMessages: updatedState.scheduledMessages,
-    );
+    _channelState = _channelState
+        .merge(updatedState)
+        .copyWith(
+          messages: newMessages,
+          channel: newChannel?.copyWith(truncatedAt: truncatedAt),
+          watchers: newWatchers,
+          read: newReads,
+          pinnedMessages: newPinnedMessages,
+        );
   }
 
   /// Applies a [remoteState] from a `query`/`watch` response or offline

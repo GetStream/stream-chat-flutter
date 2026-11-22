@@ -85,10 +85,10 @@ void main() {
       carrying([fakeScheduledMessage('fresh')]),
     ]);
 
-    final [channel] = await harness.client.queryChannelsOnline(
+    final [channel] = (await harness.client.queryChannelsOnline(
       filter: ChannelFilter.equal(ChannelFilterField.cid, testCid),
       includeScheduledMessages: true,
-    );
+    )).getOrThrow();
 
     expect(idsOf(channel.state!.scheduledMessages), ['fresh', 'local']);
   });

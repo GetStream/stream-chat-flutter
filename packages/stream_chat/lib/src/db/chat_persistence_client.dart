@@ -1,7 +1,6 @@
 import 'package:collection/collection.dart';
 import 'package:stream_core/stream_core.dart' show CurrentPlatform;
 import '../core/api/requests.dart';
-import '../core/api/responses.dart';
 import '../core/models/attachment_file.dart';
 import '../core/models/channel_model.dart';
 import '../core/models/channel_state.dart';
@@ -13,6 +12,7 @@ import '../core/models/poll.dart';
 import '../core/models/poll_vote.dart';
 import '../core/models/reaction.dart';
 import '../core/models/read.dart';
+import '../core/models/response/query_channels_response.dart';
 import '../core/models/user.dart';
 import '../core/util/extension.dart';
 import '../ws/events/event.dart';
@@ -173,6 +173,8 @@ abstract class ChatPersistenceClient {
   /// - [paginationParams] paginates results.
   ///
   /// For standard mode, [QueryChannelsResponse.predefinedFilter] is null.
+  ///
+  /// The response reports a `0ms` duration.
   Future<QueryChannelsResponse> queryChannelStates({
     ChannelFilter? filter,
     List<ChannelSort>? sort,
@@ -183,7 +185,7 @@ abstract class ChatPersistenceClient {
     PaginationParams? paginationParams,
   }) async {
     if (predefinedFilter != null) {
-      return QueryChannelsResponse()..channels = const [];
+      return const QueryChannelsResponse(duration: '0ms', channels: []);
     }
     // ignore: deprecated_member_use_from_same_package
     final channels = await getChannelStates(
@@ -192,7 +194,7 @@ abstract class ChatPersistenceClient {
       messageLimit: messageLimit,
       paginationParams: paginationParams,
     );
-    return QueryChannelsResponse()..channels = channels;
+    return QueryChannelsResponse(duration: '0ms', channels: channels);
   }
 
   /// Persists the result of a channel query.

@@ -1,5 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
+
 import 'channel_model.dart';
+import 'converters/v1_json_converters.dart';
 import 'user.dart';
 
 part 'channel_mute.g.dart';
@@ -23,6 +25,7 @@ class ChannelMute {
   final User user;
 
   /// The target channel
+  @ChannelModelV1JsonConverter()
   final ChannelModel channel;
 
   /// The date in which the channel was muted

@@ -144,7 +144,7 @@ void main() {
       id: 'testId',
       type: 'testType',
       cid: 'testCid',
-      ownCapabilities: ['testCapability'],
+      ownCapabilities: const [ChannelCapability('testCapability')],
       config: ChannelConfig(
         maxMessageLength: 33,
         pushLevel: .allMentions,

@@ -1,7 +1,7 @@
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_core/stream_core.dart' show StreamApiException, StreamLogger;
+import 'package:stream_core/stream_core.dart' show Failure, StreamApiException, StreamLogger, Success;
 import 'package:synchronized/synchronized.dart';
 
 import '../core/api/requests.dart';
@@ -193,20 +193,25 @@ class SyncManager {
     final refreshed = <String>{};
     (Object, StackTrace)? failure;
 
-    for (final page in cids.slices(_channelPageSize)) {
-      try {
-        final channels = await client.queryChannelsOnline(
-          filter: ChannelFilter.in_(ChannelFilterField.cid, page),
-          paginationParams: PaginationParams(limit: page.length),
-          // Fail fast if the connection dropped again: the reconnect handler is
-          // waiting to announce recovery, and a sync would hold its lock.
-          waitForConnect: false,
-        );
+    void onPageFailed(int pageSize, Object error, StackTrace stk) {
+      _logger.w(() => 'Failed to refresh $pageSize channels', error: error, stackTrace: stk);
+      failure ??= (error, stk);
+    }
 
-        refreshed.addAll(channels.map((it) => it.cid).nonNulls);
-      } catch (error, stk) {
-        _logger.w(() => 'Failed to refresh ${page.length} channels', error: error, stackTrace: stk);
-        failure ??= (error, stk);
+    for (final page in cids.slices(_channelPageSize)) {
+      final result = await client.queryChannelsOnline(
+        filter: ChannelFilter.in_(ChannelFilterField.cid, page),
+        paginationParams: PaginationParams(limit: page.length),
+        // Fail fast if the connection dropped again: the reconnect handler is
+        // waiting to announce recovery, and a sync would hold its lock.
+        waitForConnect: false,
+      );
+
+      switch (result) {
+        case Success(:final data):
+          refreshed.addAll(data.map((it) => it.cid).nonNulls);
+        case Failure(:final error, :final stackTrace):
+          onPageFailed(page.length, error, stackTrace ?? StackTrace.current);
       }
     }
 

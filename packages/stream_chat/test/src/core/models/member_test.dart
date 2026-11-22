@@ -5,56 +5,6 @@ import '../../utils.dart';
 
 void main() {
   group('src/models/member', () {
-    test('should parse json correctly', () {
-      final member = Member.fromJson(jsonFixture('member.json'));
-      expect(member.user, isA<User>());
-      expect(member.channelRole, 'channel_member');
-      expect(member.createdAt, DateTime.parse('2020-01-28T22:17:30.95443Z'));
-      expect(member.updatedAt, DateTime.parse('2020-01-28T22:17:30.95443Z'));
-      expect(member.deletedMessages, ['msg-1', 'msg-2', 'msg-3']);
-      expect(member.custom['some_custom_field'], 'with_custom_data');
-      expect(member.notificationsMuted, isTrue);
-      expect(member.status, 'member');
-      expect(member.banFromFutureChannels, isTrue);
-      expect(member.futureChannelBanExpires, DateTime.parse('2020-02-28T22:17:30.95443Z'));
-      expect(member.deletedAt, DateTime.parse('2020-01-29T22:17:30.95443Z'));
-    });
-
-    test('Member.toJson leaves out custom data named like a field', () {
-      final member = Member(
-        userId: 'user',
-        channelRole: 'channel_member',
-        custom: const {'channel_role': 'custom', 'color': 'red'},
-      );
-
-      expect(member.toJson()['channel_role'], 'channel_member');
-      expect(member.toJson()['color'], 'red');
-    });
-
-    test('Member.toJson leaves out the fields only fromJson reads', () {
-      final member = Member(
-        userId: 'user',
-        notificationsMuted: true,
-        status: 'member',
-        banFromFutureChannels: true,
-        futureChannelBanExpires: DateTime.utc(2021),
-        deletedAt: DateTime.utc(2020),
-      );
-
-      expect(
-        member.toJson().keys,
-        isNot(
-          anyOf(
-            contains('notifications_muted'),
-            contains('status'),
-            contains('ban_from_future_channels'),
-            contains('future_channel_ban_expires'),
-            contains('deleted_at'),
-          ),
-        ),
-      );
-    });
-
     test('Member.copyWith replaces the fields it is given', () {
       final member = Member(
         userId: 'user',

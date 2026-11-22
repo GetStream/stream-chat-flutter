@@ -1,15 +1,17 @@
-import 'package:json_annotation/json_annotation.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:stream_core/stream_core.dart' show Filter;
+
 import 'channel_state.dart';
 
-part 'predefined_filter.g.dart';
+part 'predefined_filter.freezed.dart';
 
 /// A predefined filter, resolved for one channel query.
 ///
 /// When a channel query names a predefined filter, its template is filled in
 /// with the filter and sort values the query supplies, and the filter and sort
 /// it resolves to come back with the channels.
-@JsonSerializable(createToJson: false)
-class PredefinedFilter {
+@freezed
+class PredefinedFilter with _$PredefinedFilter {
   /// Creates a new instance.
   const PredefinedFilter({
     required this.name,
@@ -17,10 +19,8 @@ class PredefinedFilter {
     this.sort,
   });
 
-  /// Create a new instance from a json.
-  factory PredefinedFilter.fromJson(Map<String, dynamic> json) => _$PredefinedFilterFromJson(json);
-
   /// The name of the predefined filter.
+  @override
   final String name;
 
   /// The filter conditions the predefined filter resolved to.
@@ -28,18 +28,17 @@ class PredefinedFilter {
   /// Wrapped in [ChannelFilter.raw], since it is not authored here and may use an
   /// operator this package does not model. Read it with [ChannelFilter.toJson];
   /// [ChannelFilter.matches] throws for it.
-  @JsonKey(fromJson: _filterFromJson)
+  @override
   final ChannelFilter filter;
 
   /// The sort the predefined filter resolved to, if it names one.
+  @override
   final List<ChannelSort>? sort;
 
   /// The sort that reproduces this predefined filter's ordering locally.
   ///
   /// This is [sort], or a default derived from [filter] when [sort] is null.
   List<ChannelSort> get effectiveSort => sort ?? _defaultSortFor(filter);
-
-  static ChannelFilter _filterFromJson(Map<String, dynamic> json) => ChannelFilter.raw(json);
 }
 
 // Mirrors the ordering a channel query with no sort falls back to, so the field

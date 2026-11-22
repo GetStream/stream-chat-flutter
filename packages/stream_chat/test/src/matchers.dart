@@ -5,7 +5,7 @@ import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_core/stream_core.dart' show Filter;
+import 'package:stream_core/stream_core.dart' show Filter, Sort;
 import 'package:test/test.dart';
 
 /// Matches a filter that serializes the same way as [target].
@@ -16,6 +16,14 @@ Matcher isSameFilterAs(Filter<Object> target) {
   return predicate<Filter<Object>>(
     (it) => const DeepCollectionEquality().equals(it.toJson(), target.toJson()),
     'a filter serializing to ${target.toJson()}',
+  );
+}
+
+Matcher isSameSortAs(List<Sort<Object>> target) {
+  final targetJson = [for (final sort in target) sort.toJson()];
+  return predicate<List<Sort<Object>>>(
+    (it) => const DeepCollectionEquality().equals([for (final sort in it) sort.toJson()], targetJson),
+    'a sort serializing to $targetJson',
   );
 }
 
