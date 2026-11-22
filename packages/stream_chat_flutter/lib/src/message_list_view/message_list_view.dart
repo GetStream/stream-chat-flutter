@@ -1342,9 +1342,12 @@ class _StreamMessageListViewState extends State<StreamMessageListView> {
     final parentId = quoted.parentId;
     final isThreadOnlyReply = parentId != null && quoted.showInChannel != true;
     if (onThreadTap != null && isThreadOnlyReply && !_isThreadConversation) {
-      final parent = await streamChannel!.getMessage(parentId);
+      final result = await streamChannel!.getMessage(parentId);
       if (!mounted) return;
-      onThreadTap(parent, quoted);
+      result.fold(
+        onSuccess: (parent) => onThreadTap(parent, quoted),
+        onFailure: (error, stackTrace) => debugPrint('Error while fetching message: $error, $stackTrace'),
+      );
       return;
     }
 

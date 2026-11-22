@@ -227,10 +227,10 @@ Future<void> _pumpMessageList(
   when(
     () => channel.getReplies(
       any(),
-      options: any(named: 'options'),
+      limit: any(named: 'limit'),
       preferOffline: any(named: 'preferOffline'),
     ),
-  ).thenAnswer((_) async => QueryRepliesResponse()..messages = replies ?? messages);
+  ).thenAnswer((_) async => Result.success(GetRepliesResponse(duration: '0ms', messages: replies ?? messages)));
   when(() => channelState.messagesStream).thenAnswer((_) => Stream.value(messages));
   when(() => channelState.messages).thenReturn([?parentMessage, ...messages]);
   when(() => channelState.isUpToDate).thenReturn(true);

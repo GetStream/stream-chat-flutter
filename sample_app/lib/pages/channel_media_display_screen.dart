@@ -41,7 +41,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
     return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamAppBar(title: Text(context.translations.photosAndVideosLabel)),
-      body: ValueListenableBuilder<PagedValue<String, GetMessageResponse>>(
+      body: ValueListenableBuilder<PagedValue<String, SearchMessageResult>>(
         valueListenable: _controller,
         builder: (context, value, _) {
           return value.when(

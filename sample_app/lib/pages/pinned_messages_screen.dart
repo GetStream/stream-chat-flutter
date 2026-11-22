@@ -49,13 +49,13 @@ class _PinnedMessagesScreenState extends State<PinnedMessagesScreen> {
     );
   }
 
-  Future<void> _openMessage(GetMessageResponse response) async {
+  Future<void> _openMessage(SearchMessageResult result) async {
     final client = StreamChat.of(context).client;
     final router = GoRouter.of(context);
-    final message = response.message;
+    final message = result.message;
     final channel = client.channel(
-      response.channel!.type,
-      id: response.channel!.id,
+      result.channel!.type,
+      id: result.channel!.id,
     );
     if (channel.state == null) await channel.watch();
     router.goNamed(

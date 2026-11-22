@@ -325,7 +325,7 @@ Future<Message?> _resolveQuotedMessage(StreamChatClient client, ScheduledMessage
   if (loaded.firstWhereOrNull((it) => it.id == quotedMessageId) case final quoted?) return quoted;
 
   try {
-    final response = await client.getMessage(quotedMessageId);
+    final response = (await client.getMessage(quotedMessageId)).getOrThrow();
     return response.message;
   } on StreamApiException catch (error) {
     // Only a quoted message that is gone is dropped; any other failure stops

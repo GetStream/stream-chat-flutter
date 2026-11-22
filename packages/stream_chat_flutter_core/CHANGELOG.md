@@ -10,6 +10,8 @@
 - `StreamChannelListController.muteChannel` and `unmuteChannel` return a `Result` instead of throwing.
 - `StreamChannelListController.deleteChannel` returns a `Result<DeleteChannelResponse>` instead of throwing.
 - `StreamPollController.addOption` and `updateOption` take the option's custom data as `custom` instead of `extraData`.
+- `StreamChannel.getMessage` returns a `Result<Message>` and `StreamChannel.getReplies` a `Result<void>` instead of throwing.
+- `StreamMessageSearchListController` holds `SearchMessageResult`s instead of `GetMessageResponse`s.
 
 🐞 Fixed
 

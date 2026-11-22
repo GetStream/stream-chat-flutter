@@ -39,9 +39,9 @@ Future<void> openMessage(BuildContext context, Channel channel, String messageId
   final client = StreamChat.of(context).client;
   if (channel.state == null) await channel.watch();
 
-  final message = (await client.getMessage(messageId)).message;
+  final message = (await client.getMessage(messageId)).getOrThrow().message;
   final parentId = message.parentId;
-  final parent = parentId == null ? null : (await client.getMessage(parentId)).message;
+  final parent = parentId == null ? null : (await client.getMessage(parentId)).getOrThrow().message;
   if (!context.mounted) return;
   return openChannel(context, channel, messageId: messageId, parent: parent);
 }

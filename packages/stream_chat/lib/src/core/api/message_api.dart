@@ -1,6 +1,5 @@
 import '../http/stream_http_client.dart';
 import '../models/message.dart';
-import 'requests.dart';
 import 'responses.dart';
 
 /// Defines the api dedicated to messages operations
@@ -27,28 +26,6 @@ class MessageApi {
       },
     );
     return SendMessageResponse.fromJson(response.data);
-  }
-
-  /// Retrieves a list of messages by [messageIDs]
-  /// from the given [channelId] of type [channelType]
-  Future<GetMessagesByIdResponse> getMessagesById(
-    String channelId,
-    String channelType,
-    List<String> messageIDs,
-  ) async {
-    final response = await _client.get(
-      '/channels/$channelType/$channelId/messages',
-      queryParameters: {'ids': messageIDs.join(',')},
-    );
-    return GetMessagesByIdResponse.fromJson(response.data);
-  }
-
-  /// Get a message by [messageId]
-  Future<GetMessageResponse> getMessage(String messageId) async {
-    final response = await _client.get(
-      '/messages/$messageId',
-    );
-    return GetMessageResponse.fromJson(response.data);
   }
 
   /// Updates the given [message]
@@ -128,31 +105,5 @@ class MessageApi {
       },
     );
     return SendActionResponse.fromJson(response.data);
-  }
-
-  /// Translates the [messageId] in provided [language]
-  Future<TranslateMessageResponse> translateMessage(
-    String messageId,
-    String language,
-  ) async {
-    final response = await _client.post(
-      '/messages/$messageId/translate',
-      data: {'language': language},
-    );
-    return TranslateMessageResponse.fromJson(response.data);
-  }
-
-  /// Lists all the message replies for the [parentId]
-  Future<QueryRepliesResponse> getReplies(
-    String parentId, {
-    PaginationParams? options,
-  }) async {
-    final response = await _client.get(
-      '/messages/$parentId/replies',
-      queryParameters: {
-        if (options != null) ...options.toJson(),
-      },
-    );
-    return QueryRepliesResponse.fromJson(response.data);
   }
 }

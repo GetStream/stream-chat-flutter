@@ -56,10 +56,10 @@ void main() {
         when(
           () => channel.getReplies(
             any(),
-            options: any(named: 'options'),
+            limit: any(named: 'limit'),
             preferOffline: any(named: 'preferOffline'),
           ),
-        ).thenAnswer((_) => Completer<QueryRepliesResponse>().future);
+        ).thenAnswer((_) => Completer<Result<GetRepliesResponse>>().future);
       },
     );
 

@@ -25,7 +25,7 @@ class _ThreadListTabState extends State<ThreadListTab> {
     final [type, id] = thread.channelCid.split(':');
     final channel = client.channel(type, id: id);
     if (channel.state == null) await channel.watch();
-    final parent = thread.parentMessage ?? (await client.getMessage(thread.parentMessageId)).message;
+    final parent = thread.parentMessage ?? (await client.getMessage(thread.parentMessageId)).getOrThrow().message;
     if (!mounted) return;
     return openChannel(context, channel, parent: parent);
   }

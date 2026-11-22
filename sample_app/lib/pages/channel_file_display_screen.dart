@@ -42,7 +42,7 @@ class _ChannelFileDisplayScreenState extends State<ChannelFileDisplayScreen> {
     return StreamScaffold(
       backgroundColor: colorScheme.backgroundApp,
       appBar: StreamAppBar(title: const Text('Files')),
-      body: ValueListenableBuilder<PagedValue<String, GetMessageResponse>>(
+      body: ValueListenableBuilder<PagedValue<String, SearchMessageResult>>(
         valueListenable: _controller,
         builder: (context, value, _) => value.when(
           (items, nextPageKey, _) {

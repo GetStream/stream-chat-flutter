@@ -36,16 +36,17 @@ Future<void> _pumpTile(WidgetTester tester, {StreamChatThemeData? chatTheme}) as
   when(() => clientState.currentUser).thenReturn(currentUser);
   when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
 
-  final messageResponse = GetMessageResponse()
-    ..message = Message(
+  final searchResult = SearchMessageResult(
+    message: Message(
       id: 'deleted',
       text: 'Can you send me a voice note?',
       type: MessageType.deleted,
       user: User(id: 'jason', name: 'Jason Thompson'),
       createdAt: DateTime(2026, 8, 26, 14),
       deletedAt: DateTime(2026, 8, 26, 15),
-    )
-    ..channel = ChannelModel(cid: 'messaging:general', custom: const {'name': 'General'});
+    ),
+    channel: ChannelModel(cid: 'messaging:general', custom: const {'name': 'General'}),
+  );
 
   await tester.pumpWidget(
     MaterialApp(
@@ -54,7 +55,7 @@ Future<void> _pumpTile(WidgetTester tester, {StreamChatThemeData? chatTheme}) as
         connectivityStream: Stream.value(const [ConnectivityResult.wifi]),
         themeData: chatTheme,
         child: Scaffold(
-          body: StreamMessageSearchListTile(messageResponse: messageResponse),
+          body: StreamMessageSearchListTile(searchResult: searchResult),
         ),
       ),
     ),
