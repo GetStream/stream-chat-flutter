@@ -115,102 +115,6 @@ void main() {
       expect(messageWithPollId.pollId, equals(pollId));
     });
 
-    test('should correctly serialize to JSON', () {
-      final json = draftMessage.toJson();
-
-      expect(json['id'], equals(id));
-      expect(json['text'], equals(text));
-      expect(json['type'], equals('regular'));
-      expect(json['attachments'], isEmpty);
-      expect(json['silent'], equals(false));
-    });
-
-    test('should serialize custom data correctly', () {
-      const custom = {'custom_field': 'custom_value', 'priority': 5};
-      final messageWithCustom = DraftMessage(
-        id: id,
-        text: text,
-        custom: custom,
-      );
-
-      final json = messageWithCustom.toJson();
-
-      expect(json['id'], equals(id));
-      expect(json['text'], equals(text));
-      expect(json['custom_field'], equals('custom_value'));
-      expect(json['priority'], equals(5));
-    });
-
-    test('should serialize poll ID correctly', () {
-      const pollId = 'poll-123';
-      final messageWithPollId = DraftMessage(
-        id: id,
-        text: text,
-        pollId: pollId,
-      );
-
-      final json = messageWithPollId.toJson();
-
-      expect(json['id'], equals(id));
-      expect(json['poll_id'], equals(pollId));
-    });
-
-    test('should append command to text field in toJson when command exists', () {
-      final draftWithCommand = DraftMessage(
-        id: id,
-        text: 'Hello world',
-        command: 'giphy',
-      );
-
-      final json = draftWithCommand.toJson();
-      expect(json['text'], equals('/giphy Hello world'));
-    });
-
-    test('should not modify text field when command is empty', () {
-      final draftWithEmptyCommand = DraftMessage(
-        id: id,
-        text: 'Hello world',
-        command: '',
-      );
-
-      final json = draftWithEmptyCommand.toJson();
-      expect(json['text'], equals('Hello world'));
-    });
-
-    test('should not modify text field when command is null', () {
-      final draftWithNullCommand = DraftMessage(
-        id: id,
-        text: 'Hello world',
-        command: null,
-      );
-
-      final json = draftWithNullCommand.toJson();
-      expect(json['text'], equals('Hello world'));
-    });
-
-    test('should remove mentioned users not found in text', () {
-      final user1 = User(id: 'user1', name: 'User One');
-      final user2 = User(id: 'user2', name: 'User Two');
-      final user3 = User(id: 'user3', name: 'User Three');
-
-      final draftWithMentions = DraftMessage(
-        id: id,
-        text: 'Hello @user1 and @User Two',
-        mentionedUsers: [user1, user2, user3],
-      );
-
-      final json = draftWithMentions.toJson();
-
-      // Decode the json to verify the mentions
-      //
-      // We should have only user1 and user2 in mentioned_users since user3 is
-      // not in the text
-      final mentionedUserIds = (json['mentioned_users'] as List).cast<String>();
-      expect(mentionedUserIds, containsAll(['user1', 'user2']));
-      expect(mentionedUserIds, isNot(contains('user3')));
-      expect(mentionedUserIds.length, equals(2));
-    });
-
     test('should correctly deserialize from JSON', () {
       final json = {
         'id': id,
@@ -446,15 +350,6 @@ void main() {
         expect(message.pollId, equals(draftMessage.pollId));
         expect(message.custom, equals(draftMessage.custom));
       });
-    });
-
-    test('DraftMessage.toJson leaves out custom data named like a field', () {
-      final draft = DraftMessage(text: 'Hi', custom: const {'text': 'custom', 'mood': 'busy'});
-
-      final json = draft.toJson();
-
-      expect(json['text'], 'Hi');
-      expect(json['mood'], 'busy');
     });
   });
 }

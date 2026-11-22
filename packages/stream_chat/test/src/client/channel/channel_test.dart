@@ -3402,40 +3402,40 @@ void main() {
       ).called(1);
     });
 
-    test('`.stopAIResponse`', () async {
-      final stopAIEvent = Event(type: EventType.aiIndicatorStop);
-
+    test('Channel.stopAIResponse sends the AI indicator stop event and returns a success', () async {
       when(
-        () => client.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(stopAIEvent)),
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => client.sendEvent(channelId, channelType, type: EventType.aiIndicatorStop),
+      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0.01ms')));
 
       final res = await channel.stopAIResponse();
 
-      expect(res, isNotNull);
-
-      verify(
-        () => client.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(stopAIEvent)),
-        ),
-      ).called(1);
+      expect(res, isA<Success<void>>());
+      verify(() => client.sendEvent(channelId, channelType, type: EventType.aiIndicatorStop)).called(1);
     });
 
-    test('`.sendEvent`', () async {
-      final event = Event(type: 'event.local');
+    test('Channel.stopAIResponse returns the failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
+      when(
+        () => client.sendEvent(channelId, channelType, type: EventType.aiIndicatorStop),
+      ).thenAnswer((_) async => const Result.failure(error));
 
-      when(() => client.sendEvent(channelId, channelType, event)).thenAnswer((_) async => EmptyResponse());
+      final res = await channel.stopAIResponse();
 
-      final res = await channel.sendEvent(event);
+      expect(res.exceptionOrNull(), error);
+    });
 
-      expect(res, isNotNull);
+    test('Channel.sendEvent sends the event to this channel and returns the response', () async {
+      const custom = {'theme': 'disco'};
+      when(
+        () => client.sendEvent(channelId, channelType, type: 'party_started', parentId: 'parent-id', custom: custom),
+      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0.01ms')));
 
-      verify(() => client.sendEvent(channelId, channelType, event)).called(1);
+      final res = await channel.sendEvent(type: 'party_started', parentId: 'parent-id', custom: custom);
+
+      expect(res.getOrNull(), const EventResponse(duration: '0.01ms'));
+      verify(
+        () => client.sendEvent(channelId, channelType, type: 'party_started', parentId: 'parent-id', custom: custom),
+      ).called(1);
     });
 
     group('`.sendReaction`', () {
@@ -6406,16 +6406,10 @@ void main() {
         final channel = Channel.fromState(client, channelState);
         addTearDown(channel.dispose);
 
-        final typingEvent = Event(type: EventType.typingStart);
-
-        await expectLater(channel.keyStroke(), completes);
+        await expectLater(channel.keyStroke(), completion(isA<Success<void>>()));
 
         verifyNever(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(typingEvent)),
-          ),
+          () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
         );
       },
     );
@@ -6442,16 +6436,10 @@ void main() {
         final channel = Channel.fromState(client, channelState);
         addTearDown(channel.dispose);
 
-        final typingEvent = Event(type: EventType.typingStart);
-
-        await expectLater(channel.keyStroke(), completes);
+        await expectLater(channel.keyStroke(), completion(isA<Success<void>>()));
 
         verifyNever(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(typingEvent)),
-          ),
+          () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
         );
       },
     );
@@ -6468,41 +6456,22 @@ void main() {
         final channel = Channel.fromState(client, channelState);
         addTearDown(channel.dispose);
 
-        final startTypingEvent = Event(type: EventType.typingStart);
-        final stopTypingEvent = Event(type: EventType.typingStop);
+        when(
+          () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
+        ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0.01ms')));
 
         when(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(startTypingEvent)),
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
+          () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
+        ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0.01ms')));
 
-        when(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(stopTypingEvent)),
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
-
-        await expectLater(channel.keyStroke(), completes);
+        await expectLater(channel.keyStroke(), completion(isA<Success<void>>()));
 
         verify(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(startTypingEvent)),
-          ),
+          () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
         ).called(1);
 
         verify(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(stopTypingEvent)),
-          ),
+          () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
         ).called(1);
       },
     );
@@ -6520,16 +6489,14 @@ void main() {
       final channel = Channel.fromState(client, channelState);
       addTearDown(channel.dispose);
 
-      final startTypingEvent = Event(type: EventType.typingStart);
-      final stopTypingEvent = Event(type: EventType.typingStop);
       final message = Message(id: 'test-message-id', text: 'Hello world!');
 
       when(
-        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(startTypingEvent))),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
+      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0ms')));
       when(
-        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
+      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0ms')));
       when(
         () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
       ).thenAnswer((_) async => Result.success(SendMessageResponse(duration: '0ms', message: message)));
@@ -6538,7 +6505,7 @@ void main() {
       await channel.sendMessage(message);
 
       verify(
-        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
       ).called(1);
     });
 
@@ -6555,16 +6522,14 @@ void main() {
       final channel = Channel.fromState(client, channelState);
       addTearDown(channel.dispose);
 
-      final startTypingEvent = Event(type: EventType.typingStart);
-      final stopTypingEvent = Event(type: EventType.typingStop);
       final message = Message(id: 'test-message-id', text: 'Edited');
 
       when(
-        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(startTypingEvent))),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
+      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0ms')));
       when(
-        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
+      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0ms')));
       when(
         () => client.updateMessage(any(that: isSameMessageAs(message))),
       ).thenAnswer((_) async => Result.success(UpdateMessageResponse(duration: '0ms', message: message)));
@@ -6573,7 +6538,7 @@ void main() {
       await channel.updateMessage(message);
 
       verify(
-        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
       ).called(1);
     });
 
@@ -6590,17 +6555,15 @@ void main() {
       final channel = Channel.fromState(client, channelState);
       addTearDown(channel.dispose);
 
-      final startTypingEvent = Event(type: EventType.typingStart);
-      final stopTypingEvent = Event(type: EventType.typingStop);
       final message = Message(id: 'test-message-id', text: 'Good morning');
       final scheduledAt = DateTime.utc(2026, 11, 2, 9);
 
       when(
-        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(startTypingEvent))),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
+      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0ms')));
       when(
-        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
+      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0ms')));
       when(
         () => client.scheduleMessage(
           any(that: isSameMessageAs(message)),
@@ -6614,7 +6577,7 @@ void main() {
       await channel.scheduleMessage(message, scheduledAt: scheduledAt);
 
       verify(
-        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
       ).called(1);
     });
 
@@ -6631,7 +6594,6 @@ void main() {
       final channel = Channel.fromState(client, channelState);
       addTearDown(channel.dispose);
 
-      final stopTypingEvent = Event(type: EventType.typingStop);
       final message = Message(id: 'test-message-id', text: 'Hello world!');
 
       when(
@@ -6641,7 +6603,7 @@ void main() {
       await channel.sendMessage(message);
 
       verifyNever(
-        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
       );
     });
 
@@ -6657,16 +6619,10 @@ void main() {
         final channel = Channel.fromState(client, channelState);
         addTearDown(channel.dispose);
 
-        final typingStartEvent = Event(type: EventType.typingStart);
-
-        await expectLater(channel.startTyping(), completes);
+        await expectLater(channel.startTyping(), completion(isA<Success<void>>()));
 
         verifyNever(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(typingStartEvent)),
-          ),
+          () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
         );
       },
     );
@@ -6693,16 +6649,10 @@ void main() {
         final channel = Channel.fromState(client, channelState);
         addTearDown(channel.dispose);
 
-        final typingStartEvent = Event(type: EventType.typingStart);
-
-        await expectLater(channel.startTyping(), completes);
+        await expectLater(channel.startTyping(), completion(isA<Success<void>>()));
 
         verifyNever(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(typingStartEvent)),
-          ),
+          () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
         );
       },
     );
@@ -6717,24 +6667,14 @@ void main() {
       final channel = Channel.fromState(client, channelState);
       addTearDown(channel.dispose);
 
-      final typingStartEvent = Event(type: EventType.typingStart);
-
       when(
-        () => client.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(typingStartEvent)),
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
+      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0.01ms')));
 
-      await expectLater(channel.startTyping(), completes);
+      await expectLater(channel.startTyping(), completion(isA<Success<void>>()));
 
       verify(
-        () => client.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(typingStartEvent)),
-        ),
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
       ).called(1);
     });
 
@@ -6748,16 +6688,10 @@ void main() {
       final channel = Channel.fromState(client, channelState);
       addTearDown(channel.dispose);
 
-      final typingStopEvent = Event(type: EventType.typingStop);
-
-      await expectLater(channel.stopTyping(), completes);
+      await expectLater(channel.stopTyping(), completion(isA<Success<void>>()));
 
       verifyNever(
-        () => client.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(typingStopEvent)),
-        ),
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
       );
     });
 
@@ -6783,16 +6717,10 @@ void main() {
         final channel = Channel.fromState(client, channelState);
         addTearDown(channel.dispose);
 
-        final typingStopEvent = Event(type: EventType.typingStop);
-
-        await expectLater(channel.stopTyping(), completes);
+        await expectLater(channel.stopTyping(), completion(isA<Success<void>>()));
 
         verifyNever(
-          () => client.sendEvent(
-            channelId,
-            channelType,
-            any(that: isSameEventAs(typingStopEvent)),
-          ),
+          () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
         );
       },
     );
@@ -6807,25 +6735,65 @@ void main() {
       final channel = Channel.fromState(client, channelState);
       addTearDown(channel.dispose);
 
-      final typingStopEvent = Event(type: EventType.typingStop);
-
       when(
-        () => client.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(typingStopEvent)),
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
+      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0.01ms')));
 
-      await expectLater(channel.stopTyping(), completes);
+      await expectLater(channel.stopTyping(), completion(isA<Success<void>>()));
 
       verify(
-        () => client.sendEvent(
-          channelId,
-          channelType,
-          any(that: isSameEventAs(typingStopEvent)),
-        ),
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
       ).called(1);
+    });
+
+    test('Channel.startTyping returns the failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
+      final channel = Channel.fromState(
+        client,
+        _generateChannelState(channelId, channelType, ownCapabilities: [ChannelCapability.typingEvents]),
+      );
+      addTearDown(channel.dispose);
+      when(
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
+      ).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await channel.startTyping();
+
+      expect(res.exceptionOrNull(), error);
+    });
+
+    test('Channel.stopTyping returns the failure without throwing', () async {
+      const error = StreamClientException(message: 'boom');
+      final channel = Channel.fromState(
+        client,
+        _generateChannelState(channelId, channelType, ownCapabilities: [ChannelCapability.typingEvents]),
+      );
+      addTearDown(channel.dispose);
+      when(
+        () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
+      ).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await channel.stopTyping();
+
+      expect(res.exceptionOrNull(), error);
+    });
+
+    test('Channel.dispose sends the typing stop event while the user is typing', () async {
+      clearInteractions(client);
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [ChannelCapability.typingEvents],
+      );
+      final channel = Channel.fromState(client, channelState);
+      when(
+        () => client.sendEvent(channelId, channelType, type: any(named: 'type')),
+      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0.01ms')));
+
+      unawaited(channel.keyStroke());
+      channel.dispose();
+
+      verify(() => client.sendEvent(channelId, channelType, type: EventType.typingStop)).called(1);
     });
   });
 

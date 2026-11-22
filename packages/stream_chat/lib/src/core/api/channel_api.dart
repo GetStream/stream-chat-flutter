@@ -3,7 +3,6 @@ library;
 
 import 'dart:convert';
 
-import '../../ws/events/event.dart';
 import '../http/stream_http_client.dart';
 import '../models/channel_state.dart';
 import '../models/message.dart';
@@ -216,19 +215,6 @@ class ChannelApi {
       },
     );
     return RemoveMembersResponse.fromJson(response.data);
-  }
-
-  /// Send an event on this channel
-  Future<EmptyResponse> sendEvent(
-    String channelId,
-    String channelType,
-    Event event,
-  ) async {
-    final response = await _client.post(
-      '${_getChannelUrl(channelId, channelType)}/event',
-      data: {'event': event},
-    );
-    return EmptyResponse.fromJson(response.data);
   }
 
   /// Removes all messages from the channel

@@ -3,6 +3,7 @@ import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
 import '../../open_api/api.dart' as api;
 import '../core/models/request/message_delivery.dart';
 import '../core/models/response/delete_channel_response.dart';
+import '../core/models/response/event_response.dart';
 import '../core/models/response/hide_channel_response.dart';
 import '../core/models/response/mark_delivered_response.dart';
 import '../core/models/response/mark_read_response.dart';
@@ -168,6 +169,31 @@ class ChannelsRepository {
     final result = await _api.markDelivered(
       markDeliveredRequest: api.MarkDeliveredRequest(
         latestDeliveredMessages: [...deliveries.map((it) => it.toRequest())],
+      ),
+    );
+
+    return result.map((response) => response.toModel());
+  }
+
+  /// Sends an event of the given [type] to the channel's watchers.
+  ///
+  /// The [type] names the event, such as [EventType.typingStart] or a custom
+  /// event's name.
+  ///
+  /// A [parentId] ties the event to the thread of that message, and the
+  /// [custom] data reaches the watchers alongside the event.
+  Future<Result<EventResponse>> sendEvent(
+    String channelId,
+    String channelType, {
+    required String type,
+    String? parentId,
+    Map<String, Object?>? custom,
+  }) async {
+    final result = await _api.sendEvent(
+      type: channelType,
+      id: channelId,
+      sendEventRequest: api.SendEventRequest(
+        event: api.EventRequest(type: type, parentId: parentId, custom: custom),
       ),
     );
 

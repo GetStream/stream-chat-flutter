@@ -24,24 +24,7 @@ DraftMessage _$DraftMessageFromJson(Map<String, dynamic> json) => DraftMessage(
   quotedMessageId: json['quoted_message_id'] as String?,
   silent: json['silent'] as bool? ?? false,
   command: json['command'] as String?,
-  poll: _$JsonConverterFromJson<Map<String, dynamic>, Poll>(json['poll'], const PollV1JsonConverter().fromJson),
+  poll: pollFromV1Json(json['poll'] as Map<String, dynamic>?),
   pollId: json['poll_id'] as String?,
   custom: json['extra_data'] as Map<String, dynamic>? ?? const {},
 );
-
-Map<String, dynamic> _$DraftMessageToJson(DraftMessage instance) => <String, dynamic>{
-  'id': instance.id,
-  'text': ?instance.text,
-  'type': ?MessageType.toJson(instance.type),
-  'attachments': instance.attachments.map((e) => e.toJson()).toList(),
-  'parent_id': ?instance.parentId,
-  'show_in_channel': ?instance.showInChannel,
-  'mentioned_users': ?User.toIds(instance.mentionedUsers),
-  'quoted_message_id': ?instance.quotedMessageId,
-  'silent': instance.silent,
-  'poll_id': ?instance.pollId,
-  'extra_data': instance.custom,
-};
-
-Value? _$JsonConverterFromJson<Json, Value>(Object? json, Value? Function(Json json) fromJson) =>
-    json == null ? null : fromJson(json as Json);

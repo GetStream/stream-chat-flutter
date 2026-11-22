@@ -43,31 +43,6 @@ void main() {
       expect(channelState.watcherCount, 5);
     });
 
-    test('should serialize to json correctly', () {
-      final j = jsonFixture('channel_state.json');
-      final channelState = ChannelState(
-        channel: ChannelModel.fromJson(j['channel']),
-        members: [],
-        messages:
-            // ignore: unnecessary_lambdas
-            (j['messages'] as List).map((m) => Message.fromJson(m)).toList(),
-        read: [],
-        watcherCount: 5,
-        pinnedMessages: [],
-        watchers: [],
-        pushPreferences: ChannelPushPreference(
-          chatLevel: ChatLevel.all,
-          disabledUntil: DateTime.parse('2020-01-30T13:43:41.062362Z'),
-        ),
-        activeLiveLocations: [],
-      );
-
-      expect(
-        channelState.toJson(),
-        jsonFixture('channel_state_to_json.json'),
-      );
-    });
-
     test('should handle draft field correctly', () {
       final now = DateTime.now();
       final draftMessage = DraftMessage(text: 'Draft message');

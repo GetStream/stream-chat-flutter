@@ -53,19 +53,11 @@ void main() {
       expect(fullDraft.quotedMessage, equals(quotedMessage));
     });
 
-    test('should correctly serialize to JSON', () {
-      final json = draft.toJson();
-
-      expect(json['channel_cid'], equals(channelCid));
-      expect(json['created_at'], isA<String>());
-      expect(json['message'], isA<Map<String, dynamic>>());
-    });
-
     test('should correctly deserialize from JSON', () {
       final json = {
         'channel_cid': channelCid,
         'created_at': now.toIso8601String(),
-        'message': draftMessage.toJson(),
+        'message': {'id': draftMessage.id, 'text': draftMessage.text},
       };
 
       final deserializedDraft = Draft.fromJson(json);

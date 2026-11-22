@@ -171,13 +171,11 @@ class Message extends Equatable {
   final Map<String, ReactionGroup>? reactionGroups;
 
   /// The latest reactions to the message created by any user.
-  @JsonKey(includeToJson: false)
-  @ReactionV1JsonConverter()
+  @JsonKey(includeToJson: false, fromJson: reactionsFromV1Json)
   final List<Reaction>? latestReactions;
 
   /// The reactions added to the message by the current user.
-  @JsonKey(includeToJson: false)
-  @ReactionV1JsonConverter()
+  @JsonKey(includeToJson: false, fromJson: reactionsFromV1Json)
   final List<Reaction>? ownReactions;
 
   /// The ID of the parent message, if the message is a thread reply.
@@ -283,8 +281,7 @@ class Message extends Equatable {
   final User? pinnedBy;
 
   /// The poll associated with this message.
-  @JsonKey(includeToJson: false)
-  @PollV1JsonConverter()
+  @JsonKey(includeToJson: false, fromJson: pollFromV1Json)
   final Poll? poll;
 
   /// The ID of the [poll] associated with this message.
@@ -318,8 +315,7 @@ class Message extends Equatable {
   /// Optional reminder for this message.
   ///
   /// This is present when a user has set a reminder for this message.
-  @JsonKey(includeToJson: false)
-  @MessageReminderV1JsonConverter()
+  @JsonKey(includeToJson: false, fromJson: messageReminderFromV1Json)
   final MessageReminder? reminder;
 
   static Object? _channelRoleReadValue(Map<Object?, Object?> json, String key) {

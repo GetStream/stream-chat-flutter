@@ -5,7 +5,6 @@ import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/converters/v1_json_converters.dart';
 import 'package:stream_chat/src/core/models/device.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
-import 'package:stream_chat/src/core/models/draft_message.dart';
 import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/message_reminder.dart';
@@ -312,35 +311,6 @@ void main() {
     expect(event.reaction!.score, 1);
   });
 
-  test('Event.toJson writes the reaction in the request shape, with its custom data at the root', () {
-    final event = Event(
-      type: 'reaction.new',
-      reaction: Reaction(
-        messageId: 'message-id',
-        type: 'wow',
-        user: User(id: 'user-id'),
-        score: 2,
-        emojiCode: '😮',
-        custom: const {'bananas': 'yes'},
-      ),
-    );
-
-    expect(event.toJson()['reaction'], {'type': 'wow', 'score': 2, 'emoji_code': '😮', 'bananas': 'yes'});
-  });
-
-  test('Event.toJson leaves out a reaction custom entry named like a reaction key', () {
-    final event = Event(
-      type: 'reaction.new',
-      reaction: Reaction(
-        type: 'wow',
-        emojiCode: '😮',
-        custom: const {'emoji_code': 'custom', 'type': 'custom'},
-      ),
-    );
-
-    expect(event.toJson()['reaction'], {'type': 'wow', 'score': 1, 'emoji_code': '😮'});
-  });
-
   test('Message.fromJson reads the latest and own reactions', () {
     final message = Message.fromJson(const {
       'id': 'message-id',
@@ -523,44 +493,19 @@ void main() {
     expect(event.reminder?.updatedAt, DateTime.utc(2024, 6, 2, 10));
   });
 
-  test("Event.toJson writes the reminder's ids and dates, without its channel, message or user", () {
-    final event = Event(
-      type: 'reminder.created',
-      reminder: MessageReminder(
-        channelCid: 'messaging:general',
-        channel: ChannelModel(cid: 'messaging:general'),
-        messageId: 'message-id',
-        message: Message(id: 'message-id'),
-        userId: 'user-id',
-        user: User(id: 'user-id'),
-        remindAt: DateTime.utc(2024, 6, 15, 14, 30),
-        createdAt: DateTime.utc(2024, 6, 1, 10),
-        updatedAt: DateTime.utc(2024, 6, 2, 10),
-      ),
-    );
-
-    expect(event.toJson()['reminder'], {
-      'channel_cid': 'messaging:general',
-      'message_id': 'message-id',
-      'user_id': 'user-id',
-      'remind_at': '2024-06-15T14:30:00.000Z',
-      'created_at': '2024-06-01T10:00:00.000Z',
-      'updated_at': '2024-06-02T10:00:00.000Z',
+  test('Event.fromJson reads a reminder sent without a due date', () {
+    final event = Event.fromJson(const {
+      'type': 'reminder.updated',
+      'reminder': {
+        'channel_cid': 'messaging:general',
+        'message_id': 'message-id',
+        'user_id': 'user-id',
+        'created_at': '2024-06-01T10:00:00.000Z',
+        'updated_at': '2024-06-02T10:00:00.000Z',
+      },
     });
-  });
 
-  test('Event.fromJson reads back a reminder without a due date written by toJson', () {
-    final reminder = MessageReminder(
-      channelCid: 'messaging:general',
-      messageId: 'message-id',
-      userId: 'user-id',
-      createdAt: DateTime.utc(2024, 6, 1, 10),
-      updatedAt: DateTime.utc(2024, 6, 2, 10),
-    );
-
-    final event = Event.fromJson(Event(type: 'reminder.updated', reminder: reminder).toJson());
-
-    expect(event.reminder, reminder);
+    expect(event.reminder?.remindAt, isNull);
   });
 
   test('Event.fromJson reads every thread field from its v1 keys, with custom data in custom', () {
@@ -701,99 +646,5 @@ void main() {
         lastMessageAt: DateTime.utc(2024, 6, 2, 9),
       ),
     );
-  });
-
-  test('Event.toJson writes the thread under its v1 keys, with custom data not named like a key at the root', () {
-    final event = Event(
-      type: 'thread.updated',
-      thread: Thread(
-        activeParticipantCount: 2,
-        channelCid: 'messaging:general',
-        createdAt: DateTime.utc(2024, 6, 1, 10),
-        updatedAt: DateTime.utc(2024, 6, 2, 10),
-        createdByUserId: 'creator-id',
-        title: 'Meeting point',
-        parentMessageId: 'parent-id',
-        replyCount: 4,
-        participantCount: 3,
-        threadParticipants: [
-          ThreadParticipant(
-            channelCid: 'messaging:general',
-            createdAt: DateTime.utc(2024, 6, 1, 11),
-            lastReadAt: DateTime.utc(2024, 6, 2, 11),
-            threadId: 'parent-id',
-            userId: 'participant-id',
-          ),
-        ],
-        lastMessageAt: DateTime.utc(2024, 6, 2, 9),
-        // A custom entry named like one of the thread's keys is not written.
-        custom: const {'priority': 'high', 'title': 'custom'},
-      ),
-    );
-
-    expect(event.toJson()['thread'], {
-      'active_participant_count': 2,
-      'channel_cid': 'messaging:general',
-      'channel': null,
-      'created_at': '2024-06-01T10:00:00.000Z',
-      'updated_at': '2024-06-02T10:00:00.000Z',
-      'deleted_at': null,
-      'created_by_user_id': 'creator-id',
-      'created_by': null,
-      'title': 'Meeting point',
-      'parent_message_id': 'parent-id',
-      'parent_message': null,
-      'reply_count': 4,
-      'participant_count': 3,
-      'thread_participants': [
-        {
-          'channel_cid': 'messaging:general',
-          'created_at': '2024-06-01T11:00:00.000Z',
-          'last_read_at': '2024-06-02T11:00:00.000Z',
-          'last_thread_message_at': null,
-          'left_thread_at': null,
-          'thread_id': 'parent-id',
-          'user_id': 'participant-id',
-          'user': null,
-        },
-      ],
-      'last_message_at': '2024-06-02T09:00:00.000Z',
-      'latest_replies': <Object?>[],
-      'read': <Object?>[],
-      'draft': null,
-      'priority': 'high',
-    });
-  });
-
-  test('Event.fromJson reads back a thread written by toJson', () {
-    final thread = Thread(
-      activeParticipantCount: 2,
-      channelCid: 'messaging:general',
-      createdAt: DateTime.utc(2024, 6, 1, 10),
-      updatedAt: DateTime.utc(2024, 6, 2, 10),
-      createdByUserId: 'creator-id',
-      createdBy: User(id: 'creator-id'),
-      title: 'Meeting point',
-      parentMessageId: 'parent-id',
-      replyCount: 4,
-      participantCount: 3,
-      lastMessageAt: DateTime.utc(2024, 6, 2, 9),
-      read: [
-        Read(
-          user: User(id: 'reader-id'),
-          lastRead: DateTime.utc(2024, 6, 2, 13),
-        ),
-      ],
-      draft: Draft(
-        channelCid: 'messaging:general',
-        createdAt: DateTime.utc(2024, 6, 5, 10),
-        message: DraftMessage(id: 'draft-id', text: 'Maybe at noon'),
-      ),
-      custom: const {'priority': 'high'},
-    );
-
-    final event = Event.fromJson(Event(type: 'thread.updated', thread: thread).toJson());
-
-    expect(event.thread, thread);
   });
 }

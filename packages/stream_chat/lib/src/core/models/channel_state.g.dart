@@ -35,20 +35,3 @@ ChannelState _$ChannelStateFromJson(Map<String, dynamic> json) => ChannelState(
       ?.map((e) => ScheduledMessage.fromJson(e as Map<String, dynamic>))
       .toList(),
 );
-
-Map<String, dynamic> _$ChannelStateToJson(
-  ChannelState instance,
-) => <String, dynamic>{
-  'channel': instance.channel?.toJson(),
-  'messages': instance.messages?.map((e) => e.toJson()).toList(),
-  'members': instance.members?.map((e) => e.toJson()).toList(),
-  'pinned_messages': instance.pinnedMessages?.map((e) => e.toJson()).toList(),
-  'watcher_count': instance.watcherCount,
-  'watchers': instance.watchers?.map((e) => e.toJson()).toList(),
-  'read': instance.read?.map((e) => e.toJson()).toList(),
-  'membership': instance.membership?.toJson(),
-  'draft': instance.draft?.toJson(),
-  'pending_messages': instance.pendingMessages?.map((e) => e.toJson()).toList(),
-  'push_preferences': instance.pushPreferences?.toJson(),
-  'active_live_locations': instance.activeLiveLocations?.map(const LocationV1JsonConverter().toJson).toList(),
-};

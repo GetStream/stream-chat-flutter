@@ -5,7 +5,6 @@ import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/user.dart';
-import 'package:stream_chat/src/ws/events/event.dart';
 import 'package:stream_core/stream_core.dart' show Filter;
 import 'package:test/test.dart';
 
@@ -32,20 +31,6 @@ class _IsSameMultipartFileAs extends Matcher {
 
   @override
   bool matches(covariant MultipartFile file, Map matchState) => file.length == targetFile.length;
-}
-
-Matcher isSameEventAs(Event targetEvent) => _IsSameEventAs(targetEvent: targetEvent);
-
-class _IsSameEventAs extends Matcher {
-  const _IsSameEventAs({required this.targetEvent});
-
-  final Event targetEvent;
-
-  @override
-  Description describe(Description description) => description.add('is same event as $targetEvent');
-
-  @override
-  bool matches(covariant Event event, Map matchState) => event.type == targetEvent.type;
 }
 
 Matcher isSameMessageAs(

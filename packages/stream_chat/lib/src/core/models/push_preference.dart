@@ -142,7 +142,7 @@ class PushPreference extends Equatable {
 }
 
 /// The class that contains push preferences for a specific channel
-@JsonSerializable(includeIfNull: false)
+@JsonSerializable(createToJson: false)
 class ChannelPushPreference extends Equatable {
   /// Creates a new channel push preference instance
   const ChannelPushPreference({
@@ -164,9 +164,6 @@ class ChannelPushPreference extends Equatable {
 
   /// Disabled until this date (snooze functionality)
   final DateTime? disabledUntil;
-
-  /// Serialize model to json
-  Map<String, dynamic> toJson() => _$ChannelPushPreferenceToJson(this);
 
   @override
   List<Object?> get props => [chatLevel, chatPreferences, disabledUntil];
