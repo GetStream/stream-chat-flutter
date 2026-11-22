@@ -152,12 +152,11 @@ void main() {
             any(),
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
+            limit: any(named: 'limit'),
+            next: any(named: 'next'),
           ),
         ).thenAnswer(
-          (_) async => QueryReactionsResponse()
-            ..reactions = reactions
-            ..next = null,
+          (_) async => Result.success(QueryReactionsResponse(duration: '0ms', reactions: reactions)),
         );
 
         return Scaffold(
@@ -216,12 +215,11 @@ void main() {
             any(),
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
+            limit: any(named: 'limit'),
+            next: any(named: 'next'),
           ),
         ).thenAnswer(
-          (_) async => QueryReactionsResponse()
-            ..reactions = listReactions
-            ..next = null,
+          (_) async => Result.success(QueryReactionsResponse(duration: '0ms', reactions: listReactions)),
         );
 
         final controller = StreamReactionListController(

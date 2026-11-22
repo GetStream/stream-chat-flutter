@@ -50,12 +50,11 @@ void main() {
         'test-message',
         filter: any(named: 'filter'),
         sort: any(named: 'sort'),
-        pagination: any(named: 'pagination'),
+        limit: any(named: 'limit'),
+        next: any(named: 'next'),
       ),
     ).thenAnswer(
-      (_) async => QueryReactionsResponse()
-        ..reactions = reactions
-        ..next = null,
+      (_) async => Result.success(QueryReactionsResponse(duration: '0.01ms', reactions: reactions)),
     );
 
     final message = _buildMessage(
@@ -98,12 +97,11 @@ void main() {
         'test-message',
         filter: any(named: 'filter'),
         sort: any(named: 'sort'),
-        pagination: any(named: 'pagination'),
+        limit: any(named: 'limit'),
+        next: any(named: 'next'),
       ),
     ).thenAnswer(
-      (_) async => QueryReactionsResponse()
-        ..reactions = [loveReaction]
-        ..next = null,
+      (_) async => Result.success(QueryReactionsResponse(duration: '0.01ms', reactions: [loveReaction])),
     );
 
     final message = _buildMessage(
@@ -148,12 +146,11 @@ void main() {
         'test-message',
         filter: any(named: 'filter'),
         sort: any(named: 'sort'),
-        pagination: any(named: 'pagination'),
+        limit: any(named: 'limit'),
+        next: any(named: 'next'),
       ),
     ).thenAnswer(
-      (_) async => QueryReactionsResponse()
-        ..reactions = [reaction]
-        ..next = null,
+      (_) async => Result.success(QueryReactionsResponse(duration: '0.01ms', reactions: [reaction])),
     );
 
     final message = _buildMessage(
@@ -201,12 +198,11 @@ void main() {
         'test-message',
         filter: any(named: 'filter'),
         sort: any(named: 'sort'),
-        pagination: any(named: 'pagination'),
+        limit: any(named: 'limit'),
+        next: any(named: 'next'),
       ),
     ).thenAnswer(
-      (_) async => QueryReactionsResponse()
-        ..reactions = [otherReaction]
-        ..next = null,
+      (_) async => Result.success(QueryReactionsResponse(duration: '0.01ms', reactions: [otherReaction])),
     );
 
     final message = _buildMessage(
@@ -254,12 +250,11 @@ void main() {
         'test-message',
         filter: any(named: 'filter'),
         sort: any(named: 'sort'),
-        pagination: any(named: 'pagination'),
+        limit: any(named: 'limit'),
+        next: any(named: 'next'),
       ),
     ).thenAnswer(
-      (_) async => QueryReactionsResponse()
-        ..reactions = []
-        ..next = null,
+      (_) async => const Result.success(QueryReactionsResponse(duration: '0.01ms', reactions: [])),
     );
 
     final message = _buildMessage(
@@ -332,12 +327,11 @@ void main() {
               'test-message',
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
-              pagination: any(named: 'pagination'),
+              limit: any(named: 'limit'),
+              next: any(named: 'next'),
             ),
           ).thenAnswer(
-            (_) async => QueryReactionsResponse()
-              ..reactions = reactions
-              ..next = null,
+            (_) async => Result.success(QueryReactionsResponse(duration: '0.01ms', reactions: reactions)),
           );
           // Pump once to trigger post-frame modal opening, then settle animation.
           await tester.pump();
@@ -360,12 +354,13 @@ void main() {
               'test-message',
               filter: any(named: 'filter'),
               sort: any(named: 'sort'),
-              pagination: any(named: 'pagination'),
+              limit: any(named: 'limit'),
+              next: any(named: 'next'),
             ),
           ).thenAnswer(
-            (_) async => QueryReactionsResponse()
-              ..reactions = reactions.where((r) => r.type == 'love').toList()
-              ..next = null,
+            (_) async => Result.success(
+              QueryReactionsResponse(duration: '0.01ms', reactions: reactions.where((r) => r.type == 'love').toList()),
+            ),
           );
           // Pump once to trigger post-frame modal opening, then settle animation.
           await tester.pump();
