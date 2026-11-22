@@ -9,7 +9,7 @@ part of 'sort_param_request.dart';
 SortParamRequest _$SortParamRequestFromJson(Map<String, dynamic> json) => SortParamRequest(
   direction: (json['direction'] as num?)?.toInt(),
   field: json['field'] as String?,
-  type: json['type'] as String?,
+  type: json['type'] as SortParamType?,
 );
 
 Map<String, dynamic> _$SortParamRequestToJson(SortParamRequest instance) => <String, dynamic>{

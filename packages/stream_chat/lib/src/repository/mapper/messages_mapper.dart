@@ -331,7 +331,7 @@ extension MessageRequestMapper on Message {
         _ => message.text,
       },
       type: switch (MessageType.toJson(message.type)) {
-        final type? => api.MessageRequestType.fromJson(type),
+        final type? => api.MessageRequestType(type),
         null => null,
       },
       attachments: [for (final attachment in message.attachments) attachment.toRequest()],
@@ -358,7 +358,7 @@ extension MessageRequestMapper on Message {
 /// [api.TranslateMessageRequestLanguage].
 extension TranslationLanguageRequestMapper on TranslationLanguage {
   /// Converts this language into an [api.TranslateMessageRequestLanguage].
-  api.TranslateMessageRequestLanguage toRequest() => api.TranslateMessageRequestLanguage.fromJson(this);
+  api.TranslateMessageRequestLanguage toRequest() => api.TranslateMessageRequestLanguage(this);
 }
 
 /// Maps a generated [api.ModerationV2Response] to a [Moderation].

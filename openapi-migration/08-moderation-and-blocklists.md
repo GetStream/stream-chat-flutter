@@ -34,7 +34,6 @@
 | `GET` | `/api/v2/moderation/appeal/{id}` | `getAppeal` | `GetAppealResponse` |
 | `GET` | `/api/v2/moderation/config/{key}` | `getConfig` | `GetConfigResponse` |
 | `GET` | `/api/v2/moderation/queues/{id}` | `getQueue` | `QueueResponse` |
-| `POST` | `/api/v2/blocklists/{id}/import` | `importBlockList` | `ImportBlockListResponse` |
 | `GET` | `/api/v2/blocklists` | `listBlockLists` | `ListBlockListResponse` |
 | `GET` | `/api/v2/moderation/queues` | `listQueues` | `ListQueuesResponse` |
 | `POST` | `/api/v2/moderation/mute` | `mute` | `MuteResponse` |
@@ -44,6 +43,7 @@
 | `GET` | `/api/v2/chat/moderation/flags/message` | `queryMessageFlags` | `QueryMessageFlagsResponse` |
 | `POST` | `/api/v2/moderation/configs` | `queryModerationConfigs` | `QueryModerationConfigsResponse` |
 | `POST` | `/api/v2/moderation/review_queue` | `queryReviewQueue` | `QueryReviewQueueResponse` |
+| `POST` | `/api/v2/moderation/reveal_media` | `revealMedia` | `RevealMediaResponse` |
 | `POST` | `/api/v2/moderation/submit_action` | `submitAction` | `SubmitActionResponse` |
 | `POST` | `/api/v2/moderation/unban` | `unban` | `UnbanResponse` |
 | `POST` | `/api/v2/moderation/unmute` | `unmute` | `UnmuteResponse` |
@@ -110,10 +110,10 @@
   otherwise truncate to means no expiry at all.
 
 - **`deleteMessages` is a hand-written `DeleteType`, not the generated enum.** The generated
-  `BanRequestDeleteMessages` is already a correct extension type over `String` with the same three
-  values, so this is not about quality — it is about the name. A caller writing
-  `BanRequestDeleteMessages.hard` is naming our request DTO rather than the concept, and the type
-  is what hovers show. This follows `PushProvider`, which group 02 first adopted from the
+  `DeleteMessages` (once the per-request `BanRequestDeleteMessages`) is already a correct extension
+  type over `String` with the same three values, so this is not about quality — it is about the
+  name. `DeleteMessages` names the action rather than the kind of delete it takes, and the type is
+  what hovers show. This follows `PushProvider`, which group 02 first adopted from the
   generated side and [#3004](https://github.com/GetStream/stream-chat-flutter/pull/3004) replaced
   with a hand-written one for exactly that reason, and it settles the rule group 02 left open:
   **adopt a generated type only when its name names the concept.** It also leaves the barrel with

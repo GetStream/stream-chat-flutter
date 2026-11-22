@@ -135,10 +135,31 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
+  Future<void> settleInterruptedRequests() {
+    assert(_debugIsConnected, '');
+    _logger.v(() => 'settleInterruptedRequests');
+    return db!.transaction(() async {
+      await db!.messageDao.settleInterruptedRequests();
+      await db!.pinnedMessageDao.settleInterruptedRequests();
+    });
+  }
+
+  @override
   Future<void> deleteMessageByCids(List<String> cids) {
     assert(_debugIsConnected, '');
     _logger.v(() => 'deleteMessageByCids');
     return db!.messageDao.deleteMessageByCids(cids);
+  }
+
+  @override
+  Future<void> truncateChannel(String cid, {DateTime? truncatedAt}) {
+    assert(_debugIsConnected, '');
+    _logger.v(() => 'truncateChannel');
+    final cutoff = truncatedAt ?? DateTime.now();
+    return db!.transaction(() async {
+      await db!.messageDao.deleteMessagesCreatedBefore(cid, cutoff);
+      await db!.pinnedMessageDao.deleteMessagesCreatedBefore(cid, cutoff);
+    });
   }
 
   @override

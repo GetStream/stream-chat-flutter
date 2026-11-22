@@ -845,8 +845,22 @@ Existing examples: `MessageType`, `AttachmentType`, `ChannelCapability`, `RoleTy
 
 All public API members must have explicit type annotations — parameters, fields, and
 return types (`type_annotate_public_apis`, `always_declare_return_types`). This
-includes top-level declarations and static members. The linter will reject a public
-member without a declared type.
+includes top-level declarations and static members. The linter rejects a public member
+without a declared type, with one gap described below.
+
+A public constant or field that serves as a default declares the most general type its
+consumers accept, not the class that implements it today: `SliverGridDelegate`,
+`ShapeBorder`, `Widget`. The declared type is the API; the implementation behind it can
+then change without changing it. `type_annotate_public_apis` doesn't flag a top-level
+`const` or `final` whose type is inferred from its initializer, so reviewers check this one.
+
+```dart
+// BAD: the public type is whatever implementation the default uses today.
+const defaultGalleryDelegate = StreamMediaGridDelegate(mainAxisSpacing: 2);
+
+// GOOD:
+const SliverGridDelegate defaultGalleryDelegate = StreamMediaGridDelegate(mainAxisSpacing: 2);
+```
 
 Avoid `dynamic` in public APIs. If the type is unknown, prefer `Object?` and casting;
 `dynamic` disables all static checking.
@@ -1699,8 +1713,8 @@ tooling — do not write these entries by hand.
   an issue, and hand a PR over for review.
 - **Melos commands**: `melos.yaml` — every task the repo runs (test, analyze, generate,
   goldens).
-- **Design source**: the [Chat SDK Design System](https://www.figma.com/design/Us73erK1xFNcB5EH3hyq6Y/Chat-SDK-Design-System)
-  Figma project — accessed via the Figma MCP server when implementing UI.
+- **Design source**: the [Chat SDK Design System](https://www.figma.com/design/Us73erK1xFNcB5EH3hyq6Y/Chat-SDK-Design-System) Figma project for chat-specific
+  components and the [SDK Design System](https://www.figma.com/design/BJppI3JYlPy3XeEu5MZY1E/SDK-Design-System) for core components — accessed via the Figma MCP server when implementing UI.
 
 When something isn't covered here and isn't obvious from surrounding code, prefer to
 ask in the PR rather than guessing. If a convention isn't documented, propose adding

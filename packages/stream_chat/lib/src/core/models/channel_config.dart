@@ -1,8 +1,12 @@
+/// @docImport '../error/stream_chat_exception.dart';
+library;
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../db/data_serializable.dart';
 import 'chat_preferences.dart';
 import 'command.dart';
+import 'converters/duration_in_seconds_converter.dart';
 import 'push_level.dart';
 
 part 'channel_config.freezed.dart';
@@ -39,6 +43,10 @@ class ChannelConfig with _$ChannelConfig {
     this.markMessagesPending = false,
     this.deliveryEvents = false,
     this.sharedLocations = false,
+    this.scheduledMessagesMaxPerChannel,
+    this.scheduledMessagesMaxPerUser,
+    this.scheduledMessagesMinLeadTime,
+    this.scheduledMessagesMaxLeadTime,
   }) : createdAt = createdAt ?? DateTime.now(),
        updatedAt = updatedAt ?? DateTime.now();
 
@@ -157,6 +165,43 @@ class ChannelConfig with _$ChannelConfig {
   /// True if shared locations are enabled for this channel.
   @override
   final bool sharedLocations;
+
+  /// The limit on the current user's scheduled messages in each channel.
+  ///
+  /// Only scheduled and sending ones count toward it.
+  ///
+  /// Null when scheduled messages are not enabled.
+  @override
+  final int? scheduledMessagesMaxPerChannel;
+
+  /// The limit on the current user's scheduled messages across all channels.
+  ///
+  /// Only scheduled and sending ones count toward it.
+  ///
+  /// Null when scheduled messages are not enabled.
+  @override
+  final int? scheduledMessagesMaxPerUser;
+
+  /// The least time ahead of now a message is scheduled for.
+  ///
+  /// A sooner time is moved to the first whole minute at least this far ahead.
+  ///
+  /// Null when scheduled messages are not enabled.
+  @override
+  @JsonKey(name: 'scheduled_messages_min_lead_time_seconds')
+  @DurationInSecondsConverter()
+  final Duration? scheduledMessagesMinLeadTime;
+
+  /// The most time ahead of now a message can be scheduled for.
+  ///
+  /// A later time is refused with
+  /// [ScheduledMessageErrorReason.scheduledAtTooFar].
+  ///
+  /// Null when scheduled messages are not enabled.
+  @override
+  @JsonKey(name: 'scheduled_messages_max_lead_time_seconds')
+  @DurationInSecondsConverter()
+  final Duration? scheduledMessagesMaxLeadTime;
 
   /// Serializes this configuration to the format `stream_chat_persistence`
   /// stores.

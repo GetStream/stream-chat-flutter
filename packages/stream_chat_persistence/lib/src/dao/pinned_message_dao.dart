@@ -21,6 +21,32 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
 
   $UsersTable get _pinnedByUsers => alias(users, 'pinnedByUsers');
 
+  /// Marks the messages left sending, updating or deleting as failed.
+  ///
+  /// Each keeps the options its request was made with.
+  Future<void> settleInterruptedRequests() async {
+    final query = select(pinnedMessages)..where((tbl) => tbl.state.like('%"runtimeType":"outgoing"%'));
+    final rows = await query.get();
+    for (final row in rows) {
+      final state = MessageState.fromJson(jsonDecode(row.state)).settled;
+      final settled = PinnedMessagesCompanion(state: Value(jsonEncode(state)));
+      await (update(pinnedMessages)..where((tbl) => tbl.id.equals(row.id))).write(settled);
+    }
+  }
+
+  // Matches the messages created at or after their channel's last truncation,
+  // and the messages not sent yet.
+  Expression<bool> get _survivesTruncation {
+    final truncatedLater = select(_db.channels)
+      ..where((channel) {
+        final createdAt = pinnedMessages.remoteCreatedAt;
+        final sameChannel = channel.cid.equalsExp(pinnedMessages.channelCid);
+        final isLater = channel.truncatedAt.isBiggerThan(createdAt);
+        return sameChannel & isLater;
+      });
+    return notExistsQuery(truncatedLater);
+  }
+
   /// Removes all the messages by matching [PinnedMessages.id] in [messageIds]
   ///
   /// This will automatically delete the following linked records
@@ -34,6 +60,21 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
   /// 1. Message Reactions
   Future<void> deleteMessageByCids(List<String> cids) async =>
       (delete(pinnedMessages)..where((tbl) => tbl.channelCid.isIn(cids))).go();
+
+  /// Removes the pinned messages of the channel with [cid] created before
+  /// [createdBefore], keeping the ones not sent yet.
+  Future<void> deleteMessagesCreatedBefore(
+    String cid,
+    DateTime createdBefore,
+  ) {
+    final query = delete(pinnedMessages)
+      ..where((tbl) {
+        final inChannel = tbl.channelCid.equals(cid);
+        final isOlder = tbl.remoteCreatedAt.isSmallerThanValue(createdBefore);
+        return inChannel & isOlder;
+      });
+    return query.go();
+  }
 
   /// Hydrates `rows` (from the pinned-messages table) into `Message`s using
   /// batched lookups for related entities.
@@ -295,11 +336,11 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
 
     final orderBy = isForwardPagination
         ? [
-            OrderingTerm.asc(pinnedMessages.createdAt),
+            OrderingTerm.asc(pinnedMessages.createdAt.julianday),
             OrderingTerm.asc(pinnedMessages.id),
           ]
         : [
-            OrderingTerm.desc(pinnedMessages.createdAt),
+            OrderingTerm.desc(pinnedMessages.createdAt.julianday),
             OrderingTerm.desc(pinnedMessages.id),
           ];
 
@@ -313,6 +354,7 @@ class PinnedMessageDao extends DatabaseAccessor<DriftChatDatabase> with _$Pinned
           ])
           ..where(pinnedMessages.channelCid.equals(cid))
           ..where(pinnedMessages.parentId.isNull() | pinnedMessages.showInChannel.equals(true))
+          ..where(_survivesTruncation)
           ..orderBy(orderBy);
 
     // Cursor predicates compare the full `(createdAt, id)` tuple — the same

@@ -27,6 +27,10 @@ void main() {
     markMessagesPending: true,
     deliveryEvents: true,
     sharedLocations: true,
+    scheduledMessagesMaxPerChannel: 10,
+    scheduledMessagesMaxPerUser: 100,
+    scheduledMessagesMinLeadTime: const Duration(minutes: 1),
+    scheduledMessagesMaxLeadTime: const Duration(days: 120),
   );
 
   test('ChannelConfig.toData writes every field under its stored key', () {
@@ -62,6 +66,10 @@ void main() {
         'mark_messages_pending': true,
         'delivery_events': true,
         'shared_locations': true,
+        'scheduled_messages_max_per_channel': 10,
+        'scheduled_messages_max_per_user': 100,
+        'scheduled_messages_min_lead_time_seconds': 60,
+        'scheduled_messages_max_lead_time_seconds': const Duration(days: 120).inSeconds,
       },
     );
   });
@@ -80,5 +88,28 @@ void main() {
     ).toData();
 
     expect(ChannelConfig.fromData(data).toData(), data);
+  });
+
+  test('ChannelConfig.fromData reads the scheduled message limits', () {
+    final config = ChannelConfig.fromData({
+      'scheduled_messages_max_per_channel': 10,
+      'scheduled_messages_max_per_user': 100,
+      'scheduled_messages_min_lead_time_seconds': 60,
+      'scheduled_messages_max_lead_time_seconds': const Duration(days: 120).inSeconds,
+    });
+
+    expect(config.scheduledMessagesMaxPerChannel, 10);
+    expect(config.scheduledMessagesMaxPerUser, 100);
+    expect(config.scheduledMessagesMinLeadTime, const Duration(minutes: 1));
+    expect(config.scheduledMessagesMaxLeadTime, const Duration(days: 120));
+  });
+
+  test('ChannelConfig.fromData has no scheduled message limits when none are given', () {
+    final config = ChannelConfig.fromData({});
+
+    expect(config.scheduledMessagesMaxPerChannel, isNull);
+    expect(config.scheduledMessagesMaxPerUser, isNull);
+    expect(config.scheduledMessagesMinLeadTime, isNull);
+    expect(config.scheduledMessagesMaxLeadTime, isNull);
   });
 }

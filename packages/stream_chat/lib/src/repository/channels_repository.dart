@@ -162,6 +162,7 @@ class ChannelsRepository {
     PaginationParams? messagesPagination,
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
+    bool includeScheduledMessages = false,
   }) async {
     final request = api.ChannelGetOrCreateRequest(
       data: channelData?.toRequest(),
@@ -171,6 +172,7 @@ class ChannelsRepository {
       messages: messagesPagination?.toMessagePaginationParams(),
       members: membersPagination?.toPaginationParams(),
       watchers: watchersPagination?.toPaginationParams(),
+      includeScheduledMessages: includeScheduledMessages ? true : null,
     );
 
     final result = switch (channelId) {
@@ -193,6 +195,8 @@ class ChannelsRepository {
     bool state = true,
     bool watch = true,
     bool presence = false,
+    bool includeScheduledMessages = false,
+    bool includeActiveMemberCount = false,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
     final result = await _api.queryChannels(
@@ -207,6 +211,8 @@ class ChannelsRepository {
         state: state,
         watch: watch,
         presence: presence,
+        includeScheduledMessages: includeScheduledMessages ? true : null,
+        includeActiveMemberCount: includeActiveMemberCount ? true : null,
         limit: paginationParams.limit,
         offset: paginationParams.offset,
       ),

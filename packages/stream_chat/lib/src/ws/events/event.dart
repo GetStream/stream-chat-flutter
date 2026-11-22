@@ -50,6 +50,7 @@ class Event extends WsEvent {
     this.lastReadMessageId,
     this.draft,
     this.reminder,
+    this.scheduledMessage,
     this.pushPreference,
     this.channelPushPreference,
     this.channelMemberCount,
@@ -62,20 +63,12 @@ class Event extends WsEvent {
   }) : createdAt = createdAt?.toUtc() ?? DateTime.now().toUtc();
 
   /// Create a new instance from a json
-  factory Event.fromJson(Map<String, dynamic> json) {
-    final event = _$EventFromJson(
-      Serializer.moveToExtraDataFromRoot(
-        json,
-        topLevelFields,
-      ),
-    );
-
-    // TODO(openapi-migration): remove once WebSocket events decode v2 payloads.
-    return switch ((event.type, json['user'])) {
-      (EventType.userUpdated, final Map<String, dynamic> user) => event.copyWith(user: OwnUser.fromJson(user)),
-      _ => event,
-    };
-  }
+  factory Event.fromJson(Map<String, dynamic> json) => _$EventFromJson(
+    Serializer.moveToExtraDataFromRoot(
+      json,
+      topLevelFields,
+    ),
+  );
 
   /// The type of the event
   /// [EventType] contains some predefined constant types
@@ -105,10 +98,7 @@ class Event extends WsEvent {
   /// User object of the health check user
   final OwnUser? me;
 
-  /// User object of the current user
-  ///
-  /// An [OwnUser] on a [EventType.userUpdated] event, so it keeps the user's
-  /// privacy settings.
+  /// The user this event concerns, such as the sender of a new message.
   final User? user;
 
   /// The message sent with the event
@@ -199,6 +189,13 @@ class Event extends WsEvent {
   @JsonKey(fromJson: messageReminderFromV1Json)
   final MessageReminder? reminder;
 
+  /// The scheduled message this event is about.
+  ///
+  /// On [EventType.scheduledMessageSent], [messageId] is the ID of the sent
+  /// message, when it is known.
+  @JsonKey(includeToJson: false)
+  final ScheduledMessage? scheduledMessage;
+
   /// Push notification preferences for the current user.
   final PushPreference? pushPreference;
 
@@ -267,6 +264,7 @@ class Event extends WsEvent {
     'last_read_message_id',
     'draft',
     'reminder',
+    'scheduled_message',
     'push_preference',
     'channel_push_preference',
     'channel_member_count',
@@ -311,6 +309,7 @@ class Event extends WsEvent {
     String? lastReadMessageId,
     Draft? draft,
     MessageReminder? reminder,
+    ScheduledMessage? scheduledMessage,
     PushPreference? pushPreference,
     ChannelPushPreference? channelPushPreference,
     int? channelMemberCount,
@@ -353,6 +352,7 @@ class Event extends WsEvent {
     lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
     draft: draft ?? this.draft,
     reminder: reminder ?? this.reminder,
+    scheduledMessage: scheduledMessage ?? this.scheduledMessage,
     pushPreference: pushPreference ?? this.pushPreference,
     channelPushPreference: channelPushPreference ?? this.channelPushPreference,
     channelMemberCount: channelMemberCount ?? this.channelMemberCount,

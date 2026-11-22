@@ -19,7 +19,7 @@ class MemberDao extends DatabaseAccessor<DriftChatDatabase> with _$MemberDaoMixi
               leftOuterJoin(users, members.userId.equalsExp(users.id)),
             ])
             ..where(members.channelCid.equals(cid))
-            ..orderBy([OrderingTerm.asc(members.createdAt)]))
+            ..orderBy([OrderingTerm.asc(members.createdAt.julianday)]))
           .map((row) {
             final userEntity = row.readTable(users);
             final memberEntity = row.readTable(members);

@@ -51,8 +51,7 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
           );
         }
 
-        final hasText = _controller.text.trim().isNotEmpty;
-        final hasContent = hasText || _controller.attachments.isNotEmpty;
+        final canSend = _controller.canSend;
         final isEditing = _controller.isEditing;
         final hasCommand = _controller.message.command != null;
         var buttonState = _ButtonState.microphone;
@@ -64,11 +63,9 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
           buttonState = _ButtonState.edit;
         } else if (hasCommand) {
           buttonState = _ButtonState.command;
-        } else if (hasContent) {
+        } else if (canSend) {
           buttonState = _ButtonState.send;
         }
-
-        final isEnabled = (!isEditing && !hasCommand) || hasContent;
 
         final voiceRecordingCallback = props.voiceRecordingCallback;
         if (buttonState == .send || buttonState == .edit || buttonState == .command || voiceRecordingCallback == null) {
@@ -85,7 +82,7 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
               .command => a11y.sendCommandTooltip,
               _ => a11y.sendMessageTooltip,
             },
-            onPressed: isEnabled ? props.onSendPressed : null,
+            onPressed: canSend ? props.onSendPressed : null,
           );
         }
 

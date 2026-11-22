@@ -49,6 +49,9 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
   lastReadMessageId: json['last_read_message_id'] as String?,
   draft: json['draft'] == null ? null : Draft.fromJson(json['draft'] as Map<String, dynamic>),
   reminder: messageReminderFromV1Json(json['reminder'] as Map<String, dynamic>?),
+  scheduledMessage: json['scheduled_message'] == null
+      ? null
+      : ScheduledMessage.fromJson(json['scheduled_message'] as Map<String, dynamic>),
   pushPreference: json['push_preference'] == null
       ? null
       : PushPreference.fromJson(json['push_preference'] as Map<String, dynamic>),

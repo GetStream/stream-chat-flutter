@@ -72,7 +72,7 @@ class ReactionDao extends DatabaseAccessor<DriftChatDatabase> with _$ReactionDao
   Future<List<Reaction>> _selectReactions(Expression<bool> where) {
     final rows = select(reactions).join([leftOuterJoin(users, reactions.userId.equalsExp(users.id))])
       ..where(where)
-      ..orderBy([OrderingTerm.asc(reactions.createdAt)]);
+      ..orderBy([OrderingTerm.asc(reactions.createdAt.julianday)]);
     return rows.map((row) {
       final reactionEntity = row.readTable(reactions);
       final userEntity = row.readTableOrNull(users);

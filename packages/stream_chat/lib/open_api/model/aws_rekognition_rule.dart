@@ -13,19 +13,6 @@ import '../models.dart';
 part 'aws_rekognition_rule.g.dart';
 part 'aws_rekognition_rule.freezed.dart';
 
-extension type const AWSRekognitionRuleAction._(String _) implements String {
-  static const bounce = AWSRekognitionRuleAction._('bounce');
-  static const bounceFlag = AWSRekognitionRuleAction._('bounce_flag');
-  static const bounceRemove = AWSRekognitionRuleAction._('bounce_remove');
-  static const flag = AWSRekognitionRuleAction._('flag');
-  static const remove = AWSRekognitionRuleAction._('remove');
-  static const shadow = AWSRekognitionRuleAction._('shadow');
-
-  factory AWSRekognitionRuleAction.fromJson(String json) => AWSRekognitionRuleAction._(json);
-
-  String toJson() => this;
-}
-
 @freezed
 @immutable
 @JsonSerializable()
@@ -39,7 +26,7 @@ class AWSRekognitionRule with _$AWSRekognitionRule {
 
   @override
   @JsonKey(name: 'action')
-  final AWSRekognitionRuleAction action;
+  final ModerationAction action;
 
   @override
   @JsonKey(name: 'label')

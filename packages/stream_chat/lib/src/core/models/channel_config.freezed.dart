@@ -37,6 +37,10 @@ mixin _$ChannelConfig {
   bool get markMessagesPending;
   bool get deliveryEvents;
   bool get sharedLocations;
+  int? get scheduledMessagesMaxPerChannel;
+  int? get scheduledMessagesMaxPerUser;
+  Duration? get scheduledMessagesMinLeadTime;
+  Duration? get scheduledMessagesMaxLeadTime;
 
   /// Create a copy of ChannelConfig
   /// with the given fields replaced by the non-null parameter values.
@@ -76,7 +80,15 @@ mixin _$ChannelConfig {
             (identical(other.markMessagesPending, markMessagesPending) ||
                 other.markMessagesPending == markMessagesPending) &&
             (identical(other.deliveryEvents, deliveryEvents) || other.deliveryEvents == deliveryEvents) &&
-            (identical(other.sharedLocations, sharedLocations) || other.sharedLocations == sharedLocations));
+            (identical(other.sharedLocations, sharedLocations) || other.sharedLocations == sharedLocations) &&
+            (identical(other.scheduledMessagesMaxPerChannel, scheduledMessagesMaxPerChannel) ||
+                other.scheduledMessagesMaxPerChannel == scheduledMessagesMaxPerChannel) &&
+            (identical(other.scheduledMessagesMaxPerUser, scheduledMessagesMaxPerUser) ||
+                other.scheduledMessagesMaxPerUser == scheduledMessagesMaxPerUser) &&
+            (identical(other.scheduledMessagesMinLeadTime, scheduledMessagesMinLeadTime) ||
+                other.scheduledMessagesMinLeadTime == scheduledMessagesMinLeadTime) &&
+            (identical(other.scheduledMessagesMaxLeadTime, scheduledMessagesMaxLeadTime) ||
+                other.scheduledMessagesMaxLeadTime == scheduledMessagesMaxLeadTime));
   }
 
   @override
@@ -106,11 +118,15 @@ mixin _$ChannelConfig {
     markMessagesPending,
     deliveryEvents,
     sharedLocations,
+    scheduledMessagesMaxPerChannel,
+    scheduledMessagesMaxPerUser,
+    scheduledMessagesMinLeadTime,
+    scheduledMessagesMaxLeadTime,
   ]);
 
   @override
   String toString() {
-    return 'ChannelConfig(automod: $automod, commands: $commands, connectEvents: $connectEvents, createdAt: $createdAt, updatedAt: $updatedAt, maxMessageLength: $maxMessageLength, messageRetention: $messageRetention, mutes: $mutes, reactions: $reactions, readEvents: $readEvents, replies: $replies, search: $search, polls: $polls, pushLevel: $pushLevel, pushNotifications: $pushNotifications, chatPreferences: $chatPreferences, typingEvents: $typingEvents, uploads: $uploads, urlEnrichment: $urlEnrichment, skipLastMsgUpdateForSystemMsgs: $skipLastMsgUpdateForSystemMsgs, userMessageReminders: $userMessageReminders, markMessagesPending: $markMessagesPending, deliveryEvents: $deliveryEvents, sharedLocations: $sharedLocations)';
+    return 'ChannelConfig(automod: $automod, commands: $commands, connectEvents: $connectEvents, createdAt: $createdAt, updatedAt: $updatedAt, maxMessageLength: $maxMessageLength, messageRetention: $messageRetention, mutes: $mutes, reactions: $reactions, readEvents: $readEvents, replies: $replies, search: $search, polls: $polls, pushLevel: $pushLevel, pushNotifications: $pushNotifications, chatPreferences: $chatPreferences, typingEvents: $typingEvents, uploads: $uploads, urlEnrichment: $urlEnrichment, skipLastMsgUpdateForSystemMsgs: $skipLastMsgUpdateForSystemMsgs, userMessageReminders: $userMessageReminders, markMessagesPending: $markMessagesPending, deliveryEvents: $deliveryEvents, sharedLocations: $sharedLocations, scheduledMessagesMaxPerChannel: $scheduledMessagesMaxPerChannel, scheduledMessagesMaxPerUser: $scheduledMessagesMaxPerUser, scheduledMessagesMinLeadTime: $scheduledMessagesMinLeadTime, scheduledMessagesMaxLeadTime: $scheduledMessagesMaxLeadTime)';
   }
 }
 
@@ -143,6 +159,10 @@ abstract mixin class $ChannelConfigCopyWith<$Res> {
     bool markMessagesPending,
     bool deliveryEvents,
     bool sharedLocations,
+    int? scheduledMessagesMaxPerChannel,
+    int? scheduledMessagesMaxPerUser,
+    Duration? scheduledMessagesMinLeadTime,
+    Duration? scheduledMessagesMaxLeadTime,
   });
 }
 
@@ -182,6 +202,10 @@ class _$ChannelConfigCopyWithImpl<$Res> implements $ChannelConfigCopyWith<$Res> 
     Object? markMessagesPending = null,
     Object? deliveryEvents = null,
     Object? sharedLocations = null,
+    Object? scheduledMessagesMaxPerChannel = freezed,
+    Object? scheduledMessagesMaxPerUser = freezed,
+    Object? scheduledMessagesMinLeadTime = freezed,
+    Object? scheduledMessagesMaxLeadTime = freezed,
   }) {
     return _then(
       ChannelConfig(
@@ -281,6 +305,22 @@ class _$ChannelConfigCopyWithImpl<$Res> implements $ChannelConfigCopyWith<$Res> 
             ? _self.sharedLocations
             : sharedLocations // ignore: cast_nullable_to_non_nullable
                   as bool,
+        scheduledMessagesMaxPerChannel: freezed == scheduledMessagesMaxPerChannel
+            ? _self.scheduledMessagesMaxPerChannel
+            : scheduledMessagesMaxPerChannel // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        scheduledMessagesMaxPerUser: freezed == scheduledMessagesMaxPerUser
+            ? _self.scheduledMessagesMaxPerUser
+            : scheduledMessagesMaxPerUser // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        scheduledMessagesMinLeadTime: freezed == scheduledMessagesMinLeadTime
+            ? _self.scheduledMessagesMinLeadTime
+            : scheduledMessagesMinLeadTime // ignore: cast_nullable_to_non_nullable
+                  as Duration?,
+        scheduledMessagesMaxLeadTime: freezed == scheduledMessagesMaxLeadTime
+            ? _self.scheduledMessagesMaxLeadTime
+            : scheduledMessagesMaxLeadTime // ignore: cast_nullable_to_non_nullable
+                  as Duration?,
       ),
     );
   }

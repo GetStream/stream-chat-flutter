@@ -62,6 +62,10 @@ void main() {
           'mark_messages_pending': true,
           'delivery_events': true,
           'shared_locations': true,
+          'scheduled_messages_max_per_channel': 10,
+          'scheduled_messages_max_per_user': 100,
+          'scheduled_messages_min_lead_time_seconds': 60,
+          'scheduled_messages_max_lead_time_seconds': 10368000,
         },
       },
     }).channel!;
@@ -92,6 +96,10 @@ void main() {
     expect(config.markMessagesPending, isTrue);
     expect(config.deliveryEvents, isTrue);
     expect(config.sharedLocations, isTrue);
+    expect(config.scheduledMessagesMaxPerChannel, 10);
+    expect(config.scheduledMessagesMaxPerUser, 100);
+    expect(config.scheduledMessagesMinLeadTime, const Duration(minutes: 1));
+    expect(config.scheduledMessagesMaxLeadTime, const Duration(days: 120));
   });
 
   test('Event.fromJson reads a channel config without its optional keys with the defaults', () {
@@ -111,6 +119,10 @@ void main() {
     expect(config.pushLevel, isNull);
     expect(config.chatPreferences, isNull);
     expect(config.maxMessageLength, 0);
+    expect(config.scheduledMessagesMaxPerChannel, isNull);
+    expect(config.scheduledMessagesMaxPerUser, isNull);
+    expect(config.scheduledMessagesMinLeadTime, isNull);
+    expect(config.scheduledMessagesMaxLeadTime, isNull);
   });
 
   test('Event.fromJson reads a channel without a config with the default config', () {
@@ -203,6 +215,7 @@ void main() {
   test('Event.fromJson reads a v1 channel with its custom data at the root', () {
     final channel = Event.fromJson({'type': 'channel.updated', 'channel': jsonFixture('channel.json')}).channel!;
 
+    expect(channel.activeMemberCount, 3);
     expect(channel.custom, {
       'cats': true,
       'fruit': ['bananas', 'apples'],

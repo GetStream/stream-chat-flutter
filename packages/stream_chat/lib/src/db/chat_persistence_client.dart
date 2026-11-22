@@ -257,6 +257,19 @@ abstract class ChatPersistenceClient {
   /// Remove a pinned message by channel [cid]
   Future<void> deletePinnedMessageByCid(String cid) async => deletePinnedMessageByCids([cid]);
 
+  /// Marks the stored messages left sending, updating or deleting as failed.
+  ///
+  /// Each keeps the options its request was made with, so it can be retried.
+  /// The client calls this once the user is connected, before any channel
+  /// loads, when no request can still be running.
+  Future<void> settleInterruptedRequests();
+
+  /// Removes the stored messages and pinned messages of the channel with
+  /// [cid] created before [truncatedAt], or before now when omitted.
+  ///
+  /// Messages not sent yet are kept.
+  Future<void> truncateChannel(String cid, {DateTime? truncatedAt});
+
   /// Remove a message by message [cids]
   Future<void> deleteMessageByCids(List<String> cids);
 

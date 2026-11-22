@@ -32,6 +32,7 @@ import '../../core/models/response/update_member_partial_response.dart';
 import 'drafts_mapper.dart';
 import 'locations_mapper.dart';
 import 'messages_mapper.dart';
+import 'scheduled_messages_mapper.dart';
 import 'users_mapper.dart';
 
 /// Maps a generated [api.ChannelResponse] to a [ChannelModel].
@@ -60,6 +61,7 @@ extension ChannelResponseMapper on api.ChannelResponse {
     blocked: blocked,
     truncatedAt: truncatedAt,
     messageCount: messageCount,
+    activeMemberCount: activeMemberCount,
     filterTags: filterTags,
     truncatedBy: truncatedBy?.toModel(),
     autoTranslationEnabled: autoTranslationEnabled,
@@ -108,6 +110,10 @@ extension ChannelConfigWithInfoMapper on api.ChannelConfigWithInfo {
     markMessagesPending: markMessagesPending,
     deliveryEvents: deliveryEvents,
     sharedLocations: sharedLocations,
+    scheduledMessagesMaxPerChannel: scheduledMessagesMaxPerChannel,
+    scheduledMessagesMaxPerUser: scheduledMessagesMaxPerUser,
+    scheduledMessagesMinLeadTime: scheduledMessagesMinLeadTimeSeconds?.let((it) => Duration(seconds: it)),
+    scheduledMessagesMaxLeadTime: scheduledMessagesMaxLeadTimeSeconds?.let((it) => Duration(seconds: it)),
   );
 }
 
@@ -356,6 +362,7 @@ extension ChannelStateResponseMapper on api.ChannelStateResponse {
       pinnedMessages: pinnedMessages,
       pushPreferences: pushPreferences,
       read: read,
+      scheduledMessages: scheduledMessages,
       threads: threads,
       watcherCount: watcherCount,
       watchers: watchers,
@@ -390,6 +397,7 @@ extension ChannelStateResponseFieldsMapper on api.ChannelStateResponseFields {
       pendingMessages: pendingMessages.isEmpty ? null : pendingMessages,
       pushPreferences: pushPreferences?.toModel(),
       activeLiveLocations: activeLiveLocations?.map((location) => location.toModel()).toList(),
+      scheduledMessages: scheduledMessages?.map((scheduled) => scheduled.toModel()).toList(),
     );
   }
 }

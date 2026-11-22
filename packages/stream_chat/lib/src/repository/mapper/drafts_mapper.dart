@@ -82,7 +82,7 @@ extension DraftMessageRequestMapper on DraftMessage {
         (final text, _) => text,
       },
       type: switch (MessageType.toJson(type)) {
-        final type? => api.MessageRequestType.fromJson(type),
+        final type? => api.MessageRequestType(type),
         null => null,
       },
       attachments: [for (final attachment in attachments) attachment.toRequest()],

@@ -4,7 +4,9 @@ import '../../ws/events/event.dart';
 import '../models/banned_user.dart';
 import '../models/converters/v1_json_converters.dart';
 import '../models/location.dart';
+import '../models/message.dart';
 import '../models/push_preference.dart';
+import '../models/scheduled_message.dart';
 import '../models/user.dart';
 
 part 'responses.g.dart';
@@ -81,6 +83,71 @@ class QueryBannedUsersResponse extends _BaseResponse {
 class EmptyResponse extends _BaseResponse {
   /// Create a new instance from a json
   static EmptyResponse fromJson(Map<String, dynamic> json) => _$EmptyResponseFromJson(json);
+}
+
+/// Model response for the [StreamChatClient.queryScheduledMessages] API call.
+@JsonSerializable(createToJson: false)
+final class QueryScheduledMessagesResponse extends _BaseResponse {
+  /// The scheduled messages in this page.
+  @JsonKey(defaultValue: [])
+  late List<ScheduledMessage> scheduledMessages;
+
+  /// The cursor for the next page.
+  ///
+  /// Null on the last page.
+  late String? next;
+
+  /// Creates a new instance from [json].
+  static QueryScheduledMessagesResponse fromJson(Map<String, dynamic> json) =>
+      _$QueryScheduledMessagesResponseFromJson(json);
+}
+
+/// Model response for the [StreamChatClient.scheduleMessage] API call.
+@JsonSerializable(createToJson: false)
+final class ScheduleMessageResponse extends _BaseResponse {
+  /// The message that was scheduled, or sent right away.
+  late Message message;
+
+  /// The scheduled message created.
+  ///
+  /// Null when the message was sent right away. When set, [message] is a
+  /// preview of what will be sent and is not in the channel yet.
+  ScheduledMessage? scheduledMessage;
+
+  /// Creates a new instance from [json].
+  static ScheduleMessageResponse fromJson(Map<String, dynamic> json) => _$ScheduleMessageResponseFromJson(json);
+}
+
+// The scheduled message shared by the responses of the calls that change one.
+class _ScheduledMessageBaseResponse extends _BaseResponse {
+  /// The scheduled message after the call.
+  late ScheduledMessage scheduledMessage;
+}
+
+/// Model response for [StreamChatClient.updateScheduledMessage].
+///
+/// Also returned by [StreamChatClient.rescheduleMessage].
+@JsonSerializable(createToJson: false)
+final class UpdateScheduledMessageResponse extends _ScheduledMessageBaseResponse {
+  /// Creates a new instance from [json].
+  static UpdateScheduledMessageResponse fromJson(Map<String, dynamic> json) =>
+      _$UpdateScheduledMessageResponseFromJson(json);
+}
+
+/// Model response for the [StreamChatClient.deleteScheduledMessage] API call.
+@JsonSerializable(createToJson: false)
+final class DeleteScheduledMessageResponse extends _ScheduledMessageBaseResponse {
+  /// Creates a new instance from [json].
+  static DeleteScheduledMessageResponse fromJson(Map<String, dynamic> json) =>
+      _$DeleteScheduledMessageResponseFromJson(json);
+}
+
+/// Model response for [StreamChatClient.sendScheduledMessageNow].
+@JsonSerializable(createToJson: false)
+final class SendScheduledMessageNowResponse extends _ScheduledMessageBaseResponse {
+  /// Creates a new instance from [json].
+  static SendScheduledMessageNowResponse fromJson(Map<String, dynamic> json) =>
+      _$SendScheduledMessageNowResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.setPushPreferences] api call

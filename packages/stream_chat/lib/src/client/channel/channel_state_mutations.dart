@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:collection/collection.dart';
 
 import '../../../stream_chat.dart';
@@ -45,8 +43,13 @@ class ChannelStateMutations {
   void onTypingStop(User user) => _removeTypingEvent(user);
 
   /// Adds the new [message], updating the watcher count when provided.
+  ///
+  /// Also ends the author's typing in the [message]'s channel or thread.
   void onMessageNew(Message message, {int? watcherCount}) {
     _state.addNewMessage(message);
+
+    final author = message.user;
+    if (author != null) _endTypingFor(author, message, at: message.createdAt);
 
     if (watcherCount != null) {
       _state.updateChannelState(
@@ -55,23 +58,44 @@ class ChannelStateMutations {
     }
   }
 
+  // Ends [user]'s typing in [message]'s context that started by [at]. Their
+  // `EventType.typingStop` may arrive late, or never.
+  void _endTypingFor(User user, Message message, {required DateTime at}) {
+    // Matched by id: the stored user may be an older snapshot.
+    final typing = _state.typingEvents.entries.firstWhereOrNull((it) => it.key.id == user.id);
+    if (typing == null) return;
+
+    final MapEntry(key: typingUser, value: typingEvent) = typing;
+    final isSameContext = typingEvent.parentId == message.parentId;
+    final startedBefore = !typingEvent.createdAt.isAfter(at);
+    if (isSameContext && startedBefore) onTypingStop(typingUser);
+  }
+
   /// Marks the [message] as deleted.
   void onMessageDeleted(Message message, {bool hardDelete = false}) {
-    // Decrement the locally-tracked unread count for hard-deleted
-    // messages that would have counted as unread. Soft-deleted messages
-    // keep their slot. Only applies to channels that track unread counts
-    // locally (see [Channel.usesLocalUnreadCount]) — other channels get
-    // corrected counts from read events instead.
-    if (hardDelete && _channel.usesLocalUnreadCount && MessageRules.canCountAsUnread(message, _channel)) {
-      _state.unreadCount = math.max(0, _state.unreadCount - 1);
+    // A hard-deleted message that counted as unread no longer exists, so it
+    // gives its unread slot back. Soft-deleted messages keep theirs.
+    if (hardDelete && MessageRules.canCountAsUnread(message, _channel) && _state.unreadCount > 0) {
+      _state.unreadCount -= 1;
     }
 
     return _state.deleteMessage(message, hardDelete: hardDelete);
   }
 
   /// Applies the updated [message] without inserting it when absent.
-  void onMessageUpdated(Message message) {
-    return _state.updateMessage(message, upsert: false);
+  ///
+  /// A text edit also ends the [editor]'s typing in the [message]'s channel or
+  /// thread.
+  void onMessageUpdated(Message message, {User? editor}) {
+    _state.updateMessage(message, upsert: false);
+
+    if (editor == null) return;
+
+    // Not every update is an edit: reply counts, link previews, translations.
+    final editedAt = message.messageTextUpdatedAt;
+    if (editedAt == null) return;
+
+    _endTypingFor(editor, message, at: editedAt);
   }
 
   /// Applies the updated [draft].
@@ -387,10 +411,26 @@ class ChannelStateMutations {
     _state.updateRead([updatedRead]);
   }
 
-  /// Clears the channel messages, applying the truncation system [message]
-  /// when provided.
-  void onChannelTruncated({Message? message}) {
-    _state.truncate();
+  /// Truncates the channel at [cutoff], removing the older messages, pinned
+  /// messages and thread replies.
+  ///
+  /// Also takes the [channel]'s truncation and last message times, and applies
+  /// the truncation system [message] when provided.
+  void onChannelTruncated(
+    ChannelModel channel, {
+    required DateTime cutoff,
+    Message? message,
+  }) {
+    _state.truncateBefore(cutoff, truncatedAt: channel.truncatedAt);
+
+    final channelState = _state.channelState;
+    final current = channelState.channel;
+    final lastMessageAt = channel.lastMessageAt;
+    if (lastMessageAt != null && lastMessageAt != current?.lastMessageAt) {
+      final updated = current?.copyWith(lastMessageAt: lastMessageAt);
+      _state.updateChannelState(channelState.copyWith(channel: updated));
+    }
+
     if (message != null) {
       _state.updateMessage(message);
     }

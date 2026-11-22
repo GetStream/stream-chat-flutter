@@ -36,6 +36,11 @@ mixin _$StreamQuotedMessageThemeData {
         b.subtitleTextStyle,
         t,
       ),
+      messagePreviewTextTheme: StreamMessagePreviewTextThemeData.lerp(
+        a.messagePreviewTextTheme,
+        b.messagePreviewTextTheme,
+        t,
+      ),
       indicatorColor: Color.lerp(a.indicatorColor, b.indicatorColor, t),
       backgroundColor: Color.lerp(a.backgroundColor, b.backgroundColor, t),
       shape: OutlinedBorder.lerp(a.shape, b.shape, t),
@@ -63,6 +68,7 @@ mixin _$StreamQuotedMessageThemeData {
   StreamQuotedMessageThemeData copyWith({
     TextStyle? titleTextStyle,
     TextStyle? subtitleTextStyle,
+    StreamMessagePreviewTextThemeData? messagePreviewTextTheme,
     Color? indicatorColor,
     Color? backgroundColor,
     OutlinedBorder? shape,
@@ -78,6 +84,8 @@ mixin _$StreamQuotedMessageThemeData {
     return StreamQuotedMessageThemeData(
       titleTextStyle: titleTextStyle ?? _this.titleTextStyle,
       subtitleTextStyle: subtitleTextStyle ?? _this.subtitleTextStyle,
+      messagePreviewTextTheme:
+          messagePreviewTextTheme ?? _this.messagePreviewTextTheme,
       indicatorColor: indicatorColor ?? _this.indicatorColor,
       backgroundColor: backgroundColor ?? _this.backgroundColor,
       shape: shape ?? _this.shape,
@@ -108,6 +116,9 @@ mixin _$StreamQuotedMessageThemeData {
       subtitleTextStyle:
           _this.subtitleTextStyle?.merge(other.subtitleTextStyle) ??
           other.subtitleTextStyle,
+      messagePreviewTextTheme:
+          _this.messagePreviewTextTheme?.merge(other.messagePreviewTextTheme) ??
+          other.messagePreviewTextTheme,
       indicatorColor: other.indicatorColor,
       backgroundColor: other.backgroundColor,
       shape: other.shape,
@@ -139,6 +150,7 @@ mixin _$StreamQuotedMessageThemeData {
 
     return _other.titleTextStyle == _this.titleTextStyle &&
         _other.subtitleTextStyle == _this.subtitleTextStyle &&
+        _other.messagePreviewTextTheme == _this.messagePreviewTextTheme &&
         _other.indicatorColor == _this.indicatorColor &&
         _other.backgroundColor == _this.backgroundColor &&
         _other.shape == _this.shape &&
@@ -158,6 +170,7 @@ mixin _$StreamQuotedMessageThemeData {
       runtimeType,
       _this.titleTextStyle,
       _this.subtitleTextStyle,
+      _this.messagePreviewTextTheme,
       _this.indicatorColor,
       _this.backgroundColor,
       _this.shape,

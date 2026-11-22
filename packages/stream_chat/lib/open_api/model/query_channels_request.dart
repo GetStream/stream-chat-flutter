@@ -20,6 +20,8 @@ class QueryChannelsRequest with _$QueryChannelsRequest {
   const QueryChannelsRequest({
     this.filterConditions,
     this.filterValues,
+    this.includeActiveMemberCount,
+    this.includeScheduledMessages,
     this.limit,
     this.memberCustomInclude,
     this.memberLimit,
@@ -40,6 +42,14 @@ class QueryChannelsRequest with _$QueryChannelsRequest {
   @override
   @JsonKey(name: 'filter_values')
   final Map<String, Object?>? filterValues;
+
+  @override
+  @JsonKey(name: 'include_active_member_count')
+  final bool? includeActiveMemberCount;
+
+  @override
+  @JsonKey(name: 'include_scheduled_messages')
+  final bool? includeScheduledMessages;
 
   @override
   @JsonKey(name: 'limit')

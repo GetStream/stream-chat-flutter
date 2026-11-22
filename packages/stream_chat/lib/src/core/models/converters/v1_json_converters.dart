@@ -160,6 +160,7 @@ ChannelModel _channelModelFromV1Json(Map<String, dynamic> json) {
     blocked: data['blocked'] as bool?,
     truncatedAt: _dateTimeOrNull(data['truncated_at']),
     messageCount: (data['message_count'] as num?)?.toInt(),
+    activeMemberCount: (data['active_member_count'] as num?)?.toInt(),
     filterTags: (data['filter_tags'] as List<dynamic>?)?.map((it) => it as String).toList(),
     truncatedBy: switch (data['truncated_by']) {
       final Map<String, dynamic> user => User.fromJson(user),
@@ -173,6 +174,7 @@ ChannelModel _channelModelFromV1Json(Map<String, dynamic> json) {
 // The keys a channel's v1 map carries beside its custom data: the fields the
 // API's channel declares.
 const _channelV1Keys = [
+  'active_member_count',
   'auto_translation_enabled',
   'auto_translation_language',
   'blocked',
@@ -243,7 +245,16 @@ ChannelConfig _channelConfigFromV1Json(Map<String, dynamic> json) => ChannelConf
   markMessagesPending: json['mark_messages_pending'] as bool? ?? false,
   deliveryEvents: json['delivery_events'] as bool? ?? false,
   sharedLocations: json['shared_locations'] as bool? ?? false,
+  scheduledMessagesMaxPerChannel: (json['scheduled_messages_max_per_channel'] as num?)?.toInt(),
+  scheduledMessagesMaxPerUser: (json['scheduled_messages_max_per_user'] as num?)?.toInt(),
+  scheduledMessagesMinLeadTime: _secondsOrNull(json['scheduled_messages_min_lead_time_seconds']),
+  scheduledMessagesMaxLeadTime: _secondsOrNull(json['scheduled_messages_max_lead_time_seconds']),
 );
+
+Duration? _secondsOrNull(Object? seconds) => switch (seconds) {
+  final num seconds => Duration(seconds: seconds.toInt()),
+  _ => null,
+};
 
 /// Reads a [Member] from its v1 keys, or null when there is none.
 ///

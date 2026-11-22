@@ -33,7 +33,7 @@ class SortParamRequest with _$SortParamRequest {
 
   @override
   @JsonKey(name: 'type')
-  final String? type;
+  final SortParamType? type;
 
   Map<String, dynamic> toJson() => _$SortParamRequestToJson(this);
 

@@ -41,8 +41,10 @@ class _StreamThreadListItemSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(context.streamSpacing.sm),
+    return StreamSafeArea(
+      top: false,
+      bottom: false,
+      minimum: EdgeInsets.all(context.streamSpacing.sm),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

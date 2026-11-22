@@ -38,6 +38,7 @@ mixin _$ChannelModel {
   Map<String, Object?> get custom;
   String? get team;
   int? get messageCount;
+  int? get activeMemberCount;
   List<String>? get filterTags;
 
   /// Create a copy of ChannelModel
@@ -79,6 +80,7 @@ mixin _$ChannelModel {
             const DeepCollectionEquality().equals(other.custom, custom) &&
             (identical(other.team, team) || other.team == team) &&
             (identical(other.messageCount, messageCount) || other.messageCount == messageCount) &&
+            (identical(other.activeMemberCount, activeMemberCount) || other.activeMemberCount == activeMemberCount) &&
             const DeepCollectionEquality().equals(other.filterTags, filterTags));
   }
 
@@ -110,12 +112,13 @@ mixin _$ChannelModel {
     const DeepCollectionEquality().hash(custom),
     team,
     messageCount,
+    activeMemberCount,
     const DeepCollectionEquality().hash(filterTags),
   ]);
 
   @override
   String toString() {
-    return 'ChannelModel(id: $id, type: $type, cid: $cid, ownCapabilities: $ownCapabilities, config: $config, createdBy: $createdBy, frozen: $frozen, lastMessageAt: $lastMessageAt, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, memberCount: $memberCount, members: $members, cooldown: $cooldown, disabled: $disabled, hidden: $hidden, muted: $muted, blocked: $blocked, truncatedAt: $truncatedAt, truncatedBy: $truncatedBy, autoTranslationEnabled: $autoTranslationEnabled, autoTranslationLanguage: $autoTranslationLanguage, custom: $custom, team: $team, messageCount: $messageCount, filterTags: $filterTags)';
+    return 'ChannelModel(id: $id, type: $type, cid: $cid, ownCapabilities: $ownCapabilities, config: $config, createdBy: $createdBy, frozen: $frozen, lastMessageAt: $lastMessageAt, createdAt: $createdAt, updatedAt: $updatedAt, deletedAt: $deletedAt, memberCount: $memberCount, members: $members, cooldown: $cooldown, disabled: $disabled, hidden: $hidden, muted: $muted, blocked: $blocked, truncatedAt: $truncatedAt, truncatedBy: $truncatedBy, autoTranslationEnabled: $autoTranslationEnabled, autoTranslationLanguage: $autoTranslationLanguage, custom: $custom, team: $team, messageCount: $messageCount, activeMemberCount: $activeMemberCount, filterTags: $filterTags)';
   }
 }
 
@@ -146,6 +149,7 @@ abstract mixin class $ChannelModelCopyWith<$Res> {
     bool? blocked,
     DateTime? truncatedAt,
     int? messageCount,
+    int? activeMemberCount,
     List<String>? filterTags,
     User? truncatedBy,
     bool? autoTranslationEnabled,
@@ -187,6 +191,7 @@ class _$ChannelModelCopyWithImpl<$Res> implements $ChannelModelCopyWith<$Res> {
     Object? blocked = freezed,
     Object? truncatedAt = freezed,
     Object? messageCount = freezed,
+    Object? activeMemberCount = freezed,
     Object? filterTags = freezed,
     Object? truncatedBy = freezed,
     Object? autoTranslationEnabled = freezed,
@@ -281,6 +286,10 @@ class _$ChannelModelCopyWithImpl<$Res> implements $ChannelModelCopyWith<$Res> {
         messageCount: freezed == messageCount
             ? _self.messageCount
             : messageCount // ignore: cast_nullable_to_non_nullable
+                  as int?,
+        activeMemberCount: freezed == activeMemberCount
+            ? _self.activeMemberCount
+            : activeMemberCount // ignore: cast_nullable_to_non_nullable
                   as int?,
         filterTags: freezed == filterTags
             ? _self.filterTags

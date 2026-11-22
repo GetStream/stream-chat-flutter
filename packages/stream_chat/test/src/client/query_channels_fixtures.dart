@@ -3,12 +3,14 @@ import 'package:stream_chat/open_api/api.dart' as api;
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
+import '../fakes.dart';
+
 /// A generated channel query answer carrying the channel of each state in
 /// [channelStates], with [predefinedFilter] as the filter the query resolved
 /// to.
 ///
-/// Throws if a state carries more than its channel, which this answer would
-/// drop.
+/// Throws if a state carries more than its channel and its scheduled messages,
+/// which this answer would drop.
 api.QueryChannelsResponse generatedQueryChannelsResponse(
   List<ChannelState> channelStates, {
   PredefinedFilter? predefinedFilter,
@@ -50,13 +52,51 @@ api.ChannelStateResponseFields _generatedChannelState(ChannelState channelState)
       lastMessageAt: channel.lastMessageAt,
       custom: channel.custom,
       memberCount: channel.memberCount,
+      activeMemberCount: channel.activeMemberCount,
       disabled: false,
       frozen: channel.frozen,
     ),
     members: const [],
     messages: const [],
     pinnedMessages: const [],
+    scheduledMessages: channelState.scheduledMessages?.map(_generatedScheduledMessage).toList(),
     threads: const [],
+  );
+}
+
+api.ScheduledMessageResponse _generatedScheduledMessage(ScheduledMessage scheduled) => api.ScheduledMessageResponse(
+  cid: scheduled.cid,
+  createdAt: scheduled.createdAt,
+  failureReason: switch (scheduled.failureReason) {
+    final reason? => api.ScheduledMessageFailureReason(reason),
+    null => null,
+  },
+  id: scheduled.id,
+  message: api.ScheduledMessageContentResponse(
+    custom: const {},
+    parentId: scheduled.message.parentId,
+    text: scheduled.message.text ?? '',
+  ),
+  scheduledAt: scheduled.scheduledAt,
+  status: api.ScheduledMessageStatus(scheduled.status),
+  updatedAt: scheduled.updatedAt,
+  user: fakeUserResponse(scheduled.user.id),
+);
+
+/// A generated answer to a channel query carrying [channelState].
+///
+/// Throws if the state carries more than its channel and its scheduled
+/// messages, which this answer would drop.
+api.ChannelStateResponse generatedChannelStateResponse(ChannelState channelState) {
+  final fields = _generatedChannelState(channelState);
+  return api.ChannelStateResponse(
+    duration: '0.01ms',
+    channel: fields.channel,
+    members: fields.members,
+    messages: fields.messages,
+    pinnedMessages: fields.pinnedMessages,
+    scheduledMessages: fields.scheduledMessages,
+    threads: fields.threads,
   );
 }
 

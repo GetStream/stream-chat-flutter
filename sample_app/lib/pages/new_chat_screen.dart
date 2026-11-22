@@ -159,7 +159,7 @@ class _NewChatScreenState extends State<NewChatScreen> {
               statusString = 'Disconnected';
               break;
           }
-          return StreamInfoTile(
+          final content = StreamInfoTile(
             showMessage: showStatus,
             tileAnchor: Alignment.topCenter,
             childAnchor: Alignment.topCenter,
@@ -374,6 +374,8 @@ class _NewChatScreenState extends State<NewChatScreen> {
               ),
             ),
           );
+
+          return SafeArea(top: false, bottom: false, child: content);
         },
       ),
     );

@@ -1,7 +1,7 @@
 name: stream_chat
 homepage: https://getstream.io/
 description: The official Dart client for Stream Chat, a service for building chat applications.
-version: 10.5.0
+version: 10.7.0
 repository: https://github.com/GetStream/stream-chat-flutter
 issue_tracker: https://github.com/GetStream/stream-chat-flutter/issues
 
@@ -26,7 +26,7 @@ dependencies:
   collection: ^1.19.1
   diacritic: ^0.1.6
   dio: ^5.11.0
-  equatable: ^2.0.8
+  equatable: ">=2.0.8 <4.0.0"
   freezed_annotation: ^3.0.0
   http_parser: ^4.1.2
   jose: ^0.3.5+1
@@ -37,14 +37,23 @@ dependencies:
   retrofit: ^4.9.2
   rxdart: ^0.28.0
   stream_core:
+    # The ignore below silences `invalid_dependency` because stream_core is
+    # pinned to a git ref until the fix in GetStream/stream-core-flutter#254
+    # is released.
+    #
+    # **Note:** Before publishing stream_chat, this MUST be swapped back to a pub
+    # version constraint — git deps are not allowed on pub.dev and will block
+    # the release.
+    # ignore: invalid_dependency
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
-      ref: 6042453b56c782d9c8b29a2d103ae73ba433814c
+      ref: 340e010f186c5fc221b31d8e9b4102ba1530a2ef
       path: packages/stream_core
   synchronized: ^3.4.0
   uuid: ^4.5.3
 
 dev_dependencies:
+  benchmark_harness: ^2.4.0
   build_runner: ^2.15.0
   freezed: ^3.0.0
   json_serializable: ^6.13.2

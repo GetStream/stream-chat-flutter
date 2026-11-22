@@ -199,6 +199,35 @@ void main() {
     );
     expect(channelState.activeLiveLocations!.single.messageId, 'message-id');
     expect(channelState.activeLiveLocations!.single.latitude, 1.5);
+    expect(channelState.channel!.activeMemberCount, 3);
+
+    final scheduled = channelState.scheduledMessages!.single;
+    expect(scheduled.id, 'scheduled-id');
+    expect(scheduled.cid, 'messaging:general');
+    expect(scheduled.user.id, 'sender');
+    expect(scheduled.message.text, 'Good morning');
+    expect(scheduled.message.custom, {'color': 'red'});
+    expect(scheduled.scheduledAt, DateTime.utc(2026, 2));
+    expect(scheduled.status, ScheduledMessageStatus.scheduled);
+    expect(scheduled.channel!.cid, 'messaging:general');
+    expect(scheduled.channel!.name, 'General');
+  });
+
+  test('StreamChatClient.queryChannel asks for the scheduled messages only when told to', () async {
+    final defaultApi = _defaultApi();
+    final client = _client(defaultApi);
+
+    await client.queryChannel('messaging', channelId: 'general');
+    await client.queryChannel('messaging', channelId: 'general', includeScheduledMessages: true);
+
+    final requests = verify(
+      () => defaultApi.getOrCreateChannel(
+        type: 'messaging',
+        id: 'general',
+        channelGetOrCreateRequest: captureAny(named: 'channelGetOrCreateRequest'),
+      ),
+    ).captured.cast<api.ChannelGetOrCreateRequest>();
+    expect(requests.map((it) => it.includeScheduledMessages), [null, true]);
   });
 
   test('StreamChatClient.queryChannel reads a channel state without pending messages as having none', () async {
@@ -292,7 +321,7 @@ api.ChannelStateResponse _channelStateResponse({
   List<api.PendingMessageResponse>? pendingMessages,
 }) => api.ChannelStateResponse(
   duration: '0.01ms',
-  channel: channel ?? generatedChannel,
+  channel: channel ?? generatedChannel.copyWith(activeMemberCount: 3),
   messages: [generatedLeafMessage('message-1')],
   pinnedMessages: [generatedLeafMessage('pinned-1')],
   members: [fakeChannelMemberResponse()],
@@ -331,6 +360,24 @@ api.ChannelStateResponse _channelStateResponse({
       messageId: 'message-id',
       updatedAt: DateTime.utc(2026, 1, 9, 12),
       userId: 'sender',
+    ),
+  ],
+  scheduledMessages: [
+    api.ScheduledMessageResponse(
+      channel: const api.ScheduledMessageChannelResponse(
+        cid: 'messaging:general',
+        id: 'general',
+        type: 'messaging',
+        name: 'General',
+      ),
+      cid: 'messaging:general',
+      createdAt: DateTime.utc(2026, 1, 5),
+      id: 'scheduled-id',
+      message: const api.ScheduledMessageContentResponse(custom: {'color': 'red'}, text: 'Good morning'),
+      scheduledAt: DateTime.utc(2026, 2),
+      status: const api.ScheduledMessageStatus('scheduled'),
+      updatedAt: DateTime.utc(2026, 1, 6),
+      user: fakeUserResponse('sender'),
     ),
   ],
   threads: const [],

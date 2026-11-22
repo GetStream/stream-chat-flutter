@@ -24,7 +24,7 @@ mixin _$CreatePollRequest {
   String get name;
   List<PollOptionInput>? get options;
   String? get team;
-  CreatePollRequestVotingVisibility? get votingVisibility;
+  VotingVisibility? get votingVisibility;
 
   /// Create a copy of CreatePollRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -100,7 +100,7 @@ abstract mixin class $CreatePollRequestCopyWith<$Res> {
     String name,
     List<PollOptionInput>? options,
     String? team,
-    CreatePollRequestVotingVisibility? votingVisibility,
+    VotingVisibility? votingVisibility,
   });
 }
 
@@ -178,7 +178,7 @@ class _$CreatePollRequestCopyWithImpl<$Res> implements $CreatePollRequestCopyWit
         votingVisibility: freezed == votingVisibility
             ? _self.votingVisibility
             : votingVisibility // ignore: cast_nullable_to_non_nullable
-                  as CreatePollRequestVotingVisibility?,
+                  as VotingVisibility?,
       ),
     );
   }

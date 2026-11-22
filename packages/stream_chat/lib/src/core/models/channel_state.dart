@@ -1,3 +1,6 @@
+/// @docImport '../../client/channel/channel_client_state.dart';
+library;
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stream_core/stream_core.dart'
     show Filter, FilterField, NullOrdering, Sort, SortDirection, SortField, Standard, normalizeStringForSort;
@@ -9,6 +12,7 @@ import 'member.dart';
 import 'message.dart';
 import 'push_preference.dart';
 import 'read.dart';
+import 'scheduled_message.dart';
 import 'user.dart';
 
 part 'channel_state.freezed.dart';
@@ -30,6 +34,7 @@ class ChannelState with _$ChannelState {
     this.pendingMessages,
     this.pushPreferences,
     this.activeLiveLocations,
+    this.scheduledMessages,
   });
 
   /// The channel to which this state belongs
@@ -82,6 +87,13 @@ class ChannelState with _$ChannelState {
   @override
   final List<Location>? activeLiveLocations;
 
+  /// The current user's scheduled messages in this channel when it was queried.
+  ///
+  /// Use [ChannelClientState.scheduledMessages] for the list as it changes.
+  /// Null when the query did not ask for them.
+  @override
+  final List<ScheduledMessage>? scheduledMessages;
+
   /// Returns this state updated with [other], a newer state of the same
   /// channel.
   ///
@@ -103,6 +115,7 @@ class ChannelState with _$ChannelState {
       pendingMessages: other.pendingMessages ?? pendingMessages,
       pushPreferences: other.pushPreferences ?? pushPreferences,
       activeLiveLocations: other.activeLiveLocations ?? activeLiveLocations,
+      scheduledMessages: other.scheduledMessages ?? scheduledMessages,
     );
   }
 }

@@ -12,7 +12,7 @@ Widget _buildIndicatorRow(MockClient client) {
     id: 'msg-sending',
     text: '',
     user: ownUser,
-    state: MessageState.sending,
+    state: MessageState.sending(),
   );
   final sentMsg = Message(
     id: 'msg-sent',

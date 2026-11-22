@@ -1,0 +1,57 @@
+name: update_size_badges
+
+# Writes the latest SDK size benchmark into the README badges and commits them
+# to the branch the workflow runs on. The release-pr skill runs it on the
+# release branch, so the badges ship with the release:
+#
+#   gh workflow run update_size_badges.yml --ref release/v<version> -f base_branch=master
+on:
+  workflow_dispatch:
+    inputs:
+      base_branch:
+        description: "Branch whose benchmark the badges show: master or v11."
+        required: true
+        default: master
+
+permissions:
+  contents: read
+
+jobs:
+  update_size_badges:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      # Reads stream-internal-metrics, and pushes the badge commit, which
+      # re-triggers CI on the branch.
+      - name: 🔑 Create bot token
+        id: bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+          repositories: ${{ github.event.repository.name }},stream-internal-metrics
+          permission-contents: write
+
+      - name: 📚 Git Checkout
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: 💎 Set up Ruby
+        uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: metrics/sdk_size
+
+      - name: 📏 Update Badges
+        working-directory: metrics/sdk_size
+        env:
+          BASE_BRANCH: ${{ inputs.base_branch }}
+          GITHUB_TOKEN: ${{ steps.bot-token.outputs.token }}
+        run: bundle exec fastlane update_readme_badges
+
+      - name: 📤 Commit Changes
+        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@c322b778cb789f4c45d8830dd1b5324584da378f
+        with:
+          files: README.md
+          message: "chore(repo): update the SDK size badges"
+          token: ${{ steps.bot-token.outputs.token }}

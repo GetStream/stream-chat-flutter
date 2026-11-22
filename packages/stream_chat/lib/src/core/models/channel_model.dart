@@ -34,6 +34,7 @@ class ChannelModel with _$ChannelModel {
     this.blocked,
     this.truncatedAt,
     this.messageCount,
+    this.activeMemberCount,
     this.filterTags,
     this.truncatedBy,
     this.autoTranslationEnabled,
@@ -179,6 +180,14 @@ class ChannelModel with _$ChannelModel {
   @override
   final int? messageCount;
 
+  /// The number of members whose users are neither deactivated nor deleted.
+  ///
+  /// Null until a channel query made with `includeActiveMemberCount` loads this
+  /// channel. Once set, it keeps its last value until another such query
+  /// refreshes it.
+  @override
+  final int? activeMemberCount;
+
   /// List of filter tags applied to the channel.
   ///
   /// This is generally used for querying filtered channels based on tags.
@@ -217,6 +226,7 @@ class ChannelModel with _$ChannelModel {
       blocked: other.blocked ?? blocked,
       truncatedAt: other.truncatedAt ?? truncatedAt,
       messageCount: other.messageCount ?? messageCount,
+      activeMemberCount: other.activeMemberCount ?? activeMemberCount,
       filterTags: other.filterTags ?? filterTags,
       truncatedBy: other.truncatedBy ?? truncatedBy,
       autoTranslationEnabled: other.autoTranslationEnabled ?? false,
@@ -234,6 +244,9 @@ extension type const ChannelCapability(String _) implements String {
 
   /// Ability to reply to a message.
   static const sendReply = ChannelCapability('send-reply');
+
+  /// Ability to schedule a message to be sent later.
+  static const scheduleMessage = ChannelCapability('schedule-message');
 
   /// Ability to send a message with restricted visibility.
   static const sendRestrictedVisibilityMessage = ChannelCapability(

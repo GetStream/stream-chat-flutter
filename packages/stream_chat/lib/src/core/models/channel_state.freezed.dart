@@ -25,6 +25,7 @@ mixin _$ChannelState {
   List<Message>? get pendingMessages;
   ChannelPushPreference? get pushPreferences;
   List<Location>? get activeLiveLocations;
+  List<ScheduledMessage>? get scheduledMessages;
 
   /// Create a copy of ChannelState
   /// with the given fields replaced by the non-null parameter values.
@@ -49,7 +50,8 @@ mixin _$ChannelState {
             (identical(other.draft, draft) || other.draft == draft) &&
             const DeepCollectionEquality().equals(other.pendingMessages, pendingMessages) &&
             (identical(other.pushPreferences, pushPreferences) || other.pushPreferences == pushPreferences) &&
-            const DeepCollectionEquality().equals(other.activeLiveLocations, activeLiveLocations));
+            const DeepCollectionEquality().equals(other.activeLiveLocations, activeLiveLocations) &&
+            const DeepCollectionEquality().equals(other.scheduledMessages, scheduledMessages));
   }
 
   @override
@@ -67,11 +69,12 @@ mixin _$ChannelState {
     const DeepCollectionEquality().hash(pendingMessages),
     pushPreferences,
     const DeepCollectionEquality().hash(activeLiveLocations),
+    const DeepCollectionEquality().hash(scheduledMessages),
   );
 
   @override
   String toString() {
-    return 'ChannelState(channel: $channel, messages: $messages, members: $members, pinnedMessages: $pinnedMessages, watcherCount: $watcherCount, watchers: $watchers, read: $read, membership: $membership, draft: $draft, pendingMessages: $pendingMessages, pushPreferences: $pushPreferences, activeLiveLocations: $activeLiveLocations)';
+    return 'ChannelState(channel: $channel, messages: $messages, members: $members, pinnedMessages: $pinnedMessages, watcherCount: $watcherCount, watchers: $watchers, read: $read, membership: $membership, draft: $draft, pendingMessages: $pendingMessages, pushPreferences: $pushPreferences, activeLiveLocations: $activeLiveLocations, scheduledMessages: $scheduledMessages)';
   }
 }
 
@@ -92,6 +95,7 @@ abstract mixin class $ChannelStateCopyWith<$Res> {
     List<Message>? pendingMessages,
     ChannelPushPreference? pushPreferences,
     List<Location>? activeLiveLocations,
+    List<ScheduledMessage>? scheduledMessages,
   });
 }
 
@@ -119,6 +123,7 @@ class _$ChannelStateCopyWithImpl<$Res> implements $ChannelStateCopyWith<$Res> {
     Object? pendingMessages = freezed,
     Object? pushPreferences = freezed,
     Object? activeLiveLocations = freezed,
+    Object? scheduledMessages = freezed,
   }) {
     return _then(
       ChannelState(
@@ -170,6 +175,10 @@ class _$ChannelStateCopyWithImpl<$Res> implements $ChannelStateCopyWith<$Res> {
             ? _self.activeLiveLocations
             : activeLiveLocations // ignore: cast_nullable_to_non_nullable
                   as List<Location>?,
+        scheduledMessages: freezed == scheduledMessages
+            ? _self.scheduledMessages
+            : scheduledMessages // ignore: cast_nullable_to_non_nullable
+                  as List<ScheduledMessage>?,
       ),
     );
   }
