@@ -23,7 +23,7 @@ mixin _$UpdatePollRequest {
   int? get maxVotesAllowed;
   String get name;
   List<PollOptionRequest>? get options;
-  UpdatePollRequestVotingVisibility? get votingVisibility;
+  VotingVisibility? get votingVisibility;
 
   /// Create a copy of UpdatePollRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -96,7 +96,7 @@ abstract mixin class $UpdatePollRequestCopyWith<$Res> {
     int? maxVotesAllowed,
     String name,
     List<PollOptionRequest>? options,
-    UpdatePollRequestVotingVisibility? votingVisibility,
+    VotingVisibility? votingVisibility,
   });
 }
 
@@ -169,7 +169,7 @@ class _$UpdatePollRequestCopyWithImpl<$Res> implements $UpdatePollRequestCopyWit
         votingVisibility: freezed == votingVisibility
             ? _self.votingVisibility
             : votingVisibility // ignore: cast_nullable_to_non_nullable
-                  as UpdatePollRequestVotingVisibility?,
+                  as VotingVisibility?,
       ),
     );
   }

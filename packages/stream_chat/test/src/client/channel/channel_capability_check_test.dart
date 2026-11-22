@@ -64,6 +64,12 @@ void main() {
     );
 
     testCapability(
+      'ScheduleMessage',
+      ChannelCapability.scheduleMessage,
+      (channel) => channel.canScheduleMessage,
+    );
+
+    testCapability(
       'SendRestrictedVisibilityMessage',
       ChannelCapability.sendRestrictedVisibilityMessage,
       (channel) => channel.canSendRestrictedVisibilityMessage,

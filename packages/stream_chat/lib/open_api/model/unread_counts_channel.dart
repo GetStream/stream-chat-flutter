@@ -19,6 +19,7 @@ part 'unread_counts_channel.freezed.dart';
 class UnreadCountsChannel with _$UnreadCountsChannel {
   const UnreadCountsChannel({
     required this.channelId,
+    required this.hasUnread,
     required this.lastRead,
     required this.unreadCount,
   });
@@ -26,6 +27,10 @@ class UnreadCountsChannel with _$UnreadCountsChannel {
   @override
   @JsonKey(name: 'channel_id')
   final String channelId;
+
+  @override
+  @JsonKey(name: 'has_unread')
+  final bool hasUnread;
 
   @override
   @StreamDateTimeConverter()

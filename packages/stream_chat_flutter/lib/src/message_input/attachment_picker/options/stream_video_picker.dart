@@ -45,6 +45,7 @@ class StreamVideoPicker extends StatelessWidget {
     }
 
     final drawer = OptionDrawer(
+      margin: .symmetric(horizontal: spacing.md),
       child: EndOfFrameCallbackWidget(
         child: Center(
           child: Column(

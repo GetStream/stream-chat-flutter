@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:stream_core_flutter/chat.dart';
 import 'package:theme_extensions_builder_annotation/theme_extensions_builder_annotation.dart';
 
+import 'message_preview_text_theme.dart';
 import 'stream_chat_theme.dart';
 
 part 'quoted_message_theme.g.theme.dart';
@@ -95,6 +96,7 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
   const StreamQuotedMessageThemeData({
     this.titleTextStyle,
     this.subtitleTextStyle,
+    this.messagePreviewTextTheme,
     this.indicatorColor,
     this.backgroundColor,
     this.shape,
@@ -108,15 +110,25 @@ class StreamQuotedMessageThemeData with _$StreamQuotedMessageThemeData {
 
   /// The text style for the quoted user's name.
   ///
-  /// If null, defaults to [StreamTextTheme.metadataEmphasis] tinted with the
-  /// alignment-aware text color.
+  /// If null, defaults to [StreamTextTheme.metadataEmphasis] in
+  /// [StreamColorScheme.textPrimary] for an incoming reply and `brand.shade900`
+  /// for an outgoing one.
   final TextStyle? titleTextStyle;
 
-  /// The text style for the quoted message preview.
+  /// The text style for the whole quoted message preview.
   ///
-  /// If null, defaults to [StreamTextTheme.metadataDefault] tinted with the
-  /// alignment-aware text color.
+  /// To style only parts of it, consider [messagePreviewTextTheme]. If null,
+  /// defaults to [StreamTextTheme.metadataDefault] in
+  /// [StreamColorScheme.textPrimary] for an incoming reply and `brand.shade900`
+  /// for an outgoing one.
   final TextStyle? subtitleTextStyle;
+
+  /// The theme for styling parts of the quoted message preview differently
+  /// from the rest.
+  ///
+  /// Takes precedence over an enclosing [StreamMessagePreviewTextTheme] and
+  /// the app-wide one. A quoted reply shows no sender or draft prefix.
+  final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 
   /// Color of the leading indicator bar.
   ///

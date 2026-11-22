@@ -1450,6 +1450,131 @@ void main() {
         },
       );
 
+      test('concurrent calls that differ only in includeActiveMemberCount do not share the cache', () async {
+        final pendingQuery = Completer<QueryChannelsResponse>();
+        when(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            includeActiveMemberCount: any(named: 'includeActiveMemberCount'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).thenAnswer((_) => pendingQuery.future);
+        clearInteractions(fakeChatApi.channel);
+
+        final queries = Future.wait([
+          client.queryChannels(includeActiveMemberCount: true).toList(),
+          client.queryChannels().toList(),
+        ]);
+        await pumpEventQueue();
+        pendingQuery.complete(QueryChannelsResponse()..channels = []);
+        await queries;
+
+        verify(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            includeActiveMemberCount: true,
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).called(1);
+        verify(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            includeActiveMemberCount: false,
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).called(1);
+      });
+
+      test('queryChannelsOnline forwards includeActiveMemberCount', () async {
+        when(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            includeActiveMemberCount: any(named: 'includeActiveMemberCount'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).thenAnswer((_) async => QueryChannelsResponse()..channels = const []);
+        clearInteractions(fakeChatApi.channel);
+
+        await client.queryChannelsOnline(includeActiveMemberCount: true);
+
+        verify(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            includeActiveMemberCount: true,
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).called(1);
+      });
+
+      test('queryChannelsOnline returns channels with their active member count', () async {
+        when(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            includeActiveMemberCount: any(named: 'includeActiveMemberCount'),
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).thenAnswer(
+          (_) async => QueryChannelsResponse()
+            ..channels = [
+              ChannelState(channel: ChannelModel(cid: 'test-type:test-id', activeMemberCount: 3)),
+            ],
+        );
+        clearInteractions(fakeChatApi.channel);
+
+        final channels = await client.queryChannelsOnline(includeActiveMemberCount: true);
+
+        expect(channels.single.activeMemberCount, 3);
+        verify(
+          () => fakeChatApi.channel.queryChannels(
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            state: any(named: 'state'),
+            watch: any(named: 'watch'),
+            presence: any(named: 'presence'),
+            includeActiveMemberCount: true,
+            memberLimit: any(named: 'memberLimit'),
+            messageLimit: any(named: 'messageLimit'),
+            paginationParams: any(named: 'paginationParams'),
+          ),
+        ).called(1);
+      });
+
       test(
         'concurrent calls share the same error when the request fails',
         () async {
@@ -1605,7 +1730,7 @@ void main() {
       const id = 'test-device-id';
       const request = api.CreateDeviceRequest(
         id: id,
-        pushProvider: api.CreateDeviceRequestPushProvider.firebase,
+        pushProvider: api.PushProviderName.firebase,
       );
 
       when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
@@ -1621,9 +1746,9 @@ void main() {
 
     test('StreamChatClient.addDevice sends a provider without a constant by its wire value', () async {
       const id = 'test-device-id';
-      final request = api.CreateDeviceRequest(
+      const request = api.CreateDeviceRequest(
         id: id,
-        pushProvider: api.CreateDeviceRequestPushProvider.fromJson('onesignal'),
+        pushProvider: api.PushProviderName('onesignal'),
       );
 
       when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
@@ -1641,7 +1766,7 @@ void main() {
       const pushProviderName = 'my-custom-config';
       const request = api.CreateDeviceRequest(
         id: id,
-        pushProvider: api.CreateDeviceRequestPushProvider.firebase,
+        pushProvider: api.PushProviderName.firebase,
         pushProviderName: pushProviderName,
       );
 
@@ -1659,7 +1784,7 @@ void main() {
       const id = 'test-device-id';
       const request = api.CreateDeviceRequest(
         id: id,
-        pushProvider: api.CreateDeviceRequestPushProvider.apn,
+        pushProvider: api.PushProviderName.apn,
       );
 
       when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
@@ -1676,7 +1801,7 @@ void main() {
       const error = StreamClientException(message: 'boom');
       const request = api.CreateDeviceRequest(
         id: 'test-device-id',
-        pushProvider: api.CreateDeviceRequestPushProvider.firebase,
+        pushProvider: api.PushProviderName.firebase,
       );
 
       when(() => defaultApi.createDevice(createDeviceRequest: request)).thenAnswer(
@@ -3760,6 +3885,23 @@ void main() {
       expect(client.persistenceEnabled, isTrue);
     });
 
+    test('openPersistenceConnection settles the interrupted requests once connected', () async {
+      final persistence = FakePersistenceClient();
+      client.chatPersistenceClient = persistence;
+
+      await client.openPersistenceConnection(user);
+
+      expect(persistence.settleCallCount, 1);
+    });
+
+    test('openPersistenceConnection still connects when settling the interrupted requests fails', () async {
+      client.chatPersistenceClient = _FailingSettlePersistenceClient();
+
+      await client.openPersistenceConnection(user);
+
+      expect(client.persistenceEnabled, isTrue);
+    });
+
     test(
       '''multiple call to openPersistenceConnection does not throws an error if already connected to the same user''',
       () async {
@@ -5505,5 +5647,15 @@ UserGroup _userGroup(String id) {
 }
 
 api.DeviceResponse _generatedDevice({required String id, required String pushProvider}) {
-  return api.DeviceResponse(id: id, pushProvider: pushProvider, createdAt: DateTime.utc(2024), userId: 'test-user-id');
+  return api.DeviceResponse(
+    id: id,
+    pushProvider: api.PushProviderName(pushProvider),
+    createdAt: DateTime.utc(2024),
+    userId: 'test-user-id',
+  );
+}
+
+class _FailingSettlePersistenceClient extends MockPersistenceClient {
+  @override
+  Future<void> settleInterruptedRequests() => Future.error(StateError('Database is locked'));
 }

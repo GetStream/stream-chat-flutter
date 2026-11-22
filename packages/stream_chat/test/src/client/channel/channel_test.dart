@@ -240,6 +240,36 @@ void main() {
       expect(res.getOrNull(), response);
       verify(() => client.getReplies(parentId, limit: 30)).called(1);
     });
+
+    test('`.query` reads the offline cache even when scheduled messages are asked for', () async {
+      final cached =
+          _generateChannelState(
+            channelId,
+            channelType,
+          ).copyWith(
+            messages: [Message(id: 'cached', text: 'From the cache')],
+          );
+      when(
+        () => client.chatPersistenceClient.getChannelStateByCid(
+          channelCid,
+          messagePagination: any(named: 'messagePagination'),
+        ),
+      ).thenAnswer((_) async => cached);
+      when(() => client.channelDeliveryReporter.submitForDelivery(any())).thenAnswer((_) async {});
+      await pumpEventQueue();
+
+      final channelState = await channel.query(preferOffline: true, includeScheduledMessages: true);
+
+      expect(channelState, same(cached));
+      verifyNever(
+        () => client.queryChannel(
+          channelType,
+          channelId: channelId,
+          channelData: any(named: 'channelData'),
+          includeScheduledMessages: any(named: 'includeScheduledMessages'),
+        ),
+      );
+    });
   });
 
   group('Initialized Channel', () {
@@ -315,6 +345,78 @@ void main() {
       expect(() => channel.name = 'New name', throwsA(isA<StateError>()));
     });
 
+    group('`.scheduleMessage`', () {
+      final scheduledAt = DateTime.utc(2026, 10, 31, 12);
+
+      ScheduledMessage scheduledMessageFor(Message message) => ScheduledMessage(
+        id: message.id,
+        cid: channelCid,
+        user: client.state.currentUser!,
+        message: message,
+        scheduledAt: scheduledAt,
+        status: ScheduledMessageStatus.scheduled,
+        createdAt: DateTime.utc(2026, 10, 29),
+        updatedAt: DateTime.utc(2026, 10, 29),
+      );
+
+      test('keeps a scheduled message out of the channel', () async {
+        final message = Message(id: 'scheduled-id', text: 'Good morning');
+        when(
+          () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer(
+          (_) async => ScheduleMessageResponse()
+            ..message = message
+            ..scheduledMessage = scheduledMessageFor(message),
+        );
+
+        final res = await channel.scheduleMessage(message, scheduledAt: scheduledAt);
+
+        expect(res.scheduledMessage?.id, message.id);
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test('keeps a scheduled thread reply out of the thread', () async {
+        final reply = Message(id: 'reply-id', text: 'Good morning', parentId: 'parent-id', showInChannel: true);
+        when(
+          () => client.scheduleMessage(reply, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer(
+          (_) async => ScheduleMessageResponse()
+            ..message = reply
+            ..scheduledMessage = scheduledMessageFor(reply),
+        );
+
+        await channel.scheduleMessage(reply, scheduledAt: scheduledAt);
+
+        expect(channel.state!.threads['parent-id'], isNull);
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test("a message sent right away isn't in the channel after scheduling", () async {
+        final message = Message(id: 'sent-id', text: 'Good morning');
+        when(
+          () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer((_) async => ScheduleMessageResponse()..message = message);
+
+        final res = await channel.scheduleMessage(message, scheduledAt: scheduledAt);
+
+        expect(res.scheduledMessage, isNull);
+        expect(channel.state!.messages, isEmpty);
+      });
+
+      test('the message.new event of a message sent right away adds it', () async {
+        final message = Message(id: 'sent-id', text: 'Good morning');
+        when(
+          () => client.scheduleMessage(message, channelId, channelType, scheduledAt: scheduledAt),
+        ).thenAnswer((_) async => ScheduleMessageResponse()..message = message);
+        await channel.scheduleMessage(message, scheduledAt: scheduledAt);
+
+        client.addEvent(Event(type: EventType.messageNew, cid: channel.cid, message: message));
+        await pumpEventQueue();
+
+        expect(channel.state!.messages.single.id, 'sent-id');
+      });
+    });
+
     group('`.sendMessage`', () {
       test('queues a failed send for retry when the failure is retriable', () async {
         // The enqueue gate used to test a type nothing throws any more, so a
@@ -372,7 +474,7 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.sending),
+                message.copyWith(state: MessageState.sending()),
                 matchMessageState: true,
               ),
             ],
@@ -423,7 +525,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(
+                    state: MessageState.sending(skipPush: true, skipEnrichUrl: false),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -478,7 +582,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(
+                    state: MessageState.sending(skipPush: true, skipEnrichUrl: true),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -533,7 +639,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(
+                    state: MessageState.sending(skipPush: false, skipEnrichUrl: true),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -586,7 +694,7 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(state: MessageState.sending()),
                   matchMessageState: true,
                 ),
               ],
@@ -693,7 +801,7 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.sending),
+                message.copyWith(state: MessageState.sending()),
                 matchMessageState: true,
               ),
             ],
@@ -786,7 +894,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.sending,
+                    state: MessageState.sending(),
                     attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.preparing()))],
                   ),
                   matchMessageState: true,
@@ -798,7 +906,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.sending,
+                    state: MessageState.sending(),
                     attachments: [...attachments]
                       ..[0] = attachments[0].copyWith(
                         uploadState: const UploadState.success(),
@@ -813,7 +921,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.sending,
+                    state: MessageState.sending(),
                     attachments: [...attachments]
                       ..[0] = attachments[0].copyWith(
                         uploadState: const UploadState.success(),
@@ -831,7 +939,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.sending,
+                    state: MessageState.sending(),
                     attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.success()))],
                   ),
                   matchMessageState: true,
@@ -1036,6 +1144,42 @@ void main() {
             isA<StreamNetworkException>().having((it) => it.isCancelled, 'isCancelled', isTrue),
           ),
         );
+      });
+
+      test('superseded by a newer send leaves the newer one sending', () async {
+        final message = Message(
+          id: 'test-message-id',
+          attachments: [
+            Attachment(
+              id: 'test-attachment-id',
+              type: AttachmentType.image,
+              file: AttachmentFile(size: 100, path: 'test-file-path'),
+            ),
+          ],
+        );
+
+        final upload = Completer<Result<UploadedFile>>();
+        when(
+          () => client.sendImage(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer((_) => upload.future);
+        addTearDown(
+          () => upload.complete(const Result<UploadedFile>.success(UploadedFile(fileUrl: 'url'))),
+        );
+
+        final first = channel.sendMessage(message).then<void>((_) {}, onError: (_) {});
+        await pumpEventQueue();
+
+        channel.sendMessage(message).ignore();
+        await first;
+
+        expect(channel.state!.messages.single.state, MessageState.sending());
       });
 
       test(
@@ -1416,6 +1560,52 @@ void main() {
       verify(() => client.createDraft(draftMessage, channelId, channelType)).called(1);
     });
 
+    test('Channel.createDraft keeps the draft in the channel state when the request fails', () async {
+      final draftMessage = DraftMessage(text: 'Typed while offline');
+      const error = StreamNetworkException(message: 'No connection');
+      when(
+        () => client.createDraft(draftMessage, channelId, channelType),
+      ).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await channel.createDraft(draftMessage);
+
+      expect(res.isFailure, isTrue);
+      expect(channel.state!.draft?.message, draftMessage);
+    });
+
+    test('Channel.createDraft leaves the channel draft alone for a thread whose parent is not loaded', () async {
+      final threadDraft = DraftMessage(text: 'Thread reply', parentId: 'unloaded-parent-id');
+      const error = StreamNetworkException(message: 'No connection');
+      when(
+        () => client.createDraft(threadDraft, channelId, channelType),
+      ).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await channel.createDraft(threadDraft);
+
+      expect(res.isFailure, isTrue);
+      expect(channel.state!.draft, isNull);
+    });
+
+    test('Channel.deleteDraft removes the draft from the channel state when the request fails', () async {
+      channel.state!.updateDraft(
+        Draft(
+          channelCid: channelCid,
+          createdAt: DateTime.now(),
+          message: DraftMessage(text: 'Old draft'),
+        ),
+      );
+      const error = StreamNetworkException(message: 'No connection');
+      when(
+        () => client.deleteDraft(channelId, channelType, parentId: any(named: 'parentId')),
+      ).thenAnswer((_) async => const Result.failure(error));
+
+      final res = await channel.deleteDraft();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(res.isFailure, isTrue);
+      expect(channel.state!.draft, isNull);
+    });
+
     test('Channel.getDraft fetches the draft of this channel', () async {
       final response = GetDraftResponse(
         duration: '0.01ms',
@@ -1567,7 +1757,7 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
+                message.copyWith(state: MessageState.updating()),
                 matchMessageState: true,
               ),
             ],
@@ -1659,7 +1849,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.updating(),
                     attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.preparing()))],
                   ),
                   matchMessageState: true,
@@ -1671,7 +1861,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.updating(),
                     attachments: [...attachments]
                       ..[0] = attachments[0].copyWith(
                         uploadState: const UploadState.success(),
@@ -1686,7 +1876,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.updating(),
                     attachments: [...attachments]
                       ..[0] = attachments[0].copyWith(
                         uploadState: const UploadState.success(),
@@ -1704,7 +1894,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.updating(),
                     attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.success()))],
                   ),
                   matchMessageState: true,
@@ -1787,7 +1977,9 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
+                message.copyWith(
+                  state: MessageState.updating(skipPush: false, skipEnrichUrl: true),
+                ),
                 matchMessageState: true,
               ),
             ],
@@ -1835,7 +2027,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
+                  message.copyWith(
+                    state: MessageState.updating(skipPush: false, skipEnrichUrl: true),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -1888,7 +2082,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
+                  message.copyWith(
+                    state: MessageState.updating(skipPush: true, skipEnrichUrl: false),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -1937,7 +2133,9 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
+                message.copyWith(
+                  state: MessageState.updating(skipPush: true, skipEnrichUrl: true),
+                ),
                 matchMessageState: true,
               ),
             ],
@@ -1985,7 +2183,7 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
+                message.copyWith(state: MessageState.updating()),
                 matchMessageState: true,
               ),
             ],
@@ -2009,6 +2207,43 @@ void main() {
             isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
           ),
         );
+      });
+
+      test('superseded by a newer update leaves the newer one updating', () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.sent,
+          attachments: [
+            Attachment(
+              id: 'test-attachment-id',
+              type: AttachmentType.image,
+              file: AttachmentFile(size: 100, path: 'test-file-path'),
+            ),
+          ],
+        );
+
+        final upload = Completer<Result<UploadedFile>>();
+        when(
+          () => client.sendImage(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer((_) => upload.future);
+        addTearDown(
+          () => upload.complete(const Result<UploadedFile>.success(UploadedFile(fileUrl: 'url'))),
+        );
+
+        final first = channel.updateMessage(message).then<void>((_) {}, onError: (_) {});
+        await pumpEventQueue();
+
+        channel.updateMessage(message).ignore();
+        await first;
+
+        expect(channel.state!.messages.single.state, MessageState.updating());
       });
     });
 
@@ -2089,7 +2324,7 @@ void main() {
           [
             isSameMessageAs(
               message.copyWith(
-                state: MessageState.updating,
+                state: MessageState.partialUpdating(set: set, unset: unset),
               ),
               matchText: true,
               matchMessageState: true,
@@ -2152,7 +2387,7 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updating,
+                  state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: false),
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -2217,7 +2452,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: true),
                   ),
                   matchText: true,
                   matchMessageState: true,
@@ -2287,7 +2522,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: false),
                   ),
                   matchText: true,
                   matchMessageState: true,
@@ -2352,7 +2587,7 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updating,
+                  state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: true),
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -2414,7 +2649,7 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updating,
+                  state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: false),
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -2490,6 +2725,82 @@ void main() {
         verify(() => client.deleteMessage(messageId)).called(1);
       });
 
+      test('marks a message that is already gone as deleted', () async {
+        const messageId = 'test-message-id';
+        final message = Message(
+          id: messageId,
+          createdAt: DateTime.now(),
+          state: MessageState.sent,
+        );
+        const errorMessage = 'DeleteMessage failed with error: "message with id test-message-id has been deleted"';
+        when(() => client.deleteMessage(messageId)).thenThrow(
+          apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+        );
+        channel.state?.addNewMessage(message);
+
+        final res = await channel.deleteMessage(message);
+
+        expect(res, isNotNull);
+        expect(channel.state?.messages.single.state, MessageState.softDeleted);
+      });
+
+      test('removes a hard-deleted message that is already gone', () async {
+        const messageId = 'test-message-id';
+        final message = Message(
+          id: messageId,
+          attachments: [
+            Attachment(type: 'image', imageUrl: 'test-image-url'),
+            Attachment(type: 'file', assetUrl: 'test-asset-url'),
+          ],
+          createdAt: DateTime.now(),
+          state: MessageState.sent,
+        );
+        const errorMessage = 'DeleteMessage failed with error: "message with id test-message-id doesn\'t exist"';
+        when(() => client.deleteMessage(messageId, hard: true)).thenThrow(
+          apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+        );
+        when(
+          () => client.deleteImage(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
+        when(
+          () => client.deleteFile(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
+        channel.state?.addNewMessage(message);
+
+        await channel.deleteMessage(message, hard: true);
+
+        expect(channel.state?.messages, isEmpty);
+      });
+
+      test('deletes the attachments of a hard-deleted message that is already gone', () async {
+        const messageId = 'test-message-id';
+        final message = Message(
+          id: messageId,
+          attachments: [
+            Attachment(type: 'image', imageUrl: 'test-image-url'),
+            Attachment(type: 'file', assetUrl: 'test-asset-url'),
+          ],
+          createdAt: DateTime.now(),
+          state: MessageState.sent,
+        );
+        const errorMessage = 'DeleteMessage failed with error: "message with id test-message-id doesn\'t exist"';
+        when(() => client.deleteMessage(messageId, hard: true)).thenThrow(
+          apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+        );
+        when(
+          () => client.deleteImage(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
+        when(
+          () => client.deleteFile(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
+        channel.state?.addNewMessage(message);
+
+        await channel.deleteMessage(message, hard: true);
+
+        verify(() => client.deleteImage('test-image-url', channelId, channelType)).called(1);
+        verify(() => client.deleteFile('test-asset-url', channelId, channelType)).called(1);
+      });
+
       test('should delete attachments for hard delete', () async {
         final attachments = List.generate(
           3,
@@ -2540,7 +2851,7 @@ void main() {
           final message = Message(
             id: messageId,
             text: 'Hello World!',
-            state: MessageState.sending,
+            state: MessageState.sending(),
           );
 
           expectLater(
@@ -2549,7 +2860,7 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(state: MessageState.sending()),
                   matchMessageState: true,
                 ),
               ],
@@ -2616,7 +2927,7 @@ void main() {
           final message = Message(
             id: messageId,
             text: 'Hello World!',
-            state: MessageState.sending,
+            state: MessageState.sending(),
           );
 
           expectLater(
@@ -2625,7 +2936,7 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(state: MessageState.sending()),
                   matchMessageState: true,
                 ),
               ],
@@ -2667,10 +2978,7 @@ void main() {
           channel.state?.messagesStream.skip(1),
           emitsInOrder([
             [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
-                matchMessageState: true,
-              ),
+              isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
             ],
             [
               isSameMessageAs(
@@ -2723,10 +3031,7 @@ void main() {
             channel.state?.messagesStream.skip(1),
             emitsInOrder([
               [
-                isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
-                  matchMessageState: true,
-                ),
+                isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
               ],
               [
                 isSameMessageAs(
@@ -2781,10 +3086,7 @@ void main() {
             channel.state?.messagesStream.skip(1),
             emitsInOrder([
               [
-                isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
-                  matchMessageState: true,
-                ),
+                isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
               ],
               [
                 isSameMessageAs(
@@ -2849,10 +3151,7 @@ void main() {
         channel.state?.messagesStream.skip(1),
         emitsInOrder([
           [
-            isSameMessageAs(
-              message.copyWith(state: MessageState.updating),
-              matchMessageState: true,
-            ),
+            isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
           ],
           [
             isSameMessageAs(
@@ -5590,6 +5889,74 @@ void main() {
       );
     });
 
+    test('a channel update without an active member count keeps the last one', () async {
+      const channelId = 'test-channel-id';
+      const channelType = 'test-channel-type';
+      final channelState = _generateChannelState(channelId, channelType);
+      final channel = Channel.fromState(
+        client,
+        channelState.copyWith(
+          channel: channelState.channel!.copyWith(activeMemberCount: 3),
+        ),
+      );
+      addTearDown(channel.dispose);
+
+      final emitted = <int?>[];
+      final subscription = channel.activeMemberCountStream.listen(emitted.add);
+      addTearDown(subscription.cancel);
+      await Future.delayed(Duration.zero);
+
+      client.addEvent(
+        Event(
+          cid: channel.cid,
+          type: EventType.channelUpdated,
+          channel: ChannelModel(id: channelId, type: channelType),
+        ),
+      );
+      await Future.delayed(Duration.zero);
+
+      expect(emitted, [3]);
+    });
+
+    test('activeMemberCountStream emits the new count when the channel state updates', () async {
+      final channelState = _generateChannelState('test-channel-id', 'test-channel-type');
+      final channel = Channel.fromState(
+        client,
+        channelState.copyWith(
+          channel: channelState.channel!.copyWith(activeMemberCount: 3),
+        ),
+      );
+      addTearDown(channel.dispose);
+
+      final emitted = <int?>[];
+      final subscription = channel.activeMemberCountStream.listen(emitted.add);
+      addTearDown(subscription.cancel);
+      await Future.delayed(Duration.zero);
+
+      final state = channel.state!;
+      state.updateChannelState(
+        state.channelState.copyWith(
+          channel: state.channelState.channel!.copyWith(activeMemberCount: 5),
+        ),
+      );
+      await Future.delayed(Duration.zero);
+
+      expect(emitted, [3, 5]);
+    });
+
+    test('activeMemberCount reads the count the channel was loaded with', () {
+      final channelState = _generateChannelState('test-channel-id', 'test-channel-type');
+      final channel = Channel.fromState(
+        client,
+        channelState.copyWith(
+          channel: channelState.channel!.copyWith(activeMemberCount: 3),
+        ),
+      );
+      addTearDown(channel.dispose);
+
+      expect(channel.activeMemberCount, 3);
+    });
+
     group('Channel member count events', () {
       const channelId = 'test-channel-id';
       const channelType = 'test-channel-type';
@@ -5987,6 +6354,144 @@ void main() {
         ).called(1);
       },
     );
+
+    test('.sendMessage stops typing when the user is typing', () async {
+      // The group shares one client mock.
+      addTearDown(() => clearInteractions(client));
+
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [ChannelCapability.typingEvents, ChannelCapability.sendMessage],
+      );
+
+      final channel = Channel.fromState(client, channelState);
+      addTearDown(channel.dispose);
+
+      final startTypingEvent = Event(type: EventType.typingStart);
+      final stopTypingEvent = Event(type: EventType.typingStop);
+      final message = Message(id: 'test-message-id', text: 'Hello world!');
+
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(startTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+      ).thenAnswer((_) async => SendMessageResponse()..message = message);
+
+      channel.keyStroke().ignore();
+      await channel.sendMessage(message);
+
+      verify(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).called(1);
+    });
+
+    test('.updateMessage stops typing when the user is typing', () async {
+      // The group shares one client mock.
+      addTearDown(() => clearInteractions(client));
+
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [ChannelCapability.typingEvents, ChannelCapability.updateOwnMessage],
+      );
+
+      final channel = Channel.fromState(client, channelState);
+      addTearDown(channel.dispose);
+
+      final startTypingEvent = Event(type: EventType.typingStart);
+      final stopTypingEvent = Event(type: EventType.typingStop);
+      final message = Message(id: 'test-message-id', text: 'Edited');
+
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(startTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.updateMessage(any(that: isSameMessageAs(message))),
+      ).thenAnswer((_) async => UpdateMessageResponse()..message = message);
+
+      channel.keyStroke().ignore();
+      await channel.updateMessage(message);
+
+      verify(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).called(1);
+    });
+
+    test('.scheduleMessage stops typing when the user is typing', () async {
+      // The group shares one client mock.
+      addTearDown(() => clearInteractions(client));
+
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [ChannelCapability.typingEvents, ChannelCapability.sendMessage],
+      );
+
+      final channel = Channel.fromState(client, channelState);
+      addTearDown(channel.dispose);
+
+      final startTypingEvent = Event(type: EventType.typingStart);
+      final stopTypingEvent = Event(type: EventType.typingStop);
+      final message = Message(id: 'test-message-id', text: 'Good morning');
+      final scheduledAt = DateTime.utc(2026, 11, 2, 9);
+
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(startTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => client.scheduleMessage(
+          any(that: isSameMessageAs(message)),
+          channelId,
+          channelType,
+          scheduledAt: scheduledAt,
+        ),
+      ).thenAnswer((_) async => ScheduleMessageResponse()..message = message);
+
+      channel.keyStroke().ignore();
+      await channel.scheduleMessage(message, scheduledAt: scheduledAt);
+
+      verify(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      ).called(1);
+    });
+
+    test('.sendMessage does not send a typing stop when the user is not typing', () async {
+      // The group shares one client mock.
+      addTearDown(() => clearInteractions(client));
+
+      final channelState = _generateChannelState(
+        channelId,
+        channelType,
+        ownCapabilities: [ChannelCapability.typingEvents, ChannelCapability.sendMessage],
+      );
+
+      final channel = Channel.fromState(client, channelState);
+      addTearDown(channel.dispose);
+
+      final stopTypingEvent = Event(type: EventType.typingStop);
+      final message = Message(id: 'test-message-id', text: 'Hello world!');
+
+      when(
+        () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+      ).thenAnswer((_) async => SendMessageResponse()..message = message);
+
+      await channel.sendMessage(message);
+
+      verifyNever(
+        () => client.sendEvent(channelId, channelType, any(that: isSameEventAs(stopTypingEvent))),
+      );
+    });
 
     test(
       ".startTyping should return if we don't have the capability",

@@ -262,7 +262,7 @@ extension SearchResultMessageMapper on api.SearchResultMessage {
 /// [api.TranslateMessageRequestLanguage].
 extension TranslationLanguageRequestMapper on TranslationLanguage {
   /// Converts this language into an [api.TranslateMessageRequestLanguage].
-  api.TranslateMessageRequestLanguage toRequest() => api.TranslateMessageRequestLanguage.fromJson(this);
+  api.TranslateMessageRequestLanguage toRequest() => api.TranslateMessageRequestLanguage(this);
 }
 
 /// Maps a generated [api.ModerationV2Response] to a [Moderation].

@@ -13,7 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$BlockListOptions {
-  BlockListOptionsBehavior get behavior;
+  ChannelModerationBehavior get behavior;
   String get blocklist;
 
   /// Create a copy of BlockListOptions
@@ -50,7 +50,7 @@ abstract mixin class $BlockListOptionsCopyWith<$Res> {
     $Res Function(BlockListOptions) _then,
   ) = _$BlockListOptionsCopyWithImpl;
   @useResult
-  $Res call({BlockListOptionsBehavior behavior, String blocklist});
+  $Res call({ChannelModerationBehavior behavior, String blocklist});
 }
 
 /// @nodoc
@@ -70,7 +70,7 @@ class _$BlockListOptionsCopyWithImpl<$Res> implements $BlockListOptionsCopyWith<
         behavior: null == behavior
             ? _self.behavior
             : behavior // ignore: cast_nullable_to_non_nullable
-                  as BlockListOptionsBehavior,
+                  as ChannelModerationBehavior,
         blocklist: null == blocklist
             ? _self.blocklist
             : blocklist // ignore: cast_nullable_to_non_nullable

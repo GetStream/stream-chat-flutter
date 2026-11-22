@@ -28,6 +28,7 @@ class StreamMessageListViewBuilders {
     this.floatingDateDivider,
     this.threadSeparator,
     this.unreadMessagesSeparator,
+    this.typingIndicator,
     this.scrollToBottomButton,
     this.paginationLoadingIndicator,
     this.spacing,
@@ -83,6 +84,12 @@ class StreamMessageListViewBuilders {
   /// Receives the number of unread messages below the separator.
   final Widget Function(BuildContext context, int unreadCount)? unreadMessagesSeparator;
 
+  /// Custom builder for the row that shows who is typing.
+  ///
+  /// Receives the users currently typing, never empty. Defaults to
+  /// [StreamMessageListTypingIndicator].
+  final TypingUsersWidgetBuilder? typingIndicator;
+
   /// Custom builder for the scroll-to-bottom button.
   ///
   /// Receives the current unread count and the default tap action.
@@ -136,6 +143,7 @@ class StreamMessageListViewBuilders {
     Widget Function(DateTime dateTime)? floatingDateDivider,
     Widget Function(BuildContext context, Message parentMessage)? threadSeparator,
     Widget Function(BuildContext context, int unreadCount)? unreadMessagesSeparator,
+    TypingUsersWidgetBuilder? typingIndicator,
     Widget Function(int unreadCount, Future<void> Function(int) defaultTapAction)? scrollToBottomButton,
     WidgetBuilder? paginationLoadingIndicator,
     SpacingWidgetBuilder? spacing,
@@ -155,6 +163,7 @@ class StreamMessageListViewBuilders {
       floatingDateDivider: floatingDateDivider ?? this.floatingDateDivider,
       threadSeparator: threadSeparator ?? this.threadSeparator,
       unreadMessagesSeparator: unreadMessagesSeparator ?? this.unreadMessagesSeparator,
+      typingIndicator: typingIndicator ?? this.typingIndicator,
       scrollToBottomButton: scrollToBottomButton ?? this.scrollToBottomButton,
       paginationLoadingIndicator: paginationLoadingIndicator ?? this.paginationLoadingIndicator,
       spacing: spacing ?? this.spacing,
@@ -179,6 +188,7 @@ class StreamMessageListViewBuilders {
         other.floatingDateDivider == floatingDateDivider &&
         other.threadSeparator == threadSeparator &&
         other.unreadMessagesSeparator == unreadMessagesSeparator &&
+        other.typingIndicator == typingIndicator &&
         other.scrollToBottomButton == scrollToBottomButton &&
         other.paginationLoadingIndicator == paginationLoadingIndicator &&
         other.spacing == spacing &&
@@ -200,6 +210,7 @@ class StreamMessageListViewBuilders {
     floatingDateDivider,
     threadSeparator,
     unreadMessagesSeparator,
+    typingIndicator,
     scrollToBottomButton,
     paginationLoadingIndicator,
     spacing,
