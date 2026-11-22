@@ -18,6 +18,7 @@ void main() {
           channels: [
             api.UnreadCountsChannel(
               channelId: 'messaging:general',
+              hasUnread: true,
               lastRead: DateTime.utc(2024, 1, 15, 10, 30),
               unreadCount: 5,
             ),
@@ -78,8 +79,18 @@ void main() {
         _unreadCountsResponse(
           totalUnreadCount: 25,
           channels: [
-            api.UnreadCountsChannel(channelId: 'messaging:one', lastRead: DateTime.utc(2024), unreadCount: 10),
-            api.UnreadCountsChannel(channelId: 'messaging:two', lastRead: DateTime.utc(2024), unreadCount: 15),
+            api.UnreadCountsChannel(
+              channelId: 'messaging:one',
+              hasUnread: true,
+              lastRead: DateTime.utc(2024),
+              unreadCount: 10,
+            ),
+            api.UnreadCountsChannel(
+              channelId: 'messaging:two',
+              hasUnread: true,
+              lastRead: DateTime.utc(2024),
+              unreadCount: 15,
+            ),
           ],
           threads: [
             api.UnreadCountsThread(

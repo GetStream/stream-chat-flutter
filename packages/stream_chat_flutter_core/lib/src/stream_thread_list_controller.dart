@@ -427,6 +427,7 @@ extension ThreadExtension on Thread {
   Thread deleteReply(Message reply) {
     // Skip update if [reply] is not related to this Thread.
     if (parentMessageId != reply.parentId) return this;
+    if (!latestReplies.any((it) => it.id == reply.id)) return this;
 
     final updatedReplies = latestReplies.where((it) => it.id != reply.id);
     final sortedUpdatedReplies = updatedReplies.sortedBy(

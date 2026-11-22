@@ -8,10 +8,16 @@ import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../../stream_chat.dart';
+import '../../core/error/stream_chat_exception.dart';
 
 /// The maximum time the incoming [Event.typingStart] event is valid before a
 /// [Event.typingStop] event is emitted automatically.
 const incomingTypingStartEventTimeout = 7;
+
+// Ends a send or an update waiting on its attachments: one for the same
+// message started after it, or a deletion of the message.
+const _messageCancelled = StreamNetworkException(message: 'Message cancelled', isCancelled: true);
+const _messageDeleted = StreamNetworkException(message: 'Message deleted', isCancelled: true);
 
 /// Class that manages a specific channel.
 ///
@@ -502,6 +508,24 @@ class Channel {
     return state!.channelStateStream.map((cs) => cs.channel?.messageCount).distinct();
   }
 
+  /// The number of members whose users are neither deactivated nor deleted.
+  ///
+  /// Null until a channel query made with `includeActiveMemberCount` loads this
+  /// channel. Once set, it keeps its last value until another such query
+  /// refreshes it.
+  int? get activeMemberCount {
+    _checkInitialized();
+    return state!.channelState.channel?.activeMemberCount;
+  }
+
+  /// The [activeMemberCount] of this channel as a stream.
+  ///
+  /// Emits the current value on listen, then a new value each time it changes.
+  Stream<int?> get activeMemberCountStream {
+    _checkInitialized();
+    return state!.channelStateStream.map((cs) => cs.channel?.activeMemberCount).distinct();
+  }
+
   /// List of filter tags applied to this channel.
   ///
   /// Generally used for filtering channels while querying.
@@ -624,10 +648,7 @@ class Channel {
     String messageId,
     Iterable<String> attachmentIds,
   ) {
-    var message = [
-      ...state!.messages,
-      ...state!.threads.values.expand((messages) => messages),
-    ].firstWhereOrNull((it) => it.id == messageId);
+    var message = _findMessageInLocalState(messageId);
 
     if (message == null) {
       throw const StreamClientException(message: 'Error, Message not found');
@@ -662,7 +683,8 @@ class Channel {
         }
 
         final updatedMessage = message!.copyWith(attachments: newAttachments);
-        state?.updateMessage(updatedMessage);
+        // A message deleted mid-upload is left out of the state.
+        state?.updateMessage(updatedMessage, upsert: false);
         // updating original message for next iteration
         message = message!.merge(updatedMessage);
       }
@@ -736,9 +758,16 @@ class Channel {
     });
   }
 
+  Message? _findMessageInLocalState(String messageId) {
+    final threadMessages = state!.threads.values.expand((messages) => messages);
+    return state!.messages.followedBy(threadMessages).firstWhereOrNull((it) => it.id == messageId);
+  }
+
   final _sendMessageLock = Lock();
 
   /// Send a [message] to this channel.
+  ///
+  /// Also stops the current user's typing.
   ///
   /// If [skipPush] is true the message will not send a push notification.
   ///
@@ -751,13 +780,14 @@ class Channel {
   }) async {
     _checkInitialized();
 
+    _keyStrokeHandler.cancel();
+
     // Clean up stale error messages before sending a new message.
     state?.cleanUpStaleErrorMessages();
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    const cancelled = StreamNetworkException(message: 'Message cancelled', isCancelled: true);
-    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(cancelled);
+    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(_messageCancelled);
 
     final quotedMessage = state!.messages.firstWhereOrNull(
       (m) => m.id == message.quotedMessageId,
@@ -767,7 +797,7 @@ class Channel {
       localCreatedAt: DateTime.now(),
       user: _client.state.currentUser,
       quotedMessage: quotedMessage,
-      state: MessageState.sending,
+      state: .sending(skipPush: skipPush, skipEnrichUrl: skipEnrichUrl),
       attachments: message.attachments.map(
         (it) {
           if (it.uploadState.isSuccess) return it;
@@ -829,6 +859,13 @@ class Channel {
 
       return response;
     } catch (e) {
+      // Cancelled by a deletion or by a newer call for the same message, which
+      // now owns its state.
+      if (e case StreamNetworkException(isCancelled: true)) rethrow;
+
+      if (e is StreamChatException && e.isMessageAlreadyExistsError) {
+        return SendMessageResponse()..message = _markMessageAsSent(message);
+      }
       final failedMessage = message.copyWith(
         // Update the message state to failed.
         state: MessageState.sendingFailed(
@@ -847,9 +884,64 @@ class Channel {
     }
   }
 
+  /// Schedules [message] to be sent to this channel at [scheduledAt].
+  ///
+  /// Until it is sent, the message is not among this channel's messages.
+  /// [ChannelClientState.scheduledMessages] lists it instead, or
+  /// [ChannelClientState.scheduledThreadReplies] for a thread reply.
+  ///
+  /// The [scheduledAt] is rounded up to a whole minute, at least
+  /// [ChannelConfig.scheduledMessagesMinLeadTime] from now. If it has passed by
+  /// the time the message is scheduled, the message is sent right away: it is
+  /// no longer listed, it arrives in this channel like any other message, and
+  /// [ScheduleMessageResponse.scheduledMessage] is null.
+  ///
+  /// Also stops the current user's typing.
+  ///
+  /// Throws a [StreamChatException] if the request fails. If it fails in a
+  /// way that can be retried, the message stays listed as failed with
+  /// [ScheduledMessageFailureReason.requestFailed].
+  ///
+  /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
+  /// attachment of [message] is not uploaded yet. A message to send right
+  /// away goes through [sendMessage].
+  Future<ScheduleMessageResponse> scheduleMessage(
+    Message message, {
+    required DateTime scheduledAt,
+    bool skipPush = false,
+    bool skipEnrichUrl = false,
+  }) {
+    _checkInitialized();
+    _keyStrokeHandler.cancel();
+
+    return _client.scheduleMessage(
+      message,
+      id!,
+      type,
+      scheduledAt: scheduledAt,
+      skipPush: skipPush,
+      skipEnrichUrl: skipEnrichUrl,
+    );
+  }
+
+  Message _markMessageAsSent(Message message) {
+    if (state == null) return message.copyWith(state: MessageState.sent);
+
+    final localStateMessage = _findMessageInLocalState(message.id) ?? message;
+    final sentMessage = localStateMessage.copyWith(
+      createdAt: localStateMessage.remoteCreatedAt ?? localStateMessage.localCreatedAt,
+      state: MessageState.sent,
+    );
+
+    state!.updateMessage(sentMessage);
+    return sentMessage;
+  }
+
   final _updateMessageLock = Lock();
 
   /// Updates the [message] in this channel.
+  ///
+  /// Also stops the current user's typing.
   ///
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually updating the message.
@@ -860,14 +952,15 @@ class Channel {
   }) async {
     _checkInitialized();
 
+    _keyStrokeHandler.cancel();
+
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    const cancelled = StreamNetworkException(message: 'Message cancelled', isCancelled: true);
-    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(cancelled);
+    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(_messageCancelled);
 
     // ignore: parameter_assignments
     message = message.copyWith(
-      state: MessageState.updating,
+      state: .updating(skipPush: skipPush, skipEnrichUrl: skipEnrichUrl),
       localUpdatedAt: DateTime.now(),
       attachments: message.attachments.map(
         (it) {
@@ -919,6 +1012,10 @@ class Channel {
 
       return response;
     } catch (e) {
+      // Cancelled by a newer call for the same message, which now owns its
+      // state.
+      if (e case StreamNetworkException(isCancelled: true)) rethrow;
+
       final failedMessage = message.copyWith(
         // Update the message state to failed.
         state: MessageState.updatingFailed(
@@ -952,12 +1049,11 @@ class Channel {
 
     // Cancelling previous completer in case it's called again in the process
     // Eg. Updating the message while the previous call is in progress.
-    const cancelled = StreamNetworkException(message: 'Message cancelled', isCancelled: true);
-    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(cancelled);
+    _messageAttachmentsUploadCompleter.remove(message.id)?.completeError(_messageCancelled);
 
     // ignore: parameter_assignments
     message = message.copyWith(
-      state: MessageState.updating,
+      state: .partialUpdating(set: set, unset: unset, skipEnrichUrl: skipEnrichUrl),
       localUpdatedAt: DateTime.now(),
     );
 
@@ -1073,17 +1169,18 @@ class Channel {
         },
       );
 
-      final deletedMessage = message.copyWith(
-        deletedForMe: scope is DeleteForMe,
-        state: MessageState.deleted(scope: scope),
-      );
-
-      state?.deleteMessage(deletedMessage, hardDelete: scope.hard);
+      final deletedMessage = _markMessageAsDeleted(message, scope: scope);
       // If hard delete, also delete the uploaded attachments.
       if (scope.hard) _deleteMessageAttachments(deletedMessage);
 
       return response;
     } catch (e) {
+      if (e is StreamChatException && e.isMessageGoneError) {
+        final deletedMessage = _markMessageAsDeleted(message, scope: scope);
+        if (scope.hard) _deleteMessageAttachments(deletedMessage);
+        return EmptyResponse();
+      }
+
       final failedMessage = message.copyWith(
         // Update the message state to failed.
         state: MessageState.deletingFailed(scope: scope),
@@ -1099,26 +1196,53 @@ class Channel {
     }
   }
 
+  Message _markMessageAsDeleted(
+    Message message, {
+    required MessageDeleteScope scope,
+  }) {
+    final deletedMessage = message.copyWith(
+      deletedForMe: scope is DeleteForMe,
+      state: .deleted(scope: scope),
+    );
+
+    state?.deleteMessage(deletedMessage, hardDelete: scope.hard);
+    return deletedMessage;
+  }
+
   // Deletes a local [message] that is not yet sent.
   //
   // This is typically called when a user wants to delete a message that they
   // have composed but not yet sent, or if a message failed to send and the user
   // wants to remove it from their local view.
   void _deleteLocalMessage(Message message) {
-    state?.deleteMessage(
-      hardDelete: true, // Local messages are always hard deleted.
-      message.copyWith(
-        type: MessageType.deleted,
-        localDeletedAt: DateTime.now(),
-        state: MessageState.hardDeleted,
-      ),
+    final deletedMessage = message.copyWith(
+      type: MessageType.deleted,
+      localDeletedAt: DateTime.now(),
+      state: MessageState.hardDeleted,
     );
 
-    // Removing the attachments upload completer to stop the `sendMessage`
-    // waiting for attachments to complete.
+    state?.deleteMessage(deletedMessage, hardDelete: true);
+
+    // Stopping the attachment uploads still running for the message, and the
+    // `sendMessage` or `updateMessage` waiting for them to complete.
+    for (final attachment in message.attachments) {
+      final cancelToken = _cancelableAttachmentUploadRequest[attachment.id];
+      if (cancelToken == null || cancelToken.isCancelled) continue;
+      cancelToken.cancel();
+    }
     final completer = _messageAttachmentsUploadCompleter.remove(message.id);
-    completer?.completeError(
-      const StreamNetworkException(message: 'Message deleted', isCancelled: true),
+    completer?.completeError(_messageDeleted);
+
+    // Nothing else reports the deletion of a message that only exists locally.
+    _client.handleEvent(
+      Event(
+        type: EventType.messageDeleted,
+        cid: cid,
+        channelId: id,
+        channelType: type,
+        message: deletedMessage,
+        hardDelete: true,
+      ),
     );
   }
 
@@ -1240,10 +1364,19 @@ class Channel {
   );
 
   /// Creates or updates a new [draft] for this channel.
+  ///
+  /// Updates the draft in [state] right away, even if the request fails.
   Future<CreateDraftResponse> createDraft(
     DraftMessage draft,
   ) {
     _checkInitialized();
+    final localDraft = Draft(
+      channelCid: cid!,
+      createdAt: DateTime.now(),
+      message: draft,
+      parentId: draft.parentId,
+    );
+    state!.updateDraft(localDraft);
     return _client.createDraft(draft, id!, type);
   }
 
@@ -1261,10 +1394,17 @@ class Channel {
   ///
   /// Optionally, provide a [parentId] to delete the draft for a specific
   /// thread.
+  ///
+  /// Removes the draft from [state], even if the request fails.
   Future<EmptyResponse> deleteDraft({
     String? parentId,
   }) {
     _checkInitialized();
+    final draft = switch (parentId) {
+      final parentId? => state!.threadDraft(parentId),
+      null => state!.draft,
+    };
+    if (draft != null) state!.deleteDraft(draft);
     return _client.deleteDraft(id!, type, parentId: parentId);
   }
 
@@ -1876,15 +2016,12 @@ class Channel {
   /// Messages up to and including the one with [messageId] are marked as read,
   /// or all of them when [messageId] is null.
   ///
-  /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
-  /// unread count locally, on-device, without making a network request, and
-  /// returns a [MarkReadResponse] whose [MarkReadResponse.duration] is `0ms`.
-  /// In that case [messageId] is recorded as the read boundary but does
-  /// **not** narrow the count: the channel is always treated as fully read and
-  /// the count drops to zero. See [ChannelClientState.markReadLocally].
+  /// If [usesLocalUnreadCount] is true, only the local unread count changes,
+  /// and it drops to zero whatever [messageId] is. See
+  /// [ChannelClientState.markReadLocally].
   ///
-  /// Returns a failure if [canUseReadReceipts] is `false`, unless
-  /// [usesLocalUnreadCount] is `true`.
+  /// Returns a failure if [canUseReadReceipts] is false, unless
+  /// [usesLocalUnreadCount] is true.
   Future<Result<MarkReadResponse>> markRead({String? messageId}) async {
     _checkInitialized();
 
@@ -1909,19 +2046,17 @@ class Channel {
   /// Marks this channel as unread for the current user.
   ///
   /// The message with [messageId] and every later one are marked as unread.
-  /// Contrast with [markUnreadByTimestamp], which is exclusive: a message
-  /// created at exactly the given timestamp stays read.
+  /// Unlike [markUnreadByTimestamp], the boundary is inclusive.
   ///
   /// The message must be one of the channel's latest 100 messages; an older one
   /// returns a failure.
   ///
-  /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
-  /// unread count locally, on-device, without making a network request. The
-  /// message must be part of the locally-known messages ([Channel.messages])
-  /// for the count to be recomputed; otherwise this returns a failure.
+  /// If [usesLocalUnreadCount] is true, only the local unread count changes,
+  /// and a message missing from [ChannelClientState.messages] returns a
+  /// failure.
   ///
-  /// Returns a failure if [canUseReadReceipts] is `false`, unless
-  /// [usesLocalUnreadCount] is `true`.
+  /// Returns a failure if [canUseReadReceipts] is false, unless
+  /// [usesLocalUnreadCount] is true.
   Future<Result<void>> markUnread(String messageId) async {
     _checkInitialized();
 
@@ -1966,8 +2101,7 @@ class Channel {
     return _client.markChannelUnread(id!, type, messageId);
   }
 
-  /// Marks the messages of this channel created after [timestamp] as unread for
-  /// the current user.
+  /// Marks this channel unread after [timestamp] for the current user.
   ///
   /// The boundary is **exclusive**: a message created at exactly [timestamp]
   /// stays read. Contrast with [markUnread], which is inclusive of the message
@@ -1975,11 +2109,13 @@ class Channel {
   /// `markUnreadByTimestamp(m.createdAt - 1µs)`, not to
   /// `markUnreadByTimestamp(m.createdAt)`.
   ///
-  /// If [usesLocalUnreadCount] is `true` for this channel, this updates the
-  /// unread count locally, on-device, without making a network request.
+  /// The first message after [timestamp] must exist and be one of the
+  /// channel's latest 100 messages; otherwise this returns a failure.
   ///
-  /// Returns a failure if [canUseReadReceipts] is `false`, unless
-  /// [usesLocalUnreadCount] is `true`.
+  /// If [usesLocalUnreadCount] is true, only the local unread count changes.
+  ///
+  /// Returns a failure if [canUseReadReceipts] is false, unless
+  /// [usesLocalUnreadCount] is true.
   Future<Result<void>> markUnreadByTimestamp(DateTime timestamp) async {
     _checkInitialized();
 
@@ -2010,10 +2146,11 @@ class Channel {
     return _client.markChannelUnreadByTimestamp(id!, type, timestamp);
   }
 
-  /// Marks the thread started by the message with [threadId] as read for the
-  /// current user.
+  /// Marks the thread of [threadId] as read for the current user.
   ///
-  /// Returns a failure if [canUseReadReceipts] is `false`.
+  /// The [threadId] is the id of the thread's parent message.
+  ///
+  /// Returns a failure if [canUseReadReceipts] is false.
   Future<Result<MarkReadResponse>> markThreadRead(String threadId) async {
     _checkInitialized();
 
@@ -2030,10 +2167,11 @@ class Channel {
     return _client.markThreadRead(id!, type, threadId);
   }
 
-  /// Marks the thread started by the message with [threadId] as unread for the
-  /// current user.
+  /// Marks the thread of [threadId] as unread for the current user.
   ///
-  /// Returns a failure if [canUseReadReceipts] is `false`.
+  /// The [threadId] is the id of the thread's parent message.
+  ///
+  /// Returns a failure if [canUseReadReceipts] is false.
   Future<Result<void>> markThreadUnread(String threadId) async {
     _checkInitialized();
 
@@ -2059,11 +2197,16 @@ class Channel {
   }
 
   /// Loads the initial channel state and watches for changes.
+  ///
+  /// If [includeScheduledMessages] is true, the current user's scheduled
+  /// messages in this channel are loaded too. [ClientState.scheduledMessages]
+  /// then lists this channel's current ones, thread replies included.
   Future<ChannelState> watch({
     bool presence = false,
     PaginationParams? messagesPagination,
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
+    bool includeScheduledMessages = false,
   }) {
     return query(
       watch: true,
@@ -2071,6 +2214,7 @@ class Channel {
       messagesPagination: messagesPagination,
       membersPagination: membersPagination,
       watchersPagination: watchersPagination,
+      includeScheduledMessages: includeScheduledMessages,
     );
   }
 
@@ -2159,10 +2303,15 @@ class Channel {
   /// Creates a new channel.
   Future<ChannelState> create() => query(state: false);
 
-  /// Query the API, get messages, members or other channel fields.
+  /// Queries this channel's messages, members and other fields.
   ///
-  /// Set [preferOffline] to true to avoid the API call if the data is already
-  /// in the offline storage.
+  /// If [preferOffline] is true, the channel state is read from the offline
+  /// storage when it has messages for this channel, without an API call.
+  ///
+  /// If [includeScheduledMessages] is true and the state comes from the API,
+  /// the current user's scheduled messages in this channel are loaded too.
+  /// [ClientState.scheduledMessages] then lists this channel's current ones,
+  /// thread replies included.
   Future<ChannelState> query({
     bool state = true,
     bool watch = false,
@@ -2171,6 +2320,7 @@ class Channel {
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
     bool preferOffline = false,
+    bool includeScheduledMessages = false,
   }) async {
     // A prior failed init left the completer errored; reset it so this attempt
     // owns the `initialized` result. Must stay before the first `await` so a
@@ -2211,6 +2361,7 @@ class Channel {
         messagesPagination: messagesPagination,
         membersPagination: membersPagination,
         watchersPagination: watchersPagination,
+        includeScheduledMessages: includeScheduledMessages,
       );
 
       if (_id == null) {
@@ -2225,15 +2376,15 @@ class Channel {
         // Otherwise, we update the existing state with the new channel state.
         //
         // But, before updating the state, we check if we are querying around a
-        // message, If we are, we have to truncate the state to avoid potential
-        // gaps in the message sequence.
+        // message. If we are, we have to clear the loaded messages to avoid
+        // potential gaps in the message sequence.
         final isQueryingAround = switch (messagesPagination) {
           PaginationParams(idAround: _?) => true,
           PaginationParams(createdAtAround: _?) => true,
           _ => false,
         };
 
-        if (isQueryingAround) this.state?.truncate();
+        if (isQueryingAround) this.state?.clearMessages();
         this.state?.updateChannelStateFromServer(channelState);
       }
 

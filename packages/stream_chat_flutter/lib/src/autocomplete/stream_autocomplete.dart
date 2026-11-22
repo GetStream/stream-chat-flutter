@@ -281,6 +281,9 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
   bool _hideOptions = false;
   String _lastFieldText = '';
 
+  // A tap on the options is not a tap outside the field.
+  final _tapRegionGroupId = Object();
+
   // True if the state indicates that the options should be visible.
   bool get _shouldShowOptions {
     return !_hideOptions && _focusNode.hasFocus && _currentQuery != null && _currentTrigger != null;
@@ -500,11 +503,14 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
         final anchor = widget.optionsAlignment._toAnchor();
         final shouldShowOptions = _shouldShowOptions;
         final optionViewBuilder = shouldShowOptions
-            ? TextFieldTapRegion(
-                child: _currentTrigger!.optionsViewBuilder(
-                  context,
-                  _currentQuery!,
-                  _messageComposerController,
+            ? TapRegion(
+                groupId: _tapRegionGroupId,
+                child: TextFieldTapRegion(
+                  child: _currentTrigger!.optionsViewBuilder(
+                    context,
+                    _currentQuery!,
+                    _messageComposerController,
+                  ),
                 ),
               )
             : null;
@@ -513,10 +519,17 @@ class _StreamAutocompleteState extends State<StreamAutocomplete> {
           anchor: anchor,
           visible: shouldShowOptions,
           portalFollower: optionViewBuilder,
-          child: widget.fieldViewBuilder(
-            context,
-            _messageComposerController,
-            _focusNode,
+          child: TapRegion(
+            groupId: _tapRegionGroupId,
+            enabled: shouldShowOptions,
+            // Hide the options the way losing focus does, for a touch outside
+            // that keeps the field focused.
+            onTapOutside: (_) => setState(() => _hideOptions = true),
+            child: widget.fieldViewBuilder(
+              context,
+              _messageComposerController,
+              _focusNode,
+            ),
           ),
         );
       },
@@ -615,6 +628,9 @@ class _TopBorderShape extends ShapeBorder {
 }
 
 /// A helper widget used to show the options of a [StreamAutocomplete].
+///
+/// Its options stay clear of the display cutouts and system bars at the sides
+/// of the screen, as reported by [MediaQuery]'s padding.
 class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
   /// Creates a [StreamAutocompleteOptions] widget.
   const StreamAutocompleteOptions({
@@ -669,31 +685,33 @@ class StreamAutocompleteOptions<T extends Object> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final height = MediaQuery.of(context).size.height;
+    final height = MediaQuery.sizeOf(context).height;
+    final content = Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (headerBuilder != null) headerBuilder!(context),
+        LimitedBox(
+          maxHeight: maxHeight ?? height * 0.5,
+          child: ListView.builder(
+            shrinkWrap: true,
+            padding: EdgeInsets.zero,
+            itemCount: options.length,
+            itemBuilder: (context, index) {
+              final option = options.elementAt(index);
+              return optionBuilder(context, option);
+            },
+          ),
+        ),
+      ],
+    );
+
     return Card(
       margin: margin,
       elevation: elevation,
       color: color ?? context.streamColorScheme.backgroundElevation1,
       shape: shape,
       clipBehavior: clipBehavior,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          if (headerBuilder != null) headerBuilder!(context),
-          LimitedBox(
-            maxHeight: maxHeight ?? height * 0.5,
-            child: ListView.builder(
-              shrinkWrap: true,
-              padding: EdgeInsets.zero,
-              itemCount: options.length,
-              itemBuilder: (context, index) {
-                final option = options.elementAt(index);
-                return optionBuilder(context, option);
-              },
-            ),
-          ),
-        ],
-      ),
+      child: StreamSafeArea(top: false, bottom: false, child: content),
     );
   }
 }

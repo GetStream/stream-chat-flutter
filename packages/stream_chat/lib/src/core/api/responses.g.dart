@@ -60,17 +60,11 @@ QueryBannedUsersResponse _$QueryBannedUsersResponseFromJson(
   ..duration = json['duration'] as String?
   ..bans = (json['bans'] as List<dynamic>?)?.map((e) => BannedUser.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-QueryReactionsResponse _$QueryReactionsResponseFromJson(
-  Map<String, dynamic> json,
-) => QueryReactionsResponse()
+QueryReactionsResponse _$QueryReactionsResponseFromJson(Map<String, dynamic> json) => QueryReactionsResponse()
   ..duration = json['duration'] as String?
   ..reactions =
       (json['reactions'] as List<dynamic>?)
-          ?.map(
-            (e) => const ReactionV1JsonConverter().fromJson(
-              e as Map<String, dynamic>,
-            ),
-          )
+          ?.map((e) => const ReactionV1JsonConverter().fromJson(e as Map<String, dynamic>))
           .toList() ??
       []
   ..next = json['next'] as String?;
@@ -82,14 +76,10 @@ QueryRepliesResponse _$QueryRepliesResponseFromJson(
   ..messages =
       (json['messages'] as List<dynamic>?)?.map((e) => Message.fromJson(e as Map<String, dynamic>)).toList() ?? [];
 
-SendReactionResponse _$SendReactionResponseFromJson(
-  Map<String, dynamic> json,
-) => SendReactionResponse()
+SendReactionResponse _$SendReactionResponseFromJson(Map<String, dynamic> json) => SendReactionResponse()
   ..duration = json['duration'] as String?
   ..message = Message.fromJson(json['message'] as Map<String, dynamic>)
-  ..reaction = const ReactionV1JsonConverter().fromJson(
-    json['reaction'] as Map<String, dynamic>,
-  );
+  ..reaction = const ReactionV1JsonConverter().fromJson(json['reaction'] as Map<String, dynamic>);
 
 UpdateMessageResponse _$UpdateMessageResponseFromJson(
   Map<String, dynamic> json,
@@ -219,6 +209,52 @@ QueryDraftsResponse _$QueryDraftsResponseFromJson(Map<String, dynamic> json) => 
   ..drafts = (json['drafts'] as List<dynamic>?)?.map((e) => Draft.fromJson(e as Map<String, dynamic>)).toList() ?? []
   ..next = json['next'] as String?;
 
+QueryScheduledMessagesResponse _$QueryScheduledMessagesResponseFromJson(
+  Map<String, dynamic> json,
+) => QueryScheduledMessagesResponse()
+  ..duration = json['duration'] as String?
+  ..scheduledMessages =
+      (json['scheduled_messages'] as List<dynamic>?)
+          ?.map((e) => ScheduledMessage.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      []
+  ..next = json['next'] as String?;
+
+ScheduleMessageResponse _$ScheduleMessageResponseFromJson(
+  Map<String, dynamic> json,
+) => ScheduleMessageResponse()
+  ..duration = json['duration'] as String?
+  ..message = Message.fromJson(json['message'] as Map<String, dynamic>)
+  ..scheduledMessage = json['scheduled_message'] == null
+      ? null
+      : ScheduledMessage.fromJson(
+          json['scheduled_message'] as Map<String, dynamic>,
+        );
+
+UpdateScheduledMessageResponse _$UpdateScheduledMessageResponseFromJson(
+  Map<String, dynamic> json,
+) => UpdateScheduledMessageResponse()
+  ..duration = json['duration'] as String?
+  ..scheduledMessage = ScheduledMessage.fromJson(
+    json['scheduled_message'] as Map<String, dynamic>,
+  );
+
+DeleteScheduledMessageResponse _$DeleteScheduledMessageResponseFromJson(
+  Map<String, dynamic> json,
+) => DeleteScheduledMessageResponse()
+  ..duration = json['duration'] as String?
+  ..scheduledMessage = ScheduledMessage.fromJson(
+    json['scheduled_message'] as Map<String, dynamic>,
+  );
+
+SendScheduledMessageNowResponse _$SendScheduledMessageNowResponseFromJson(
+  Map<String, dynamic> json,
+) => SendScheduledMessageNowResponse()
+  ..duration = json['duration'] as String?
+  ..scheduledMessage = ScheduledMessage.fromJson(
+    json['scheduled_message'] as Map<String, dynamic>,
+  );
+
 UpsertPushPreferencesResponse _$UpsertPushPreferencesResponseFromJson(
   Map<String, dynamic> json,
 ) => UpsertPushPreferencesResponse()
@@ -240,12 +276,9 @@ UpsertPushPreferencesResponse _$UpsertPushPreferencesResponseFromJson(
       ) ??
       {};
 
-GetActiveLiveLocationsResponse _$GetActiveLiveLocationsResponseFromJson(
-  Map<String, dynamic> json,
-) => GetActiveLiveLocationsResponse()
-  ..duration = json['duration'] as String?
-  ..activeLiveLocations = (json['active_live_locations'] as List<dynamic>)
-      .map(
-        (e) => const LocationV1JsonConverter().fromJson(e as Map<String, dynamic>),
-      )
-      .toList();
+GetActiveLiveLocationsResponse _$GetActiveLiveLocationsResponseFromJson(Map<String, dynamic> json) =>
+    GetActiveLiveLocationsResponse()
+      ..duration = json['duration'] as String?
+      ..activeLiveLocations = (json['active_live_locations'] as List<dynamic>)
+          .map((e) => const LocationV1JsonConverter().fromJson(e as Map<String, dynamic>))
+          .toList();

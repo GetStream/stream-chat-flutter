@@ -142,7 +142,7 @@ class DefaultStreamLinkPreviewAttachment extends StatelessWidget {
                       color: colorScheme.textPrimary,
                     ),
                   ),
-                if (urlAttachment.titleLink case final titleLink?)
+                if (urlAttachment.titleLink ?? urlAttachment.ogScrapeUrl case final link?)
                   Row(
                     mainAxisSize: .min,
                     spacing: spacing.xxs,
@@ -150,7 +150,7 @@ class DefaultStreamLinkPreviewAttachment extends StatelessWidget {
                       Icon(icons.link, size: 12),
                       Expanded(
                         child: Text(
-                          titleLink,
+                          link,
                           maxLines: 1,
                           overflow: .ellipsis,
                           style: textTheme.metadataDefault.copyWith(

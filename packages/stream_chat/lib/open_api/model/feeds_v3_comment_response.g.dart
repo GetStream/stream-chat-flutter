@@ -59,7 +59,7 @@ FeedsV3CommentResponse _$FeedsV3CommentResponseFromJson(
   ),
   replyCount: (json['reply_count'] as num).toInt(),
   score: (json['score'] as num).toInt(),
-  status: json['status'] as String,
+  status: json['status'] as CommentStatus,
   text: json['text'] as String?,
   updatedAt: const StreamDateTimeConverter().fromJson(
     json['updated_at'] as Object,

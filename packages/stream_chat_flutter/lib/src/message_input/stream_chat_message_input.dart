@@ -273,15 +273,8 @@ class _StreamChatMessageInputContent extends StatelessWidget {
           contentInsertionConfiguration: widget.contentInsertionConfiguration,
         );
 
-        return Container(
+        return Padding(
           padding: EdgeInsets.only(top: spacing.md, right: spacing.md, left: spacing.md),
-          decoration: widget.isFloating
-              ? null
-              : BoxDecoration(
-                  border: Border(
-                    top: BorderSide(color: context.streamColorScheme.borderDefault),
-                  ),
-                ),
           child: Semantics(
             container: true,
             explicitChildNodes: true,

@@ -1,3 +1,6 @@
+/// @docImport '../models/channel_model.dart';
+library;
+
 import 'dart:convert';
 
 import '../../ws/events/event.dart';
@@ -16,7 +19,11 @@ class ChannelApi {
 
   String _getChannelUrl(String channelId, String channelType) => '/channels/$channelType/$channelId';
 
-  /// Query the API, get messages, members or other channel fields
+  /// Queries a channel's messages, members and other fields.
+  ///
+  /// If [includeScheduledMessages] is true, the result's
+  /// [ChannelState.scheduledMessages] lists the current user's scheduled
+  /// messages in the channel, thread replies included.
   Future<ChannelState> queryChannel(
     String channelType, {
     bool state = true,
@@ -27,6 +34,7 @@ class ChannelApi {
     PaginationParams? messagesPagination,
     PaginationParams? membersPagination,
     PaginationParams? watchersPagination,
+    bool includeScheduledMessages = false,
   }) async {
     var channelPath = '/channels/$channelType';
     if (channelId != null) channelPath = '$channelPath/$channelId';
@@ -40,6 +48,7 @@ class ChannelApi {
         if (messagesPagination != null) 'messages': messagesPagination,
         if (membersPagination != null) 'members': membersPagination,
         if (watchersPagination != null) 'watchers': watchersPagination,
+        if (includeScheduledMessages) 'include_scheduled_messages': true,
       },
     );
     return ChannelState.fromJson(response.data);
@@ -52,6 +61,13 @@ class ChannelApi {
   /// provided. When a predefined filter is used,
   /// [QueryChannelsResponse.predefinedFilter] carries the filter and sort it
   /// resolved to.
+  ///
+  /// If [includeScheduledMessages] is true, each returned channel's
+  /// [ChannelState.scheduledMessages] lists the current user's scheduled
+  /// messages in it, thread replies included.
+  ///
+  /// If [includeActiveMemberCount] is true, each returned channel has its
+  /// [ChannelModel.activeMemberCount] set.
   Future<QueryChannelsResponse> queryChannels({
     ChannelFilter? filter,
     List<ChannelSort>? sort,
@@ -63,6 +79,8 @@ class ChannelApi {
     bool state = true,
     bool watch = true,
     bool presence = false,
+    bool includeScheduledMessages = false,
+    bool includeActiveMemberCount = false,
     PaginationParams paginationParams = const PaginationParams(),
   }) async {
     final response = await _client.get(
@@ -82,6 +100,8 @@ class ChannelApi {
           if (sortValues != null) 'sort_values': sortValues,
           if (memberLimit != null) 'member_limit': memberLimit,
           if (messageLimit != null) 'message_limit': messageLimit,
+          if (includeScheduledMessages) 'include_scheduled_messages': true,
+          if (includeActiveMemberCount) 'include_active_member_count': true,
 
           // pagination
           ...paginationParams.toJson(),

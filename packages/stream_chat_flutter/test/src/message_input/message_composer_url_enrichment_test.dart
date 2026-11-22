@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:record/record.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
+import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../fakes.dart';
 import '../mocks.dart';
@@ -162,6 +163,31 @@ void main() {
 
       expect(controller.ogAttachment?.ogScrapeUrl, 'https://example.com');
       verify(() => client.enrichUrl('https://example.com')).called(1);
+    });
+
+    testWidgets('keeps the input focused when the link preview is removed', (tester) async {
+      await enrichUrlFrom(tester, 'look https://example.com');
+      final preview = find.byType(core.StreamMessageComposerLinkPreviewAttachment);
+
+      tester.widget<core.StreamMessageComposerLinkPreviewAttachment>(preview).props.onRemovePressed!();
+      await tester.pumpAndSettle();
+
+      expect(preview, findsNothing);
+      expect(tester.widget<EditableText>(find.byType(EditableText)).focusNode.hasFocus, isTrue);
+    });
+
+    testWidgets('shows a scraped image as a single link preview', (tester) async {
+      const url = 'https://example.com/photo.jpg';
+      when(() => client.enrichUrl(any())).thenAnswer(
+        (_) async => const Result.success(
+          OGAttachmentResponse(duration: '1ms', type: 'image', imageUrl: url, ogScrapeUrl: url),
+        ),
+      );
+
+      await enrichUrlFrom(tester, 'look $url');
+
+      expect(find.byType(StreamMessageComposerAttachmentList), findsNothing);
+      expect(find.text(url), findsOneWidget);
     });
   });
 }
