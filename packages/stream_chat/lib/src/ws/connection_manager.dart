@@ -55,6 +55,9 @@ class ConnectionManager with Disposable {
   // The attempt everyone opening a connection waits on, while one is under way.
   final _opening = InFlightCache<String, HealthCheckEvent>();
 
+  // Whether the connection being opened may still be tried again with a new token.
+  var _canRetryWithNewToken = false;
+
   /// Every frame received on the connection, as it arrives.
   EventEmitter<WsEvent> get events => _ws.events;
 
@@ -71,6 +74,11 @@ class ConnectionManager with Disposable {
   Stream<ConnectionStatus> get statusStream => connectionState.map(_statusOf).distinct();
 
   ConnectionStatus _statusOf(WebSocketConnectionState state) {
+    // A refusal the next attempt answers with a new token is still part of connecting.
+    if (state case Disconnecting(:final source) || Disconnected(:final source)) {
+      if (_willRetryWithNewToken(source)) return .connecting;
+    }
+
     return .fromState(state, isRecovering: _recovery.isRecovering);
   }
 
@@ -99,9 +107,11 @@ class ConnectionManager with Disposable {
 
   /// Opens a connection for [user], completing with the health check that established it.
   ///
-  /// Set [includeUserDetails] to send the user's full details, which creates or updates the user.
+  /// If [includeUserDetails] is true, the user's full details are sent, which creates or updates
+  /// the user. Completes with the attempt already under way when there is one for [user].
   ///
-  /// Completes with the attempt already under way when there is one for [user].
+  /// A connection refused because its token expired is tried once more with a new token, unless
+  /// the token provider is static.
   ///
   /// Throws a [StateError] when a connection is already open, or one is being opened for another
   /// user, and a [StreamChatException] when the connection is refused.
@@ -162,9 +172,21 @@ class ConnectionManager with Disposable {
     user.id,
     () async {
       final session = _session;
+      _canRetryWithNewToken = true;
 
-      // Subscribed before connecting: the frame that establishes the connection is the first health
-      // check, and the only one carrying the signed-in user.
+      try {
+        return await _attempt(user, session);
+      } finally {
+        _canRetryWithNewToken = false;
+      }
+    },
+  );
+
+  // Opens the connection, trying once more with a new token when an expired one is refused.
+  Future<HealthCheckEvent> _attempt(OwnUser user, _Session? session) async {
+    while (true) {
+      // Subscribed before connecting: the frame that establishes the connection is the first
+      // health check, and the only one carrying the signed-in user.
       final established = events.waitFor<HealthCheckEvent>();
 
       // Not awaited: the state has moved on by the time this returns, so the closure waited on
@@ -175,6 +197,13 @@ class ConnectionManager with Disposable {
       if (settledState case Disconnected(:final source)) {
         // Otherwise it fails unobserved when the socket closes without a frame.
         established.ignore();
+
+        // The next attempt loads a new token in place of the refused one.
+        if (_willRetryWithNewToken(source)) {
+          _canRetryWithNewToken = false;
+          continue;
+        }
+
         _refuse(user, source);
       }
 
@@ -184,8 +213,19 @@ class ConnectionManager with Disposable {
       session?.establishedWith(event);
 
       return event;
-    },
-  );
+    }
+  }
+
+  // Whether the attempt refused with [source] is tried again with a new token.
+  bool _willRetryWithNewToken(DisconnectionSource source) {
+    if (!_canRetryWithNewToken) return false;
+    if (_tokenManager.usesStaticProvider) return false;
+
+    return switch (source) {
+      ServerInitiated(error: StreamApiException(isTokenExpired: true)) => true,
+      _ => false,
+    };
+  }
 
   // Raises why a connection was refused, the way a rejected request is raised.
   Never _refuse(OwnUser user, DisconnectionSource source) {

@@ -17,15 +17,6 @@ void main() {
     expect(find.byType(StreamMessageComposer), findsOneWidget);
   });
 
-  testWidgets('renders a typing indicator above the composer', (tester) async {
-    await _pumpChannelPage(tester, surfaceStyle: StreamSurfaceStyle.floating);
-
-    final indicator = tester.getRect(_bodyTypingIndicator());
-    final composer = tester.getRect(find.byType(StreamMessageComposer));
-
-    expect(indicator.bottom, lessThanOrEqualTo(composer.top));
-  });
-
   testWidgets('tapping the channel avatar invokes onChannelAvatarPressed', (tester) async {
     Channel? pressedChannel;
     await _pumpChannelPage(tester, onChannelAvatarPressed: (_, channel) => pressedChannel = channel);
@@ -34,6 +25,18 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(pressedChannel, isNotNull);
+  });
+
+  testWidgets('shows a back button by default', (tester) async {
+    await _pumpChannelPage(tester);
+
+    expect(find.byType(StreamBackButton), findsOneWidget);
+  });
+
+  testWidgets('hides the back button when automaticallyImplyLeading is false', (tester) async {
+    await _pumpChannelPage(tester, automaticallyImplyLeading: false);
+
+    expect(find.byType(StreamBackButton), findsNothing);
   });
 
   testWidgets('tapping back invokes onBackPressed', (tester) async {
@@ -228,21 +231,6 @@ StreamMessageListView _messageListView(WidgetTester tester) {
   return tester.widget<StreamMessageListView>(find.byType(StreamMessageListView));
 }
 
-// The typing indicator the page renders in its body.
-//
-// The header renders one of its own as part of the channel subtitle, so the
-// plain type finder is ambiguous.
-Finder _bodyTypingIndicator() {
-  final inHeader = find
-      .descendant(of: find.byType(StreamChannelHeader), matching: find.byType(StreamTypingIndicator))
-      .evaluate()
-      .toSet();
-
-  return find.byElementPredicate((element) {
-    return element.widget is StreamTypingIndicator && !inHeader.contains(element);
-  });
-}
-
 // The gesture detector wrapping the header's channel avatar.
 Finder _channelAvatarTapTarget() {
   return find.ancestor(
@@ -267,6 +255,7 @@ Future<void> _pumpChannelPage(
   StreamSurfaceStyle? composerSurfaceStyle,
   StreamSurfaceStyle? headerSurfaceStyle,
   void Function(BuildContext context, Channel channel)? onChannelAvatarPressed,
+  bool automaticallyImplyLeading = true,
   VoidCallback? onBackPressed,
   bool pushOntoARoute = false,
 }) async {
@@ -317,6 +306,7 @@ Future<void> _pumpChannelPage(
 
   final page = StreamChannelPage(
     onChannelAvatarPressed: onChannelAvatarPressed,
+    automaticallyImplyLeading: automaticallyImplyLeading,
     onBackPressed: onBackPressed,
   );
 

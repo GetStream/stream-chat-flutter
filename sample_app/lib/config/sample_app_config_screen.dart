@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import 'sample_app_config.dart';
+import 'settings_widgets.dart';
 
 /// Whether dynamic color extraction is supported on the current platform.
 ///
@@ -29,7 +30,7 @@ class SampleAppConfigScreen extends StatelessWidget {
       body: Builder(
         builder: (context) {
           final topInset = MediaQuery.paddingOf(context).top;
-          return SingleChildScrollView(
+          final content = SingleChildScrollView(
             padding: EdgeInsets.symmetric(horizontal: spacing.md) + EdgeInsets.only(top: topInset),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -37,11 +38,11 @@ class SampleAppConfigScreen extends StatelessWidget {
                 SizedBox(height: spacing.xs),
 
                 // ── Appearance ──
-                const _SectionHeader(title: 'Appearance'),
+                const SettingsSectionHeader(title: 'Appearance'),
                 SizedBox(height: spacing.xs),
-                _SettingsCard(
+                SettingsCard(
                   children: [
-                    _SegmentedRow<ThemeMode>(
+                    SettingsSegmentedRow<ThemeMode>(
                       title: 'Theme',
                       value: config.themeMode,
                       segments: const {
@@ -49,15 +50,15 @@ class SampleAppConfigScreen extends StatelessWidget {
                         ThemeMode.light: 'Light',
                         ThemeMode.dark: 'Dark',
                       },
-                      segmentIcons: const {
+                      segmentIcons: {
                         ThemeMode.system: Icons.brightness_auto_outlined,
-                        ThemeMode.light: Icons.light_mode_outlined,
-                        ThemeMode.dark: Icons.dark_mode_outlined,
+                        ThemeMode.light: icons.lightMode,
+                        ThemeMode.dark: icons.darkMode,
                       },
                       onChanged: (v) => SampleAppConfig.update(context, config.copyWith(themeMode: v)),
                     ),
                     _SurfaceStyleRows(config: config),
-                    _SwitchRow(
+                    SettingsSwitchRow(
                       icon: Icons.palette_outlined,
                       title: 'Dynamic Color',
                       subtitle: _dynamicColorSupported
@@ -69,7 +70,7 @@ class SampleAppConfigScreen extends StatelessWidget {
                           : null,
                     ),
                     _LocaleRow(config: config),
-                    _SwitchRow(
+                    SettingsSwitchRow(
                       icon: icons.reorder,
                       title: 'Force RTL',
                       subtitle: 'Right-to-left layout direction',
@@ -82,39 +83,46 @@ class SampleAppConfigScreen extends StatelessWidget {
                 SizedBox(height: spacing.xl),
 
                 // ── Features ──
-                const _SectionHeader(title: 'Features'),
+                const SettingsSectionHeader(title: 'Features'),
                 SizedBox(height: spacing.xs),
-                _SettingsCard(
+                SettingsCard(
                   children: [
-                    _SwitchRow(
+                    SettingsSwitchRow(
                       icon: icons.bell,
                       title: 'Reminders',
                       subtitle: 'Remind me, Save for later, Edit',
                       value: config.enableReminderActions,
                       onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableReminderActions: v)),
                     ),
-                    _SwitchRow(
+                    SettingsSwitchRow(
+                      icon: icons.clock,
+                      title: 'Scheduled Messages',
+                      subtitle: 'List and manage scheduled messages',
+                      value: config.enableScheduledMessages,
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableScheduledMessages: v)),
+                    ),
+                    SettingsSwitchRow(
                       icon: icons.delete,
                       title: 'Delete for Me',
                       subtitle: 'Delete message for current user',
                       value: config.enableDeleteForMe,
                       onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableDeleteForMe: v)),
                     ),
-                    _SwitchRow(
+                    SettingsSwitchRow(
                       icon: icons.info,
                       title: 'Message Info',
                       subtitle: 'Show delivery info sheet',
                       value: config.enableMessageInfo,
                       onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableMessageInfo: v)),
                     ),
-                    _SwitchRow(
+                    SettingsSwitchRow(
                       icon: icons.translate,
                       title: 'Message Translation',
                       subtitle: 'Show translations, annotate them, and translate on request',
                       value: config.enableMessageTranslation,
                       onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enableMessageTranslation: v)),
                     ),
-                    _SwitchRow(
+                    SettingsSwitchRow(
                       icon: icons.location,
                       title: 'Location Sharing',
                       subtitle: 'Attachment builder and picker',
@@ -127,18 +135,18 @@ class SampleAppConfigScreen extends StatelessWidget {
                 SizedBox(height: spacing.xl),
 
                 // ── Chat ──
-                const _SectionHeader(title: 'Chat'),
+                const SettingsSectionHeader(title: 'Chat'),
                 SizedBox(height: spacing.xs),
-                _SettingsCard(
+                SettingsCard(
                   children: [
-                    _SwitchRow(
+                    SettingsSwitchRow(
                       icon: icons.edit,
                       title: 'Draft Messages',
                       subtitle: 'Enable draft message saving',
                       value: config.draftMessagesEnabled,
                       onChanged: (v) => SampleAppConfig.update(context, config.copyWith(draftMessagesEnabled: v)),
                     ),
-                    _SwitchRow(
+                    SettingsSwitchRow(
                       icon: icons.emoji,
                       title: 'Unique Reactions',
                       subtitle: 'New reaction replaces existing',
@@ -151,11 +159,11 @@ class SampleAppConfigScreen extends StatelessWidget {
                 SizedBox(height: spacing.xl),
 
                 // ── Reactions ──
-                const _SectionHeader(title: 'Reactions'),
+                const SettingsSectionHeader(title: 'Reactions'),
                 SizedBox(height: spacing.xs),
-                _SettingsCard(
+                SettingsCard(
                   children: [
-                    _SegmentedRow<StreamReactionsType?>(
+                    SettingsSegmentedRow<StreamReactionsType?>(
                       title: 'Reaction Type',
                       value: config.reactionType,
                       segments: const {
@@ -165,7 +173,7 @@ class SampleAppConfigScreen extends StatelessWidget {
                       },
                       onChanged: (v) => SampleAppConfig.update(context, config.copyWith(reactionType: v)),
                     ),
-                    _SegmentedRow<StreamReactionsPosition?>(
+                    SettingsSegmentedRow<StreamReactionsPosition?>(
                       title: 'Reaction Position',
                       value: config.reactionPosition,
                       segments: const {
@@ -182,119 +190,13 @@ class SampleAppConfigScreen extends StatelessWidget {
               ],
             ),
           );
+
+          return SafeArea(top: false, bottom: false, child: content);
         },
       ),
     );
   }
 }
-
-// ---------------------------------------------------------------------------
-// Section header
-// ---------------------------------------------------------------------------
-
-class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.title});
-
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
-    final textTheme = context.streamTextTheme;
-    final spacing = context.streamSpacing;
-
-    return Padding(
-      padding: EdgeInsets.only(left: spacing.xxs),
-      child: Text(
-        title.toUpperCase(),
-        style: textTheme.captionEmphasis.copyWith(
-          color: colorScheme.textTertiary,
-          letterSpacing: 0.8,
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Settings card — canonical DS pattern with foregroundDecoration for borders
-// ---------------------------------------------------------------------------
-
-class _SettingsCard extends StatelessWidget {
-  const _SettingsCard({required this.children});
-
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
-    final radius = context.streamRadius;
-
-    return Container(
-      clipBehavior: Clip.antiAlias,
-      decoration: BoxDecoration(
-        color: colorScheme.backgroundSurfaceCard,
-        borderRadius: BorderRadius.all(radius.lg),
-      ),
-      foregroundDecoration: BoxDecoration(
-        borderRadius: BorderRadius.all(radius.lg),
-        border: Border.all(color: colorScheme.borderSubtle),
-      ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            for (var i = 0; i < children.length; i++) ...[
-              children[i],
-              if (i < children.length - 1) Divider(height: 1, color: colorScheme.borderSubtle),
-            ],
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Switch row — plain icon, DS list tile + switch
-// ---------------------------------------------------------------------------
-
-class _SwitchRow extends StatelessWidget {
-  const _SwitchRow({
-    required this.icon,
-    required this.title,
-    this.subtitle,
-    required this.value,
-    required this.onChanged,
-  });
-
-  final IconData icon;
-  final String title;
-  final String? subtitle;
-  final bool value;
-
-  /// Called when the switch is toggled. Pass `null` to disable the row.
-  final ValueChanged<bool>? onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    final enabled = onChanged != null;
-
-    return StreamListTile(
-      enabled: enabled,
-      leading: Icon(icon, size: 24),
-      title: Text(title),
-      subtitle: subtitle != null ? Text(subtitle!) : null,
-      trailing: StreamSwitch(value: value, onChanged: onChanged),
-      onTap: enabled ? () => onChanged!(!value) : null,
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Segmented row
-// ---------------------------------------------------------------------------
 
 // The app-wide surface style, plus the per-component overrides folded behind a
 // disclosure so they don't crowd the section until they're wanted.
@@ -350,7 +252,7 @@ class _SurfaceStyleRowsState extends State<_SurfaceStyleRows> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        _SegmentedRow<StreamSurfaceStyle>(
+        SettingsSegmentedRow<StreamSurfaceStyle>(
           title: 'Surface Style',
           value: config.surfaceStyle,
           segments: const {
@@ -379,7 +281,7 @@ class _SurfaceStyleRowsState extends State<_SurfaceStyleRows> {
         if (_expanded)
           for (final override in overrides) ...[
             divider(),
-            _SegmentedRow<StreamSurfaceStyle?>(
+            SettingsSegmentedRow<StreamSurfaceStyle?>(
               title: override.title,
               value: override.value,
               segments: _componentSurfaceSegments,
@@ -427,73 +329,6 @@ const _componentSurfaceSegments = <StreamSurfaceStyle?, String>{
   StreamSurfaceStyle.floating: 'Floating',
 };
 
-class _SegmentedRow<T> extends StatelessWidget {
-  const _SegmentedRow({
-    required this.title,
-    required this.value,
-    required this.segments,
-    required this.onChanged,
-    this.segmentIcons,
-  });
-
-  final String title;
-  final T value;
-  final Map<T, String> segments;
-  final ValueChanged<T> onChanged;
-  final Map<T, IconData>? segmentIcons;
-
-  @override
-  Widget build(BuildContext context) {
-    final colorScheme = context.streamColorScheme;
-    final textTheme = context.streamTextTheme;
-    final spacing = context.streamSpacing;
-    final radius = context.streamRadius;
-
-    return Padding(
-      padding: EdgeInsets.symmetric(horizontal: spacing.md, vertical: spacing.sm),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: spacing.xs,
-        children: [
-          Text(title, style: textTheme.bodyDefault.copyWith(color: colorScheme.textPrimary)),
-          SizedBox(
-            width: double.infinity,
-            child: SegmentedButton<T>(
-              showSelectedIcon: false,
-              style: ButtonStyle(
-                textStyle: WidgetStatePropertyAll(textTheme.captionEmphasis),
-                foregroundColor: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) return colorScheme.textOnAccent;
-                  return colorScheme.textPrimary;
-                }),
-                backgroundColor: WidgetStateProperty.resolveWith((states) {
-                  if (states.contains(WidgetState.selected)) return colorScheme.accentPrimary;
-                  return colorScheme.backgroundSurfaceSubtle;
-                }),
-                side: WidgetStatePropertyAll(BorderSide(color: colorScheme.borderDefault)),
-                shape: WidgetStatePropertyAll(
-                  RoundedRectangleBorder(borderRadius: BorderRadius.all(radius.md)),
-                ),
-                padding: const WidgetStatePropertyAll(EdgeInsets.symmetric(vertical: 10, horizontal: 12)),
-              ),
-              segments: [
-                for (final entry in segments.entries)
-                  ButtonSegment(
-                    value: entry.key,
-                    label: Text(entry.value),
-                    icon: segmentIcons?[entry.key] != null ? Icon(segmentIcons![entry.key], size: 16) : null,
-                  ),
-              ],
-              selected: {value},
-              onSelectionChanged: (selected) => onChanged(selected.first),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 // ---------------------------------------------------------------------------
 // Locale row
 // ---------------------------------------------------------------------------
@@ -519,23 +354,12 @@ class _LocaleRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final spacing = context.streamSpacing;
-    final colorScheme = context.streamColorScheme;
-    final textTheme = context.streamTextTheme;
-    final icons = context.streamIcons;
     final currentLabel = config.locale == null ? 'System' : _localeLabels[config.locale!.languageCode] ?? 'System';
 
-    return StreamListTile(
-      leading: Icon(icons.translate, size: 24),
-      title: const Text('Language'),
-      trailing: Row(
-        mainAxisSize: MainAxisSize.min,
-        spacing: spacing.xxs,
-        children: [
-          Text(currentLabel, style: textTheme.captionEmphasis.copyWith(color: colorScheme.textTertiary)),
-          Icon(Icons.chevron_right_outlined, size: 20, color: colorScheme.textTertiary),
-        ],
-      ),
+    return SettingsValueRow(
+      icon: context.streamIcons.translate,
+      title: 'Language',
+      value: currentLabel,
       onTap: () => _showLocalePicker(context),
     );
   }
@@ -544,7 +368,6 @@ class _LocaleRow extends StatelessWidget {
     final colorScheme = context.streamColorScheme;
     final textTheme = context.streamTextTheme;
     final spacing = context.streamSpacing;
-    final radius = context.streamRadius;
 
     final items = [
       const _LocaleOption(label: 'System', code: null),
@@ -556,94 +379,61 @@ class _LocaleRow extends StatelessWidget {
       ),
     ];
 
-    showModalBottomSheet<void>(
+    showStreamSheet<void>(
       context: context,
-      isScrollControlled: true,
-      backgroundColor: colorScheme.backgroundSurfaceCard,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: radius.xxl),
-      ),
-      builder: (sheetContext) {
-        return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.5,
-          maxChildSize: 0.8,
-          minChildSize: 0.3,
-          builder: (context, scrollController) => SafeArea(
-            child: Column(
-              children: [
-                Padding(
-                  padding: EdgeInsets.only(top: spacing.md, bottom: spacing.sm),
-                  child: Container(
-                    width: 32,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: colorScheme.borderDefault,
-                      borderRadius: BorderRadius.all(radius.max),
-                    ),
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(bottom: spacing.sm),
-                  child: Text(
-                    'Select Language',
-                    style: textTheme.headingSm.copyWith(color: colorScheme.textPrimary),
-                  ),
-                ),
-                Divider(height: 1, color: colorScheme.borderSubtle),
-                Expanded(
-                  child: ListView.separated(
-                    controller: scrollController,
-                    padding: EdgeInsets.symmetric(vertical: spacing.xs),
-                    itemCount: items.length,
-                    separatorBuilder: (_, __) => Divider(
-                      height: 1,
-                      indent: spacing.lg,
-                      endIndent: spacing.lg,
-                      color: colorScheme.borderSubtle,
-                    ),
-                    itemBuilder: (context, index) {
-                      final item = items[index];
-                      final isSelected = item.code == config.locale?.languageCode;
+      isDismissible: true,
+      builder: (sheetContext, scrollController) => Column(
+        children: [
+          StreamSheetHeader(title: const Text('Select Language')),
+          Expanded(
+            child: ListView.separated(
+              controller: scrollController,
+              itemCount: items.length,
+              separatorBuilder: (_, __) => Divider(
+                height: 1,
+                indent: spacing.lg,
+                endIndent: spacing.lg,
+                color: colorScheme.borderSubtle,
+              ),
+              itemBuilder: (context, index) {
+                final item = items[index];
+                final isSelected = item.code == config.locale?.languageCode;
 
-                      return StreamListTile(
-                        title: Text(
-                          item.label,
-                          style: textTheme.bodyDefault.copyWith(
-                            color: isSelected ? colorScheme.accentPrimary : colorScheme.textPrimary,
-                            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                          ),
-                        ),
-                        subtitle: switch (item.code) {
-                          final code? => Text(
-                            code,
-                            style: textTheme.captionDefault.copyWith(color: colorScheme.textTertiary),
-                          ),
-                          null => null,
-                        },
-                        trailing: StreamCheckbox.circular(
-                          value: isSelected,
-                          size: StreamCheckboxSize.sm,
-                          onChanged: (_) {
-                            final locale = item.code != null ? Locale(item.code!) : null;
-                            SampleAppConfig.update(context, config.copyWith(locale: locale));
-                            Navigator.of(sheetContext).pop();
-                          },
-                        ),
-                        onTap: () {
-                          final locale = item.code != null ? Locale(item.code!) : null;
-                          SampleAppConfig.update(context, config.copyWith(locale: locale));
-                          Navigator.of(sheetContext).pop();
-                        },
-                      );
+                return StreamListTile(
+                  title: Text(
+                    item.label,
+                    style: textTheme.bodyDefault.copyWith(
+                      color: isSelected ? colorScheme.accentPrimary : colorScheme.textPrimary,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                    ),
+                  ),
+                  subtitle: switch (item.code) {
+                    final code? => Text(
+                      code,
+                      style: textTheme.captionDefault.copyWith(color: colorScheme.textTertiary),
+                    ),
+                    null => null,
+                  },
+                  trailing: StreamCheckbox.circular(
+                    value: isSelected,
+                    size: StreamCheckboxSize.sm,
+                    onChanged: (_) {
+                      final locale = item.code != null ? Locale(item.code!) : null;
+                      SampleAppConfig.update(context, config.copyWith(locale: locale));
+                      Navigator.of(sheetContext).pop();
                     },
                   ),
-                ),
-              ],
+                  onTap: () {
+                    final locale = item.code != null ? Locale(item.code!) : null;
+                    SampleAppConfig.update(context, config.copyWith(locale: locale));
+                    Navigator.of(sheetContext).pop();
+                  },
+                );
+              },
             ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 }

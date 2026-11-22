@@ -136,14 +136,18 @@ class _HeaderRow implements _Row {
 
     return Container(
       color: colorScheme.backgroundSurfaceCard,
-      padding: EdgeInsets.symmetric(
-        horizontal: spacing.md,
-        vertical: spacing.xs,
-      ),
       width: double.infinity,
-      child: Text(
-        label,
-        style: textTheme.captionEmphasis.copyWith(color: colorScheme.textPrimary),
+      child: SafeArea(
+        top: false,
+        bottom: false,
+        minimum: EdgeInsets.symmetric(
+          horizontal: spacing.md,
+          vertical: spacing.xs,
+        ),
+        child: Text(
+          label,
+          style: textTheme.captionEmphasis.copyWith(color: colorScheme.textPrimary),
+        ),
       ),
     );
   }

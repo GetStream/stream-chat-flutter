@@ -1,100 +1,107 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
-import 'package:lottie/lottie.dart';
 
 import '../../stream_chat_flutter.dart';
 import '../misc/empty_widget.dart';
 
-/// {@template streamTypingIndicator}
-/// Shows the list of user who are actively typing.
-/// {@endtemplate}
+/// Shows who is typing as a line of text followed by animated dots.
+///
+/// Shows [alternativeWidget] when nobody is typing.
+///
+/// ```dart
+/// StreamTypingIndicator(alternativeWidget: Text(lastMessageText))
+/// ```
+///
+/// See also:
+///
+///  * [StreamMessageListTypingIndicator], for the message list.
+///  * [StreamTypingIndicatorDots], for the dots alone.
+///  * [StreamTypingUsersBuilder], to build a custom one.
 class StreamTypingIndicator extends StatelessWidget {
-  /// {@macro streamTypingIndicator}
+  /// Creates a typing indicator for [channel], or a thread of it.
   const StreamTypingIndicator({
     super.key,
     this.channel,
+    this.parentId,
     this.alternativeWidget,
     this.style,
     this.padding = EdgeInsets.zero,
-    this.parentId,
   });
 
-  /// Style of the text widget
-  final TextStyle? style;
-
-  /// List of typing users
+  /// The channel to watch.
+  ///
+  /// If null, uses the closest [StreamChannel].
   final Channel? channel;
 
-  /// The widget to build when no typing is happening
-  final Widget? alternativeWidget;
-
-  /// The padding of this widget
-  final EdgeInsets padding;
-
-  /// Id of the parent message in case of a thread
+  /// The parent message id of the thread to watch.
+  ///
+  /// If null, watches the channel itself.
   final String? parentId;
 
-  // Compares the typing users by id so the indicator only rebuilds when the
-  // set of typing users changes. The stream maps to a new list on every typing
-  // event (and on the stale-typing cleanup), so identity equality would rebuild
-  // even when the same users are still typing. Order-sensitive because only the
-  // first user is shown by name.
-  bool _typingUsersEquals(List<User>? previous, List<User>? current) {
-    final previousIds = previous?.map((it) => it.id) ?? const <String>[];
-    final currentIds = current?.map((it) => it.id) ?? const <String>[];
-    return const IterableEquality<String>().equals(previousIds, currentIds);
-  }
+  /// Shown when nobody is typing.
+  final Widget? alternativeWidget;
 
-  // Keeps only the users typing in the same context as this indicator: the
-  // thread identified by [parentId], or the main channel when it's null.
-  List<User> _typingUsers(Map<User, Event> typingEvents) {
-    return typingEvents.entries.where((element) => element.value.parentId == parentId).map((e) => e.key).toList();
-  }
+  /// The style of the typing text.
+  ///
+  /// If null, uses the surrounding [DefaultTextStyle].
+  final TextStyle? style;
+
+  /// The padding around the typing text and dots.
+  final EdgeInsets padding;
 
   @override
   Widget build(BuildContext context) {
-    final channelState = channel?.state ?? StreamChannel.of(context).channel.state!;
-
-    final altWidget = alternativeWidget ?? const Empty();
-
-    return BetterStreamBuilder<List<User>>(
-      initialData: _typingUsers(channelState.typingEvents),
-      stream: channelState.typingEventsStream.map(_typingUsers),
-      comparator: _typingUsersEquals,
+    return StreamTypingUsersBuilder(
+      channel: channel,
+      parentId: parentId,
       builder: (context, users) => AnimatedSwitcher(
         layoutBuilder: (currentChild, previousChildren) => Stack(
-          children: <Widget>[
-            ...previousChildren,
-            if (currentChild != null) currentChild,
-          ],
+          children: [...previousChildren, ?currentChild],
         ),
         duration: const Duration(milliseconds: 300),
-        child: users.isNotEmpty
-            ? Padding(
-                padding: padding,
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  spacing: 4,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        context.translations.userTypingText(users),
-                        maxLines: 1,
-                        style: style,
-                      ),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(top: 2),
-                      child: Lottie.asset(
-                        'lib/assets/animations/typing_dots.json',
-                        package: 'stream_chat_flutter',
-                        height: 5,
-                      ),
-                    ),
-                  ],
-                ),
-              )
-            : altWidget,
+        child: switch (users) {
+          [] => alternativeWidget ?? const Empty(),
+          _ => _TypingText(users: users, style: style, padding: padding),
+        },
+      ),
+    );
+  }
+}
+
+class _TypingText extends StatelessWidget {
+  const _TypingText({
+    required this.users,
+    this.style,
+    required this.padding,
+  });
+
+  final List<User> users;
+  final TextStyle? style;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) {
+    final typingText = context.translations.userTypingText(users);
+
+    return Semantics(
+      container: true,
+      label: typingText,
+      excludeSemantics: true,
+      child: Padding(
+        padding: padding,
+        child: Row(
+          mainAxisSize: .min,
+          spacing: context.streamSpacing.xs,
+          children: [
+            Flexible(
+              child: Text(typingText, maxLines: 1, style: style),
+            ),
+            Padding(
+              // Centers the dots on the text.
+              padding: const EdgeInsets.only(top: 2),
+              child: StreamTypingIndicatorDots(),
+            ),
+          ],
+        ),
       ),
     );
   }

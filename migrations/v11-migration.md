@@ -46,6 +46,8 @@ onto Stream's OpenAPI-generated API client.
     - [Channel and Member Custom Data](#channel-and-member-custom-data)
     - [User Custom Data](#user-custom-data)
     - [Message Custom Data](#message-custom-data)
+    - [Channel Truncation](#channel-truncation)
+    - [Message States](#message-states)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -98,12 +100,14 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Channel Lifecycle**](#channel-lifecycle) | Hiding, showing and deleting a channel return a `Result` instead of throwing |
 | [**Read Receipts**](#read-receipts) | Marking read, unread and delivered return a `Result` instead of throwing; `ChannelDeliveryReporter`'s callback returns a `Result` |
 | [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models lose their JSON codecs and compare by value |
-| [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUsersResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUsersResponse`, and `UserBlock`'s fields are all non-nullable |
+| [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUserResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUserResponse`, and `UserBlock`'s fields are all non-nullable |
 | [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action`, `Reaction` and `Location` no longer decode from or encode to JSON; `Action` compares by value; reaction calls return a `Result`, `getReactions` answers a new `GetReactionsResponse`, and the reaction queries take `limit`/`offset` or `limit`/`next`/`prev`; message reads and search return a `Result`, `getMessagesById` is `getManyMessages`, `getReplies` takes a required `limit` and reply ids, `translateMessage` takes a `TranslationLanguage`, search results are `SearchMessageResult`s, `sendAction` returns a `Result`, takes `Map<String, String>` form data and, on the client, no channel id or type; sending, updating, pinning and deleting messages return a `Result`, `partialUpdateMessage` is `updateMessagePartial` and deletes answer a `DeleteMessageResponse` |
 | [**User Updates**](#user-updates) | `updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing; `partialUpdateUser(s)` becomes `updateUserPartial` / `updateUsersPartial` and `PartialUpdateUserRequest` becomes `UpdateUserPartialRequest`; `updateUser` no longer sends `role`, `teams` or `teamsRole`, and the returned users no longer carry their private fields in `extraData` |
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`; the channel and member flags it carried are fields |
 | [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
 | [**Message Custom Data**](#message-custom-data) | `extraData` is `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`; a message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields |
+| [**Channel Truncation**](#channel-truncation) | `ChannelClientState.truncate` truncates the channel instead of emptying the loaded messages, which is now `clearMessages`; `ChatPersistenceClient.truncateChannel` is required |
+| [**Message States**](#message-states) | `MessageState.sending` and `.updating` are factories carrying the request's options; a partial update has its own `partialUpdating` state |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -302,14 +306,14 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `GetUnreadCountResponse`, `UnreadCountsChannel`, `UnreadCountsThread`, `UnreadCountsChannelType` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `GetUnreadCountResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `StreamChatApi.user.getUnreadCount` | `StreamChatClient.getUnreadCount` | `removed` | The endpoint moved to the generated client |
-| `StreamChatClient.blockUser` → `Future<UserBlockResponse>` | `Future<Result<BlockUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing. The blocked user is still added to `OwnUser.blockedUserIds` on success |
-| `StreamChatClient.unblockUser` → `Future<EmptyResponse>` | `Future<Result<UnblockUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing. The user is still removed from `OwnUser.blockedUserIds` on success |
-| `StreamChatClient.queryBlockedUsers` | `StreamChatClient.getBlockedUsers` | `renamed` | Same call, the API's name |
+| `StreamChatClient.blockUser` → `Future<UserBlockResponse>` | `Future<Result<BlockUserResponse>>` | `retyped` | Returns a `Result` instead of throwing. The blocked user is still added to `OwnUser.blockedUserIds` on success |
+| `StreamChatClient.unblockUser` → `Future<EmptyResponse>` | `Future<Result<UnblockUserResponse>>` | `retyped` | Returns a `Result` instead of throwing. The user is still removed from `OwnUser.blockedUserIds` on success |
+| `StreamChatClient.queryBlockedUsers` | `StreamChatClient.getBlockedUsers` | `renamed` | Same call; the name of the API's operation |
 | `StreamChatClient.queryBlockedUsers` → `Future<BlockedUsersResponse>` | `Future<Result<GetBlockedUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing. `OwnUser.blockedUserIds` is still replaced on success |
-| `UserBlockResponse` | `BlockUsersResponse` | `renamed` | Same fields |
-| `BlockedUsersResponse` | `GetBlockedUsersResponse` | `renamed` | Same fields |
+| `UserBlockResponse` | `BlockUserResponse` | `renamed` | Same fields: `duration`, `blockedByUserId`, `blockedUserId` and `createdAt` |
+| `BlockedUsersResponse` | `GetBlockedUsersResponse` | `renamed` | The name of the API's response. Same fields: `duration` and `blocks` |
 | `UserBlockResponse.fromJson`, `BlockedUsersResponse.fromJson`, `UserBlock.fromJson` / `toJson` | — | `removed` | The responses and model are plain classes; construct them directly |
-| `UserBlockResponse()..blockedUserId = …`, `BlockedUsersResponse()..blocks = …` and their other setters | `BlockUsersResponse(duration: …, blockedUserId: …, …)`, `GetBlockedUsersResponse(duration: …, blocks: …)` | `retyped` | Plain classes with a const constructor and final fields |
+| `UserBlockResponse()..blockedUserId = …`, `BlockedUsersResponse()..blocks = …` and their other setters | `BlockUserResponse(duration: …, blockedUserId: …, …)`, `GetBlockedUsersResponse(duration: …, blocks: …)` | `retyped` | Plain classes with a const constructor and final fields |
 | `UserBlockResponse`, `BlockedUsersResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `UserBlockResponse.duration`, `BlockedUsersResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `UserBlock extends Equatable`, `UserBlock.props` | `UserBlock` (value `==`, `copyWith`) | `removed` | Equality is unchanged; `props` is gone and `UserBlock` is no longer an `Equatable` |
@@ -433,6 +437,12 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `SendMessageResponse.duration` / `UpdateMessageResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `SendMessageResponse` / `UpdateMessageResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two responses with the same fields are now equal |
 | `StreamChatApi.message`, `MessageApi` | the `StreamChatClient` methods | `removed` | Every message endpoint moved to the generated client |
+| `ChannelClientState.truncate()` (empties the loaded messages) | `ChannelClientState.clearMessages()` | `moved` | `truncate({DateTime? truncatedAt})` now removes only what was sent before the truncation time |
+| — | `ChatPersistenceClient.truncateChannel(cid, {truncatedAt})` | `added` | Abstract: a custom persistence client must implement it |
+| `MessageState.sending` / `MessageState.updating` (constants) | `MessageState.sending()` / `MessageState.updating()` | `retyped` | Factories taking `skipPush` and `skipEnrichUrl`; no longer usable in a `const` expression |
+| — | `ChatPersistenceClient.settleInterruptedRequests()` | `added` | Abstract: a custom persistence client must implement it |
+| — | `OutgoingState.partialUpdating` / `MessageState.partialUpdating(...)` | `added` | The state of a partial update, such as a pin, while it runs. An exhaustive `switch` over `OutgoingState` needs the new case |
+| `OutgoingState.when(sending: () => …, updating: () => …)` | `when(sending: (skipPush, skipEnrichUrl) => …, updating: (skipPush, skipEnrichUrl) => …, partialUpdating: (set, unset, skipEnrichUrl) => …)` | `retyped` | Also `whenOrNull` and `maybeWhen`; `map`, `mapOrNull` and `maybeMap` take a `partialUpdating` callback |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -625,7 +635,7 @@ counterpart: `code` is now a `StreamErrorCode` (an extension type over `int`, wi
 ## Offline Cache
 
 If you use `stream_chat_persistence`, the local database is **rebuilt from empty** the first time your app runs
-on v11. The Drift schema version moves from v10's `1000 + n` (`1035` in v10.5.0) to `1107`, and the upgrade strategy
+on v11. The Drift schema version moves from v10's `1000 + n` (`1035` in v10.5.0) to `1109`, and the upgrade strategy
 drops and recreates every table rather than migrating rows.
 
 Everything held on disk is discarded: channels, messages, members, reads, drafts, locations, polls, poll votes
@@ -1013,8 +1023,8 @@ always present.
 ### User Blocking
 
 **`blockUser`, `unblockUser` and `getBlockedUsers` return a `Result` instead of throwing, and `queryBlockedUsers`
-is renamed `getBlockedUsers`.** They answer `BlockUsersResponse` (renamed from `UserBlockResponse`),
-`UnblockUsersResponse` (new; `unblockUser` returned an `EmptyResponse`) and `GetBlockedUsersResponse` (renamed from
+is renamed `getBlockedUsers`.** They answer `BlockUserResponse` (renamed from `UserBlockResponse`),
+`UnblockUserResponse` (new; `unblockUser` returned an `EmptyResponse`) and `GetBlockedUsersResponse` (renamed from
 `BlockedUsersResponse`). A `try`/`catch` around them still compiles, but no longer catches a failed call: read the
 returned `Result` instead. On success they still update the current user's `blockedUserIds`; a failure leaves it as
 it was.
@@ -1038,7 +1048,7 @@ result.fold(
 
 **`UserBlock.blockedUser`, `userId`, `blockedUserId` and `createdAt` are non-nullable** and required in the
 constructor; drop any `!`, `?.` or `?? …` on them. `UserBlock` no longer decodes from or encodes to JSON and no
-longer extends `Equatable`; it still compares by value and keeps `copyWith`. `BlockUsersResponse` and
+longer extends `Equatable`; it still compares by value and keeps `copyWith`. `BlockUserResponse` and
 `GetBlockedUsersResponse` no longer decode from JSON, are plain classes with a const constructor, compare by value
 and gain `copyWith`, and their `duration` is always present.
 
@@ -1046,10 +1056,10 @@ and gain `copyWith`, and their `duration` is always present.
 `unblockUser` and `getBlockedUsers` on `StreamChatClient`.
 
 > **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. `blockUser` and
-> `unblockUser` keep their names, because each takes one user id, and answer the API's responses under the API's
-> names. `queryBlockedUsers` becomes `getBlockedUsers`, the API's name, because the call takes no filter, sort or
-> pagination. The server always sends every `UserBlock` field, so the model no longer makes callers handle nulls
-> that never arrive.
+> `unblockUser` keep their names, and their responses take singular ones, because each takes one user id.
+> `queryBlockedUsers` becomes `getBlockedUsers`, the API's name, because the call takes no filter, sort or pagination.
+> The server always sends every `UserBlock` field, so the model no longer makes callers handle nulls that never
+> arrive.
 
 ### User Updates
 
@@ -1076,9 +1086,10 @@ if (result case Failure(:final error)) report(error);
 settings, and nothing else.** v10 sent the whole user, so the user's online status, ban and timestamps, and an own
 user's devices, mutes and unread counts, were stored as custom data on every call, and an own user with many devices
 went over the custom data size limit and failed; that no longer happens. An own user decoded from the connection
-still keeps `unread_count`, `total_unread_count_by_team` and `latest_hidden_channels` in `custom`, so passing
-`currentUser` back stores them as custom data, as v10 did; remove them from `custom` first if you don't want them
-stored. `role`, `teams` and `teamsRole` are no longer sent, so these calls cannot change them.
+still keeps `unread_count`, `total_unread_count_by_team`, `latest_hidden_channels` and `last_engaged_at` in
+`custom`, and one whose tokens were revoked also keeps `revoke_tokens_issued_before`, so passing `currentUser` back
+stores them as custom data, as v10 did; remove them from `custom` first if you don't want them stored. `role`, `teams`
+and `teamsRole` are no longer sent, so these calls cannot change them.
 
 **The returned users no longer carry the fields only they can see in `extraData`.** v10 left every field `User`
 does not model in `extraData` as raw JSON; now their devices, mutes, channel mutes, privacy settings, unread counts, hidden
@@ -1769,6 +1780,55 @@ which is removed: build them with their constructors. `StreamChatApi.message` an
 > **Why:** a failure is a value the caller handles where it happens, and the public models stop being wire shapes,
 > so the API payload can change without changing the type a caller holds.
 
+### Channel Truncation
+
+**`ChannelClientState.truncate` truncates the channel.** It removes the messages, pinned messages and thread
+replies sent before `truncatedAt`, or before now when omitted, and keeps the ones sent after it and the ones not
+sent yet. When the loaded messages are the latest ones and some of them are removed, it also lowers an unread
+count higher than the messages left. To only empty the loaded messages, as `truncate` did in v10, call
+`clearMessages`.
+
+```dart
+// v10
+channel.state?.truncate();
+
+// v11
+channel.state?.clearMessages();
+```
+
+**A custom `ChatPersistenceClient` implements `truncateChannel`.** It removes the channel's stored messages and
+pinned messages sent before `truncatedAt`, or before now when it is null, and keeps the messages not sent yet.
+
+> **Why:** v10 removed every message on truncation, including the ones sent after it and the ones still being
+> sent, so they vanished until the next query. A `truncate` that does what its name says, and a separate
+> `clearMessages` for a reload, keeps both callers correct.
+
+### Message States
+
+**`MessageState.sending` and `MessageState.updating` are factories.** They take the request's `skipPush` and
+`skipEnrichUrl`, both `false` by default, so add `()` where you used the constants. A `const` expression that used
+one becomes `final`.
+
+```dart
+// v10
+message.copyWith(state: MessageState.sending);
+
+// v11
+message.copyWith(state: MessageState.sending());
+```
+
+**A partial update has its own state.** While `partialUpdateMessage`, `pinMessage` or `unpinMessage` runs, the
+message is in `OutgoingState.partialUpdating`, carrying the update's `set`, `unset` and `skipEnrichUrl`, rather than
+`updating`. `isUpdating` is true for both. An exhaustive `switch` over `OutgoingState` needs the new case, and the
+`when` and `map` helpers take a `partialUpdating` callback.
+
+**A custom `ChatPersistenceClient` implements `settleInterruptedRequests`.** The client calls it once connected,
+before any channel loads, to mark the stored messages left sending, updating or deleting as failed, keeping the
+options their requests were made with. `MessageState.settled` gives the failed state for each.
+
+> **Why:** each request in progress now keeps what is needed to send it again, mirroring its failed state, so a
+> send, edit or delete interrupted by the app closing is retried as it was made.
+
 ---
 
 ## Migration Checklist
@@ -1789,7 +1849,13 @@ Work top to bottom; each item is independently verifiable.
 - [ ] If you persist models yourself, re-check nullability as endpoints move to the generated types, which are nullable wherever the API allows it
 - [ ] Replace `sort: null` on any list controller with `XSort.empty` if you relied on server ordering — see
       [Sorting](#sorting)
+- [ ] If you call `ChannelClientState.truncate()` to empty the loaded messages, call `clearMessages()` — see
+  [Channel Truncation](#channel-truncation)
+- [ ] If you implement `ChatPersistenceClient`, implement `truncateChannel` — see [Channel Truncation](#channel-truncation)
 - [ ] If you use `stream_chat_persistence`, expect one cold start after upgrading — see [Offline Cache](#offline-cache)
+- [ ] Add `()` to `MessageState.sending` and `MessageState.updating`, and handle `OutgoingState.partialUpdating` in exhaustive
+      `switch`es — see [Message States](#message-states)
+- [ ] If you implement `ChatPersistenceClient`, implement `settleInterruptedRequests` — see [Message States](#message-states)
 - [ ] Run `dart analyze` and your test suite; the analyzer finds most of the mechanical work for you
 
 ---

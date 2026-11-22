@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 import 'package:theme_extensions_builder_annotation/theme_extensions_builder_annotation.dart';
 
 import '../utils/date_formatter.dart';
+import 'message_preview_text_theme.dart';
 import 'stream_chat_theme.dart';
 
 part 'thread_list_tile_theme.g.theme.dart';
@@ -11,8 +12,7 @@ part 'thread_list_tile_theme.g.theme.dart';
 ///
 /// See also:
 ///
-///  * [StreamPollOptionVotesSheetThemeData], which is used to configure this
-///    theme.
+///  * [StreamThreadListTileThemeData], which is used to configure this theme.
 /// {@endtemplate}
 class StreamThreadListTileTheme extends InheritedTheme {
   /// Creates a [StreamThreadListTileTheme].
@@ -27,13 +27,13 @@ class StreamThreadListTileTheme extends InheritedTheme {
   /// The configuration of this theme.
   final StreamThreadListTileThemeData data;
 
-  /// The closest instance of this class that encloses the given context.
+  /// The [StreamThreadListTileThemeData] for the given context.
   ///
-  /// If there is no enclosing [StreamThreadListTileTheme] widget, then
-  /// [StreamChatThemeData.pollOptionVotesSheetTheme] is used.
+  /// Values from the nearest [StreamThreadListTileTheme] ancestor take
+  /// precedence over [StreamChatThemeData.threadListTileTheme].
   static StreamThreadListTileThemeData of(BuildContext context) {
-    final threadListTileTheme = context.dependOnInheritedWidgetOfExactType<StreamThreadListTileTheme>();
-    return threadListTileTheme?.data ?? StreamChatTheme.of(context).threadListTileTheme;
+    final localTheme = context.dependOnInheritedWidgetOfExactType<StreamThreadListTileTheme>();
+    return StreamChatTheme.of(context).threadListTileTheme.merge(localTheme?.data);
   }
 
   @override
@@ -64,6 +64,7 @@ class StreamThreadListTileThemeData with _$StreamThreadListTileThemeData {
     this.backgroundColor,
     this.threadChannelNameStyle,
     this.threadReplyToMessageStyle,
+    this.messagePreviewTextTheme,
     this.threadLatestReplyUsernameStyle,
     this.threadLatestReplyMessageStyle,
     this.threadLatestReplyTimestampStyle,
@@ -85,11 +86,21 @@ class StreamThreadListTileThemeData with _$StreamThreadListTileThemeData {
   /// [StreamColorScheme.textTertiary].
   final TextStyle? threadChannelNameStyle;
 
-  /// The style of the root message preview in the [StreamThreadListTile]
-  /// widget.
+  /// The style of the whole root message preview in the
+  /// [StreamThreadListTile] widget.
   ///
-  /// Falls back to [StreamTextTheme.bodyDefault].
+  /// To style only parts of it, consider [messagePreviewTextTheme]. Falls
+  /// back to [StreamTextTheme.bodyDefault] with
+  /// [StreamColorScheme.textPrimary].
   final TextStyle? threadReplyToMessageStyle;
+
+  /// The theme for styling parts of the root message preview differently
+  /// from the rest.
+  ///
+  /// Takes precedence over an enclosing [StreamMessagePreviewTextTheme] and
+  /// the app-wide one. The sender prefix and a deleted message default to
+  /// [StreamColorScheme.textSecondary]. A thread list shows no draft prefix.
+  final StreamMessagePreviewTextThemeData? messagePreviewTextTheme;
 
   /// The style of the latest reply author username in the
   /// [StreamThreadListTile] widget.

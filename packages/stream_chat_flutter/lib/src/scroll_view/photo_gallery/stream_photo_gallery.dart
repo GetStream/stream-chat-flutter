@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:photo_manager/photo_manager.dart' show AssetEntity, ThumbnailFormat, ThumbnailSize;
 
 import '../../../stream_chat_flutter.dart';
+import '../../media_gallery/stream_media_grid_delegate.dart';
 import '../../utils/network_error_text.dart';
 
-/// Default grid delegate  for [StreamPhotoGallery].
-const defaultStreamPhotoGalleryDelegate = SliverGridDelegateWithFixedCrossAxisCount(
-  crossAxisCount: 3,
+/// The grid delegate a [StreamPhotoGallery] uses when none is given.
+///
+/// Shows square tiles, with more tiles per row as the gallery gets wider.
+const SliverGridDelegate defaultStreamPhotoGalleryDelegate = StreamMediaGridDelegate(
   mainAxisSpacing: 2,
   crossAxisSpacing: 2,
 );
@@ -59,8 +61,9 @@ class StreamPhotoGallery extends StatelessWidget {
   /// The [StreamPhotoGalleryController] used to control the grid of users.
   final StreamPhotoGalleryController controller;
 
-  /// A delegate that controls the layout of the children within
-  /// the [PagedValueGridView].
+  /// The delegate that lays out the gallery's tiles.
+  ///
+  /// Defaults to [defaultStreamPhotoGalleryDelegate].
   final SliverGridDelegate gridDelegate;
 
   /// A builder that is called to build items in the [PagedValueGridView].

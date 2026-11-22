@@ -14,7 +14,7 @@ DeviceResponse _$DeviceResponseFromJson(Map<String, dynamic> json) => DeviceResp
   disabledReason: json['disabled_reason'] as String?,
   hardwareId: json['hardware_id'] as String?,
   id: json['id'] as String,
-  pushProvider: json['push_provider'] as String,
+  pushProvider: json['push_provider'] as PushProviderName,
   pushProviderName: json['push_provider_name'] as String?,
   userId: json['user_id'] as String,
   voip: json['voip'] as bool?,

@@ -5,11 +5,13 @@ import 'package:stream_chat/src/client/channel/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
 import 'package:stream_chat/src/client/client.dart';
 import 'package:stream_chat/src/client/moderation_client.dart';
+import 'package:stream_chat/src/client/scheduled_messages/scheduled_message_manager.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/push_preferences_api.dart';
+import 'package:stream_chat/src/core/api/scheduled_messages_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
@@ -54,6 +56,8 @@ class MockModerationClient extends Mock implements ModerationClient {}
 
 class MockGeneralApi extends Mock implements GeneralApi {}
 
+class MockScheduledMessagesApi extends Mock implements ScheduledMessagesApi {}
+
 class MockAttachmentFileUploader extends Mock implements AttachmentFileUploader {}
 
 class MockPersistenceClient extends Mock implements ChatPersistenceClient {
@@ -71,6 +75,9 @@ class MockPersistenceClient extends Mock implements ChatPersistenceClient {
     _userId = userId;
     _isConnected = true;
   }
+
+  @override
+  Future<void> settleInterruptedRequests() async {}
 
   @override
   Future<void> disconnect({bool flush = false}) async {
@@ -112,6 +119,9 @@ class MockStreamChatClient extends Mock implements StreamChatClient {
   Stream<Event> get eventStream => _eventController.stream;
   final _eventController = EventController<Event>();
   void addEvent(Event event) => _eventController.add(event);
+
+  @override
+  late final scheduledMessageManager = ScheduledMessageManager(this);
 
   @override
   Stream<Event> on([

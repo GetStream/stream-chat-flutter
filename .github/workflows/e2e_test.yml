@@ -10,7 +10,7 @@ on:
       ios:
         description: "Run iOS e2e tests"
         type: boolean
-        default: true
+        default: false
   pull_request:
 
 permissions:
@@ -26,8 +26,37 @@ env:
   GITHUB_PR_NUM: ${{ github.event.pull_request.number }}
 
 jobs:
+  select:
+    # Pull requests run the tests their changes can reach, per the nightly coverage map.
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read # downloads the e2e-coverage-map artifact
+    outputs:
+      e2e_batches: ${{ steps.select.outputs.e2e_batches }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 2 # the pull request merge commit and its base
+
+      - uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: e2e_app
+
+      - name: Select e2e tests
+        id: select
+        working-directory: e2e_app
+        run: bundle exec fastlane select_e2e_tests
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: e2e-selection
+          path: e2e_app/build/e2e_selection.json
+
   allure_launch_android:
-    if: github.event_name != 'workflow_dispatch' || inputs.android
+    needs: select
+    if: (github.event_name != 'workflow_dispatch' || inputs.android) && needs.select.outputs.e2e_batches != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -38,10 +67,11 @@ jobs:
       - uses: ./.github/actions/allure-launch
         id: launch
         with:
-          working-directory: sample_app/android
+          working-directory: e2e_app
 
   allure_launch_ios:
-    if: github.event_name == 'workflow_dispatch' && inputs.ios
+    needs: select
+    if: github.event_name == 'workflow_dispatch' && inputs.ios && needs.select.outputs.e2e_batches != '[]'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     outputs:
@@ -52,20 +82,19 @@ jobs:
       - uses: ./.github/actions/allure-launch
         id: launch
         with:
-          working-directory: sample_app/ios
+          working-directory: e2e_app
 
   android:
     # Always on pull_request; opt-out via the checkbox on workflow_dispatch.
-    if: github.event_name != 'workflow_dispatch' || inputs.android
-    needs: allure_launch_android
+    if: (github.event_name != 'workflow_dispatch' || inputs.android) && needs.select.outputs.e2e_batches != '[]'
+    needs: [select, allure_launch_android]
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
-        batch: [0, 1]
+        batch: ${{ fromJson(needs.select.outputs.e2e_batches) }}
     env:
-      ANDROID_API_LEVEL: "34"
       LAUNCH_ID: ${{ needs.allure_launch_android.outputs.launch_id }}
     steps:
       - uses: actions/checkout@v7
@@ -75,42 +104,72 @@ jobs:
       - uses: ./.github/actions/cache-gradle
 
       - uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: e2e_app
 
       - uses: ./.github/actions/setup-flutter
 
+      - uses: ./.github/actions/install-android-ndk
+
       - uses: ./.github/actions/enable-kvm
 
-      - name: Use Firebase stubs
-        run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
 
       - name: Bootstrap
-        run: |
-          flutter pub global activate melos
-          melos bootstrap
+        run: melos bootstrap
+
+      - uses: actions/download-artifact@v8
+        with:
+          name: e2e-selection
+          path: e2e_app/build
+
+      # Saved by the nightly run. A miss (e.g. after an emulator update) cold boots as before.
+      - uses: ./.github/actions/android-sdk-packages
+        id: sdk
+
+      - name: Restore the AVD
+        id: avd
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: ${{ steps.sdk.outputs.avd-key }}
 
       - name: Run e2e (Android emulator)
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        env:
+          # So an emulator the run_e2e_test lane restarts boots from the snapshot too.
+          E2E_EMULATOR_OPTIONS: -no-snapshot-save ${{ steps.sdk.outputs.emulator-options }}
         with:
-          api-level: ${{ env.ANDROID_API_LEVEL }}
+          api-level: ${{ steps.sdk.outputs.api-level }}
+          target: ${{ steps.sdk.outputs.target }}
           arch: x86_64
-          profile: pixel_6
-          script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554 batch:${{ matrix.batch }} batch_count:${{ strategy.job-total }}
+          profile: ${{ steps.sdk.outputs.profile }}
+          cores: ${{ steps.sdk.outputs.cores }}
+          force-avd-creation: ${{ steps.avd.outputs.cache-hit != 'true' }}
+          emulator-options: -no-snapshot-save ${{ steps.sdk.outputs.emulator-options }}
+          script: cd e2e_app && bundle exec fastlane run_e2e_test device:emulator-5554 selection:build/e2e_selection.json batch:${{ matrix.batch }} batch_count:${{ strategy.job-total }}
 
       - name: Attach videos to failed tests
         if: failure()
-        working-directory: sample_app/android
+        # Videos only help debugging: a slow apt mirror (19 min once) must not hold the job.
+        timeout-minutes: 5
+        continue-on-error: true
+        working-directory: e2e_app
         run: |
-          sudo apt-get update && sudo apt-get install -y ffmpeg
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
           bundle exec fastlane attach_videos
 
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
-        working-directory: sample_app/android
+        working-directory: e2e_app
         run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
 
       - name: Allure TestOps Launch Removal
         if: env.LAUNCH_ID != '' && cancelled()
-        working-directory: sample_app/android
+        working-directory: e2e_app
         run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
 
       - uses: actions/upload-artifact@v7
@@ -118,19 +177,19 @@ jobs:
         with:
           name: e2e-android-logs-${{ matrix.batch }}
           path: |
-            sample_app/stream-chat-test-mock-server/logs
-            sample_app/build/e2e-test.log
+            e2e_app/stream-chat-test-mock-server/logs
+            e2e_app/build/e2e-test.log
 
   ios:
     # Only on workflow_dispatch, when the checkbox is ticked.
-    if: github.event_name == 'workflow_dispatch' && inputs.ios
-    needs: allure_launch_ios
+    if: github.event_name == 'workflow_dispatch' && inputs.ios && needs.select.outputs.e2e_batches != '[]'
+    needs: [select, allure_launch_ios]
     runs-on: macos-15
     timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
-        batch: [0, 1]
+        batch: ${{ fromJson(needs.select.outputs.e2e_batches) }}
     env:
       IOS_SIMULATOR_VERSION: "26.2"
       IOS_SIMULATOR_DEVICE: "iPhone 17"
@@ -146,28 +205,34 @@ jobs:
       - uses: ./.github/actions/setup-flutter
 
       - uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: e2e_app
 
-      - name: Use Firebase stubs
-        run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
 
       - name: Bootstrap
         run: |
           flutter precache --ios
-          flutter pub global activate melos
           melos bootstrap
 
+      - uses: actions/download-artifact@v8
+        with:
+          name: e2e-selection
+          path: e2e_app/build
+
       - name: Run e2e (iOS simulator)
-        working-directory: sample_app/ios
-        run: bundle exec fastlane run_e2e_test platform:ios ios:"${{ env.IOS_SIMULATOR_VERSION }}" device:"${{ env.IOS_SIMULATOR_DEVICE }}" batch:${{ matrix.batch }} batch_count:${{ strategy.job-total }}
+        working-directory: e2e_app
+        run: bundle exec fastlane run_e2e_test platform:ios ios:"${{ env.IOS_SIMULATOR_VERSION }}" device:"${{ env.IOS_SIMULATOR_DEVICE }}" selection:build/e2e_selection.json batch:${{ matrix.batch }} batch_count:${{ strategy.job-total }}
 
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
-        working-directory: sample_app/ios
+        working-directory: e2e_app
         run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
 
       - name: Allure TestOps Launch Removal
         if: env.LAUNCH_ID != '' && cancelled()
-        working-directory: sample_app/ios
+        working-directory: e2e_app
         run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
 
       - uses: actions/upload-artifact@v7
@@ -175,5 +240,18 @@ jobs:
         with:
           name: e2e-ios-logs-${{ matrix.batch }}
           path: |
-            sample_app/stream-chat-test-mock-server/logs
-            sample_app/build/e2e-test.log
+            e2e_app/stream-chat-test-mock-server/logs
+            e2e_app/build/e2e-test.log
+
+  # The single required check for E2E: the batch count follows the selection, so
+  # the per-batch job names come and go.
+  result:
+    name: E2E result
+    runs-on: ubuntu-latest
+    if: ${{ always() }}
+    needs: [select, allure_launch_android, allure_launch_ios, android, ios]
+    permissions: {}
+    steps:
+      - name: Fail if an E2E job failed or was cancelled
+        if: ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}
+        run: exit 1

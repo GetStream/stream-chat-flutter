@@ -7,7 +7,9 @@ part 'update_user_partial_request.freezed.dart';
 /// The fields in [set] are set and the fields named in [unset] are removed,
 /// leaving every other field as it is.
 ///
-/// Passed to [StreamChatClient.updateUsersPartial].
+/// See also:
+///
+///  * [StreamChatClient.updateUsersPartial], which takes a list of them.
 @freezed
 class UpdateUserPartialRequest with _$UpdateUserPartialRequest {
   /// Creates a partial update of the user with [id].

@@ -1,5 +1,10 @@
 name: 'Setup Ruby'
 description: 'Install Ruby and Cache Gems'
+inputs:
+  working-directory:
+    description: 'The directory holding the Gemfile to install'
+    required: false
+    default: sample_app
 runs:
   using: "composite"
   steps:
@@ -7,4 +12,4 @@ runs:
       with:
         ruby-version: "3.3"
         bundler-cache: true
-        working-directory: sample_app
+        working-directory: ${{ inputs.working-directory }}

@@ -13,38 +13,14 @@ import '../models.dart';
 part 'push_preference_input.g.dart';
 part 'push_preference_input.freezed.dart';
 
-extension type const PushPreferenceInputCallLevel._(String _) implements String {
-  static const all = PushPreferenceInputCallLevel._('all');
-  static const default_ = PushPreferenceInputCallLevel._('default');
-  static const none = PushPreferenceInputCallLevel._('none');
-
-  factory PushPreferenceInputCallLevel.fromJson(String json) => PushPreferenceInputCallLevel._(json);
-
-  String toJson() => this;
-}
-
-extension type const PushPreferenceInputChatLevel._(String _) implements String {
-  static const all = PushPreferenceInputChatLevel._('all');
-  static const allMentions = PushPreferenceInputChatLevel._('all_mentions');
-  static const default_ = PushPreferenceInputChatLevel._('default');
-  static const directMentions = PushPreferenceInputChatLevel._('direct_mentions');
+extension type const PushPreferenceInputChatLevel(String _) implements String {
+  static const all = PushPreferenceInputChatLevel('all');
+  static const allMentions = PushPreferenceInputChatLevel('all_mentions');
+  static const default_ = PushPreferenceInputChatLevel('default');
+  static const directMentions = PushPreferenceInputChatLevel('direct_mentions');
   @Deprecated('Use directMentions instead.')
-  static const mentions = PushPreferenceInputChatLevel._('mentions');
-  static const none = PushPreferenceInputChatLevel._('none');
-
-  factory PushPreferenceInputChatLevel.fromJson(String json) => PushPreferenceInputChatLevel._(json);
-
-  String toJson() => this;
-}
-
-extension type const PushPreferenceInputFeedsLevel._(String _) implements String {
-  static const all = PushPreferenceInputFeedsLevel._('all');
-  static const default_ = PushPreferenceInputFeedsLevel._('default');
-  static const none = PushPreferenceInputFeedsLevel._('none');
-
-  factory PushPreferenceInputFeedsLevel.fromJson(String json) => PushPreferenceInputFeedsLevel._(json);
-
-  String toJson() => this;
+  static const mentions = PushPreferenceInputChatLevel('mentions');
+  static const none = PushPreferenceInputChatLevel('none');
 }
 
 @freezed
@@ -52,20 +28,15 @@ extension type const PushPreferenceInputFeedsLevel._(String _) implements String
 @JsonSerializable()
 class PushPreferenceInput with _$PushPreferenceInput {
   const PushPreferenceInput({
-    this.callLevel,
     this.channelCid,
     this.chatLevel,
     this.chatPreferences,
     this.disabledUntil,
-    this.feedsLevel,
-    this.feedsPreferences,
     this.removeDisable,
+    this.removeSchedule,
+    this.schedule,
     this.userId,
   });
-
-  @override
-  @JsonKey(name: 'call_level')
-  final PushPreferenceInputCallLevel? callLevel;
 
   @override
   @JsonKey(name: 'channel_cid')
@@ -85,16 +56,16 @@ class PushPreferenceInput with _$PushPreferenceInput {
   final DateTime? disabledUntil;
 
   @override
-  @JsonKey(name: 'feeds_level')
-  final PushPreferenceInputFeedsLevel? feedsLevel;
-
-  @override
-  @JsonKey(name: 'feeds_preferences')
-  final FeedsPreferences? feedsPreferences;
-
-  @override
   @JsonKey(name: 'remove_disable')
   final bool? removeDisable;
+
+  @override
+  @JsonKey(name: 'remove_schedule')
+  final bool? removeSchedule;
+
+  @override
+  @JsonKey(name: 'schedule')
+  final PushScheduleInput? schedule;
 
   @override
   @JsonKey(name: 'user_id')

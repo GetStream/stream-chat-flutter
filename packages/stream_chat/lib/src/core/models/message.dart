@@ -163,7 +163,7 @@ class Message extends Equatable {
   final List<String>? mentionedRoles;
 
   /// The list of user mentioned in the message.
-  @JsonKey(toJson: User.toIds)
+  @JsonKey(fromJson: User.fromIdsOrJson, toJson: User.toIds)
   final List<User> mentionedUsers;
 
   /// A map of reaction types and their corresponding reaction groups.

@@ -12,6 +12,9 @@ import 'message_text_field_controller.dart';
 /// Pass in a [StreamMessageComposerController] as the `valueListenable`.
 typedef StreamMessageValueListenableBuilder = ValueListenableBuilder<Message>;
 
+/// Signature for a function that decides whether a [Message] can be sent.
+typedef MessageValidator = bool Function(Message message);
+
 /// {@template stream_chat_flutter.StreamMessageComposerController}
 /// Controller for storing and mutating a [Message] value.
 /// {@endtemplate}
@@ -23,18 +26,22 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   factory StreamMessageComposerController({
     Message? message,
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
+    MessageValidator validator = defaultValidator,
   }) => StreamMessageComposerController._(
     initialMessage: message ?? Message(),
     textPatternStyle: textPatternStyle,
+    validator: validator,
   );
 
   /// Creates a controller for an editable text field from an initial [text].
   factory StreamMessageComposerController.fromText(
     String? text, {
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
+    MessageValidator validator = defaultValidator,
   }) => StreamMessageComposerController._(
     initialMessage: Message(text: text),
     textPatternStyle: textPatternStyle,
+    validator: validator,
   );
 
   /// Creates a controller for an editable text field from initial
@@ -42,14 +49,17 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   factory StreamMessageComposerController.fromAttachments(
     List<Attachment> attachments, {
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
+    MessageValidator validator = defaultValidator,
   }) => StreamMessageComposerController._(
     initialMessage: Message(attachments: attachments),
     textPatternStyle: textPatternStyle,
+    validator: validator,
   );
 
   StreamMessageComposerController._({
     required Message initialMessage,
     Map<RegExp, TextStyleBuilder>? textPatternStyle,
+    required this.validator,
   }) : assert(
          initialMessage.state.isInitial,
          'Controllers must be created with an initial (draft) message. '
@@ -62,6 +72,23 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
        ),
        super(initialMessage) {
     _textFieldController.addListener(_textFieldListener);
+  }
+
+  /// The function that decides whether the message being composed can be
+  /// sent.
+  ///
+  /// Defaults to [defaultValidator].
+  final MessageValidator validator;
+
+  /// Returns whether [message] has text, an attachment or a poll.
+  ///
+  /// Used as the default [validator].
+  static bool defaultValidator(Message message) {
+    final hasText = message.text?.trim().isNotEmpty == true;
+    final hasAttachments = message.attachments.isNotEmpty;
+    final hasPoll = message.pollId != null;
+
+    return hasText || hasAttachments || hasPoll;
   }
 
   /// Returns the controller of the text field linked to this controller.
@@ -112,6 +139,9 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   set text(String text) {
     _textFieldController.text = text;
   }
+
+  /// Whether the current message can be sent, according to [validator].
+  bool get canSend => validator.call(message);
 
   /// Returns true if the slow mode is currently active.
   bool get isSlowModeActive => _cooldownTimeOut > 0;
@@ -284,6 +314,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   // Snapshot of the composer message taken when [editMessage] is first called,
   // so [cancelEditMessage] can restore the user's draft.
   Message? _messageBeforeEdit;
+  bool _ogAttachmentDismissedBeforeEdit = false;
 
   /// Switches the controller to edit mode for the given [message].
   ///
@@ -300,10 +331,14 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
     // command alongside an edit.
     clearCommand();
 
-    _messageBeforeEdit ??= this.message;
+    if (_messageBeforeEdit == null) {
+      _messageBeforeEdit = this.message;
+      _ogAttachmentDismissedBeforeEdit = _ogAttachmentDismissed;
+      _ogAttachmentDismissed = false;
+    }
     _messageBeingEdited = message;
 
-    this.message = message.copyWith(state: MessageState.updating);
+    this.message = message.copyWith(state: MessageState.updating());
   }
 
   /// Cancels the active edit and restores the composer to the content it
@@ -315,6 +350,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
     if (_messageBeforeEdit case final message?) {
       this.message = message;
       _messageBeforeEdit = null;
+      _ogAttachmentDismissed = _ogAttachmentDismissedBeforeEdit;
     }
   }
 
@@ -370,6 +406,15 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
     return attachments.firstWhereOrNull((it) => it.ogScrapeUrl != null);
   }
 
+  /// Whether the message should be sent without the server scraping its links.
+  ///
+  /// True while the message has an [ogAttachment], and after the user
+  /// dismissed one with [clearOGAttachment] until it is cleared again, or
+  /// [clear] or [reset] is called. A dismissal on the draft doesn't apply
+  /// while [editMessage] is editing another message.
+  bool get skipEnrichUrl => _ogAttachmentDismissed || ogAttachment != null;
+  bool _ogAttachmentDismissed = false;
+
   /// Sets the og attachment in the message.
   void setOGAttachment(Attachment attachment) {
     final updatedAttachments = [...attachments];
@@ -386,7 +431,11 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   }
 
   /// Removes the og attachment.
-  void clearOGAttachment() {
+  ///
+  /// Pass [dismissed] as true when the user removed it, which sets
+  /// [skipEnrichUrl].
+  void clearOGAttachment({bool dismissed = false}) {
+    _ogAttachmentDismissed = dismissed;
     if (ogAttachment case final existingOGAttachment?) {
       removeAttachment(existingOGAttachment);
     }
@@ -489,6 +538,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
   void clear() {
     // Clear the command state, if any.
     _messageBeforeCommand = null;
+    _ogAttachmentDismissed = false;
     message = Message();
   }
 
@@ -500,6 +550,7 @@ class StreamMessageComposerController extends ValueNotifier<Message> {
 
     // Reset the command state, if any.
     _messageBeforeCommand = null;
+    _ogAttachmentDismissed = false;
 
     if (resetId) {
       final newId = const Uuid().v4();
@@ -533,7 +584,10 @@ class StreamRestorableMessageComposerController extends RestorableChangeNotifier
   ///
   /// This constructor creates a default [Message] when no `message` argument
   /// is supplied.
-  StreamRestorableMessageComposerController({Message? message}) : _initialValue = message ?? Message();
+  StreamRestorableMessageComposerController({
+    Message? message,
+    this.validator = StreamMessageComposerController.defaultValidator,
+  }) : _initialValue = message ?? Message();
 
   /// Creates a [StreamRestorableMessageComposerController] from an initial
   /// [text] value.
@@ -542,8 +596,17 @@ class StreamRestorableMessageComposerController extends RestorableChangeNotifier
 
   final Message _initialValue;
 
+  /// The function that decides whether the message being composed can be
+  /// sent.
+  ///
+  /// Becomes the [StreamMessageComposerController.validator] of [value].
+  /// Defaults to [StreamMessageComposerController.defaultValidator].
+  final MessageValidator validator;
+
   @override
-  StreamMessageComposerController createDefaultValue() => StreamMessageComposerController(message: _initialValue);
+  StreamMessageComposerController createDefaultValue() {
+    return StreamMessageComposerController(message: _initialValue, validator: validator);
+  }
 
   @override
   StreamMessageComposerController fromPrimitives(Object? data) {
@@ -564,6 +627,7 @@ class StreamRestorableMessageComposerController extends RestorableChangeNotifier
       final controller =
           StreamMessageComposerController(
               message: messageBeforeEdit.copyWith(state: const MessageState.initial()),
+              validator: validator,
             )
             ..editMessage(messageBeingEdited)
             // Restore any edits the user made while in edit mode.
@@ -575,6 +639,7 @@ class StreamRestorableMessageComposerController extends RestorableChangeNotifier
     // it; any non-initial state serialized here is unrecoverable anyway).
     return StreamMessageComposerController(
       message: currentMessage.copyWith(state: const MessageState.initial()),
+      validator: validator,
     );
   }
 
@@ -582,14 +647,21 @@ class StreamRestorableMessageComposerController extends RestorableChangeNotifier
   String toPrimitives() {
     final controller = value;
     final data = <String, dynamic>{
-      'message': controller.message.toJson(),
+      'message': _messageToJson(controller.message),
     };
     if (controller.isEditing) {
-      data['message_being_edited'] = controller.messageBeingEdited!.toJson();
-      data['message_before_edit'] = controller._messageBeforeEdit!.toJson();
+      data['message_being_edited'] = _messageToJson(controller.messageBeingEdited!);
+      data['message_before_edit'] = _messageToJson(controller._messageBeforeEdit!);
     }
     return json.encode(data);
   }
+
+  // Message.toJson keeps only the ids of the mentioned users, which
+  // Message.fromJson cannot read back, so the full users are kept instead.
+  Map<String, dynamic> _messageToJson(Message message) => {
+    ...message.toJson(),
+    'mentioned_users': [...message.mentionedUsers.map((it) => it.toJson())],
+  };
 }
 
 /// Why a [Command] cannot be activated on a
