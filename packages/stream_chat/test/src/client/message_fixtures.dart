@@ -23,7 +23,7 @@ final generatedMessage = api.MessageResponse(
   deletedAt: DateTime.utc(2026, 1, 3),
   deletedForMe: false,
   deletedReplyCount: 2,
-  draft: _generatedDraft,
+  draft: generatedDraft,
   html: '<p>Hello</p>',
   i18n: const {'fr_text': 'Bonjour', 'language': 'en'},
   id: 'message-id',
@@ -213,7 +213,7 @@ Message expectedMessageLike(Message actual) => Message(
     semanticFilterMatched: 'spam',
     platformCircumvented: true,
   ),
-  draft: _expectedDraft(
+  draft: expectedDraft(
     attachmentId: actual.draft!.message.attachments.single.id,
     channel: actual.draft!.channel,
   ),
@@ -401,7 +401,9 @@ final _expectedOwnReaction = Reaction(
   updatedAt: DateTime.utc(2026, 1, 4, 13),
 );
 
-final _generatedDraft = api.DraftResponse(
+/// A generated draft with every field set, as creating or querying drafts
+/// answers it.
+final generatedDraft = api.DraftResponse(
   channel: _generatedChannel,
   channelCid: 'messaging:general',
   createdAt: DateTime.utc(2026, 1, 11),
@@ -420,21 +422,25 @@ final _generatedDraft = api.DraftResponse(
     showInChannel: true,
     silent: false,
     text: 'Draft',
-    type: 'reply',
+    type: 'system',
   ),
   parentId: 'message-id',
   parentMessage: generatedLeafMessage('message-id'),
   quotedMessage: generatedLeafMessage('draft-quoted-id'),
 );
 
-Draft _expectedDraft({required String attachmentId, required ChannelModel? channel}) => Draft(
+/// The [Draft] that [generatedDraft] maps to.
+///
+/// The attachment gets a new local id and a channel compares by identity, so
+/// both are passed in; check the channel's `cid` on its own.
+Draft expectedDraft({required String attachmentId, required ChannelModel? channel}) => Draft(
   channelCid: 'messaging:general',
   channel: channel,
   createdAt: DateTime.utc(2026, 1, 11),
   message: DraftMessage(
     id: 'draft-id',
     text: 'Draft',
-    type: 'reply',
+    type: 'system',
     attachments: [
       Attachment(
         id: attachmentId,
@@ -559,6 +565,102 @@ Message _expectedQuotedMessage(String attachmentId) => Message(
   cid: 'messaging:general',
   html: '<p>Quoted</p>',
   deletedReplyCount: 1,
+);
+
+/// A generated thread with every field set, as querying or fetching threads
+/// answers it.
+final generatedThread = api.ThreadStateResponse(
+  activeParticipantCount: 2,
+  channel: _generatedChannel,
+  channelCid: 'messaging:general',
+  createdAt: DateTime.utc(2026, 2, 1),
+  createdBy: fakeUserResponse('creator'),
+  createdByUserId: 'creator',
+  custom: const {'topic': 'travel'},
+  deletedAt: DateTime.utc(2026, 2, 3),
+  draft: generatedDraft,
+  lastMessageAt: DateTime.utc(2026, 2, 4),
+  latestReplies: [generatedLeafMessage('reply-id')],
+  parentMessage: generatedLeafMessage('parent-id'),
+  parentMessageId: 'parent-id',
+  participantCount: 3,
+  read: [
+    api.ReadStateResponse(
+      lastDeliveredAt: DateTime.utc(2026, 2, 5),
+      lastDeliveredMessageId: 'delivered-id',
+      lastRead: DateTime.utc(2026, 2, 6),
+      lastReadMessageId: 'reply-id',
+      unreadMessages: 1,
+      user: fakeUserResponse('reader'),
+    ),
+  ],
+  replyCount: 4,
+  threadParticipants: [
+    api.ThreadParticipant(
+      channelCid: 'messaging:general',
+      createdAt: DateTime.utc(2026, 2, 7),
+      custom: const {'nickname': 'Rey'},
+      lastReadAt: DateTime.utc(2026, 2, 8),
+      lastThreadMessageAt: DateTime.utc(2026, 2, 9),
+      leftThreadAt: DateTime.utc(2026, 2, 10),
+      threadId: 'parent-id',
+      user: fakeUserResponse('participant'),
+      userId: 'participant',
+    ),
+  ],
+  title: 'Trip',
+  updatedAt: DateTime.utc(2026, 2, 2),
+);
+
+/// The [Thread] that [generatedThread] maps to, with the values the mapping
+/// creates read off [actual].
+///
+/// A channel compares by identity, so the thread's and its draft's channels are
+/// taken from [actual], as is the local id of the draft's attachment; check
+/// those channels' `cid` on their own.
+Thread expectedThreadLike(Thread actual) => Thread(
+  activeParticipantCount: 2,
+  channel: actual.channel,
+  channelCid: 'messaging:general',
+  createdAt: DateTime.utc(2026, 2, 1),
+  createdBy: fakeUser('creator'),
+  createdByUserId: 'creator',
+  deletedAt: DateTime.utc(2026, 2, 3),
+  draft: expectedDraft(
+    attachmentId: actual.draft!.message.attachments.single.id,
+    channel: actual.draft!.channel,
+  ),
+  lastMessageAt: DateTime.utc(2026, 2, 4),
+  latestReplies: [expectedLeafMessage('reply-id')],
+  parentMessage: expectedLeafMessage('parent-id'),
+  parentMessageId: 'parent-id',
+  participantCount: 3,
+  read: [
+    Read(
+      lastDeliveredAt: DateTime.utc(2026, 2, 5),
+      lastDeliveredMessageId: 'delivered-id',
+      lastRead: DateTime.utc(2026, 2, 6),
+      lastReadMessageId: 'reply-id',
+      unreadMessages: 1,
+      user: fakeUser('reader'),
+    ),
+  ],
+  replyCount: 4,
+  threadParticipants: [
+    ThreadParticipant(
+      channelCid: 'messaging:general',
+      createdAt: DateTime.utc(2026, 2, 7),
+      lastReadAt: DateTime.utc(2026, 2, 8),
+      lastThreadMessageAt: DateTime.utc(2026, 2, 9),
+      leftThreadAt: DateTime.utc(2026, 2, 10),
+      threadId: 'parent-id',
+      user: fakeUser('participant'),
+      userId: 'participant',
+    ),
+  ],
+  title: 'Trip',
+  updatedAt: DateTime.utc(2026, 2, 2),
+  custom: const {'topic': 'travel'},
 );
 
 /// A generated message with the id [id] and only the fields the API always

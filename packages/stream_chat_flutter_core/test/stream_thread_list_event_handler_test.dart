@@ -21,8 +21,6 @@ void main() {
     late final mockController = MockStreamThreadListController();
     late final mockEvent = MockEvent();
     late final mockMessage = MockMessage();
-    late final mockUser = MockUser();
-    late final mockThread = MockThread();
 
     setUpAll(() {
       registerFallbackValue(MockEvent());
@@ -36,8 +34,6 @@ void main() {
       reset(mockController);
       reset(mockEvent);
       reset(mockMessage);
-      reset(mockUser);
-      reset(mockThread);
     });
 
     test('onThreadUpdated does nothing by default', () {
@@ -185,33 +181,60 @@ void main() {
     });
 
     test('onMessageRead marks thread as read', () {
-      when(() => mockThread.copyWith(read: any(named: 'read'))).thenReturn(mockThread);
-      when(() => mockThread.parentMessageId).thenReturn('parent-id');
-      when(() => mockEvent.thread).thenReturn(mockThread);
-      when(() => mockEvent.user).thenReturn(mockUser);
-      when(() => mockEvent.createdAt).thenReturn(DateTime.now());
-      when(() => mockController.getThread(parentMessageId: 'parent-id')).thenReturn(mockThread);
-      when(() => mockController.updateThread(mockThread)).thenReturn(true);
+      final reader = User(id: 'reader');
+      final readAt = DateTime.utc(2026, 1, 2);
+      final thread = _thread(
+        read: [Read(user: reader, lastRead: DateTime.utc(2026), unreadMessages: 3)],
+      );
+      when(() => mockEvent.thread).thenReturn(_thread());
+      when(() => mockEvent.user).thenReturn(reader);
+      when(() => mockEvent.createdAt).thenReturn(readAt);
+      when(() => mockController.getThread(parentMessageId: 'parent-id')).thenReturn(thread);
+      when(() => mockController.updateThread(any())).thenReturn(true);
 
       handler.onMessageRead(mockEvent, mockController);
-      verify(() => mockController.getThread(parentMessageId: 'parent-id'));
-      verify(() => mockThread.copyWith(read: any(named: 'read')));
-      verify(() => mockController.updateThread(mockThread));
+
+      verify(
+        () => mockController.updateThread(
+          thread.copyWith(
+            read: [Read(user: reader, lastRead: readAt, unreadMessages: 0)],
+          ),
+        ),
+      );
     });
 
     test('onNotificationMarkUnread marks thread as unread', () {
-      when(() => mockThread.copyWith(read: any(named: 'read'))).thenReturn(mockThread);
-      when(() => mockThread.parentMessageId).thenReturn('parent-id');
-      when(() => mockEvent.thread).thenReturn(mockThread);
-      when(() => mockEvent.user).thenReturn(mockUser);
-      when(() => mockEvent.createdAt).thenReturn(DateTime.now());
-      when(() => mockController.getThread(parentMessageId: 'parent-id')).thenReturn(mockThread);
-      when(() => mockController.updateThread(mockThread)).thenReturn(true);
+      final reader = User(id: 'reader');
+      final markedAt = DateTime.utc(2026, 1, 2);
+      final thread = _thread(
+        read: [Read(user: reader, lastRead: DateTime.utc(2026), unreadMessages: 3)],
+      );
+      when(() => mockEvent.thread).thenReturn(_thread());
+      when(() => mockEvent.user).thenReturn(reader);
+      when(() => mockEvent.createdAt).thenReturn(markedAt);
+      when(() => mockController.getThread(parentMessageId: 'parent-id')).thenReturn(thread);
+      when(() => mockController.updateThread(any())).thenReturn(true);
 
       handler.onNotificationMarkUnread(mockEvent, mockController);
-      verify(() => mockController.getThread(parentMessageId: 'parent-id'));
-      verify(() => mockThread.copyWith(read: any(named: 'read')));
-      verify(() => mockController.updateThread(mockThread));
+
+      verify(
+        () => mockController.updateThread(
+          thread.copyWith(
+            read: [Read(user: reader, lastRead: markedAt, unreadMessages: 4)],
+          ),
+        ),
+      );
     });
   });
 }
+
+Thread _thread({List<Read>? read}) => Thread(
+  channelCid: 'messaging:general',
+  parentMessageId: 'parent-id',
+  createdByUserId: 'creator',
+  replyCount: 1,
+  participantCount: 1,
+  createdAt: DateTime.utc(2026),
+  updatedAt: DateTime.utc(2026),
+  read: read,
+);

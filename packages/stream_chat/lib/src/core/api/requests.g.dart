@@ -41,13 +41,3 @@ Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) => <Str
   'created_at_before': ?instance.createdAtBefore?.toIso8601String(),
   'created_at_around': ?instance.createdAtAround?.toIso8601String(),
 };
-
-Map<String, dynamic> _$ThreadOptionsToJson(ThreadOptions instance) => <String, dynamic>{
-  'stringify': instance.stringify,
-  'hash_code': instance.hashCode,
-  'watch': instance.watch,
-  'reply_limit': instance.replyLimit,
-  'participant_limit': instance.participantLimit,
-  'member_limit': instance.memberLimit,
-  'props': instance.props,
-};

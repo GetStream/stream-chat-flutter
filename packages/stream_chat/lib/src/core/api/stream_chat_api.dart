@@ -8,7 +8,6 @@ import 'message_api.dart';
 import 'moderation_api.dart';
 import 'push_preferences_api.dart';
 import 'scheduled_messages_api.dart';
-import 'threads_api.dart';
 import 'user_api.dart';
 
 /// ApiClient that wraps every other specific api
@@ -44,10 +43,6 @@ class StreamChatApi {
   /// Api dedicated to message operations
   MessageApi get message => _message ??= MessageApi(_client);
   MessageApi? _message;
-
-  /// Api dedicated to threads operations
-  ThreadsApi get threads => _threads ??= ThreadsApi(_client);
-  ThreadsApi? _threads;
 
   /// Api dedicated to channel operations
   ChannelApi get channel => _channel ??= ChannelApi(_client);

@@ -80,15 +80,14 @@ void main() {
   group('Initial loading', () {
     test('successfully loads drafts from API', () async {
       final drafts = generateDrafts();
-      final response = QueryDraftsResponse()
-        ..drafts = drafts
-        ..next = '';
+      final response = Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: drafts, next: ''));
 
       when(
         () => client.queryDrafts(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((_) async => response);
 
@@ -97,11 +96,13 @@ void main() {
       await controller.doInitialLoad();
       await pumpEventQueue();
 
+      // The first page is three pages of the controller's limit, and has no
+      // cursor.
       verify(
         () => client.queryDrafts(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: 30,
         ),
       ).called(1);
 
@@ -115,9 +116,10 @@ void main() {
         () => client.queryDrafts(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
-      ).thenThrow(exception);
+      ).thenAnswer((_) async => Result.failure(exception));
 
       final controller = StreamDraftListController(client: client);
 
@@ -143,15 +145,14 @@ void main() {
         texts: ['Draft 3'],
       );
 
-      final response = QueryDraftsResponse()
-        ..drafts = additionalDrafts
-        ..next = '';
+      final response = Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: additionalDrafts, next: ''));
 
       when(
         () => client.queryDrafts(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((_) async => response);
 
@@ -165,6 +166,15 @@ void main() {
 
       await controller.loadMore(nextKey);
       await pumpEventQueue();
+
+      verify(
+        () => client.queryDrafts(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          limit: 10,
+          next: nextKey,
+        ),
+      ).called(1);
 
       // We need to verify that all the drafts are there, but not necessarily in
       // the same order since the controller might sort them differently
@@ -188,18 +198,19 @@ void main() {
       expect(controller.value.asSuccess.nextPageKey, isNull);
     });
 
-    test('loadMore preserves existing items when API throws exception', () async {
+    test('loadMore keeps the loaded drafts and reports the failure of the query as it is', () async {
       const nextKey = 'next_page_token';
       final existingDrafts = generateDrafts();
-      final exception = Exception('Network error');
+      const exception = StreamNetworkException(message: 'Network error');
 
       when(
         () => client.queryDrafts(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
-      ).thenThrow(exception);
+      ).thenAnswer((_) async => const Result.failure(exception));
 
       final controller = StreamDraftListController.fromValue(
         PagedValue<String, Draft>(
@@ -214,10 +225,39 @@ void main() {
 
       expect(controller.value.isSuccess, isTrue);
       expect(controller.value.asSuccess.items, equals(existingDrafts));
-      final error = controller.value.asSuccess.error;
-      // The message names the load; the throwable survives as `cause`.
-      expect(error?.message, 'Failed to load more drafts');
-      expect(error?.cause, same(exception));
+      expect(controller.value.asSuccess.error, same(exception));
+    });
+
+    test('loadMore keeps the loaded drafts and reports any other failure as a client error', () async {
+      const nextKey = 'next_page_token';
+      final existingDrafts = generateDrafts();
+      final cause = Exception('boom');
+
+      when(
+        () => client.queryDrafts(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
+        ),
+      ).thenAnswer((_) async => Result.failure(cause));
+
+      final controller = StreamDraftListController.fromValue(
+        PagedValue<String, Draft>(
+          items: existingDrafts,
+          nextPageKey: nextKey,
+        ),
+        client: client,
+      );
+
+      await controller.loadMore(nextKey);
+      await pumpEventQueue();
+
+      expect(controller.value.asSuccess.items, equals(existingDrafts));
+      expect(
+        controller.value.asSuccess.error,
+        isA<StreamClientException>().having((it) => it.cause, 'cause', same(cause)),
+      );
     });
   });
 
@@ -412,15 +452,14 @@ void main() {
 
     test('draft_updated event triggers draft update', () async {
       final drafts = generateDrafts();
-      final queryResponse = QueryDraftsResponse()
-        ..drafts = drafts
-        ..next = '';
+      final queryResponse = Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: drafts, next: ''));
 
       when(
         () => client.queryDrafts(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((_) async => queryResponse);
 
@@ -453,15 +492,14 @@ void main() {
 
     test('draft_deleted event triggers draft removal', () async {
       final drafts = generateDrafts();
-      final queryResponse = QueryDraftsResponse()
-        ..drafts = drafts
-        ..next = '';
+      final queryResponse = Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: drafts, next: ''));
 
       when(
         () => client.queryDrafts(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((_) async => queryResponse);
 
@@ -504,13 +542,12 @@ void main() {
         () => client.queryDrafts(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((_) async {
         queryCallCount++;
-        return QueryDraftsResponse()
-          ..drafts = drafts
-          ..next = '';
+        return Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: drafts, next: ''));
       });
 
       final controller = StreamDraftListController.fromValue(
@@ -537,15 +574,14 @@ void main() {
 
     test('custom event listener can prevent default handling', () async {
       final drafts = generateDrafts();
-      final queryResponse = QueryDraftsResponse()
-        ..drafts = drafts
-        ..next = '';
+      final queryResponse = Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: drafts, next: ''));
 
       when(
         () => client.queryDrafts(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((_) async => queryResponse);
 
@@ -596,15 +632,14 @@ void main() {
       final eventController = StreamController<Event>.broadcast();
       when(client.on).thenAnswer((_) => eventController.stream);
 
-      final response = QueryDraftsResponse()
-        ..drafts = drafts
-        ..next = '';
+      final response = Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: drafts, next: ''));
 
       when(
         () => client.queryDrafts(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((_) async => response);
 
@@ -632,13 +667,12 @@ void main() {
         () => client.queryDrafts(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((invocation) async {
         sorts.add(invocation.namedArguments[const Symbol('sort')]);
-        return QueryDraftsResponse()
-          ..drafts = generateDrafts()
-          ..next = '';
+        return Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: generateDrafts(), next: ''));
       });
 
       final controller = StreamDraftListController(client: client);
@@ -656,13 +690,12 @@ void main() {
         () => client.queryDrafts(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((invocation) async {
         sorts.add(invocation.namedArguments[const Symbol('sort')]);
-        return QueryDraftsResponse()
-          ..drafts = generateDrafts()
-          ..next = '';
+        return Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: generateDrafts(), next: ''));
       });
 
       final controller = StreamDraftListController(client: client, sort: DraftSort.empty);
@@ -682,12 +715,11 @@ void main() {
         () => client.queryDrafts(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer(
-        (_) async => QueryDraftsResponse()
-          ..drafts = oldestFirst
-          ..next = '',
+        (_) async => Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: oldestFirst, next: '')),
       );
 
       final controller = StreamDraftListController(client: client, sort: DraftSort.empty);
@@ -709,16 +741,15 @@ void main() {
         () => client.queryDrafts(
           filter: any(named: 'filter'),
           sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
         ),
       ).thenAnswer((invocation) async {
         apiCalls.add({
           'filter': invocation.namedArguments[const Symbol('filter')],
           'sort': invocation.namedArguments[const Symbol('sort')],
         });
-        return QueryDraftsResponse()
-          ..drafts = drafts
-          ..next = '';
+        return Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: drafts, next: ''));
       });
 
       final controller = StreamDraftListController(
@@ -759,7 +790,8 @@ void main() {
           () => client.queryDrafts(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
+            limit: any(named: 'limit'),
+            next: any(named: 'next'),
           ),
         ).thenAnswer((invocation) {
           apiCalls.add({
@@ -767,9 +799,7 @@ void main() {
             'sort': invocation.namedArguments[const Symbol('sort')],
           });
           return Future.value(
-            QueryDraftsResponse()
-              ..drafts = drafts
-              ..next = '',
+            Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: drafts, next: '')),
           );
         });
 
@@ -800,6 +830,14 @@ void main() {
 
   group('Disposal', () {
     test('dispose cancels subscriptions without errors', () {
+      when(
+        () => client.queryDrafts(
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          limit: any(named: 'limit'),
+          next: any(named: 'next'),
+        ),
+      ).thenAnswer((_) async => const Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: [])));
       final controller = StreamDraftListController(client: client)..doInitialLoad();
 
       expect(controller.dispose, returnsNormally);
@@ -810,12 +848,13 @@ void main() {
     test(
       'disposing during doInitialLoad does not throw when response arrives late',
       () async {
-        final completer = Completer<QueryDraftsResponse>();
+        final completer = Completer<Result<QueryDraftsResponse>>();
         when(
           () => client.queryDrafts(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
+            limit: any(named: 'limit'),
+            next: any(named: 'next'),
           ),
         ).thenAnswer((_) => completer.future);
 
@@ -825,9 +864,7 @@ void main() {
         controller.dispose();
 
         // Resolve the in-flight request after the controller is disposed.
-        final response = QueryDraftsResponse()
-          ..drafts = generateDrafts()
-          ..next = '';
+        final response = Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: generateDrafts(), next: ''));
         completer.complete(response);
 
         // The future should resolve cleanly with no assertion/exception.
@@ -847,21 +884,22 @@ void main() {
           client: client,
         );
 
-        final completer = Completer<QueryDraftsResponse>();
+        final completer = Completer<Result<QueryDraftsResponse>>();
         when(
           () => client.queryDrafts(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
+            limit: any(named: 'limit'),
+            next: any(named: 'next'),
           ),
         ).thenAnswer((_) => completer.future);
 
         final loadMoreFuture = controller.loadMore(nextPageKey);
         controller.dispose();
 
-        final response = QueryDraftsResponse()
-          ..drafts = generateDrafts(count: 1, startId: 999)
-          ..next = '';
+        final response = Result.success(
+          QueryDraftsResponse(duration: '0.01ms', drafts: generateDrafts(count: 1, startId: 999), next: ''),
+        );
         completer.complete(response);
 
         await expectLater(loadMoreFuture, completes);
@@ -871,7 +909,7 @@ void main() {
     test(
       'event subscription is not created when disposed before response arrives',
       () async {
-        final completer = Completer<QueryDraftsResponse>();
+        final completer = Completer<Result<QueryDraftsResponse>>();
         // Use a fresh mock client to track `on()` calls per-test.
         final localClient = MockClient();
         // Stub `on()` only if needed after dispose — we will verify it is NOT called.
@@ -880,7 +918,8 @@ void main() {
           () => localClient.queryDrafts(
             filter: any(named: 'filter'),
             sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
+            limit: any(named: 'limit'),
+            next: any(named: 'next'),
           ),
         ).thenAnswer((_) => completer.future);
 
@@ -888,9 +927,7 @@ void main() {
         final loadFuture = controller.doInitialLoad();
         controller.dispose();
 
-        final response = QueryDraftsResponse()
-          ..drafts = generateDrafts()
-          ..next = '';
+        final response = Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: generateDrafts(), next: ''));
         completer.complete(response);
         await loadFuture;
 

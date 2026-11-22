@@ -1363,10 +1363,14 @@ class Channel {
     },
   );
 
-  /// Creates or updates a new [draft] for this channel.
+  /// Saves [draft] as the current user's draft in this channel.
   ///
-  /// Updates the draft in [state] right away, even if the request fails.
-  Future<CreateDraftResponse> createDraft(
+  /// It replaces the draft the user already has here, or in the thread of the
+  /// message [DraftMessage.parentId] names. The draft is stored in [state]
+  /// right away, so it is kept even if the request fails.
+  ///
+  /// Throws a [StateError] if the channel is not initialized.
+  Future<Result<CreateDraftResponse>> createDraft(
     DraftMessage draft,
   ) {
     _checkInitialized();
@@ -1380,23 +1384,27 @@ class Channel {
     return _client.createDraft(draft, id!, type);
   }
 
-  /// Retrieves the draft for this channel.
+  /// Fetches the current user's draft in this channel, or in the thread of the
+  /// message with the id [parentId].
   ///
-  /// Optionally, provide a [parentId] to get the draft for a specific thread.
-  Future<GetDraftResponse> getDraft({
+  /// A channel or thread without a draft comes back as a failure.
+  ///
+  /// Throws a [StateError] if the channel is not initialized.
+  Future<Result<GetDraftResponse>> getDraft({
     String? parentId,
   }) {
     _checkInitialized();
     return _client.getDraft(id!, type, parentId: parentId);
   }
 
-  /// Deletes the draft for this channel.
+  /// Deletes the current user's draft in this channel, or in the thread of the
+  /// message with the id [parentId].
   ///
-  /// Optionally, provide a [parentId] to delete the draft for a specific
-  /// thread.
+  /// The draft is removed from [state] right away, even if the request
+  /// fails. A channel or thread without a draft comes back as a failure.
   ///
-  /// Removes the draft from [state], even if the request fails.
-  Future<EmptyResponse> deleteDraft({
+  /// Throws a [StateError] if the channel is not initialized.
+  Future<Result<void>> deleteDraft({
     String? parentId,
   }) {
     _checkInitialized();

@@ -102,57 +102,56 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
       this.limit * defaultInitialPagedLimitMultiplier,
       _kDefaultBackendPaginationLimit,
     );
-    try {
-      final response = await client.queryDrafts(
-        sort: _activeSort,
-        filter: _activeFilter,
-        pagination: PaginationParams(limit: limit),
-      );
+    final result = await client.queryDrafts(
+      sort: _activeSort,
+      filter: _activeFilter,
+      limit: limit,
+    );
 
-      final results = response.drafts;
-      final nextKey = response.next;
-      value = PagedValue(
-        items: results,
-        nextPageKey: nextKey,
-      );
-      // Start listening to events
-      if (disposed) return;
-      _subscribeToDraftListEvents();
-    } on StreamChatException catch (error) {
-      value = PagedValue.error(error);
-    } catch (error) {
-      final chatError = StreamClientException(message: 'Failed to load drafts', cause: error);
-      value = PagedValue.error(chatError);
-    }
+    result.fold(
+      onSuccess: (response) {
+        value = PagedValue(
+          items: response.drafts,
+          nextPageKey: response.next,
+        );
+
+        // Start listening to events
+        if (disposed) return;
+        _subscribeToDraftListEvents();
+      },
+      onFailure: (error, _) => value = PagedValue.error(_chatException(error, 'Failed to load drafts')),
+    );
   }
 
   @override
   Future<void> loadMore(String nextPageKey) async {
     final previousValue = value.asSuccess;
 
-    try {
-      final response = await client.queryDrafts(
-        sort: _activeSort,
-        filter: _activeFilter,
-        pagination: PaginationParams(limit: limit, next: nextPageKey),
-      );
+    final result = await client.queryDrafts(
+      sort: _activeSort,
+      filter: _activeFilter,
+      limit: limit,
+      next: nextPageKey,
+    );
 
-      final results = response.drafts;
-      final previousItems = previousValue.items;
-      final newItems = previousItems + results;
-      final next = response.next;
-      final nextKey = next != null && next.isNotEmpty ? next : null;
-      value = PagedValue(
-        items: newItems,
-        nextPageKey: nextKey,
-      );
-    } on StreamChatException catch (error) {
-      value = previousValue.copyWith(error: error);
-    } catch (error) {
-      final chatError = StreamClientException(message: 'Failed to load more drafts', cause: error);
-      value = previousValue.copyWith(error: chatError);
-    }
+    result.fold(
+      onSuccess: (response) {
+        final next = response.next;
+        value = PagedValue(
+          items: previousValue.items + response.drafts,
+          nextPageKey: next != null && next.isNotEmpty ? next : null,
+        );
+      },
+      onFailure: (error, _) {
+        value = previousValue.copyWith(error: _chatException(error, 'Failed to load more drafts'));
+      },
+    );
   }
+
+  StreamChatException _chatException(Object error, String message) => switch (error) {
+    final StreamChatException error => error,
+    _ => StreamClientException(message: message, cause: error),
+  };
 
   /// Event listener, which can be set in order to listen
   /// [client] web-socket events.

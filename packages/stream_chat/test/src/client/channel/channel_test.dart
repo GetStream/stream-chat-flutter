@@ -1487,181 +1487,125 @@ void main() {
       );
     });
 
-    group('`.createDraft`', () {
-      final draftMessage = DraftMessage(text: 'Draft message text');
+    test('Channel.createDraft saves the draft in this channel and returns the saved draft', () async {
+      final draftMessage = DraftMessage(id: 'draft-id', text: 'Draft message text');
+      final response = CreateDraftResponse(
+        duration: '0.01ms',
+        draft: Draft(channelCid: channelCid, createdAt: DateTime.utc(2024, 6, 1), message: draftMessage),
+      );
+      when(
+        () => client.createDraft(draftMessage, channelId, channelType),
+      ).thenAnswer((_) async => Result.success(response));
 
-      setUp(() {
-        when(
-          () => client.createDraft(
-            draftMessage,
-            channelId,
-            channelType,
-          ),
-        ).thenAnswer(
-          (_) async => CreateDraftResponse()
-            ..draft = Draft(
-              channelCid: channelCid,
-              createdAt: DateTime.now(),
-              message: draftMessage,
-            ),
-        );
-      });
+      final res = await channel.createDraft(draftMessage);
 
-      test('should call client.createDraft', () async {
-        final res = await channel.createDraft(draftMessage);
-
-        expect(res, isNotNull);
-        expect(res.draft.message, draftMessage);
-
-        verify(
-          () => channel.client.createDraft(
-            draftMessage,
-            channelId,
-            channelType,
-          ),
-        ).called(1);
-      });
+      expect(res.getOrNull(), response);
+      verify(() => client.createDraft(draftMessage, channelId, channelType)).called(1);
     });
 
-    group('`.createDraft` while offline', () {
+    test('Channel.createDraft keeps the draft in the channel state when the request fails', () async {
       final draftMessage = DraftMessage(text: 'Typed while offline');
+      const error = StreamNetworkException(message: 'No connection');
+      when(
+        () => client.createDraft(draftMessage, channelId, channelType),
+      ).thenAnswer((_) async => const Result.failure(error));
 
-      setUp(() {
-        when(
-          () => client.createDraft(draftMessage, channelId, channelType),
-        ).thenAnswer((_) async => throw const StreamNetworkException(message: 'No connection'));
-      });
+      final res = await channel.createDraft(draftMessage);
 
-      test('keeps the draft in the channel state', () async {
-        await expectLater(() => channel.createDraft(draftMessage), throwsA(isA<StreamNetworkException>()));
-
-        expect(channel.state!.draft?.message, draftMessage);
-      });
-
-      test('leaves the channel draft alone for a thread whose parent is not loaded', () async {
-        final threadDraft = DraftMessage(text: 'Thread reply', parentId: 'unloaded-parent-id');
-        when(
-          () => client.createDraft(threadDraft, channelId, channelType),
-        ).thenAnswer((_) async => throw const StreamNetworkException(message: 'No connection'));
-
-        await expectLater(() => channel.createDraft(threadDraft), throwsA(isA<StreamNetworkException>()));
-
-        expect(channel.state!.draft, isNull);
-      });
+      expect(res.isFailure, isTrue);
+      expect(channel.state!.draft?.message, draftMessage);
     });
 
-    group('`.deleteDraft` while offline', () {
-      setUp(() {
-        when(
-          () => client.deleteDraft(channelId, channelType, parentId: any(named: 'parentId')),
-        ).thenAnswer((_) async => throw const StreamNetworkException(message: 'No connection'));
-      });
+    test('Channel.createDraft leaves the channel draft alone for a thread whose parent is not loaded', () async {
+      final threadDraft = DraftMessage(text: 'Thread reply', parentId: 'unloaded-parent-id');
+      const error = StreamNetworkException(message: 'No connection');
+      when(
+        () => client.createDraft(threadDraft, channelId, channelType),
+      ).thenAnswer((_) async => const Result.failure(error));
 
-      test('removes the draft from the channel state', () async {
-        channel.state!.updateDraft(
-          Draft(
-            channelCid: channelCid,
-            createdAt: DateTime.now(),
-            message: DraftMessage(text: 'Old draft'),
-          ),
-        );
+      final res = await channel.createDraft(threadDraft);
 
-        await expectLater(() => channel.deleteDraft(), throwsA(isA<StreamNetworkException>()));
-        await Future<void>.delayed(Duration.zero);
-
-        expect(channel.state!.draft, isNull);
-      });
+      expect(res.isFailure, isTrue);
+      expect(channel.state!.draft, isNull);
     });
 
-    group('`.getDraft`', () {
-      final draftMessage = DraftMessage(text: 'Draft message text');
+    test('Channel.deleteDraft removes the draft from the channel state when the request fails', () async {
+      channel.state!.updateDraft(
+        Draft(
+          channelCid: channelCid,
+          createdAt: DateTime.now(),
+          message: DraftMessage(text: 'Old draft'),
+        ),
+      );
+      const error = StreamNetworkException(message: 'No connection');
+      when(
+        () => client.deleteDraft(channelId, channelType, parentId: any(named: 'parentId')),
+      ).thenAnswer((_) async => const Result.failure(error));
 
-      setUp(() {
-        when(
-          () => client.getDraft(
-            channelId,
-            channelType,
-            parentId: any(named: 'parentId'),
-          ),
-        ).thenAnswer(
-          (_) async => GetDraftResponse()
-            ..draft = Draft(
-              channelCid: channelCid,
-              createdAt: DateTime.now(),
-              message: draftMessage,
-            ),
-        );
-      });
+      final res = await channel.deleteDraft();
+      await Future<void>.delayed(Duration.zero);
 
-      test('should call client.getDraft', () async {
-        final res = await channel.getDraft();
-
-        expect(res, isNotNull);
-        expect(res.draft.message, draftMessage);
-
-        verify(
-          () => channel.client.getDraft(
-            channelId,
-            channelType,
-          ),
-        ).called(1);
-      });
-
-      test('with parentId should pass parentId to client', () async {
-        const parentId = 'parent-123';
-        final res = await channel.getDraft(parentId: parentId);
-
-        expect(res, isNotNull);
-        expect(res.draft.message, draftMessage);
-
-        verify(
-          () => channel.client.getDraft(
-            channelId,
-            channelType,
-            parentId: parentId,
-          ),
-        ).called(1);
-      });
+      expect(res.isFailure, isTrue);
+      expect(channel.state!.draft, isNull);
     });
 
-    group('`.deleteDraft`', () {
-      setUp(() {
-        when(
-          () => client.deleteDraft(
-            channelId,
-            channelType,
-            parentId: any(named: 'parentId'),
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
-      });
+    test('Channel.getDraft fetches the draft of this channel', () async {
+      final response = GetDraftResponse(
+        duration: '0.01ms',
+        draft: Draft(
+          channelCid: channelCid,
+          createdAt: DateTime.utc(2024, 6, 1),
+          message: DraftMessage(id: 'draft-id', text: 'Draft message text'),
+        ),
+      );
+      when(() => client.getDraft(channelId, channelType)).thenAnswer((_) async => Result.success(response));
 
-      test('should call client.deleteDraft', () async {
-        final res = await channel.deleteDraft();
+      final res = await channel.getDraft();
 
-        expect(res, isNotNull);
+      expect(res.getOrNull(), response);
+      verify(() => client.getDraft(channelId, channelType)).called(1);
+    });
 
-        verify(
-          () => channel.client.deleteDraft(
-            channelId,
-            channelType,
-          ),
-        ).called(1);
-      });
+    test('Channel.getDraft with a parent id fetches the draft of that thread', () async {
+      const parentId = 'parent-123';
+      final response = GetDraftResponse(
+        duration: '0.01ms',
+        draft: Draft(
+          channelCid: channelCid,
+          createdAt: DateTime.utc(2024, 6, 1),
+          message: DraftMessage(id: 'draft-id', text: 'Draft message text', parentId: parentId),
+          parentId: parentId,
+        ),
+      );
+      when(
+        () => client.getDraft(channelId, channelType, parentId: parentId),
+      ).thenAnswer((_) async => Result.success(response));
 
-      test('with parentId should pass parentId to client', () async {
-        const parentId = 'parent-123';
-        final res = await channel.deleteDraft(parentId: parentId);
+      final res = await channel.getDraft(parentId: parentId);
 
-        expect(res, isNotNull);
+      expect(res.getOrNull(), response);
+      verify(() => client.getDraft(channelId, channelType, parentId: parentId)).called(1);
+    });
 
-        verify(
-          () => channel.client.deleteDraft(
-            channelId,
-            channelType,
-            parentId: parentId,
-          ),
-        ).called(1);
-      });
+    test('Channel.deleteDraft deletes the draft of this channel and returns a success', () async {
+      when(() => client.deleteDraft(channelId, channelType)).thenAnswer((_) async => const Result.success(null));
+
+      final res = await channel.deleteDraft();
+
+      expect(res.isSuccess, isTrue);
+      verify(() => client.deleteDraft(channelId, channelType)).called(1);
+    });
+
+    test('Channel.deleteDraft with a parent id deletes the draft of that thread and returns a success', () async {
+      const parentId = 'parent-123';
+      when(
+        () => client.deleteDraft(channelId, channelType, parentId: parentId),
+      ).thenAnswer((_) async => const Result.success(null));
+
+      final res = await channel.deleteDraft(parentId: parentId);
+
+      expect(res.isSuccess, isTrue);
+      verify(() => client.deleteDraft(channelId, channelType, parentId: parentId)).called(1);
     });
 
     test("Channel.createReminder sends the due date and returns the client's createReminder response", () async {
