@@ -15,6 +15,11 @@ extension ChannelCapabilityCheck on Channel {
     return ownCapabilities.contains(ChannelCapability.sendReply);
   }
 
+  /// Whether the current user can schedule a message in this channel.
+  bool get canScheduleMessage {
+    return ownCapabilities.contains(ChannelCapability.scheduleMessage);
+  }
+
   /// True, if the current user can send a message with restricted visibility.
   bool get canSendRestrictedVisibilityMessage {
     return ownCapabilities.contains(
@@ -158,8 +163,7 @@ extension ChannelCapabilityCheck on Channel {
   ///
   /// This is the case when [StreamChatClient.isLocalUnreadCountEnabled] is
   /// enabled and the channel doesn't support read receipts (for example,
-  /// livestream channel types that disable read events). Channels that
-  /// support read receipts never track them locally.
+  /// livestream channel types that disable read events).
   bool get usesLocalUnreadCount {
     return client.isLocalUnreadCountEnabled && !canUseReadReceipts;
   }

@@ -126,7 +126,20 @@
 - An entry of `ChannelModel.custom` or `Member.custom` named like one of the model's own fields stays in `custom` and leaves the field alone, and `toJson` leaves it out.
 - `rawType` is removed from `MessageType`, `AttachmentType`, `PushLevel`, `ChatPreferenceLevel`, `ChatLevel`, `CallLevel` and `RoleType`, as are `ModerationAction.action` and `ChannelCapability.capability`; use the value itself instead.
 
+- `ChannelClientState.truncate` now truncates the channel at an optional `truncatedAt` instead of emptying the loaded messages; use `clearMessages` for that.
+- A custom `ChatPersistenceClient` must implement `truncateChannel`, which removes a channel's stored messages from before a given time.
+- `MessageState.sending` and `MessageState.updating` are factories that take the request's `skipPush` and `skipEnrichUrl`; add `()` where you used the constants.
+- A partial update, such as pinning a message, is in the new `OutgoingState.partialUpdating` state while it runs; `isUpdating` still covers it.
+- `OutgoingState`'s `when`, `whenOrNull` and `maybeWhen` pass the request's options to `sending` and `updating` and take a `partialUpdating` callback, and its `map`, `mapOrNull` and `maybeMap` take one too.
+- A custom `ChatPersistenceClient` must implement `settleInterruptedRequests`, which marks the stored messages left sending, updating or deleting as failed.
+
 🐞 Fixed
+
+- Truncating a channel no longer removes the messages sent after its truncation time, or messages not sent yet.
+- Truncating a channel now also removes its thread replies from before the truncation, lowers an unread count higher than the messages left, and updates its last message time.
+- Messages from before a channel's truncation no longer come back when the truncation event was missed.
+- A message no longer stays sending, updating or deleting forever when the app is closed before its request finishes; the interrupted request is retried.
+- Deleting a message that was already deleted no longer fails and offers a retry that can never succeed.
 
 - `connectGuestUser` no longer copies the user's online status, ban, unread counts, devices and push preferences into the created guest's `extraData`.
 - `Channel.custom` no longer returns the data the channel was created with once the channel's custom data is empty.
@@ -150,6 +163,8 @@
 
 ✅ Added
 
+- Added `ChannelClientState.clearMessages`, which empties the loaded messages.
+- Added `MessageState.settled`, the failed state a message is left in when its request never finished.
 - Log records from the HTTP and token layers now reach the configured handler.
 - Added `MessageSearchSortField.relevance`, which sorts a message search by match quality.
 - Added `MessageReminderSortField.messageId`, the field the API breaks reminder ties on.
@@ -175,6 +190,36 @@
 - Replaced the internal `InFlightCache` and `SystemEnvironmentManager` with shared implementations.
 
 ## Upcoming
+
+✅ Added
+
+- Added scheduled messages: schedule one with `Channel.scheduleMessage`, and read the current user's unsent ones from `ClientState.scheduledMessages` after `StreamChatClient.loadScheduledMessages`, or those in one channel or thread with `ClientState.scheduledChannelMessages` and `ClientState.scheduledThreadReplies`.
+
+🔄 Changed
+
+- Overrides of the channel query methods on `Channel` and `StreamChatClient` must add the new `includeScheduledMessages` parameter.
+
+## 10.7.0
+
+✅ Added
+
+- Added quiet hours to push preferences, set and cleared through `PushPreferenceInput` and reported on `PushPreference.schedule`.
+- Added `includeActiveMemberCount` to the channel queries, which fills the new `Channel.activeMemberCount`: the number of members who are neither deactivated nor deleted.
+
+🔄 Changed
+
+- `Attachment.type` is now `url_preview` for every attachment scraped from a link in the message text, including a link to an image or file. Use `Attachment.rawType` to read the type it was created or received with.
+- `Attachment.toJson` keeps the original `type` of an attachment scraped from a link, such as `video` or `image`, instead of writing `url_preview`.
+
+🐞 Fixed
+
+- Fixed the connection getting stuck while connecting, and requests never completing, when the token provider throws while refreshing an expired token.
+- Fixed sending, updating and deleting a message not retrying when the server answers with a timeout (408), a rate limit (429) or a server error (5xx).
+- Fixed hard-deleting an unread message not lowering the channel's unread count.
+- Fixed a draft saved or deleted while offline not being kept.
+- Fixed a thread draft replacing the channel's draft when the thread's parent message isn't loaded.
+
+## 10.6.0
 
 ✅ Added
 

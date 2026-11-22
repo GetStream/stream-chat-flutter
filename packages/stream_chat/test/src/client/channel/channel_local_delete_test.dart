@@ -33,7 +33,7 @@ void main() {
 
   test('deleting an unsent message emits message.deleted', () async {
     final channel = _channel();
-    final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending);
+    final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending());
     channel.state!.addNewMessage(unsent);
     final deleted = channel.on(EventType.messageDeleted).first;
 
@@ -59,7 +59,7 @@ void main() {
 
   test('deleting an unsent message removes it from the state', () async {
     final channel = _channel();
-    final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending);
+    final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending());
     channel.state!.addNewMessage(unsent);
 
     await channel.deleteMessage(unsent);
@@ -84,7 +84,7 @@ void main() {
 
   test('deleting an unsent message for me emits a hard-deleted message.deleted', () async {
     final channel = _channel();
-    final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending);
+    final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending());
     channel.state!.addNewMessage(unsent);
     final deleted = channel.on(EventType.messageDeleted).first;
 

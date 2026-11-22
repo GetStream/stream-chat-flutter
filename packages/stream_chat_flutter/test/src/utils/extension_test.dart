@@ -256,6 +256,56 @@ void main() {
       });
     });
 
+    test('should not let a mentioned name claim the start of a longer one', () {
+      final ann = User(id: 'ann', name: 'Ann');
+      final anna = User(id: 'anna', name: 'Anna');
+
+      final message = Message(
+        text: 'Hi @Ann and @Anna!',
+        mentionedUsers: [ann, anna],
+      );
+
+      final modifiedMessage = message.replaceMentions();
+
+      expect(
+        modifiedMessage.text,
+        equals('Hi [@Ann](mention:ann) and [@Anna](mention:anna)!'),
+      );
+    });
+
+    test('should not let a mentioned id claim the start of a longer one', () {
+      final first = User(id: 'user1', name: 'First');
+      final twelfth = User(id: 'user12', name: 'Twelfth');
+
+      final message = Message(
+        text: 'Hi @user12 and @user1!',
+        mentionedUsers: [first, twelfth],
+      );
+
+      final modifiedMessage = message.replaceMentions();
+
+      expect(
+        modifiedMessage.text,
+        equals('Hi [@Twelfth](mention:user12) and [@First](mention:user1)!'),
+      );
+    });
+
+    test('a role mention does not claim the start of a longer user mention', () {
+      final user = User(id: 'usr-1', name: 'admins');
+      final message = Message(
+        text: 'Hey @admin and @admins!',
+        mentionedRoles: const ['admin'],
+        mentionedUsers: [user],
+      );
+
+      final result = message.replaceMentions();
+
+      expect(
+        result.text,
+        equals('Hey [@admin](mention-role:admin) and [@admins](mention:usr-1)!'),
+      );
+    });
+
     test('replaceMentions should replace user mentions with names and IDs', () {
       final user1 = User(id: 'user1', name: 'Alice');
       final user2 = User(id: 'user2', name: 'Bob');
@@ -642,8 +692,6 @@ void main() {
 
           final result = message.replaceMentions();
 
-          // Role is processed before user; the negative lookbehind prevents
-          // the user iteration from re-wrapping the already-wrapped mention.
           expect(
             result.text,
             equals('Hey [@admin](mention-role:admin)!'),

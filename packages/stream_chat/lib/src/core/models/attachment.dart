@@ -66,8 +66,7 @@ class Attachment extends Equatable {
   );
 
   factory Attachment.fromOGAttachment(OGAttachmentResponse ogAttachment) => Attachment(
-    // If the type is not specified, we default to urlPreview.
-    type: ogAttachment.type ?? AttachmentType.urlPreview,
+    type: ogAttachment.type,
     title: ogAttachment.title,
     titleLink: ogAttachment.titleLink,
     text: ogAttachment.text,
@@ -80,26 +79,27 @@ class Attachment extends Equatable {
     uploadState: const UploadState.success(),
   );
 
-  ///The attachment type based on the URL resource. This can be: audio,
-  ///image or video
+  /// The kind of attachment.
+  ///
+  /// An attachment scraped from a link in the message text is
+  /// [AttachmentType.urlPreview], whatever the link points to. [rawType] holds
+  /// the type it was created or received with.
   @JsonKey(
-    includeIfNull: false,
-    toJson: AttachmentType.toJson,
+    includeToJson: false,
     fromJson: AttachmentType.fromJson,
   )
   AttachmentType? get type {
-    // If the attachment contains ogScrapeUrl as well as titleLink, we consider
-    // it as a urlPreview.
-    if (ogScrapeUrl != null && titleLink != null) {
-      return AttachmentType.urlPreview;
-    }
+    // If the attachment was scraped from a link, we consider it as a
+    // urlPreview, whatever the link points to.
+    if (ogScrapeUrl != null) return AttachmentType.urlPreview;
 
     return _type;
   }
 
   final AttachmentType? _type;
 
-  /// The raw attachment type.
+  /// The type this attachment was created or received with.
+  @JsonKey(name: 'type', includeFromJson: false, includeToJson: true)
   String? get rawType => _type;
 
   ///The link to which the attachment message points to.
@@ -250,7 +250,7 @@ class Attachment extends Equatable {
     Map<String, Object?>? extraData,
   }) => Attachment(
     id: id ?? this.id,
-    type: type ?? this.type,
+    type: type ?? rawType,
     titleLink: titleLink ?? this.titleLink,
     title: title ?? this.title,
     thumbUrl: thumbUrl ?? this.thumbUrl,
@@ -278,7 +278,7 @@ class Attachment extends Equatable {
   Attachment merge(Attachment? other) {
     if (other == null) return this;
     return copyWith(
-      type: other.type,
+      type: other.rawType,
       titleLink: other.titleLink,
       title: other.title,
       thumbUrl: other.thumbUrl,
@@ -307,7 +307,7 @@ class Attachment extends Equatable {
   @override
   List<Object?> get props => [
     id,
-    type,
+    rawType,
     titleLink,
     title,
     thumbUrl,

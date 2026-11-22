@@ -126,7 +126,7 @@ final generatedPoll = api.PollResponseData(
   updatedAt: DateTime.utc(2024, 4, 18),
   voteCount: 1,
   voteCountsByOption: const {'pizza': 1},
-  votingVisibility: api.PollResponseDataVotingVisibility.anonymous,
+  votingVisibility: api.VotingVisibility.anonymous,
 );
 
 final poll = Poll(

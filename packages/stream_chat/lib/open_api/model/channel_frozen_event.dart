@@ -3,20 +3,12 @@
 // coverage:ignore-file
 // ignore_for_file: unused_import, unnecessary_import, prefer_single_quotes, require_trailing_commas, unnecessary_raw_strings, public_member_api_docs, sort_constructors_first, provide_deprecation_message
 
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
-import 'package:stream_core/stream_core.dart' as core;
-
-import '../models.dart';
-
-part 'channel_frozen_event.g.dart';
-part 'channel_frozen_event.freezed.dart';
+part of 'events.dart';
 
 @freezed
 @immutable
 @JsonSerializable()
-class ChannelFrozenEvent extends core.WsEvent with _$ChannelFrozenEvent {
+class ChannelFrozenEvent extends core.WsEvent with _$ChannelFrozenEvent implements WSClientEvent, WSEvent {
   const ChannelFrozenEvent({
     this.channelId,
     this.channelType,
@@ -57,6 +49,7 @@ class ChannelFrozenEvent extends core.WsEvent with _$ChannelFrozenEvent {
   @JsonKey(name: 'type')
   final String type;
 
+  @override
   Map<String, dynamic> toJson() => _$ChannelFrozenEventToJson(this);
 
   static ChannelFrozenEvent fromJson(Map<String, dynamic> json) => _$ChannelFrozenEventFromJson(json);

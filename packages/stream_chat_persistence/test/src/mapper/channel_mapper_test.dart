@@ -32,6 +32,7 @@ void main() {
       deletedAt: DateTime.now(),
       memberCount: 33,
       messageCount: 42,
+      activeMemberCount: 17,
       createdById: user.id,
       filterTags: ['tag1', 'tag2'],
       custom: {'test_extra_data': 'testData'},
@@ -61,6 +62,7 @@ void main() {
       expect(channelModel.updatedAt, isSameDateAs(entity.updatedAt));
       expect(channelModel.memberCount, entity.memberCount);
       expect(channelModel.messageCount, entity.messageCount);
+      expect(channelModel.activeMemberCount, entity.activeMemberCount);
       expect(channelModel.cid, entity.cid);
       expect(channelModel.lastMessageAt, isSameDateAs(entity.lastMessageAt));
       expect(channelModel.deletedAt, isSameDateAs(entity.deletedAt));
@@ -118,6 +120,7 @@ void main() {
       expect(channelModel.updatedAt, isSameDateAs(entity.updatedAt));
       expect(channelModel.memberCount, entity.memberCount);
       expect(channelModel.messageCount, entity.messageCount);
+      expect(channelModel.activeMemberCount, entity.activeMemberCount);
       expect(channelModel.cid, entity.cid);
       expect(channelModel.lastMessageAt, isSameDateAs(entity.lastMessageAt));
       expect(channelModel.deletedAt, isSameDateAs(entity.deletedAt));
@@ -158,6 +161,7 @@ void main() {
       deletedAt: DateTime.now(),
       memberCount: 33,
       messageCount: 75,
+      activeMemberCount: 28,
       createdBy: createdBy,
       filterTags: ['tag1', 'tag2'],
       custom: {'test_extra_data': 'testData'},
@@ -194,6 +198,7 @@ void main() {
     expect(channelEntity.updatedAt, isSameDateAs(model.updatedAt));
     expect(channelEntity.memberCount, model.memberCount);
     expect(channelEntity.messageCount, model.messageCount);
+    expect(channelEntity.activeMemberCount, model.activeMemberCount);
     expect(channelEntity.cid, model.cid);
     expect(channelEntity.lastMessageAt, isSameDateAs(model.lastMessageAt));
     expect(channelEntity.deletedAt, isSameDateAs(model.deletedAt));

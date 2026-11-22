@@ -50,7 +50,7 @@ abstract mixin class $EventResponseCopyWith<$Res> {
     $Res Function(EventResponse) _then,
   ) = _$EventResponseCopyWithImpl;
   @useResult
-  $Res call({String duration, WSEvent<WsEvent> event});
+  $Res call({String duration, WSEvent event});
 }
 
 /// @nodoc
@@ -74,7 +74,7 @@ class _$EventResponseCopyWithImpl<$Res> implements $EventResponseCopyWith<$Res> 
         event: null == event
             ? _self.event
             : event // ignore: cast_nullable_to_non_nullable
-                  as WSEvent<WsEvent>,
+                  as WSEvent,
       ),
     );
   }

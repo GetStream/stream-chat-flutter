@@ -40,6 +40,8 @@ onto Stream's OpenAPI-generated API client.
     - [Unread Counts](#unread-counts)
     - [User Blocking](#user-blocking)
     - [Channel and Member Custom Data](#channel-and-member-custom-data)
+    - [Channel Truncation](#channel-truncation)
+    - [Message States](#message-states)
 - [Migration Checklist](#migration-checklist)
 - [For AI Agents](#for-ai-agents)
 - [Contributing to this guide](#contributing-to-this-guide)
@@ -92,6 +94,8 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Unread Counts**](#unread-counts) | `getUnreadCount` returns a `Result<GetUnreadCountResponse>` instead of throwing; the response and its `UnreadCounts*` models lose their JSON codecs and compare by value |
 | [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUserResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUserResponse`, and `UserBlock`'s fields are all non-nullable |
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`; the channel and member flags it carried are fields |
+| [**Channel Truncation**](#channel-truncation) | `ChannelClientState.truncate` truncates the channel instead of emptying the loaded messages, which is now `clearMessages`; `ChatPersistenceClient.truncateChannel` is required |
+| [**Message States**](#message-states) | `MessageState.sending` and `.updating` are factories carrying the request's options; a partial update has its own `partialUpdating` state |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -310,6 +314,12 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `member.extraData['notifications_muted']` / `['status']` / `['ban_from_future_channels']` / `['future_channel_ban_expires']` / `['deleted_at']` | `Member.notificationsMuted` / `status` / `banFromFutureChannels` / `futureChannelBanExpires` / `deletedAt` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them, and `toJson` no longer writes them |
 | `ChannelModel.custom` / `Member.custom` entry named like one of the model's own fields | the same entry, as custom data | `retyped` | Kept as the API returns it; `toJson` leaves it out so it cannot overwrite the field |
 | `MessageType.rawType` / `AttachmentType.rawType` / `PushLevel.rawType` / `ChatPreferenceLevel.rawType` / `ChatLevel.rawType` / `CallLevel.rawType` / `RoleType.rawType`, `ModerationAction.action`, `ChannelCapability.capability` | the value itself | `removed` | Each is a `String`, so use it directly: `message.type.rawType` becomes `message.type` |
+| `ChannelClientState.truncate()` (empties the loaded messages) | `ChannelClientState.clearMessages()` | `moved` | `truncate({DateTime? truncatedAt})` now removes only what was sent before the truncation time |
+| — | `ChatPersistenceClient.truncateChannel(cid, {truncatedAt})` | `added` | Abstract: a custom persistence client must implement it |
+| `MessageState.sending` / `MessageState.updating` (constants) | `MessageState.sending()` / `MessageState.updating()` | `retyped` | Factories taking `skipPush` and `skipEnrichUrl`; no longer usable in a `const` expression |
+| — | `ChatPersistenceClient.settleInterruptedRequests()` | `added` | Abstract: a custom persistence client must implement it |
+| — | `OutgoingState.partialUpdating` / `MessageState.partialUpdating(...)` | `added` | The state of a partial update, such as a pin, while it runs. An exhaustive `switch` over `OutgoingState` needs the new case |
+| `OutgoingState.when(sending: () => …, updating: () => …)` | `when(sending: (skipPush, skipEnrichUrl) => …, updating: (skipPush, skipEnrichUrl) => …, partialUpdating: (set, unset, skipEnrichUrl) => …)` | `retyped` | Also `whenOrNull` and `maybeWhen`; `map`, `mapOrNull` and `maybeMap` take a `partialUpdating` callback |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -1247,6 +1257,55 @@ StreamChatClient(apiKey, attachmentFileUploaderProvider: (httpClient) => MyUploa
 StreamChatClient(apiKey, attachmentFileUploaderProvider: (dio) => MyUploader(dio));
 ```
 
+### Channel Truncation
+
+**`ChannelClientState.truncate` truncates the channel.** It removes the messages, pinned messages and thread
+replies sent before `truncatedAt`, or before now when omitted, and keeps the ones sent after it and the ones not
+sent yet. When the loaded messages are the latest ones and some of them are removed, it also lowers an unread
+count higher than the messages left. To only empty the loaded messages, as `truncate` did in v10, call
+`clearMessages`.
+
+```dart
+// v10
+channel.state?.truncate();
+
+// v11
+channel.state?.clearMessages();
+```
+
+**A custom `ChatPersistenceClient` implements `truncateChannel`.** It removes the channel's stored messages and
+pinned messages sent before `truncatedAt`, or before now when it is null, and keeps the messages not sent yet.
+
+> **Why:** v10 removed every message on truncation, including the ones sent after it and the ones still being
+> sent, so they vanished until the next query. A `truncate` that does what its name says, and a separate
+> `clearMessages` for a reload, keeps both callers correct.
+
+### Message States
+
+**`MessageState.sending` and `MessageState.updating` are factories.** They take the request's `skipPush` and
+`skipEnrichUrl`, both `false` by default, so add `()` where you used the constants. A `const` expression that used
+one becomes `final`.
+
+```dart
+// v10
+message.copyWith(state: MessageState.sending);
+
+// v11
+message.copyWith(state: MessageState.sending());
+```
+
+**A partial update has its own state.** While `partialUpdateMessage`, `pinMessage` or `unpinMessage` runs, the
+message is in `OutgoingState.partialUpdating`, carrying the update's `set`, `unset` and `skipEnrichUrl`, rather than
+`updating`. `isUpdating` is true for both. An exhaustive `switch` over `OutgoingState` needs the new case, and the
+`when` and `map` helpers take a `partialUpdating` callback.
+
+**A custom `ChatPersistenceClient` implements `settleInterruptedRequests`.** The client calls it once connected,
+before any channel loads, to mark the stored messages left sending, updating or deleting as failed, keeping the
+options their requests were made with. `MessageState.settled` gives the failed state for each.
+
+> **Why:** each request in progress now keeps what is needed to send it again, mirroring its failed state, so a
+> send, edit or delete interrupted by the app closing is retried as it was made.
+
 ---
 
 ## Migration Checklist
@@ -1267,7 +1326,13 @@ Work top to bottom; each item is independently verifiable.
 - [ ] If you persist models yourself, re-check nullability as endpoints move to the generated types, which are nullable wherever the API allows it
 - [ ] Replace `sort: null` on any list controller with `XSort.empty` if you relied on server ordering — see
       [Sorting](#sorting)
+- [ ] If you call `ChannelClientState.truncate()` to empty the loaded messages, call `clearMessages()` — see
+  [Channel Truncation](#channel-truncation)
+- [ ] If you implement `ChatPersistenceClient`, implement `truncateChannel` — see [Channel Truncation](#channel-truncation)
 - [ ] If you use `stream_chat_persistence`, expect one cold start after upgrading — see [Offline Cache](#offline-cache)
+- [ ] Add `()` to `MessageState.sending` and `MessageState.updating`, and handle `OutgoingState.partialUpdating` in exhaustive
+      `switch`es — see [Message States](#message-states)
+- [ ] If you implement `ChatPersistenceClient`, implement `settleInterruptedRequests` — see [Message States](#message-states)
 - [ ] Run `dart analyze` and your test suite; the analyzer finds most of the mechanical work for you
 
 ---

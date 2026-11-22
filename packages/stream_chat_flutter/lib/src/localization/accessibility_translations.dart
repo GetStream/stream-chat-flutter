@@ -188,6 +188,12 @@ abstract class AccessibilityTranslations {
   /// actions modal.
   String get messageActionsLabel;
 
+  /// The accessibility label for the send time of a scheduled message, with
+  /// `scheduledAt` spelled out for screen-reader announcements.
+  ///
+  /// The `scheduledAt` is announced in local time.
+  String scheduledMessageSendAtLabel({required DateTime scheduledAt});
+
   /// The accessibility label for an image tile in the attachment-picker
   /// gallery, including a locale-aware timestamp for `createdAt` when
   /// provided.
@@ -553,6 +559,12 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
 
   @override
   String get messageActionsLabel => 'Message actions';
+
+  @override
+  String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
+    final date = formatDateTime(scheduledAt.toLocal());
+    return 'Scheduled for $date';
+  }
 
   @override
   String galleryImageLabel({DateTime? createdAt}) {

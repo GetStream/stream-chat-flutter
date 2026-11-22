@@ -550,6 +550,72 @@ void main() {
 
       expect(controller.attachments, isEmpty);
     });
+
+    test('skips url enrichment while the message has an OG attachment', () {
+      controller.addAttachment(Attachment(ogScrapeUrl: 'https://example.com'));
+
+      expect(controller.skipEnrichUrl, isTrue);
+    });
+
+    test('clearOGAttachment with dismissed removes the OG attachment and skips url enrichment', () {
+      controller.setOGAttachment(Attachment(ogScrapeUrl: 'https://example.com'));
+
+      controller.clearOGAttachment(dismissed: true);
+
+      expect(controller.ogAttachment, isNull);
+      expect(controller.skipEnrichUrl, isTrue);
+    });
+
+    test('clearOGAttachment forgets a dismissal', () {
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.clearOGAttachment();
+
+      expect(controller.skipEnrichUrl, isFalse);
+    });
+
+    test('clear forgets a dismissal', () {
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.clear();
+
+      expect(controller.skipEnrichUrl, isFalse);
+    });
+
+    test('editMessage does not carry the draft dismissal into the edit', () {
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.editMessage(Message(id: 'edited', text: 'See https://example.com'));
+
+      expect(controller.skipEnrichUrl, isFalse);
+    });
+
+    test('cancelEditMessage restores the draft dismissal', () {
+      controller.clearOGAttachment(dismissed: true);
+      controller.editMessage(Message(id: 'edited', text: 'See https://example.com'));
+
+      controller.cancelEditMessage();
+
+      expect(controller.skipEnrichUrl, isTrue);
+    });
+
+    test('editMessage keeps a dismissal made during the edit when called again', () {
+      final edited = Message(id: 'edited', text: 'See https://example.com');
+      controller.editMessage(edited);
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.editMessage(edited);
+
+      expect(controller.skipEnrichUrl, isTrue);
+    });
+
+    test('reset forgets a dismissal', () {
+      controller.clearOGAttachment(dismissed: true);
+
+      controller.reset();
+
+      expect(controller.skipEnrichUrl, isFalse);
+    });
   });
 
   group('Poll Management', () {
@@ -745,7 +811,7 @@ void main() {
       final existingMessage = Message(
         id: 'msg-1',
         text: 'Existing text',
-        state: MessageState.updating,
+        state: MessageState.updating(),
       );
 
       expect(
@@ -761,7 +827,7 @@ void main() {
       expect(editController.messageBeingEdited, isNull);
     });
 
-    test('editMessage sets state to MessageState.updating', () {
+    test('editMessage sets state to MessageState.updating()', () {
       final existingMessage = Message(id: 'msg-1', text: 'Original text');
       controller.editMessage(existingMessage);
 
@@ -1118,7 +1184,7 @@ void main() {
         // ignores it and always constructs with MessageState.initial().
         final controller = restore({
           'message': Message(text: 'Hi').toJson(),
-          'message_state': MessageState.sending.toJson(),
+          'message_state': MessageState.sending().toJson(),
         });
 
         expect(controller.message.state.isInitial, isTrue);
@@ -1132,7 +1198,7 @@ void main() {
           'message': messageBeingEdited
               .copyWith(
                 text: 'Edited text',
-                state: MessageState.updating,
+                state: MessageState.updating(),
               )
               .toJson(),
           'message_being_edited': messageBeingEdited.toJson(),
@@ -1152,7 +1218,7 @@ void main() {
           'message': messageBeingEdited
               .copyWith(
                 text: 'Edited text',
-                state: MessageState.updating,
+                state: MessageState.updating(),
               )
               .toJson(),
           'message_being_edited': messageBeingEdited.toJson(),

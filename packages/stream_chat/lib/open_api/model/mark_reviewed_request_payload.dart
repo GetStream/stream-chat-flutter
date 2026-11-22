@@ -21,6 +21,7 @@ class MarkReviewedRequestPayload with _$MarkReviewedRequestPayload {
     this.contentToMarkAsReviewedLimit,
     this.decisionReason,
     this.disableMarkingContentAsReviewed,
+    this.reason,
   });
 
   @override
@@ -34,6 +35,10 @@ class MarkReviewedRequestPayload with _$MarkReviewedRequestPayload {
   @override
   @JsonKey(name: 'disable_marking_content_as_reviewed')
   final bool? disableMarkingContentAsReviewed;
+
+  @override
+  @JsonKey(name: 'reason')
+  final String? reason;
 
   Map<String, dynamic> toJson() => _$MarkReviewedRequestPayloadToJson(this);
 

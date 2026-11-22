@@ -434,7 +434,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get sendMessagePermissionError => 'Sie sind nicht berechtigt Nachrichten zu senden';
 
   @override
-  String get couldNotReadBytesFromFileError => 'Kan bytes niet uit bestand lezen.';
+  String get couldNotReadBytesFromFileError => 'Bytes konnten nicht aus der Datei gelesen werden.';
 
   @override
   String get downloadLabel => 'Downloaden';
@@ -442,42 +442,43 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   @override
   String toggleMuteUnmuteAction({required bool isMuted}) {
     if (isMuted) {
-      return 'UNMUTE';
+      return 'STUMMSCHALTUNG AUFHEBEN';
     } else {
-      return 'STOM';
+      return 'STUMMSCHALTEN';
     }
   }
 
   @override
   String toggleMuteUnmuteGroupQuestion({required bool isMuted}) {
     if (isMuted) {
-      return 'Weet je zeker dat je het dempen van deze groep wilt opheffen?';
+      return 'Sind Sie sicher, dass Sie die Stummschaltung dieser Gruppe aufheben wollen?';
     } else {
-      return 'Weet je zeker dat je deze groep wilt dempen?';
+      return 'Sind Sie sicher, dass Sie diese Gruppe stummschalten wollen?';
     }
   }
 
   @override
   String toggleMuteUnmuteGroupText({required bool isMuted}) {
     if (isMuted) {
-      return 'Dempen groep opheffen';
+      return 'Stummschaltung der Gruppe aufheben';
     } else {
-      return 'Groep dempen';
+      return 'Gruppe stummschalten';
     }
   }
 
   @override
   String toggleMuteUnmuteUserQuestion({required bool isMuted}) {
     if (isMuted) {
-      return '''Weet je zeker dat je het dempen van deze gebruiker wilt opheffen?''';
+      return 'Sind Sie sicher, dass Sie die Stummschaltung dieses Benutzers aufheben wollen?';
     } else {
-      return 'Weet u zeker dat u deze gebruiker wilt dempen?';
+      return 'Sind Sie sicher, dass Sie diesen Benutzer stummschalten wollen?';
     }
   }
 
   @override
   String toggleMuteUnmuteUserText({required bool isMuted}) {
-    return 'Gebruiker dempen';
+    if (isMuted) return 'Stummschaltung aufheben';
+    return 'Benutzer stummschalten';
   }
 
   @override
@@ -886,6 +887,68 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
 
   @override
   String notifyRoleText(String role) => 'Benachrichtige alle $role-Mitglieder';
+
+  @override
+  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    return 'Senden am $date um $time';
+  }
+
+  @override
+  String get scheduledMessageSendingLabel => 'Wird gesendet…';
+
+  @override
+  String get scheduledMessageUploadingLabel => 'Wird hochgeladen…';
+
+  @override
+  String get scheduledThreadReplyPrefixText => 'Antwort im Thread:';
+
+  @override
+  String scheduledQuoteReplyPrefixText({String? name}) {
+    if (name == null) return 'Antwort:';
+    return 'Antwort an $name:';
+  }
+
+  @override
+  String scheduledMessageFailureReasonText({
+    ScheduledMessageFailureReason? reason,
+    bool isQuoteDeleted = false,
+  }) {
+    return switch (reason) {
+      .requestFailed => 'Senden fehlgeschlagen. Versuche es erneut',
+      .internalError => 'Etwas ist schiefgelaufen. Versuche es erneut',
+      .channelDeleted => 'Dieser Kanal wurde gelöscht',
+      .userDeleted => 'Dein Konto wurde gelöscht',
+      .channelFrozen => 'Dieser Kanal ist eingefroren',
+      .banned => 'Du kannst in diesem Kanal keine Nachrichten senden',
+      .noPermission => 'Du darfst hier nicht mehr posten',
+      .moderationBlocked => 'Von der Moderation blockiert',
+      .hookRejected => 'Von der App abgelehnt',
+      .expired => 'Nicht gesendet: Der Dienst war verzögert',
+      .pendingNotSupported => 'Dieser Kanal erfordert jetzt eine Freigabe. Plane die Nachricht erneut.',
+      .invalidMessage when isQuoteDeleted =>
+        'Die zitierte Nachricht wurde gelöscht. Bearbeite die Nachricht, um das Zitat zu entfernen.',
+      .invalidMessage => 'Die Nachricht entspricht nicht mehr den Vorgaben der App. Bearbeite sie.',
+      _ => 'Etwas ist schiefgelaufen. Versuche es erneut',
+    };
+  }
+
+  @override
+  String get noScheduledMessagesText => 'Keine geplanten Nachrichten';
+
+  @override
+  String get loadingScheduledMessagesError => 'Geplante Nachrichten konnten nicht geladen werden';
+
+  @override
+  String get editAndRescheduleLabel => 'Bearbeiten & neu planen';
+
+  @override
+  String get rescheduleLabel => 'Neu planen';
+
+  @override
+  String get sendNowLabel => 'Jetzt senden';
 }
 
 class _AccessibilityTranslationsDe extends AccessibilityTranslations {
@@ -1003,6 +1066,12 @@ class _AccessibilityTranslationsDe extends AccessibilityTranslations {
 
   @override
   String get messageActionsLabel => 'Nachrichtenaktionen';
+
+  @override
+  String scheduledMessageSendAtLabel({required DateTime scheduledAt}) {
+    final date = formatDateTime(scheduledAt.toLocal());
+    return 'Geplant für $date';
+  }
 
   @override
   String galleryImageLabel({DateTime? createdAt}) {

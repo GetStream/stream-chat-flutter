@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$CreateDeviceRequest {
   String? get hardwareId;
   String get id;
-  CreateDeviceRequestPushProvider get pushProvider;
+  PushProviderName get pushProvider;
   String? get pushProviderName;
   bool? get voipToken;
 
@@ -67,7 +67,7 @@ abstract mixin class $CreateDeviceRequestCopyWith<$Res> {
   $Res call({
     String? hardwareId,
     String id,
-    CreateDeviceRequestPushProvider pushProvider,
+    PushProviderName pushProvider,
     String? pushProviderName,
     bool? voipToken,
   });
@@ -104,7 +104,7 @@ class _$CreateDeviceRequestCopyWithImpl<$Res> implements $CreateDeviceRequestCop
         pushProvider: null == pushProvider
             ? _self.pushProvider
             : pushProvider // ignore: cast_nullable_to_non_nullable
-                  as CreateDeviceRequestPushProvider,
+                  as PushProviderName,
         pushProviderName: freezed == pushProviderName
             ? _self.pushProviderName
             : pushProviderName // ignore: cast_nullable_to_non_nullable
