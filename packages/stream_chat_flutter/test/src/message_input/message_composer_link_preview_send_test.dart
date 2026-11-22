@@ -116,10 +116,10 @@ Future<void> _send(WidgetTester tester) async {
   when(() => channelState.draftStream).thenAnswer((_) => Stream.value(null));
   when(
     () => channel.sendMessage(any(), skipEnrichUrl: any(named: 'skipEnrichUrl')),
-  ).thenAnswer((_) async => SendMessageResponse());
+  ).thenAnswer((_) async => Result.success(SendMessageResponse(duration: '0ms', message: Message())));
   when(
     () => channel.updateMessage(any(), skipEnrichUrl: any(named: 'skipEnrichUrl')),
-  ).thenAnswer((_) async => UpdateMessageResponse());
+  ).thenAnswer((_) async => Result.success(UpdateMessageResponse(duration: '0ms', message: Message())));
 
   return (client: client, channel: channel);
 }

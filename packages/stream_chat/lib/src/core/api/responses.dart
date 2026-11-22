@@ -111,26 +111,6 @@ class QueryBannedUsersResponse extends _BaseResponse {
   static QueryBannedUsersResponse fromJson(Map<String, dynamic> json) => _$QueryBannedUsersResponseFromJson(json);
 }
 
-/// Base Model response for message based api calls.
-class MessageResponse extends _BaseResponse {
-  /// Message returned by the api call
-  late Message message;
-}
-
-/// Model response for [StreamChatClient.updateMessage] api call
-@JsonSerializable(createToJson: false)
-class UpdateMessageResponse extends MessageResponse {
-  /// Create a new instance from a json
-  static UpdateMessageResponse fromJson(Map<String, dynamic> json) => _$UpdateMessageResponseFromJson(json);
-}
-
-/// Model response for [Channel.sendMessage] api call
-@JsonSerializable(createToJson: false)
-class SendMessageResponse extends MessageResponse {
-  /// Create a new instance from a json
-  static SendMessageResponse fromJson(Map<String, dynamic> json) => _$SendMessageResponseFromJson(json);
-}
-
 /// Model response for [Channel.update] api call
 @JsonSerializable(createToJson: false)
 class UpdateChannelResponse extends _BaseResponse {
@@ -179,16 +159,6 @@ class RemoveMembersResponse extends _BaseResponse {
 
   /// Create a new instance from a json
   static RemoveMembersResponse fromJson(Map<String, dynamic> json) => _$RemoveMembersResponseFromJson(json);
-}
-
-/// Model response for [Channel.sendAction] api call
-@JsonSerializable(createToJson: false)
-class SendActionResponse extends _BaseResponse {
-  /// Message returned by the api call
-  Message? message;
-
-  /// Create a new instance from a json
-  static SendActionResponse fromJson(Map<String, dynamic> json) => _$SendActionResponseFromJson(json);
 }
 
 /// Model response for [Channel.addMembers] api call
@@ -294,7 +264,10 @@ final class QueryScheduledMessagesResponse extends _BaseResponse {
 
 /// Model response for the [StreamChatClient.scheduleMessage] API call.
 @JsonSerializable(createToJson: false)
-final class ScheduleMessageResponse extends MessageResponse {
+final class ScheduleMessageResponse extends _BaseResponse {
+  /// The message that was scheduled, or sent right away.
+  late Message message;
+
   /// The scheduled message created.
   ///
   /// Null when the message was sent right away. When set, [message] is a

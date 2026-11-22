@@ -77,7 +77,14 @@ class RetryQueue {
       final retryPolicy = _retryPolicy;
       try {
         await backOff(
-          () => channel.retryMessage(message),
+          () async {
+            // backOff retries a call that throws, so a failure is thrown here
+            // and caught below; it never reaches a caller.
+            final result = await channel.retryMessage(message);
+            if (result case Failure(:final error, :final stackTrace)) {
+              Error.throwWithStackTrace(error, stackTrace ?? StackTrace.current);
+            }
+          },
           delayFactor: retryPolicy.delayFactor,
           randomizationFactor: retryPolicy.randomizationFactor,
           maxDelay: retryPolicy.maxDelay,

@@ -184,7 +184,9 @@ MockChannel _channel() {
   when(() => channelState.draft).thenReturn(null);
   when(() => channelState.draftStream).thenAnswer((_) => Stream.value(null));
   registerFallbackValue(Message());
-  when(() => channel.sendMessage(any())).thenAnswer((_) async => SendMessageResponse());
+  when(
+    () => channel.sendMessage(any()),
+  ).thenAnswer((_) async => Result.success(SendMessageResponse(duration: '0ms', message: Message())));
 
   return channel;
 }

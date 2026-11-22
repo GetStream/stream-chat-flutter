@@ -18,7 +18,11 @@ void main() {
       final channel = _initializedChannel(client);
       final message = Message(id: 'stored-message-id', text: 'Hello world!');
 
-      _whenSendingMessage(client, channel, message).thenThrow(_messageAlreadyExistsError(message.id));
+      _whenSendingMessage(
+        client,
+        channel,
+        message,
+      ).thenAnswer((_) async => Result.failure(_messageAlreadyExistsError(message.id)));
       await channel.sendMessage(message);
 
       expect(channel.state!.messages.single.state, MessageState.sent);
@@ -29,10 +33,14 @@ void main() {
       final channel = _initializedChannel(client);
       final message = Message(id: 'stored-message-id', text: 'Hello world!');
 
-      _whenSendingMessage(client, channel, message).thenThrow(_messageAlreadyExistsError(message.id));
-      final response = await channel.sendMessage(message);
+      _whenSendingMessage(
+        client,
+        channel,
+        message,
+      ).thenAnswer((_) async => Result.failure(_messageAlreadyExistsError(message.id)));
+      final result = await channel.sendMessage(message);
 
-      expect(response.message.state, MessageState.sent);
+      expect(result.getOrNull()?.message.state, MessageState.sent);
     });
 
     test('stamps the local creation date as the server creation date when no server copy arrived', () async {
@@ -40,7 +48,11 @@ void main() {
       final channel = _initializedChannel(client);
       final message = Message(id: 'stored-message-id', text: 'Hello world!');
 
-      _whenSendingMessage(client, channel, message).thenThrow(_messageAlreadyExistsError(message.id));
+      _whenSendingMessage(
+        client,
+        channel,
+        message,
+      ).thenAnswer((_) async => Result.failure(_messageAlreadyExistsError(message.id)));
       await channel.sendMessage(message);
 
       final sentMessage = channel.state!.messages.single;
@@ -59,7 +71,11 @@ void main() {
       );
       channel.state!.updateMessage(failedMessage);
 
-      _whenSendingMessage(client, channel, failedMessage).thenThrow(_messageAlreadyExistsError(failedMessage.id));
+      _whenSendingMessage(
+        client,
+        channel,
+        failedMessage,
+      ).thenAnswer((_) async => Result.failure(_messageAlreadyExistsError(failedMessage.id)));
       await channel.retryMessage(failedMessage);
 
       expect(channel.state!.messages.single.createdAt, originalCreatedAt);
@@ -81,7 +97,7 @@ void main() {
           ),
         );
         await pumpEventQueue();
-        throw _messageAlreadyExistsError(message.id);
+        return Result.failure(_messageAlreadyExistsError(message.id));
       });
       await channel.sendMessage(message);
 
@@ -95,14 +111,15 @@ void main() {
 
       // The first attempt times out, so the retry queue re-sends the message.
       const receiveTimeout = StreamNetworkException(message: 'The request took longer than the receive timeout');
-      final errors = [receiveTimeout, _messageAlreadyExistsError(message.id)];
+      final errors = <StreamException>[receiveTimeout, _messageAlreadyExistsError(message.id)];
       var attempt = 0;
       _whenSendingMessage(client, channel, message).thenAnswer((_) async {
         final error = errors[attempt];
         attempt += 1;
-        throw error;
+        return Result.failure(error);
       });
-      await expectLater(channel.sendMessage(message), throwsA(isA<StreamNetworkException>()));
+      final result = await channel.sendMessage(message);
+      expect(result.exceptionOrNull(), isA<StreamNetworkException>());
       await pumpEventQueue();
 
       expect(channel.state!.messages.single.state, MessageState.sent);
@@ -129,7 +146,7 @@ Channel _initializedChannel(MockStreamChatClient client) {
   return channel;
 }
 
-When<Future<SendMessageResponse>> _whenSendingMessage(
+When<Future<Result<SendMessageResponse>>> _whenSendingMessage(
   StreamChatClient client,
   Channel channel,
   Message message,

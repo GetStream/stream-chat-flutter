@@ -774,7 +774,7 @@ class Channel {
   ///
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually sending the message.
-  Future<SendMessageResponse> sendMessage(
+  Future<Result<SendMessageResponse>> sendMessage(
     Message message, {
     bool skipPush = false,
     bool skipEnrichUrl = false,
@@ -809,7 +809,7 @@ class Channel {
 
     state?.updateMessage(message);
 
-    try {
+    final result = await _runCatching(failureMessage: 'Failed to send the message', () async {
       if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
         final attachmentsUploadCompleter = Completer<Message>();
         _messageAttachmentsUploadCompleter[message.id] = attachmentsUploadCompleter;
@@ -839,7 +839,7 @@ class Channel {
 
       // Wait for the previous sendMessage call to finish. Otherwise, the order
       // of messages will not be maintained.
-      final response = await _sendMessageLock.synchronized(
+      return _sendMessageLock.synchronized(
         () => _client.sendMessage(
           message,
           id!,
@@ -848,41 +848,42 @@ class Channel {
           skipEnrichUrl: skipEnrichUrl,
         ),
       );
+    });
 
-      final sentMessage = message
-          .updateWith(response.message)
-          .copyWith(
-            // Update the message state to sent.
-            state: MessageState.sent,
-          );
+    switch (result) {
+      case Success(data: final response):
+        final sentMessage = message
+            .updateWith(response.message)
+            .copyWith(
+              // Update the message state to sent.
+              state: MessageState.sent,
+            );
 
-      state?.updateMessage(sentMessage);
-
-      return response;
-    } catch (e) {
+        state?.updateMessage(sentMessage);
       // Cancelled by a deletion or by a newer call for the same message, which
       // now owns its state.
-      if (e case StreamNetworkException(isCancelled: true)) rethrow;
+      case Failure(error: StreamNetworkException(isCancelled: true)):
+        break;
+      case Failure(:final error) when error is StreamChatException && error.isMessageAlreadyExistsError:
+        final sentMessage = _markMessageAsSent(message);
+        return Result.success(SendMessageResponse(duration: '0ms', message: sentMessage));
+      case Failure(:final error):
+        final failedMessage = message.copyWith(
+          // Update the message state to failed.
+          state: MessageState.sendingFailed(
+            skipPush: skipPush,
+            skipEnrichUrl: skipEnrichUrl,
+          ),
+        );
 
-      if (e is StreamChatException && e.isMessageAlreadyExistsError) {
-        return SendMessageResponse()..message = _markMessageAsSent(message);
-      }
-      final failedMessage = message.copyWith(
-        // Update the message state to failed.
-        state: MessageState.sendingFailed(
-          skipPush: skipPush,
-          skipEnrichUrl: skipEnrichUrl,
-        ),
-      );
-
-      state?.updateMessage(failedMessage);
-      // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatException && e.isRetriable) {
-        state?.scheduleRetry(failedMessage);
-      }
-
-      rethrow;
+        state?.updateMessage(failedMessage);
+        // If the error is retriable, add it to the retry queue.
+        if (error is StreamChatException && error.isRetriable) {
+          state?.scheduleRetry(failedMessage);
+        }
     }
+
+    return result;
   }
 
   /// Schedules [message] to be sent to this channel at [scheduledAt].
@@ -946,7 +947,7 @@ class Channel {
   ///
   /// Waits for a [_messageAttachmentsUploadCompleter] to complete
   /// before actually updating the message.
-  Future<UpdateMessageResponse> updateMessage(
+  Future<Result<UpdateMessageResponse>> updateMessage(
     Message message, {
     bool skipPush = false,
     bool skipEnrichUrl = false,
@@ -973,7 +974,7 @@ class Channel {
 
     state?.updateMessage(message);
 
-    try {
+    final result = await _runCatching(failureMessage: 'Failed to update the message', () async {
       if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
         final attachmentsUploadCompleter = Completer<Message>();
         _messageAttachmentsUploadCompleter[message.id] = attachmentsUploadCompleter;
@@ -994,53 +995,51 @@ class Channel {
 
       // Wait for the previous update call to finish. Otherwise, the order of
       // messages will not be maintained.
-      final response = await _updateMessageLock.synchronized(
+      return _updateMessageLock.synchronized(
         () => _client.updateMessage(
           message,
           skipPush: skipPush,
           skipEnrichUrl: skipEnrichUrl,
         ),
       );
+    });
 
-      final updateMessage = message
-          .updateWith(response.message)
-          .copyWith(
-            // Update the message state to updated.
-            state: MessageState.updated,
-          );
+    switch (result) {
+      case Success(data: final response):
+        final updateMessage = message
+            .updateWith(response.message)
+            .copyWith(
+              // Update the message state to updated.
+              state: MessageState.updated,
+            );
 
-      state?.updateMessage(updateMessage);
-
-      return response;
-    } catch (e) {
+        state?.updateMessage(updateMessage);
       // Cancelled by a newer call for the same message, which now owns its
       // state.
-      if (e case StreamNetworkException(isCancelled: true)) rethrow;
+      case Failure(error: StreamNetworkException(isCancelled: true)):
+        break;
+      case Failure(:final error):
+        final failedMessage = message.copyWith(
+          // Update the message state to failed.
+          state: MessageState.updatingFailed(
+            skipPush: skipPush,
+            skipEnrichUrl: skipEnrichUrl,
+          ),
+        );
 
-      final failedMessage = message.copyWith(
-        // Update the message state to failed.
-        state: MessageState.updatingFailed(
-          skipPush: skipPush,
-          skipEnrichUrl: skipEnrichUrl,
-        ),
-      );
-
-      state?.updateMessage(failedMessage);
-      // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatException && e.isRetriable) {
-        state?.scheduleRetry(failedMessage);
-      }
-
-      rethrow;
+        state?.updateMessage(failedMessage);
+        // If the error is retriable, add it to the retry queue.
+        if (error is StreamChatException && error.isRetriable) {
+          state?.scheduleRetry(failedMessage);
+        }
     }
+
+    return result;
   }
 
-  /// Partially updates the [message] in this channel.
-  ///
-  /// Use [set] to define values to be set.
-  ///
-  /// Use [unset] to define values to be unset.
-  Future<UpdateMessageResponse> partialUpdateMessage(
+  /// Sets the fields in [set] and removes the fields named in [unset] on
+  /// [message].
+  Future<Result<UpdateMessagePartialResponse>> updateMessagePartial(
     Message message, {
     Map<String, Object?>? set,
     List<String>? unset,
@@ -1060,46 +1059,45 @@ class Channel {
 
     state?.updateMessage(message);
 
-    try {
-      // Wait for the previous update call to finish. Otherwise, the order of
-      // messages will not be maintained.
-      final response = await _updateMessageLock.synchronized(
-        () => _client.partialUpdateMessage(
-          message.id,
-          set: set,
-          unset: unset,
-          skipEnrichUrl: skipEnrichUrl,
-        ),
-      );
+    // Wait for the previous update call to finish. Otherwise, the order of
+    // messages will not be maintained.
+    final result = await _updateMessageLock.synchronized(
+      () => _client.updateMessagePartial(
+        message.id,
+        set: set,
+        unset: unset,
+        skipEnrichUrl: skipEnrichUrl,
+      ),
+    );
 
-      final updatedMessage = message
-          .updateWith(response.message)
-          .copyWith(
-            // Update the message state to updated.
-            state: MessageState.updated,
-          );
+    switch (result) {
+      case Success(data: final response):
+        final updatedMessage = message
+            .updateWith(response.message)
+            .copyWith(
+              // Update the message state to updated.
+              state: MessageState.updated,
+            );
 
-      state?.updateMessage(updatedMessage);
+        state?.updateMessage(updatedMessage);
+      case Failure(:final error):
+        final failedMessage = message.copyWith(
+          // Update the message state to failed.
+          state: MessageState.partialUpdatingFailed(
+            set: set,
+            unset: unset,
+            skipEnrichUrl: skipEnrichUrl,
+          ),
+        );
 
-      return response;
-    } catch (e) {
-      final failedMessage = message.copyWith(
-        // Update the message state to failed.
-        state: MessageState.partialUpdatingFailed(
-          set: set,
-          unset: unset,
-          skipEnrichUrl: skipEnrichUrl,
-        ),
-      );
-
-      state?.updateMessage(failedMessage);
-      // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatException && e.isRetriable) {
-        state?.scheduleRetry(failedMessage);
-      }
-
-      rethrow;
+        state?.updateMessage(failedMessage);
+        // If the error is retriable, add it to the retry queue.
+        if (error is StreamChatException && error.isRetriable) {
+          state?.scheduleRetry(failedMessage);
+        }
     }
+
+    return result;
   }
 
   final _deleteMessageLock = Lock();
@@ -1109,7 +1107,7 @@ class Channel {
   /// If [hard] is true, the message is permanently deleted and cannot be
   /// recovered. In this case, any attachments associated with the message are
   /// deleted as well.
-  Future<EmptyResponse> deleteMessage(Message message, {bool hard = false}) {
+  Future<Result<DeleteMessageResponse>> deleteMessage(Message message, {bool hard = false}) {
     final deletionScope = MessageDeleteScope.deleteForAll(hard: hard);
 
     return _deleteMessage(message, scope: deletionScope);
@@ -1119,7 +1117,7 @@ class Channel {
   ///
   /// Note: This does not delete the message for other channel members and
   /// they can still see the message.
-  Future<EmptyResponse> deleteMessageForMe(Message message) {
+  Future<Result<DeleteMessageResponse>> deleteMessageForMe(Message message) {
     const deletionScope = MessageDeleteScope.deleteForMe();
 
     return _deleteMessage(message, scope: deletionScope);
@@ -1136,7 +1134,7 @@ class Channel {
   // If the message is deleted for everyone and [scope.hard] is true, the
   // message is permanently deleted and cannot be recovered. In this case, any
   // attachments associated with the message are deleted as well.
-  Future<EmptyResponse> _deleteMessage(
+  Future<Result<DeleteMessageResponse>> _deleteMessage(
     Message message, {
     required MessageDeleteScope scope,
   }) async {
@@ -1145,9 +1143,8 @@ class Channel {
     // Directly deleting the local messages and bounced error messages as they
     // were never sent.
     if (message.remoteCreatedAt == null || message.isBouncedWithError) {
-      _deleteLocalMessage(message);
-      // Returning empty response to mark the api call as success.
-      return EmptyResponse();
+      final deletedMessage = _deleteLocalMessage(message);
+      return Result.success(DeleteMessageResponse(duration: '0ms', message: deletedMessage));
     }
 
     // ignore: parameter_assignments
@@ -1160,41 +1157,38 @@ class Channel {
 
     state?.deleteMessage(message, hardDelete: scope.hard);
 
-    try {
-      // Wait for the previous delete call to finish. Otherwise, the order of
-      // messages will not be maintained.
-      final response = await _deleteMessageLock.synchronized(
-        () => switch (scope) {
-          DeleteForMe() => _client.deleteMessageForMe(message.id),
-          DeleteForAll() => _client.deleteMessage(message.id, hard: scope.hard),
-        },
-      );
+    // Wait for the previous delete call to finish. Otherwise, the order of
+    // messages will not be maintained.
+    final result = await _deleteMessageLock.synchronized(
+      () => switch (scope) {
+        DeleteForMe() => _client.deleteMessageForMe(message.id),
+        DeleteForAll() => _client.deleteMessage(message.id, hard: scope.hard),
+      },
+    );
 
-      final deletedMessage = _markMessageAsDeleted(message, scope: scope);
-      // If hard delete, also delete the uploaded attachments.
-      if (scope.hard) _deleteMessageAttachments(deletedMessage);
-
-      return response;
-    } catch (e) {
-      if (e is StreamChatException && e.isMessageGoneError) {
+    switch (result) {
+      case Success():
+        final deletedMessage = _markMessageAsDeleted(message, scope: scope);
+        // If hard delete, also delete the uploaded attachments.
+        if (scope.hard) _deleteMessageAttachments(deletedMessage);
+      case Failure(:final error) when error is StreamChatException && error.isMessageGoneError:
         final deletedMessage = _markMessageAsDeleted(message, scope: scope);
         if (scope.hard) _deleteMessageAttachments(deletedMessage);
-        return EmptyResponse();
-      }
+        return Result.success(DeleteMessageResponse(duration: '0ms', message: deletedMessage));
+      case Failure(:final error):
+        final failedMessage = message.copyWith(
+          // Update the message state to failed.
+          state: MessageState.deletingFailed(scope: scope),
+        );
 
-      final failedMessage = message.copyWith(
-        // Update the message state to failed.
-        state: MessageState.deletingFailed(scope: scope),
-      );
-
-      state?.deleteMessage(failedMessage, hardDelete: scope.hard);
-      // If the error is retriable, add it to the retry queue.
-      if (e is StreamChatException && e.isRetriable) {
-        state?.scheduleRetry(failedMessage);
-      }
-
-      rethrow;
+        state?.deleteMessage(failedMessage, hardDelete: scope.hard);
+        // If the error is retriable, add it to the retry queue.
+        if (error is StreamChatException && error.isRetriable) {
+          state?.scheduleRetry(failedMessage);
+        }
     }
+
+    return result;
   }
 
   Message _markMessageAsDeleted(
@@ -1210,12 +1204,12 @@ class Channel {
     return deletedMessage;
   }
 
-  // Deletes a local [message] that is not yet sent.
+  // Deletes a local [message] that is not yet sent, and returns it as deleted.
   //
   // This is typically called when a user wants to delete a message that they
   // have composed but not yet sent, or if a message failed to send and the user
   // wants to remove it from their local view.
-  void _deleteLocalMessage(Message message) {
+  Message _deleteLocalMessage(Message message) {
     final deletedMessage = message.copyWith(
       type: MessageType.deleted,
       localDeletedAt: DateTime.now(),
@@ -1245,6 +1239,8 @@ class Channel {
         hardDelete: true,
       ),
     );
+
+    return deletedMessage;
   }
 
   // Deletes all the uploaded attachments associated with the given [message].
@@ -1283,9 +1279,11 @@ class Channel {
   ///   again, using the same scope (for me or for all) as the original request.
   /// - For messages with [isBouncedWithError], it attempts to send the message.
   ///
+  /// Returns the retried call's result.
+  ///
   /// Throws a [StateError] if the message is not in a failed state or
   /// bounced with an error.
-  Future<Object> retryMessage(Message message) async {
+  Future<Result<Object>> retryMessage(Message message) async {
     assert(
       message.state.isFailed || message.isBouncedWithError,
       'Only failed or bounced messages can be retried',
@@ -1304,7 +1302,7 @@ class Channel {
           skipEnrichUrl: skipEnrichUrl,
         ),
         partialUpdatingFailed: (set, unset, skipEnrichUrl) {
-          return partialUpdateMessage(
+          return updateMessagePartial(
             message,
             set: set,
             unset: unset,
@@ -1327,8 +1325,8 @@ class Channel {
     );
   }
 
-  /// Pins provided message
-  Future<UpdateMessageResponse> pinMessage(
+  /// Pins [message].
+  Future<Result<UpdateMessagePartialResponse>> pinMessage(
     Message message, {
     Object? /*num|DateTime*/ timeoutOrExpirationDate,
   }) {
@@ -1347,7 +1345,7 @@ class Channel {
         Duration(seconds: timeoutOrExpirationDate.toInt()),
       );
     }
-    return partialUpdateMessage(
+    return updateMessagePartial(
       message,
       set: {
         'pinned': true,
@@ -1356,8 +1354,8 @@ class Channel {
     );
   }
 
-  /// Unpins provided message.
-  Future<UpdateMessageResponse> unpinMessage(Message message) => partialUpdateMessage(
+  /// Unpins [message].
+  Future<Result<UpdateMessagePartialResponse>> unpinMessage(Message message) => updateMessagePartial(
     message,
     set: {
       'pinned': false,
@@ -1421,7 +1419,7 @@ class Channel {
   ///
   /// A [messageText] and [custom] data, when given, are sent in the message
   /// with the location.
-  Future<SendMessageResponse> sendStaticLocation({
+  Future<Result<SendMessageResponse>> sendStaticLocation({
     String? id,
     String? messageText,
     String? createdByDeviceId,
@@ -1453,7 +1451,7 @@ class Channel {
   ///
   /// A [messageText] and [custom] data, when given, are sent in the message
   /// with the location.
-  Future<SendMessageResponse> startLiveLocationSharing({
+  Future<Result<SendMessageResponse>> startLiveLocationSharing({
     String? id,
     String? messageText,
     String? createdByDeviceId,
@@ -1605,20 +1603,10 @@ class Channel {
   }) async {
     _checkInitialized();
     final created = await _pollLock.synchronized(() => _client.createPoll(poll));
-    return created.flatMapAsync((response) => _sendPollMessage(response.poll, messageText));
-  }
-
-  // TODO(openapi-migration): remove once sendMessage returns a Result
-  Future<Result<SendMessageResponse>> _sendPollMessage(Poll poll, String? messageText) async {
-    try {
-      final message = Message(text: messageText, poll: poll, pollId: poll.id);
-      return Result.success(await sendMessage(message));
-    } on StreamException catch (error, stackTrace) {
-      return Result.failure(error, stackTrace);
-    } catch (error, stackTrace) {
-      final exception = StreamClientException(message: 'Failed to send the poll message', cause: error);
-      return Result.failure(exception, stackTrace);
-    }
+    return created.flatMapAsync((response) {
+      final poll = response.poll;
+      return sendMessage(Message(text: messageText, poll: poll, pollId: poll.id));
+    });
   }
 
   /// Updates [poll] to match the settings and options it carries.
@@ -2016,24 +2004,19 @@ class Channel {
     return _client.removeChannelMembers(id!, type, memberIds, message: message);
   }
 
-  /// Send action for a specific message of this channel.
-  Future<SendActionResponse> sendAction(
-    Message message,
-    Map<String, dynamic> formData,
-  ) async {
+  /// Runs the action [formData] describes on [message].
+  Future<Result<SendActionResponse>> sendAction(Message message, Map<String, String> formData) async {
     _checkInitialized();
-    final messageId = message.id;
-    final res = await _client.sendAction(id!, type, messageId, formData);
+    final result = await _client.sendAction(message.id, formData);
 
-    // update the passed message with response message
-    if (res.message != null) {
-      state!.updateMessage(res.message!);
-    } else {
-      // remove the passed message if response does
-      // not contain message
-      state!.removeMessage(message);
-    }
-    return res;
+    return result.onSuccess((response) {
+      switch (response.message) {
+        case final updated?:
+          state?.updateMessage(updated);
+        case null:
+          state?.removeMessage(message);
+      }
+    });
   }
 
   /// Marks this channel as read for the current user.
@@ -2714,6 +2697,19 @@ class Channel {
     state = null;
     _muteExpirationTimer?.cancel();
     _keyStrokeHandler.cancel();
+  }
+
+  // Runs [block] and returns its result, or what it throws as a failure: a
+  // [StreamException] as it is, and any other error in a
+  // [StreamClientException] carrying [failureMessage].
+  Future<Result<T>> _runCatching<T>(Future<Result<T>> Function() block, {required String failureMessage}) async {
+    try {
+      return await block();
+    } on StreamException catch (error, stackTrace) {
+      return Result.failure(error, stackTrace);
+    } catch (error, stackTrace) {
+      return Result.failure(StreamClientException(message: failureMessage, cause: error), stackTrace);
+    }
   }
 
   void _checkInitialized() {

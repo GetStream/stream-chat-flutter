@@ -426,9 +426,10 @@ void main() {
 
         when(
           () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
-        ).thenThrow(apiException(statusCode: 500));
+        ).thenAnswer((_) async => Result.failure(apiException(statusCode: 500)));
 
-        await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatException>()));
+        final result = await channel.sendMessage(message);
+        expect(result.exceptionOrNull(), isA<StreamChatException>());
         await Future.delayed(const Duration(milliseconds: 50));
 
         verify(
@@ -441,9 +442,10 @@ void main() {
 
         when(
           () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
-        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
+        ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.notAllowed, statusCode: 403)));
 
-        await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatException>()));
+        final result = await channel.sendMessage(message);
+        expect(result.exceptionOrNull(), isA<StreamChatException>());
         await Future.delayed(const Duration(milliseconds: 50));
 
         verify(
@@ -458,7 +460,10 @@ void main() {
           user: client.state.currentUser,
         );
 
-        final sendMessageResponse = SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
+        final sendMessageResponse = SendMessageResponse(
+          duration: '0.01ms',
+          message: message.copyWith(state: MessageState.sent),
+        );
 
         when(
           () => client.sendMessage(
@@ -466,7 +471,7 @@ void main() {
             channelId,
             channelType,
           ),
-        ).thenAnswer((_) async => sendMessageResponse);
+        ).thenAnswer((_) async => Result.success(sendMessageResponse));
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -489,8 +494,8 @@ void main() {
 
         final res = await channel.sendMessage(message);
 
-        expect(res, isNotNull);
-        expect(res.message.id, message.id);
+        expect(res.isSuccess, isTrue);
+        expect(res.getOrNull()!.message.id, message.id);
 
         verify(
           () => client.sendMessage(
@@ -517,7 +522,7 @@ void main() {
               channelType,
               skipPush: true,
             ),
-          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
+          ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.notAllowed, statusCode: 403)));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -545,14 +550,13 @@ void main() {
             ]),
           );
 
-          await expectLater(
-            channel.sendMessage(
-              message,
-              skipPush: true,
-            ),
-            throwsA(
-              isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
-            ),
+          final result = await channel.sendMessage(
+            message,
+            skipPush: true,
+          );
+          expect(
+            result.exceptionOrNull(),
+            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
           );
         },
       );
@@ -574,7 +578,7 @@ void main() {
               skipPush: true,
               skipEnrichUrl: true,
             ),
-          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
+          ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.notAllowed, statusCode: 403)));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -602,15 +606,14 @@ void main() {
             ]),
           );
 
-          await expectLater(
-            channel.sendMessage(
-              message,
-              skipPush: true,
-              skipEnrichUrl: true,
-            ),
-            throwsA(
-              isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
-            ),
+          final result = await channel.sendMessage(
+            message,
+            skipPush: true,
+            skipEnrichUrl: true,
+          );
+          expect(
+            result.exceptionOrNull(),
+            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
           );
         },
       );
@@ -631,7 +634,7 @@ void main() {
               channelType,
               skipEnrichUrl: true,
             ),
-          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
+          ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.notAllowed, statusCode: 403)));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -659,14 +662,13 @@ void main() {
             ]),
           );
 
-          await expectLater(
-            channel.sendMessage(
-              message,
-              skipEnrichUrl: true,
-            ),
-            throwsA(
-              isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
-            ),
+          final result = await channel.sendMessage(
+            message,
+            skipEnrichUrl: true,
+          );
+          expect(
+            result.exceptionOrNull(),
+            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
           );
         },
       );
@@ -686,7 +688,7 @@ void main() {
               channelId,
               channelType,
             ),
-          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
+          ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.notAllowed, statusCode: 403)));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -712,13 +714,12 @@ void main() {
             ]),
           );
 
-          await expectLater(
-            channel.sendMessage(
-              message,
-            ),
-            throwsA(
-              isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
-            ),
+          final result = await channel.sendMessage(
+            message,
+          );
+          expect(
+            result.exceptionOrNull(),
+            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
           );
         },
       );
@@ -736,9 +737,10 @@ void main() {
             channelId,
             channelType,
           ),
-        ).thenThrow(apiException(code: StreamErrorCode.internalError, statusCode: 500));
+        ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.internalError, statusCode: 500)));
 
-        await expectLater(channel.sendMessage(message), throwsA(isA<StreamApiException>()));
+        final result = await channel.sendMessage(message);
+        expect(result.exceptionOrNull(), isA<StreamApiException>());
         await pumpEventQueue();
 
         // Once for the original send, once for the queue's retry attempt.
@@ -764,9 +766,10 @@ void main() {
             channelId,
             channelType,
           ),
-        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+        ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400)));
 
-        await expectLater(channel.sendMessage(message), throwsA(isA<StreamApiException>()));
+        final result = await channel.sendMessage(message);
+        expect(result.exceptionOrNull(), isA<StreamApiException>());
         await pumpEventQueue();
 
         verify(
@@ -791,8 +794,9 @@ void main() {
             channelId,
             channelType,
           ),
-        ).thenThrow(
-          apiException(code: StreamErrorCode.inputError, statusCode: 400, message: 'Input error'),
+        ).thenAnswer(
+          (_) async =>
+              Result.failure(apiException(code: StreamErrorCode.inputError, statusCode: 400, message: 'Input error')),
         );
 
         expectLater(
@@ -819,10 +823,46 @@ void main() {
           ]),
         );
 
-        await expectLater(
-          channel.sendMessage(message),
-          throwsA(isA<StreamApiException>()),
+        final result = await channel.sendMessage(message);
+        expect(result.exceptionOrNull(), isA<StreamApiException>());
+      });
+
+      test('Channel.sendMessage returns a thrown error as a client failure and keeps the message failed', () async {
+        final message = Message(id: 'test-message-id', text: 'Hello world!', user: client.state.currentUser);
+        final error = StateError('boom');
+
+        when(
+          () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+        ).thenThrow(error);
+
+        final result = await channel.sendMessage(message);
+        await pumpEventQueue();
+
+        expect(
+          result.exceptionOrNull(),
+          isA<StreamClientException>().having((e) => e.cause, 'cause', same(error)),
         );
+        expect(
+          channel.state!.messages.single.state,
+          MessageState.sendingFailed(skipPush: false, skipEnrichUrl: false),
+        );
+      });
+
+      test('Channel.sendMessage does not queue a send whose request throws', () async {
+        final message = Message(id: 'test-message-id', text: 'Hello world!', user: client.state.currentUser);
+
+        when(
+          () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+        ).thenThrow(StateError('boom'));
+
+        await channel.sendMessage(message);
+        await pumpEventQueue();
+
+        // A retry would send it again, so a single call means it was not
+        // queued.
+        verify(
+          () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+        ).called(1);
       });
 
       test('with attachments should work just fine', () async {
@@ -876,13 +916,17 @@ void main() {
             channelType,
           ),
         ).thenAnswer(
-          (_) async => SendMessageResponse()
-            ..message = message.copyWith(
-              attachments: attachments
-                  .map((it) => it.copyWith(uploadState: const UploadState.success()))
-                  .toList(growable: false),
-              state: MessageState.sent,
+          (_) async => Result.success(
+            SendMessageResponse(
+              duration: '0.01ms',
+              message: message.copyWith(
+                attachments: attachments
+                    .map((it) => it.copyWith(uploadState: const UploadState.success()))
+                    .toList(growable: false),
+                state: MessageState.sent,
+              ),
             ),
+          ),
         );
 
         expectLater(
@@ -964,11 +1008,11 @@ void main() {
 
         final res = await channel.sendMessage(message);
 
-        expect(res, isNotNull);
-        expect(res.message.id, message.id);
-        expect(res.message.attachments.length, message.attachments.length);
+        expect(res.isSuccess, isTrue);
+        expect(res.getOrNull()!.message.id, message.id);
+        expect(res.getOrNull()!.message.attachments.length, message.attachments.length);
         expect(
-          res.message.attachments.every(
+          res.getOrNull()!.message.attachments.every(
             (it) => it.uploadState == const UploadState.success(),
           ),
           isTrue,
@@ -1024,7 +1068,12 @@ void main() {
           ),
         ).thenAnswer((_) async => const Result.success(UploadedFile(fileUrl: 'image-url')));
         when(() => client.sendMessage(any(), channelId, channelType)).thenAnswer(
-          (_) async => SendMessageResponse()..message = message.copyWith(state: MessageState.sent),
+          (_) async => Result.success(
+            SendMessageResponse(
+              duration: '0.01ms',
+              message: message.copyWith(state: MessageState.sent),
+            ),
+          ),
         );
 
         await channel.sendMessage(message);
@@ -1054,7 +1103,12 @@ void main() {
           (_) async => const Result.success(UploadedFile(fileUrl: 'clip-url', thumbUrl: 'thumb-url')),
         );
         when(() => client.sendMessage(any(), channelId, channelType)).thenAnswer(
-          (_) async => SendMessageResponse()..message = message.copyWith(state: MessageState.sent),
+          (_) async => Result.success(
+            SendMessageResponse(
+              duration: '0.01ms',
+              message: message.copyWith(state: MessageState.sent),
+            ),
+          ),
         );
 
         await channel.sendMessage(message);
@@ -1087,7 +1141,8 @@ void main() {
           ),
         ).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'boom')));
 
-        await expectLater(channel.sendMessage(message), throwsA(isA<StreamClientException>()));
+        final result = await channel.sendMessage(message);
+        expect(result.exceptionOrNull(), isA<StreamClientException>());
 
         final stored = channel.state!.messages.single.attachments.single;
         expect(stored.uploadState, isA<UploadStateFailed>());
@@ -1096,10 +1151,8 @@ void main() {
       test('should not send if the message is invalid', () async {
         final message = Message(id: 'test-message-id');
 
-        expect(
-          () => channel.sendMessage(message),
-          throwsA(isA<StreamClientException>()),
-        );
+        final result = await channel.sendMessage(message);
+        expect(result.exceptionOrNull(), isA<StreamClientException>());
 
         verifyNever(
           () => client.sendMessage(any(), channelId, channelType),
@@ -1134,15 +1187,14 @@ void main() {
 
         final superseded = channel.sendMessage(message);
         await pumpEventQueue();
-        unawaited(channel.sendMessage(message).catchError((_) => SendMessageResponse()));
+        unawaited(channel.sendMessage(message));
 
         // The caller stopped it, so it is a cancelled request rather than an
         // SDK failure a crash tracker should hear about.
-        await expectLater(
-          superseded,
-          throwsA(
-            isA<StreamNetworkException>().having((it) => it.isCancelled, 'isCancelled', isTrue),
-          ),
+        final result = await superseded;
+        expect(
+          result.exceptionOrNull(),
+          isA<StreamNetworkException>().having((it) => it.isCancelled, 'isCancelled', isTrue),
         );
       });
 
@@ -1209,10 +1261,8 @@ void main() {
             (_) async => const Result.failure(StreamNetworkException(message: 'Request cancelled', isCancelled: true)),
           );
 
-          expect(
-            () => channel.sendMessage(message),
-            throwsA(isA<StreamClientException>()),
-          );
+          final result = await channel.sendMessage(message);
+          expect(result.exceptionOrNull(), isA<StreamClientException>());
 
           verify(
             () => client.sendImage(
@@ -1266,17 +1316,21 @@ void main() {
               channelType,
             ),
           ).thenAnswer(
-            (_) async => SendMessageResponse()
-              ..message = message.copyWith(
-                attachments: [],
-                state: MessageState.sent,
+            (_) async => Result.success(
+              SendMessageResponse(
+                duration: '0.01ms',
+                message: message.copyWith(
+                  attachments: [],
+                  state: MessageState.sent,
+                ),
               ),
+            ),
           );
 
           final res = await channel.sendMessage(message);
 
-          expect(res, isNotNull);
-          expect(res.message.text, 'Hello world!');
+          expect(res.isSuccess, isTrue);
+          expect(res.getOrNull()!.message.text, 'Hello world!');
 
           verify(
             () => client.sendImage(
@@ -1339,17 +1393,21 @@ void main() {
               channelType,
             ),
           ).thenAnswer(
-            (_) async => SendMessageResponse()
-              ..message = message.copyWith(
-                attachments: [],
-                state: MessageState.sent,
+            (_) async => Result.success(
+              SendMessageResponse(
+                duration: '0.01ms',
+                message: message.copyWith(
+                  attachments: [],
+                  state: MessageState.sent,
+                ),
               ),
+            ),
           );
 
           final res = await channel.sendMessage(message);
 
-          expect(res, isNotNull);
-          expect(res.message.quotedMessageId, quotedMessage.id);
+          expect(res.isSuccess, isTrue);
+          expect(res.getOrNull()!.message.quotedMessageId, quotedMessage.id);
 
           verify(
             () => client.sendImage(
@@ -1407,17 +1465,21 @@ void main() {
               channelType,
             ),
           ).thenAnswer(
-            (_) async => SendMessageResponse()
-              ..message = message.copyWith(
-                attachments: [],
-                state: MessageState.sent,
+            (_) async => Result.success(
+              SendMessageResponse(
+                duration: '0.01ms',
+                message: message.copyWith(
+                  attachments: [],
+                  state: MessageState.sent,
+                ),
               ),
+            ),
           );
 
           final res = await channel.sendMessage(message);
 
-          expect(res, isNotNull);
-          expect(res.message.pollId, 'poll-123');
+          expect(res.isSuccess, isTrue);
+          expect(res.getOrNull()!.message.pollId, 'poll-123');
 
           verify(
             () => client.sendImage(
@@ -1453,20 +1515,24 @@ void main() {
         when(
           () => client.sendMessage(any(), channelId, channelType),
         ).thenAnswer(
-          (_) async => SendMessageResponse()
-            ..message = Message(
-              id: locationId,
-              text: 'Location shared',
-              custom: const {'custom': 'data'},
-              sharedLocation: Location(
-                channelCid: channel.cid,
-                messageId: locationId,
-                userId: client.state.currentUser?.id,
-                latitude: coordinates.latitude,
-                longitude: coordinates.longitude,
-                createdByDeviceId: deviceId,
+          (_) async => Result.success(
+            SendMessageResponse(
+              duration: '0.01ms',
+              message: Message(
+                id: locationId,
+                text: 'Location shared',
+                custom: const {'custom': 'data'},
+                sharedLocation: Location(
+                  channelCid: channel.cid,
+                  messageId: locationId,
+                  userId: client.state.currentUser?.id,
+                  latitude: coordinates.latitude,
+                  longitude: coordinates.longitude,
+                  createdByDeviceId: deviceId,
+                ),
               ),
             ),
+          ),
         );
 
         final response = await channel.sendStaticLocation(
@@ -1477,11 +1543,11 @@ void main() {
           custom: {'custom': 'data'},
         );
 
-        expect(response, isNotNull);
-        expect(response.message.id, locationId);
-        expect(response.message.text, 'Location shared');
-        expect(response.message.custom['custom'], 'data');
-        expect(response.message.sharedLocation, isNotNull);
+        expect(response.isSuccess, isTrue);
+        expect(response.getOrNull()!.message.id, locationId);
+        expect(response.getOrNull()!.message.text, 'Location shared');
+        expect(response.getOrNull()!.message.custom['custom'], 'data');
+        expect(response.getOrNull()!.message.sharedLocation, isNotNull);
 
         verify(
           () => client.sendMessage(any(), channelId, channelType),
@@ -1504,21 +1570,25 @@ void main() {
           when(
             () => client.sendMessage(any(), channelId, channelType),
           ).thenAnswer(
-            (_) async => SendMessageResponse()
-              ..message = Message(
-                id: locationId,
-                text: 'Location shared',
-                custom: const {'custom': 'data'},
-                sharedLocation: Location(
-                  channelCid: channel.cid,
-                  messageId: locationId,
-                  userId: client.state.currentUser?.id,
-                  latitude: coordinates.latitude,
-                  longitude: coordinates.longitude,
-                  createdByDeviceId: deviceId,
-                  endAt: endSharingAt,
+            (_) async => Result.success(
+              SendMessageResponse(
+                duration: '0.01ms',
+                message: Message(
+                  id: locationId,
+                  text: 'Location shared',
+                  custom: const {'custom': 'data'},
+                  sharedLocation: Location(
+                    channelCid: channel.cid,
+                    messageId: locationId,
+                    userId: client.state.currentUser?.id,
+                    latitude: coordinates.latitude,
+                    longitude: coordinates.longitude,
+                    createdByDeviceId: deviceId,
+                    endAt: endSharingAt,
+                  ),
                 ),
               ),
+            ),
           );
 
           final response = await channel.startLiveLocationSharing(
@@ -1530,12 +1600,12 @@ void main() {
             custom: {'custom': 'data'},
           );
 
-          expect(response, isNotNull);
-          expect(response.message.id, locationId);
-          expect(response.message.text, 'Location shared');
-          expect(response.message.custom['custom'], 'data');
-          expect(response.message.sharedLocation, isNotNull);
-          expect(response.message.sharedLocation?.endAt, endSharingAt);
+          expect(response.isSuccess, isTrue);
+          expect(response.getOrNull()!.message.id, locationId);
+          expect(response.getOrNull()!.message.text, 'Location shared');
+          expect(response.getOrNull()!.message.custom['custom'], 'data');
+          expect(response.getOrNull()!.message.sharedLocation, isNotNull);
+          expect(response.getOrNull()!.message.sharedLocation?.endAt, endSharingAt);
 
           verify(
             () => client.sendMessage(any(), channelId, channelType),
@@ -1745,11 +1815,11 @@ void main() {
           state: MessageState.sent,
         );
 
-        final updateMessageResponse = UpdateMessageResponse()..message = message;
+        final updateMessageResponse = UpdateMessageResponse(duration: '0.01ms', message: message);
 
         when(
           () => client.updateMessage(any(that: isSameMessageAs(message))),
-        ).thenAnswer((_) async => updateMessageResponse);
+        ).thenAnswer((_) async => Result.success(updateMessageResponse));
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -1772,8 +1842,8 @@ void main() {
 
         final res = await channel.updateMessage(message);
 
-        expect(res, isNotNull);
-        expect(res.message.id, message.id);
+        expect(res.isSuccess, isTrue);
+        expect(res.getOrNull()!.message.id, message.id);
 
         verify(
           () => client.updateMessage(
@@ -1831,13 +1901,17 @@ void main() {
             any(that: isSameMessageAs(message)),
           ),
         ).thenAnswer(
-          (_) async => UpdateMessageResponse()
-            ..message = message.copyWith(
-              state: MessageState.sent,
-              attachments: attachments
-                  .map((it) => it.copyWith(uploadState: const UploadState.success()))
-                  .toList(growable: false),
+          (_) async => Result.success(
+            UpdateMessageResponse(
+              duration: '0.01ms',
+              message: message.copyWith(
+                state: MessageState.sent,
+                attachments: attachments
+                    .map((it) => it.copyWith(uploadState: const UploadState.success()))
+                    .toList(growable: false),
+              ),
             ),
+          ),
         );
 
         expectLater(
@@ -1919,11 +1993,11 @@ void main() {
 
         final res = await channel.updateMessage(message);
 
-        expect(res, isNotNull);
-        expect(res.message.id, message.id);
-        expect(res.message.attachments.length, message.attachments.length);
+        expect(res.isSuccess, isTrue);
+        expect(res.getOrNull()!.message.id, message.id);
+        expect(res.getOrNull()!.message.attachments.length, message.attachments.length);
         expect(
-          res.message.attachments.every(
+          res.getOrNull()!.message.attachments.every(
             (it) => it.uploadState == const UploadState.success(),
           ),
           isTrue,
@@ -1997,9 +2071,10 @@ void main() {
           ]),
         );
 
-        await expectLater(
-          channel.updateMessage(message, skipEnrichUrl: true),
-          throwsA(isA<ArgumentError>()),
+        final result = await channel.updateMessage(message, skipEnrichUrl: true);
+        expect(
+          result.exceptionOrNull(),
+          isA<StreamClientException>().having((e) => e.cause, 'cause', isA<ArgumentError>()),
         );
       });
 
@@ -2017,8 +2092,10 @@ void main() {
               any(that: isSameMessageAs(message)),
               skipEnrichUrl: true,
             ),
-          ).thenThrow(
-            apiException(code: StreamErrorCode.requestTimeout, statusCode: 408, message: 'Request timed out'),
+          ).thenAnswer(
+            (_) async => Result.failure(
+              apiException(code: StreamErrorCode.requestTimeout, statusCode: 408, message: 'Request timed out'),
+            ),
           );
 
           expectLater(
@@ -2047,13 +2124,12 @@ void main() {
             ]),
           );
 
-          await expectLater(
-            channel.updateMessage(message, skipEnrichUrl: true),
-            throwsA(
-              isA<StreamApiException>()
-                  .having((it) => it.code, 'code', StreamErrorCode.requestTimeout)
-                  .having((it) => it.isRetriable, 'isRetriable', isTrue),
-            ),
+          final result = await channel.updateMessage(message, skipEnrichUrl: true);
+          expect(
+            result.exceptionOrNull(),
+            isA<StreamApiException>()
+                .having((it) => it.code, 'code', StreamErrorCode.requestTimeout)
+                .having((it) => it.isRetriable, 'isRetriable', isTrue),
           );
         },
       );
@@ -2072,8 +2148,10 @@ void main() {
               any(that: isSameMessageAs(message)),
               skipPush: true,
             ),
-          ).thenThrow(
-            apiException(code: StreamErrorCode.internalError, statusCode: 500, message: 'Internal system error'),
+          ).thenAnswer(
+            (_) async => Result.failure(
+              apiException(code: StreamErrorCode.internalError, statusCode: 500, message: 'Internal system error'),
+            ),
           );
 
           expectLater(
@@ -2102,16 +2180,42 @@ void main() {
             ]),
           );
 
-          await expectLater(
-            channel.updateMessage(message, skipPush: true),
-            throwsA(
-              isA<StreamApiException>()
-                  .having((it) => it.code, 'code', StreamErrorCode.internalError)
-                  .having((it) => it.isRetriable, 'isRetriable', isTrue),
-            ),
+          final result = await channel.updateMessage(message, skipPush: true);
+          expect(
+            result.exceptionOrNull(),
+            isA<StreamApiException>()
+                .having((it) => it.code, 'code', StreamErrorCode.internalError)
+                .having((it) => it.isRetriable, 'isRetriable', isTrue),
           );
         },
       );
+
+      test('should re-send the update through the retry queue when the failure is retriable', () async {
+        final message = Message(id: 'test-message-id-retry-3', state: MessageState.sent);
+
+        when(
+          () => client.updateMessage(any(that: isSameMessageAs(message))),
+        ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.internalError, statusCode: 500)));
+
+        await channel.updateMessage(message);
+        await pumpEventQueue();
+
+        // Once for the original update, once for the queue's retry attempt.
+        verify(() => client.updateMessage(any(that: isSameMessageAs(message)))).called(2);
+      });
+
+      test('should not re-send the update when the failure is not retriable', () async {
+        final message = Message(id: 'test-message-id-error-4', state: MessageState.sent);
+
+        when(
+          () => client.updateMessage(any(that: isSameMessageAs(message))),
+        ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.notAllowed, statusCode: 403)));
+
+        await channel.updateMessage(message);
+        await pumpEventQueue();
+
+        verify(() => client.updateMessage(any(that: isSameMessageAs(message)))).called(1);
+      });
 
       test('should handle a non-retriable failure with skipPush: true, skipEnrichUrl: true', () async {
         final message = Message(
@@ -2125,7 +2229,7 @@ void main() {
             skipPush: true,
             skipEnrichUrl: true,
           ),
-        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
+        ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.notAllowed, statusCode: 403)));
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -2153,15 +2257,14 @@ void main() {
           ]),
         );
 
-        await expectLater(
-          channel.updateMessage(
-            message,
-            skipPush: true,
-            skipEnrichUrl: true,
-          ),
-          throwsA(
-            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
-          ),
+        final result = await channel.updateMessage(
+          message,
+          skipPush: true,
+          skipEnrichUrl: true,
+        );
+        expect(
+          result.exceptionOrNull(),
+          isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
         );
       });
 
@@ -2175,7 +2278,7 @@ void main() {
           () => client.updateMessage(
             any(that: isSameMessageAs(message)),
           ),
-        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
+        ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.notAllowed, statusCode: 403)));
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -2201,11 +2304,10 @@ void main() {
           ]),
         );
 
-        await expectLater(
-          channel.updateMessage(message),
-          throwsA(
-            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
-          ),
+        final result = await channel.updateMessage(message);
+        expect(
+          result.exceptionOrNull(),
+          isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
         );
       });
 
@@ -2301,7 +2403,7 @@ void main() {
       });
     });
 
-    test('`.partialUpdateMessage`', () async {
+    test('`.updateMessagePartial`', () async {
       final message = Message(
         id: 'test-message-id',
         state: MessageState.sent,
@@ -2310,12 +2412,14 @@ void main() {
       const set = {'text': 'Update Message text'};
       const unset = ['pinExpires'];
 
-      final updateMessageResponse = UpdateMessageResponse()
-        ..message = message.copyWith(text: set['text'], pinExpires: null);
+      final updateMessageResponse = UpdateMessagePartialResponse(
+        duration: '0.01ms',
+        message: message.copyWith(text: set['text'], pinExpires: null),
+      );
 
       when(
-        () => client.partialUpdateMessage(message.id, set: set, unset: unset),
-      ).thenAnswer((_) async => updateMessageResponse);
+        () => client.updateMessagePartial(message.id, set: set, unset: unset),
+      ).thenAnswer((_) async => Result.success(updateMessageResponse));
 
       expectLater(
         // skipping first seed message list -> [] messages
@@ -2332,7 +2436,7 @@ void main() {
           ],
           [
             isSameMessageAs(
-              updateMessageResponse.message.copyWith(
+              updateMessageResponse.message!.copyWith(
                 state: MessageState.updated,
               ),
               matchText: true,
@@ -2342,83 +2446,24 @@ void main() {
         ]),
       );
 
-      final res = await channel.partialUpdateMessage(
+      final res = await channel.updateMessagePartial(
         message,
         set: set,
         unset: unset,
       );
 
-      expect(res, isNotNull);
-      expect(res.message.id, message.id);
-      expect(res.message.id, message.id);
-      expect(res.message.text, set['text']);
-      expect(res.message.pinExpires, isNull);
+      expect(res.isSuccess, isTrue);
+      expect(res.getOrNull()!.message!.id, message.id);
+      expect(res.getOrNull()!.message!.id, message.id);
+      expect(res.getOrNull()!.message!.text, set['text']);
+      expect(res.getOrNull()!.message!.pinExpires, isNull);
 
       verify(
-        () => client.partialUpdateMessage(message.id, set: set, unset: unset),
+        () => client.updateMessagePartial(message.id, set: set, unset: unset),
       ).called(1);
     });
 
-    group('`.partialUpdateMessage` error handling', () {
-      test('should update message state even when the error is not a StreamChatException', () async {
-        final message = Message(
-          id: 'test-message-id-error-partial-1',
-          state: MessageState.sent,
-        );
-
-        // Add message to channel state first
-        channel.state?.updateMessage(message);
-
-        const set = {'text': 'Update Message text'};
-        const unset = ['pinExpires'];
-
-        when(
-          () => client.partialUpdateMessage(
-            message.id,
-            set: set,
-            unset: unset,
-          ),
-        ).thenThrow(ArgumentError('Invalid argument'));
-
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: false),
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-            [
-              isSameMessageAs(
-                message.copyWith(
-                  state: MessageState.partialUpdatingFailed(
-                    set: set,
-                    unset: unset,
-                    skipEnrichUrl: false,
-                  ),
-                ),
-                matchText: true,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
-
-        await expectLater(
-          channel.partialUpdateMessage(
-            message,
-            set: set,
-            unset: unset,
-          ),
-          throwsA(isA<ArgumentError>()),
-        );
-      });
-
+    group('`.updateMessagePartial` error handling', () {
       test(
         'should mark the message failed and report the failure as retriable with skipEnrichUrl: true',
         () async {
@@ -2435,14 +2480,16 @@ void main() {
 
           // Create a retriable error (data == null)
           when(
-            () => client.partialUpdateMessage(
+            () => client.updateMessagePartial(
               message.id,
               set: set,
               unset: unset,
               skipEnrichUrl: true,
             ),
-          ).thenThrow(
-            apiException(code: StreamErrorCode.requestTimeout, statusCode: 408, message: 'Request timed out'),
+          ).thenAnswer(
+            (_) async => Result.failure(
+              apiException(code: StreamErrorCode.requestTimeout, statusCode: 408, message: 'Request timed out'),
+            ),
           );
 
           expectLater(
@@ -2474,18 +2521,17 @@ void main() {
             ]),
           );
 
-          await expectLater(
-            channel.partialUpdateMessage(
-              message,
-              set: set,
-              unset: unset,
-              skipEnrichUrl: true,
-            ),
-            throwsA(
-              isA<StreamApiException>()
-                  .having((it) => it.code, 'code', StreamErrorCode.requestTimeout)
-                  .having((it) => it.isRetriable, 'isRetriable', isTrue),
-            ),
+          final result = await channel.updateMessagePartial(
+            message,
+            set: set,
+            unset: unset,
+            skipEnrichUrl: true,
+          );
+          expect(
+            result.exceptionOrNull(),
+            isA<StreamApiException>()
+                .having((it) => it.code, 'code', StreamErrorCode.requestTimeout)
+                .having((it) => it.isRetriable, 'isRetriable', isTrue),
           );
         },
       );
@@ -2506,13 +2552,15 @@ void main() {
 
           // Create a retriable error (data == null)
           when(
-            () => client.partialUpdateMessage(
+            () => client.updateMessagePartial(
               message.id,
               set: set,
               unset: unset,
             ),
-          ).thenThrow(
-            apiException(code: StreamErrorCode.internalError, statusCode: 500, message: 'Internal system error'),
+          ).thenAnswer(
+            (_) async => Result.failure(
+              apiException(code: StreamErrorCode.internalError, statusCode: 500, message: 'Internal system error'),
+            ),
           );
 
           expectLater(
@@ -2544,20 +2592,48 @@ void main() {
             ]),
           );
 
-          await expectLater(
-            channel.partialUpdateMessage(
-              message,
-              set: set,
-              unset: unset,
-            ),
-            throwsA(
-              isA<StreamApiException>()
-                  .having((it) => it.code, 'code', StreamErrorCode.internalError)
-                  .having((it) => it.isRetriable, 'isRetriable', isTrue),
-            ),
+          final result = await channel.updateMessagePartial(
+            message,
+            set: set,
+            unset: unset,
+          );
+          expect(
+            result.exceptionOrNull(),
+            isA<StreamApiException>()
+                .having((it) => it.code, 'code', StreamErrorCode.internalError)
+                .having((it) => it.isRetriable, 'isRetriable', isTrue),
           );
         },
       );
+
+      test('should re-send the partial update through the retry queue when the failure is retriable', () async {
+        final message = Message(id: 'test-message-id-retry-partial-3', state: MessageState.sent);
+        const set = {'text': 'Update Message text'};
+
+        when(
+          () => client.updateMessagePartial(message.id, set: set),
+        ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.internalError, statusCode: 500)));
+
+        await channel.updateMessagePartial(message, set: set);
+        await pumpEventQueue();
+
+        // Once for the original update, once for the queue's retry attempt.
+        verify(() => client.updateMessagePartial(message.id, set: set)).called(2);
+      });
+
+      test('should not re-send the partial update when the failure is not retriable', () async {
+        final message = Message(id: 'test-message-id-error-partial-4', state: MessageState.sent);
+        const set = {'text': 'Update Message text'};
+
+        when(
+          () => client.updateMessagePartial(message.id, set: set),
+        ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.notAllowed, statusCode: 403)));
+
+        await channel.updateMessagePartial(message, set: set);
+        await pumpEventQueue();
+
+        verify(() => client.updateMessagePartial(message.id, set: set)).called(1);
+      });
 
       test('should handle a non-retriable failure with skipEnrichUrl: true', () async {
         final message = Message(
@@ -2572,13 +2648,13 @@ void main() {
         const unset = ['pinExpires'];
 
         when(
-          () => client.partialUpdateMessage(
+          () => client.updateMessagePartial(
             message.id,
             set: set,
             unset: unset,
             skipEnrichUrl: true,
           ),
-        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
+        ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.notAllowed, statusCode: 403)));
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -2609,16 +2685,15 @@ void main() {
           ]),
         );
 
-        await expectLater(
-          channel.partialUpdateMessage(
-            message,
-            set: set,
-            unset: unset,
-            skipEnrichUrl: true,
-          ),
-          throwsA(
-            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
-          ),
+        final result = await channel.updateMessagePartial(
+          message,
+          set: set,
+          unset: unset,
+          skipEnrichUrl: true,
+        );
+        expect(
+          result.exceptionOrNull(),
+          isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
         );
       });
 
@@ -2635,12 +2710,12 @@ void main() {
         const unset = ['pinExpires'];
 
         when(
-          () => client.partialUpdateMessage(
+          () => client.updateMessagePartial(
             message.id,
             set: set,
             unset: unset,
           ),
-        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
+        ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.notAllowed, statusCode: 403)));
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -2671,15 +2746,14 @@ void main() {
           ]),
         );
 
-        await expectLater(
-          channel.partialUpdateMessage(
-            message,
-            set: set,
-            unset: unset,
-          ),
-          throwsA(
-            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
-          ),
+        final result = await channel.updateMessagePartial(
+          message,
+          set: set,
+          unset: unset,
+        );
+        expect(
+          result.exceptionOrNull(),
+          isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
         );
       });
     });
@@ -2693,7 +2767,9 @@ void main() {
           state: MessageState.sent,
         );
 
-        when(() => client.deleteMessage(messageId)).thenAnswer((_) async => EmptyResponse());
+        when(
+          () => client.deleteMessage(messageId),
+        ).thenAnswer((_) async => Result.success(DeleteMessageResponse(duration: '0.01ms', message: message)));
 
         // A soft delete only updates a message already in the loaded window,
         // so seed it first — a delete must never insert a phantom record.
@@ -2720,7 +2796,7 @@ void main() {
 
         final res = await channel.deleteMessage(message);
 
-        expect(res, isNotNull);
+        expect(res.isSuccess, isTrue);
 
         verify(() => client.deleteMessage(messageId)).called(1);
       });
@@ -2733,14 +2809,16 @@ void main() {
           state: MessageState.sent,
         );
         const errorMessage = 'DeleteMessage failed with error: "message with id test-message-id has been deleted"';
-        when(() => client.deleteMessage(messageId)).thenThrow(
-          apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+        when(() => client.deleteMessage(messageId)).thenAnswer(
+          (_) async => Result.failure(
+            apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+          ),
         );
         channel.state?.addNewMessage(message);
 
         final res = await channel.deleteMessage(message);
 
-        expect(res, isNotNull);
+        expect(res.isSuccess, isTrue);
         expect(channel.state?.messages.single.state, MessageState.softDeleted);
       });
 
@@ -2756,8 +2834,10 @@ void main() {
           state: MessageState.sent,
         );
         const errorMessage = 'DeleteMessage failed with error: "message with id test-message-id doesn\'t exist"';
-        when(() => client.deleteMessage(messageId, hard: true)).thenThrow(
-          apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+        when(() => client.deleteMessage(messageId, hard: true)).thenAnswer(
+          (_) async => Result.failure(
+            apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+          ),
         );
         when(
           () => client.deleteImage(any(), channelId, channelType),
@@ -2784,8 +2864,10 @@ void main() {
           state: MessageState.sent,
         );
         const errorMessage = 'DeleteMessage failed with error: "message with id test-message-id doesn\'t exist"';
-        when(() => client.deleteMessage(messageId, hard: true)).thenThrow(
-          apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+        when(() => client.deleteMessage(messageId, hard: true)).thenAnswer(
+          (_) async => Result.failure(
+            apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+          ),
         );
         when(
           () => client.deleteImage(any(), channelId, channelType),
@@ -2824,7 +2906,7 @@ void main() {
 
         when(
           () => client.deleteMessage(messageId, hard: true),
-        ).thenAnswer((_) async => EmptyResponse());
+        ).thenAnswer((_) async => Result.success(DeleteMessageResponse(duration: '0.01ms', message: message)));
 
         when(
           () => client.deleteImage(any(), channelId, channelType),
@@ -2835,7 +2917,7 @@ void main() {
         ).thenAnswer((_) async => const Result.success(null));
 
         final res = await channel.deleteMessage(message, hard: true);
-        expect(res, isNotNull);
+        expect(res.isSuccess, isTrue);
 
         verify(() => client.deleteMessage(messageId, hard: true)).called(1);
 
@@ -2873,10 +2955,60 @@ void main() {
 
           final res = await channel.deleteMessage(message);
 
-          expect(res, isNotNull);
+          expect(res.isSuccess, isTrue);
           verifyNever(() => client.deleteMessage(messageId));
         },
       );
+
+      test(
+        'Channel.deleteMessage of a message that was never sent returns a 0ms response with the deleted message',
+        () async {
+          final message = Message(id: 'test-message-id', text: 'Hello World!', state: MessageState.sending());
+          channel.state?.addNewMessage(message);
+
+          final result = await channel.deleteMessage(message);
+
+          final response = result.getOrNull()!;
+          expect(response.duration, '0ms');
+          expect(response.message.id, message.id);
+          expect(response.message.state, MessageState.hardDeleted);
+          verifyNever(() => client.deleteMessage(any(), hard: any(named: 'hard')));
+        },
+      );
+
+      test('Channel.deleteMessage returns the failure to delete the message', () async {
+        final message = Message(id: 'test-message-id', createdAt: DateTime.now(), state: MessageState.sent);
+        final error = apiException(code: StreamErrorCode.notAllowed, statusCode: 403);
+        when(() => client.deleteMessage(message.id)).thenAnswer((_) async => Result.failure(error));
+
+        final result = await channel.deleteMessage(message);
+
+        expect(result.exceptionOrNull(), error);
+      });
+
+      test('Channel.deleteMessage keeps a message whose delete fails as failed to soft delete', () async {
+        final message = Message(id: 'test-message-id', createdAt: DateTime.now(), state: MessageState.sent);
+        channel.state?.addNewMessage(message);
+        when(
+          () => client.deleteMessage(message.id),
+        ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.notAllowed, statusCode: 403)));
+
+        await channel.deleteMessage(message);
+
+        expect(channel.state!.messages.single.state, MessageState.softDeletingFailed);
+      });
+
+      test('Channel.deleteMessage does not retry a delete whose failure is not retriable', () async {
+        final message = Message(id: 'test-message-id', createdAt: DateTime.now(), state: MessageState.sent);
+        when(
+          () => client.deleteMessage(message.id),
+        ).thenAnswer((_) async => Result.failure(apiException(code: StreamErrorCode.notAllowed, statusCode: 403)));
+
+        await channel.deleteMessage(message);
+        await pumpEventQueue();
+
+        verify(() => client.deleteMessage(message.id)).called(1);
+      });
     });
 
     group('`.deleteMessageForMe`', () {
@@ -2888,7 +3020,9 @@ void main() {
           state: MessageState.sent,
         );
 
-        when(() => client.deleteMessageForMe(messageId)).thenAnswer((_) async => EmptyResponse());
+        when(
+          () => client.deleteMessageForMe(messageId),
+        ).thenAnswer((_) async => Result.success(DeleteMessageResponse(duration: '0.01ms', message: message)));
 
         // A soft delete only updates a message already in the loaded window,
         // so seed it first — a delete must never insert a phantom record.
@@ -2915,7 +3049,7 @@ void main() {
 
         final res = await channel.deleteMessageForMe(message);
 
-        expect(res, isNotNull);
+        expect(res.isSuccess, isTrue);
 
         verify(() => client.deleteMessageForMe(messageId)).called(1);
       });
@@ -2949,7 +3083,7 @@ void main() {
 
           final res = await channel.deleteMessageForMe(message);
 
-          expect(res, isNotNull);
+          expect(res.isSuccess, isTrue);
           verifyNever(() => client.deleteMessageForMe(messageId));
         },
       );
@@ -2960,17 +3094,21 @@ void main() {
         final message = Message(id: 'test-message-id');
 
         when(
-          () => client.partialUpdateMessage(
+          () => client.updateMessagePartial(
             message.id,
             set: any(named: 'set'),
             unset: any(named: 'unset'),
           ),
         ).thenAnswer(
-          (_) async => UpdateMessageResponse()
-            ..message = message.copyWith(
-              pinned: true,
-              pinExpires: null,
+          (_) async => Result.success(
+            UpdateMessagePartialResponse(
+              duration: '0.01ms',
+              message: message.copyWith(
+                pinned: true,
+                pinExpires: null,
+              ),
             ),
+          ),
         );
 
         expectLater(
@@ -2991,12 +3129,12 @@ void main() {
 
         final res = await channel.pinMessage(message);
 
-        expect(res, isNotNull);
-        expect(res.message.pinned, isTrue);
-        expect(res.message.pinExpires, isNull);
+        expect(res.isSuccess, isTrue);
+        expect(res.getOrNull()!.message!.pinned, isTrue);
+        expect(res.getOrNull()!.message!.pinExpires, isNull);
 
         verify(
-          () => client.partialUpdateMessage(
+          () => client.updateMessagePartial(
             message.id,
             set: any(named: 'set'),
             unset: any(named: 'unset'),
@@ -3011,19 +3149,23 @@ void main() {
           const timeoutOrExpirationDate = 300; // 300 seconds
 
           when(
-            () => client.partialUpdateMessage(
+            () => client.updateMessagePartial(
               message.id,
               set: any(named: 'set'),
               unset: any(named: 'unset'),
             ),
           ).thenAnswer(
-            (_) async => UpdateMessageResponse()
-              ..message = message.copyWith(
-                pinned: true,
-                pinExpires: DateTime.now().add(
-                  const Duration(seconds: timeoutOrExpirationDate),
+            (_) async => Result.success(
+              UpdateMessagePartialResponse(
+                duration: '0.01ms',
+                message: message.copyWith(
+                  pinned: true,
+                  pinExpires: DateTime.now().add(
+                    const Duration(seconds: timeoutOrExpirationDate),
+                  ),
                 ),
               ),
+            ),
           );
 
           expectLater(
@@ -3047,12 +3189,12 @@ void main() {
             timeoutOrExpirationDate: timeoutOrExpirationDate,
           );
 
-          expect(res, isNotNull);
-          expect(res.message.pinned, isTrue);
-          expect(res.message.pinExpires, isNotNull);
+          expect(res.isSuccess, isTrue);
+          expect(res.getOrNull()!.message!.pinned, isTrue);
+          expect(res.getOrNull()!.message!.pinExpires, isNotNull);
 
           verify(
-            () => client.partialUpdateMessage(
+            () => client.updateMessagePartial(
               message.id,
               set: any(named: 'set'),
               unset: any(named: 'unset'),
@@ -3068,17 +3210,21 @@ void main() {
           final timeoutOrExpirationDate = DateTime.now().add(const Duration(days: 3)); // 3 days
 
           when(
-            () => client.partialUpdateMessage(
+            () => client.updateMessagePartial(
               message.id,
               set: any(named: 'set'),
               unset: any(named: 'unset'),
             ),
           ).thenAnswer(
-            (_) async => UpdateMessageResponse()
-              ..message = message.copyWith(
-                pinned: true,
-                pinExpires: timeoutOrExpirationDate,
+            (_) async => Result.success(
+              UpdateMessagePartialResponse(
+                duration: '0.01ms',
+                message: message.copyWith(
+                  pinned: true,
+                  pinExpires: timeoutOrExpirationDate,
+                ),
               ),
+            ),
           );
 
           expectLater(
@@ -3102,13 +3248,13 @@ void main() {
             timeoutOrExpirationDate: timeoutOrExpirationDate,
           );
 
-          expect(res, isNotNull);
-          expect(res.message.pinned, isTrue);
-          expect(res.message.pinExpires, isNotNull);
-          expect(res.message.pinExpires, timeoutOrExpirationDate.toUtc());
+          expect(res.isSuccess, isTrue);
+          expect(res.getOrNull()!.message!.pinned, isTrue);
+          expect(res.getOrNull()!.message!.pinExpires, isNotNull);
+          expect(res.getOrNull()!.message!.pinExpires, timeoutOrExpirationDate.toUtc());
 
           verify(
-            () => client.partialUpdateMessage(
+            () => client.updateMessagePartial(
               message.id,
               set: any(named: 'set'),
               unset: any(named: 'unset'),
@@ -3140,11 +3286,14 @@ void main() {
       final message = Message(id: 'test-message-id', pinned: true);
 
       when(
-        () => client.partialUpdateMessage(
+        () => client.updateMessagePartial(
           message.id,
           set: {'pinned': false},
         ),
-      ).thenAnswer((_) async => UpdateMessageResponse()..message = message.copyWith(pinned: false));
+      ).thenAnswer(
+        (_) async =>
+            Result.success(UpdateMessagePartialResponse(duration: '0.01ms', message: message.copyWith(pinned: false))),
+      );
 
       expectLater(
         // skipping first seed message list -> [] messages
@@ -3164,11 +3313,11 @@ void main() {
 
       final res = await channel.unpinMessage(message);
 
-      expect(res, isNotNull);
-      expect(res.message.pinned, isFalse);
+      expect(res.isSuccess, isTrue);
+      expect(res.getOrNull()!.message!.pinned, isFalse);
 
       verify(
-        () => client.partialUpdateMessage(
+        () => client.updateMessagePartial(
           message.id,
           set: {'pinned': false},
         ),
@@ -4261,54 +4410,50 @@ void main() {
       ).called(1);
     });
 
-    group('`.sendAction`', () {
-      test('should work fine', () async {
-        final message = Message(id: 'test-message-id', text: 'Action Sent');
-        const formData = {'key': 'value'};
+    test('Channel.sendAction replaces the message with the one the action left', () async {
+      final message = Message(id: 'test-message-id', text: '/giphy hello');
+      channel.state!.updateMessage(message);
+      const formData = {'image_action': 'send'};
 
-        when(
-          () => client.sendAction(channelId, channelType, message.id, formData),
-        ).thenAnswer((_) async => SendActionResponse());
+      final sent = message.copyWith(text: 'hello');
+      final response = SendActionResponse(duration: '0.01ms', message: sent);
+      when(() => client.sendAction(message.id, formData)).thenAnswer((_) async => Result.success(response));
 
-        final res = await channel.sendAction(message, formData);
+      final res = await channel.sendAction(message, formData);
 
-        expect(res, isNotNull);
+      expect(res.getOrNull(), response);
+      final stateMessage = channel.state!.messages.firstWhere((it) => it.id == message.id);
+      expect(stateMessage.text, 'hello');
+      verify(() => client.sendAction(message.id, formData)).called(1);
+    });
 
-        verify(
-          () => client.sendAction(channelId, channelType, message.id, formData),
-        ).called(1);
-      });
+    test('Channel.sendAction removes the message when the action leaves none', () async {
+      final message = Message(id: 'test-message-id', text: '/giphy hello');
+      channel.state!.updateMessage(message);
+      const formData = {'image_action': 'cancel'};
 
-      test('should emit received message if not null', () async {
-        final message = Message(id: 'test-message-id', text: 'Action Sent');
-        const formData = {'key': 'value'};
+      const response = SendActionResponse(duration: '0.01ms');
+      when(() => client.sendAction(message.id, formData)).thenAnswer((_) async => const Result.success(response));
 
-        when(
-          () => client.sendAction(channelId, channelType, message.id, formData),
-        ).thenAnswer((_) async => SendActionResponse()..message = message);
+      final res = await channel.sendAction(message, formData);
 
-        expectLater(
-          // skipping first seed message list -> [] messages
-          channel.state?.messagesStream.skip(1),
-          emitsInOrder([
-            [
-              isSameMessageAs(
-                message,
-                matchMessageState: true,
-              ),
-            ],
-          ]),
-        );
+      expect(res.getOrNull(), response);
+      expect(channel.state!.messages.where((it) => it.id == message.id), isEmpty);
+    });
 
-        final res = await channel.sendAction(message, formData);
+    test('Channel.sendAction leaves the channel state untouched on a failure', () async {
+      final message = Message(id: 'test-message-id', text: '/giphy hello');
+      channel.state!.updateMessage(message);
+      const formData = {'image_action': 'shuffle'};
 
-        expect(res, isNotNull);
-        expect(res.message?.id, message.id);
+      const error = StreamClientException(message: 'boom');
+      when(() => client.sendAction(message.id, formData)).thenAnswer((_) async => const Result.failure(error));
 
-        verify(
-          () => client.sendAction(channelId, channelType, message.id, formData),
-        ).called(1);
-      });
+      final res = await channel.sendAction(message, formData);
+
+      expect(res.exceptionOrNull(), error);
+      final stateMessage = channel.state!.messages.firstWhere((it) => it.id == message.id);
+      expect(stateMessage.text, '/giphy hello');
     });
 
     group('`.watch`', () {
@@ -5246,7 +5391,14 @@ void main() {
 
         when(
           () => client.sendMessage(any(), channelId, channelType),
-        ).thenAnswer((_) async => SendMessageResponse()..message = newMessage.copyWith(state: MessageState.sent));
+        ).thenAnswer(
+          (_) async => Result.success(
+            SendMessageResponse(
+              duration: '0.01ms',
+              message: newMessage.copyWith(state: MessageState.sent),
+            ),
+          ),
+        );
 
         // Send a new message
         await channel.sendMessage(newMessage);
@@ -6380,7 +6532,7 @@ void main() {
       ).thenAnswer((_) async => EmptyResponse());
       when(
         () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
-      ).thenAnswer((_) async => SendMessageResponse()..message = message);
+      ).thenAnswer((_) async => Result.success(SendMessageResponse(duration: '0ms', message: message)));
 
       channel.keyStroke().ignore();
       await channel.sendMessage(message);
@@ -6415,7 +6567,7 @@ void main() {
       ).thenAnswer((_) async => EmptyResponse());
       when(
         () => client.updateMessage(any(that: isSameMessageAs(message))),
-      ).thenAnswer((_) async => UpdateMessageResponse()..message = message);
+      ).thenAnswer((_) async => Result.success(UpdateMessageResponse(duration: '0ms', message: message)));
 
       channel.keyStroke().ignore();
       await channel.updateMessage(message);
@@ -6484,7 +6636,7 @@ void main() {
 
       when(
         () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
-      ).thenAnswer((_) async => SendMessageResponse()..message = message);
+      ).thenAnswer((_) async => Result.success(SendMessageResponse(duration: '0ms', message: message)));
 
       await channel.sendMessage(message);
 
@@ -6855,7 +7007,10 @@ void main() {
           ),
         );
 
-        final sendMessageResponse = SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
+        final sendMessageResponse = SendMessageResponse(
+          duration: '0.01ms',
+          message: message.copyWith(state: MessageState.sent),
+        );
 
         when(
           () => client.sendMessage(
@@ -6865,12 +7020,12 @@ void main() {
             skipPush: true,
             skipEnrichUrl: true,
           ),
-        ).thenAnswer((_) async => sendMessageResponse);
+        ).thenAnswer((_) async => Result.success(sendMessageResponse));
 
         final result = await channel.retryMessage(message);
 
-        expect(result, isNotNull);
-        expect(result, isA<SendMessageResponse>());
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull(), isA<SendMessageResponse>());
 
         verify(
           () => client.sendMessage(
@@ -6893,7 +7048,10 @@ void main() {
           ),
         );
 
-        final sendMessageResponse = SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
+        final sendMessageResponse = SendMessageResponse(
+          duration: '0.01ms',
+          message: message.copyWith(state: MessageState.sent),
+        );
 
         when(
           () => client.sendMessage(
@@ -6902,12 +7060,12 @@ void main() {
             channelType,
             skipPush: true,
           ),
-        ).thenAnswer((_) async => sendMessageResponse);
+        ).thenAnswer((_) async => Result.success(sendMessageResponse));
 
         final result = await channel.retryMessage(message);
 
-        expect(result, isNotNull);
-        expect(result, isA<SendMessageResponse>());
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull(), isA<SendMessageResponse>());
 
         verify(
           () => client.sendMessage(
@@ -6929,7 +7087,10 @@ void main() {
           ),
         );
 
-        final sendMessageResponse = SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
+        final sendMessageResponse = SendMessageResponse(
+          duration: '0.01ms',
+          message: message.copyWith(state: MessageState.sent),
+        );
 
         when(
           () => client.sendMessage(
@@ -6938,12 +7099,12 @@ void main() {
             channelType,
             skipEnrichUrl: true,
           ),
-        ).thenAnswer((_) async => sendMessageResponse);
+        ).thenAnswer((_) async => Result.success(sendMessageResponse));
 
         final result = await channel.retryMessage(message);
 
-        expect(result, isNotNull);
-        expect(result, isA<SendMessageResponse>());
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull(), isA<SendMessageResponse>());
 
         verify(
           () => client.sendMessage(
@@ -6965,7 +7126,10 @@ void main() {
           ),
         );
 
-        final sendMessageResponse = SendMessageResponse()..message = message.copyWith(state: MessageState.sent);
+        final sendMessageResponse = SendMessageResponse(
+          duration: '0.01ms',
+          message: message.copyWith(state: MessageState.sent),
+        );
 
         when(
           () => client.sendMessage(
@@ -6973,12 +7137,12 @@ void main() {
             channelId,
             channelType,
           ),
-        ).thenAnswer((_) async => sendMessageResponse);
+        ).thenAnswer((_) async => Result.success(sendMessageResponse));
 
         final result = await channel.retryMessage(message);
 
-        expect(result, isNotNull);
-        expect(result, isA<SendMessageResponse>());
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull(), isA<SendMessageResponse>());
 
         verify(
           () => client.sendMessage(
@@ -6999,7 +7163,10 @@ void main() {
           ),
         );
 
-        final updateMessageResponse = UpdateMessageResponse()..message = message.copyWith(state: MessageState.updated);
+        final updateMessageResponse = UpdateMessageResponse(
+          duration: '0.01ms',
+          message: message.copyWith(state: MessageState.updated),
+        );
 
         when(
           () => client.updateMessage(
@@ -7007,12 +7174,12 @@ void main() {
             skipPush: true,
             skipEnrichUrl: true,
           ),
-        ).thenAnswer((_) async => updateMessageResponse);
+        ).thenAnswer((_) async => Result.success(updateMessageResponse));
 
         final result = await channel.retryMessage(message);
 
-        expect(result, isNotNull);
-        expect(result, isA<UpdateMessageResponse>());
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull(), isA<UpdateMessageResponse>());
 
         verify(
           () => client.updateMessage(
@@ -7032,22 +7199,60 @@ void main() {
           ),
         );
 
-        final updateMessageResponse = UpdateMessageResponse()..message = message.copyWith(state: MessageState.updated);
+        final updateMessageResponse = UpdateMessageResponse(
+          duration: '0.01ms',
+          message: message.copyWith(state: MessageState.updated),
+        );
 
         when(
           () => client.updateMessage(
             any(that: isSameMessageAs(message)),
           ),
-        ).thenAnswer((_) async => updateMessageResponse);
+        ).thenAnswer((_) async => Result.success(updateMessageResponse));
 
         final result = await channel.retryMessage(message);
 
-        expect(result, isNotNull);
-        expect(result, isA<UpdateMessageResponse>());
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull(), isA<UpdateMessageResponse>());
 
         verify(
           () => client.updateMessage(
             any(that: isSameMessageAs(message)),
+          ),
+        ).called(1);
+      });
+
+      test('should call updateMessagePartial with preserved set, unset and skipEnrichUrl parameters', () async {
+        final message = Message(
+          id: 'test-message-id',
+          state: MessageState.partialUpdatingFailed(
+            set: {'text': 'x'},
+            unset: ['pin_expires'],
+            skipEnrichUrl: true,
+          ),
+        );
+
+        when(
+          () => client.updateMessagePartial(
+            message.id,
+            set: {'text': 'x'},
+            unset: ['pin_expires'],
+            skipEnrichUrl: true,
+          ),
+        ).thenAnswer(
+          (_) async => Result.success(UpdateMessagePartialResponse(duration: '0.01ms', message: message)),
+        );
+
+        final result = await channel.retryMessage(message);
+
+        expect(result.getOrNull(), isA<UpdateMessagePartialResponse>());
+
+        verify(
+          () => client.updateMessagePartial(
+            message.id,
+            set: {'text': 'x'},
+            unset: ['pin_expires'],
+            skipEnrichUrl: true,
           ),
         ).called(1);
       });
@@ -7064,12 +7269,12 @@ void main() {
             message.id,
             hard: true,
           ),
-        ).thenAnswer((_) async => EmptyResponse());
+        ).thenAnswer((_) async => Result.success(DeleteMessageResponse(duration: '0.01ms', message: message)));
 
         final result = await channel.retryMessage(message);
 
-        expect(result, isNotNull);
-        expect(result, isA<EmptyResponse>());
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull(), isA<DeleteMessageResponse>());
 
         verify(
           () => client.deleteMessage(
@@ -7090,12 +7295,12 @@ void main() {
           () => client.deleteMessage(
             message.id,
           ),
-        ).thenAnswer((_) async => EmptyResponse());
+        ).thenAnswer((_) async => Result.success(DeleteMessageResponse(duration: '0.01ms', message: message)));
 
         final result = await channel.retryMessage(message);
 
-        expect(result, isNotNull);
-        expect(result, isA<EmptyResponse>());
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull(), isA<DeleteMessageResponse>());
 
         verify(
           () => client.deleteMessage(
@@ -7111,12 +7316,14 @@ void main() {
           state: MessageState.deletingForMeFailed,
         );
 
-        when(() => client.deleteMessageForMe(message.id)).thenAnswer((_) async => EmptyResponse());
+        when(
+          () => client.deleteMessageForMe(message.id),
+        ).thenAnswer((_) async => Result.success(DeleteMessageResponse(duration: '0.01ms', message: message)));
 
         final result = await channel.retryMessage(message);
 
-        expect(result, isNotNull);
-        expect(result, isA<EmptyResponse>());
+        expect(result.isSuccess, isTrue);
+        expect(result.getOrNull(), isA<DeleteMessageResponse>());
 
         verify(() => client.deleteMessageForMe(message.id)).called(1);
       });

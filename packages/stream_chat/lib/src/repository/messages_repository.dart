@@ -5,8 +5,10 @@ import '../core/models/channel_state.dart';
 import '../core/models/draft.dart';
 import '../core/models/draft_message.dart';
 import '../core/models/message.dart';
+import '../core/models/message_delete_scope.dart';
 import '../core/models/reaction.dart';
 import '../core/models/response/create_draft_response.dart';
+import '../core/models/response/delete_message_response.dart';
 import '../core/models/response/delete_reaction_response.dart';
 import '../core/models/response/get_draft_response.dart';
 import '../core/models/response/get_many_messages_response.dart';
@@ -16,8 +18,12 @@ import '../core/models/response/get_replies_response.dart';
 import '../core/models/response/query_drafts_response.dart';
 import '../core/models/response/query_reactions_response.dart';
 import '../core/models/response/search_messages_response.dart';
+import '../core/models/response/send_action_response.dart';
+import '../core/models/response/send_message_response.dart';
 import '../core/models/response/send_reaction_response.dart';
 import '../core/models/response/translate_message_response.dart';
+import '../core/models/response/update_message_partial_response.dart';
+import '../core/models/response/update_message_response.dart';
 import '../core/models/translation_language.dart';
 import 'mapper/drafts_mapper.dart';
 import 'mapper/filter_mapper.dart';
@@ -214,6 +220,107 @@ class MessagesRepository {
     final result = await _api.translateMessage(
       id: messageId,
       translateMessageRequest: api.TranslateMessageRequest(language: language.toRequest()),
+    );
+
+    return result.map((response) => response.toModel());
+  }
+
+  /// Sends [message] to the channel with the id [channelId] and type
+  /// [channelType].
+  ///
+  /// If [skipPush] is true, no push notification is sent.
+  ///
+  /// If [skipEnrichUrl] is true, the links in the text get no preview.
+  Future<Result<SendMessageResponse>> sendMessage(
+    String channelId,
+    String channelType,
+    Message message, {
+    bool skipPush = false,
+    bool skipEnrichUrl = false,
+  }) async {
+    final result = await _api.sendMessage(
+      type: channelType,
+      id: channelId,
+      sendMessageRequest: api.SendMessageRequest(
+        message: message.toRequest(),
+        skipPush: skipPush,
+        skipEnrichUrl: skipEnrichUrl,
+      ),
+    );
+
+    return result.map((response) => response.toModel());
+  }
+
+  /// Replaces the message that has [message]'s id with [message].
+  ///
+  /// If [skipPush] is true, no push notification is sent.
+  ///
+  /// If [skipEnrichUrl] is true, the links in the text get no preview.
+  Future<Result<UpdateMessageResponse>> updateMessage(
+    Message message, {
+    bool skipPush = false,
+    bool skipEnrichUrl = false,
+  }) async {
+    final result = await _api.updateMessage(
+      id: message.id,
+      updateMessageRequest: api.UpdateMessageRequest(
+        message: message.toRequest(),
+        skipPush: skipPush,
+        skipEnrichUrl: skipEnrichUrl,
+      ),
+    );
+
+    return result.map((response) => response.toModel());
+  }
+
+  /// Sets the fields in [set] and removes the fields named in [unset] on the
+  /// message with the id [messageId], leaving every other field as it is.
+  ///
+  /// If [skipEnrichUrl] is true, the links in the text get no preview.
+  Future<Result<UpdateMessagePartialResponse>> updateMessagePartial(
+    String messageId, {
+    Map<String, Object?>? set,
+    List<String>? unset,
+    bool skipEnrichUrl = false,
+  }) async {
+    final result = await _api.updateMessagePartial(
+      id: messageId,
+      updateMessagePartialRequest: api.UpdateMessagePartialRequest(
+        set: set,
+        unset: unset,
+        skipEnrichUrl: skipEnrichUrl,
+      ),
+    );
+
+    return result.map((response) => response.toModel());
+  }
+
+  /// Deletes the message with the id [messageId] within [scope].
+  ///
+  /// The [scope] deletes it for the current user only, or for everyone, softly
+  /// or permanently.
+  Future<Result<DeleteMessageResponse>> deleteMessage(String messageId, MessageDeleteScope scope) async {
+    final result = await _api.deleteMessage(
+      id: messageId,
+      hard: switch (scope) {
+        DeleteForAll(:final hard) => hard,
+        DeleteForMe() => null,
+      },
+      deleteForMe: switch (scope) {
+        DeleteForMe() => true,
+        DeleteForAll() => null,
+      },
+    );
+
+    return result.map((response) => response.toModel());
+  }
+
+  /// Runs the action [formData] describes on the message with the id
+  /// [messageId], such as sending, shuffling or canceling a Giphy command.
+  Future<Result<SendActionResponse>> sendAction(String messageId, Map<String, String> formData) async {
+    final result = await _api.runMessageAction(
+      id: messageId,
+      messageActionRequest: api.MessageActionRequest(formData: formData),
     );
 
     return result.map((response) => response.toModel());
