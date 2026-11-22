@@ -1465,9 +1465,9 @@ GROUPS = [
             - **`custom` is the wire's, verbatim,** and the v1 writers leave out a custom entry named like a key,
               so it cannot overwrite the field. `OwnUser.fromUser` copies the user's fields and no longer reads an
               own user's fields out of the custom data.
-            - **`OwnUser.merge` takes the other user's fields,** as before. A `user.updated` event's user is decoded
-              again as an `OwnUser`, so the privacy settings it carries for the current user replace theirs, as in
-              v10 — a temporary adapter (README) for the WebSocket v2 move to replace.
+            - **`OwnUser.merge` takes the other user's fields,** as before. For the current user, the `user.updated`
+              handler rebuilds the event's user through JSON as an `OwnUser`, so the privacy settings it carries replace
+              theirs, as in v10 — a temporary adapter (README) for the WebSocket v2 move to replace.
             """),
         risks=[
             'A `try`/`catch` around `updateUser`, `updateUsers`, `updateUserPartial` or `updateUsersPartial` still '
