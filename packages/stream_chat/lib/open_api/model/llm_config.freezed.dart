@@ -15,6 +15,8 @@ T _$identity<T>(T value) => value;
 mixin _$LLMConfig {
   String? get appContext;
   bool? get async;
+  List<String>? get contextCustomKeys;
+  String? get customKeysContextDescription;
   bool get enabled;
   List<LLMRule> get rules;
   Map<String, String>? get severityDescriptions;
@@ -32,6 +34,15 @@ mixin _$LLMConfig {
             other is LLMConfig &&
             (identical(other.appContext, appContext) || other.appContext == appContext) &&
             (identical(other.async, async) || other.async == async) &&
+            const DeepCollectionEquality().equals(
+              other.contextCustomKeys,
+              contextCustomKeys,
+            ) &&
+            (identical(
+                  other.customKeysContextDescription,
+                  customKeysContextDescription,
+                ) ||
+                other.customKeysContextDescription == customKeysContextDescription) &&
             (identical(other.enabled, enabled) || other.enabled == enabled) &&
             const DeepCollectionEquality().equals(other.rules, rules) &&
             const DeepCollectionEquality().equals(
@@ -45,6 +56,8 @@ mixin _$LLMConfig {
     runtimeType,
     appContext,
     async,
+    const DeepCollectionEquality().hash(contextCustomKeys),
+    customKeysContextDescription,
     enabled,
     const DeepCollectionEquality().hash(rules),
     const DeepCollectionEquality().hash(severityDescriptions),
@@ -52,7 +65,7 @@ mixin _$LLMConfig {
 
   @override
   String toString() {
-    return 'LLMConfig(appContext: $appContext, async: $async, enabled: $enabled, rules: $rules, severityDescriptions: $severityDescriptions)';
+    return 'LLMConfig(appContext: $appContext, async: $async, contextCustomKeys: $contextCustomKeys, customKeysContextDescription: $customKeysContextDescription, enabled: $enabled, rules: $rules, severityDescriptions: $severityDescriptions)';
   }
 }
 
@@ -63,6 +76,8 @@ abstract mixin class $LLMConfigCopyWith<$Res> {
   $Res call({
     String? appContext,
     bool? async,
+    List<String>? contextCustomKeys,
+    String? customKeysContextDescription,
     bool enabled,
     List<LLMRule> rules,
     Map<String, String>? severityDescriptions,
@@ -83,6 +98,8 @@ class _$LLMConfigCopyWithImpl<$Res> implements $LLMConfigCopyWith<$Res> {
   $Res call({
     Object? appContext = freezed,
     Object? async = freezed,
+    Object? contextCustomKeys = freezed,
+    Object? customKeysContextDescription = freezed,
     Object? enabled = null,
     Object? rules = null,
     Object? severityDescriptions = freezed,
@@ -97,6 +114,14 @@ class _$LLMConfigCopyWithImpl<$Res> implements $LLMConfigCopyWith<$Res> {
             ? _self.async
             : async // ignore: cast_nullable_to_non_nullable
                   as bool?,
+        contextCustomKeys: freezed == contextCustomKeys
+            ? _self.contextCustomKeys
+            : contextCustomKeys // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+        customKeysContextDescription: freezed == customKeysContextDescription
+            ? _self.customKeysContextDescription
+            : customKeysContextDescription // ignore: cast_nullable_to_non_nullable
+                  as String?,
         enabled: null == enabled
             ? _self.enabled
             : enabled // ignore: cast_nullable_to_non_nullable

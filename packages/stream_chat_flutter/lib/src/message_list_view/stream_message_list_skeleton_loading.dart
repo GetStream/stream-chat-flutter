@@ -6,6 +6,8 @@ import 'package:stream_core_flutter/chat.dart';
 /// Displays a skeleton UI with shimmer animation that mimics a chat
 /// conversation with incoming (left-aligned) and outgoing (right-aligned)
 /// message bubbles using [StreamSkeletonLoading] and [StreamSkeletonBox].
+///
+/// Scrolls instead of overflowing when it has less room than it needs.
 class StreamMessageListSkeletonLoading extends StatelessWidget {
   /// Creates a new instance of [StreamMessageListSkeletonLoading].
   const StreamMessageListSkeletonLoading({super.key});
@@ -15,26 +17,22 @@ class StreamMessageListSkeletonLoading extends StatelessWidget {
     final spacing = context.streamSpacing;
 
     return StreamSkeletonLoading(
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          return Padding(
-            padding: EdgeInsets.all(spacing.md),
-            child: Column(
-              children: [
-                _IncomingBubble(),
-                SizedBox(height: spacing.lg),
-                _OutgoingBubble(),
-                SizedBox(height: spacing.lg),
-                _IncomingBubble(),
-                SizedBox(height: spacing.lg),
-                _OutgoingBubble(),
-                SizedBox(height: spacing.lg),
-                _IncomingBubble(),
-                SizedBox(height: spacing.md),
-              ],
-            ),
-          );
-        },
+      child: SingleChildScrollView(
+        padding: .all(spacing.md),
+        child: Column(
+          children: [
+            _IncomingBubble(),
+            SizedBox(height: spacing.lg),
+            _OutgoingBubble(),
+            SizedBox(height: spacing.lg),
+            _IncomingBubble(),
+            SizedBox(height: spacing.lg),
+            _OutgoingBubble(),
+            SizedBox(height: spacing.lg),
+            _IncomingBubble(),
+            SizedBox(height: spacing.md),
+          ],
+        ),
       ),
     );
   }

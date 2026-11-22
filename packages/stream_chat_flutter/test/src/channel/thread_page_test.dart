@@ -33,12 +33,20 @@ void main() {
     expect(_composerController(tester).message.parentId, 'parent-id');
   });
 
-  testWidgets('hides the composer when the parent message is deleted', (tester) async {
+  testWidgets('hides the composer when the deleted parent message has no replies', (tester) async {
     final parent = Message(id: 'parent-id', text: 'Hello world!', type: 'deleted');
 
     await _pumpThreadPage(tester, parent: parent);
 
     expect(find.byType(StreamMessageComposer), findsNothing);
+  });
+
+  testWidgets('shows the composer when the deleted parent message has replies', (tester) async {
+    final parent = Message(id: 'parent-id', text: 'Hello world!', type: 'deleted', replyCount: 1);
+
+    await _pumpThreadPage(tester, parent: parent);
+
+    expect(find.byType(StreamMessageComposer), findsOneWidget);
   });
 
   testWidgets('still shows the thread when the parent message is deleted', (tester) async {
@@ -143,6 +151,18 @@ void main() {
     expect(_backButtonIsFloating(tester), isFalse);
   });
 
+  testWidgets('shows a back button by default', (tester) async {
+    await _pumpThreadPage(tester);
+
+    expect(find.byType(StreamBackButton), findsOneWidget);
+  });
+
+  testWidgets('hides the back button when automaticallyImplyLeading is false', (tester) async {
+    await _pumpThreadPage(tester, automaticallyImplyLeading: false);
+
+    expect(find.byType(StreamBackButton), findsNothing);
+  });
+
   testWidgets('tapping back invokes onBackPressed', (tester) async {
     var backPressed = 0;
     await _pumpThreadPage(tester, onBackPressed: () => backPressed++);
@@ -209,6 +229,7 @@ Future<void> _pumpThreadPage(
   StreamSurfaceStyle surfaceStyle = StreamSurfaceStyle.regular,
   StreamSurfaceStyle? headerSurfaceStyle,
   void Function(Message message)? onViewInChannelTap,
+  bool automaticallyImplyLeading = true,
   VoidCallback? onBackPressed,
   bool pushOntoARoute = false,
 }) async {
@@ -275,6 +296,7 @@ Future<void> _pumpThreadPage(
   final page = StreamThreadPage(
     parent: parentMessage,
     onViewInChannelTap: onViewInChannelTap,
+    automaticallyImplyLeading: automaticallyImplyLeading,
     onBackPressed: onBackPressed,
   );
 

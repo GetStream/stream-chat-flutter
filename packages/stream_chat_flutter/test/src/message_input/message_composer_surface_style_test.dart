@@ -59,6 +59,21 @@ void main() {
     expect(_backgroundFillFinder(tester), findsOneWidget);
   });
 
+  testWidgets('StreamMessageComposer runs the regular top divider under the side insets', (tester) async {
+    await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.regular, leftPadding: 47, rightPadding: 84);
+
+    final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+    final divider = tester.getRect(_topDividerFinder);
+    expect(divider.left, 0);
+    expect(divider.right, moreOrLessEquals(screenWidth));
+  });
+
+  testWidgets('StreamMessageComposer draws a single regular top divider', (tester) async {
+    await _pumpComposer(tester, surfaceStyle: StreamSurfaceStyle.regular);
+
+    expect(_topDividerFinder, findsOneWidget);
+  });
+
   testWidgets('the floating composer does not fill its background', (tester) async {
     // Floating paints a fading backdrop instead of an opaque fill, so the
     // message list stays visible behind the composer.
@@ -150,6 +165,38 @@ void main() {
     // Open: the inset has collapsed.
     expect(insetBottom(), moreOrLessEquals(0));
   });
+
+  testWidgets('StreamMessageComposer keeps its side insets while the attachment picker opens', (tester) async {
+    const leftInset = 47.0;
+    const rightInset = 84.0;
+    await _pumpComposer(
+      tester,
+      surfaceStyle: StreamSurfaceStyle.floating,
+      bottomPadding: 34,
+      leftPadding: leftInset,
+      rightPadding: rightInset,
+    );
+
+    final screenWidth = tester.view.physicalSize.width / tester.view.devicePixelRatio;
+    Rect inputRect() => tester.getRect(find.byType(StreamChatMessageInput));
+
+    final closed = inputRect();
+    expect(closed.left, greaterThanOrEqualTo(leftInset));
+    expect(closed.right, lessThanOrEqualTo(screenWidth - rightInset));
+
+    await tester.tap(_attachmentButtonFinder);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    // Mid-animation: neither edge moves.
+    expect(inputRect().left, moreOrLessEquals(closed.left));
+    expect(inputRect().right, moreOrLessEquals(closed.right));
+
+    await tester.pumpAndSettle();
+
+    expect(inputRect().left, moreOrLessEquals(closed.left));
+    expect(inputRect().right, moreOrLessEquals(closed.right));
+  });
 }
 
 // The composer's attachment (picker) button, in the leading slot.
@@ -167,13 +214,30 @@ StreamSurfaceStyle _resolvedSurfaceStyle(WidgetTester tester) {
 // Finds the opaque background fill the regular composer paints behind itself.
 Finder _backgroundFillFinder(WidgetTester tester) {
   final context = tester.element(find.byType(StreamChatMessageInput));
-  final fill = BoxDecoration(color: context.streamColorScheme.backgroundElevation1);
+  final colorScheme = context.streamColorScheme;
+  final fill = BoxDecoration(
+    color: colorScheme.backgroundElevation1,
+    border: Border(top: BorderSide(color: colorScheme.borderDefault)),
+  );
 
   return find.descendant(
     of: find.byType(StreamMessageComposer),
     matching: find.byWidgetPredicate((widget) => widget is DecoratedBox && widget.decoration == fill),
   );
 }
+
+// Finds every box inside the composer that draws a top border and no bottom
+// border, i.e. a divider rather than an outline.
+final _topDividerFinder = find.descendant(
+  of: find.byType(StreamMessageComposer),
+  matching: find.byWidgetPredicate(
+    (widget) => switch (widget) {
+      DecoratedBox(decoration: BoxDecoration(border: Border(:final top, :final bottom))) =>
+        top != BorderSide.none && bottom == BorderSide.none,
+      _ => false,
+    },
+  ),
+);
 
 // The vertical distance between the bottom of the input pill and the bottom
 // of the composer.
@@ -196,6 +260,8 @@ Future<void> _pumpComposer(
   StreamSurfaceStyle? composerSurfaceStyle,
   bool? enableSafeArea,
   double bottomPadding = 0,
+  double leftPadding = 0,
+  double rightPadding = 0,
   TargetPlatform? platform,
 }) async {
   final originalRecordPlatform = RecordPlatform.instance;
@@ -241,7 +307,9 @@ Future<void> _pumpComposer(
       // brightness the test binding provides are preserved.
       home: Builder(
         builder: (context) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(padding: EdgeInsets.only(bottom: bottomPadding)),
+          data: MediaQuery.of(context).copyWith(
+            padding: EdgeInsets.only(left: leftPadding, right: rightPadding, bottom: bottomPadding),
+          ),
           child: StreamChat(
             client: client,
             themeData: StreamChatThemeData(messageComposerTheme: globalTheme),

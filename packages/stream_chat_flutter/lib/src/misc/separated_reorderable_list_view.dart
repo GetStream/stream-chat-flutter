@@ -43,6 +43,7 @@ class SeparatedReorderableListView extends ReorderableListView {
              return ReorderableDelayedDragStartListener(
                key: listItem.key,
                index: index,
+               enabled: itemCount > 1,
                child: listItem,
              );
            }

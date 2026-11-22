@@ -13,16 +13,26 @@ concurrency:
 
 jobs:
   release:
+    # Publishing waits for a flutter-developers approval, and pub.dev only
+    # accepts uploads from this environment.
+    environment: pub.dev
     permissions:
       contents: write  # Required to creating release
       id-token: write # Required for authentication using OIDC
     runs-on: ubuntu-latest
     steps:
+      - name: 🔑 Mint CI Bot Token
+        id: ci-bot-token
+        uses: actions/create-github-app-token@v3
+        with:
+          client-id: ${{ vars.FLUTTER_CI_BOT_CLIENT_ID }}
+          private-key: ${{ secrets.FLUTTER_CI_BOT_PRIVATE_KEY }}
+
       - name: 📚 Checkout branch
         uses: actions/checkout@v7
         with:
           fetch-depth: 0
-          token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
+          token: ${{ steps.ci-bot-token.outputs.token }}
 
       # Set up the Dart SDK and provision the OIDC token used for publishing.
       - name: 🎯 Setup Dart
@@ -32,7 +42,7 @@ jobs:
         uses: ./.github/actions/setup-flutter
 
       - name: 📦 Install Tools
-        run: flutter pub global activate melos
+        uses: ./.github/actions/install-tools
 
       - name: 🔧 Bootstrap Workspace
         run: melos bootstrap --verbose
@@ -65,4 +75,4 @@ jobs:
           generate_release_notes: true
           tag_name: ${{ steps.extract_version.outputs.tag }}
           prerelease: ${{ steps.extract_version.outputs.prerelease }}
-          token: ${{ secrets.BOT_GITHUB_API_TOKEN }}
+          token: ${{ steps.ci-bot-token.outputs.token }}

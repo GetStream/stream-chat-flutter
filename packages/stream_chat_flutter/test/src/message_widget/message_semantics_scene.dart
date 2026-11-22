@@ -119,10 +119,18 @@ Widget buildMessageScene(
   // [message], leaving the widgets above it untouched — which is what a live
   // channel does to a row on a read receipt or a new message.
   ValueListenable<Message>? rebuildFrom,
+  // Set to false to render a channel whose type has read events turned off.
+  bool readEvents = true,
 }) {
   final client = MockClient();
   final clientState = MockClientState();
-  final channel = MockChannel();
+  final channel = MockChannel(
+    ownCapabilities: [
+      ChannelCapability.sendMessage,
+      ChannelCapability.uploadFile,
+      if (readEvents) ChannelCapability.readEvents,
+    ],
+  );
   final channelState = MockChannelState();
 
   when(() => client.state).thenReturn(clientState);

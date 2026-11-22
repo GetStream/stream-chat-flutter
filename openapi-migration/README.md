@@ -22,7 +22,7 @@ generated operations in scope, the decisions that group has to make, its risks, 
 | [08](08-moderation-and-blocklists.md) | Moderation & Blocklists | 0 | 34 | ☑ |
 | [09](09-users.md) | Users | 3 | 3 | ☐ |
 | [10](10-messages.md) | Messages & Search | 14 | 12 | ☐ |
-| [11](11-channels-and-members.md) | Channels, Members & Sync | 13 | 15 | ☐ |
+| [11](11-channels-and-members.md) | Channels, Members & Sync | 13 | 19 | ☐ |
 | [12](12-uploads-cdn.md) | Uploads (CDN) | 8 | 8 | ☑ |
 | [13](13-push-preferences.md) | Push Preferences | 1 | 1 | ☐ |
 | [14](14-banned-users.md) | Banned Users — split out of 08 | 1 | 1 | ☐ |
@@ -141,7 +141,7 @@ includes a named response that carries only `duration` today, such as `HideChann
    ours.
 6. **Request enums are hand-written extension types** over the wire string, per `STYLE_GUIDE.md` § Prefer
    extension types over enums for server-defined values, and mapped to the generated type in the repository
-   (`PushProvider` → `CreateDeviceRequestPushProvider`).
+   (`PushProvider` → `PushProviderName`).
 7. **A plain model embedded in a json_serializable parent gets a temporary converter.** Some parents still decode
    v1 REST or WebSocket JSON with json_serializable; their field gets a `JsonConverter` — or a decode-only
    `fromJson` function when the parent never writes the field — in
@@ -184,15 +184,15 @@ includes a named response that carries only `duration` today, such as `HideChann
 | `PollV1JsonConverter` | `Message.poll`, `DraftMessage.poll`, `Event.poll` | WebSocket v2 (no group) |
 | `PollVoteV1JsonConverter` | `Event.pollVote` | WebSocket v2 (no group) |
 | `ThreadV1JsonConverter` | `Event.thread` | WebSocket v2 (no group) |
-| `Event.fromJson`'s `user.updated` re-decode | `Event.user`, decoded as a `User` and again as an `OwnUser` | WebSocket v2 (no group) |
+| The `user.updated` handler's JSON round trip | `OwnUser.privacySettings`, read out of `Event.user.custom` | WebSocket v2 (no group) |
 | `users_mapper.dart` (kept, re-pointed) | today's `User`, which still reads and writes JSON | [09](09-users.md) |
 | `channels_mapper.dart` (kept, re-pointed) | today's `ChannelModel`, `ChannelConfig` and `Member`, which still read and write JSON | [11](11-channels-and-members.md) |
 | `messages_mapper.dart`, `attachments_mapper.dart`, `reactions_mapper.dart`, `locations_mapper.dart`, `drafts_mapper.dart` (kept, re-pointed) | today's `Message`, `Attachment`, `Reaction`, `Location`, `Draft` and `DraftMessage`, which still read and write JSON | [10](10-messages.md) |
 
-The `user.updated` re-decode keeps the privacy settings the current user's copy of the event carries, which `User`
-does not model, so the handler can apply them as v10 did. When the WebSocket moves to v2, map the generated
-`UserUpdatedEvent.user` (`UserResponsePrivacyFields`) onto the current user once, and make the handler apply only
-what that type carries: it never fills `blocked_user_ids` and has no shadow ban or ban expiry, which the handler
+The `user.updated` round trip reads the privacy settings the current user's copy of the event carries, which `User` does
+not model and leaves in `custom`, so the handler can apply them as v10 did. When the WebSocket moves to v2, map the
+generated `UserUpdatedEvent.user` (`UserResponsePrivacyFields`) onto the current user once, and make the handler apply
+only what that type carries: it never fills `blocked_user_ids` and has no shadow ban or ban expiry, which the handler
 wipes or resets today, as v10 did.
 
 How v1 JSON decodes `User` once it becomes a plain model is decided in [01-foundation](01-foundation.md): until

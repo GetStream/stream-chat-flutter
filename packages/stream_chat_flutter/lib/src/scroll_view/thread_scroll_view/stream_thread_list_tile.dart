@@ -18,11 +18,13 @@ class StreamThreadListTile extends StatelessWidget {
     User? currentUser,
     GestureTapCallback? onTap,
     GestureLongPressCallback? onLongPress,
+    bool selected = false,
   }) : props = StreamThreadListTileProps(
          thread: thread,
          currentUser: currentUser,
          onTap: onTap,
          onLongPress: onLongPress,
+         selected: selected,
        );
 
   /// Creates a thread list tile from pre-built [props].
@@ -33,6 +35,26 @@ class StreamThreadListTile extends StatelessWidget {
 
   /// The properties configuring this thread list tile.
   final StreamThreadListTileProps props;
+
+  /// Creates a copy of this tile but with the given fields replaced with
+  /// the new values.
+  StreamThreadListTile copyWith({
+    Key? key,
+    Thread? thread,
+    User? currentUser,
+    GestureTapCallback? onTap,
+    GestureLongPressCallback? onLongPress,
+    bool? selected,
+  }) {
+    return StreamThreadListTile(
+      key: key ?? this.key,
+      thread: thread ?? props.thread,
+      currentUser: currentUser ?? props.currentUser,
+      onTap: onTap ?? props.onTap,
+      onLongPress: onLongPress ?? props.onLongPress,
+      selected: selected ?? props.selected,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +71,7 @@ class StreamThreadListTileProps {
     this.currentUser,
     this.onTap,
     this.onLongPress,
+    this.selected = false,
   });
 
   /// The thread displayed by the tile.
@@ -62,6 +85,11 @@ class StreamThreadListTileProps {
 
   /// Called when the tile is long pressed.
   final GestureLongPressCallback? onLongPress;
+
+  /// Whether the tile is highlighted as the current selection.
+  ///
+  /// Defaults to `false`.
+  final bool selected;
 }
 
 class _DefaultStreamThreadListTile extends StatelessWidget {
@@ -74,6 +102,7 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
+    final colorScheme = context.streamColorScheme;
 
     final theme = StreamThreadListTileTheme.of(context);
     final defaults = _StreamThreadListTileThemeDefaults(context);
@@ -82,6 +111,8 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
     final effectivePadding = theme.padding ?? defaults.padding;
     final effectiveChannelNameStyle = theme.threadChannelNameStyle ?? defaults.threadChannelNameStyle;
     final effectiveReplyToMessageStyle = theme.threadReplyToMessageStyle ?? defaults.threadReplyToMessageStyle;
+    final basePreviewTextTheme = defaults.messagePreviewTextTheme.merge(StreamMessagePreviewTextTheme.of(context));
+    final effectiveMessagePreviewTextTheme = basePreviewTextTheme.merge(theme.messagePreviewTextTheme);
     final effectiveLatestReplyMessageStyle =
         theme.threadLatestReplyMessageStyle ?? defaults.threadLatestReplyMessageStyle;
     final effectiveReplyCountStyle = theme.threadReplyCountStyle ?? defaults.threadReplyCountStyle;
@@ -110,11 +141,15 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
       child: StreamListTileTheme(
         data: StreamListTileThemeData(
           contentPadding: effectivePadding,
-          backgroundColor: .all(effectiveBackgroundColor),
+          backgroundColor: .resolveWith((states) {
+            if (!states.contains(WidgetState.selected)) return effectiveBackgroundColor;
+            return .alphaBlend(colorScheme.backgroundSelected, effectiveBackgroundColor);
+          }),
         ),
         child: StreamListTileContainer(
           onTap: props.onTap,
           onLongPress: props.onLongPress,
+          selected: props.selected,
           child: Row(
             spacing: spacing.sm,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -148,12 +183,15 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: spacing.xxs),
-                    ThreadRootMessagePreview(
-                      parentMessage: parentMessage,
-                      channel: channel,
-                      language: language,
-                      style: effectiveReplyToMessageStyle,
-                      emptyStyle: effectiveLatestReplyMessageStyle,
+                    StreamMessagePreviewTextTheme(
+                      data: effectiveMessagePreviewTextTheme,
+                      child: ThreadRootMessagePreview(
+                        parentMessage: parentMessage,
+                        channel: channel,
+                        language: language,
+                        style: effectiveReplyToMessageStyle,
+                        emptyStyle: effectiveLatestReplyMessageStyle,
+                      ),
                     ),
                     SizedBox(height: spacing.xs),
                     ThreadFooter(
@@ -353,10 +391,12 @@ class ThreadFooter extends StatelessWidget {
           context.translations.threadReplyCountText(replyCount),
           style: replyCountStyle,
         ),
-        StreamTimestamp(
-          date: latestActivityAt.toLocal(),
-          style: timestampStyle,
-          formatter: timestampFormatter ?? formatRecentDateTime,
+        Flexible(
+          child: StreamTimestamp(
+            date: latestActivityAt.toLocal(),
+            style: timestampStyle,
+            formatter: timestampFormatter ?? formatRecentDateTime,
+          ),
         ),
       ],
     );
@@ -382,7 +422,13 @@ class _StreamThreadListTileThemeDefaults extends StreamThreadListTileThemeData {
   TextStyle get threadChannelNameStyle => _textTheme.captionEmphasis.copyWith(color: _colorScheme.textTertiary);
 
   @override
-  TextStyle get threadReplyToMessageStyle => _textTheme.bodyDefault;
+  TextStyle get threadReplyToMessageStyle => _textTheme.bodyDefault.copyWith(color: _colorScheme.textPrimary);
+
+  @override
+  StreamMessagePreviewTextThemeData get messagePreviewTextTheme => StreamMessagePreviewTextThemeData(
+    senderPrefixStyle: TextStyle(color: _colorScheme.textSecondary),
+    deletedContentStyle: TextStyle(color: _colorScheme.textSecondary),
+  );
 
   @override
   TextStyle get threadLatestReplyMessageStyle => _textTheme.bodyDefault;

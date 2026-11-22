@@ -18,7 +18,7 @@ mixin _$DeviceResponse {
   String? get disabledReason;
   String? get hardwareId;
   String get id;
-  String get pushProvider;
+  PushProviderName get pushProvider;
   String? get pushProviderName;
   String get userId;
   bool? get voip;
@@ -81,7 +81,7 @@ abstract mixin class $DeviceResponseCopyWith<$Res> {
     String? disabledReason,
     String? hardwareId,
     String id,
-    String pushProvider,
+    PushProviderName pushProvider,
     String? pushProviderName,
     String userId,
     bool? voip,
@@ -135,7 +135,7 @@ class _$DeviceResponseCopyWithImpl<$Res> implements $DeviceResponseCopyWith<$Res
         pushProvider: null == pushProvider
             ? _self.pushProvider
             : pushProvider // ignore: cast_nullable_to_non_nullable
-                  as String,
+                  as PushProviderName,
         pushProviderName: freezed == pushProviderName
             ? _self.pushProviderName
             : pushProviderName // ignore: cast_nullable_to_non_nullable

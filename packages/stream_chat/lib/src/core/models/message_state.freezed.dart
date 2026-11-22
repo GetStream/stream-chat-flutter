@@ -365,6 +365,8 @@ OutgoingState _$OutgoingStateFromJson(Map<String, dynamic> json) {
       return Sending.fromJson(json);
     case 'updating':
       return Updating.fromJson(json);
+    case 'partialUpdating':
+      return PartialUpdating.fromJson(json);
     case 'deleting':
       return Deleting.fromJson(json);
 
@@ -406,11 +408,26 @@ class $OutgoingStateCopyWith<$Res> {
 /// @nodoc
 @JsonSerializable()
 class Sending implements OutgoingState {
-  const Sending({final String? $type}) : $type = $type ?? 'sending';
+  const Sending({
+    this.skipPush = false,
+    this.skipEnrichUrl = false,
+    final String? $type,
+  }) : $type = $type ?? 'sending';
   factory Sending.fromJson(Map<String, dynamic> json) => _$SendingFromJson(json);
+
+  @JsonKey()
+  final bool skipPush;
+  @JsonKey()
+  final bool skipEnrichUrl;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
+
+  /// Create a copy of OutgoingState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $SendingCopyWith<Sending> get copyWith => _$SendingCopyWithImpl<Sending>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
@@ -419,22 +436,28 @@ class Sending implements OutgoingState {
 
   @override
   bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType && other is Sending);
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is Sending &&
+            (identical(other.skipPush, skipPush) || other.skipPush == skipPush) &&
+            (identical(other.skipEnrichUrl, skipEnrichUrl) || other.skipEnrichUrl == skipEnrichUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => Object.hash(runtimeType, skipPush, skipEnrichUrl);
 
   @override
   String toString() {
-    return 'OutgoingState.sending()';
+    return 'OutgoingState.sending(skipPush: $skipPush, skipEnrichUrl: $skipEnrichUrl)';
   }
 }
 
 /// @nodoc
-class $SendingCopyWith<$Res> implements $OutgoingStateCopyWith<$Res> {
-  $SendingCopyWith(Sending _, $Res Function(Sending) __);
+abstract mixin class $SendingCopyWith<$Res> implements $OutgoingStateCopyWith<$Res> {
+  factory $SendingCopyWith(Sending value, $Res Function(Sending) _then) = _$SendingCopyWithImpl;
+  @useResult
+  $Res call({bool skipPush, bool skipEnrichUrl});
 }
 
 /// @nodoc
@@ -443,16 +466,49 @@ class _$SendingCopyWithImpl<$Res> implements $SendingCopyWith<$Res> {
 
   final Sending _self;
   final $Res Function(Sending) _then;
+
+  /// Create a copy of OutgoingState
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({Object? skipPush = null, Object? skipEnrichUrl = null}) {
+    return _then(
+      Sending(
+        skipPush: null == skipPush
+            ? _self.skipPush
+            : skipPush // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        skipEnrichUrl: null == skipEnrichUrl
+            ? _self.skipEnrichUrl
+            : skipEnrichUrl // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
+  }
 }
 
 /// @nodoc
 @JsonSerializable()
 class Updating implements OutgoingState {
-  const Updating({final String? $type}) : $type = $type ?? 'updating';
+  const Updating({
+    this.skipPush = false,
+    this.skipEnrichUrl = false,
+    final String? $type,
+  }) : $type = $type ?? 'updating';
   factory Updating.fromJson(Map<String, dynamic> json) => _$UpdatingFromJson(json);
+
+  @JsonKey()
+  final bool skipPush;
+  @JsonKey()
+  final bool skipEnrichUrl;
 
   @JsonKey(name: 'runtimeType')
   final String $type;
+
+  /// Create a copy of OutgoingState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $UpdatingCopyWith<Updating> get copyWith => _$UpdatingCopyWithImpl<Updating>(this, _$identity);
 
   @override
   Map<String, dynamic> toJson() {
@@ -461,22 +517,28 @@ class Updating implements OutgoingState {
 
   @override
   bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType && other is Updating);
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is Updating &&
+            (identical(other.skipPush, skipPush) || other.skipPush == skipPush) &&
+            (identical(other.skipEnrichUrl, skipEnrichUrl) || other.skipEnrichUrl == skipEnrichUrl));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => runtimeType.hashCode;
+  int get hashCode => Object.hash(runtimeType, skipPush, skipEnrichUrl);
 
   @override
   String toString() {
-    return 'OutgoingState.updating()';
+    return 'OutgoingState.updating(skipPush: $skipPush, skipEnrichUrl: $skipEnrichUrl)';
   }
 }
 
 /// @nodoc
-class $UpdatingCopyWith<$Res> implements $OutgoingStateCopyWith<$Res> {
-  $UpdatingCopyWith(Updating _, $Res Function(Updating) __);
+abstract mixin class $UpdatingCopyWith<$Res> implements $OutgoingStateCopyWith<$Res> {
+  factory $UpdatingCopyWith(Updating value, $Res Function(Updating) _then) = _$UpdatingCopyWithImpl;
+  @useResult
+  $Res call({bool skipPush, bool skipEnrichUrl});
 }
 
 /// @nodoc
@@ -485,6 +547,146 @@ class _$UpdatingCopyWithImpl<$Res> implements $UpdatingCopyWith<$Res> {
 
   final Updating _self;
   final $Res Function(Updating) _then;
+
+  /// Create a copy of OutgoingState
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({Object? skipPush = null, Object? skipEnrichUrl = null}) {
+    return _then(
+      Updating(
+        skipPush: null == skipPush
+            ? _self.skipPush
+            : skipPush // ignore: cast_nullable_to_non_nullable
+                  as bool,
+        skipEnrichUrl: null == skipEnrichUrl
+            ? _self.skipEnrichUrl
+            : skipEnrichUrl // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class PartialUpdating implements OutgoingState {
+  const PartialUpdating({
+    final Map<String, Object?>? set,
+    final List<String>? unset,
+    this.skipEnrichUrl = false,
+    final String? $type,
+  }) : _set = set,
+       _unset = unset,
+       $type = $type ?? 'partialUpdating';
+  factory PartialUpdating.fromJson(Map<String, dynamic> json) => _$PartialUpdatingFromJson(json);
+
+  final Map<String, Object?>? _set;
+  Map<String, Object?>? get set {
+    final value = _set;
+    if (value == null) return null;
+    if (_set is EqualUnmodifiableMapView) return _set;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableMapView(value);
+  }
+
+  final List<String>? _unset;
+  List<String>? get unset {
+    final value = _unset;
+    if (value == null) return null;
+    if (_unset is EqualUnmodifiableListView) return _unset;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(value);
+  }
+
+  @JsonKey()
+  final bool skipEnrichUrl;
+
+  @JsonKey(name: 'runtimeType')
+  final String $type;
+
+  /// Create a copy of OutgoingState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $PartialUpdatingCopyWith<PartialUpdating> get copyWith =>
+      _$PartialUpdatingCopyWithImpl<PartialUpdating>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$PartialUpdatingToJson(this);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is PartialUpdating &&
+            const DeepCollectionEquality().equals(other._set, _set) &&
+            const DeepCollectionEquality().equals(other._unset, _unset) &&
+            (identical(other.skipEnrichUrl, skipEnrichUrl) || other.skipEnrichUrl == skipEnrichUrl));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(_set),
+    const DeepCollectionEquality().hash(_unset),
+    skipEnrichUrl,
+  );
+
+  @override
+  String toString() {
+    return 'OutgoingState.partialUpdating(set: $set, unset: $unset, skipEnrichUrl: $skipEnrichUrl)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $PartialUpdatingCopyWith<$Res> implements $OutgoingStateCopyWith<$Res> {
+  factory $PartialUpdatingCopyWith(
+    PartialUpdating value,
+    $Res Function(PartialUpdating) _then,
+  ) = _$PartialUpdatingCopyWithImpl;
+  @useResult
+  $Res call({
+    Map<String, Object?>? set,
+    List<String>? unset,
+    bool skipEnrichUrl,
+  });
+}
+
+/// @nodoc
+class _$PartialUpdatingCopyWithImpl<$Res> implements $PartialUpdatingCopyWith<$Res> {
+  _$PartialUpdatingCopyWithImpl(this._self, this._then);
+
+  final PartialUpdating _self;
+  final $Res Function(PartialUpdating) _then;
+
+  /// Create a copy of OutgoingState
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? set = freezed,
+    Object? unset = freezed,
+    Object? skipEnrichUrl = null,
+  }) {
+    return _then(
+      PartialUpdating(
+        set: freezed == set
+            ? _self._set
+            : set // ignore: cast_nullable_to_non_nullable
+                  as Map<String, Object?>?,
+        unset: freezed == unset
+            ? _self._unset
+            : unset // ignore: cast_nullable_to_non_nullable
+                  as List<String>?,
+        skipEnrichUrl: null == skipEnrichUrl
+            ? _self.skipEnrichUrl
+            : skipEnrichUrl // ignore: cast_nullable_to_non_nullable
+                  as bool,
+      ),
+    );
+  }
 }
 
 /// @nodoc

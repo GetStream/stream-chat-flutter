@@ -11,11 +11,6 @@ subprojects {
 
     afterEvaluate { project ->
         if (project.hasProperty("android")) {
-            // Set the namespace for all subprojects if not set
-            if (android.namespace == null) {
-                android.namespace = project.group
-            }
-
             // Pin a floor of 36 so AAR metadata checks pass for transitive
             // dependencies that require it until Flutter's bundled
             // compileSdkVersion catches up.

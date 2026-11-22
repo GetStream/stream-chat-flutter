@@ -13,6 +13,10 @@ import 'channel/channel.dart';
 /// has received a message.
 ///
 /// The returned [Result] reports whether the receipts were sent.
+///
+/// See also:
+///
+///  * [StreamChatClient.markChannelsDelivered], which matches this signature.
 typedef MarkChannelsDelivered =
     Future<Result<void>> Function(
       Iterable<MessageDelivery> deliveries,
@@ -43,6 +47,7 @@ class ChannelDeliveryReporter {
   /// The callback invoked to send delivery receipts.
   ///
   /// Receives delivery receipts acknowledging that messages were received.
+  ///
   /// When it returns a failure, or throws, the receipts are kept for a later
   /// batch.
   final MarkChannelsDelivered onMarkChannelsDelivered;

@@ -55,6 +55,9 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
     json['reminder'],
     const MessageReminderV1JsonConverter().fromJson,
   ),
+  scheduledMessage: json['scheduled_message'] == null
+      ? null
+      : ScheduledMessage.fromJson(json['scheduled_message'] as Map<String, dynamic>),
   pushPreference: json['push_preference'] == null
       ? null
       : PushPreference.fromJson(json['push_preference'] as Map<String, dynamic>),

@@ -37,6 +37,7 @@ void main() {
     client = MockStreamChatClient();
     state = MockChannelClientState();
 
+    when(() => state.typingEvents).thenReturn({});
     when(() => client.state).thenReturn(FakeClientState());
 
     // A real channel (without an attached state) so that the capability and
@@ -99,6 +100,53 @@ void main() {
       verifyNever(() => state.updateChannelState(any()));
     });
 
+    test("onMessageNew clears its author's typing in the same channel", () {
+      final sentAt = DateTime.utc(2026, 10, 13, 12);
+      final typing = Event(
+        type: EventType.typingStart,
+        user: otherUser,
+        createdAt: sentAt.subtract(const Duration(seconds: 2)),
+      );
+      when(() => state.typingEvents).thenReturn({otherUser: typing});
+
+      mutations.onMessageNew(message.copyWith(createdAt: sentAt));
+
+      expect(removeTypingEventCalls, [otherUser]);
+    });
+
+    test("onMessageNew keeps its author's typing in a thread", () {
+      final threadTyping = Event(type: EventType.typingStart, user: otherUser, parentId: 'parent-id');
+      when(() => state.typingEvents).thenReturn({otherUser: threadTyping});
+
+      mutations.onMessageNew(message);
+
+      expect(removeTypingEventCalls, isEmpty);
+    });
+
+    test("onMessageNew keeps its author's typing that started after the message", () {
+      final sentAt = DateTime.utc(2026, 10, 13, 12);
+      final sentMessage = message.copyWith(createdAt: sentAt);
+      final nextTyping = Event(
+        type: EventType.typingStart,
+        user: otherUser,
+        createdAt: sentAt.add(const Duration(milliseconds: 200)),
+      );
+      when(() => state.typingEvents).thenReturn({otherUser: nextTyping});
+
+      mutations.onMessageNew(sentMessage);
+
+      expect(removeTypingEventCalls, isEmpty);
+    });
+
+    test('onMessageNew keeps other users typing', () {
+      final someoneElse = User(id: 'someone-else');
+      when(() => state.typingEvents).thenReturn({someoneElse: Event(type: EventType.typingStart, user: someoneElse)});
+
+      mutations.onMessageNew(message);
+
+      expect(removeTypingEventCalls, isEmpty);
+    });
+
     test('onMessageNew also applies the watcher count when provided', () {
       stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
 
@@ -125,22 +173,64 @@ void main() {
       verify(() => state.deleteMessage(message, hardDelete: true)).called(1);
     });
 
-    test('onMessageDeleted never decrements the unread count below zero', () {
+    test('onMessageDeleted leaves a zero unread count untouched', () {
       client.isLocalUnreadCountEnabled = true;
       when(() => state.unreadCount).thenReturn(0);
 
       mutations.onMessageDeleted(message, hardDelete: true);
 
-      verify(() => state.unreadCount = 0).called(1);
+      verifyNever(() => state.unreadCount = any());
     });
 
-    test('onMessageDeleted skips the unread count on server-driven channels', () {
+    test('onMessageDeleted skips the unread count on a channel without read receipts', () {
       client.isLocalUnreadCountEnabled = false;
 
       mutations.onMessageDeleted(message, hardDelete: true);
 
       verifyNever(() => state.unreadCount = any());
       verify(() => state.deleteMessage(message, hardDelete: true)).called(1);
+    });
+
+    test("onMessageUpdated clears the editor's typing in the same channel", () {
+      final editedAt = DateTime.utc(2026, 10, 13, 12);
+      final typing = Event(
+        type: EventType.typingStart,
+        user: otherUser,
+        createdAt: editedAt.subtract(const Duration(seconds: 2)),
+      );
+      when(() => state.typingEvents).thenReturn({otherUser: typing});
+
+      mutations.onMessageUpdated(message.copyWith(messageTextUpdatedAt: editedAt), editor: otherUser);
+
+      expect(removeTypingEventCalls, [otherUser]);
+    });
+
+    test("onMessageUpdated keeps the editor's typing when the text was not edited", () {
+      final updatedAt = DateTime.utc(2026, 10, 13, 12);
+      final typing = Event(
+        type: EventType.typingStart,
+        user: otherUser,
+        createdAt: updatedAt.subtract(const Duration(seconds: 2)),
+      );
+      when(() => state.typingEvents).thenReturn({otherUser: typing});
+
+      mutations.onMessageUpdated(message.copyWith(updatedAt: updatedAt), editor: otherUser);
+
+      expect(removeTypingEventCalls, isEmpty);
+    });
+
+    test("onMessageUpdated keeps the editor's typing that started after the edit", () {
+      final editedAt = DateTime.utc(2026, 10, 13, 12);
+      final nextTyping = Event(
+        type: EventType.typingStart,
+        user: otherUser,
+        createdAt: editedAt.add(const Duration(milliseconds: 200)),
+      );
+      when(() => state.typingEvents).thenReturn({otherUser: nextTyping});
+
+      mutations.onMessageUpdated(message.copyWith(messageTextUpdatedAt: editedAt), editor: otherUser);
+
+      expect(removeTypingEventCalls, isEmpty);
     });
 
     test('onMessageUpdated applies the message without upserting', () {
@@ -645,20 +735,96 @@ void main() {
 
   group('channel', () {
     test('onChannelTruncated truncates before applying the system message', () {
+      final truncatedAt = DateTime.utc(2026, 10, 29, 12);
       final systemMessage = Message(id: 'system-id');
+      stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
 
-      mutations.onChannelTruncated(message: systemMessage);
+      mutations.onChannelTruncated(
+        ChannelModel(cid: 'messaging:test', truncatedAt: truncatedAt),
+        cutoff: truncatedAt,
+        message: systemMessage,
+      );
 
       verifyInOrder([
-        () => state.truncate(),
+        () => state.truncateBefore(truncatedAt, truncatedAt: truncatedAt),
         () => state.updateMessage(systemMessage),
       ]);
     });
 
-    test('onChannelTruncated only truncates without a system message', () {
-      mutations.onChannelTruncated();
+    test("onChannelTruncated truncates at the channel's truncatedAt", () {
+      final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+      stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
 
-      verify(() => state.truncate()).called(1);
+      mutations.onChannelTruncated(
+        ChannelModel(cid: 'messaging:test', truncatedAt: truncatedAt),
+        cutoff: truncatedAt,
+      );
+
+      verify(() => state.truncateBefore(truncatedAt, truncatedAt: truncatedAt)).called(1);
+    });
+
+    test('onChannelTruncated cuts at the cutoff without recording it as the truncation time', () {
+      final cutoff = DateTime.utc(2026, 10, 29, 12);
+      stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
+
+      mutations.onChannelTruncated(ChannelModel(cid: 'messaging:test'), cutoff: cutoff);
+
+      verify(() => state.truncateBefore(cutoff)).called(1);
+    });
+
+    test('onChannelTruncated takes the last message time before applying the system message', () {
+      stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
+      final systemMessage = Message(id: 'system-id');
+
+      mutations.onChannelTruncated(
+        ChannelModel(cid: 'messaging:test', lastMessageAt: DateTime.utc(2026, 10, 29, 13)),
+        cutoff: DateTime.utc(2026, 10, 29, 12),
+        message: systemMessage,
+      );
+
+      verifyInOrder([
+        () => state.updateChannelState(any()),
+        () => state.updateMessage(systemMessage),
+      ]);
+    });
+
+    test('onChannelTruncated skips an unchanged last message time', () {
+      final lastMessageAt = DateTime.utc(2026, 10, 29, 13);
+      stubChannelState(
+        ChannelState(
+          channel: ChannelModel(cid: 'messaging:test', lastMessageAt: lastMessageAt),
+        ),
+      );
+
+      mutations.onChannelTruncated(
+        ChannelModel(cid: 'messaging:test', lastMessageAt: lastMessageAt),
+        cutoff: DateTime.utc(2026, 10, 29, 12),
+      );
+
+      verifyNever(() => state.updateChannelState(any()));
+    });
+
+    test("onChannelTruncated takes the channel's last message time", () {
+      final lastMessageAt = DateTime.utc(2026, 10, 29, 13);
+      stubChannelState(
+        ChannelState(
+          channel: ChannelModel(cid: 'messaging:test', lastMessageAt: DateTime.utc(2026, 10, 29, 11)),
+        ),
+      );
+
+      mutations.onChannelTruncated(
+        ChannelModel(cid: 'messaging:test', lastMessageAt: lastMessageAt),
+        cutoff: DateTime.utc(2026, 10, 29, 12),
+      );
+
+      expect(capturedChannelState().channel?.lastMessageAt, lastMessageAt);
+    });
+
+    test('onChannelTruncated applies no message without a system message', () {
+      stubChannelState(ChannelState(channel: ChannelModel(cid: 'messaging:test')));
+
+      mutations.onChannelTruncated(ChannelModel(cid: 'messaging:test'), cutoff: DateTime.utc(2026, 10, 29, 12));
+
       verifyNever(() => state.updateMessage(any()));
     });
 

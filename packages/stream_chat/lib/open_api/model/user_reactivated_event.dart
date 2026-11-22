@@ -3,20 +3,12 @@
 // coverage:ignore-file
 // ignore_for_file: unused_import, unnecessary_import, prefer_single_quotes, require_trailing_commas, unnecessary_raw_strings, public_member_api_docs, sort_constructors_first, provide_deprecation_message
 
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:json_annotation/json_annotation.dart';
-import 'package:meta/meta.dart';
-import 'package:stream_core/stream_core.dart' as core;
-
-import '../models.dart';
-
-part 'user_reactivated_event.g.dart';
-part 'user_reactivated_event.freezed.dart';
+part of 'events.dart';
 
 @freezed
 @immutable
 @JsonSerializable()
-class UserReactivatedEvent extends core.WsEvent with _$UserReactivatedEvent {
+class UserReactivatedEvent extends core.WsEvent with _$UserReactivatedEvent implements WSClientEvent, WSEvent {
   const UserReactivatedEvent({
     required this.createdAt,
     this.createdBy,
@@ -52,6 +44,7 @@ class UserReactivatedEvent extends core.WsEvent with _$UserReactivatedEvent {
   @JsonKey(name: 'user')
   final UserResponseCommonFields user;
 
+  @override
   Map<String, dynamic> toJson() => _$UserReactivatedEventToJson(this);
 
   static UserReactivatedEvent fromJson(Map<String, dynamic> json) => _$UserReactivatedEventFromJson(json);

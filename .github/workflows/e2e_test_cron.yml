@@ -15,22 +15,95 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.ref }}:${{ inputs.mock_server_branch || 'main' }}
   cancel-in-progress: true
 
 env:
-  mock_server_branch: ${{ github.event.inputs.mock_server_branch || 'main' }}
+  mock_server_branch: ${{ inputs.mock_server_branch || 'main' }}
   ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 jobs:
+  # Saves the AVD with a quick-boot snapshot for the e2e_test.yml batches. Here, because a cache
+  # saved by a pull request is visible to that pull request alone, and one saved on master to all.
+  android_avd:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/enable-kvm
+
+      - uses: ./.github/actions/android-sdk-packages
+        id: sdk
+
+      - name: Look up the AVD
+        id: avd
+        uses: actions/cache/restore@v5
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: ${{ steps.sdk.outputs.avd-key }}
+          lookup-only: true
+
+      - name: Create the AVD and its snapshot
+        if: steps.avd.outputs.cache-hit != 'true'
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        with:
+          api-level: ${{ steps.sdk.outputs.api-level }}
+          target: ${{ steps.sdk.outputs.target }}
+          arch: x86_64
+          profile: ${{ steps.sdk.outputs.profile }}
+          cores: ${{ steps.sdk.outputs.cores }}
+          force-avd-creation: false
+          emulator-options: ${{ steps.sdk.outputs.emulator-options }}
+          disable-animations: true
+          # Lets dexopt finish, so the snapshot holds a settled system.
+          script: |
+            "$ANDROID_HOME/platform-tools/adb" -s emulator-5554 shell cmd package bg-dexopt-job > /dev/null 2>&1 || true
+            sleep 30
+
+      # adb emu kill returns before the snapshot is written. On timeout, nothing is saved.
+      - name: Wait for the emulator to save the snapshot
+        if: steps.avd.outputs.cache-hit != 'true'
+        timeout-minutes: 3
+        run: while pgrep -f qemu-system > /dev/null; do sleep 1; done
+
+      - name: Save the AVD
+        if: steps.avd.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v5
+        with:
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: ${{ steps.sdk.outputs.avd-key }}
+
   android:
     runs-on: ubuntu-latest
-    timeout-minutes: 120
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix:
-        api-level: [34, 31, 28]
+        # Coverage runs every test in its own app process for the map that selects e2e tests on
+        # pull requests. That takes hours, longer than a hosted runner lasts under the emulator's
+        # load, so its tests are split across batches. coverage_map's batch_count must match.
+        # Coverage is only collected against the main mock server.
+        include: |-
+          ${{ fromJson(
+            (inputs.mock_server_branch || 'main') != 'main' && '[
+              { "api-level": 36, "batch": 0, "batch_count": 1 }
+            ]'
+            || '[
+              { "api-level": 36, "coverage": true, "batch": 0, "batch_count": 4 },
+              { "api-level": 36, "coverage": true, "batch": 1, "batch_count": 4 },
+              { "api-level": 36, "coverage": true, "batch": 2, "batch_count": 4 },
+              { "api-level": 36, "coverage": true, "batch": 3, "batch_count": 4 },
+              { "api-level": 34, "batch": 0, "batch_count": 1 },
+              { "api-level": 31, "batch": 0, "batch_count": 1 },
+              { "api-level": 28, "batch": 0, "batch_count": 1 }
+            ]'
+          ) }}
     steps:
       - uses: actions/checkout@v7
 
@@ -39,69 +112,139 @@ jobs:
       - uses: ./.github/actions/cache-gradle
 
       - uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: e2e_app
 
       - uses: ./.github/actions/setup-flutter
 
+      - uses: ./.github/actions/install-android-ndk
+
       - uses: ./.github/actions/enable-kvm
 
-      - name: Use Firebase stubs
-        run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
+      # The emulator, Gradle and flutter test together can briefly need more than the runner's
+      # 16 GB; without swap the host stalls and GitHub loses the runner.
+      - name: Make room for the builds
+        run: |
+          sudo fallocate -l 8G /mnt/e2e.swap
+          sudo chmod 600 /mnt/e2e.swap
+          sudo mkswap /mnt/e2e.swap
+          sudo swapon /mnt/e2e.swap
+          free -m
+          # Flutter's own Gradle plugin is an included build, which ignores e2e_app's
+          # gradle.properties; without this it starts a Kotlin daemon with Gradle's 4 GB heap.
+          # ~/.gradle is missing when the Gradle cache misses.
+          mkdir -p ~/.gradle
+          echo 'kotlin.compiler.execution.strategy=in-process' >> ~/.gradle/gradle.properties
+
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
 
       - name: Bootstrap
-        run: |
-          flutter pub global activate melos
-          melos bootstrap
+        run: melos bootstrap
 
       - name: Launch Allure TestOps
-        working-directory: sample_app/android
+        working-directory: e2e_app
         run: bundle exec fastlane allure_launch cron:true
 
       - name: Run e2e (Android emulator)
-        uses: reactivecircus/android-emulator-runner@v2
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         with:
           api-level: ${{ matrix.api-level }}
           arch: x86_64
           profile: pixel_6
           emulator-options: -no-snapshot-save -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect
-          script: cd sample_app/android && bundle exec fastlane run_e2e_test device:emulator-5554 mock_server_branch:${{ env.mock_server_branch }}
+          script: cd e2e_app && bundle exec fastlane run_e2e_test device:emulator-5554 coverage:${{ matrix.coverage == true }} batch:${{ matrix.batch }} batch_count:${{ matrix.batch_count }} mock_server_branch:${{ env.mock_server_branch }}
+
+      # A tarball, as upload-artifact rejects some characters a test name (the folder name) may hold.
+      - name: Pack the coverage
+        if: matrix.coverage && !cancelled()
+        working-directory: e2e_app/build
+        run: tar -czf e2e-coverage-batch-${{ matrix.batch }}.tgz e2e-coverage
+
+      - uses: actions/upload-artifact@v7
+        if: matrix.coverage && !cancelled()
+        with:
+          name: e2e-coverage-batch-${{ matrix.batch }}
+          path: e2e_app/build/e2e-coverage-batch-${{ matrix.batch }}.tgz
+          retention-days: 3
 
       - name: Attach videos to failed tests
         if: failure()
-        working-directory: sample_app/android
+        # Videos only help debugging: a slow apt mirror (19 min once) must not hold the job.
+        timeout-minutes: 5
+        continue-on-error: true
+        working-directory: e2e_app
         run: |
-          sudo apt-get update && sudo apt-get install -y ffmpeg
+          sudo apt-get update && sudo apt-get install -y --no-install-recommends ffmpeg
           bundle exec fastlane attach_videos
 
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
-        working-directory: sample_app/android
+        working-directory: e2e_app
         run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
 
       - name: Allure TestOps Launch Removal
         if: env.LAUNCH_ID != '' && cancelled()
-        working-directory: sample_app/android
+        working-directory: e2e_app
         run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
 
       - uses: actions/upload-artifact@v7
         if: failure()
         with:
-          name: e2e-nightly-android-${{ matrix.api-level }}
+          name: e2e-nightly-android-${{ matrix.api-level }}-batch-${{ matrix.batch }}
           path: |
-            sample_app/stream-chat-test-mock-server/logs
-            sample_app/build/e2e-test.log
+            e2e_app/stream-chat-test-mock-server/logs
+            e2e_app/build/e2e-test.log
+
+  coverage_map:
+    needs: android
+    # Failed tests keep their previous coverage; only a batch that never finished blocks the map.
+    # Coverage is only collected against the main mock server.
+    if: ${{ !cancelled() && (inputs.mock_server_branch || 'main') == 'main' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read # downloads the previous map, for the coverage of failed tests
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: e2e_app
+
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: e2e-coverage-batch-*
+          path: e2e_app/build/batches
+          merge-multiple: true
+
+      - name: Merge the batches
+        working-directory: e2e_app/build
+        run: |
+          shopt -s nullglob
+          for batch in batches/*.tgz; do tar -xzf "$batch"; done
+
+      - name: Build the coverage map
+        working-directory: e2e_app
+        run: bundle exec fastlane build_e2e_coverage_map batch_count:4
+
+      - uses: actions/upload-artifact@v7
+        with:
+          name: e2e-coverage-map
+          path: e2e_app/build/e2e_coverage_map.json
+          retention-days: 14
 
   ios:
+    if: ${{ (inputs.mock_server_branch || 'main') == 'main' }}
     runs-on: macos-15
-    timeout-minutes: 120
+    timeout-minutes: 360
     strategy:
       fail-fast: false
       matrix:
         include:
           - ios: "26.2"
             device: "iPhone 17 Pro"
-            setup_runtime: false
-          - ios: "18.5"
-            device: "iPhone 16 Pro"
             setup_runtime: false
           - ios: "17.5"
             device: "iPhone 15 Pro"
@@ -115,6 +258,8 @@ jobs:
           xcode-version: '26.2'
 
       - uses: ./.github/actions/setup-ruby
+        with:
+          working-directory: e2e_app
 
       - uses: ./.github/actions/setup-flutter
 
@@ -124,31 +269,30 @@ jobs:
           version: ${{ matrix.ios }}
           device: ${{ matrix.device }}
 
-      - name: Use Firebase stubs
-        run: cp sample_app/pubspec_overrides.e2e.yaml sample_app/pubspec_overrides.yaml
+      - name: Install Tools
+        uses: ./.github/actions/install-tools
 
       - name: Bootstrap
         run: |
           flutter precache --ios
-          flutter pub global activate melos
           melos bootstrap
 
       - name: Launch Allure TestOps
-        working-directory: sample_app/ios
+        working-directory: e2e_app
         run: bundle exec fastlane allure_launch cron:true
 
       - name: Run e2e (iOS simulator)
-        working-directory: sample_app/ios
+        working-directory: e2e_app
         run: bundle exec fastlane run_e2e_test platform:ios ios:${{ matrix.ios }} device:"${{ matrix.device }} (${{ matrix.ios }})" mock_server_branch:${{ env.mock_server_branch }}
 
       - name: Upload Allure results
         if: env.LAUNCH_ID != '' && (success() || failure())
-        working-directory: sample_app/ios
+        working-directory: e2e_app
         run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
 
       - name: Allure TestOps Launch Removal
         if: env.LAUNCH_ID != '' && cancelled()
-        working-directory: sample_app/ios
+        working-directory: e2e_app
         run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
 
       - uses: actions/upload-artifact@v7
@@ -156,14 +300,14 @@ jobs:
         with:
           name: e2e-nightly-ios-${{ matrix.ios }}
           path: |
-            sample_app/stream-chat-test-mock-server/logs
-            sample_app/build/e2e-test.log
+            e2e_app/stream-chat-test-mock-server/logs
+            e2e_app/build/e2e-test.log
 
   slack:
     name: Slack Report
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    needs: [android, ios]
+    needs: [android, coverage_map, ios]
     if: failure() && github.event_name == 'schedule'
     steps:
       - uses: 8398a7/action-slack@v3

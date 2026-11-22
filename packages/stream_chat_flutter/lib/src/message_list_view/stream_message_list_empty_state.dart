@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
+
 import '../../stream_chat_flutter.dart';
 
 /// A widget that is used to display the empty state of the message list.
+///
+/// Scrolls instead of overflowing when it has less room than it needs.
 class StreamMessageListEmptyState extends StatelessWidget {
   /// Creates a new instance of the [StreamMessageListEmptyState].
   const StreamMessageListEmptyState({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
+    final content = Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -21,6 +24,10 @@ class StreamMessageListEmptyState extends StatelessWidget {
           Text(context.translations.sendMessageToStartConversationText),
         ],
       ),
+    );
+
+    return CustomScrollView(
+      slivers: [SliverFillRemaining(hasScrollBody: false, child: content)],
     );
   }
 }

@@ -4,7 +4,9 @@ part 'unread_counts_thread.freezed.dart';
 
 /// The current user's unread count in one thread.
 ///
-/// Listed in [GetUnreadCountResponse.threads].
+/// See also:
+///
+///  * [GetUnreadCountResponse.threads], which lists them.
 @freezed
 class UnreadCountsThread with _$UnreadCountsThread {
   /// Creates a new [UnreadCountsThread].
@@ -23,8 +25,9 @@ class UnreadCountsThread with _$UnreadCountsThread {
   @override
   final DateTime lastRead;
 
-  /// The id of the last reply the user read in the thread, or empty if they
-  /// have not read one.
+  /// The id of the last reply the user read in the thread.
+  ///
+  /// Empty if they have not read one.
   @override
   final String lastReadMessageId;
 

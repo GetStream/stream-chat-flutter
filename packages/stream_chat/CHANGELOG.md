@@ -114,10 +114,10 @@
 - `GetUnreadCountResponse` no longer decodes from JSON, is immutable, built through a const constructor, compares by value, gains `copyWith`, and its `duration` is a non-nullable `String`.
 - `UnreadCountsChannel`, `UnreadCountsThread` and `UnreadCountsChannelType` no longer decode from or encode to JSON, compare by value and gain `copyWith`.
 - `StreamChatApi.user.getUnreadCount` is removed; call `StreamChatClient.getUnreadCount` instead.
-- `StreamChatClient.blockUser` returns a `Result<BlockUsersResponse>` and `unblockUser` a `Result<UnblockUsersResponse>` instead of throwing.
+- `StreamChatClient.blockUser` returns a `Result<BlockUserResponse>` and `unblockUser` a `Result<UnblockUserResponse>` instead of throwing.
 - `StreamChatClient.queryBlockedUsers` is renamed `getBlockedUsers` and returns a `Result<GetBlockedUsersResponse>` instead of throwing.
-- `UserBlockResponse` is renamed `BlockUsersResponse`, and `BlockedUsersResponse` is renamed `GetBlockedUsersResponse`.
-- `BlockUsersResponse` and `GetBlockedUsersResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, gain `copyWith`, and their `duration` is a non-nullable `String`.
+- `UserBlockResponse` is renamed `BlockUserResponse`, and `BlockedUsersResponse` is renamed `GetBlockedUsersResponse`.
+- `BlockUserResponse` and `GetBlockedUsersResponse` no longer decode from JSON, are immutable, built through a const constructor, compare by value, gain `copyWith`, and their `duration` is a non-nullable `String`.
 - `UserBlock` no longer decodes from or encodes to JSON and no longer extends `Equatable`, so `props` is removed; it still compares by value.
 - `UserBlock.blockedUser`, `userId`, `blockedUserId` and `createdAt` are required and non-nullable, and `UserBlock.copyWith` takes every field as a non-nullable value.
 - `StreamChatApi.user`'s blocking methods are removed; use `blockUser`, `unblockUser` and `getBlockedUsers` on `StreamChatClient` instead.
@@ -165,12 +165,27 @@
 - `Message.toJson` no longer writes the message's channel id, HTML, markup or deleted reply count.
 - `Reaction.topLevelFields` is removed.
 
+- `ChannelClientState.truncate` now truncates the channel at an optional `truncatedAt` instead of emptying the loaded messages; use `clearMessages` for that.
+- A custom `ChatPersistenceClient` must implement `truncateChannel`, which removes a channel's stored messages from before a given time.
+- `MessageState.sending` and `MessageState.updating` are factories that take the request's `skipPush` and `skipEnrichUrl`; add `()` where you used the constants.
+- A partial update, such as pinning a message, is in the new `OutgoingState.partialUpdating` state while it runs; `isUpdating` still covers it.
+- `OutgoingState`'s `when`, `whenOrNull` and `maybeWhen` pass the request's options to `sending` and `updating` and take a `partialUpdating` callback, and its `map`, `mapOrNull` and `maybeMap` take one too.
+- A custom `ChatPersistenceClient` must implement `settleInterruptedRequests`, which marks the stored messages left sending, updating or deleting as failed.
+
 🐞 Fixed
+
+- Truncating a channel no longer removes the messages sent after its truncation time, or messages not sent yet.
+- Truncating a channel now also removes its thread replies from before the truncation, lowers an unread count higher than the messages left, and updates its last message time.
+- Messages from before a channel's truncation no longer come back when the truncation event was missed.
+- A message no longer stays sending, updating or deleting forever when the app is closed before its request finishes; the interrupted request is retried.
+- Deleting a message that was already deleted no longer fails and offers a retry that can never succeed.
 
 - `connectGuestUser` no longer copies the user's online status, ban, unread counts, devices and push preferences into the created guest's custom data.
 - `Channel.custom` no longer returns the data the channel was created with once the channel's custom data is empty.
 
 - `updateUser` and `updateUsers` no longer store the user's online status, ban, devices or unread counts as custom data, and no longer fail for an own user with many devices.
+
+- A message deleted while its attachments upload no longer comes back.
 
 - `queryChannels` no longer gives up watching the channels it loads when it is called before the connection is open. Whether they can be watched is read when the request is sent, which is after the query has waited for the connection.
 
@@ -185,9 +200,12 @@
 - Failed messages now retry on server errors. The retry policy is now explicit: retry a request that never reached the server, a 5xx, a 429 and a 408; never another 4xx, a cancelled request, broken credentials, or anything the server marked unrecoverable. Previously only failures without a parseable error body retried, so a 500 or a 429 did not.
 - `SystemEnvironment` is a different type with the same constructor and fields, so existing usage keeps working.
 - Most SDK logging moved off `info`. It now carries only client and connection lifecycle — client created and disposed, user set and disconnected, connection opening, established and closing — and per-operation, per-event and per-timer records are `debug` or `verbose`. Raising the priority to `info` to debug a problem no longer buries it under a health check every 20 seconds and a line per WebSocket frame.
+- Deleting a bounced or unsent message now emits a local `message.deleted` with `hardDelete: true`. The server never stored these messages.
 
 ✅ Added
 
+- Added `ChannelClientState.clearMessages`, which empties the loaded messages.
+- Added `MessageState.settled`, the failed state a message is left in when its request never finished.
 - Log records from the HTTP and token layers now reach the configured handler.
 - Added `MessageSearchSortField.relevance`, which sorts a message search by match quality.
 - Added `MessageReminderSortField.messageId`, the field the API breaks reminder ties on.
@@ -220,17 +238,55 @@
 
 ✅ Added
 
+- Added scheduled messages: schedule one with `Channel.scheduleMessage`, and read the current user's unsent ones from `ClientState.scheduledMessages` after `StreamChatClient.loadScheduledMessages`, or those in one channel or thread with `ClientState.scheduledChannelMessages` and `ClientState.scheduledThreadReplies`.
+
+🔄 Changed
+
+- Overrides of the channel query methods on `Channel` and `StreamChatClient` must add the new `includeScheduledMessages` parameter.
+
+## 10.7.0
+
+✅ Added
+
+- Added quiet hours to push preferences, set and cleared through `PushPreferenceInput` and reported on `PushPreference.schedule`.
+- Added `includeActiveMemberCount` to the channel queries, which fills the new `Channel.activeMemberCount`: the number of members who are neither deactivated nor deleted.
+
+🔄 Changed
+
+- `Attachment.type` is now `url_preview` for every attachment scraped from a link in the message text, including a link to an image or file. Use `Attachment.rawType` to read the type it was created or received with.
+- `Attachment.toJson` keeps the original `type` of an attachment scraped from a link, such as `video` or `image`, instead of writing `url_preview`.
+
+🐞 Fixed
+
+- Fixed the connection getting stuck while connecting, and requests never completing, when the token provider throws while refreshing an expired token.
+- Fixed sending, updating and deleting a message not retrying when the server answers with a timeout (408), a rate limit (429) or a server error (5xx).
+- Fixed hard-deleting an unread message not lowering the channel's unread count.
+- Fixed a draft saved or deleted while offline not being kept.
+- Fixed a thread draft replacing the channel's draft when the thread's parent message isn't loaded.
+
+## 10.6.0
+
+✅ Added
+
 - Added `Poll.nameI18n`, `Poll.descriptionI18n`, `PollOption.textI18n` and `PollVote.answerTextI18n`, holding the server's translations of a poll.
 
 🔄 Changed
 
+- Allowed `equatable` 3.x alongside 2.x.
 - `name_i18n`, `description_i18n` and `text_i18n` are no longer kept in `Poll.extraData` and `PollOption.extraData`; read the new `*I18n` fields instead.
 - Reduced the channel state updates emitted for message updates in channels without active live locations.
+- `StreamChatClient.state.usersStream` no longer emits when an update brings no new or changed users, such as an event without a user.
+- `User` equality now also compares `createdAt`.
+- Deleting a bounced or unsent message now emits a local `message.deleted` with `hardDelete: true`. The server never stored these messages.
 
 🐞 Fixed
 
 - Fixed `Event.aiState` reading `AI_STATE_EXTERNAL_SOURCES` as `idle` instead of `checkingSources`.
 - Fixed `Channel.disableSlowMode` and `StreamChatClient.disableSlowdown` always failing.
+- Fixed users still showing as typing after sending or editing a message, or after switching between a thread and the channel.
+- Fixed a message the server had already stored being shown as failed after a lost response or a retried send.
+- Fixed a message deleted while its attachments upload coming back.
+- Fixed `Channel.state.pinnedMessages` falling out of order when a message is pinned; it is now kept newest pin first.
 
 ## 10.5.0
 
