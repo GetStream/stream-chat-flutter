@@ -14,13 +14,13 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$ChannelConfigOverrides {
   String? get blocklist;
-  ChannelConfigOverridesBlocklistBehavior? get blocklistBehavior;
+  BlocklistBehavior? get blocklistBehavior;
   ChatPreferences? get chatPreferences;
   List<String>? get commands;
   bool? get countMessages;
   Map<String, List<String>>? get grants;
   int? get maxMessageLength;
-  ChannelConfigOverridesPushLevel? get pushLevel;
+  PushLevel? get pushLevel;
   bool? get quotes;
   bool? get reactions;
   bool? get replies;
@@ -100,13 +100,13 @@ abstract mixin class $ChannelConfigOverridesCopyWith<$Res> {
   @useResult
   $Res call({
     String? blocklist,
-    ChannelConfigOverridesBlocklistBehavior? blocklistBehavior,
+    BlocklistBehavior? blocklistBehavior,
     ChatPreferences? chatPreferences,
     List<String>? commands,
     bool? countMessages,
     Map<String, List<String>>? grants,
     int? maxMessageLength,
-    ChannelConfigOverridesPushLevel? pushLevel,
+    PushLevel? pushLevel,
     bool? quotes,
     bool? reactions,
     bool? replies,
@@ -156,7 +156,7 @@ class _$ChannelConfigOverridesCopyWithImpl<$Res> implements $ChannelConfigOverri
         blocklistBehavior: freezed == blocklistBehavior
             ? _self.blocklistBehavior
             : blocklistBehavior // ignore: cast_nullable_to_non_nullable
-                  as ChannelConfigOverridesBlocklistBehavior?,
+                  as BlocklistBehavior?,
         chatPreferences: freezed == chatPreferences
             ? _self.chatPreferences
             : chatPreferences // ignore: cast_nullable_to_non_nullable
@@ -180,7 +180,7 @@ class _$ChannelConfigOverridesCopyWithImpl<$Res> implements $ChannelConfigOverri
         pushLevel: freezed == pushLevel
             ? _self.pushLevel
             : pushLevel // ignore: cast_nullable_to_non_nullable
-                  as ChannelConfigOverridesPushLevel?,
+                  as PushLevel?,
         quotes: freezed == quotes
             ? _self.quotes
             : quotes // ignore: cast_nullable_to_non_nullable

@@ -16,8 +16,17 @@
 
 - A cached channel query given no sort came back in whatever order the lookup returned; it now applies `ChannelSort.defaultSort`, the ordering the API would have.
 - A member's `banExpires` is now kept in the local cache.
+- Messages sent before a channel was truncated no longer come back from the local cache, including after a truncation the client missed.
+- Truncating a channel no longer removes the stored messages sent after its truncation time.
+- A message left sending, updating or deleting when the app was closed no longer comes back from the local cache still in progress; it comes back failed, so it is retried.
 
-## Upcoming
+## 10.7.0
+
+✅ Added
+
+- `Channel.activeMemberCount` is now kept in the local cache.
+
+## 10.6.0
 
 ✅ Added
 

@@ -25,9 +25,9 @@ dependencies:
   flutter:
     sdk: flutter
   responsive_builder: ^0.7.0
-  stream_chat_flutter: ^10.5.0
-  stream_chat_localizations: ^10.5.0
-  stream_chat_persistence: ^10.5.0
+  stream_chat_flutter: ^10.7.0
+  stream_chat_localizations: ^10.7.0
+  stream_chat_persistence: ^10.7.0
 
 dependency_overrides:
   stream_chat:
@@ -46,7 +46,7 @@ dependency_overrides:
     git:
       url: https://github.com/GetStream/stream-core-flutter.git
       path: packages/stream_core
-      ref: 6042453b56c782d9c8b29a2d103ae73ba433814c
+      ref: 340e010f186c5fc221b31d8e9b4102ba1530a2ef
 
 flutter:
   uses-material-design: true

@@ -1391,6 +1391,43 @@ class _DefaultApi extends DefaultApi {
     );
   }
 
+  Future<DeleteScheduledMessageResponse> _deleteScheduledMessage({
+    required String id,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<Result<DeleteScheduledMessageResponse>>(
+      Options(method: 'DELETE', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/chat/scheduled_messages/${id}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late DeleteScheduledMessageResponse _value;
+    try {
+      _value = DeleteScheduledMessageResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<DeleteScheduledMessageResponse>> deleteScheduledMessage({
+    required String id,
+  }) {
+    return _ResultCallAdapter<DeleteScheduledMessageResponse>().adapt(
+      () => _deleteScheduledMessage(id: id),
+    );
+  }
+
   Future<DurationResponse> _deleteUserGroup({
     required String id,
     String? teamId,
@@ -1462,6 +1499,98 @@ class _DefaultApi extends DefaultApi {
   Future<Result<FlagItemResponse>> flag({required FlagRequest flagRequest}) {
     return _ResultCallAdapter<FlagItemResponse>().adapt(
       () => _flag(flagRequest: flagRequest),
+    );
+  }
+
+  Future<ForkChannelResponse> _forkChannel({
+    required String type,
+    required String id,
+    required ForkChannelRequest forkChannelRequest,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(forkChannelRequest.toJson());
+    final _options = _setStreamType<Result<ForkChannelResponse>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/chat/channels/${type}/${id}/fork',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ForkChannelResponse _value;
+    try {
+      _value = ForkChannelResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<ForkChannelResponse>> forkChannel({
+    required String type,
+    required String id,
+    required ForkChannelRequest forkChannelRequest,
+  }) {
+    return _ResultCallAdapter<ForkChannelResponse>().adapt(
+      () => _forkChannel(
+        type: type,
+        id: id,
+        forkChannelRequest: forkChannelRequest,
+      ),
+    );
+  }
+
+  Future<ForkMessageIDsResponse> _forkMessageIDs({
+    required String type,
+    required String id,
+    required ForkMessageIDsRequest forkMessageIDsRequest,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(forkMessageIDsRequest.toJson());
+    final _options = _setStreamType<Result<ForkMessageIDsResponse>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/chat/channels/${type}/${id}/fork/message_ids',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late ForkMessageIDsResponse _value;
+    try {
+      _value = ForkMessageIDsResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<ForkMessageIDsResponse>> forkMessageIDs({
+    required String type,
+    required String id,
+    required ForkMessageIDsRequest forkMessageIDsRequest,
+  }) {
+    return _ResultCallAdapter<ForkMessageIDsResponse>().adapt(
+      () => _forkMessageIDs(
+        type: type,
+        id: id,
+        forkMessageIDsRequest: forkMessageIDsRequest,
+      ),
     );
   }
 
@@ -2524,49 +2653,6 @@ class _DefaultApi extends DefaultApi {
     );
   }
 
-  Future<ImportBlockListResponse> _importBlockList({
-    required String id,
-    required ImportBlockListRequest importBlockListRequest,
-  }) async {
-    final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
-    final _headers = <String, dynamic>{};
-    final _data = <String, dynamic>{};
-    _data.addAll(importBlockListRequest.toJson());
-    final _options = _setStreamType<Result<ImportBlockListResponse>>(
-      Options(method: 'POST', headers: _headers, extra: _extra)
-          .compose(
-            _dio.options,
-            '/api/v2/blocklists/${id}/import',
-            queryParameters: queryParameters,
-            data: _data,
-          )
-          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
-    );
-    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
-    late ImportBlockListResponse _value;
-    try {
-      _value = ImportBlockListResponse.fromJson(_result.data!);
-    } on Object catch (e, s) {
-      errorLogger?.logError(e, s, _options, response: _result);
-      rethrow;
-    }
-    return _value;
-  }
-
-  @override
-  Future<Result<ImportBlockListResponse>> importBlockList({
-    required String id,
-    required ImportBlockListRequest importBlockListRequest,
-  }) {
-    return _ResultCallAdapter<ImportBlockListResponse>().adapt(
-      () => _importBlockList(
-        id: id,
-        importBlockListRequest: importBlockListRequest,
-      ),
-    );
-  }
-
   Future<ListBlockListResponse> _listBlockLists({
     String? team,
     String? cursor,
@@ -3556,6 +3642,49 @@ class _DefaultApi extends DefaultApi {
     );
   }
 
+  Future<QueryScheduledMessagesResponse> _queryScheduledMessages({
+    QueryScheduledMessagesRequest? queryScheduledMessagesRequest,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(
+      queryScheduledMessagesRequest?.toJson() ?? <String, dynamic>{},
+    );
+    final _options = _setStreamType<Result<QueryScheduledMessagesResponse>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/chat/scheduled_messages/query',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late QueryScheduledMessagesResponse _value;
+    try {
+      _value = QueryScheduledMessagesResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<QueryScheduledMessagesResponse>> queryScheduledMessages({
+    QueryScheduledMessagesRequest? queryScheduledMessagesRequest,
+  }) {
+    return _ResultCallAdapter<QueryScheduledMessagesResponse>().adapt(
+      () => _queryScheduledMessages(
+        queryScheduledMessagesRequest: queryScheduledMessagesRequest,
+      ),
+    );
+  }
+
   Future<QueryThreadsResponse> _queryThreads({
     QueryThreadsRequest? queryThreadsRequest,
   }) async {
@@ -3668,6 +3797,90 @@ class _DefaultApi extends DefaultApi {
       () => _removeUserGroupMembers(
         id: id,
         removeUserGroupMembersRequest: removeUserGroupMembersRequest,
+      ),
+    );
+  }
+
+  Future<RevealMediaResponse> _revealMedia({
+    required RevealMediaRequest revealMediaRequest,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(revealMediaRequest.toJson());
+    final _options = _setStreamType<Result<RevealMediaResponse>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/moderation/reveal_media',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late RevealMediaResponse _value;
+    try {
+      _value = RevealMediaResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<RevealMediaResponse>> revealMedia({
+    required RevealMediaRequest revealMediaRequest,
+  }) {
+    return _ResultCallAdapter<RevealMediaResponse>().adapt(
+      () => _revealMedia(revealMediaRequest: revealMediaRequest),
+    );
+  }
+
+  Future<RewindChannelResponse> _rewindChannel({
+    required String type,
+    required String id,
+    required RewindChannelRequest rewindChannelRequest,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(rewindChannelRequest.toJson());
+    final _options = _setStreamType<Result<RewindChannelResponse>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/chat/channels/${type}/${id}/rewind',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late RewindChannelResponse _value;
+    try {
+      _value = RewindChannelResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<RewindChannelResponse>> rewindChannel({
+    required String type,
+    required String id,
+    required RewindChannelRequest rewindChannelRequest,
+  }) {
+    return _ResultCallAdapter<RewindChannelResponse>().adapt(
+      () => _rewindChannel(
+        type: type,
+        id: id,
+        rewindChannelRequest: rewindChannelRequest,
       ),
     );
   }
@@ -3988,6 +4201,43 @@ class _DefaultApi extends DefaultApi {
   }) {
     return _ResultCallAdapter<SendReactionResponse>().adapt(
       () => _sendReaction(id: id, sendReactionRequest: sendReactionRequest),
+    );
+  }
+
+  Future<SendScheduledMessageNowResponse> _sendScheduledMessageNow({
+    required String id,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<Result<SendScheduledMessageNowResponse>>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/chat/scheduled_messages/${id}/send_now',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late SendScheduledMessageNowResponse _value;
+    try {
+      _value = SendScheduledMessageNowResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<SendScheduledMessageNowResponse>> sendScheduledMessageNow({
+    required String id,
+  }) {
+    return _ResultCallAdapter<SendScheduledMessageNowResponse>().adapt(
+      () => _sendScheduledMessageNow(id: id),
     );
   }
 
@@ -4403,9 +4653,14 @@ class _DefaultApi extends DefaultApi {
     );
   }
 
-  Future<WrappedUnreadCountsResponse> _unreadCounts() async {
+  Future<WrappedUnreadCountsResponse> _unreadCounts({
+    bool? includeLargeChannels,
+  }) async {
     final _extra = <String, dynamic>{};
-    final queryParameters = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{
+      r'include_large_channels': includeLargeChannels,
+    };
+    queryParameters.removeWhere((k, v) => v == null);
     final _headers = <String, dynamic>{};
     const Map<String, dynamic>? _data = null;
     final _options = _setStreamType<Result<WrappedUnreadCountsResponse>>(
@@ -4430,9 +4685,11 @@ class _DefaultApi extends DefaultApi {
   }
 
   @override
-  Future<Result<WrappedUnreadCountsResponse>> unreadCounts() {
+  Future<Result<WrappedUnreadCountsResponse>> unreadCounts({
+    bool? includeLargeChannels,
+  }) {
     return _ResultCallAdapter<WrappedUnreadCountsResponse>().adapt(
-      () => _unreadCounts(),
+      () => _unreadCounts(includeLargeChannels: includeLargeChannels),
     );
   }
 
@@ -4992,6 +5249,52 @@ class _DefaultApi extends DefaultApi {
       () => _updateReminder(
         messageId: messageId,
         updateReminderRequest: updateReminderRequest,
+      ),
+    );
+  }
+
+  Future<UpdateScheduledMessageResponse> _updateScheduledMessage({
+    required String id,
+    UpdateScheduledMessageRequest? updateScheduledMessageRequest,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    queryParameters.removeWhere((k, v) => v == null);
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(
+      updateScheduledMessageRequest?.toJson() ?? <String, dynamic>{},
+    );
+    final _options = _setStreamType<Result<UpdateScheduledMessageResponse>>(
+      Options(method: 'PATCH', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v2/chat/scheduled_messages/${id}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, dynamic>>(_options);
+    late UpdateScheduledMessageResponse _value;
+    try {
+      _value = UpdateScheduledMessageResponse.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
+  Future<Result<UpdateScheduledMessageResponse>> updateScheduledMessage({
+    required String id,
+    UpdateScheduledMessageRequest? updateScheduledMessageRequest,
+  }) {
+    return _ResultCallAdapter<UpdateScheduledMessageResponse>().adapt(
+      () => _updateScheduledMessage(
+        id: id,
+        updateScheduledMessageRequest: updateScheduledMessageRequest,
       ),
     );
   }

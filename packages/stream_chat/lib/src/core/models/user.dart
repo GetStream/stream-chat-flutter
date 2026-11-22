@@ -1,5 +1,6 @@
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 import 'package:stream_core/stream_core.dart'
     show Filter, FilterField, Standard, Sort, SortField, normalizeStringForSort;
 
@@ -151,6 +152,13 @@ class User extends Equatable {
 
   /// List of users to list of userIds.
   static List<String>? toIds(List<User>? users) => users?.map((u) => u.id).toList();
+
+  /// Creates users from [json], whose entries are user objects or user IDs.
+  @internal
+  static List<User> fromIdsOrJson(List<Object?>? json) => [
+    for (final user in json ?? const [])
+      if (user is String) User(id: user) else User.fromJson(user as Map<String, dynamic>),
+  ];
 
   /// Serializes this user to JSON.
   ///

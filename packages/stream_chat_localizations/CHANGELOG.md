@@ -1,3 +1,23 @@
+## Upcoming
+
+✅ Added
+
+- Added the scheduled message strings for all supported locales.
+
+🔄 Changed
+
+- A language added by subclassing `GlobalStreamChatLocalizations` must add the scheduled message strings.
+
+## 10.7.0
+
+🐞 Fixed
+
+- Fixed German mute strings showing Dutch text, and the German "Mute user" action not switching to "unmute" for an already-muted user.
+
+## 10.6.0
+
+- Updated `stream_chat_flutter` dependency to [`10.6.0`](https://pub.dev/packages/stream_chat_flutter/changelog).
+
 ## 10.5.0
 
 ✅ Added

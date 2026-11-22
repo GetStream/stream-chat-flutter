@@ -27,7 +27,7 @@ class EventResponse with _$EventResponse {
   final String duration;
 
   @override
-  @JsonKey(name: 'event', fromJson: wsEventFromJson, toJson: wsEventToJson)
+  @JsonKey(name: 'event')
   final WSEvent event;
 
   Map<String, dynamic> toJson() => _$EventResponseToJson(this);

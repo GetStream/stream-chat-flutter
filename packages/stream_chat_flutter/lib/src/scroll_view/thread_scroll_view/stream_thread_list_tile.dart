@@ -111,6 +111,8 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
     final effectivePadding = theme.padding ?? defaults.padding;
     final effectiveChannelNameStyle = theme.threadChannelNameStyle ?? defaults.threadChannelNameStyle;
     final effectiveReplyToMessageStyle = theme.threadReplyToMessageStyle ?? defaults.threadReplyToMessageStyle;
+    final basePreviewTextTheme = defaults.messagePreviewTextTheme.merge(StreamMessagePreviewTextTheme.of(context));
+    final effectiveMessagePreviewTextTheme = basePreviewTextTheme.merge(theme.messagePreviewTextTheme);
     final effectiveLatestReplyMessageStyle =
         theme.threadLatestReplyMessageStyle ?? defaults.threadLatestReplyMessageStyle;
     final effectiveReplyCountStyle = theme.threadReplyCountStyle ?? defaults.threadReplyCountStyle;
@@ -181,12 +183,15 @@ class _DefaultStreamThreadListTile extends StatelessWidget {
                       ],
                     ),
                     SizedBox(height: spacing.xxs),
-                    ThreadRootMessagePreview(
-                      parentMessage: parentMessage,
-                      channel: channel,
-                      language: language,
-                      style: effectiveReplyToMessageStyle,
-                      emptyStyle: effectiveLatestReplyMessageStyle,
+                    StreamMessagePreviewTextTheme(
+                      data: effectiveMessagePreviewTextTheme,
+                      child: ThreadRootMessagePreview(
+                        parentMessage: parentMessage,
+                        channel: channel,
+                        language: language,
+                        style: effectiveReplyToMessageStyle,
+                        emptyStyle: effectiveLatestReplyMessageStyle,
+                      ),
                     ),
                     SizedBox(height: spacing.xs),
                     ThreadFooter(
@@ -417,7 +422,13 @@ class _StreamThreadListTileThemeDefaults extends StreamThreadListTileThemeData {
   TextStyle get threadChannelNameStyle => _textTheme.captionEmphasis.copyWith(color: _colorScheme.textTertiary);
 
   @override
-  TextStyle get threadReplyToMessageStyle => _textTheme.bodyDefault;
+  TextStyle get threadReplyToMessageStyle => _textTheme.bodyDefault.copyWith(color: _colorScheme.textPrimary);
+
+  @override
+  StreamMessagePreviewTextThemeData get messagePreviewTextTheme => StreamMessagePreviewTextThemeData(
+    senderPrefixStyle: TextStyle(color: _colorScheme.textSecondary),
+    deletedContentStyle: TextStyle(color: _colorScheme.textSecondary),
+  );
 
   @override
   TextStyle get threadLatestReplyMessageStyle => _textTheme.bodyDefault;

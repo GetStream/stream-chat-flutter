@@ -59,8 +59,10 @@ class PollOptionListItem extends StatelessWidget {
     required PollOptionItem this.option,
     this.hintText,
     this.focusNode,
+    this.showControls = true,
     this.onRemove,
     this.onChanged,
+    this.onSubmitted,
   }) : onAddOptionPressed = null,
        _variant = .option;
 
@@ -71,8 +73,10 @@ class PollOptionListItem extends StatelessWidget {
     VoidCallback? onPressed,
   }) : option = null,
        focusNode = null,
+       showControls = false,
        onRemove = null,
        onChanged = null,
+       onSubmitted = null,
        onAddOptionPressed = onPressed,
        _variant = .addOption;
 
@@ -89,11 +93,17 @@ class PollOptionListItem extends StatelessWidget {
   /// The focus node for the text field.
   final FocusNode? focusNode;
 
+  /// Whether to show the reorder handle and the remove button.
+  final bool showControls;
+
   /// Callback called when the poll option item is removed.
   final ValueSetter<PollOptionItem>? onRemove;
 
   /// Callback called when the poll option item is changed.
   final ValueSetter<PollOptionItem>? onChanged;
+
+  /// Callback called when this option is submitted from the keyboard.
+  final ValueSetter<PollOptionItem>? onSubmitted;
 
   /// Callback called when the "add an option" button is pressed.
   ///
@@ -120,26 +130,35 @@ class PollOptionListItem extends StatelessWidget {
       hintText: hintText,
       focusNode: focusNode,
       textCapitalization: TextCapitalization.sentences,
+      textInputAction: TextInputAction.next,
+      onEditingComplete: switch (onSubmitted) {
+        final onSubmitted? => () => onSubmitted.call(option!),
+        _ => null,
+      },
       helperText: option!.error,
       helperState: option!.error != null ? StreamHelperState.error : null,
-      leading: MouseRegion(
-        cursor: SystemMouseCursors.grab,
-        child: Icon(icons.reorder),
-      ),
-      trailing: StreamButton.icon(
-        type: .ghost,
-        style: .secondary,
-        icon: Icon(icons.minusCircle),
-        tooltip: a11y.removePollOptionTooltip(optionText: option!.text),
-        themeStyle: .from(
-          fixedSize: const .square(20),
-          tapTargetSize: .shrinkWrap,
-        ),
-        onPressed: switch (onRemove) {
-          final onRemove? => () => onRemove.call(option!),
-          _ => null,
-        },
-      ),
+      leading: showControls
+          ? MouseRegion(
+              cursor: SystemMouseCursors.grab,
+              child: Icon(icons.reorder),
+            )
+          : null,
+      trailing: showControls
+          ? StreamButton.icon(
+              type: .ghost,
+              style: .secondary,
+              icon: Icon(icons.minusCircle),
+              tooltip: a11y.removePollOptionTooltip(optionText: option!.text),
+              themeStyle: .from(
+                fixedSize: const .square(20),
+                tapTargetSize: .shrinkWrap,
+              ),
+              onPressed: switch (onRemove) {
+                final onRemove? => () => onRemove.call(option!),
+                _ => null,
+              },
+            )
+          : null,
       onChanged: switch (onChanged) {
         final onChanged? => (text) {
           final updated = option!.copyWith(text: text);
@@ -365,8 +384,19 @@ class _PollOptionReorderableListViewState extends State<PollOptionReorderableLis
   }
 
   Future<void> _onOptionRemoved(PollOptionItem option) async {
-    final confirm = await showPollDeleteOptionDialog(context: context);
-    if (!mounted || confirm != true) return;
+    final wasFocused = _focusNodes[option.id]?.hasFocus ?? false;
+    if (option.text.isNotEmpty) {
+      final confirm = await showPollDeleteOptionDialog(context: context);
+      if (!mounted || confirm != true) return;
+    }
+
+    // Keeps the keyboard up when the focused option is removed.
+    if (wasFocused) {
+      final ids = [..._options.keys];
+      final index = ids.indexOf(option.id);
+      final neighbor = index > 0 ? ids[index - 1] : ids.elementAtOrNull(index + 1);
+      if (neighbor != null) _focusNodes[neighbor]?.requestFocus();
+    }
 
     setState(() {
       _options.remove(option.id);
@@ -441,6 +471,18 @@ class _PollOptionReorderableListViewState extends State<PollOptionReorderableLis
     });
   }
 
+  void _onOptionSubmitted(PollOptionItem option) {
+    final ids = [..._options.keys];
+    final index = ids.indexOf(option.id);
+
+    if (ids.elementAtOrNull(index + 1) case final nextId?) {
+      return _focusNodes[nextId]?.requestFocus();
+    }
+
+    if (_canAddMoreOptions) return _onAddOptionPressed();
+    _focusNodes[option.id]?.unfocus();
+  }
+
   bool get _canAddMoreOptions {
     // Don't allow adding if there's already an empty option
     final hasEmptyOption = _options.values.any((it) => it.text.isEmpty);
@@ -492,8 +534,10 @@ class _PollOptionReorderableListViewState extends State<PollOptionReorderableLis
                   option: option,
                   hintText: widget.itemHintText,
                   focusNode: _focusNodes[option.id],
+                  showControls: _options.length > 1,
                   onRemove: _onOptionRemoved,
                   onChanged: _onOptionChanged,
+                  onSubmitted: _onOptionSubmitted,
                 );
               },
             ),

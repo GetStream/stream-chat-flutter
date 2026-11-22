@@ -11,6 +11,8 @@ QueryChannelsRequest _$QueryChannelsRequestFromJson(
 ) => QueryChannelsRequest(
   filterConditions: json['filter_conditions'] as Map<String, dynamic>?,
   filterValues: json['filter_values'] as Map<String, dynamic>?,
+  includeActiveMemberCount: json['include_active_member_count'] as bool?,
+  includeScheduledMessages: json['include_scheduled_messages'] as bool?,
   limit: (json['limit'] as num?)?.toInt(),
   memberCustomInclude: (json['member_custom_include'] as List<dynamic>?)?.map((e) => e as String).toList(),
   memberLimit: (json['member_limit'] as num?)?.toInt(),
@@ -29,6 +31,8 @@ Map<String, dynamic> _$QueryChannelsRequestToJson(
 ) => <String, dynamic>{
   'filter_conditions': instance.filterConditions,
   'filter_values': instance.filterValues,
+  'include_active_member_count': instance.includeActiveMemberCount,
+  'include_scheduled_messages': instance.includeScheduledMessages,
   'limit': instance.limit,
   'member_custom_include': instance.memberCustomInclude,
   'member_limit': instance.memberLimit,

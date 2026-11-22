@@ -82,7 +82,8 @@ class StreamMessageFooterProps {
 /// The footer can show up to four pieces depending on the message:
 ///
 ///  * **Username** — for messages from other users.
-///  * **Sending status** — for the current user's own messages.
+///  * **Sending status** — for the current user's own messages, except
+///    ephemeral ones.
 ///  * **Timestamp** — always shown, formatted as a short time string.
 ///  * **Edited label** — when the message text has been updated.
 ///
@@ -120,7 +121,7 @@ class DefaultStreamMessageFooter extends StatelessWidget {
     }
 
     Widget? statusWidget;
-    if (message.user case final user? when user.id == currentUser?.id) {
+    if (message.user case final user? when user.id == currentUser?.id && !message.isEphemeral) {
       statusWidget = ExcludeSemantics(
         excluding: excluding,
         child: StreamMessageSendingStatus(message: message),

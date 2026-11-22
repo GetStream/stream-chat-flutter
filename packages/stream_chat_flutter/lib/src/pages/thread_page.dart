@@ -8,7 +8,7 @@ import '../../stream_chat_flutter.dart';
 /// out floating or regular according to the ambient [StreamSurfaceStyle]. Expects a
 /// [StreamChannel] ancestor.
 ///
-/// The composer is omitted when [parent] is deleted.
+/// The composer is omitted when [parent] is deleted and has no replies.
 ///
 /// ## Customizing this page
 ///
@@ -101,7 +101,8 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
       onBackPressed: widget.onBackPressed,
     );
 
-    final composer = !widget.parent.isDeleted
+    final canReply = !widget.parent.isDeleted || (widget.parent.replyCount ?? 0) > 0;
+    final composer = canReply
         ? StreamMessageComposer(
             focusNode: _focusNode,
             messageComposerController: _messageComposerController,
@@ -113,7 +114,7 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
       appBar: appBar,
       bottom: composer,
       // Resolved from the slots so the body inset matches what the chrome draws.
-      // The bottom value is ignored when the composer is null (deleted parent).
+      // The bottom value is ignored when the composer is null.
       appBarSurfaceStyle: StreamThreadHeader.resolveSurfaceStyle(context),
       bottomSurfaceStyle: StreamMessageComposer.resolveSurfaceStyle(context),
       body: _ThreadBody(

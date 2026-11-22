@@ -13,16 +13,6 @@ import '../models.dart';
 part 'ban_options.g.dart';
 part 'ban_options.freezed.dart';
 
-extension type const BanOptionsDeleteMessages._(String _) implements String {
-  static const hard = BanOptionsDeleteMessages._('hard');
-  static const pruning = BanOptionsDeleteMessages._('pruning');
-  static const soft = BanOptionsDeleteMessages._('soft');
-
-  factory BanOptionsDeleteMessages.fromJson(String json) => BanOptionsDeleteMessages._(json);
-
-  String toJson() => this;
-}
-
 @freezed
 @immutable
 @JsonSerializable()
@@ -37,7 +27,7 @@ class BanOptions with _$BanOptions {
 
   @override
   @JsonKey(name: 'delete_messages')
-  final BanOptionsDeleteMessages? deleteMessages;
+  final DeleteMessages? deleteMessages;
 
   @override
   @JsonKey(name: 'duration')

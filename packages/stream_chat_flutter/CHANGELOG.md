@@ -2,7 +2,7 @@
 
 🛑️ Breaking
 
-- `errorBuilder` on the paged scroll views (`StreamChannelListView`, `StreamUserListView`, `StreamMemberListView`, `StreamThreadListView`, `StreamPollVoteListView`, `StreamReactionListView`, `StreamMessageSearchListView`, `StreamPhotoGallery` and the grid variants) now receives a `StreamChatException` instead of a `StreamChatError`.
+- `errorBuilder` on the paged scroll views (`StreamChannelListView`, `StreamUserListView`, `StreamMemberListView`, `StreamThreadListView`, `StreamPollVoteListView`, `StreamReactionListView`, `StreamMessageSearchListView`, `StreamScheduledMessageListView`, `StreamPhotoGallery` and the grid variants) now receives a `StreamChatException` instead of a `StreamChatError`.
 - `AttachmentLimitReachedError`, `AttachmentTooLargeError` and `AttachmentBlockedError` now extend the sealed `AttachmentValidationError` rather than `StreamChatError`, and `StreamAttachmentValidator.validate` and `validateCount` return one. A refused attachment is not a failed call, so it is no longer one of the `StreamException` kinds.
 
 🔄 Changed
@@ -11,6 +11,64 @@
 - `StreamUserAvatar` shows its placeholder icon for a user with no name, instead of initials taken from their id.
 
 ## Upcoming
+
+✅ Added
+
+- Added `StreamScheduledMessageListView` to list the current user's scheduled messages.
+- Added `showStreamScheduledMessageActionsSheet` to act on a scheduled message.
+
+🔄 Changed
+
+- A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
+
+## 10.7.0
+
+✅ Added
+
+- Added a next action to the poll creator's option fields, which moves to the next option or adds a new one from the last.
+- Added `StreamMessagePreviewTextTheme` and `StreamChatThemeData.messagePreviewTextTheme`, to style the "Draft:" and sender prefixes, the deleted message and the icons in message previews.
+- Added `messagePreviewTextTheme` to `StreamQuotedMessageThemeData`, `StreamChannelListItemThemeData` and `StreamThreadListTileThemeData`, to style parts of the message preview on each.
+
+🔄 Changed
+
+- Removing an empty poll option no longer asks for confirmation.
+- A deleted message in `StreamMessagePreviewText` now matches the rest of the preview unless `StreamMessagePreviewTextThemeData.deletedContentStyle` sets a style. The channel list, thread list and message search still apply their own deleted style.
+- Icons in `StreamMessagePreviewText` and `StreamDraftMessagePreviewText` no longer follow a surrounding `IconTheme`.
+- Values a local `StreamThreadListTileTheme` leaves unset now keep their `StreamChatThemeData.threadListTileTheme` setting instead of resetting to the default.
+- A `www.` address in a message now opens over `https://` instead of `http://`.
+
+🐞 Fixed
+
+- Fixed swiping a message starting a reply in a channel that doesn't allow quoting or while the message is still being sent.
+- Fixed a web address written without `https://`, such as `youtube.com`, not being tappable in a message.
+- Fixed a web address right after a quote or Chinese or Japanese text not being tappable in a message.
+- Fixed `StreamThreadPage` hiding the composer for a deleted parent message that already has replies, which can still be replied to.
+- Fixed the "Only visible to you" Giphy preview showing a delivery status.
+- Fixed channel list previews showing a "You:" or sender name prefix, and the delivery status, in front of a system message.
+- Fixed a deleted message hiding its replies count, which left its thread unreachable from the channel.
+- Fixed `StreamMessageComposer` throwing when its channel is disposed while it still holds unsent text, for example when the user is disconnected with a channel page open.
+- Fixed a message that failed to send, update or delete hiding the timestamp and delivery status of the message before it.
+- Fixed a voice recording sent as a reply without text showing inside a filled container instead of directly on the message bubble.
+- Fixed a mention rendering as another mentioned user's shorter mention followed by leftover text, such as `@Anna` next to `@Ann`.
+- Fixed the poll creator showing the reorder handle and remove button when there is only one option.
+- Fixed a link that points straight to an image showing as a plain image instead of a link preview, and appearing twice in the message composer.
+- Fixed the keyboard closing when removing the link preview in the message composer.
+- Fixed messages and their channel list preview showing a "sent" checkmark in channels without read events.
+- Fixed tapping a quote of a thread reply in the channel not opening the thread, and a thread opened at one of its replies not scrolling to it.
+- Fixed `StreamMessageComposer` always sending the default `skipEnrichUrl`, so the server could add a link preview the user removed, or a second one next to the attached preview.
+- Fixed the composer's command and mention suggestions staying open after tapping outside the composer, such as on the message list.
+- Fixed "Message deleted" in a quoted reply showing in a muted gray instead of the reply's text color.
+- Fixed icons in message previews showing in a different color from the text beside them.
+- Fixed a quoted reply to your own message showing your name instead of "You".
+- Fixed a deleted message in a thread list preview showing in the tertiary text color instead of the secondary one.
+- Fixed the "You:" and sender name prefix in message previews showing bold instead of semibold, and in the text color instead of a muted one in the channel and thread lists.
+- Fixed the "Draft:" prefix in channel list previews showing bold instead of semibold.
+- Fixed icons in a quoted reply and in the composer's reply and edit previews showing at 16 pixels instead of 12.
+- Fixed "No messages yet" in the channel list showing in the secondary text color instead of the tertiary one.
+- Fixed the root message in a thread list preview showing in the app's default text color instead of the primary one.
+- Fixed some file sizes of 1 MB and up, such as 1.5 MB, showing rounded to a whole number, such as 2 MB.
+
+## 10.6.0
 
 ✅ Added
 

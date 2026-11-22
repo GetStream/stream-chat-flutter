@@ -7,7 +7,7 @@ part of 'bodyguard_rule.dart';
 // **************************************************************************
 
 BodyguardRule _$BodyguardRuleFromJson(Map<String, dynamic> json) => BodyguardRule(
-  action: BodyguardRuleAction.fromJson(json['action'] as String),
+  action: json['action'] as BodyguardRuleAction,
   label: json['label'] as String,
   severityRules: (json['severity_rules'] as List<dynamic>)
       .map((e) => BodyguardSeverityRule.fromJson(e as Map<String, dynamic>))
@@ -15,7 +15,7 @@ BodyguardRule _$BodyguardRuleFromJson(Map<String, dynamic> json) => BodyguardRul
 );
 
 Map<String, dynamic> _$BodyguardRuleToJson(BodyguardRule instance) => <String, dynamic>{
-  'action': instance.action.toJson(),
+  'action': instance.action,
   'label': instance.label,
   'severity_rules': instance.severityRules.map((e) => e.toJson()).toList(),
 };
