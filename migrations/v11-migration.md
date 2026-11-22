@@ -536,7 +536,7 @@ counterpart: `code` is now a `StreamErrorCode` (an extension type over `int`, wi
 ## Offline Cache
 
 If you use `stream_chat_persistence`, the local database is **rebuilt from empty** the first time your app runs
-on v11. The Drift schema version moves from v10's `1000 + n` (`1035` in v10.5.0) to `1107`, and the upgrade strategy
+on v11. The Drift schema version moves from v10's `1000 + n` (`1035` in v10.5.0) to `1108`, and the upgrade strategy
 drops and recreates every table rather than migrating rows.
 
 Everything held on disk is discarded: channels, messages, members, reads, drafts, locations, polls, poll votes
