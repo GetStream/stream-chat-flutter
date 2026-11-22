@@ -3,6 +3,7 @@ repository: https://github.com/GetStream/stream-chat-flutter
 
 packages:
   - docs/*
+  - e2e_app
   - sample_app
   - packages/*
   - packages/*/example
@@ -10,6 +11,8 @@ packages:
 categories:
   docs:
     - docs/*
+  e2e_app:
+    - e2e_app
   sample_app:
     - sample_app
   packages:
@@ -24,7 +27,7 @@ command:
 
     # Resolves `stream_core` from a sibling checkout when there is one, so the two repos can be
     # worked on together without editing the ref below. Scoped to `stream_core` on purpose:
-    # `packages/**` would also capture `stream_thumbnail`, which is pinned to a different commit.
+    # `packages/**` would also capture `stream_core_flutter` and `stream_thumbnail`, which resolve elsewhere.
     dependencyOverridePaths:
       - '../stream-core-flutter/packages/stream_core'
 
@@ -44,13 +47,13 @@ command:
       collection: ^1.19.1
       connectivity_plus: ^7.1.1
       cupertino_icons: ^1.0.3
-      desktop_drop: ^0.7.1
+      desktop_drop: '>=0.8.4 <0.9.0'
       device_info_plus: '>=12.4.0 <14.0.0'
       device_preview: ^1.2.0
       diacritic: ^0.1.6
       dio: ^5.11.0
       drift: ^2.33.0
-      equatable: ^2.0.8
+      equatable: ">=2.0.8 <4.0.0"
       ezanimation: ^0.6.0
       firebase_core: ^4.0.0
       # Capped below 5.2.5 / 16.4.2: those releases import `FirebasePlugin` from
@@ -69,6 +72,7 @@ command:
       flutter_secure_storage: ^10.3.1
       flutter_slidable: ^3.1.1
       flutter_svg: ^2.3.0
+      flutter_timezone: ^5.1.1
       freezed_annotation: ^3.0.0
       gal: ^2.3.2
       geolocator: ^13.0.0
@@ -94,47 +98,40 @@ command:
       path: ^1.9.1
       path_provider: ^2.1.5
       path_provider_android: ">=2.2.5 <2.3.0"
-      photo_manager: ^3.9.0
+      photo_manager: '>=3.11.0 <4.0.0'
       photo_view: ^0.15.0
       rate_limiter: ^1.1.0
-      record: ^6.2.0
+      record: '>=6.2.0 <8.0.0'
       responsive_builder: ^0.7.0
       retrofit: ^4.9.2
       rxdart: ^0.28.0
       share_plus: ">=12.0.2 <14.0.0"
       sqlite3_flutter_libs: ^0.5.26
-      stream_chat: ^10.5.0
-      stream_chat_flutter: ^10.5.0
-      stream_chat_flutter_core: ^10.5.0
-      stream_chat_localizations: ^10.5.0
-      stream_chat_persistence: ^10.5.0
+      stream_chat: ^10.7.0
+      stream_chat_flutter: ^10.7.0
+      stream_chat_flutter_core: ^10.7.0
+      stream_chat_localizations: ^10.7.0
+      stream_chat_persistence: ^10.7.0
       streaming_shared_preferences: ^2.0.0
       svg_icon_widget: ^0.0.1
-      # Both core packages come from one pinned commit while v11 lands
-      # alongside stream-core-flutter. Pinned to a SHA rather than a branch:
-      # pub treats a branch ref and a resolved SHA as different sources, so a
-      # branch name fails to solve.
+      # `stream_core` comes from a pinned commit until the fix for
+      # `--analyze-size` AOT builds crashing on sort fields is released
+      # (GetStream/stream-core-flutter#254). Pinned to a SHA rather than a
+      # branch: pub treats a branch ref and a resolved SHA as different
+      # sources, so a branch name fails to solve.
       #
-      # `stream_core_flutter` declares a hosted `stream_core`, which keeps it
-      # publishable but names a second source for a package taken here from
-      # git — and pub allows a package only one. Every workspace package that
-      # sees both therefore overrides `stream_core` to this same ref. Restore
-      # hosted constraints before release and the overrides go with them.
+      # `stream_core_flutter` declares a hosted `stream_core`, which names a
+      # second source for a package taken here from git — and pub allows a
+      # package only one. Every workspace package that sees both therefore
+      # overrides `stream_core` to this same ref. Restore the hosted constraint
+      # once the fix is released and the overrides go with it.
       stream_core:
         git:
           url: https://github.com/GetStream/stream-core-flutter.git
           path: packages/stream_core
-          ref: 6042453b56c782d9c8b29a2d103ae73ba433814c
-      stream_core_flutter:
-        git:
-          url: https://github.com/GetStream/stream-core-flutter.git
-          path: packages/stream_core_flutter
-          ref: 1546087d1a3dac29e824853fb2a9f05dcd2d41e6
-      stream_thumbnail:
-        git:
-          url: https://github.com/GetStream/stream-core-flutter.git
-          ref: 2aea1413997af886ee951921d71e6b8cb8c5cfbb
-          path: packages/stream_thumbnail
+          ref: 340e010f186c5fc221b31d8e9b4102ba1530a2ef
+      stream_core_flutter: ^0.5.4
+      stream_thumbnail: ^0.2.0
       synchronized: ^3.4.0
       url_launcher: ^6.3.2
       uuid: ^4.5.3
@@ -143,6 +140,7 @@ command:
     # List of all the dev_dependencies used in the project.
     dev_dependencies:
       alchemist: ^0.14.0
+      benchmark_harness: ^2.4.0
       build_runner: ^2.15.0
       emojis: ^0.9.9
       substring_highlight: ^1.0.33
@@ -247,7 +245,7 @@ scripts:
       dirExists: test
 
   e2e:run:
-    run: melos exec -c 1 --scope="sample_app" -- "flutter test integration_test/"
+    run: melos exec -c 1 --scope="e2e_app" -- "flutter test integration_test/"
     description: >
       Run the integration_test e2e suite. Start the mock-server driver first
       (`fastlane start_mock_server`), or use the `run_e2e_test` Fastlane lane to
@@ -278,8 +276,10 @@ scripts:
       flutter: true
 
   coverage:ignore-file:
+    # One package at a time: the first run builds remove_from_coverage, and
+    # parallel first runs would replace each other's build.
     run: |
-      melos exec -c 5 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/remove-from-coverage.sh"
+      melos exec -c 1 --fail-fast -- "\$MELOS_ROOT_PATH/.github/workflows/scripts/remove-from-coverage.sh"
     description: Removes all the ignored files from the coverage report.
     packageFilters:
       dirExists: coverage

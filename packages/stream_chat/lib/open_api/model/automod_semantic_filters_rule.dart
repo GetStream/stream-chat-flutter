@@ -13,19 +13,6 @@ import '../models.dart';
 part 'automod_semantic_filters_rule.g.dart';
 part 'automod_semantic_filters_rule.freezed.dart';
 
-extension type const AutomodSemanticFiltersRuleAction._(String _) implements String {
-  static const bounce = AutomodSemanticFiltersRuleAction._('bounce');
-  static const bounceFlag = AutomodSemanticFiltersRuleAction._('bounce_flag');
-  static const bounceRemove = AutomodSemanticFiltersRuleAction._('bounce_remove');
-  static const flag = AutomodSemanticFiltersRuleAction._('flag');
-  static const remove = AutomodSemanticFiltersRuleAction._('remove');
-  static const shadow = AutomodSemanticFiltersRuleAction._('shadow');
-
-  factory AutomodSemanticFiltersRuleAction.fromJson(String json) => AutomodSemanticFiltersRuleAction._(json);
-
-  String toJson() => this;
-}
-
 @freezed
 @immutable
 @JsonSerializable()
@@ -38,7 +25,7 @@ class AutomodSemanticFiltersRule with _$AutomodSemanticFiltersRule {
 
   @override
   @JsonKey(name: 'action')
-  final AutomodSemanticFiltersRuleAction action;
+  final ModerationAction action;
 
   @override
   @JsonKey(name: 'name')

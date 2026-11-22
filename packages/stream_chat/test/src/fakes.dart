@@ -6,6 +6,7 @@ import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/general_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/push_preferences_api.dart';
+import 'package:stream_chat/src/core/api/scheduled_messages_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/stream_chat.dart';
 
@@ -53,6 +54,7 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
 
   // Track method calls for testing
   int connectCallCount = 0;
+  int settleCallCount = 0;
   int disconnectCallCount = 0;
   int flushCallCount = 0;
 
@@ -71,6 +73,9 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
     _isConnected = true;
     connectCallCount++;
   }
+
+  @override
+  Future<void> settleInterruptedRequests() async => settleCallCount++;
 
   @override
   Future<void> disconnect({bool flush = false}) async {
@@ -146,6 +151,11 @@ class FakeChatApi extends Fake implements StreamChatApi {
 
   @override
   GeneralApi get general => _general ??= MockGeneralApi();
+
+  ScheduledMessagesApi? _scheduledMessages;
+
+  @override
+  ScheduledMessagesApi get scheduledMessages => _scheduledMessages ??= MockScheduledMessagesApi();
 }
 
 /// Answers the `getApp` call `connectUser` makes on the generated client.

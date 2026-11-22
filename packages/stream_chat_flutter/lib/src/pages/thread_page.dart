@@ -8,7 +8,7 @@ import '../../stream_chat_flutter.dart';
 /// out floating or regular according to the ambient [StreamSurfaceStyle]. Expects a
 /// [StreamChannel] ancestor.
 ///
-/// The composer is omitted when [parent] is deleted.
+/// The composer is omitted when [parent] is deleted and has no replies.
 ///
 /// ## Customizing this page
 ///
@@ -31,6 +31,7 @@ class StreamThreadPage extends StatefulWidget {
     this.initialScrollIndex,
     this.initialAlignment,
     this.onViewInChannelTap,
+    this.automaticallyImplyLeading = true,
     this.onBackPressed,
   });
 
@@ -45,6 +46,11 @@ class StreamThreadPage extends StatefulWidget {
 
   /// Called when the user taps "View in channel".
   final void Function(Message message)? onViewInChannelTap;
+
+  /// Whether the header shows a back button.
+  ///
+  /// When `false`, [onBackPressed] is never called. Defaults to `true`.
+  final bool automaticallyImplyLeading;
 
   /// Called when the header's back button is pressed.
   ///
@@ -89,12 +95,14 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
   Widget build(BuildContext context) {
     final appBar = StreamThreadHeader(
       parent: widget.parent,
+      automaticallyImplyLeading: widget.automaticallyImplyLeading,
       // Leaving this null keeps the header's default back button, which pops
       // the route.
       onBackPressed: widget.onBackPressed,
     );
 
-    final composer = !widget.parent.isDeleted
+    final canReply = !widget.parent.isDeleted || (widget.parent.replyCount ?? 0) > 0;
+    final composer = canReply
         ? StreamMessageComposer(
             focusNode: _focusNode,
             messageComposerController: _messageComposerController,
@@ -106,7 +114,7 @@ class _StreamThreadPageState extends State<StreamThreadPage> {
       appBar: appBar,
       bottom: composer,
       // Resolved from the slots so the body inset matches what the chrome draws.
-      // The bottom value is ignored when the composer is null (deleted parent).
+      // The bottom value is ignored when the composer is null.
       appBarSurfaceStyle: StreamThreadHeader.resolveSurfaceStyle(context),
       bottomSurfaceStyle: StreamMessageComposer.resolveSurfaceStyle(context),
       body: _ThreadBody(

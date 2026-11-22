@@ -1,17 +1,20 @@
 name: 'PR is Conventional and Semantic'
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - edited
       - synchronize
+      # [changelog_placement] can be waived with the `changelog-override`
+      # label, so it has to re-run when labels change.
+      - labeled
+      - unlabeled
     branches:
       - master
       - v11
       - v9
 
 concurrency:
-  # Use PR number — github.ref is the base branch under pull_request_target.
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
@@ -43,7 +46,7 @@ jobs:
     needs: conventional_pr_title # Trigger after the [conventional_pr_title] completes
     runs-on: ubuntu-latest
     steps:
-      - uses: GetStream/verify-semantic-changelog-update@main
+      - uses: GetStream/verify-semantic-changelog-update@v1.1.0
         with:
           scopes: |
             {
@@ -55,3 +58,15 @@ jobs:
             }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # [semantic_changelog_update] checks that a changelog was updated at all; this
+  # checks that the entries went under `## Upcoming` (or v11's `## Upcoming Beta`)
+  # rather than into a section for a version that is already published. Version
+  # headings published from master count as released, so v11 can carry them.
+  changelog_placement:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: GetStream/verify-semantic-changelog-update/placement@v1.1.0
+        with:
+          upcoming-heading: 'Upcoming( Beta)?'
+          released-from: master

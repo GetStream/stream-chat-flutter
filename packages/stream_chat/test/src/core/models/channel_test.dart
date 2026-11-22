@@ -24,6 +24,8 @@ void main() {
       expect(channel.truncatedBy?.name, 'Truncator');
       expect(channel.autoTranslationEnabled, isTrue);
       expect(channel.autoTranslationLanguage, 'fr');
+      expect(channel.activeMemberCount, 3);
+      expect(channel.custom, isNot(contains('active_member_count')));
     });
 
     test('should serialize to json correctly', () {
@@ -252,5 +254,37 @@ void main() {
     );
 
     expect(channel.lastUpdatedAt, DateTime(2023, 6, 10));
+  });
+
+  test('ChannelModel.copyWith replaces the active member count it is given', () {
+    final channel = ChannelModel(cid: 'test:cid', activeMemberCount: 3);
+
+    final newChannel = channel.copyWith(activeMemberCount: 4);
+
+    expect(newChannel.activeMemberCount, 4);
+  });
+
+  test('ChannelModel.copyWith keeps the active member count it is not given', () {
+    final channel = ChannelModel(cid: 'test:cid', activeMemberCount: 3);
+
+    final newChannel = channel.copyWith(team: 'blue');
+
+    expect(newChannel.activeMemberCount, 3);
+  });
+
+  test('ChannelModel.merge keeps the active member count the other channel leaves out', () {
+    final channel = ChannelModel(cid: 'test:cid', activeMemberCount: 3);
+
+    final merged = channel.merge(ChannelModel(cid: 'test:cid'));
+
+    expect(merged.activeMemberCount, 3);
+  });
+
+  test('ChannelModel.merge takes the active member count from the other channel', () {
+    final channel = ChannelModel(cid: 'test:cid', activeMemberCount: 3);
+
+    final merged = channel.merge(ChannelModel(cid: 'test:cid', activeMemberCount: 2));
+
+    expect(merged.activeMemberCount, 2);
   });
 }

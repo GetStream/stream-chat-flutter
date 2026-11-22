@@ -52,7 +52,7 @@ class DeviceResponse with _$DeviceResponse {
 
   @override
   @JsonKey(name: 'push_provider')
-  final String pushProvider;
+  final PushProviderName pushProvider;
 
   @override
   @JsonKey(name: 'push_provider_name')

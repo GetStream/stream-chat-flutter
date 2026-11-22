@@ -39,7 +39,7 @@ MessageRequest _$MessageRequestFromJson(Map<String, dynamic> json) => MessageReq
   showInChannel: json['show_in_channel'] as bool?,
   silent: json['silent'] as bool?,
   text: json['text'] as String?,
-  type: json['type'] == null ? null : MessageRequestType.fromJson(json['type'] as String),
+  type: json['type'] as MessageRequestType?,
 );
 
 Map<String, dynamic> _$MessageRequestToJson(MessageRequest instance) => <String, dynamic>{
@@ -69,7 +69,7 @@ Map<String, dynamic> _$MessageRequestToJson(MessageRequest instance) => <String,
   'show_in_channel': instance.showInChannel,
   'silent': instance.silent,
   'text': instance.text,
-  'type': instance.type?.toJson(),
+  'type': instance.type,
 };
 
 Value? _$JsonConverterFromJson<Json, Value>(

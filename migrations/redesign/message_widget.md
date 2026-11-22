@@ -198,7 +198,7 @@ These parameters have been removed entirely. See the **Migration Path** column f
 | `padding`                      | Outer padding around the message item (overrides theme)            |
 | `spacing`                      | Horizontal spacing between avatar and content (overrides theme)    |
 | `backgroundColor`              | Background color for the message row (overrides theme)             |
-| `maxWidth`                     | Max content width in logical pixels (default: `264` on `StreamMessageItem`, `272` on `StreamMessageItemProps`) |
+| `maxWidth`                     | Max content width in logical pixels (default: `272`)               |
 | `onMessageLinkTap`             | `void Function(Message, String)` — receives message and URL        |
 | `onUserMentionTap`             | `void Function(User)` — receives the mentioned user                |
 | `onQuotedMessageTap`           | `void Function(Message)` — receives the quoted message object      |

@@ -8,10 +8,10 @@ part of 'event_response.dart';
 
 EventResponse _$EventResponseFromJson(Map<String, dynamic> json) => EventResponse(
   duration: json['duration'] as String,
-  event: wsEventFromJson(json['event'] as Map<String, dynamic>),
+  event: WSEvent.fromJson(json['event'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$EventResponseToJson(EventResponse instance) => <String, dynamic>{
   'duration': instance.duration,
-  'event': wsEventToJson(instance.event),
+  'event': instance.event.toJson(),
 };

@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$DeleteUserMessagesRequestPayload {
   String? get channelCid;
-  DeleteUserMessagesRequestPayloadDeleteMessages get deleteMessages;
+  DeleteMessages get deleteMessages;
   bool? get deleteReactions;
   String? get entityId;
   String? get entityType;
@@ -69,7 +69,7 @@ abstract mixin class $DeleteUserMessagesRequestPayloadCopyWith<$Res> {
   @useResult
   $Res call({
     String? channelCid,
-    DeleteUserMessagesRequestPayloadDeleteMessages deleteMessages,
+    DeleteMessages deleteMessages,
     bool? deleteReactions,
     String? entityId,
     String? entityType,
@@ -105,7 +105,7 @@ class _$DeleteUserMessagesRequestPayloadCopyWithImpl<$Res> implements $DeleteUse
         deleteMessages: null == deleteMessages
             ? _self.deleteMessages
             : deleteMessages // ignore: cast_nullable_to_non_nullable
-                  as DeleteUserMessagesRequestPayloadDeleteMessages,
+                  as DeleteMessages,
         deleteReactions: freezed == deleteReactions
             ? _self.deleteReactions
             : deleteReactions // ignore: cast_nullable_to_non_nullable

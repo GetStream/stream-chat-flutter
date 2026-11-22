@@ -91,7 +91,13 @@ class KeyStrokeHandler {
   /// Completes early with the failure of [onStartTyping], which also cancels
   /// the scheduled stop. An error either callback throws completes this with
   /// that error.
+  ///
+  /// Switching [parentId] stops typing under the previous one.
   Future<Result<void>> call([String? parentId]) async {
+    if (_lastTypingEvent != null && parentId != _currentParentId) {
+      _stopTyping(_currentParentId).ignore();
+    }
+
     final completer = _resetKeyStrokeCompleter();
 
     _cancelKeyStrokeTimer();

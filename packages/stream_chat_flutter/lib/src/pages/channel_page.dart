@@ -60,6 +60,7 @@ class StreamChannelPage extends StatefulWidget {
     super.key,
     this.initialScrollIndex,
     this.initialAlignment,
+    this.automaticallyImplyLeading = true,
     this.onBackPressed,
     this.onChannelAvatarPressed,
   });
@@ -69,6 +70,11 @@ class StreamChannelPage extends StatefulWidget {
 
   /// Initial scroll alignment for the message list.
   final double? initialAlignment;
+
+  /// Whether the header shows a back button.
+  ///
+  /// When `false`, [onBackPressed] is never called. Defaults to `true`.
+  final bool automaticallyImplyLeading;
 
   /// Called when the header's back button is pressed.
   ///
@@ -113,6 +119,7 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
   @override
   Widget build(BuildContext context) {
     final appBar = StreamChannelHeader(
+      automaticallyImplyLeading: widget.automaticallyImplyLeading,
       // Leaving this null keeps the header's default back button, which pops
       // the route.
       onBackPressed: widget.onBackPressed,
@@ -126,16 +133,6 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
       enableVoiceRecording: true,
     );
 
-    final typingIndicator = StreamTypingIndicator(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 8,
-        vertical: 4,
-      ),
-      style: context.streamTextTheme.captionDefault.copyWith(
-        color: context.streamColorScheme.textSecondary,
-      ),
-    );
-
     return StreamScaffold(
       appBar: appBar,
       bottom: composer,
@@ -147,28 +144,20 @@ class _StreamChannelPageState extends State<StreamChannelPage> {
         initialAlignment: widget.initialAlignment,
         onReply: _reply,
         onEditMessage: _editMessage,
-        typingIndicator: typingIndicator,
       ),
     );
   }
 }
 
 // The body of a channel page.
-//
-// Positions the typing indicator just above the composer (floating or docked)
-// via a bottom SafeArea over the floating-bar insets in MediaQuery.padding
-// (injected by StreamScaffold). StreamMessageListView reads the same insets
-// directly to pad its scroll content.
 class _ChannelPageBody extends StatelessWidget {
   const _ChannelPageBody({
-    required this.typingIndicator,
     required this.onReply,
     required this.onEditMessage,
     this.initialScrollIndex,
     this.initialAlignment,
   });
 
-  final Widget typingIndicator;
   final void Function(Message) onReply;
   final void Function(Message) onEditMessage;
   final int? initialScrollIndex;
@@ -176,27 +165,15 @@ class _ChannelPageBody extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      children: [
-        StreamMessageListView(
-          initialScrollIndex: initialScrollIndex,
-          initialAlignment: initialAlignment,
-          onEditMessageTap: onEditMessage,
-          onReplyTap: onReply,
-          threadBuilder: (_, parentMessage) {
-            return StreamThreadPage(parent: parentMessage!);
-          },
-          enableSafeArea: true,
-        ),
-        Positioned(
-          left: 0,
-          right: 0,
-          bottom: 0,
-          // A bottom SafeArea lifts the indicator above the composer / bottom
-          // bar — the scaffold injects its extent into MediaQuery.padding.bottom.
-          child: SafeArea(top: false, child: typingIndicator),
-        ),
-      ],
+    return StreamMessageListView(
+      initialScrollIndex: initialScrollIndex,
+      initialAlignment: initialAlignment,
+      onEditMessageTap: onEditMessage,
+      onReplyTap: onReply,
+      threadBuilder: (_, parentMessage) {
+        return StreamThreadPage(parent: parentMessage!);
+      },
+      enableSafeArea: true,
     );
   }
 }

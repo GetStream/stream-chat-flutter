@@ -115,7 +115,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
       body: Builder(
         builder: (context) {
           final topInset = MediaQuery.paddingOf(context).top;
-          return Padding(
+          final content = Padding(
             padding: EdgeInsets.fromLTRB(16, 16 + topInset, 16, 0),
             child: Form(
               key: _formKey,
@@ -332,6 +332,8 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
               ),
             ),
           );
+
+          return SafeArea(top: false, bottom: false, child: content);
         },
       ),
     );

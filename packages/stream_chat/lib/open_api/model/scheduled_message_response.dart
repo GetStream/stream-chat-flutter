@@ -18,6 +18,7 @@ part 'scheduled_message_response.freezed.dart';
 @JsonSerializable()
 class ScheduledMessageResponse with _$ScheduledMessageResponse {
   const ScheduledMessageResponse({
+    this.channel,
     required this.cid,
     required this.createdAt,
     this.failureReason,
@@ -30,6 +31,10 @@ class ScheduledMessageResponse with _$ScheduledMessageResponse {
   });
 
   @override
+  @JsonKey(name: 'channel')
+  final ScheduledMessageChannelResponse? channel;
+
+  @override
   @JsonKey(name: 'cid')
   final String cid;
 
@@ -40,7 +45,7 @@ class ScheduledMessageResponse with _$ScheduledMessageResponse {
 
   @override
   @JsonKey(name: 'failure_reason')
-  final String? failureReason;
+  final ScheduledMessageFailureReason? failureReason;
 
   @override
   @JsonKey(name: 'id')
@@ -57,7 +62,7 @@ class ScheduledMessageResponse with _$ScheduledMessageResponse {
 
   @override
   @JsonKey(name: 'status')
-  final String status;
+  final ScheduledMessageStatus status;
 
   @override
   @StreamDateTimeConverter()

@@ -28,8 +28,6 @@ const _kAndroidPushProvider = PushProvider.firebase(name: 'firebase');
 /// SQLite connection.
 final _chatPersistenceClient = StreamChatPersistenceClient();
 
-bool get isE2eTestRun => authController.debugConnectionOverride != null;
-
 /// Prints records in debug builds and reports the ones carrying an error to
 /// Crashlytics.
 class _SampleAppLogHandler extends StreamLogHandler {
@@ -37,8 +35,6 @@ class _SampleAppLogHandler extends StreamLogHandler {
 
   @override
   void handle(StreamLogRecord record) {
-    if (isE2eTestRun) return;
-
     if (kDebugMode) const StreamLogHandler.console().handle(record);
 
     // Report errors to Firebase Crashlytics, keyed on the priority rather than on an error being
@@ -55,72 +51,20 @@ class _SampleAppLogHandler extends StreamLogHandler {
   }
 }
 
-@visibleForTesting
-class StreamConnectionOverride {
-  const StreamConnectionOverride({
-    this.baseURL,
-    this.baseWsUrl,
-    this.usePersistence = false,
-  });
-
-  final String? baseURL;
-  final String? baseWsUrl;
-  final bool usePersistence;
-}
-
-StreamChatClient _buildStreamChatClient(
-  String apiKey, {
-  String? baseUrl,
-  StreamConnectionOverride? connectionOverride,
-}) {
-  final priority = switch (connectionOverride) {
-    _? => StreamLogPriority.none,
-    _ when kDebugMode => StreamLogPriority.debug,
-    _ => StreamLogPriority.error,
-  };
-
+StreamChatClient _buildStreamChatClient(String apiKey, {String? baseUrl}) {
   return StreamChatClient(
-      apiKey,
-      logConfig: StreamLogConfig(
-        priority: priority,
-        handler: const _SampleAppLogHandler(),
-      ),
-      retryPolicy: RetryPolicy(
-        maxRetryAttempts: 3,
-        shouldRetry: (client, attempt, error) => error?.isRetriable ?? false,
-      ),
-      baseURL: connectionOverride?.baseURL ?? baseUrl,
-      baseWsUrl: connectionOverride?.baseWsUrl,
-      // e2e only: lets the harness simulate a full network outage by failing
-      // every HTTP request (paired with the WebSocket close from
-      // debugConnectivityStream). See `AuthController.debugForceOffline`.
-      chatApiInterceptors: connectionOverride != null ? [_offlineSimulationInterceptor] : null,
-    )
-    ..chatPersistenceClient = switch (connectionOverride) {
-      // Production always persists.
-      null => _chatPersistenceClient,
-      // Under e2e, persistence is opt-in per test; the harness empties the DB
-      // on teardown (see AuthController.debugReset) so it can't leak between
-      // tests. Off by default keeps most e2e tests fast and DB-free.
-      final override => override.usePersistence ? _chatPersistenceClient : null,
-    };
+    apiKey,
+    logConfig: const StreamLogConfig(
+      priority: kDebugMode ? StreamLogPriority.debug : StreamLogPriority.error,
+      handler: _SampleAppLogHandler(),
+    ),
+    retryPolicy: RetryPolicy(
+      maxRetryAttempts: 3,
+      shouldRetry: (client, attempt, error) => error?.isRetriable ?? false,
+    ),
+    baseURL: baseUrl,
+  )..chatPersistenceClient = _chatPersistenceClient;
 }
-
-/// Rejects every Stream API request with a connection error while
-/// [AuthController.debugForceOffline] is set, mimicking a device that has lost
-/// its network — the HTTP half of the e2e offline switch.
-final _offlineSimulationInterceptor = InterceptorsWrapper(
-  onRequest: (options, handler) {
-    if (!authController.debugForceOffline) return handler.next(options);
-    return handler.reject(
-      DioException(
-        requestOptions: options,
-        type: DioExceptionType.connectionError,
-        error: 'e2e: simulated offline',
-      ),
-    );
-  },
-);
 
 /// Authentication state exposed by [AuthController].
 sealed class AuthState {
@@ -170,24 +114,6 @@ class AuthController extends ValueNotifier<AuthState> {
     final baseUrl = _activeBaseUrl ?? '';
     return apiKey != kDefaultStreamApiKey || baseUrl != kStreamBaseUrl;
   }
-
-  @visibleForTesting
-  StreamConnectionOverride? debugConnectionOverride;
-
-  /// Test-controlled connectivity source fed to the `StreamChat` widget.
-  ///
-  /// When set, it replaces the real `connectivity_plus` monitor so e2e tests
-  /// can deterministically drive the client offline/online (see the e2e
-  /// harness's `goOffline`/`goOnline`). Null in production (read by `app.dart`,
-  /// so it can't be `@visibleForTesting` like [debugConnectionOverride]).
-  Stream<List<ConnectivityResult>>? debugConnectivityStream;
-
-  /// e2e only: when true, every Stream API HTTP request fails with a simulated
-  /// connection error (see [_offlineSimulationInterceptor]). Paired with the
-  /// WebSocket close driven by [debugConnectivityStream] to simulate a full
-  /// network outage. Toggled by the harness's `goOffline`/`goOnline`.
-  @visibleForTesting
-  bool debugForceOffline = false;
 
   String? _activeApiKey;
   String? _activeBaseUrl;
@@ -248,7 +174,6 @@ class AuthController extends ValueNotifier<AuthState> {
     final client = _client ??= _buildStreamChatClient(
       apiKey,
       baseUrl: baseUrl,
-      connectionOverride: debugConnectionOverride,
     );
     _activeApiKey = apiKey;
     _activeBaseUrl = baseUrl;
@@ -266,13 +191,11 @@ class AuthController extends ValueNotifier<AuthState> {
         ]);
       }
 
-      if (!isE2eTestRun) {
-        _pushTokenManager = PushTokenManager(
-          client: client,
-          iosPushProvider: _kIosPushProvider,
-          androidPushProvider: _kAndroidPushProvider,
-        )..registerDevice();
-      }
+      _pushTokenManager = PushTokenManager(
+        client: client,
+        iosPushProvider: _kIosPushProvider,
+        androidPushProvider: _kAndroidPushProvider,
+      )..registerDevice();
 
       value = Authenticated(ownUser);
     } catch (_) {
@@ -303,41 +226,6 @@ class AuthController extends ValueNotifier<AuthState> {
     // list's final rebuild trips `channel.state != null`.
     await SchedulerBinding.instance.endOfFrame;
     client.disconnectUser(flushChatPersistence: flushPersistence).ignore();
-  }
-
-  @visibleForTesting
-  Future<void> debugReset() async {
-    _pushTokenManager?.dispose().ignore();
-    _pushTokenManager = null;
-
-    // Detach persistence from the client *before* closing it. Every SDK path
-    // that reaches for it either uses `chatPersistenceClient?.` or is guarded by
-    // `persistenceEnabled` (which is false once this is null), so anything that
-    // lands after this point short-circuits instead of asserting against a
-    // disconnected database. Ordering the teardown differently could not close
-    // that window: a debounced channel-state write fires up to a second later,
-    // and an HTTP request already on the wire cannot be cancelled at all — its
-    // response builds a `ChannelClientState`, whose constructor reads the cached
-    // threads. Both used to throw an async StateError, which the test framework
-    // then blamed on an unrelated test that had already passed.
-    final persistence = _client?.chatPersistenceClient;
-    _client?.chatPersistenceClient = null;
-    // dispose() won't flush; empty the DB so it can't leak into the next test.
-    await persistence?.disconnect(flush: true);
-    await _client?.dispose();
-    _client = null;
-    _activeApiKey = null;
-    _activeBaseUrl = null;
-    debugConnectionOverride = null;
-    debugConnectivityStream = null;
-    debugForceOffline = false;
-
-    if (platformSupportsPersistenceCredentials) {
-      const secureStorage = FlutterSecureStorage();
-      await secureStorage.deleteAll();
-    }
-
-    value = const Unauthenticated();
   }
 
   @override

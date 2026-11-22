@@ -192,20 +192,30 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
   Widget build(BuildContext context) {
     final spacing = context.streamSpacing;
     final crossAxisAlignment = core.StreamMessageLayout.crossAxisAlignmentOf(context);
+    final contentKind = core.StreamMessageLayout.contentKindOf(context);
 
     // Only a row that speaks its own composed label has already said what the
     // bubble contains; without one the bubble is all a reader has.
     final excluding = widget.excludeTextFromSemantics;
 
     // A deleted message keeps its metadata: the design shows the timestamp and
-    // the delivery status below the placeholder, same as any other message.
+    // the delivery status below the placeholder, same as any other message. A
+    // deleted thread parent also keeps its replies, so the thread stays
+    // reachable.
     if (widget.message.isDeleted) {
       return core.StreamMessageContent(
         header: widget.header,
         footer: widget.footer,
-        // The composed row label already speaks the placeholder, so announcing
-        // it here as well would repeat it.
-        child: ExcludeSemantics(excluding: excluding, child: const StreamMessageDeleted()),
+        child: core.StreamColumn(
+          mainAxisSize: .min,
+          crossAxisAlignment: crossAxisAlignment,
+          children: [
+            // The composed row label already speaks the placeholder, so
+            // announcing it here as well would repeat it.
+            ExcludeSemantics(excluding: excluding, child: const StreamMessageDeleted()),
+            if (widget.replies case final replies?) replies,
+          ],
+        ),
       );
     }
 
@@ -229,7 +239,11 @@ class _StreamMessageContentState extends State<StreamMessageContent> {
                     showTranslatedText: widget.showTranslatedText,
                     child: core.StreamColumn(
                       mainAxisSize: .min,
-                      spacing: spacing.xs,
+                      // A lone attachment brings its own padding.
+                      spacing: switch (contentKind) {
+                        .singleAttachment => 0,
+                        .standard || .jumbomoji => spacing.xs,
+                      },
                       crossAxisAlignment: .start,
                       children: [
                         if (widget.message.quotedMessage case final quotedMessage?)

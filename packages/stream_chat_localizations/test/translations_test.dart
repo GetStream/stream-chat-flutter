@@ -1,10 +1,14 @@
 import 'package:clock/clock.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 import 'package:stream_chat_localizations/src/stream_chat_localizations.dart';
 
 void main() {
+  setUpAll(initializeDateFormatting);
+
   for (final language in kStreamChatSupportedLanguages) {
     test('translations exist for $language', () async {
       final locale = Locale(language);
@@ -410,10 +414,56 @@ void main() {
       expect(localizations.notifyChannelText, isNotNull);
       expect(localizations.notifyHereText, isNotNull);
       expect(localizations.notifyRoleText('admin'), isNotNull);
+      // Scheduled messages.
+      final scheduledAt = DateTime.utc(2026, 10, 21, 8);
+      final localScheduledAt = scheduledAt.toLocal();
+      final sendAt = localizations.scheduledMessageSendAtText(scheduledAt: scheduledAt);
+      expect(sendAt, contains(DateFormat.MMMEd(language).format(localScheduledAt)));
+      expect(sendAt, contains(DateFormat.jm(language).format(localScheduledAt)));
+      expect(localizations.scheduledMessageSendingLabel, isNotNull);
+      expect(localizations.scheduledMessageUploadingLabel, isNotNull);
+      expect(localizations.scheduledThreadReplyPrefixText, isNotNull);
+      // A known and an unknown quoted author.
+      expect(localizations.scheduledQuoteReplyPrefixText(name: 'Maya'), contains('Maya'));
+      expect(localizations.scheduledQuoteReplyPrefixText(), isNotNull);
+      for (final reason in [
+        ScheduledMessageFailureReason.requestFailed,
+        ScheduledMessageFailureReason.internalError,
+        ScheduledMessageFailureReason.channelDeleted,
+        ScheduledMessageFailureReason.userDeleted,
+        ScheduledMessageFailureReason.channelFrozen,
+        ScheduledMessageFailureReason.banned,
+        ScheduledMessageFailureReason.noPermission,
+        ScheduledMessageFailureReason.moderationBlocked,
+        ScheduledMessageFailureReason.hookRejected,
+        ScheduledMessageFailureReason.expired,
+        ScheduledMessageFailureReason.pendingNotSupported,
+        ScheduledMessageFailureReason.invalidMessage,
+        null,
+      ]) {
+        expect(localizations.scheduledMessageFailureReasonText(reason: reason), isNotNull);
+      }
+      expect(
+        localizations.scheduledMessageFailureReasonText(
+          reason: ScheduledMessageFailureReason.invalidMessage,
+          isQuoteDeleted: true,
+        ),
+        isNotNull,
+      );
+      expect(localizations.noScheduledMessagesText, isNotNull);
+      expect(localizations.loadingScheduledMessagesError, isNotNull);
+      expect(localizations.editAndRescheduleLabel, isNotNull);
+      expect(localizations.rescheduleLabel, isNotNull);
+      expect(localizations.sendNowLabel, isNotNull);
 
       // Accessibility translations
       final a11y = localizations.accessibility;
       expect(a11y, isNotNull);
+      // Scheduled messages.
+      expect(
+        a11y.scheduledMessageSendAtLabel(scheduledAt: localScheduledAt),
+        contains(a11y.formatDateTime(localScheduledAt)),
+      );
       // Composer: send button
       expect(a11y.sendMessageTooltip, isNotNull);
       expect(a11y.saveEditTooltip, isNotNull);
@@ -570,6 +620,44 @@ void main() {
         reason: '$locale has no display name for "$code"',
       );
     }
+  }
+
+  for (final language in kStreamChatSupportedLanguages) {
+    test('mute and block toggles return different text for each state in $language', () async {
+      final localizations = await GlobalStreamChatLocalizations.delegate.load(Locale(language));
+
+      // Each toggle labels an action that flips state, so its two strings must differ.
+      final toggles = {
+        'toggleMuteUnmuteAction': (
+          localizations.toggleMuteUnmuteAction(isMuted: true),
+          localizations.toggleMuteUnmuteAction(isMuted: false),
+        ),
+        'toggleMuteUnmuteGroupQuestion': (
+          localizations.toggleMuteUnmuteGroupQuestion(isMuted: true),
+          localizations.toggleMuteUnmuteGroupQuestion(isMuted: false),
+        ),
+        'toggleMuteUnmuteGroupText': (
+          localizations.toggleMuteUnmuteGroupText(isMuted: true),
+          localizations.toggleMuteUnmuteGroupText(isMuted: false),
+        ),
+        'toggleMuteUnmuteUserQuestion': (
+          localizations.toggleMuteUnmuteUserQuestion(isMuted: true),
+          localizations.toggleMuteUnmuteUserQuestion(isMuted: false),
+        ),
+        'toggleMuteUnmuteUserText': (
+          localizations.toggleMuteUnmuteUserText(isMuted: true),
+          localizations.toggleMuteUnmuteUserText(isMuted: false),
+        ),
+        'toggleBlockUnblockUserText': (
+          localizations.toggleBlockUnblockUserText(isBlocked: true),
+          localizations.toggleBlockUnblockUserText(isBlocked: false),
+        ),
+      };
+
+      for (final MapEntry(key: name, value: (on, off)) in toggles.entries) {
+        expect(on, isNot(off), reason: '$name should differ between its two states');
+      }
+    });
   }
 
   for (final language in kStreamChatSupportedLanguages) {

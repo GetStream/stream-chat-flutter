@@ -13,7 +13,7 @@ T _$identity<T>(T value) => value;
 
 /// @nodoc
 mixin _$AutomodRule {
-  AutomodRuleAction get action;
+  ModerationAction get action;
   String get label;
   double get threshold;
 
@@ -50,7 +50,7 @@ abstract mixin class $AutomodRuleCopyWith<$Res> {
     $Res Function(AutomodRule) _then,
   ) = _$AutomodRuleCopyWithImpl;
   @useResult
-  $Res call({AutomodRuleAction action, String label, double threshold});
+  $Res call({ModerationAction action, String label, double threshold});
 }
 
 /// @nodoc
@@ -74,7 +74,7 @@ class _$AutomodRuleCopyWithImpl<$Res> implements $AutomodRuleCopyWith<$Res> {
         action: null == action
             ? _self.action
             : action // ignore: cast_nullable_to_non_nullable
-                  as AutomodRuleAction,
+                  as ModerationAction,
         label: null == label
             ? _self.label
             : label // ignore: cast_nullable_to_non_nullable

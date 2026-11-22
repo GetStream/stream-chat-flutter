@@ -31,4 +31,7 @@ ChannelState _$ChannelStateFromJson(Map<String, dynamic> json) => ChannelState(
         (e) => const LocationV1JsonConverter().fromJson(e as Map<String, dynamic>),
       )
       .toList(),
+  scheduledMessages: (json['scheduled_messages'] as List<dynamic>?)
+      ?.map((e) => ScheduledMessage.fromJson(e as Map<String, dynamic>))
+      .toList(),
 );

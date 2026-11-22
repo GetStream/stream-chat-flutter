@@ -6,6 +6,7 @@ import 'channel_api.dart';
 import 'general_api.dart';
 import 'moderation_api.dart';
 import 'push_preferences_api.dart';
+import 'scheduled_messages_api.dart';
 import 'user_api.dart';
 
 /// ApiClient that wraps every other specific api
@@ -49,6 +50,10 @@ class StreamChatApi {
   /// Api dedicated to moderation operations
   ModerationApi get moderation => _moderation ??= ModerationApi(_client);
   ModerationApi? _moderation;
+
+  /// API dedicated to scheduled message operations.
+  ScheduledMessagesApi get scheduledMessages => _scheduledMessages ??= ScheduledMessagesApi(_client);
+  ScheduledMessagesApi? _scheduledMessages;
 
   /// Api dedicated to general operations
   GeneralApi get general => _general ??= GeneralApi(_client);
