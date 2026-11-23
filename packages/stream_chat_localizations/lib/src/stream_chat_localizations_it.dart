@@ -102,13 +102,10 @@ class StreamChatLocalizationsIt extends GlobalStreamChatLocalizations {
   String get editedMessageLabel => 'Modificato';
 
   @override
-  String get messageNotPlayedLabel => 'Non riprodotto';
-
-  @override
   String get messagePlayedLabel => 'Riprodotto';
 
   @override
-  String messagePlayedByLabel(int count) => 'Riprodotto da $count';
+  String messagePlayedByLabel(int count) => 'Riprodotto da ${count > 99 ? '99+' : count}';
 
   @override
   String get messageReactionsLabel => 'Reazioni al messaggio';
