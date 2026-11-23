@@ -138,7 +138,10 @@
 - `StreamChatClient.queryUsers` returns a `Result<QueryUsersResponse>` instead of throwing.
 - The users `queryUsers` returns no longer carry devices, mutes, channel mutes, privacy settings, unread counts or hidden channels in their custom data.
 - `QueryUsersResponse` no longer decodes from JSON, is immutable, built through a const constructor, compares by value, gains `copyWith`, and its `duration` is a non-nullable `String`.
-- `StreamChatApi.user.queryUsers` is removed; call `queryUsers` on `StreamChatClient` instead.
+- `getActiveLiveLocations` is renamed `getUserLiveLocations` and returns a `Result<SharedLocationsResponse>` instead of throwing.
+- `updateLiveLocation` and `stopLiveLocation` return a `Result<SharedLocationResponse>` instead of a `Location`, and no longer take `createdByDeviceId`.
+- `GetActiveLiveLocationsResponse` is replaced by `SharedLocationsResponse`, which no longer decodes from JSON, is immutable, built through a const constructor, compares by value, gains `copyWith`, and has a non-nullable `duration`.
+- `StreamChatApi.user` is removed; call `queryUsers`, `getUserLiveLocations`, `updateLiveLocation` and `stopLiveLocation` on `StreamChatClient` instead.
 - The reminder calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing.
 - `deleteReminder` returns a `DeleteReminderResponse` instead of an `EmptyResponse`.
 - `queryReminders` takes `limit`, `next` and `prev` instead of `PaginationParams`.

@@ -1,5 +1,7 @@
 import '../../../open_api/api.dart' as api;
 import '../../core/models/location.dart';
+import '../../core/models/response/shared_location_response.dart';
+import '../../core/models/response/shared_locations_response.dart';
 import 'channels_mapper.dart';
 import 'messages_mapper.dart';
 
@@ -20,6 +22,37 @@ extension SharedLocationResponseDataMapper on api.SharedLocationResponseData {
     endAt: endAt,
     createdAt: createdAt,
     updatedAt: updatedAt,
+  );
+}
+
+/// Maps a generated [api.SharedLocationResponse] to a [SharedLocationResponse].
+extension SharedLocationResponseMapper on api.SharedLocationResponse {
+  /// Converts this response into a [SharedLocationResponse].
+  SharedLocationResponse toModel() => SharedLocationResponse(
+    duration: duration,
+    location: Location(
+      channelCid: channelCid,
+      channel: channel?.toModel(),
+      messageId: messageId,
+      message: message?.toModel(),
+      userId: userId,
+      latitude: latitude,
+      longitude: longitude,
+      createdByDeviceId: createdByDeviceId,
+      endAt: endAt,
+      createdAt: createdAt,
+      updatedAt: updatedAt,
+    ),
+  );
+}
+
+/// Maps a generated [api.SharedLocationsResponse] to a
+/// [SharedLocationsResponse].
+extension SharedLocationsResponseMapper on api.SharedLocationsResponse {
+  /// Converts this response into a [SharedLocationsResponse].
+  SharedLocationsResponse toModel() => SharedLocationsResponse(
+    duration: duration,
+    activeLiveLocations: activeLiveLocations.map((location) => location.toModel()).toList(),
   );
 }
 

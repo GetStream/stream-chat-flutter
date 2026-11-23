@@ -130,14 +130,10 @@ class LocationAttachment extends StatelessWidget {
               onStopSharingPressed: () {
                 final client = StreamChat.of(context).client;
 
-                final location = sharedLocation;
-                final messageId = location.messageId;
+                final messageId = sharedLocation.messageId;
                 if (messageId == null) return;
 
-                client.stopLiveLocation(
-                  messageId: messageId,
-                  createdByDeviceId: location.createdByDeviceId,
-                );
+                client.stopLiveLocation(messageId: messageId);
               },
             ),
         ],

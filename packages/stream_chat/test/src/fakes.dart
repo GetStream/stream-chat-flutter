@@ -7,7 +7,6 @@ import 'package:stream_chat/src/core/api/general_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/push_preferences_api.dart';
 import 'package:stream_chat/src/core/api/scheduled_messages_api.dart';
-import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/stream_chat.dart';
 
 import 'mocks.dart';
@@ -127,11 +126,6 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
 }
 
 class FakeChatApi extends Fake implements StreamChatApi {
-  UserApi? _user;
-
-  @override
-  UserApi get user => _user ??= MockUserApi();
-
   ChannelApi? _channel;
 
   @override

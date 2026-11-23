@@ -84,10 +84,7 @@ class LocationDetailDialog extends StatelessWidget {
                     final messageId = sharedLocation.messageId;
                     if (messageId == null) return;
 
-                    client.stopLiveLocation(
-                      messageId: messageId,
-                      createdByDeviceId: sharedLocation.createdByDeviceId,
-                    );
+                    client.stopLiveLocation(messageId: messageId);
                   },
                 ),
             ],

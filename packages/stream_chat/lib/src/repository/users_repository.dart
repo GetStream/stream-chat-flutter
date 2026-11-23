@@ -1,4 +1,4 @@
-import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
+import 'package:stream_core/stream_core.dart' show LocationCoordinate, PatternMatching, Result;
 
 import '../../open_api/api.dart' as api;
 import '../core/api/requests.dart';
@@ -7,10 +7,13 @@ import '../core/models/response/block_user_response.dart';
 import '../core/models/response/get_blocked_users_response.dart';
 import '../core/models/response/get_unread_count_response.dart';
 import '../core/models/response/query_users_response.dart';
+import '../core/models/response/shared_location_response.dart';
+import '../core/models/response/shared_locations_response.dart';
 import '../core/models/response/unblock_user_response.dart';
 import '../core/models/response/update_users_response.dart';
 import '../core/models/user.dart';
 import 'mapper/filter_mapper.dart';
+import 'mapper/locations_mapper.dart';
 import 'mapper/sort_mapper.dart';
 import 'mapper/users_mapper.dart';
 
@@ -43,6 +46,34 @@ class UsersRepository {
         idGte: pagination?.greaterThanOrEqual,
         idLt: pagination?.lessThan,
         idLte: pagination?.lessThanOrEqual,
+      ),
+    );
+
+    return result.map((response) => response.toModel());
+  }
+
+  /// Fetches the current user's live locations that are still being shared.
+  Future<Result<SharedLocationsResponse>> getUserLiveLocations() async {
+    final result = await _api.getUserLiveLocations();
+
+    return result.map((response) => response.toModel());
+  }
+
+  /// Updates the live location shared in the message with the id [messageId].
+  ///
+  /// The location moves to [location], and its sharing ends at [endAt]. A value
+  /// that is omitted is left as it is.
+  Future<Result<SharedLocationResponse>> updateLiveLocation({
+    required String messageId,
+    LocationCoordinate? location,
+    DateTime? endAt,
+  }) async {
+    final result = await _api.updateLiveLocation(
+      updateLiveLocationRequest: api.UpdateLiveLocationRequest(
+        messageId: messageId,
+        latitude: location?.latitude,
+        longitude: location?.longitude,
+        endAt: endAt,
       ),
     );
 

@@ -176,6 +176,8 @@ export 'src/core/models/response/search_user_groups_response.dart';
 export 'src/core/models/response/send_action_response.dart';
 export 'src/core/models/response/send_message_response.dart';
 export 'src/core/models/response/send_reaction_response.dart';
+export 'src/core/models/response/shared_location_response.dart';
+export 'src/core/models/response/shared_locations_response.dart';
 export 'src/core/models/response/show_channel_response.dart';
 export 'src/core/models/response/translate_message_response.dart';
 export 'src/core/models/response/truncate_channel_response.dart';
