@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../stream_chat_flutter.dart';
+import '../message_widget/played_mark_policy.dart';
 
 /// A swipeable, full-screen viewer for a list of chat media attachments.
 ///
@@ -24,6 +25,8 @@ import '../../stream_chat_flutter.dart';
 /// - Video attachments are played by [StreamVideoPlayer], which pauses
 ///   itself when its page is no longer the active one (see
 ///   [StreamMediaGalleryPreviewScope]).
+/// - Playing another user's video marks its message played, when the
+///   enclosing [StreamChannel] allows played marks.
 ///
 /// {@tool snippet}
 ///
@@ -143,6 +146,9 @@ class _DefaultStreamMediaGalleryPreviewState extends State<DefaultStreamMediaGal
   late final _currentPage = ValueNotifier(widget.props.initialIndex);
   late final _pageController = PageController(initialPage: _currentPage.value);
 
+  // Ids of the messages marked played, or being marked, in this preview.
+  final _markedMessageIds = <String>{};
+
   // Animates the page view to the given page index.
   Future<void> _animateToPage(int page) {
     return _pageController.animateToPage(
@@ -150,6 +156,20 @@ class _DefaultStreamMediaGalleryPreviewState extends State<DefaultStreamMediaGal
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
+  }
+
+  Future<void> _markPlayed(Message message) async {
+    if (_markedMessageIds.contains(message.id)) return;
+
+    final channel = StreamChannel.maybeOf(context)?.channel;
+    if (channel == null || !channel.shouldMarkPlayed(message)) return;
+
+    _markedMessageIds.add(message.id);
+    try {
+      await channel.sendMessageMark(message, MessageMarkType.played);
+    } catch (_) {
+      _markedMessageIds.remove(message.id);
+    }
   }
 
   // Downloads the currently-focused attachment's bytes and hands them to
@@ -256,6 +276,7 @@ class _DefaultStreamMediaGalleryPreviewState extends State<DefaultStreamMediaGal
               attachment: package.attachment,
               pageIndex: index,
               autoplay: widget.props.autoplayVideos,
+              onPlay: () => _markPlayed(package.message).ignore(),
             );
           },
         ),

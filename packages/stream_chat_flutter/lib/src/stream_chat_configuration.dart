@@ -245,11 +245,11 @@ class StreamChatConfigurationData {
   /// can schedule messages. Defaults to true.
   final bool scheduledMessagesEnabled;
 
-  /// Whether the current user's voice recordings show a played mark.
+  /// Whether the current user's voice recordings and videos show a played mark.
   ///
   /// The mark appears only in channels whose [ChannelConfig.markTypes]
   /// include [MessageMarkType.played]. Playing another user's voice
-  /// recording marks it played regardless of this setting.
+  /// recording or video marks it played regardless of this setting.
   ///
   /// Defaults to false.
   final bool showMessageMarks;

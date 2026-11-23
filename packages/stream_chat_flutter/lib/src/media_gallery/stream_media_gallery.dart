@@ -21,9 +21,12 @@ import 'stream_media_grid_delegate.dart';
 ///   onItemTap: (index) => Navigator.push(
 ///     context,
 ///     MaterialPageRoute(
-///       builder: (_) => StreamMediaGalleryPreview(
-///         attachments: attachments,
-///         initialIndex: index,
+///       builder: (_) => StreamChannel.value(
+///         channel: channel,
+///         child: StreamMediaGalleryPreview(
+///           attachments: attachments,
+///           initialIndex: index,
+///         ),
 ///       ),
 ///     ),
 ///   ),

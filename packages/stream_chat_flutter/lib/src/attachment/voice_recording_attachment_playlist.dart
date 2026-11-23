@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../stream_chat_flutter.dart';
 import '../audio/audio_playlist_controller.dart';
+import '../message_widget/played_mark_policy.dart';
 
 /// Signature for decorating each voice recording item in a playlist.
 ///
@@ -161,14 +162,8 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
     if (_markRequested) return;
 
     final channel = StreamChannel.maybeOf(context)?.channel;
-    if (channel == null || !channel.canSendMessageMark) return;
-
     final message = widget.message;
-    final currentUserId = channel.client.state.currentUser?.id;
-    if (message.user?.id == currentUserId) return;
-
-    final ownMarks = message.ownMarks ?? const [];
-    if (ownMarks.any((it) => it.type == MessageMarkType.played)) return;
+    if (channel == null || !channel.shouldMarkPlayed(message)) return;
 
     _markRequested = true;
     try {
