@@ -42,6 +42,7 @@ class StreamMediaGalleryPreviewItem extends StatelessWidget {
     required this.attachment,
     this.pageIndex = 0,
     this.autoplay = false,
+    this.onPlay,
   });
 
   /// The attachment to render.
@@ -55,6 +56,11 @@ class StreamMediaGalleryPreviewItem extends StatelessWidget {
   /// Whether to start video playback automatically when this page becomes
   /// active. No effect for non-video attachments.
   final bool autoplay;
+
+  /// Called each time video playback starts.
+  ///
+  /// Never called for non-video attachments.
+  final VoidCallback? onPlay;
 
   @override
   Widget build(BuildContext context) {
@@ -74,6 +80,7 @@ class StreamMediaGalleryPreviewItem extends StatelessWidget {
         autoplay: autoplay,
         pageIndex: pageIndex,
         attachment: attachment,
+        onPlay: onPlay,
       );
     }
 

@@ -4,12 +4,12 @@ import 'package:stream_core_flutter/chat.dart' as core;
 import '../../../stream_chat_flutter.dart';
 import '../../misc/empty_widget.dart';
 
-/// Shows that the current user's voice recording was played.
+/// Shows that the current user's voice recording or video was played.
 ///
-/// Reads "Played" in a one-to-one channel and "Played by 2" elsewhere, up to
-/// "Played by 99+". Shows nothing before anyone has played the message, or
-/// when [isShownFor] is false, which requires
-/// [StreamChatConfigurationData.showMessageMarks].
+/// Reads "Played" in a two-member channel and "Played by 2" elsewhere, up to
+/// "Played by 99+". Shows nothing until someone plays the message.
+/// Requires [StreamChatConfigurationData.showMessageMarks] and a channel whose
+/// [ChannelConfig.markTypes] include [MessageMarkType.played].
 ///
 /// See also:
 ///
@@ -32,7 +32,7 @@ class StreamMessagePlayedMark extends StatelessWidget {
 
   /// Called when the mark is tapped.
   ///
-  /// Ignored in a one-to-one channel.
+  /// Ignored in a two-member channel.
   final VoidCallback? onTap;
 
   /// Whether the mark stays out of the semantics tree.
@@ -53,7 +53,7 @@ class StreamMessagePlayedMark extends StatelessWidget {
     final markTypes = channel?.config?.markTypes ?? const [];
     if (!markTypes.contains(MessageMarkType.played)) return false;
 
-    if (!message.attachments.any((it) => it.isVoiceRecording)) return false;
+    if (!message.attachments.any((it) => it.isVoiceRecording || it.isVideo)) return false;
 
     return _playedCount(message) > 0;
   }
@@ -63,7 +63,7 @@ class StreamMessagePlayedMark extends StatelessWidget {
     if (!isShownFor(context, message)) return null;
 
     final translations = context.translations;
-    if (_isOneToOne(context)) return translations.messagePlayedLabel;
+    if (_isTwoMember(context)) return translations.messagePlayedLabel;
 
     return translations.messagePlayedByLabel(_playedCount(message));
   }
@@ -72,8 +72,8 @@ class StreamMessagePlayedMark extends StatelessWidget {
     return message.markGroups?[MessageMarkType.played]?.count ?? 0;
   }
 
-  static bool _isOneToOne(BuildContext context) {
-    return StreamChannel.maybeOf(context)?.channel.isOneToOne ?? false;
+  static bool _isTwoMember(BuildContext context) {
+    return StreamChannel.maybeOf(context)?.channel.memberCount == 2;
   }
 
   @override
@@ -81,7 +81,7 @@ class StreamMessagePlayedMark extends StatelessWidget {
     final label = labelFor(context, message);
     if (label == null) return const Empty();
 
-    final effectiveOnTap = _isOneToOne(context) ? null : onTap;
+    final effectiveOnTap = _isTwoMember(context) ? null : onTap;
 
     return ExcludeSemantics(
       excluding: excludeFromSemantics && effectiveOnTap == null,

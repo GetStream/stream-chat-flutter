@@ -24,10 +24,10 @@ void main() {
     expect(find.text('Played by 2'), findsNothing);
   });
 
-  testWidgets('no one-to-one mark shows unless the app shows message marks', (tester) async {
+  testWidgets('no two-member mark shows unless the app shows message marks', (tester) async {
     final body = _wrap(
       _item(_voiceMessage(playedBy: 1)),
-      isOneToOne: true,
+      isTwoMember: true,
       showMessageMarks: false,
     );
     await tester.pumpWidget(body);
@@ -37,23 +37,31 @@ void main() {
   });
 
   testWidgets('a voice message played by more than 99 members reads 99+', (tester) async {
-    await tester.pumpWidget(_wrap(_item(_voiceMessage(playedBy: 120))));
+    await tester.pumpWidget(_wrap(_item(_voiceMessage(playedBy: 100))));
     await tester.pumpAndSettle();
 
     expect(find.text('Played by 99+'), findsOneWidget);
   });
 
-  testWidgets('a voice message nobody played shows no mark', (tester) async {
-    await tester.pumpWidget(_wrap(_item(_voiceMessage()), isOneToOne: true));
+  testWidgets('a two-member voice message nobody played shows no mark', (tester) async {
+    await tester.pumpWidget(_wrap(_item(_voiceMessage()), isTwoMember: true));
     await tester.pumpAndSettle();
 
     expect(find.byType(StreamMessagePlayedMark), findsNothing);
     expect(find.textContaining('Played'), findsNothing);
   });
 
-  testWidgets('a one-to-one voice message the other member played reads played', (tester) async {
+  testWidgets('a group voice message nobody played shows no mark', (tester) async {
+    await tester.pumpWidget(_wrap(_item(_voiceMessage())));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamMessagePlayedMark), findsNothing);
+    expect(find.textContaining('Played'), findsNothing);
+  });
+
+  testWidgets('a two-member voice message the other member played reads played', (tester) async {
     final message = _voiceMessage(playedBy: 1);
-    await tester.pumpWidget(_wrap(_item(message), isOneToOne: true));
+    await tester.pumpWidget(_wrap(_item(message), isTwoMember: true));
     await tester.pumpAndSettle();
 
     expect(find.text('Played'), findsOneWidget);
@@ -98,6 +106,16 @@ void main() {
     expect(find.textContaining('Played by'), findsNothing);
   });
 
+  testWidgets('a group video reads how many members played it', (tester) async {
+    final video = Attachment(type: AttachmentType.video, assetUrl: 'https://example.com/video.mp4');
+    final message = _voiceMessage(playedBy: 2).copyWith(attachments: [video]);
+    await tester.pumpWidget(_wrap(_item(message)));
+    // The video thumbnail keeps loading, so the frame never settles.
+    await tester.pump();
+
+    expect(find.text('Played by 2'), findsOneWidget);
+  });
+
   testWidgets('a voice message is announced with its played state', (tester) async {
     final semantics = tester.ensureSemantics();
     await tester.pumpWidget(_wrap(_item(_voiceMessage(playedBy: 2))));
@@ -123,13 +141,13 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('a one-to-one played mark stays out of the semantics tree', (tester) async {
+  testWidgets('a two-member played mark stays out of the semantics tree', (tester) async {
     final semantics = tester.ensureSemantics();
     final item = StreamMessageItem(
       message: _voiceMessage(playedBy: 1),
       onMessageMarkTap: (_, __) {},
     );
-    await tester.pumpWidget(_wrap(item, isOneToOne: true));
+    await tester.pumpWidget(_wrap(item, isTwoMember: true));
     await tester.pumpAndSettle();
 
     expect(find.bySemanticsLabel('Played'), findsNothing);
@@ -212,7 +230,7 @@ Message _voiceMessage({User? user, int playedBy = 0}) {
 
 Widget _wrap(
   Widget body, {
-  bool isOneToOne = false,
+  bool isTwoMember = false,
   List<MessageMarkType> markTypes = const [MessageMarkType.played],
   StreamMessageStackPosition stackPosition = StreamMessageStackPosition.single,
   bool showMessageMarks = true,
@@ -227,7 +245,7 @@ Widget _wrap(
   when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(_currentUser));
   when(() => channel.client).thenReturn(client);
   when(() => channel.state).thenReturn(channelState);
-  when(() => channel.isOneToOne).thenReturn(isOneToOne);
+  when(() => channel.memberCount).thenReturn(isTwoMember ? 2 : 5);
   when(() => channel.config).thenReturn(ChannelConfig(markTypes: markTypes));
   when(() => channelState.readStream).thenAnswer((_) => Stream.value(const []));
 

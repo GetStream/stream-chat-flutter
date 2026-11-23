@@ -41,7 +41,7 @@ void main() {
       expect(localizations.editedMessageLabel, isNotNull);
       expect(localizations.messagePlayedLabel, isNotNull);
       expect(localizations.messagePlayedByLabel(3), isNotNull);
-      expect(localizations.messagePlayedByLabel(120), contains('99+'));
+      expect(localizations.messagePlayedByLabel(100), contains('99+'));
       expect(localizations.threadReplyCountText(3), isNotNull);
       expect(
         localizations.attachmentsUploadProgressText(completed: 3, total: 10),

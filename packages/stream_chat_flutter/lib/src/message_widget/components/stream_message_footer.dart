@@ -75,7 +75,7 @@ class StreamMessageFooterProps {
 
   /// Called when the message's played mark is tapped.
   ///
-  /// The mark is not tappable when this is null or in a one-to-one channel.
+  /// The mark is not tappable when this is null or in a two-member channel.
   final VoidCallback? onMarkTap;
 
   /// Returns a copy of this [StreamMessageFooterProps] with the given fields
@@ -98,9 +98,9 @@ class StreamMessageFooterProps {
 /// The footer can show up to five pieces depending on the message:
 ///
 ///  * **Username** — for messages from other users.
-///  * **Played mark** — for the current user's voice recordings, when
-///    [StreamChatConfigurationData.showMessageMarks] is set and the channel
-///    allows played marks.
+///  * **Played mark** — for the current user's voice recordings and videos,
+///    when [StreamChatConfigurationData.showMessageMarks] is set and the
+///    channel allows played marks.
 ///  * **Sending status** — for the current user's own messages, except
 ///    ephemeral ones.
 ///  * **Timestamp** — always shown, formatted as a short time string.
