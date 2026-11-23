@@ -962,10 +962,11 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
             trigger: _kMentionTrigger,
             optionsViewBuilder: (context, autocompleteQuery, messageComposerController) {
               final query = autocompleteQuery.query;
+              final channel = StreamChannel.of(context).channel;
               return StreamMentionAutocompleteOptions(
                 query: query,
-                channel: StreamChannel.of(context).channel,
-                client: StreamChat.of(context).client,
+                channel: channel,
+                client: channel.client,
                 mentionAllAppUsers: widget.props.mentionAllAppUsers,
                 mentionItemBuilder: widget.props.mentionItemBuilder,
                 mentionsTileBuilder: widget.props.userMentionsTileBuilder,
