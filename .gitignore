@@ -36,6 +36,7 @@ pubspec.lock
 pubspec_overrides.yaml
 flutter_export_environment.sh
 generated_plugin_registrant.*
+generated_plugins.cmake
 GeneratedPluginRegistrant.*
 
 # Android related
