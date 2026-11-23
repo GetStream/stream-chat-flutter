@@ -242,12 +242,14 @@ class ConnectionManager with Disposable {
     final session = _session;
     if (session == null) throw StateError('No user is connected.');
 
-    // Drop the refused token, so the load below asks for another. A provider with no
-    // other to give ends the session instead of presenting the same one forever.
+    // Drop the refused token, so the load below asks for another.
     if (previousError case final refused? when refused.isTokenExpired) {
       _tokenManager.expireToken();
 
-      if (_tokenManager.usesStaticProvider) {
+      // A static provider can only present the refused token again, so a
+      // dropped connection stays closed until connect is called again.
+      final isReopening = session.established != null;
+      if (isReopening && _tokenManager.usesStaticProvider) {
         throw StreamAuthenticationException(
           message: 'The token was refused and the provider has no other to give',
           cause: refused,
