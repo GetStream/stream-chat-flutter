@@ -22,7 +22,7 @@ void main() {
       );
 
       // Close the suggestions before teardown: disposing StreamAutocomplete
-      // while they are open trips a setState-in-dispose assertion on v9.
+      // while they are open trips a setState-in-dispose assertion.
       await _typeText(tester, '');
     },
   );
