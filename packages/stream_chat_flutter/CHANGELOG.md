@@ -8,6 +8,7 @@
 🔄 Changed
 
 - A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
+- `StreamMentionAutocompleteOptions` now searches with the channel's client when `mentionAllAppUsers` is enabled and no `client` is given.
 
 🐞 Fixed
 

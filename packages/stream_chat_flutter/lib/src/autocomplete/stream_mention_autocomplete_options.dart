@@ -31,10 +31,6 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
   }) : assert(
          channel.state != null,
          'Channel ${channel.cid} is not yet initialized',
-       ),
-       assert(
-         !mentionAllAppUsers || (mentionAllAppUsers && client != null),
-         'StreamChatClient is required in order to use mentionAllAppUsers',
        );
 
   /// Query for searching users.
@@ -47,6 +43,8 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
   final Channel channel;
 
   /// The client to search for users in case [mentionAllAppUsers] is True.
+  ///
+  /// Defaults to the [channel]'s client.
   final StreamChatClient? client;
 
   /// When enabled mentions search users across the entire app.
@@ -275,11 +273,8 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
   }
 
   Future<List<User>> _queryUsers(String query) async {
-    assert(
-      widget.client != null,
-      'StreamChatClient is required in order to query all app users',
-    );
-    final response = await widget.client!.queryUsers(
+    final client = widget.client ?? widget.channel.client;
+    final response = await client.queryUsers(
       pagination: PaginationParams(limit: widget.limit),
       filter: query.isEmpty
           ? const Filter.empty()
