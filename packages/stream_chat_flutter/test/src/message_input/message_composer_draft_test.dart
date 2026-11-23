@@ -200,7 +200,7 @@ void main() {
       expect(composerController.text, isEmpty);
     });
 
-    testWidgets('the server echo of an applied draft does not undo a later edit', (tester) async {
+    testWidgets('a late copy of the applied draft does not refill a cleared composer', (tester) async {
       final composerController = StreamMessageComposerController();
       addTearDown(composerController.dispose);
 
@@ -213,35 +213,30 @@ void main() {
         draftStream: draftStream.stream,
       );
 
-      // The draft saved locally, as the composer opens with it.
-      draftStream.add(
-        Draft(
-          channelCid: 'messaging:test',
-          createdAt: DateTime(2026),
-          message: DraftMessage(id: 'draft-id', text: 'saved'),
-        ),
+      final appliedDraft = Draft(
+        channelCid: 'messaging:test',
+        createdAt: DateTime(2026),
+        message: DraftMessage(id: 'draft-id', text: 'saved'),
       );
+      draftStream.add(appliedDraft);
       await tester.pumpAndSettle();
       expect(composerController.text, 'saved');
 
       composerController.clear();
       await tester.pumpAndSettle();
 
-      // The server's copy of the same draft arrives late, with its own
-      // timestamp and `showInChannel` filled in.
-      draftStream.add(
-        Draft(
-          channelCid: 'messaging:test',
-          createdAt: DateTime(2026, 1, 2),
-          message: DraftMessage(id: 'draft-id', text: 'saved', showInChannel: false),
-        ),
+      final lateCopy = Draft(
+        channelCid: 'messaging:test',
+        createdAt: DateTime(2026, 1, 2),
+        message: DraftMessage(id: 'draft-id', text: 'saved'),
       );
+      draftStream.add(lateCopy);
       await tester.pumpAndSettle();
 
       expect(composerController.text, isEmpty);
     });
 
-    testWidgets('a draft with new content replaces the composer content', (tester) async {
+    testWidgets('an open composer keeps its content when the draft is edited elsewhere', (tester) async {
       final composerController = StreamMessageComposerController();
       addTearDown(composerController.dispose);
 
@@ -254,26 +249,23 @@ void main() {
         draftStream: draftStream.stream,
       );
 
-      draftStream.add(
-        Draft(
-          channelCid: 'messaging:test',
-          createdAt: DateTime(2026),
-          message: DraftMessage(id: 'draft-id', text: 'saved'),
-        ),
+      final appliedDraft = Draft(
+        channelCid: 'messaging:test',
+        createdAt: DateTime(2026),
+        message: DraftMessage(id: 'draft-id', text: 'saved'),
       );
+      draftStream.add(appliedDraft);
       await tester.pumpAndSettle();
 
-      // Edited on another device.
-      draftStream.add(
-        Draft(
-          channelCid: 'messaging:test',
-          createdAt: DateTime(2026, 1, 2),
-          message: DraftMessage(id: 'draft-id', text: 'edited elsewhere'),
-        ),
+      final editedDraft = Draft(
+        channelCid: 'messaging:test',
+        createdAt: DateTime(2026, 1, 2),
+        message: DraftMessage(id: 'draft-id', text: 'edited elsewhere'),
       );
+      draftStream.add(editedDraft);
       await tester.pumpAndSettle();
 
-      expect(composerController.text, 'edited elsewhere');
+      expect(composerController.text, 'saved');
     });
   });
 

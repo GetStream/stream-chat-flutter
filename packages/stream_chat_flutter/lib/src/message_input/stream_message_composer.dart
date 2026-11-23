@@ -739,8 +739,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     }
   }
 
-  // Tracks the last draft seen on the stream so we can tell the
-  // "no draft on server" initial state apart from a real removal.
+  // The last draft seen on the stream. Tells the "no draft yet" initial state
+  // apart from a removal, and a newly appearing draft from an update.
   Draft? _lastDraft;
 
   void _onDraftUpdate(Draft? draft) {
@@ -759,10 +759,9 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     // another device; reset the composer to match.
     if (draft == null) return _effectiveController.reset();
 
-    // Same content as the draft already applied, e.g. the server confirming the
-    // draft saved locally a moment ago. Applying it again would undo whatever
-    // the user typed or deleted since.
-    if (previousDraft != null && _isSameDraftContent(draft.message, previousDraft.message)) return;
+    // Only a newly appearing draft fills the composer; later updates would
+    // overwrite what the user typed or deleted since.
+    if (previousDraft != null) return;
 
     // Otherwise, update the controller with the draft message.
     if (draft.message case final draftMessage) {
@@ -773,11 +772,6 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
           )
           .toMessage();
     }
-  }
-
-  // The server sends `showInChannel: false` back for a draft saved without it.
-  static bool _isSameDraftContent(DraftMessage a, DraftMessage b) {
-    return a.copyWith(showInChannel: a.showInChannel ?? false) == b.copyWith(showInChannel: b.showInChannel ?? false);
   }
 
   @override

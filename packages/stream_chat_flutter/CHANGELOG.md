@@ -8,6 +8,7 @@
 🔄 Changed
 
 - A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
+- `StreamMessageComposer` keeps its content when its draft is updated on another device while it is open.
 
 🐞 Fixed
 
