@@ -19,7 +19,11 @@ void main() {
   testWidgets('showStreamScheduledMessageActionsSheet offers edit and reschedule, and delete, on a failed message', (
     tester,
   ) async {
-    final failed = fakeScheduledMessage(status: .failed, failureReason: .internalError);
+    final failed = fakeScheduledMessage(
+      status: .failed,
+      failure: const ScheduledMessageSendingFailed(reason: ScheduledMessageSendingFailureReason.internalError),
+      createdAt: DateTime(2026, 10, 20),
+    );
 
     await showActions(tester, failed);
 
@@ -29,7 +33,10 @@ void main() {
   testWidgets(
     'showStreamScheduledMessageActionsSheet offers edit and reschedule, and delete, on a message whose request failed',
     (tester) async {
-      final failed = fakeScheduledMessage(status: .failed, failureReason: .requestFailed);
+      final failed = fakeScheduledMessage(
+        status: .failed,
+        failure: const ScheduledMessageSchedulingFailed(),
+      );
 
       await showActions(tester, failed);
 
@@ -40,7 +47,11 @@ void main() {
   testWidgets('showStreamScheduledMessageActionsSheet offers edit, reschedule and delete on a failed edit', (
     tester,
   ) async {
-    final failed = fakeScheduledMessage(status: .failed, failureReason: .updateFailed);
+    final failed = fakeScheduledMessage(
+      status: .failed,
+      failure: const ScheduledMessageUpdatingFailed(isRetriable: true),
+      createdAt: DateTime(2026, 10, 20),
+    );
 
     await showActions(tester, failed);
 
@@ -50,7 +61,11 @@ void main() {
   testWidgets('showStreamScheduledMessageActionsSheet offers edit, reschedule and delete on a refused edit', (
     tester,
   ) async {
-    final failed = fakeScheduledMessage(status: .failed, failureReason: .updateRejected);
+    final failed = fakeScheduledMessage(
+      status: .failed,
+      failure: const ScheduledMessageUpdatingFailed(isRetriable: false),
+      createdAt: DateTime(2026, 10, 20),
+    );
 
     await showActions(tester, failed);
 
@@ -60,7 +75,11 @@ void main() {
   testWidgets('showStreamScheduledMessageActionsSheet offers copy and delete on a message whose channel was deleted', (
     tester,
   ) async {
-    final failed = fakeScheduledMessage(status: .failed, failureReason: .channelDeleted);
+    final failed = fakeScheduledMessage(
+      status: .failed,
+      failure: const ScheduledMessageSendingFailed(reason: ScheduledMessageSendingFailureReason.channelDeleted),
+      createdAt: DateTime(2026, 10, 20),
+    );
 
     await showActions(tester, failed);
 
@@ -70,7 +89,12 @@ void main() {
   testWidgets(
     'showStreamScheduledMessageActionsSheet offers only delete on a message without text whose channel was deleted',
     (tester) async {
-      final failed = fakeScheduledMessage(text: '', status: .failed, failureReason: .channelDeleted);
+      final failed = fakeScheduledMessage(
+        text: '',
+        status: .failed,
+        failure: const ScheduledMessageSendingFailed(reason: ScheduledMessageSendingFailureReason.channelDeleted),
+        createdAt: DateTime(2026, 10, 20),
+      );
 
       await showActions(tester, failed);
 
@@ -93,7 +117,10 @@ void main() {
     "showStreamScheduledMessageActionsSheet offers only delete on a failed message when the channel can't schedule",
     (tester) async {
       final channels = {'messaging:general': loadedChannel(canSchedule: false)};
-      final failed = fakeScheduledMessage(status: .failed, failureReason: .requestFailed);
+      final failed = fakeScheduledMessage(
+        status: .failed,
+        failure: const ScheduledMessageSchedulingFailed(),
+      );
 
       await showActions(tester, failed, channels: channels);
 
@@ -118,7 +145,10 @@ void main() {
     'schedule',
     (tester) async {
       final channels = {'messaging:general': loadedChannel()};
-      final failed = fakeScheduledMessage(status: .failed, failureReason: .requestFailed);
+      final failed = fakeScheduledMessage(
+        status: .failed,
+        failure: const ScheduledMessageSchedulingFailed(),
+      );
 
       await showActions(tester, failed, channels: channels);
 
@@ -126,10 +156,23 @@ void main() {
     },
   );
 
-  testWidgets('showStreamScheduledMessageActionsSheet offers only delete on a message being saved', (tester) async {
+  testWidgets('showStreamScheduledMessageActionsSheet offers only delete on a new message being scheduled', (
+    tester,
+  ) async {
     await showActions(tester, fakeScheduledMessage(status: .preparingToSchedule));
 
     expect(rowLabels(tester), ['Delete']);
+  });
+
+  testWidgets('showStreamScheduledMessageActionsSheet offers no actions while a change is being saved', (
+    tester,
+  ) async {
+    final saving = fakeScheduledMessage(status: .preparingToSchedule, createdAt: DateTime(2026, 10, 20));
+
+    final results = await showActions(tester, saving);
+
+    expect(find.byType(StreamScheduledMessageActionTile), findsNothing);
+    expect(results, [null]);
   });
 
   for (final status in [

@@ -386,4 +386,83 @@ void main() {
       expect(harness.client.state.scheduledMessages, isEmpty);
     });
   });
+
+  group('a scheduled message the server failed to send', () {
+    final frozen = fakeScheduledMessage(
+      'frozen',
+      status: ScheduledMessageStatus.failed,
+      failure: const ScheduledMessageSendingFailed(reason: ScheduledMessageSendingFailureReason.channelFrozen),
+    );
+
+    test("can't be resent", () async {
+      await harness.hold([frozen]);
+
+      await expectLater(harness.client.resendScheduledMessage(frozen.id), throwsStateError);
+      verifyNever(() => harness.api.scheduledMessages.updateScheduledMessage(any(), message: any(named: 'message')));
+    });
+
+    final notEditable = isA<ScheduledMessageRefusedError>().having(
+      (it) => it.reason,
+      'reason',
+      ScheduledMessageErrorReason.scheduledMessageNotEditable,
+    );
+    final changes = <String, Future<Object?> Function(StreamChatClient)>{
+      'updateScheduledMessage': (client) => client.updateScheduledMessage(frozen.id, Message(text: 'Hi')),
+      'rescheduleMessage': (client) => client.rescheduleMessage(frozen.id, scheduledAt: DateTime.utc(2026, 11, 3)),
+      'sendScheduledMessageNow': (client) => client.sendScheduledMessageNow(frozen.id),
+    };
+
+    for (final MapEntry(key: name, value: change) in changes.entries) {
+      test('$name refuses it without a request, and leaves it listed as it was', () async {
+        await harness.hold([frozen]);
+
+        await expectLater(change(harness.client), throwsA(notEditable));
+
+        verifyNoMoreInteractions(harness.api.scheduledMessages);
+        expect(harness.client.state.scheduledMessages, [frozen]);
+      });
+    }
+  });
+
+  group('a change the server refuses as no longer editable', () {
+    final notEditable = refusedWith(scheduledMessageNotEditableCode);
+    final later = DateTime.utc(2026, 11, 3);
+    final changes = <String, Future<Object?> Function(StreamChatClient)>{
+      'updateScheduledMessage': (client) => client.updateScheduledMessage(a.id, Message(id: 'a', text: 'Hi')),
+      'rescheduleMessage': (client) => client.rescheduleMessage(a.id, scheduledAt: later),
+      'sendScheduledMessageNow': (client) => client.sendScheduledMessageNow(a.id),
+    };
+
+    setUp(() {
+      when(
+        () => harness.api.scheduledMessages.updateScheduledMessage(
+          'a',
+          message: any(named: 'message'),
+          scheduledAt: any(named: 'scheduledAt'),
+        ),
+      ).thenAnswer((_) async => throw notEditable);
+      when(() => harness.api.scheduledMessages.sendScheduledMessageNow('a')).thenAnswer((_) async => throw notEditable);
+    });
+
+    for (final MapEntry(key: name, value: change) in changes.entries) {
+      test('$name lists a stale copy again as it was, not as a failed change', () async {
+        await harness.hold([a]);
+
+        await expectRequest(change(harness.client), notEditable);
+        await settle();
+
+        final [listed] = harness.client.state.scheduledMessages;
+        expect(listed.status, ScheduledMessageStatus.scheduled);
+        expect(listed.failure, isNull);
+        expect((listed.message.text, listed.scheduledAt), (a.message.text, a.scheduledAt));
+      });
+    }
+
+    test('updateScheduledMessage of one not listed lists nothing', () async {
+      await expectRequest(harness.client.updateScheduledMessage(a.id, Message(id: 'a', text: 'Hi')), notEditable);
+      await settle();
+
+      expect(harness.client.state.scheduledMessages, isEmpty);
+    });
+  });
 }

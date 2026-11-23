@@ -90,8 +90,7 @@ void main() {
     final failed = await editUnreachable();
 
     expect(failed.status, ScheduledMessageStatus.failed);
-    expect(failed.failureReason, ScheduledMessageFailureReason.updateFailed);
-    expect(failed.failureReason?.isRetriable, isTrue);
+    expect(failed.failure, const ScheduledMessageUpdatingFailed(isRetriable: true));
     expect(failed.message.text, 'Good evening');
   });
 
@@ -103,9 +102,73 @@ void main() {
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.failed),
     ]);
     final [failed] = harness.client.state.scheduledMessages;
-    expect(failed.failureReason, ScheduledMessageFailureReason.updateRejected);
-    expect(failed.failureReason?.isRetriable, isFalse);
+    expect(failed.failure, const ScheduledMessageUpdatingFailed(isRetriable: false));
     expect(failed.message.text, 'Good evening');
+  });
+
+  test('updateScheduledMessage keeps an edit stopped by a server error as failed, to retry', () async {
+    final serverError = StreamChatNetworkError.raw(
+      code: -1,
+      message: 'Internal error',
+      statusCode: 500,
+      data: ErrorResponse()
+        ..code = -1
+        ..statusCode = 500
+        ..message = 'Internal error',
+    );
+    stubUpdate(() async => throw serverError);
+
+    await update(throws: serverError);
+
+    final [failed] = harness.client.state.scheduledMessages;
+    expect(failed.failure, const ScheduledMessageUpdatingFailed(isRetriable: true));
+  });
+
+  test('updateScheduledMessage keeps an edit that fails without a network error as failed, to retry', () async {
+    final error = StateError('Interrupted');
+    stubUpdate(() async => throw error);
+
+    await update(throws: error);
+
+    final [failed] = harness.client.state.scheduledMessages;
+    expect(failed.failure, const ScheduledMessageUpdatingFailed(isRetriable: true));
+  });
+
+  test(
+    'updateScheduledMessage keeps an edit refused without a scheduled message reason as failed, not to retry',
+    () async {
+      final forbidden = StreamChatNetworkError.raw(
+        code: 17,
+        message: 'Not allowed',
+        statusCode: 403,
+        data: ErrorResponse()
+          ..code = 17
+          ..statusCode = 403
+          ..message = 'Not allowed',
+      );
+      stubUpdate(() async => throw forbidden);
+
+      await update(throws: forbidden);
+
+      final [failed] = harness.client.state.scheduledMessages;
+      expect(failed.failure, const ScheduledMessageUpdatingFailed(isRetriable: false));
+    },
+  );
+
+  test('updateScheduledMessage keeps the reason of a refused edit', () async {
+    final tooFar = refusedWith(scheduledAtTooFarCode);
+    stubUpdate(() async => throw tooFar);
+
+    await update(throws: tooFar);
+
+    final [failed] = harness.client.state.scheduledMessages;
+    expect(
+      failed.failure,
+      const ScheduledMessageUpdatingFailed(
+        reason: ScheduledMessageErrorReason.scheduledAtTooFar,
+        isRetriable: false,
+      ),
+    );
   });
 
   test('updateScheduledMessage keeps an edit refused for a change made at the same time as failed, to retry', () async {
@@ -114,7 +177,13 @@ void main() {
     await update(throws: conflictError);
 
     final [failed] = harness.client.state.scheduledMessages;
-    expect(failed.failureReason, ScheduledMessageFailureReason.updateFailed);
+    expect(
+      failed.failure,
+      const ScheduledMessageUpdatingFailed(
+        reason: ScheduledMessageErrorReason.scheduledMessageConflict,
+        isRetriable: true,
+      ),
+    );
     expect(failed.message.text, 'Good evening');
   });
 
@@ -301,7 +370,7 @@ void main() {
     await harness.receive(EventType.scheduledMessageUpdated, original);
 
     final [listed] = harness.client.state.scheduledMessages;
-    expect(listed.failureReason, ScheduledMessageFailureReason.updateFailed);
+    expect(listed.failure, const ScheduledMessageUpdatingFailed(isRetriable: true));
     expect(listed.message.text, 'Good evening');
   });
 

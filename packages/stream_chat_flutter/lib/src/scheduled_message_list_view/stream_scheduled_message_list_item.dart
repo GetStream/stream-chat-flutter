@@ -360,7 +360,7 @@ class _ScheduledMessageStatusLine extends core.NullableStatelessWidget {
     if (status == .failed) {
       final quoted = scheduledMessage.message.quotedMessage;
       final reason = translations.scheduledMessageFailureReasonText(
-        reason: scheduledMessage.failureReason,
+        failure: scheduledMessage.failure,
         isQuoteDeleted: quoted?.isDeleted ?? false,
       );
 

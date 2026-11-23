@@ -922,23 +922,27 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
 
   @override
   String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {
-    return switch (reason) {
-      .requestFailed => "No s'ha pogut enviar. Torna-ho a provar",
-      .internalError => 'Alguna cosa ha anat malament. Torna-ho a provar',
-      .channelDeleted => "Aquest canal s'ha eliminat",
-      .userDeleted => "El teu compte s'ha eliminat",
-      .channelFrozen => 'Aquest canal està congelat',
-      .banned => 'No pots enviar missatges en aquest canal',
-      .noPermission => 'Ja no tens permís per publicar aquí',
-      .moderationBlocked => 'Bloquejat per la moderació',
-      .hookRejected => "Rebutjat per l'aplicació",
-      .expired => "No enviat: el servei s'ha endarrerit",
-      .pendingNotSupported => 'Aquest canal ara requereix aprovació. Torna a programar-lo.',
-      .invalidMessage when isQuoteDeleted => "El missatge citat s'ha eliminat. Edita'l per treure la cita.",
-      .invalidMessage => "El missatge ja no compleix els límits de l'aplicació. Edita'l.",
+    return switch (failure) {
+      ScheduledMessageUpdatingFailed() => "L'edició no s'ha desat. La versió anterior continua programada.",
+      ScheduledMessageSchedulingFailed() => "No s'ha pogut programar.",
+      ScheduledMessageSendingFailed(reason: .internalError) => 'Alguna cosa ha anat malament. Torna-ho a provar',
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => "Aquest canal s'ha eliminat",
+      ScheduledMessageSendingFailed(reason: .userDeleted) => "El teu compte s'ha eliminat",
+      ScheduledMessageSendingFailed(reason: .channelFrozen) => 'Aquest canal està congelat',
+      ScheduledMessageSendingFailed(reason: .banned) => 'No pots enviar missatges en aquest canal',
+      ScheduledMessageSendingFailed(reason: .noPermission) => 'Ja no tens permís per publicar aquí',
+      ScheduledMessageSendingFailed(reason: .moderationBlocked) => 'Bloquejat per la moderació',
+      ScheduledMessageSendingFailed(reason: .hookRejected) => "Rebutjat per l'aplicació",
+      ScheduledMessageSendingFailed(reason: .expired) => "No enviat: el servei s'ha endarrerit",
+      ScheduledMessageSendingFailed(reason: .pendingNotSupported) =>
+        'Aquest canal ara requereix aprovació. Torna a programar-lo.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) when isQuoteDeleted =>
+        "El missatge citat s'ha eliminat. Edita'l per treure la cita.",
+      ScheduledMessageSendingFailed(reason: .invalidMessage) =>
+        "El missatge ja no compleix els límits de l'aplicació. Edita'l.",
       _ => 'Alguna cosa ha anat malament. Torna-ho a provar',
     };
   }

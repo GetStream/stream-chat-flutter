@@ -56,7 +56,7 @@ void main() {
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.failed),
     ]);
     final [failed] = harness.client.state.scheduledMessages;
-    expect(failed.failureReason, ScheduledMessageFailureReason.updateFailed);
+    expect(failed.failure, const ScheduledMessageUpdatingFailed(isRetriable: true));
     expect(failed.scheduledAt, later);
   });
 
@@ -68,7 +68,7 @@ void main() {
       (EventType.scheduledMessageUpdated, ScheduledMessageStatus.failed),
     ]);
     final [failed] = harness.client.state.scheduledMessages;
-    expect(failed.failureReason, ScheduledMessageFailureReason.updateRejected);
+    expect(failed.failure, const ScheduledMessageUpdatingFailed(isRetriable: false));
     expect(failed.scheduledAt, later);
   });
 

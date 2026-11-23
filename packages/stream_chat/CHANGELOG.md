@@ -2,7 +2,8 @@
 
 ✅ Added
 
-- Added scheduled messages: schedule one with `Channel.scheduleMessage`, and read the current user's unsent ones from `ClientState.scheduledMessages` after `StreamChatClient.loadScheduledMessages`, or those in one channel or thread with `ClientState.scheduledChannelMessages` and `ClientState.scheduledThreadReplies`. A slash command, a quote of a deleted message, or a time the message can't be sent at is refused with a `ScheduledMessageRefusedError` before any request is made, and one whose request failed can be tried again with `StreamChatClient.resendScheduledMessage`.
+- Added scheduled messages: schedule one with `Channel.scheduleMessage`, and read the current user's unsent ones from `ClientState.scheduledMessages` after `StreamChatClient.loadScheduledMessages`, or those in one channel or thread with `ClientState.scheduledChannelMessages` and `ClientState.scheduledThreadReplies`. A failed one says why in `ScheduledMessage.failure`, and one that can't be scheduled throws a `ScheduledMessageRefusedError` before any request is made.
+- Added `StreamChatClient.resendScheduledMessage`, `ScheduledMessageFailure` (`schedulingFailed`, `updatingFailed`, `sendingFailed`), `ScheduledMessageSendingFailureReason`, `ScheduledMessageStatus.isPending` and `StreamChatNetworkError.isScheduledMessageNotFound`.
 
 🔄 Changed
 

@@ -69,12 +69,11 @@ class ScheduledMessageListStateNotifier {
 
   List<ScheduledMessage> get _scheduledMessages => state.scheduledMessages;
 
-  /// Replaces the scheduled messages with [scheduledMessages], the complete
-  /// list.
+  /// Replaces the list with [scheduledMessages], which is then complete.
   ///
-  /// The list is then loaded. The ones still being scheduled, or whose request
-  /// failed, are kept, and so are edits not saved yet of the ones listed.
-  void onLoadScheduledMessages(List<ScheduledMessage> scheduledMessages) {
+  /// The ones still being scheduled, or whose request failed, are kept, and
+  /// so are the unsaved edits of the ones in [scheduledMessages].
+  void onLoaded(List<ScheduledMessage> scheduledMessages) {
     final kept = _scheduledMessages.where((it) => it.isKeptOver(scheduledMessages));
     final merged = _merged(kept, scheduledMessages);
 
@@ -84,16 +83,16 @@ class ScheduledMessageListStateNotifier {
   /// Adds [scheduledMessages], from a page or a filtered query.
   ///
   /// Of two with the same ID, the newer one is used. Nothing is removed.
-  void onQueryScheduledMessages(List<ScheduledMessage> scheduledMessages) {
+  void onQueried(List<ScheduledMessage> scheduledMessages) {
     final merged = _merged(_scheduledMessages, scheduledMessages);
     _emit(state.copyWith(scheduledMessages: _sorted(merged)));
   }
 
-  /// Replaces the scheduled messages of each of [channels] with its queried
-  /// ones.
+  /// Replaces the scheduled messages of each of [channels].
   ///
-  /// The ones still being scheduled, or whose request failed, are kept, and so
-  /// are edits not saved yet of the ones queried.
+  /// Each channel lists the ones queried for it. The ones still being
+  /// scheduled, or whose request failed, are kept, and so are the unsaved
+  /// edits of the ones queried.
   void onChannelsQueried(List<ChannelScheduledMessages> channels) {
     final cids = {for (final it in channels) it.cid};
     final queried = channels.expand((it) => it.scheduledMessages).toList();
@@ -128,13 +127,11 @@ class ScheduledMessageListStateNotifier {
     _emit(state.copyWith(scheduledMessages: remaining));
   }
 
-  /// Replaces the quote of each scheduled message that quotes [message] with
-  /// [message], as it was updated or deleted.
+  /// Updates each quote of [message] to this copy of it.
+  ///
+  /// Used when [message] is updated or deleted.
   void onQuotedMessageUpdated(Message message) {
-    bool quotes(ScheduledMessage it) {
-      final quotedMessageId = it.message.quotedMessageId ?? it.message.quotedMessage?.id;
-      return quotedMessageId == message.id;
-    }
+    bool quotes(ScheduledMessage it) => it.message.quotedMessageId == message.id;
 
     if (!_scheduledMessages.any(quotes)) return;
 
@@ -163,9 +160,9 @@ class ScheduledMessageListStateNotifier {
     return a.id.compareTo(b.id);
   }
 
-  // A newer copy wins over an older one, and one from the API over one not on
-  // the API yet. On a tie, a change made on this device to that version wins
-  // over the API's copy of it.
+  // A scheduled copy wins over one not scheduled yet, then the later
+  // [ScheduledMessage.updatedAt]. On a tie, a copy changed on this device wins
+  // over one that wasn't.
   static ScheduledMessage _newer(
     ScheduledMessage original,
     ScheduledMessage updated,
@@ -199,24 +196,34 @@ class ScheduledMessageListStateNotifier {
   }
 }
 
-extension on ScheduledMessage {
-  // Whether it is still being scheduled, or scheduling it failed and can be
-  // retried. Either way, the API doesn't have it.
-  bool get isLocal {
-    if (status == .preparingToSchedule) return remoteCreatedAt == null;
-    return failureReason == .requestFailed;
+/// Where a [ScheduledMessage] is in the requests made on this device.
+@internal
+extension ScheduledMessageProgress on ScheduledMessage {
+  /// Whether it is being scheduled for the first time.
+  bool get isBeingScheduled => status == .preparingToSchedule && remoteCreatedAt == null;
+
+  /// Whether scheduling it failed.
+  bool get isSchedulingFailed => failure is ScheduledMessageSchedulingFailed;
+
+  /// Whether saving a change to it failed, so it is still scheduled as it was.
+  bool get isEditFailed => failure is ScheduledMessageUpdatingFailed;
+
+  /// Whether it isn't scheduled yet: it is being scheduled, or scheduling it
+  /// failed.
+  bool get isNotScheduledYet => isBeingScheduled || isSchedulingFailed;
+
+  /// Whether it holds a change not saved yet of a message already scheduled.
+  bool get hasUnsavedChange {
+    final isBeingChanged = status == .preparingToSchedule && remoteCreatedAt != null;
+    return isBeingChanged || isEditFailed;
   }
 
-  // Whether it holds an unsaved edit of a message already scheduled.
-  bool get isLocalEdit {
-    if (status == .preparingToSchedule) return remoteCreatedAt != null;
-    return failureReason?.isEditFailure ?? false;
-  }
-
-  // Whether it is kept when [loaded] replaces the list: it isn't on the server
-  // yet, or it holds an edit of one still there.
-  bool isKeptOver(List<ScheduledMessage> loaded) {
-    if (isLocal) return true;
-    return isLocalEdit && loaded.any((it) => it.id == id);
+  /// Whether it is kept when [incoming] replaces the list.
+  ///
+  /// It is when it isn't scheduled yet, or holds an unsaved change of one in
+  /// [incoming].
+  bool isKeptOver(List<ScheduledMessage> incoming) {
+    if (isNotScheduledYet) return true;
+    return hasUnsavedChange && incoming.any((it) => it.id == id);
   }
 }

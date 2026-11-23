@@ -172,6 +172,28 @@ void main() {
     expect(reported, same(error));
   });
 
+  testWidgets('reports an error onSendLongPress throws to onError', (tester) async {
+    useFakeRecordPlatform();
+    final error = StateError('Could not schedule');
+    Object? reported;
+
+    await pumpComposer(
+      tester,
+      composer: StreamMessageComposer(
+        messageComposerController: composerController(),
+        enableVoiceRecording: false,
+        onSendLongPress: (_, _) => throw error,
+        onError: (error, _) => reported = error,
+      ),
+    );
+    await tester.enterText(find.byType(EditableText), 'Hello');
+    await tester.pump();
+    tester.widget<StreamButton>(find.byKey(const ValueKey('send_key'))).props.onLongPress!();
+    await tester.pump();
+
+    expect(reported, same(error));
+  });
+
   testWidgets("doesn't offer onSendLongPress to a custom trailing while a message is edited", (tester) async {
     useFakeRecordPlatform();
     final edited = Message(id: 'message-id', text: 'Hello', createdAt: DateTime.utc(2026, 10, 29));

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -35,50 +36,23 @@ FocusNode composerFocusNode(WidgetTester tester) {
   return tester.widget<StreamChatMessageInput>(find.byType(StreamChatMessageInput)).focusNode!;
 }
 
-/// Pumps a [StreamChannelPage] for a channel holding [scheduledMessages], and
-/// returns the channel.
+/// A channel of [client] stubbed for a [StreamChannelPage].
 ///
 /// The current user can schedule messages in it, unless not [canSchedule].
-Future<MockChannel> pumpChannelPage(
-  WidgetTester tester, {
-  StreamSurfaceStyle surfaceStyle = StreamSurfaceStyle.regular,
-  StreamSurfaceStyle? composerSurfaceStyle,
-  StreamSurfaceStyle? headerSurfaceStyle,
-  void Function(BuildContext context, Channel channel)? onChannelAvatarPressed,
-  bool automaticallyImplyLeading = true,
-  VoidCallback? onBackPressed,
-  bool pushOntoARoute = false,
-  List<ScheduledMessage> scheduledMessages = const [],
-  Stream<List<ScheduledMessage>>? scheduledMessagesStream,
-  StreamScheduledMessagesBannerTapCallback? onScheduledMessagesBannerTap,
+MockChannel stubPageChannel(
+  MockClient client, {
   bool canSchedule = true,
-  StreamChatConfigurationData? configData,
-}) async {
-  final originalRecordPlatform = RecordPlatform.instance;
-  RecordPlatform.instance = FakeRecordPlatform();
-  addTearDown(() => RecordPlatform.instance = originalRecordPlatform);
-
-  final client = MockClient();
-  final clientState = MockClientState();
+  Stream<List<ChannelCapability>>? capabilitiesUpdates,
+}) {
   final channel = MockChannel(
     ownCapabilities: [
       ChannelCapability.sendMessage,
       ChannelCapability.uploadFile,
       if (canSchedule) ChannelCapability.scheduleMessage,
     ],
+    capabilitiesUpdates: capabilitiesUpdates,
   );
   final channelState = MockChannelState();
-  final currentUser = OwnUser(id: 'user-id');
-
-  when(() => client.state).thenReturn(clientState);
-  when(() => clientState.currentUser).thenReturn(currentUser);
-  when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
-  when(() => clientState.totalUnreadCount).thenReturn(0);
-  when(() => clientState.totalUnreadCountStream).thenAnswer((_) => Stream.value(0));
-  // Keyed by cid so the header's back button can resolve the open channel's
-  // unread count and exclude it from the total.
-  when(() => clientState.channels).thenReturn({channel.cid!: channel});
-
   when(() => channel.client).thenReturn(client);
   when(() => channel.state).thenReturn(channelState);
   when(channel.getRemainingCooldown).thenReturn(0);
@@ -104,24 +78,79 @@ Future<MockChannel> pumpChannelPage(
   when(() => channelState.readStream).thenAnswer((_) => Stream.value([]));
   when(() => channelState.currentUserRead).thenReturn(null);
   when(() => channelState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
+  return channel;
+}
+
+/// Pumps a [StreamChannelPage] for a channel holding [scheduledMessages], and
+/// returns the channel.
+///
+/// The page shows the channel [channelSwap] holds instead, once it holds one.
+///
+/// The current user can schedule messages in it, unless not [canSchedule].
+Future<MockChannel> pumpChannelPage(
+  WidgetTester tester, {
+  StreamSurfaceStyle surfaceStyle = StreamSurfaceStyle.regular,
+  StreamSurfaceStyle? composerSurfaceStyle,
+  StreamSurfaceStyle? headerSurfaceStyle,
+  void Function(BuildContext context, Channel channel)? onChannelAvatarPressed,
+  bool automaticallyImplyLeading = true,
+  VoidCallback? onBackPressed,
+  bool pushOntoARoute = false,
+  List<ScheduledMessage> scheduledMessages = const [],
+  Stream<List<ScheduledMessage>>? scheduledMessagesStream,
+  StreamScheduledMessagesBannerTapCallback? onScheduledMessagesBannerTap,
+  bool canSchedule = true,
+  Stream<List<ChannelCapability>>? capabilitiesUpdates,
+  StreamChatConfigurationData? configData,
+  ValueListenable<MockChannel?>? channelSwap,
+}) async {
+  final originalRecordPlatform = RecordPlatform.instance;
+  RecordPlatform.instance = FakeRecordPlatform();
+  addTearDown(() => RecordPlatform.instance = originalRecordPlatform);
+
+  final client = MockClient();
+  final clientState = MockClientState();
+  final channel = stubPageChannel(client, canSchedule: canSchedule, capabilitiesUpdates: capabilitiesUpdates);
+  final currentUser = OwnUser(id: 'user-id');
+
+  when(() => client.state).thenReturn(clientState);
+  when(() => clientState.currentUser).thenReturn(currentUser);
+  when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(currentUser));
+  when(() => clientState.totalUnreadCount).thenReturn(0);
+  when(() => clientState.totalUnreadCountStream).thenAnswer((_) => Stream.value(0));
+  // Keyed by cid so the header's back button can resolve the open channel's
+  // unread count and exclude it from the total.
+  when(() => clientState.channels).thenReturn({channel.cid!: channel});
+
   when(() => clientState.scheduledMessages).thenReturn(scheduledMessages);
   when(
     () => clientState.scheduledMessagesStream,
   ).thenAnswer((_) => scheduledMessagesStream ?? Stream.value(scheduledMessages));
 
-  final page = StreamChannelPage(
+  StreamChannelPage buildPage() => StreamChannelPage(
     onChannelAvatarPressed: onChannelAvatarPressed,
     automaticallyImplyLeading: automaticallyImplyLeading,
     onBackPressed: onBackPressed,
     onScheduledMessagesBannerTap: onScheduledMessagesBannerTap,
   );
+  // A swap rebuilds the page too, as a parent passing a new channel would.
+  final page = switch (channelSwap) {
+    final swap? => ValueListenableBuilder(valueListenable: swap, builder: (context, _, _) => buildPage()),
+    null => buildPage(),
+  };
 
   await tester.pumpWidget(
     MaterialApp(
       theme: ThemeData(extensions: [StreamTheme(surfaceStyle: surfaceStyle)]),
       // Chat context lives above the navigator so it survives a pop.
       builder: (context, child) {
-        Widget content = StreamChannel(channel: channel, child: child!);
+        Widget content = switch (channelSwap) {
+          final swap? => ValueListenableBuilder(
+            valueListenable: swap,
+            builder: (context, swapped, _) => StreamChannel(channel: swapped ?? channel, child: child!),
+          ),
+          null => StreamChannel(channel: channel, child: child!),
+        };
         if (composerSurfaceStyle != null) {
           content = StreamMessageComposerTheme(
             data: StreamMessageComposerThemeData(surfaceStyle: composerSurfaceStyle),

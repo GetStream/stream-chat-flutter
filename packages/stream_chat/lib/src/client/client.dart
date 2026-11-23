@@ -2499,9 +2499,10 @@ class StreamChatClient {
   ///
   /// [ClientState.scheduledMessages] lists it right away as
   /// [ScheduledMessageStatus.preparingToSchedule]. If the request fails in a
-  /// way that can be retried, it stays there as failed with
-  /// [ScheduledMessageFailureReason.requestFailed], to retry with
-  /// [resendScheduledMessage] or delete with [deleteScheduledMessage].
+  /// way that can be retried, it stays there as failed with a
+  /// [ScheduledMessageSchedulingFailed], to retry with [resendScheduledMessage]
+  /// or delete with [deleteScheduledMessage]. Any other failure takes it out
+  /// of the list.
   ///
   /// Each of these changes is also reported on [on] as a scheduled message
   /// event with [Event.isLocal] true.
@@ -2539,13 +2540,12 @@ class StreamChatClient {
 
   /// Makes the request of the scheduled message [id] again after it failed.
   ///
-  /// One with [ScheduledMessageFailureReason.requestFailed] is scheduled
-  /// again, keeping its ID so it is never scheduled twice. One with
-  /// [ScheduledMessageFailureReason.updateFailed] or
-  /// [ScheduledMessageFailureReason.updateRejected] has its edit saved again
-  /// with its message and time, as with [updateScheduledMessage]. Resolves to
-  /// the scheduled message, or null when its time had passed and it was sent
-  /// right away.
+  /// One whose scheduling failed, a [ScheduledMessageSchedulingFailed], is
+  /// scheduled again, keeping its ID so it is never scheduled twice. One whose
+  /// edit failed, a [ScheduledMessageUpdatingFailed], has its edit saved
+  /// again with its message and time, as with [updateScheduledMessage].
+  /// Resolves to the scheduled message, or null when its time had passed and
+  /// it was sent right away. One that is refused stays listed as it was.
   ///
   /// It is reported on [on] with local events, as for [scheduleMessage]. If
   /// the first attempt had gone through and the message was sent, an
@@ -2561,8 +2561,8 @@ class StreamChatClient {
   /// uploaded yet.
   ///
   /// Throws a [StateError] if [id] isn't in [ClientState.scheduledMessages],
-  /// or failed in a way that can't be retried, as there is no failed request
-  /// to make again, or if no user is connected when it is scheduled again.
+  /// if its sending failed, as there is no failed request to make again, or
+  /// if no user is connected when it is scheduled again.
   Future<ScheduledMessage?> resendScheduledMessage(String id) {
     return _scheduledMessageManager.resendMessage(id);
   }
@@ -2576,11 +2576,12 @@ class StreamChatClient {
   /// Mentioned users whose mention is no longer in the text are removed, as
   /// with [updateMessage].
   ///
-  /// A failed scheduled message can't be edited, except one whose edit
-  /// failed. The edit is listed right away and stays listed if saving it
-  /// fails: as [ScheduledMessageFailureReason.updateFailed], to retry with
-  /// [resendScheduledMessage], when the error is temporary, or as
-  /// [ScheduledMessageFailureReason.updateRejected] otherwise.
+  /// One whose scheduling failed is scheduled again, then the edit is saved.
+  /// Of the other failed ones, only one whose edit failed can be edited. The
+  /// edit is listed right away and, if saving it fails, stays listed with a
+  /// [ScheduledMessageUpdatingFailed]; one whose
+  /// [ScheduledMessageFailure.isRetriable] is true can be retried with
+  /// [resendScheduledMessage].
   ///
   /// If the scheduled message no longer exists, an
   /// [EventType.scheduledMessageDeleted] event reports it, so
@@ -2592,16 +2593,19 @@ class StreamChatClient {
   /// is not in the future.
   ///
   /// Throws a [ScheduledMessageRefusedError] without making the request when
-  /// [message] is a command in a channel that has commands, quotes a deleted
-  /// message, or can't be sent at its time: one past the channel's
-  /// [ChannelConfig.scheduledMessagesMaxLeadTime], at or after its pin
-  /// expires, or less than a minute before its shared location ends.
-  /// If [ClientState.scheduledMessages] doesn't list it, the request is made
-  /// without these checks or changing the list first, then lists the copy it
-  /// answers with.
+  /// sending the scheduled message already failed, as it can no longer be
+  /// changed; when its scheduling failed and the time it would be scheduled
+  /// at has passed; or when [message] is a command in a channel that has
+  /// commands, quotes a deleted message, or can't be sent at its time: one
+  /// past the channel's [ChannelConfig.scheduledMessagesMaxLeadTime], at or
+  /// after its pin expires, or less than a minute before its shared location
+  /// ends. If [ClientState.scheduledMessages] doesn't list it, the request is
+  /// made without these checks or changing the list first, then lists the
+  /// copy it answers with.
   ///
   /// Throws an [ArgumentError] if an attachment of [message] is not uploaded
-  /// yet.
+  /// yet, or a [StateError] while it is still being scheduled for the first
+  /// time.
   Future<UpdateScheduledMessageResponse> updateScheduledMessage(
     String id,
     Message message, {
@@ -2623,9 +2627,8 @@ class StreamChatClient {
   /// [ClientState.scheduledMessages] lists it at its new time right away, as
   /// with [updateScheduledMessage].
   ///
-  /// A failed scheduled message can't be rescheduled, only deleted, unless
-  /// its edit failed, with [ScheduledMessageFailureReason.updateFailed] or
-  /// [ScheduledMessageFailureReason.updateRejected].
+  /// Of the failed ones, only one whose edit or scheduling failed can be
+  /// rescheduled; one whose scheduling failed is scheduled again, then moved.
   ///
   /// If the scheduled message no longer exists, an
   /// [EventType.scheduledMessageDeleted] event reports it, so
@@ -2637,13 +2640,18 @@ class StreamChatClient {
   /// is not in the future.
   ///
   /// Throws a [ScheduledMessageRefusedError] without making the request when
-  /// it is moved to another time but is a command in a channel that has
-  /// commands, quotes a deleted message, or can't be sent at the new time: one
-  /// past the channel's [ChannelConfig.scheduledMessagesMaxLeadTime], at or
-  /// after its pin expires, or less than a minute before its shared location
-  /// ends. If [ClientState.scheduledMessages] doesn't list it, the request is
-  /// made without these checks or changing the list first, then lists the
-  /// copy it answers with.
+  /// sending it already failed, as it can no longer be changed; when its
+  /// scheduling failed and [scheduledAt] has passed; or when it is moved to
+  /// another time but is a command in a channel that has commands, quotes a
+  /// deleted message, or can't be sent at the new time: one past the
+  /// channel's [ChannelConfig.scheduledMessagesMaxLeadTime], at or after its
+  /// pin expires, or less than a minute before its shared location ends. If
+  /// [ClientState.scheduledMessages] doesn't list it, the request is made
+  /// without these checks or changing the list first, then lists the copy it
+  /// answers with.
+  ///
+  /// Throws a [StateError] while it is still being scheduled for the first
+  /// time.
   Future<UpdateScheduledMessageResponse> rescheduleMessage(
     String id, {
     required DateTime scheduledAt,
@@ -2653,28 +2661,36 @@ class StreamChatClient {
 
   /// Deletes the scheduled message [id] before it is sent.
   ///
-  /// A failed scheduled message can only be deleted, unless only its edit
-  /// failed. One with [ScheduledMessageFailureReason.requestFailed] is deleted
-  /// even if scheduling it never went through. One still being scheduled is
-  /// taken out of the list right away, deleted on the server once scheduling
-  /// it ends, and listed again if deleting it there fails.
-  ///
   /// When [ClientState.scheduledMessages] lists it, it stops listing it right
   /// away, and lists it again if the request fails, unless it no longer
   /// exists. One not listed is deleted without changing the list.
   ///
+  /// One still being scheduled is deleted once scheduling it ends, and listed
+  /// again if that fails. If the user disconnects first, it stays scheduled.
+  ///
+  /// One whose scheduling failed, a [ScheduledMessageSchedulingFailed], is
+  /// deleted even if it was never scheduled.
+  ///
+  /// The returned scheduled message has the status it had when it was
+  /// deleted.
+  ///
   /// Throws a [StreamChatNetworkError] if the request fails, including when it
-  /// is already gone, unless its scheduling had failed.
+  /// is already gone, unless its scheduling had failed. One already sent is
+  /// reported with an [EventType.scheduledMessageSent] event.
   Future<DeleteScheduledMessageResponse> deleteScheduledMessage(String id) {
     return _scheduledMessageManager.deleteMessage(id);
   }
 
   /// Sends the scheduled message [id] right away.
   ///
+  /// One whose scheduling failed is scheduled again at its time, then sent
+  /// right away. Of one whose edit failed, the saved version is sent, not the
+  /// edit.
+  ///
   /// [ClientState.scheduledMessages] lists it as
   /// [ScheduledMessageStatus.preparingToSchedule] while the request runs, then
-  /// as the server answers until it is sent, and as it was if the request
-  /// fails.
+  /// as answered until it is sent. If the request fails, a scheduled one is
+  /// listed as it was.
   ///
   /// The returned scheduled message can still be waiting to go out. An
   /// [EventType.scheduledMessageSent] event follows once it has been sent.
@@ -2687,9 +2703,13 @@ class StreamChatClient {
   /// scheduled message is already gone.
   ///
   /// Throws a [ScheduledMessageRefusedError] without making the request when
-  /// it quotes a deleted message, which would fail it once sent. If
+  /// sending it already failed, as it can no longer be changed, or when it
+  /// quotes a deleted message, which would fail it once sent. If
   /// [ClientState.scheduledMessages] doesn't list it, the request is made
   /// without these checks or changing the list.
+  ///
+  /// Throws a [StateError] while it is still being scheduled for the first
+  /// time.
   Future<SendScheduledMessageNowResponse> sendScheduledMessageNow(String id) {
     return _scheduledMessageManager.sendMessageNow(id);
   }
@@ -3200,7 +3220,7 @@ class ClientState {
 
   /// The current user's unsent scheduled messages.
   ///
-  /// Failed ones last, each group earliest first, thread replies included.
+  /// Earliest first by the time each is sent, thread replies included.
   ///
   /// It lists the ones scheduled, loaded or changed on this device, each as of
   /// its latest change until it is sent or deleted. It is complete when

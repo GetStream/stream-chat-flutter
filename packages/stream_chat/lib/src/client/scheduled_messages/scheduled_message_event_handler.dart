@@ -23,23 +23,14 @@ class ScheduledMessageEventHandler {
     final scheduledMessage = event.scheduledMessage;
     if (scheduledMessage == null) return;
 
-    if (event.type == EventType.scheduledMessageCreated) {
+    final type = event.type;
+    if (type == EventType.scheduledMessageCreated ||
+        type == EventType.scheduledMessageUpdated ||
+        type == EventType.scheduledMessageFailed) {
       return state.onScheduledMessageUpserted(scheduledMessage);
     }
 
-    if (event.type == EventType.scheduledMessageUpdated) {
-      return state.onScheduledMessageUpserted(scheduledMessage);
-    }
-
-    if (event.type == EventType.scheduledMessageFailed) {
-      return state.onScheduledMessageUpserted(scheduledMessage);
-    }
-
-    if (event.type == EventType.scheduledMessageSent) {
-      return state.onScheduledMessageRemoved(scheduledMessage.id);
-    }
-
-    if (event.type == EventType.scheduledMessageDeleted) {
+    if (type == EventType.scheduledMessageSent || type == EventType.scheduledMessageDeleted) {
       return state.onScheduledMessageRemoved(scheduledMessage.id);
     }
   }

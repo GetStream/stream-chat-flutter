@@ -2,8 +2,7 @@ import 'package:flutter/material.dart';
 import '../../stream_chat_flutter.dart';
 import 'page_composer.dart';
 
-/// Signature for the callback called when a page's
-/// [StreamScheduledMessagesBanner] is tapped.
+/// Signature for a tap on a page's [StreamScheduledMessagesBanner].
 ///
 /// [parent] is the parent message of the thread whose banner was tapped, or
 /// null for the channel's own banner.

@@ -922,23 +922,27 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {
-    return switch (reason) {
-      .requestFailed => 'नहीं भेजा जा सका। फिर से कोशिश करें',
-      .internalError => 'कुछ गलत हो गया। फिर से कोशिश करें',
-      .channelDeleted => 'यह चैनल हटा दिया गया था',
-      .userDeleted => 'आपका खाता हटा दिया गया',
-      .channelFrozen => 'यह चैनल फ़्रीज़ है',
-      .banned => 'आप इस चैनल में संदेश नहीं भेज सकते',
-      .noPermission => 'अब आपको यहाँ पोस्ट करने की अनुमति नहीं है',
-      .moderationBlocked => 'मॉडरेशन द्वारा ब्लॉक किया गया',
-      .hookRejected => 'ऐप द्वारा अस्वीकार किया गया',
-      .expired => 'नहीं भेजा गया: सेवा में देरी हुई',
-      .pendingNotSupported => 'इस चैनल में अब अनुमोदन ज़रूरी है। इसे फिर से शेड्यूल करें।',
-      .invalidMessage when isQuoteDeleted => 'उद्धृत संदेश हटा दिया गया था। उद्धरण हटाने के लिए इसे संपादित करें।',
-      .invalidMessage => 'संदेश अब ऐप की सीमाओं को पूरा नहीं करता। इसे संपादित करें।',
+    return switch (failure) {
+      ScheduledMessageUpdatingFailed() => 'बदलाव सेव नहीं हुआ। पिछला संस्करण अभी भी शेड्यूल है।',
+      ScheduledMessageSchedulingFailed() => 'शेड्यूल नहीं हो सका।',
+      ScheduledMessageSendingFailed(reason: .internalError) => 'कुछ गलत हो गया। फिर से कोशिश करें',
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => 'यह चैनल हटा दिया गया था',
+      ScheduledMessageSendingFailed(reason: .userDeleted) => 'आपका खाता हटा दिया गया',
+      ScheduledMessageSendingFailed(reason: .channelFrozen) => 'यह चैनल फ़्रीज़ है',
+      ScheduledMessageSendingFailed(reason: .banned) => 'आप इस चैनल में संदेश नहीं भेज सकते',
+      ScheduledMessageSendingFailed(reason: .noPermission) => 'अब आपको यहाँ पोस्ट करने की अनुमति नहीं है',
+      ScheduledMessageSendingFailed(reason: .moderationBlocked) => 'मॉडरेशन द्वारा ब्लॉक किया गया',
+      ScheduledMessageSendingFailed(reason: .hookRejected) => 'ऐप द्वारा अस्वीकार किया गया',
+      ScheduledMessageSendingFailed(reason: .expired) => 'नहीं भेजा गया: सेवा में देरी हुई',
+      ScheduledMessageSendingFailed(reason: .pendingNotSupported) =>
+        'इस चैनल में अब अनुमोदन ज़रूरी है। इसे फिर से शेड्यूल करें।',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) when isQuoteDeleted =>
+        'उद्धृत संदेश हटा दिया गया था। उद्धरण हटाने के लिए इसे संपादित करें।',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) =>
+        'संदेश अब ऐप की सीमाओं को पूरा नहीं करता। इसे संपादित करें।',
       _ => 'कुछ गलत हो गया। फिर से कोशिश करें',
     };
   }

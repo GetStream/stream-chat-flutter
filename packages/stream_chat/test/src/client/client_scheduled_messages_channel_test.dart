@@ -52,7 +52,8 @@ void main() {
     final failed = fakeScheduledMessage(
       'failed',
       status: ScheduledMessageStatus.failed,
-      failureReason: ScheduledMessageFailureReason.requestFailed,
+      failure: const ScheduledMessageSchedulingFailed(),
+      isOnServer: false,
     );
     await harness.hold([failed]);
     harness.stubQueryChannel(carrying([fakeScheduledMessage('fresh')]));

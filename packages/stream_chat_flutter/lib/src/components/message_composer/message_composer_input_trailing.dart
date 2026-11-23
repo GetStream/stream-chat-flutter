@@ -89,7 +89,8 @@ class DefaultStreamMessageComposerInputTrailing extends StatelessWidget {
           );
 
           if (onSendLongPress == null) return button;
-          // TODO: Use StreamButton's long-press hint once it has one (GetStream/stream-core-flutter#210).
+          // TODO: Use StreamButton's long-press hint once it has one
+          // (GetStream/stream-core-flutter#210).
           return MergeSemantics(
             child: Semantics(onLongPressHint: a11y.scheduleMessageHint, child: button),
           );

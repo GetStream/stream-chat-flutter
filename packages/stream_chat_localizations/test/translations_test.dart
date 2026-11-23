@@ -429,29 +429,52 @@ void main() {
       // A known and an unknown quoted author.
       expect(localizations.scheduledQuoteReplyPrefixText(name: 'Maya'), contains('Maya'));
       expect(localizations.scheduledQuoteReplyPrefixText(), isNotNull);
-      for (final reason in [
-        ScheduledMessageFailureReason.requestFailed,
-        ScheduledMessageFailureReason.internalError,
-        ScheduledMessageFailureReason.channelDeleted,
-        ScheduledMessageFailureReason.userDeleted,
-        ScheduledMessageFailureReason.channelFrozen,
-        ScheduledMessageFailureReason.banned,
-        ScheduledMessageFailureReason.noPermission,
-        ScheduledMessageFailureReason.moderationBlocked,
-        ScheduledMessageFailureReason.hookRejected,
-        ScheduledMessageFailureReason.expired,
-        ScheduledMessageFailureReason.pendingNotSupported,
-        ScheduledMessageFailureReason.invalidMessage,
+      for (final failure in [
+        const ScheduledMessageSchedulingFailed(),
+        const ScheduledMessageSchedulingFailed(),
+        for (final reason in [
+          ScheduledMessageSendingFailureReason.internalError,
+          ScheduledMessageSendingFailureReason.channelDeleted,
+          ScheduledMessageSendingFailureReason.userDeleted,
+          ScheduledMessageSendingFailureReason.channelFrozen,
+          ScheduledMessageSendingFailureReason.banned,
+          ScheduledMessageSendingFailureReason.noPermission,
+          ScheduledMessageSendingFailureReason.moderationBlocked,
+          ScheduledMessageSendingFailureReason.hookRejected,
+          ScheduledMessageSendingFailureReason.expired,
+          ScheduledMessageSendingFailureReason.pendingNotSupported,
+          ScheduledMessageSendingFailureReason.invalidMessage,
+        ])
+          ScheduledMessageSendingFailed(reason: reason),
         null,
       ]) {
-        expect(localizations.scheduledMessageFailureReasonText(reason: reason), isNotNull);
+        expect(localizations.scheduledMessageFailureReasonText(failure: failure), isNotNull);
       }
       expect(
         localizations.scheduledMessageFailureReasonText(
-          reason: ScheduledMessageFailureReason.invalidMessage,
+          failure: const ScheduledMessageSendingFailed(reason: ScheduledMessageSendingFailureReason.invalidMessage),
           isQuoteDeleted: true,
         ),
         isNotNull,
+      );
+      // A failed edit says the earlier version is still scheduled, unlike any
+      // other failure.
+      final editNotSaved = localizations.scheduledMessageFailureReasonText(
+        failure: const ScheduledMessageUpdatingFailed(isRetriable: true),
+      );
+      expect(
+        localizations.scheduledMessageFailureReasonText(
+          failure: const ScheduledMessageUpdatingFailed(isRetriable: false),
+        ),
+        editNotSaved,
+      );
+      expect(
+        editNotSaved,
+        isNot(
+          localizations.scheduledMessageFailureReasonText(
+            failure: const ScheduledMessageSendingFailed(reason: ScheduledMessageSendingFailureReason.internalError),
+          ),
+        ),
       );
       expect(localizations.noScheduledMessagesText, isNotNull);
       expect(localizations.loadingScheduledMessagesError, isNotNull);

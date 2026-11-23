@@ -4,8 +4,9 @@ import 'package:meta/meta.dart';
 import '../../stream_chat_flutter.dart';
 import '../localization/translations.dart';
 
-/// The composer of a [StreamChannelPage] or [StreamThreadPage], with a
-/// [StreamScheduledMessagesBanner] above it.
+/// The composer of a [StreamChannelPage] or [StreamThreadPage].
+///
+/// A [StreamScheduledMessagesBanner] is shown above it.
 ///
 /// The banner is hidden while [controller] edits a message. Where the user can
 /// schedule messages, a long press of send schedules the message, unless
@@ -13,8 +14,9 @@ import '../localization/translations.dart';
 /// hides the banner.
 @internal
 class PageComposer extends StatefulWidget {
-  /// Creates a page composer that shows the composer [builder] builds below
-  /// the banner.
+  /// Creates a page composer around the composer [builder] builds.
+  ///
+  /// The composer is shown below the banner.
   const PageComposer({
     super.key,
     required this.controller,
@@ -26,8 +28,10 @@ class PageComposer extends StatefulWidget {
   /// The controller of the composer, whose editing hides the banner.
   final StreamMessageComposerController controller;
 
-  /// Builds the composer shown below the banner, given what a long press of
-  /// send does, or null when it does nothing.
+  /// Builds the composer shown below the banner.
+  ///
+  /// It is given what a long press of send does, or null when it does
+  /// nothing.
   final Widget Function(BuildContext context, StreamMessageComposerCallback? onSendLongPress) builder;
 
   /// The ID of the message whose thread's scheduled replies the banner counts.
@@ -98,8 +102,12 @@ class _PageComposerState extends State<PageComposer> {
 }
 
 // Schedules the composer's message for a time picked from the schedule sheet,
-// then clears the composer. A refused one stays in the composer.
-Future<void> _scheduleOnSendLongPress(BuildContext context, StreamMessageComposerController controller) async {
+// clearing the composer as soon as the time is picked. A refused one is put
+// back, unless something was typed meanwhile.
+Future<void> _scheduleOnSendLongPress(
+  BuildContext context,
+  StreamMessageComposerController controller,
+) async {
   final message = controller.value;
   final isUploaded = message.attachments.every((it) => it.uploadState.isSuccess);
   if (!isUploaded) return;
@@ -109,32 +117,29 @@ Future<void> _scheduleOnSendLongPress(BuildContext context, StreamMessageCompose
   final translations = context.translations;
 
   final scheduledAt = await showStreamScheduleMessageSheet(context: context, channel: channel, message: message);
-  if (scheduledAt == null) return;
+  if (scheduledAt == null || !context.mounted) return;
+
+  // Cleared before it is scheduled, so it can't be sent as well meanwhile.
+  controller.reset();
+  final cleared = controller.value;
 
   try {
     await channel.scheduleMessage(message, scheduledAt: scheduledAt);
   } catch (error) {
-    // One the server couldn't be reached for is listed as failed, to schedule
-    // again from there, so it counts as scheduled.
+    // A temporary failure leaves it listed as failed, to retry from there, and
+    // one already sent is done, so neither goes back in the composer.
     final countsAsScheduled = switch (error) {
       StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) => true,
       StreamChatNetworkError(:final isRetriable) => isRetriable,
       _ => false,
     };
+    if (countsAsScheduled) return;
 
-    if (!countsAsScheduled) {
-      final text = _scheduleErrorText(translations, channel, error);
-      messenger.show(StreamSnackbar(message: Text(text), variant: .error));
-      return;
-    }
+    final text = _scheduleErrorText(translations, channel, error);
+    messenger.show(StreamSnackbar(message: Text(text), variant: .error));
+
+    if (context.mounted && controller.value == cleared) controller.message = message;
   }
-
-  if (!context.mounted) return;
-
-  // Text typed while it was being scheduled stays, with an ID of its own.
-  final typed = controller.value == message ? null : controller.text;
-  controller.reset();
-  if (typed != null) controller.text = typed;
 }
 
 // Why scheduling failed with [error], in the words of [translations].

@@ -905,24 +905,27 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {
-    return switch (reason) {
-      .requestFailed => 'Kunne ikke sende. Prøv igjen',
-      .internalError => 'Noe gikk galt. Prøv igjen',
-      .channelDeleted => 'Denne kanalen ble slettet',
-      .userDeleted => 'Kontoen din ble slettet',
-      .channelFrozen => 'Denne kanalen er frosset',
-      .banned => 'Du kan ikke sende meldinger i denne kanalen',
-      .noPermission => 'Du har ikke lenger lov til å publisere her',
-      .moderationBlocked => 'Blokkert av moderering',
-      .hookRejected => 'Avvist av appen',
-      .expired => 'Ikke sendt: tjenesten ble forsinket',
-      .pendingNotSupported => 'Denne kanalen krever nå godkjenning. Planlegg den på nytt.',
-      .invalidMessage when isQuoteDeleted =>
+    return switch (failure) {
+      ScheduledMessageUpdatingFailed() => 'Endringen ble ikke lagret. Den forrige versjonen er fortsatt planlagt.',
+      ScheduledMessageSchedulingFailed() => 'Kunne ikke planlegge.',
+      ScheduledMessageSendingFailed(reason: .internalError) => 'Noe gikk galt. Prøv igjen',
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => 'Denne kanalen ble slettet',
+      ScheduledMessageSendingFailed(reason: .userDeleted) => 'Kontoen din ble slettet',
+      ScheduledMessageSendingFailed(reason: .channelFrozen) => 'Denne kanalen er frosset',
+      ScheduledMessageSendingFailed(reason: .banned) => 'Du kan ikke sende meldinger i denne kanalen',
+      ScheduledMessageSendingFailed(reason: .noPermission) => 'Du har ikke lenger lov til å publisere her',
+      ScheduledMessageSendingFailed(reason: .moderationBlocked) => 'Blokkert av moderering',
+      ScheduledMessageSendingFailed(reason: .hookRejected) => 'Avvist av appen',
+      ScheduledMessageSendingFailed(reason: .expired) => 'Ikke sendt: tjenesten ble forsinket',
+      ScheduledMessageSendingFailed(reason: .pendingNotSupported) =>
+        'Denne kanalen krever nå godkjenning. Planlegg den på nytt.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) when isQuoteDeleted =>
         'Den siterte meldingen ble slettet. Rediger meldingen for å fjerne sitatet.',
-      .invalidMessage => 'Meldingen oppfyller ikke lenger appens grenser. Rediger den.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) =>
+        'Meldingen oppfyller ikke lenger appens grenser. Rediger den.',
       _ => 'Noe gikk galt. Prøv igjen',
     };
   }

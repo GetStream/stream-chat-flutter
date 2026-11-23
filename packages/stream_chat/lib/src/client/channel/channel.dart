@@ -907,8 +907,8 @@ class Channel {
   /// Also stops the current user's typing.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails. If it fails in a
-  /// way that can be retried, the message stays listed as failed with
-  /// [ScheduledMessageFailureReason.requestFailed].
+  /// way that can be retried, the message stays listed as failed with a
+  /// [ScheduledMessageSchedulingFailed].
   ///
   /// Throws a [ScheduledMessageRefusedError] without making the request when
   /// [message] is a command in a channel that has commands, quotes a deleted
