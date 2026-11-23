@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput` showing no user suggestions when `mentionAllAppUsers` is enabled.
+
 ## 9.32.0
 
 🐞 Fixed

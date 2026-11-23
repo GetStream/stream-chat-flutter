@@ -754,6 +754,7 @@ class StreamMessageInputState extends State<StreamMessageInput>
               return StreamMentionAutocompleteOptions(
                 query: query,
                 channel: StreamChannel.of(context).channel,
+                client: StreamChat.of(context).client,
                 mentionAllAppUsers: widget.mentionAllAppUsers,
                 mentionsTileBuilder: widget.userMentionsTileBuilder,
                 onMentionUserTap: (user) {
