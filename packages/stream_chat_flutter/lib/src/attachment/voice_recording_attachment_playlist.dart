@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../stream_chat_flutter.dart';
 import '../audio/audio_playlist_controller.dart';
-import '../message_widget/played_mark_policy.dart';
+import '../message_widget/played_mark_sender.dart';
 
 /// Signature for decorating each voice recording item in a playlist.
 ///
@@ -121,9 +121,9 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
 
 class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceRecordingAttachmentPlaylist>
     with WidgetsBindingObserver {
-  // Whether a played mark was already requested, so repeated plays send one.
-  // Cleared when the request fails, so the next play tries again.
-  var _markRequested = false;
+  // Whether a track was playing at the last controller update, so only the
+  // start of playback marks the message played.
+  var _wasPlaying = false;
 
   late final _controller = StreamAudioPlaylistController(
     widget.voiceRecordings.toPlaylist(),
@@ -133,7 +133,9 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _controller.initialize();
+    _controller
+      ..addListener(_handlePlaylistChanged)
+      ..initialize();
   }
 
   @override
@@ -156,21 +158,15 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
     }
   }
 
-  // Marks the message played the first time the current user plays another
-  // user's recording, when the channel lets them mark messages.
-  Future<void> _markPlayed() async {
-    if (_markRequested) return;
+  void _handlePlaylistChanged() {
+    if (!mounted) return;
 
-    final channel = StreamChannel.maybeOf(context)?.channel;
-    final message = widget.message;
-    if (channel == null || !channel.shouldMarkPlayed(message)) return;
-
-    _markRequested = true;
-    try {
-      await channel.sendMessageMark(message, MessageMarkType.played);
-    } catch (_) {
-      _markRequested = false;
+    final isPlaying = _controller.value.tracks.any((it) => it.state.isPlaying);
+    if (isPlaying && !_wasPlaying) {
+      final channel = StreamChannel.maybeOf(context)?.channel;
+      channel?.sendPlayedMarkOnce(widget.message).ignore();
     }
+    _wasPlaying = isPlaying;
   }
 
   @override
@@ -213,7 +209,6 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
                 onTrackPause: _controller.pause,
                 onChangeSpeed: _controller.setSpeed,
                 onTrackPlay: () async {
-                  _markPlayed().ignore();
                   // Play the track directly if it is already loaded.
                   if (state.currentIndex == index) return _controller.play();
                   // Otherwise, load the track first and then play it.
