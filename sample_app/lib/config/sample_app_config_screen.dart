@@ -156,7 +156,7 @@ class SampleAppConfigScreen extends StatelessWidget {
                     SettingsSwitchRow(
                       icon: icons.voice,
                       title: 'Message Marks',
-                      subtitle: 'Show who played your voice messages',
+                      subtitle: 'Show who played your voice messages and videos',
                       value: config.showMessageMarks,
                       onChanged: (v) => SampleAppConfig.update(context, config.copyWith(showMessageMarks: v)),
                     ),

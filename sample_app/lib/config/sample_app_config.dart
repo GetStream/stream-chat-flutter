@@ -246,7 +246,7 @@ class SampleAppConfigData {
   /// Whether a new reaction replaces the existing one.
   final bool enforceUniqueReactions;
 
-  /// Whether played marks show on the current user's voice recordings.
+  /// Whether the current user's voice recordings and videos show played marks.
   final bool showMessageMarks;
 
   /// The visual type of the reactions display.

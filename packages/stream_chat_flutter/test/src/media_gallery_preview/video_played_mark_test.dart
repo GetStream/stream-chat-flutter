@@ -121,6 +121,7 @@ MockChannel _channel({bool canMark = true}) {
 
   when(() => client.state).thenReturn(clientState);
   when(() => clientState.currentUser).thenReturn(_currentUser);
+  when(() => client.logger).thenReturn(Logger.detached('test'));
   when(() => channel.client).thenReturn(client);
   when(() => channel.sendMessageMark(any(), any())).thenAnswer(
     (_) async => SendMessageMarkResponse(),
