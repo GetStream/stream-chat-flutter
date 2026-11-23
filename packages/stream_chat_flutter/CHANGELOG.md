@@ -9,6 +9,10 @@
 
 - A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
 
+🐞 Fixed
+
+- Fixed `StreamMessageComposer` refilling a cleared or edited draft when the server's copy of the earlier draft arrived late.
+
 ## 10.7.0
 
 ✅ Added

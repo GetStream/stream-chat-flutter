@@ -199,6 +199,82 @@ void main() {
 
       expect(composerController.text, isEmpty);
     });
+
+    testWidgets('the server echo of an applied draft does not undo a later edit', (tester) async {
+      final composerController = StreamMessageComposerController();
+      addTearDown(composerController.dispose);
+
+      final draftStream = StreamController<Draft?>.broadcast();
+      addTearDown(draftStream.close);
+
+      await pumpComposer(
+        tester,
+        composerController: composerController,
+        draftStream: draftStream.stream,
+      );
+
+      // The draft saved locally, as the composer opens with it.
+      draftStream.add(
+        Draft(
+          channelCid: 'messaging:test',
+          createdAt: DateTime(2026),
+          message: DraftMessage(id: 'draft-id', text: 'saved'),
+        ),
+      );
+      await tester.pumpAndSettle();
+      expect(composerController.text, 'saved');
+
+      composerController.clear();
+      await tester.pumpAndSettle();
+
+      // The server's copy of the same draft arrives late, with its own
+      // timestamp and `showInChannel` filled in.
+      draftStream.add(
+        Draft(
+          channelCid: 'messaging:test',
+          createdAt: DateTime(2026, 1, 2),
+          message: DraftMessage(id: 'draft-id', text: 'saved', showInChannel: false),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(composerController.text, isEmpty);
+    });
+
+    testWidgets('a draft with new content replaces the composer content', (tester) async {
+      final composerController = StreamMessageComposerController();
+      addTearDown(composerController.dispose);
+
+      final draftStream = StreamController<Draft?>.broadcast();
+      addTearDown(draftStream.close);
+
+      await pumpComposer(
+        tester,
+        composerController: composerController,
+        draftStream: draftStream.stream,
+      );
+
+      draftStream.add(
+        Draft(
+          channelCid: 'messaging:test',
+          createdAt: DateTime(2026),
+          message: DraftMessage(id: 'draft-id', text: 'saved'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      // Edited on another device.
+      draftStream.add(
+        Draft(
+          channelCid: 'messaging:test',
+          createdAt: DateTime(2026, 1, 2),
+          message: DraftMessage(id: 'draft-id', text: 'edited elsewhere'),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(composerController.text, 'edited elsewhere');
+    });
   });
 
   group('when the composer is removed with unsent text', () {

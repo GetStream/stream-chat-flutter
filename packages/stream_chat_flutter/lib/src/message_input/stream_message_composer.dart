@@ -747,17 +747,22 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     // Don't let draft changes clobber an in-progress edit.
     if (_isEditing) return;
 
-    final hadDraft = _lastDraft != null;
+    final previousDraft = _lastDraft;
     _lastDraft = draft;
 
     // Initial subscription with no draft on server — leave the controller
     // alone so any pre-populated composer state (quoted message, attachments,
     // drafted text) is preserved.
-    if (draft == null && !hadDraft) return;
+    if (draft == null && previousDraft == null) return;
 
     // Draft transitioned from non-null to null — removed locally or on
     // another device; reset the composer to match.
     if (draft == null) return _effectiveController.reset();
+
+    // Same content as the draft already applied, e.g. the server confirming the
+    // draft saved locally a moment ago. Applying it again would undo whatever
+    // the user typed or deleted since.
+    if (previousDraft != null && _isSameDraftContent(draft.message, previousDraft.message)) return;
 
     // Otherwise, update the controller with the draft message.
     if (draft.message case final draftMessage) {
@@ -768,6 +773,11 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
           )
           .toMessage();
     }
+  }
+
+  // The server sends `showInChannel: false` back for a draft saved without it.
+  static bool _isSameDraftContent(DraftMessage a, DraftMessage b) {
+    return a.copyWith(showInChannel: a.showInChannel ?? false) == b.copyWith(showInChannel: b.showInChannel ?? false);
   }
 
   @override
