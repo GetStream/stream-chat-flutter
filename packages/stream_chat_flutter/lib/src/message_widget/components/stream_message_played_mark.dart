@@ -4,13 +4,12 @@ import 'package:stream_core_flutter/chat.dart' as core;
 import '../../../stream_chat_flutter.dart';
 import '../../misc/empty_widget.dart';
 
-/// Shows whether the current user's voice recording was played.
+/// Shows that the current user's voice recording was played.
 ///
-/// Reads "Not played" or "Played" in a one-to-one channel and "Played by 2"
-/// elsewhere, highlighted once anyone has played it. Shows nothing unless
-/// [StreamChatConfigurationData.showMessageMarks] is set and [message] is the
-/// current user's voice recording in a channel whose [ChannelConfig.markTypes]
-/// include [MessageMarkType.played].
+/// Reads "Played" in a one-to-one channel and "Played by 2" elsewhere, up to
+/// "Played by 99+". Shows nothing before anyone has played the message, or
+/// when [isShownFor] is false, which requires
+/// [StreamChatConfigurationData.showMessageMarks].
 ///
 /// See also:
 ///
@@ -33,7 +32,7 @@ class StreamMessagePlayedMark extends StatelessWidget {
 
   /// Called when the mark is tapped.
   ///
-  /// Ignored in a one-to-one channel and before anyone has played the message.
+  /// Ignored in a one-to-one channel.
   final VoidCallback? onTap;
 
   /// Whether the mark stays out of the semantics tree.
@@ -54,7 +53,9 @@ class StreamMessagePlayedMark extends StatelessWidget {
     final markTypes = channel?.config?.markTypes ?? const [];
     if (!markTypes.contains(MessageMarkType.played)) return false;
 
-    return message.attachments.any((it) => it.isVoiceRecording);
+    if (!message.attachments.any((it) => it.isVoiceRecording)) return false;
+
+    return _playedCount(message) > 0;
   }
 
   /// The played mark's text for [message], or null when none is shown.
@@ -62,13 +63,9 @@ class StreamMessagePlayedMark extends StatelessWidget {
     if (!isShownFor(context, message)) return null;
 
     final translations = context.translations;
-    final count = _playedCount(message);
+    if (_isOneToOne(context)) return translations.messagePlayedLabel;
 
-    return switch ((_isOneToOne(context), count)) {
-      (true, 0) => translations.messageNotPlayedLabel,
-      (true, _) => translations.messagePlayedLabel,
-      (false, _) => translations.messagePlayedByLabel(count),
-    };
+    return translations.messagePlayedByLabel(_playedCount(message));
   }
 
   static int _playedCount(Message message) {
@@ -84,15 +81,13 @@ class StreamMessagePlayedMark extends StatelessWidget {
     final label = labelFor(context, message);
     if (label == null) return const Empty();
 
-    final count = _playedCount(message);
-    final canTap = !_isOneToOne(context) && count > 0;
-    final effectiveOnTap = canTap ? onTap : null;
+    final effectiveOnTap = _isOneToOne(context) ? null : onTap;
 
     return ExcludeSemantics(
       excluding: excludeFromSemantics && effectiveOnTap == null,
       child: core.StreamMessageMark(
         label: Text(label),
-        highlighted: count > 0,
+        highlighted: true,
         separator: separator,
         onTap: effectiveOnTap,
       ),

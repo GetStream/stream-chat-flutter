@@ -153,6 +153,13 @@ class SampleAppConfigScreen extends StatelessWidget {
                       value: config.enforceUniqueReactions,
                       onChanged: (v) => SampleAppConfig.update(context, config.copyWith(enforceUniqueReactions: v)),
                     ),
+                    SettingsSwitchRow(
+                      icon: icons.voice,
+                      title: 'Message Marks',
+                      subtitle: 'Show who played your voice messages',
+                      value: config.showMessageMarks,
+                      onChanged: (v) => SampleAppConfig.update(context, config.copyWith(showMessageMarks: v)),
+                    ),
                   ],
                 ),
 

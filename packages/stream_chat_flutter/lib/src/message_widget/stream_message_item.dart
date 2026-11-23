@@ -618,16 +618,12 @@ class DefaultStreamMessageItem extends StatelessWidget {
       ),
     );
 
-    // An earlier message in a group has no metadata row by default, so its
+    // By default only an earlier message in a group has no metadata row, so its
     // played mark stands alone unless the theme sets the visibility itself.
-    final isEarlierInGroup = switch (placement.stackPosition) {
-      .top || .middle => true,
-      _ => false,
-    };
     final usesDefaultMetadataVisibility = theme.metadataVisibility == null;
 
     Widget? playedMarkRow;
-    if (footerWidget == null && isEarlierInGroup && usesDefaultMetadataVisibility) {
+    if (footerWidget == null && usesDefaultMetadataVisibility) {
       playedMarkRow = _playedMarkRow(
         context,
         message,

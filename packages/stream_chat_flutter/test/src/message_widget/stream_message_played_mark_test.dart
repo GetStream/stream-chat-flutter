@@ -24,11 +24,31 @@ void main() {
     expect(find.text('Played by 2'), findsNothing);
   });
 
-  testWidgets('a one-to-one voice message nobody played reads not played', (tester) async {
+  testWidgets('no one-to-one mark shows unless the app shows message marks', (tester) async {
+    final body = _wrap(
+      _item(_voiceMessage(playedBy: 1)),
+      isOneToOne: true,
+      showMessageMarks: false,
+    );
+    await tester.pumpWidget(body);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Played'), findsNothing);
+  });
+
+  testWidgets('a voice message played by more than 99 members reads 99+', (tester) async {
+    await tester.pumpWidget(_wrap(_item(_voiceMessage(playedBy: 120))));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Played by 99+'), findsOneWidget);
+  });
+
+  testWidgets('a voice message nobody played shows no mark', (tester) async {
     await tester.pumpWidget(_wrap(_item(_voiceMessage()), isOneToOne: true));
     await tester.pumpAndSettle();
 
-    expect(find.text('Not played'), findsOneWidget);
+    expect(find.byType(StreamMessagePlayedMark), findsNothing);
+    expect(find.textContaining('Played'), findsNothing);
   });
 
   testWidgets('a one-to-one voice message the other member played reads played', (tester) async {
@@ -47,14 +67,14 @@ void main() {
   });
 
   testWidgets('no mark shows when the channel does not allow played marks', (tester) async {
-    await tester.pumpWidget(_wrap(_item(_voiceMessage()), markTypes: const []));
+    await tester.pumpWidget(_wrap(_item(_voiceMessage(playedBy: 2)), markTypes: const []));
     await tester.pumpAndSettle();
 
     expect(find.textContaining('Played by'), findsNothing);
   });
 
   testWidgets("no mark shows on another user's voice message", (tester) async {
-    final message = _voiceMessage(user: _otherUser);
+    final message = _voiceMessage(user: _otherUser, playedBy: 2);
     await tester.pumpWidget(_wrap(_item(message)));
     await tester.pumpAndSettle();
 
@@ -62,7 +82,7 @@ void main() {
   });
 
   testWidgets('no mark shows on a message without audio', (tester) async {
-    final message = _voiceMessage().copyWith(attachments: const []);
+    final message = _voiceMessage(playedBy: 2).copyWith(attachments: const []);
     await tester.pumpWidget(_wrap(_item(message)));
     await tester.pumpAndSettle();
 
@@ -71,7 +91,7 @@ void main() {
 
   testWidgets('no mark shows on an audio file', (tester) async {
     final audio = Attachment(type: AttachmentType.audio, assetUrl: 'https://example.com/song.mp3');
-    final message = _voiceMessage().copyWith(attachments: [audio]);
+    final message = _voiceMessage(playedBy: 2).copyWith(attachments: [audio]);
     await tester.pumpWidget(_wrap(_item(message)));
     await tester.pumpAndSettle();
 
@@ -116,7 +136,7 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('a message with hidden metadata shows no mark on its own', (tester) async {
+  testWidgets('a single voice message shows no mark when the theme hides metadata', (tester) async {
     final item = core.StreamMessageItemTheme(
       data: core.StreamMessageItemThemeData(
         metadataVisibility: .all(.gone),
@@ -149,7 +169,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Played by 2'), findsOneWidget);
-    expect(find.byType(StreamTimestamp), findsNothing);
   });
 
   testWidgets('tapping the played by mark reports the message and mark type', (tester) async {
