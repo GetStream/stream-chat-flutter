@@ -7,7 +7,6 @@ import '../models/location.dart';
 import '../models/message.dart';
 import '../models/push_preference.dart';
 import '../models/scheduled_message.dart';
-import '../models/user.dart';
 
 part 'responses.g.dart';
 
@@ -54,17 +53,6 @@ class SyncResponse extends _BaseResponse {
 
   /// Create a new instance from a json
   static SyncResponse fromJson(Map<String, dynamic> json) => _$SyncResponseFromJson(json);
-}
-
-/// Model response for [StreamChatClient.queryUsers] api call
-@JsonSerializable(createToJson: false)
-class QueryUsersResponse extends _BaseResponse {
-  /// List of users returned by the query
-  @JsonKey(defaultValue: [])
-  late List<User> users;
-
-  /// Create a new instance from a json
-  static QueryUsersResponse fromJson(Map<String, dynamic> json) => _$QueryUsersResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.queryBannedUsers] api call

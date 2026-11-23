@@ -720,7 +720,12 @@ void main() {
             pagination: any(named: 'pagination'),
           ),
         ).thenAnswer(
-          (_) async => QueryUsersResponse()..users = [User(id: 'alice-id', name: 'Alice')],
+          (_) async => Result.success(
+            QueryUsersResponse(
+              duration: '0.01ms',
+              users: [User(id: 'alice-id', name: 'Alice')],
+            ),
+          ),
         );
 
         await _pumpMentionOptions(
@@ -746,6 +751,31 @@ void main() {
             pagination: any(named: 'pagination'),
           ),
         );
+      },
+    );
+
+    testWidgets(
+      'queryUsers failure gives no user suggestions and does not blank the list',
+      (tester) async {
+        final mocks = _setupMocks(ownCapabilities: const [ChannelCapability.notifyHere]);
+        when(
+          () => mocks.client.queryUsers(
+            presence: any(named: 'presence'),
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            pagination: any(named: 'pagination'),
+          ),
+        ).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'test error')));
+
+        await _pumpMentionOptions(
+          tester,
+          client: mocks.client,
+          channel: mocks.channel,
+          query: 'h',
+          mentionAllAppUsers: true,
+        );
+
+        expect(find.text('@here'), findsOneWidget);
       },
     );
 

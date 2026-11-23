@@ -307,7 +307,7 @@ Future<bool> _scheduleAgain(
 Future<List<User>> _resolveMentionedUsers(StreamChatClient client, Message message) async {
   final ids = [for (final user in message.mentionedUsers) user.id];
   final missing = [...ids.where((id) => client.state.users[id] == null)];
-  if (missing.isNotEmpty) await client.queryUsers(filter: UserFilter.in_(UserFilterField.id, missing));
+  if (missing.isNotEmpty) (await client.queryUsers(filter: UserFilter.in_(UserFilterField.id, missing))).getOrThrow();
 
   return [for (final id in ids) client.state.users[id] ?? User(id: id)];
 }

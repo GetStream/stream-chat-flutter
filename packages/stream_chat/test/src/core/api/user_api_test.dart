@@ -22,53 +22,6 @@ void main() {
     userApi = UserApi(client);
   });
 
-  test('queryUsers', () async {
-    const presence = true;
-    final filter = UserFilter.in_(UserFilterField.id, const ['test-id-1', 'test-id-2']);
-    final sort = [UserSort.desc(UserSortField.custom('test-field'))];
-    const pagination = PaginationParams();
-
-    const path = '/users';
-
-    final users = List.generate(3, (index) => User(id: 'test-user-id-$index'));
-
-    when(
-      () => client.get(
-        path,
-        queryParameters: {
-          'payload': jsonEncode({
-            'presence': presence,
-            'sort': sort,
-            'filter_conditions': filter,
-            ...pagination.toJson(),
-          }),
-        },
-      ),
-    ).thenAnswer(
-      (_) async => successResponse(
-        path,
-        data: {
-          'users': [...users.map((it) => it.toJson())],
-        },
-      ),
-    );
-
-    final res = await userApi.queryUsers(
-      presence: presence,
-      filter: filter,
-      sort: sort,
-      pagination: pagination,
-    );
-
-    expect(res, isNotNull);
-    expect(res.users.length, users.length);
-
-    verify(
-      () => client.get(path, queryParameters: any(named: 'queryParameters')),
-    ).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
   test('getActiveLiveLocations', () async {
     const path = '/users/live_locations';
 

@@ -1379,44 +1379,6 @@ void main() {
       );
     });
 
-    test('`.queryUsers`', () async {
-      final users = List.generate(
-        3,
-        (index) => User(id: 'test-user-id-$index'),
-      );
-
-      when(
-        () => fakeChatApi.user.queryUsers(
-          presence: any(named: 'presence'),
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
-        ),
-      ).thenAnswer((_) async => QueryUsersResponse()..users = users);
-
-      expectLater(
-        // skipping initial seed event -> {} users
-        client.state.usersStream.skip(1),
-        emitsInOrder([
-          {for (final user in users) user.id: user},
-        ]),
-      );
-
-      final res = await client.queryUsers();
-      expect(res, isNotNull);
-      expect(res.users.length, users.length);
-
-      verify(
-        () => fakeChatApi.user.queryUsers(
-          presence: any(named: 'presence'),
-          filter: any(named: 'filter'),
-          sort: any(named: 'sort'),
-          pagination: any(named: 'pagination'),
-        ),
-      ).called(1);
-      verifyNoMoreInteractions(fakeChatApi.user);
-    });
-
     test('`.queryBannedUsers`', () async {
       final bans = List.generate(
         3,

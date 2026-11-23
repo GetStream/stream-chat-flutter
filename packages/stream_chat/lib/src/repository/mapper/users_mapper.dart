@@ -6,6 +6,7 @@ import '../../core/models/response/block_user_response.dart';
 import '../../core/models/response/create_guest_user_response.dart';
 import '../../core/models/response/get_blocked_users_response.dart';
 import '../../core/models/response/get_unread_count_response.dart';
+import '../../core/models/response/query_users_response.dart';
 import '../../core/models/response/unblock_user_response.dart';
 import '../../core/models/response/update_users_response.dart';
 import '../../core/models/unread_counts_channel.dart';
@@ -14,7 +15,7 @@ import '../../core/models/unread_counts_thread.dart';
 import '../../core/models/user.dart';
 import '../../core/models/user_block.dart';
 
-// TODO(openapi-migration): re-point these mappers in group 09.
+// TODO(openapi-migration): re-point these mappers in group 09b.
 
 /// Maps a generated [api.UserResponse] to a [User].
 extension UserResponseMapper on api.UserResponse {
@@ -173,6 +174,15 @@ extension BlockUsersResponseMapper on api.BlockUsersResponse {
     blockedByUserId: blockedByUserId,
     blockedUserId: blockedUserId,
     createdAt: createdAt,
+  );
+}
+
+/// Maps a generated [api.QueryUsersResponse] to a [QueryUsersResponse].
+extension QueryUsersResponseMapper on api.QueryUsersResponse {
+  /// Converts this response into a [QueryUsersResponse].
+  QueryUsersResponse toModel() => QueryUsersResponse(
+    duration: duration,
+    users: users.map((user) => user.toModel()).toList(),
   );
 }
 

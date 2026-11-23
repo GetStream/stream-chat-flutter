@@ -71,7 +71,7 @@ void stubQueryUsersForGoldens(MockClient client, List<User> users) {
       sort: any(named: 'sort'),
       pagination: any(named: 'pagination'),
     ),
-  ).thenAnswer((_) async => QueryUsersResponse()..users = users);
+  ).thenAnswer((_) async => Result.success(QueryUsersResponse(duration: '0ms', users: users)));
 }
 
 /// Stubs draft queries for [StreamDraftListController] goldens using [StreamDraftListController.fromValue].

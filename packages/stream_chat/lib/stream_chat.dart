@@ -168,6 +168,7 @@ export 'src/core/models/response/query_polls_response.dart';
 export 'src/core/models/response/query_reactions_response.dart';
 export 'src/core/models/response/query_reminders_response.dart';
 export 'src/core/models/response/query_threads_response.dart';
+export 'src/core/models/response/query_users_response.dart';
 export 'src/core/models/response/remove_user_group_members_response.dart';
 export 'src/core/models/response/search_messages_response.dart';
 export 'src/core/models/response/search_roles_response.dart';

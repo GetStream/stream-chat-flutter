@@ -1,13 +1,17 @@
 import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
 
 import '../../open_api/api.dart' as api;
+import '../core/api/requests.dart';
 import '../core/models/request/update_user_partial_request.dart';
 import '../core/models/response/block_user_response.dart';
 import '../core/models/response/get_blocked_users_response.dart';
 import '../core/models/response/get_unread_count_response.dart';
+import '../core/models/response/query_users_response.dart';
 import '../core/models/response/unblock_user_response.dart';
 import '../core/models/response/update_users_response.dart';
 import '../core/models/user.dart';
+import 'mapper/filter_mapper.dart';
+import 'mapper/sort_mapper.dart';
 import 'mapper/users_mapper.dart';
 
 /// Repository dedicated to user operations.
@@ -16,6 +20,34 @@ class UsersRepository {
   const UsersRepository(this._api);
 
   final api.DefaultApi _api;
+
+  /// Fetches the users that match [filter], ordered by [sort].
+  ///
+  /// The results are paged by [pagination]. If [presence] is true, the
+  /// connection is told each time one of the returned users goes online or
+  /// offline.
+  Future<Result<QueryUsersResponse>> queryUsers({
+    bool? presence,
+    UserFilter? filter,
+    List<UserSort>? sort,
+    PaginationParams? pagination,
+  }) async {
+    final result = await _api.queryUsers(
+      payload: api.QueryUsersPayload(
+        filterConditions: filter?.toRequest() ?? const {},
+        presence: presence,
+        sort: sort?.map((sort) => sort.toRequest()).toList(),
+        limit: pagination?.limit,
+        offset: pagination?.offset,
+        idGt: pagination?.greaterThan,
+        idGte: pagination?.greaterThanOrEqual,
+        idLt: pagination?.lessThan,
+        idLte: pagination?.lessThanOrEqual,
+      ),
+    );
+
+    return result.map((response) => response.toModel());
+  }
 
   /// Gets how many unread messages and threads the current user has.
   Future<Result<GetUnreadCountResponse>> getUnreadCount() async {

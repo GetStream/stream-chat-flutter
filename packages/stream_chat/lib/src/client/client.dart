@@ -113,6 +113,7 @@ import '../core/models/response/query_polls_response.dart';
 import '../core/models/response/query_reactions_response.dart';
 import '../core/models/response/query_reminders_response.dart';
 import '../core/models/response/query_threads_response.dart';
+import '../core/models/response/query_users_response.dart';
 import '../core/models/response/remove_user_group_members_response.dart';
 import '../core/models/response/search_messages_response.dart';
 import '../core/models/response/search_roles_response.dart';
@@ -1252,21 +1253,30 @@ class StreamChatClient {
     return MapEntry(channels, newChannels);
   }
 
-  /// Requests users with a given query.
-  Future<QueryUsersResponse> queryUsers({
+  /// Fetches the users that match [filter].
+  ///
+  /// The users are ordered by [sort] and paged by [pagination].
+  ///
+  /// If [presence] is true, the client then receives an
+  /// [EventType.userPresenceChanged] event each time one of the returned users
+  /// goes online or offline. When [presence] is omitted, it is true while the
+  /// client is connected.
+  ///
+  /// The returned users are also stored in [state].
+  Future<Result<QueryUsersResponse>> queryUsers({
     bool? presence,
     UserFilter? filter,
     List<UserSort>? sort,
     PaginationParams? pagination,
   }) async {
-    final response = await _chatApi.user.queryUsers(
+    final result = await _usersRepository.queryUsers(
       presence: presence ?? _hasConnectionId,
       filter: filter,
       sort: sort,
       pagination: pagination,
     );
-    state.updateUsers(response.users);
-    return response;
+
+    return result.onSuccess((response) => state.updateUsers(response.users));
   }
 
   /// Query banned users.

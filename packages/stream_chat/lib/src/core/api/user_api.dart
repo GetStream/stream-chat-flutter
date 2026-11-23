@@ -5,8 +5,6 @@ import 'package:stream_core/stream_core.dart' show LocationCoordinate;
 import '../http/stream_http_client.dart';
 import '../models/converters/v1_json_converters.dart';
 import '../models/location.dart';
-import '../models/user.dart';
-import 'requests.dart';
 import 'responses.dart';
 
 /// Defines the api dedicated to users operations
@@ -15,29 +13,6 @@ class UserApi {
   UserApi(this._client);
 
   final StreamHttpClient _client;
-
-  /// Requests users with a given query.
-  Future<QueryUsersResponse> queryUsers({
-    bool presence = false,
-    UserFilter? filter,
-    List<UserSort>? sort,
-    PaginationParams? pagination,
-  }) async {
-    final response = await _client.get(
-      '/users',
-      queryParameters: {
-        'payload': jsonEncode({
-          'presence': presence,
-          if (sort != null) 'sort': sort,
-          // Sent even when empty: a query without it is rejected, where `{}`
-          // is accepted.
-          'filter_conditions': filter ?? const <String, Object?>{},
-          if (pagination != null) ...pagination.toJson(),
-        }),
-      },
-    );
-    return QueryUsersResponse.fromJson(response.data);
-  }
 
   /// Retrieves all the active live locations of the current user.
   Future<GetActiveLiveLocationsResponse> getActiveLiveLocations() async {
