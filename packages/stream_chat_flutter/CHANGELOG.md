@@ -9,6 +9,10 @@
 
 - A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
 
+🐞 Fixed
+
+- Fixed `StreamMessageComposer` showing no user suggestions when `mentionAllAppUsers` is enabled.
+
 ## 10.7.0
 
 ✅ Added
