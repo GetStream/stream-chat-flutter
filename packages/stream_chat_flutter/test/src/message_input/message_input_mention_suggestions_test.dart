@@ -1,17 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:record/record.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
-import '../fakes.dart';
 import '../mocks.dart';
 
 void main() {
-  final originalRecordPlatform = RecordPlatform.instance;
-  setUp(() => RecordPlatform.instance = FakeRecordPlatform());
-  tearDown(() => RecordPlatform.instance = originalRecordPlatform);
-
   testWidgets(
     'suggests users outside the channel when mentionAllAppUsers is enabled',
     (tester) async {
@@ -54,43 +48,28 @@ Future<void> _typeText(WidgetTester tester, String text) async {
   await tester.pumpAndSettle();
 }
 
-// Pumps a message input with mentionAllAppUsers enabled, in a channel with no
-// members, so any user suggestion can only come from the app-wide user search.
+// Pumps a message input with mentionAllAppUsers enabled, in a channel that
+// holds no users, so any user suggestion can only come from the app-wide user
+// search.
 Future<void> _pumpMessageInput(
   WidgetTester tester, {
   required MockClient client,
 }) async {
-  final clientState = MockClientState();
-  final channel = MockChannel(
-    ownCapabilities: const [ChannelCapability.sendMessage],
-  );
+  final channel = MockChannel();
   final channelState = MockChannelState();
 
-  when(() => client.state).thenReturn(clientState);
-  when(() => clientState.currentUser).thenReturn(OwnUser(id: 'user-id'));
-  when(() => clientState.currentUserStream).thenAnswer(
-    (_) => Stream.value(OwnUser(id: 'user-id')),
-  );
   when(() => channel.state).thenReturn(channelState);
   when(() => channel.client).thenReturn(client);
   when(channel.getRemainingCooldown).thenReturn(0);
-  when(() => channelState.members).thenReturn([]);
-  when(() => channelState.watchers).thenReturn([]);
 
   await tester.pumpWidget(
     MaterialApp(
       home: StreamChat(
         client: client,
-        connectivityStream: Stream.value([ConnectivityResult.mobile]),
         child: StreamChannel(
           channel: channel,
           child: const Scaffold(
-            body: Column(
-              children: [
-                Expanded(child: SizedBox.expand()),
-                StreamMessageInput(mentionAllAppUsers: true),
-              ],
-            ),
+            body: StreamMessageInput(mentionAllAppUsers: true),
           ),
         ),
       ),

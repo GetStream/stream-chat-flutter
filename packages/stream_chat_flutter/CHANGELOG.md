@@ -1,5 +1,9 @@
 ## Upcoming
 
+🔄 Changed
+
+- `StreamMentionAutocompleteOptions` now searches with the channel's client when `mentionAllAppUsers` is enabled and no `client` is given.
+
 🐞 Fixed
 
 - Fixed `StreamMessageInput` showing no user suggestions when `mentionAllAppUsers` is enabled.
