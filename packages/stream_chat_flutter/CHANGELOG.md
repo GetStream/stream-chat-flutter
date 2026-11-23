@@ -11,7 +11,7 @@
 
 🐞 Fixed
 
-- Fixed `StreamMessageComposer` showing no user suggestions when `mentionAllAppUsers` is enabled.
+- Fixed `StreamMessageComposer` and `StreamMentionAutocompleteOptions` showing no user suggestions when `mentionAllAppUsers` is enabled without a `client`.
 
 ## 10.7.0
 

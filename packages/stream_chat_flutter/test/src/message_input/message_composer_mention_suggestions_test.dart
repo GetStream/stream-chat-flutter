@@ -40,7 +40,10 @@ Future<void> _typeText(WidgetTester tester, String text) async {
 
 // Pumps a composer with mentionAllAppUsers enabled, in a channel that holds no
 // users, so any user suggestion can only come from the app-wide user search.
-Future<void> _pumpComposer(WidgetTester tester, {required MockClient client}) async {
+Future<void> _pumpComposer(
+  WidgetTester tester, {
+  required MockClient client,
+}) async {
   final channel = MockChannel();
   final channelState = MockChannelState();
 

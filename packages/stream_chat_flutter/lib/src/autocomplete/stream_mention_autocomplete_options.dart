@@ -42,7 +42,7 @@ class StreamMentionAutocompleteOptions extends StatefulWidget {
   /// The channel to search for users.
   final Channel channel;
 
-  /// The client to search for users in case [mentionAllAppUsers] is True.
+  /// The client used to search all app users when [mentionAllAppUsers] is true.
   ///
   /// Defaults to the [channel]'s client.
   final StreamChatClient? client;
