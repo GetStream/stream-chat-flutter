@@ -1,3 +1,9 @@
+## Upcoming
+
+🐞 Fixed
+
+- Fixed `StreamMessageInput` and `StreamMentionAutocompleteOptions` showing no user suggestions when `mentionAllAppUsers` is enabled without a `client`.
+
 ## 9.32.0
 
 🐞 Fixed
