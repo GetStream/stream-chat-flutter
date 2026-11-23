@@ -18,6 +18,10 @@
 
 - Fixed `StreamMessageComposer` and `StreamMentionAutocompleteOptions` showing no user suggestions when `mentionAllAppUsers` is enabled without a `client`.
 
+🐞 Fixed
+
+- Fixed the channel page crashing after its channel is hidden, deleted or the user is removed from it, for example by blocking the other member of a direct message.
+
 ## 10.7.0
 
 ✅ Added

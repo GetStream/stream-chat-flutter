@@ -6422,7 +6422,7 @@ void main() {
       // Skip the BehaviorSubject's replay of the current value to new subscribers.
       final sub = client.state.channelsStream.distinct().skip(1).listen(received.add);
 
-      client.state.removeChannel('messaging:c1');
+      client.state.removeChannel(channel);
       await Future<void>.delayed(Duration.zero);
 
       expect(received, hasLength(1));

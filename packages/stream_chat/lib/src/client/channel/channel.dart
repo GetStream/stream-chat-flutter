@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
+import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:synchronized/synchronized.dart';
 
@@ -2123,9 +2124,15 @@ class Channel {
     return _client.markThreadUnread(id!, type, threadId);
   }
 
+  /// Initializes this channel with [channelState].
+  @internal
+  void loadState(ChannelState channelState) => _initState(channelState);
+
   void _initState(ChannelState channelState) {
     state = ChannelClientState(this, channelState);
-    _initializedCompleter.safeComplete(true);
+    // A failed load leaves the completer completed with its error.
+    if (_initializedCompleter.isCompleted) _initializedCompleter = Completer<bool>();
+    _initializedCompleter.complete(true);
 
     if (cid case final cid?) client.state.addChannels({cid: this});
     _client.logger.info('Channel ${channelState.channel?.cid} initialized');
@@ -2321,6 +2328,13 @@ class Channel {
 
         if (isQueryingAround) this.state?.truncate();
         this.state?.updateChannelStateFromServer(channelState);
+
+        // Watching a channel the user hid or was removed from makes it one of
+        // the client's channels again.
+        if (cid case final cid? when watch) {
+          final isListed = _client.state.channels.containsKey(cid);
+          if (!isListed) _client.state.addChannels({cid: this});
+        }
       }
 
       // Submit for delivery reporting only when fetching the latest messages.
@@ -2592,7 +2606,7 @@ class Channel {
 
   /// Call this method to dispose the channel client.
   void dispose() {
-    client.state.removeChannel('$cid');
+    client.state.removeChannel(this);
     state?.dispose();
     state = null;
     _muteExpirationTimer?.cancel();

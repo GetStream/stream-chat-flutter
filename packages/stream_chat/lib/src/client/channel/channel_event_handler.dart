@@ -105,11 +105,18 @@ class ChannelEventHandler {
       case EventType.messageDelivered:
         _onMessageDelivered(event);
       // channel events
+      case EventType.channelDeleted:
+      case EventType.notificationChannelDeleted:
+        _onChannelDeleted(event);
       case EventType.channelTruncated:
       case EventType.notificationChannelTruncated:
         _onChannelTruncated(event);
       case EventType.channelUpdated:
         _onChannelUpdated(event);
+      case EventType.channelHidden:
+        _onChannelHidden(event);
+      case EventType.channelVisible:
+        _onChannelVisible(event);
     }
   }
 
@@ -121,6 +128,8 @@ class ChannelEventHandler {
         _onMemberAdded(event);
       case EventType.memberRemoved:
         _onMemberRemoved(event);
+      case EventType.notificationRemovedFromChannel:
+        _onRemovedFromChannel(event);
     }
   }
 
@@ -194,6 +203,13 @@ class ChannelEventHandler {
     };
 
     _mutations.onMessageNew(message, watcherCount: watcherCount);
+
+    if (!_channel.hidden) return;
+
+    final currentUser = _client.state.currentUser;
+    if (!MessageRules.canShowHiddenChannel(message, currentUser: currentUser)) return;
+
+    _mutations.onChannelVisibilityChanged(hidden: false);
   }
 
   void _onMessageDeleted(Event event) {
@@ -365,6 +381,12 @@ class ChannelEventHandler {
     }
   }
 
+  void _onChannelDeleted(Event event) {
+    final deletedAt = event.channel?.deletedAt ?? event.createdAt;
+
+    return _mutations.onChannelDeleted(deletedAt: deletedAt);
+  }
+
   Future<void> _onChannelTruncated(Event event) async {
     final channel = event.channel!;
     await _client.chatPersistenceClient?.deleteMessageByCid(channel.cid);
@@ -376,6 +398,20 @@ class ChannelEventHandler {
     final channel = event.channel!;
 
     return _mutations.onChannelUpdated(channel);
+  }
+
+  Future<void> _onChannelHidden(Event event) async {
+    _mutations.onChannelVisibilityChanged(hidden: true);
+
+    final clearHistory = event.extraData['clear_history'].safeCast<bool>();
+    if (clearHistory != true) return;
+
+    await _client.chatPersistenceClient?.deleteMessageByCid(_channel.cid!);
+    _mutations.onChannelTruncated();
+  }
+
+  void _onChannelVisible(Event event) {
+    return _mutations.onChannelVisibilityChanged(hidden: false);
   }
 
   void _onChannelCounts(Event event) {
@@ -397,8 +433,17 @@ class ChannelEventHandler {
 
   void _onMemberRemoved(Event event) {
     final user = event.user!;
+    if (user.id == _client.state.currentUser?.id) {
+      return _mutations.onCurrentUserRemoved(user);
+    }
 
     return _mutations.onMemberRemoved(user);
+  }
+
+  void _onRemovedFromChannel(Event event) {
+    final user = event.user!;
+
+    return _mutations.onCurrentUserRemoved(user);
   }
 
   void _onMemberUserUpdated(Event event) {

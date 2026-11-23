@@ -37,6 +37,21 @@ class MessageRules {
     return false;
   }
 
+  /// Whether the [message] shows a hidden channel again.
+  ///
+  /// Only a regular message or reply that isn't shadowed does, and not one sent
+  /// by a user the [currentUser] blocked.
+  static bool canShowHiddenChannel(Message message, {OwnUser? currentUser}) {
+    if (!message.isRegular && !message.isReply) return false;
+    if (message.shadowed) return false;
+
+    final senderId = message.user?.id;
+    final blockedUserIds = currentUser?.blockedUserIds ?? const <String>[];
+    if (blockedUserIds.contains(senderId)) return false;
+
+    return true;
+  }
+
   /// Whether the [message] can update the channel's last message timestamp.
   ///
   /// Returns `false` for error, shadowed, ephemeral, or restricted messages,

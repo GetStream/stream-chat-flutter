@@ -64,6 +64,10 @@ class ChannelQueryDao extends DatabaseAccessor<DriftChatDatabase> with _$Channel
     });
   });
 
+  /// Removes the channels matching [cids] from every cached query.
+  Future<int> deleteChannelQueriesByCids(List<String> cids) =>
+      (delete(channelQueries)..where((c) => c.channelCid.isIn(cids))).go();
+
   /// Update list of channel queries for a predefined-filter query.
   ///
   /// Writes the cached cids to [ChannelQueries] and the server-resolved

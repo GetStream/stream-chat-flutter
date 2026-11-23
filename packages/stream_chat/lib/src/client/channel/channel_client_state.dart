@@ -42,6 +42,7 @@ class ChannelClientState {
       removeTypingEvent: _removeTypingEvent,
       removeWatcher: _removeWatcher,
       removeMember: _removeMember,
+      clearMembership: _clearMembership,
       updateMember: _updateMember,
       deleteMessagesFromUser: _deleteMessagesFromUser,
     );
@@ -90,6 +91,13 @@ class ChannelClientState {
       members: existingMembers.where((member) => member.userId != user.id).toList(),
       read: existingReads.where((read) => read.user.id != user.id).toList(),
     );
+  }
+
+  // Clears the current user's membership after they leave or are removed from
+  // the channel.
+  void _clearMembership() {
+    if (channelState.membership == null) return;
+    _channelState = channelState.copyWith(membership: null);
   }
 
   // Replaces the member matching the given member's user id in the channel
@@ -596,7 +604,7 @@ class ChannelClientState {
       watchers: newWatchers.toList(),
       watcherCount: updatedState.watcherCount,
       members: updatedState.members,
-      membership: updatedState.membership,
+      membership: updatedState.membership ?? _channelState.membership,
       read: newReads.toList(),
       draft: updatedState.draft,
       pinnedMessages: newPinnedMessages,
@@ -658,10 +666,19 @@ class ChannelClientState {
   ChannelState get channelState => _channelStateController.value;
   late BehaviorSubject<ChannelState> _channelStateController;
 
+  // Only the instance listed in the client's channels is saved, so a hidden,
+  // deleted, removed or replaced channel never writes back.
+  bool get _shouldPersist {
+    final cid = _channel.cid;
+    return cid != null && identical(_client.state.channels[cid], _channel);
+  }
+
   late final _debouncedUpdatePersistenceChannelState = debounce(
     (ChannelState state) {
       final persistenceClient = _client.chatPersistenceClient;
-      return persistenceClient?.updateChannelState(state);
+      if (persistenceClient == null || !_shouldPersist) return null;
+
+      return persistenceClient.updateChannelState(state);
     },
     const Duration(seconds: 1),
   );
@@ -677,7 +694,9 @@ class ChannelClientState {
       if (channelCid == null) return;
 
       final persistenceClient = _client.chatPersistenceClient;
-      return persistenceClient?.updateChannelThreads(channelCid, threads);
+      if (persistenceClient == null || !_shouldPersist) return;
+
+      return persistenceClient.updateChannelThreads(channelCid, threads);
     },
     const Duration(seconds: 1),
   );
