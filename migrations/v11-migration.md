@@ -106,7 +106,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUserResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUserResponse`, and `UserBlock`'s fields are all non-nullable |
 | [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action`, `Reaction` and `Location` no longer decode from or encode to JSON; `Action` compares by value; reaction calls return a `Result`, `getReactions` answers a new `GetReactionsResponse`, and the reaction queries take `limit`/`offset` or `limit`/`next`/`prev`; message reads and search return a `Result`, `getMessagesById` is `getManyMessages`, `getReplies` takes a required `limit` and reply ids, `translateMessage` takes a `TranslationLanguage`, search results are `SearchMessageResult`s, `sendAction` returns a `Result`, takes `Map<String, String>` form data and, on the client, no channel id or type; sending, updating, pinning and deleting messages return a `Result`, `partialUpdateMessage` is `updateMessagePartial` and deletes answer a `DeleteMessageResponse` |
 | [**User Updates**](#user-updates) | `updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing; `partialUpdateUser(s)` becomes `updateUserPartial` / `updateUsersPartial` and `PartialUpdateUserRequest` becomes `UpdateUserPartialRequest`; `updateUser` no longer sends `role`, `teams` or `teamsRole`, and the returned users no longer carry their private fields in `extraData` |
-| [**Users**](#users) | `queryUsers` returns a `Result<QueryUsersResponse>` instead of throwing; `QueryUsersResponse` no longer decodes from JSON and compares by value; `getActiveLiveLocations` is `getUserLiveLocations`, and it, `updateLiveLocation` and `stopLiveLocation` return a `Result`, with the last two no longer taking `createdByDeviceId` |
+| [**Users**](#users) | `queryUsers` returns a `Result<QueryUsersResponse>` instead of throwing; `QueryUsersResponse` no longer decodes from JSON and compares by value; `getActiveLiveLocations` is `getUserLiveLocations`, and it, `updateLiveLocation` and `stopLiveLocation` return a `Result`, with the last two no longer taking `createdByDeviceId`; `StreamChat(Core)`'s `currentUser` is an `OwnUser?` |
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`; the channel and member flags it carried are fields |
 | [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
 | [**Message Custom Data**](#message-custom-data) | `extraData` is `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`; a message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields |
@@ -363,6 +363,8 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `GetActiveLiveLocationsResponse.fromJson` | — | `removed` | The response is a plain class; construct it directly |
 | `GetActiveLiveLocationsResponse.duration` (`String?`) | `SharedLocationsResponse.duration` (`String`) | `retyped` | Always present; drop any `!` or `?? ''` |
 | `StreamChatApi.user` | `StreamChatClient.queryUsers`, `getUserLiveLocations`, `updateLiveLocation`, `stopLiveLocation` | `removed` | The endpoints moved to the generated client |
+| `StreamChatState.currentUser` / `currentUserStream` (`User?` / `Stream<User?>`) | `OwnUser?` / `Stream<OwnUser?>` | `retyped` | Same value as `client.state.currentUser`; readers compile unchanged |
+| `StreamChatCoreState.currentUser` / `currentUserStream` (`User?` / `Stream<User?>`) | `OwnUser?` / `Stream<OwnUser?>` | `retyped` | Same value as `client.state.currentUser`; readers compile unchanged |
 | `ChannelModel.extraData` / `Member.extraData` | `ChannelModel.custom` / `Member.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
 | `Channel.extraData` / `Channel.extraDataStream` / `Channel(…, extraData:)` / `StreamChatClient.channel(…, extraData:)` | `Channel.custom` / `Channel.customStream` / `data: CreateChannelData(custom: …)` | `renamed` | Follows `ChannelModel.custom`; the setter is renamed too |
 | `channel.extraData['disabled']` / `['hidden']` / `['muted']` / `['blocked']` / `['truncated_at']` / `['truncated_by']` / `['auto_translation_enabled']` / `['auto_translation_language']` | `ChannelModel.disabled` / `hidden` / `muted` / `blocked` / `truncatedAt` / `truncatedBy` / `autoTranslationEnabled` / `autoTranslationLanguage` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
@@ -1268,6 +1270,10 @@ no longer decodes from JSON, is built through a const constructor, compares by v
 
 **`StreamChatApi.user` is removed.** Call `queryUsers`, `getUserLiveLocations`, `updateLiveLocation` and
 `stopLiveLocation` on `StreamChatClient`.
+
+**`StreamChat.of(context).currentUser` and `StreamChatCore.of(context).currentUser` are typed `OwnUser?`**, and their
+`currentUserStream`s `Stream<OwnUser?>`, matching `client.state.currentUser`. Code that reads them compiles as before;
+a mock or subclass of `StreamChatState` or `StreamChatCoreState` that returns a plain `User` must return an `OwnUser`.
 
 > **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. The users
 > response keeps its v10 name and fields; `getUserLiveLocations` and the live-location responses take the API's

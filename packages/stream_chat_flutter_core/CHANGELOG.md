@@ -2,6 +2,7 @@
 
 🛑️ Breaking
 
+- `StreamChatCoreState.currentUser` and `currentUserStream` are typed `OwnUser?` and `Stream<OwnUser?>` instead of `User?` and `Stream<User?>`.
 - `PagedValue.error` and every `errorBuilder` now carry a `StreamChatException` instead of a `StreamChatError`, following the low-level client's error layer. A generic throwable is reported as a `StreamClientException` naming the load that failed, with the original kept as its `cause` rather than stringified into the message.
 - Each list controller's `filter` is typed for the query it runs — `StreamChannelListController` a `ChannelFilter?`, `StreamUserListController` a `UserFilter?`, and so on — so a field from another model does not compile.
 - `StreamMessageSearchListController.messageFilter` is a `MessageSearchFilter?`, distinct from the `ChannelFilter` its `filter` takes.
