@@ -1,0 +1,33 @@
+name: pr_labels
+
+# Labels every pull request with the major version it targets and keeps its
+# review-state labels (ready, pending, approved) in sync, through the shared
+# workflows in stream-core-flutter.
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - edited
+      - labeled
+      - ready_for_review
+      - converted_to_draft
+  pull_request_review:
+    types:
+      - submitted
+      - dismissed
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  version_label:
+    uses: GetStream/stream-core-flutter/.github/workflows/pr_version_labels.yml@af3b680c0a214817915a935ddbaf5bb90f5cd190 # main
+    with:
+      version-file: packages/stream_chat/pubspec.yaml
+
+  review_labels:
+    uses: GetStream/stream-core-flutter/.github/workflows/pr_review_labels.yml@af3b680c0a214817915a935ddbaf5bb90f5cd190 # main

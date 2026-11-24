@@ -25,7 +25,8 @@ permissions:
 
 jobs:
   determine_platforms:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     outputs:
       run_ios: ${{ steps.set_matrix.outputs.run_ios }}
       run_android: ${{ steps.set_matrix.outputs.run_android }}
@@ -55,7 +56,8 @@ jobs:
   android:
     needs: determine_platforms
     if: ${{ needs.determine_platforms.outputs.run_android == 'true' }}
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v7
