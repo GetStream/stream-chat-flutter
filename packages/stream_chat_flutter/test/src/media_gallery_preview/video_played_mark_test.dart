@@ -123,6 +123,16 @@ MockChannel _channel({bool canMark = true}) {
   when(() => clientState.currentUser).thenReturn(_currentUser);
   when(() => client.logger).thenReturn(Logger.detached('test'));
   when(() => channel.client).thenReturn(client);
+  final channelState = MockChannelState();
+  when(() => channel.state).thenReturn(channelState);
+  when(() => channelState.channelState).thenReturn(
+    ChannelState(
+      channel: ChannelModel(
+        cid: 'messaging:test',
+        config: ChannelConfig(markTypes: const [MessageMarkType.played]),
+      ),
+    ),
+  );
   when(() => channel.sendMessageMark(any(), any())).thenAnswer(
     (_) async => SendMessageMarkResponse(),
   );
