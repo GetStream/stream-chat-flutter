@@ -125,13 +125,12 @@ Future<void> _scheduleOnSendLongPress(
   } catch (error) {
     // One listed as failed is retried from the scheduled messages.
     final listed = channel.client.state.scheduledMessages.where((it) => it.id == message.id).firstOrNull;
-    if (listed != null) {
-      if (listed.failure case final ScheduledMessageUploadFailed failure) {
-        final text = translations.scheduledMessageFailureText(failure: failure);
-        messenger.show(StreamSnackbar(message: Text(text), variant: .error));
-      }
+    if (listed?.failure case final ScheduledMessageUploadFailed failure) {
+      final text = translations.scheduledMessageFailureText(failure: failure);
+      messenger.show(StreamSnackbar(message: Text(text), variant: .error));
       return;
     }
+    if (listed != null) return;
 
     // One deleted, replaced or sent meanwhile is done with.
     if (!_isRefused(error)) return;

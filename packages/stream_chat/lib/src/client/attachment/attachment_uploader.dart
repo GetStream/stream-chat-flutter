@@ -10,11 +10,9 @@ import '../client.dart';
 
 /// An uploader of attachment files to one channel.
 ///
-/// It turns attachment files into remote URLs. Keeping the attachments and
-/// their progress somewhere is up to the caller.
+/// The caller keeps the uploaded attachments and their progress.
 final class ChannelAttachmentUploader {
-  /// Creates an uploader that sends files to the channel `channelId` of
-  /// `channelType` through `client`.
+  /// Creates an uploader to the channel `channelId` of `channelType`.
   ChannelAttachmentUploader({
     required this._client,
     required this._channelId,
@@ -60,16 +58,16 @@ final class ChannelAttachmentUploader {
         _ => _client.sendFile,
       };
 
-      // The request also sends the framing around the file, so its counts are
-      // scaled to the file's own size.
+      // Counted against the file's own size, as the bytes sent exceed it.
       void onSendProgress(int sent, int total) {
         final fileSize = file.size;
         if (fileSize == null || total <= 0) {
           onProgress?.call(sent, total);
-        } else {
-          final fileSent = (sent / total * fileSize).round().clamp(0, fileSize);
-          onProgress?.call(fileSent, fileSize);
+          return;
         }
+
+        final fileSent = (sent / total * fileSize).round().clamp(0, fileSize);
+        onProgress?.call(fileSent, fileSize);
       }
 
       final response = await send(
@@ -82,9 +80,9 @@ final class ChannelAttachmentUploader {
       );
 
       final uploaded = switch (response) {
-        SendFileResponse(:final thumbUrl) => attachment.copyWith(
+        SendFileResponse() => attachment.copyWith(
           assetUrl: response.file,
-          thumbUrl: thumbUrl,
+          thumbUrl: response.thumbUrl,
         ),
         _ => attachment.copyWith(imageUrl: response.file),
       };

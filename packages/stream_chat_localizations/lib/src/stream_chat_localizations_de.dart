@@ -927,7 +927,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
     return switch (failure) {
       ScheduledMessageUpdatingFailed() =>
         'Die Änderung wurde nicht gespeichert. Die vorherige Version ist weiterhin geplant.',
-      ScheduledMessageUploadFailed() => 'Anhang konnte nicht hochgeladen werden',
+      ScheduledMessageUploadFailed() => 'Anhang konnte nicht hochgeladen werden.',
       ScheduledMessageSchedulingFailed() => 'Konnte nicht geplant werden.',
       ScheduledMessageSendingFailed(reason: .internalError) => 'Etwas ist schiefgelaufen. Versuche es erneut',
       ScheduledMessageSendingFailed(reason: .channelDeleted) => 'Dieser Kanal wurde gelöscht',

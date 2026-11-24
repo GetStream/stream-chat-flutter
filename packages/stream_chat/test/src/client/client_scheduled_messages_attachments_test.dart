@@ -33,7 +33,7 @@ void main() {
 
   test('scheduleMessage lists the upload progress of its attachment against the size of its file', () async {
     _stubImageUpload(harness, (invocation) {
-      // The request is larger than the file, as it also sends the framing.
+      // The request is larger than the file.
       final onSendProgress = invocation.namedArguments[#onSendProgress] as ProgressCallback;
       onSendProgress(60, 120);
       return Completer<SendImageResponse>().future;
@@ -277,15 +277,13 @@ void main() {
 
   test('scheduleMessage again for the same message cancels its earlier attachment upload', () async {
     final cancelTokens = _stubUploadUntilCanceled(harness);
-    final first = _ignoringFailure(schedule(_withImages(['first'])));
+    schedule(_withImages(['first'])).ignore();
     await settle();
 
-    final second = _ignoringFailure(schedule(_withImages(['second'])));
+    schedule(_withImages(['second'])).ignore();
     await settle();
 
     expect(cancelTokens.first.isCancelled, isTrue);
-    await harness.client.deleteScheduledMessage(harness.client.state.scheduledMessages.single.id);
-    await Future.wait([first, second]);
   });
 
   test('updateScheduledMessage sends nothing when the new attachment fails to upload', () async {
@@ -300,51 +298,40 @@ void main() {
 
   test('updateScheduledMessage refuses one still uploading to be scheduled', () async {
     _stubUploadUntilCanceled(harness);
-    final scheduling = _ignoringFailure(schedule(_withImage()));
+    schedule(_withImage()).ignore();
     await settle();
     final listed = harness.client.state.scheduledMessages.single;
 
     await expectLater(harness.client.updateScheduledMessage(listed.id, _edited(listed)), throwsStateError);
-
-    await harness.client.deleteScheduledMessage(listed.id);
-    await scheduling;
   });
 
   test('updateScheduledMessage keeps uploading the attachment of one still being scheduled', () async {
     final cancelTokens = _stubUploadUntilCanceled(harness);
-    final scheduling = _ignoringFailure(schedule(_withImage()));
+    schedule(_withImage()).ignore();
     await settle();
     final listed = harness.client.state.scheduledMessages.single;
 
     await _ignoringFailure(harness.client.updateScheduledMessage(listed.id, _edited(listed)));
 
     expect(cancelTokens.single.isCancelled, isFalse);
-    await harness.client.deleteScheduledMessage(listed.id);
-    await scheduling;
   });
 
   test('rescheduleMessage refuses one still uploading to be scheduled', () async {
     _stubUploadUntilCanceled(harness);
-    final scheduling = _ignoringFailure(schedule(_withImage()));
+    schedule(_withImage()).ignore();
     await settle();
     final listed = harness.client.state.scheduledMessages.single;
 
     await expectLater(harness.client.rescheduleMessage(listed.id, scheduledAt: scheduledAt), throwsStateError);
-
-    await harness.client.deleteScheduledMessage(listed.id);
-    await scheduling;
   });
 
   test('sendScheduledMessageNow refuses one still uploading to be scheduled', () async {
     _stubUploadUntilCanceled(harness);
-    final scheduling = _ignoringFailure(schedule(_withImage()));
+    schedule(_withImage()).ignore();
     await settle();
     final listed = harness.client.state.scheduledMessages.single;
 
     await expectLater(harness.client.sendScheduledMessageNow(listed.id), throwsStateError);
-
-    await harness.client.deleteScheduledMessage(listed.id);
-    await scheduling;
   });
 
   test('deleteScheduledMessage lists an edit stopped while it uploads as failed when the request fails', () async {
@@ -370,31 +357,23 @@ void main() {
     final scheduledMessage = fakeScheduledMessage('a');
     await harness.hold([scheduledMessage]);
     _stubUploadUntilCanceled(harness);
-    _stubDelete(harness, scheduledMessage);
-    final editing = _ignoringFailure(harness.client.updateScheduledMessage(scheduledMessage.id, _withImage(id: 'a')));
+    harness.client.updateScheduledMessage(scheduledMessage.id, _withImage(id: 'a')).ignore();
     await settle();
 
     await expectLater(harness.client.sendScheduledMessageNow(scheduledMessage.id), throwsStateError);
-
-    await harness.client.deleteScheduledMessage(scheduledMessage.id);
-    await editing;
   });
 
   test('updateScheduledMessage refuses one whose edit is uploading', () async {
     final scheduledMessage = fakeScheduledMessage('a');
     await harness.hold([scheduledMessage]);
     _stubUploadUntilCanceled(harness);
-    _stubDelete(harness, scheduledMessage);
-    final editing = _ignoringFailure(harness.client.updateScheduledMessage(scheduledMessage.id, _withImage(id: 'a')));
+    harness.client.updateScheduledMessage(scheduledMessage.id, _withImage(id: 'a')).ignore();
     await settle();
 
     await expectLater(
       harness.client.updateScheduledMessage(scheduledMessage.id, _edited(scheduledMessage)),
       throwsStateError,
     );
-
-    await harness.client.deleteScheduledMessage(scheduledMessage.id);
-    await editing;
   });
 
   test('disconnecting cancels the attachment upload of one being scheduled', () async {

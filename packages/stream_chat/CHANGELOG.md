@@ -4,15 +4,16 @@
 
 - Added scheduled messages: schedule one with `Channel.scheduleMessage`, which uploads its attachments first, and read the current user's unsent ones from `ClientState.scheduledMessages` after `StreamChatClient.loadScheduledMessages`, or per channel and thread with `ClientState.scheduledChannelMessages` and `ClientState.scheduledThreadReplies`.
 - Added `ScheduledMessage.failure`, which says why a scheduled message failed, and `StreamChatClient.resendScheduledMessage` to retry one whose request failed.
-- Added `ScheduledMessageRefusedError`, thrown before any request for a message that can't be scheduled, and `ScheduledMessageRules` to check up front.
+- Added `ScheduledMessageRefusedError`, thrown for a message that can't be scheduled, usually before any request, and `ScheduledMessageRules` to check up front.
 
 🔄 Changed
 
 - Overrides of the channel query methods on `Channel` and `StreamChatClient` must add the new `includeScheduledMessages` parameter.
-- A message's attachments now upload at most three at a time, in order.
-- `UploadState.inProgress` now reports the bytes of the attachment's file.
-- Sending or updating a message again while its attachments upload restarts their upload.
-- `Channel.retryAttachmentUpload` does nothing while the message's attachments upload.
+
+🐞 Fixed
+
+- Fixed `Channel.retryAttachmentUpload` sending the message before its other attachments finished uploading.
+- Fixed `UploadState.inProgress` counting more bytes than the attachment's file has.
 
 ## 10.7.0
 

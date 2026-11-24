@@ -907,7 +907,7 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   }) {
     return switch (failure) {
       ScheduledMessageUpdatingFailed() => '編集は保存されませんでした。以前のバージョンが引き続き予約されています。',
-      ScheduledMessageUploadFailed() => '添付ファイルをアップロードできませんでした',
+      ScheduledMessageUploadFailed() => '添付ファイルをアップロードできませんでした。',
       ScheduledMessageSchedulingFailed() => '予約できませんでした。',
       ScheduledMessageSendingFailed(reason: .internalError) => '問題が発生しました。もう一度お試しください',
       ScheduledMessageSendingFailed(reason: .channelDeleted) => 'このチャンネルは削除されました',

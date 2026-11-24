@@ -77,9 +77,10 @@ final class MessageAttachmentsUpload {
   /// The reason given to [cancel], or null if it wasn't canceled with one.
   StreamChatError? get cancelReason => _canceled?.reason;
 
-  /// Cancels the upload of [attachmentId] and removes it from the message.
+  /// Cancels the upload of [attachmentId], for [reason] if given.
   ///
-  /// The rest keep uploading. Returns false if the attachment isn't uploading.
+  /// The attachment is removed from the message and the rest keep uploading.
+  /// Returns false if it isn't uploading or waiting to upload.
   bool cancelAttachment(String attachmentId, {String? reason}) {
     if (_isCanceled || _settled.contains(attachmentId)) return false;
 
@@ -190,7 +191,7 @@ sealed class MessageAttachmentsUploadResult {
 
 /// Every attachment's upload settled on its own, and none failed.
 ///
-/// Some can have been canceled one by one.
+/// Some may have been canceled one by one.
 final class MessageAttachmentsUploadCompleted extends MessageAttachmentsUploadResult {
   const MessageAttachmentsUploadCompleted._(super.message) : super._();
 }

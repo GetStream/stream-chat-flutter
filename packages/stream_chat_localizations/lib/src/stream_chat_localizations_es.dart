@@ -929,7 +929,7 @@ No es posible añadir más de $limit archivos adjuntos
   }) {
     return switch (failure) {
       ScheduledMessageUpdatingFailed() => 'La edición no se guardó. La versión anterior sigue programada.',
-      ScheduledMessageUploadFailed() => 'No se pudo subir el archivo adjunto',
+      ScheduledMessageUploadFailed() => 'No se pudo subir el archivo adjunto.',
       ScheduledMessageSchedulingFailed() => 'No se pudo programar.',
       ScheduledMessageSendingFailed(reason: .internalError) => 'Algo salió mal. Inténtalo de nuevo',
       ScheduledMessageSendingFailed(reason: .channelDeleted) => 'Este canal fue eliminado',

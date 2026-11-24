@@ -431,7 +431,7 @@ void main() {
       expect(localizations.scheduledQuoteReplyPrefixText(), isNotNull);
       for (final failure in [
         const ScheduledMessageSchedulingFailed(),
-        const ScheduledMessageSchedulingFailed(),
+        const ScheduledMessageUploadFailed(),
         for (final reason in [
           ScheduledMessageSendingFailureReason.internalError,
           ScheduledMessageSendingFailureReason.channelDeleted,

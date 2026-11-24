@@ -940,7 +940,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
     return switch (failure) {
       ScheduledMessageUpdatingFailed() =>
         'La modifica non è stata salvata. La versione precedente è ancora programmata.',
-      ScheduledMessageUploadFailed() => "Impossibile caricare l'allegato",
+      ScheduledMessageUploadFailed() => "Impossibile caricare l'allegato.",
       ScheduledMessageSchedulingFailed() => 'Impossibile programmare.',
       ScheduledMessageSendingFailed(reason: .internalError) => 'Si è verificato un errore. Riprova',
       ScheduledMessageSendingFailed(reason: .channelDeleted) => 'Questo canale è stato eliminato',

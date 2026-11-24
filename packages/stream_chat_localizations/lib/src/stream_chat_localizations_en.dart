@@ -925,7 +925,7 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   }) {
     return switch (failure) {
       ScheduledMessageUpdatingFailed() => "The edit wasn't saved. The earlier version is still scheduled.",
-      ScheduledMessageUploadFailed() => "Couldn't upload attachment",
+      ScheduledMessageUploadFailed() => "Couldn't upload attachment.",
       ScheduledMessageSchedulingFailed() => "Couldn't schedule.",
       ScheduledMessageSendingFailed(reason: .internalError) => 'Something went wrong. Try again',
       ScheduledMessageSendingFailed(reason: .channelDeleted) => 'This channel was deleted',

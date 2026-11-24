@@ -126,7 +126,7 @@ void main() {
   test('resendScheduledMessage removes one whose first attempt was sent right away', () async {
     final message = Message(id: 'a', text: 'Good morning');
     final failed = await harness.scheduleUnreachable(message);
-    harness.stubSchedule(message, () async => throw messageAlreadyExists('a'));
+    harness.stubSchedule(message, () async => throw _messageAlreadyExists('a'));
 
     await resend(failed.id).then<void>((_) {}, onError: (_) {});
 
@@ -397,7 +397,7 @@ void main() {
 
 // The error that refuses a message whose ID [id] is already taken by a sent
 // message.
-StreamChatNetworkError messageAlreadyExists(String id) {
+StreamChatNetworkError _messageAlreadyExists(String id) {
   final message = 'SendMessage failed with error: "a message with ID $id already exists"';
   return StreamChatNetworkError.raw(
     code: ChatErrorCode.inputError.code,

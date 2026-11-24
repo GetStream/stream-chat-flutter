@@ -927,7 +927,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   }) {
     return switch (failure) {
       ScheduledMessageUpdatingFailed() => "L'edició no s'ha desat. La versió anterior continua programada.",
-      ScheduledMessageUploadFailed() => "No s'ha pogut pujar el fitxer adjunt",
+      ScheduledMessageUploadFailed() => "No s'ha pogut pujar el fitxer adjunt.",
       ScheduledMessageSchedulingFailed() => "No s'ha pogut programar.",
       ScheduledMessageSendingFailed(reason: .internalError) => 'Alguna cosa ha anat malament. Torna-ho a provar',
       ScheduledMessageSendingFailed(reason: .channelDeleted) => "Aquest canal s'ha eliminat",

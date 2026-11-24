@@ -932,7 +932,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
     return switch (failure) {
       ScheduledMessageUpdatingFailed() =>
         "La modification n'a pas été enregistrée. La version précédente reste programmée.",
-      ScheduledMessageUploadFailed() => "Impossible d'envoyer la pièce jointe",
+      ScheduledMessageUploadFailed() => "Impossible d'envoyer la pièce jointe.",
       ScheduledMessageSchedulingFailed() => 'Impossible de programmer.',
       ScheduledMessageSendingFailed(reason: .internalError) => 'Une erreur est survenue. Réessayez',
       ScheduledMessageSendingFailed(reason: .channelDeleted) => 'Ce canal a été supprimé',

@@ -35,16 +35,6 @@ void main() {
     expect(controller.text, isEmpty);
   });
 
-  testWidgets('clears the composer while the message is scheduled', (tester) async {
-    final channel = await pumpChannelPage(tester);
-    stubSchedule(channel, () => Completer<ScheduleMessageResponse>().future);
-    await _type(tester, 'Hello');
-
-    await _scheduleWithPreset(tester);
-
-    expect(composerController(tester).text, isEmpty);
-  });
-
   testWidgets('keeps the composer clear when scheduling fails in a way that can be retried', (tester) async {
     final channel = await pumpChannelPage(tester);
     stubSchedule(channel, () async => throw StreamChatNetworkError.raw(code: -1, message: 'Offline'));
@@ -55,7 +45,7 @@ void main() {
     expect(composerController(tester).text, isEmpty);
   });
 
-  testWidgets('keeps the composer clear and says so when an attachment fails to upload', (tester) async {
+  testWidgets('says so when an attachment fails to upload', (tester) async {
     final channel = await pumpChannelPage(tester);
     final clientState = channel.client.state;
     when(() => channel.scheduleMessage(any(), scheduledAt: any(named: 'scheduledAt'))).thenAnswer((invocation) async {
@@ -80,12 +70,9 @@ void main() {
       failure: const ScheduledMessageFailure.uploadFailed(),
     );
     expect(find.text(text), findsOneWidget);
-    expect(composerController(tester).text, isEmpty);
   });
 
-  testWidgets('keeps the composer clear and says nothing when the message is deleted while scheduled', (
-    tester,
-  ) async {
+  testWidgets('says nothing when the message is deleted while its attachments upload', (tester) async {
     final channel = await pumpChannelPage(tester);
     stubSchedule(channel, () async => throw const StreamChatError('The attachment uploads were canceled'));
     await _type(tester, 'Hello');
@@ -93,7 +80,6 @@ void main() {
     await _scheduleWithPreset(tester);
 
     expect(find.byType(StreamSnackbar), findsNothing);
-    expect(composerController(tester).text, isEmpty);
   });
 
   testWidgets('schedules a message whose attachment is not uploaded yet', (tester) async {

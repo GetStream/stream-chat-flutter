@@ -910,7 +910,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   }) {
     return switch (failure) {
       ScheduledMessageUpdatingFailed() => '수정 내용이 저장되지 않았습니다. 이전 버전이 계속 예약되어 있습니다.',
-      ScheduledMessageUploadFailed() => '첨부 파일을 업로드하지 못했습니다',
+      ScheduledMessageUploadFailed() => '첨부 파일을 업로드하지 못했습니다.',
       ScheduledMessageSchedulingFailed() => '예약하지 못했습니다.',
       ScheduledMessageSendingFailed(reason: .internalError) => '문제가 발생했습니다. 다시 시도하세요',
       ScheduledMessageSendingFailed(reason: .channelDeleted) => '이 채널은 삭제되었습니다',

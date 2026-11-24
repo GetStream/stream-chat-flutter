@@ -927,7 +927,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }) {
     return switch (failure) {
       ScheduledMessageUpdatingFailed() => 'बदलाव सेव नहीं हुआ। पिछला संस्करण अभी भी शेड्यूल है।',
-      ScheduledMessageUploadFailed() => 'अटैचमेंट अपलोड नहीं हो सका',
+      ScheduledMessageUploadFailed() => 'अटैचमेंट अपलोड नहीं हो सका।',
       ScheduledMessageSchedulingFailed() => 'शेड्यूल नहीं हो सका।',
       ScheduledMessageSendingFailed(reason: .internalError) => 'कुछ गलत हो गया। फिर से कोशिश करें',
       ScheduledMessageSendingFailed(reason: .channelDeleted) => 'यह चैनल हटा दिया गया था',

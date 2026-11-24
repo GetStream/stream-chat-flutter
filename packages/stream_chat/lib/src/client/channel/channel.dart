@@ -810,9 +810,8 @@ class Channel {
   /// [ScheduleMessageResponse.scheduledMessage] is null.
   ///
   /// The attachments of [message] not uploaded yet are uploaded first. If one
-  /// fails, its [Attachment.uploadState] is failed and the message stays
-  /// listed as failed with
-  /// [ScheduledMessageFailureReason.attachmentUploadFailed].
+  /// fails, it is marked failed and the message stays listed with a
+  /// [ScheduledMessageUploadFailed].
   ///
   /// Also stops the current user's typing.
   ///
@@ -822,15 +821,14 @@ class Channel {
   ///
   /// Throws a [ScheduledMessageRefusedError] without making the request when
   /// [message] is a command in a channel that has commands, or quotes a
-  /// deleted message.
+  /// deleted message. It is also thrown when sending it right away is refused,
+  /// for example in a frozen channel.
   ///
   /// Throws an [ArgumentError] if [scheduledAt] is not in the future. A
   /// message to send right away goes through [sendMessage].
   ///
-  /// Throws a [StreamChatError] if an attachment fails to upload, if
-  /// [StreamChatClient.deleteScheduledMessage] deletes it while its
-  /// attachments upload, or if sending it right away is refused, for example
-  /// in a frozen channel.
+  /// Throws a [StreamChatError] if an attachment fails to upload, or if its
+  /// upload is stopped, such as by [StreamChatClient.deleteScheduledMessage].
   ///
   /// Throws a [StateError] if no user is connected.
   Future<ScheduleMessageResponse> scheduleMessage(

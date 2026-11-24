@@ -15,7 +15,7 @@ void main() {
 
   test('canceling an attachment upload sends the message without the attachment', () async {
     final channel = _channel(imageUpload: _uploadUntilCanceled);
-    final sending = channel.sendMessage(_withImage(text: 'Hello'));
+    final sending = channel.sendMessage(_withImage());
     await pumpEventQueue();
 
     channel.cancelAttachmentUpload('image');
@@ -44,7 +44,7 @@ void main() {
         return SendImageResponse()..file = 'https://example.com/image.png';
       },
     );
-    await _ignoringFailure(channel.sendMessage(_withImage(text: 'Hello')));
+    await _ignoringFailure(channel.sendMessage(_withImage()));
 
     await channel.retryAttachmentUpload('message', 'image');
 
@@ -53,7 +53,7 @@ void main() {
     expect(attachment.imageUrl, 'https://example.com/image.png');
   });
 
-  test('sending a message with an attachment that has no file fails it', () async {
+  test('sending a message whose attachment has no file throws', () async {
     final channel = _channel(imageUpload: (_) async => SendImageResponse());
     final message = Message(
       id: 'message',
@@ -97,7 +97,7 @@ void main() {
         return _uploadUntilCanceled(invocation);
       },
     );
-    final sending = _ignoringFailure(channel.sendMessage(_withImage(text: 'Hello')));
+    final sending = _ignoringFailure(channel.sendMessage(_withImage()));
     await pumpEventQueue();
 
     await channel.deleteMessage(channel.state!.messages.single);
@@ -109,7 +109,7 @@ void main() {
   test('deleting a message while its attachment uploads makes its sending throw', () async {
     final channel = _channel(imageUpload: _uploadUntilCanceled);
     final sending = expectLater(
-      channel.sendMessage(_withImage(text: 'Hello')),
+      channel.sendMessage(_withImage()),
       throwsA(isA<StreamChatError>().having((it) => it.message, 'message', 'Message deleted')),
     );
     await pumpEventQueue();
@@ -122,12 +122,12 @@ void main() {
   test('sending a message again while its attachment uploads makes the first sending throw', () async {
     final channel = _channel(imageUpload: _uploadUntilCanceled);
     final first = expectLater(
-      channel.sendMessage(_withImage(text: 'Hello')),
+      channel.sendMessage(_withImage()),
       throwsA(isA<StreamChatError>().having((it) => it.message, 'message', 'Message cancelled')),
     );
     await pumpEventQueue();
 
-    channel.sendMessage(_withImage(text: 'Hello')).ignore();
+    channel.sendMessage(_withImage()).ignore();
 
     await first;
   });
@@ -140,10 +140,10 @@ void main() {
         return _uploadUntilCanceled(invocation);
       },
     );
-    final first = _ignoringFailure(channel.sendMessage(_withImage(text: 'Hello')));
+    final first = _ignoringFailure(channel.sendMessage(_withImage()));
     await pumpEventQueue();
 
-    channel.sendMessage(_withImage(text: 'Hello')).ignore();
+    channel.sendMessage(_withImage()).ignore();
     await first;
 
     expect(cancelTokens.first.isCancelled, isTrue);
@@ -152,7 +152,7 @@ void main() {
   test('deleting a message whose attachment finished uploading does not send it', () async {
     final upload = Completer<SendImageResponse>();
     final channel = _channel(imageUpload: (_) => upload.future);
-    final sending = _ignoringFailure(channel.sendMessage(_withImage(text: 'Hello')));
+    final sending = _ignoringFailure(channel.sendMessage(_withImage()));
     await pumpEventQueue();
     final message = channel.state!.messages.single;
 
@@ -236,7 +236,7 @@ void main() {
     final upload = Completer<SendImageResponse>();
     final channel = _channel(imageUpload: (_) => upload.future);
     final sending = expectLater(
-      channel.sendMessage(_withImage(text: 'Hello')),
+      channel.sendMessage(_withImage()),
       throwsA(isA<StreamChatError>().having((it) => it.message, 'message', 'Message deleted')),
     );
     await pumpEventQueue();
@@ -256,7 +256,7 @@ void main() {
         return Completer<SendImageResponse>().future;
       },
     );
-    channel.sendMessage(_withImage(text: 'Hello')).ignore();
+    channel.sendMessage(_withImage()).ignore();
     await pumpEventQueue();
 
     await channel.retryAttachmentUpload('message', 'image');
@@ -265,11 +265,11 @@ void main() {
   });
 }
 
-// A message with [text] and an image still to be uploaded.
-Message _withImage({required String text}) {
+// A message with an image still to be uploaded.
+Message _withImage() {
   return Message(
     id: 'message',
-    text: text,
+    text: 'Hello',
     attachments: [
       Attachment(
         id: 'image',
