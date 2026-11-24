@@ -341,12 +341,13 @@ class ScheduledMessageManager {
   /// Deletes the scheduled message [id] before it is sent.
   ///
   /// It stops being listed right away, and is listed again if the request
-  /// fails, unless it no longer exists. Returns it with the status it had when
-  /// it was deleted.
+  /// fails, unless it no longer exists. One still being scheduled is deleted
+  /// once scheduling it ends. One whose scheduling failed is only removed from
+  /// the list; a later load lists it again if it was scheduled after all.
+  /// Returns it with the status it had when it was deleted.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails, including when it
-  /// no longer exists or was already sent. One whose scheduling failed and
-  /// that no longer exists is deleted without an error.
+  /// no longer exists or was already sent.
   /// {@endtemplate}
   Future<DeleteScheduledMessageResponse> deleteMessage(String id) async {
     final scheduledMessage = _listed(id);
@@ -356,13 +357,10 @@ class ScheduledMessageManager {
     final canceled = scheduledMessage.asCanceled();
     _remove(scheduledMessage.id, generation);
 
-    // Scheduling it deletes it once it ends.
-    if (scheduledMessage.isBeingScheduled) {
+    // One being scheduled is deleted once scheduling it ends, and one whose
+    // scheduling failed only leaves the list.
+    if (scheduledMessage.isNotScheduledYet) {
       return DeleteScheduledMessageResponse()..scheduledMessage = canceled;
-    }
-
-    if (scheduledMessage.isSchedulingFailed) {
-      return _deleteFailedToSchedule(scheduledMessage, canceled, generation);
     }
 
     return _request(
@@ -603,28 +601,6 @@ class ScheduledMessageManager {
 
     _upsertAnswer(scheduledMessage, response.scheduledMessage, generation);
     return response;
-  }
-
-  // Deletes [scheduledMessage], whose scheduling failed, so it may never have
-  // been scheduled. It is listed again if deleting it fails.
-  Future<DeleteScheduledMessageResponse> _deleteFailedToSchedule(
-    ScheduledMessage scheduledMessage,
-    ScheduledMessage canceled,
-    int generation,
-  ) async {
-    try {
-      return await _api.deleteScheduledMessage(scheduledMessage.id);
-    } catch (error) {
-      // One already sent stays out of the list, and the error says so.
-      if (error is StreamChatNetworkError && error.isAlreadySent) rethrow;
-
-      if (error is StreamChatNetworkError && error.isGone) {
-        return DeleteScheduledMessageResponse()..scheduledMessage = canceled;
-      }
-
-      _upsert(scheduledMessage, generation);
-      rethrow;
-    }
   }
 
   // Runs [request] on [scheduledMessage]. If it fails, one found sent or gone
