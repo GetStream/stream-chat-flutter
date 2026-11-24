@@ -154,7 +154,7 @@ jobs:
           done
 
       - name: 📤 Commit Changes
-        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@c322b778cb789f4c45d8830dd1b5324584da378f
+        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@932fb06e4555b3556f211147f8915ce8a6bd0a6c
         with:
           files: "**/test/**/goldens/**/*.png"
           message: "chore: Update Goldens"

@@ -56,7 +56,7 @@ jobs:
 
       - name: Target
         id: target
-        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-target@e338514373956150868ee67d325c96efe1c758ec
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-target@932fb06e4555b3556f211147f8915ce8a6bd0a6c
         with:
           app: chat
           flavor: pr
@@ -70,14 +70,14 @@ jobs:
           flutter build web --release --wasm "${args[@]}"
 
       - name: Deploy
-        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-deploy@e338514373956150868ee67d325c96efe1c758ec
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-deploy@932fb06e4555b3556f211147f8915ce8a6bd0a6c
         with:
           path: ${{ steps.target.outputs.path }}
           service-account: ${{ steps.target.outputs.service-account }}
           build-dir: sample_app/build/web
 
       - name: Comment the link
-        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-pr-comment@e338514373956150868ee67d325c96efe1c758ec
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-pr-comment@932fb06e4555b3556f211147f8915ce8a6bd0a6c
         with:
           app: chat
           url: ${{ steps.target.outputs.url }}
@@ -103,18 +103,18 @@ jobs:
     steps:
       - name: Target
         id: target
-        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-target@e338514373956150868ee67d325c96efe1c758ec
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-target@932fb06e4555b3556f211147f8915ce8a6bd0a6c
         with:
           app: chat
           flavor: pr
 
       - name: Remove
-        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-remove@e338514373956150868ee67d325c96efe1c758ec
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-remove@932fb06e4555b3556f211147f8915ce8a6bd0a6c
         with:
           path: ${{ steps.target.outputs.path }}
           service-account: ${{ steps.target.outputs.service-account }}
 
       - name: Update the comment
-        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-pr-comment@e338514373956150868ee67d325c96efe1c758ec
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-pr-comment@932fb06e4555b3556f211147f8915ce8a6bd0a6c
         with:
           app: chat

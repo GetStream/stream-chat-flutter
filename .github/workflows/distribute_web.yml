@@ -103,7 +103,7 @@ jobs:
 
       - name: Target
         id: target
-        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-target@e338514373956150868ee67d325c96efe1c758ec
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-target@932fb06e4555b3556f211147f8915ce8a6bd0a6c
         with:
           app: chat
           flavor: ${{ needs.flavor.outputs.flavor }}
@@ -117,7 +117,7 @@ jobs:
           flutter build web --release --wasm "${args[@]}"
 
       - name: Deploy
-        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-deploy@e338514373956150868ee67d325c96efe1c758ec
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-deploy@932fb06e4555b3556f211147f8915ce8a6bd0a6c
         with:
           path: ${{ steps.target.outputs.path }}
           service-account: ${{ steps.target.outputs.service-account }}
