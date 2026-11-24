@@ -59,14 +59,6 @@ class ScheduledMessageManager {
   // The attachment upload of each scheduled message waiting for it.
   final _uploads = <String, MessageAttachmentsUpload>{};
 
-  static const _attachmentUploadFailed = StreamChatError(
-    'Failed to upload one or more attachments',
-  );
-
-  static const _uploadCanceled = StreamChatError(
-    'The attachment uploads were canceled',
-  );
-
   /// The scheduled messages, and whether the complete list is loaded.
   ScheduledMessageListState get state => _stateNotifier.state;
 
@@ -408,19 +400,21 @@ class ScheduledMessageManager {
     }
 
     // An edit stopped mid-upload is relisted as failed, to resend or delete.
-    final relisted = wasUploading
-        ? scheduledMessage.copyWith(
-            status: .failed,
-            failure: const ScheduledMessageFailure.updatingFailed(isRetriable: true),
-            localUpdatedAt: clock.now(),
-          )
-        : scheduledMessage;
+    ScheduledMessage relisted(Object error) {
+      if (!wasUploading) return scheduledMessage;
+
+      return scheduledMessage.copyWith(
+        status: .failed,
+        failure: const ScheduledMessageFailure.updatingFailed(isRetriable: true),
+        localUpdatedAt: clock.now(),
+      );
+    }
 
     return _request(
       scheduledMessage,
       generation,
       () => _api.deleteScheduledMessage(id),
-      relistOnFailure: (_) => relisted,
+      relistOnFailure: relisted,
       relistIfUnlisted: true,
     );
   }
@@ -503,23 +497,23 @@ class ScheduledMessageManager {
       return _listed(local.id) == null;
     }
 
-    try {
-      if (local.message.hasPendingAttachments) {
-        final result = await _uploadAttachments(local, generation);
-        local = local.copyWith(message: result.message);
+    if (local.message.hasPendingAttachments) {
+      final result = await _uploadAttachments(local, generation);
+      local = local.copyWith(message: result.message);
 
-        if (result is MessageAttachmentsUploadFailed) {
-          final failed = local.copyWith(
-            status: .failed,
-            failure: const ScheduledMessageFailure.uploadFailed(),
-            localUpdatedAt: clock.now(),
-          );
+      if (result is MessageAttachmentsUploadFailed) {
+        final failed = local.copyWith(
+          status: .failed,
+          failure: const ScheduledMessageFailure.uploadFailed(),
+          localUpdatedAt: clock.now(),
+        );
 
-          _upsert(failed, generation);
-          throw _attachmentUploadFailed;
-        }
+        _upsert(failed, generation);
+        throw const StreamChatError('Failed to upload one or more attachments');
       }
+    }
 
+    try {
       final response = await _api.scheduleMessage(
         channelId,
         channelType,
@@ -570,10 +564,6 @@ class ScheduledMessageManager {
       await _upsertUnlessDeleted(failed, generation, wasDeletedMeanwhile: wasDeletedMeanwhile());
       rethrow;
     } catch (error) {
-      // Listed as failed already, or stopped by a deletion or a newer call for
-      // the message, which now owns its state.
-      if (error == _attachmentUploadFailed || error == _uploadCanceled) rethrow;
-
       _undoRefused(local, restoreOnRefusal, generation, wasDeletedMeanwhile: wasDeletedMeanwhile());
       rethrow;
     }
@@ -668,7 +658,7 @@ class ScheduledMessageManager {
         );
 
         _upsert(failed, generation);
-        throw _attachmentUploadFailed;
+        throw const StreamChatError('Failed to upload one or more attachments');
       }
     }
 
@@ -708,7 +698,7 @@ class ScheduledMessageManager {
   // Uploads the attachments of [scheduledMessage] not uploaded yet, showing
   // their progress on it, and resolves to how the upload ended.
   //
-  // Throws [_uploadCanceled] if [_cancelUploads] stops them, even once they
+  // Throws a [StreamChatError] if [_cancelUploads] stops them, even once they
   // have finished.
   Future<MessageAttachmentsUploadResult> _uploadAttachments(
     ScheduledMessage scheduledMessage,
@@ -729,7 +719,9 @@ class ScheduledMessageManager {
     final result = await upload.result;
 
     // Deleted, replaced or cleared while it waited.
-    if (!identical(_uploads[id], upload)) throw _uploadCanceled;
+    if (!identical(_uploads[id], upload)) {
+      throw const StreamChatError('The attachment uploads were canceled');
+    }
     _uploads.remove(id);
 
     return result;
@@ -960,14 +952,11 @@ extension on Message {
   Message withPendingAttachmentsPreparing() {
     if (!hasPendingAttachments) return this;
 
-    return copyWith(
-      attachments: [
-        for (final attachment in attachments)
-          if (attachment.uploadState.isSuccess)
-            attachment
-          else
-            attachment.copyWith(uploadState: const UploadState.preparing()),
-      ],
-    );
+    final preparing = attachments.map((it) {
+      if (it.uploadState.isSuccess) return it;
+      return it.copyWith(uploadState: const UploadState.preparing());
+    });
+
+    return copyWith(attachments: preparing.toList());
   }
 }

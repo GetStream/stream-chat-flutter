@@ -12,7 +12,7 @@
 
 🔄 Changed
 
-- `StreamChannelPage` and `StreamThreadPage` show the scheduled messages banner above their composer, and schedule the message on a long press of send, in channels where the user can schedule messages. Turn both off with `StreamChatConfigurationData.scheduledMessagesEnabled`.
+- `StreamChannelPage` and `StreamThreadPage` show the scheduled messages banner above their composer, and schedule the message, uploading its attachments first, on a long press of send, in channels where the user can schedule messages. Turn both off with `StreamChatConfigurationData.scheduledMessagesEnabled`.
 - A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
 
 ## 10.7.0

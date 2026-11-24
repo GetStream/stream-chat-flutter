@@ -2,7 +2,7 @@
 
 ✅ Added
 
-- Added the scheduled message strings, including the schedule sheets and the scheduled messages banner, for all supported locales.
+- Added the scheduled message strings, including the schedule sheets, the scheduled messages banner and a failed attachment upload, for all supported locales.
 
 🔄 Changed
 
