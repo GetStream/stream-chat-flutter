@@ -359,11 +359,14 @@ class _ScheduledMessageStatusLine extends core.NullableStatelessWidget {
 
     if (status == .failed) {
       final message = scheduledMessage.message;
+      final failure = scheduledMessage.failure;
       final isUploadFailed = message.attachments.any((it) => it.uploadState.isFailed);
-      final reason = switch (isUploadFailed) {
-        true => translations.scheduledMessageAttachmentUploadFailedText,
-        false => translations.scheduledMessageFailureText(
-          failure: scheduledMessage.failure,
+      // A failed edit says the earlier version is still scheduled.
+      final reason = switch (failure) {
+        ScheduledMessageSchedulingFailed() when isUploadFailed =>
+          translations.scheduledMessageAttachmentUploadFailedText,
+        _ => translations.scheduledMessageFailureText(
+          failure: failure,
           isQuoteDeleted: message.quotedMessage?.isDeleted ?? false,
         ),
       };
