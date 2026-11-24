@@ -615,6 +615,9 @@ class Channel {
 
   /// Cancels the upload of [attachmentId] and removes it from its message.
   ///
+  /// It covers the attachments of a message being sent or updated in this
+  /// channel. The uploads of a scheduled message stop when it is deleted.
+  ///
   /// A [reason] can be given for the cancellation.
   ///
   /// Throws a [StreamChatError] if the attachment isn't uploading or waiting
