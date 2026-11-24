@@ -37,7 +37,8 @@ jobs:
   # pushes. Pull requests only test the packages they change and their
   # dependents.
   gate:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     outputs:
       should_run: ${{ github.event_name == 'push' || (steps.filter.outputs.relevant == 'true' && github.event.pull_request.draft != true) }}
       test_all: ${{ github.event_name == 'push' }}
@@ -60,7 +61,8 @@ jobs:
   analyze:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     timeout-minutes: 15
     steps:
       - name: 📚 Git Checkout
@@ -87,7 +89,8 @@ jobs:
   format:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     timeout-minutes: 15
     steps:
       - name: 📚 Git Checkout
@@ -115,7 +118,8 @@ jobs:
   select-packages:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     timeout-minutes: 10
     outputs:
       packages: ${{ steps.select.outputs.packages }}
@@ -178,7 +182,8 @@ jobs:
     name: test (${{ matrix.package }})
     needs: select-packages
     if: needs.select-packages.outputs.packages != '[]'
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     timeout-minutes: 30
     permissions:
       contents: read
@@ -233,7 +238,8 @@ jobs:
   test:
     needs: [gate, select-packages, test-package]
     if: ${{ !cancelled() && (needs.gate.result != 'success' || needs.gate.outputs.should_run == 'true') }}
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     steps:
       - name: 🚨 Check Results
         if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled')
@@ -243,14 +249,14 @@ jobs:
     name: build (${{ matrix.platform }})
     needs: gate
     if: needs.gate.outputs.should_run == 'true' && github.event_name == 'pull_request'
-    runs-on: ${{ matrix.os }}
+    runs-on:
+      group: github-public-ubuntu-static
     timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         include:
           - platform: android
-            os: ubuntu-latest
             working-directory: sample_app/android
             build-command: bundle exec fastlane build_apk
           # - platform: ios
@@ -269,6 +275,14 @@ jobs:
       - name: 🍎 Setup Xcode
         if: matrix.platform == 'ios'
         uses: ./.github/actions/setup-xcode
+
+      # Android lint needs Java 21 or newer; the runner image defaults to 17.
+      - name: ☕ Set up Java
+        if: matrix.platform == 'android'
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
 
       - name: 💾 Cache Gradle
         if: matrix.platform == 'android'
