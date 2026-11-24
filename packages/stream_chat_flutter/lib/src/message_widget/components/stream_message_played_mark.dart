@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../../stream_chat_flutter.dart';
 import '../../misc/empty_widget.dart';
@@ -11,6 +10,8 @@ import '../../misc/empty_widget.dart';
 /// Requires [StreamChatConfigurationData.showMessageMarks] and a channel whose
 /// [ChannelConfig.markTypes] include [MessageMarkType.played].
 ///
+/// Takes its text style from the surrounding [DefaultTextStyle].
+///
 /// See also:
 ///
 ///  * [StreamMessageFooter], which hosts this widget.
@@ -19,16 +20,12 @@ class StreamMessagePlayedMark extends StatelessWidget {
   const StreamMessagePlayedMark({
     super.key,
     required this.message,
-    this.separator = core.StreamMessageMark.separator,
     this.onTap,
     this.excludeFromSemantics = false,
   });
 
   /// The message whose played state to display.
   final Message message;
-
-  /// The widget after the label, or null when nothing follows the mark.
-  final Widget? separator;
 
   /// Called when the mark is tapped.
   ///
@@ -82,15 +79,17 @@ class StreamMessagePlayedMark extends StatelessWidget {
     if (label == null) return const Empty();
 
     final effectiveOnTap = _isTwoMember(context) ? null : onTap;
+    if (effectiveOnTap == null) {
+      return ExcludeSemantics(
+        excluding: excludeFromSemantics,
+        child: Text(label),
+      );
+    }
 
-    return ExcludeSemantics(
-      excluding: excludeFromSemantics && effectiveOnTap == null,
-      child: core.StreamMessageMark(
-        label: Text(label),
-        highlighted: true,
-        separator: separator,
-        onTap: effectiveOnTap,
-      ),
+    return GestureDetector(
+      behavior: .opaque,
+      onTap: effectiveOnTap,
+      child: Text(label),
     );
   }
 }
