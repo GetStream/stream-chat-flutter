@@ -425,8 +425,8 @@ class ScheduledMessageManager {
   /// Throws an [ArgumentError] if it isn't listed and an attachment of
   /// [message] is not uploaded yet, as its channel to upload to is unknown.
   ///
-  /// Throws a [StateError] while it is still uploading attachments to be
-  /// scheduled.
+  /// Throws a [StateError] while its attachments upload, to be scheduled or
+  /// saved as an edit; only deleting it is allowed meanwhile.
   Future<UpdateScheduledMessageResponse> updateMessage(
     String id,
     Message message, {
@@ -445,7 +445,7 @@ class ScheduledMessageManager {
       return _updateUnlisted(() => request(message));
     }
 
-    _refuseWhileScheduling(scheduledMessage);
+    _refuseWhileUploading(scheduledMessage);
     _refuseUnschedulable(scheduledMessage.cid, message);
     _refuseUnschedulableAt(
       scheduledMessage.cid,
@@ -482,8 +482,8 @@ class ScheduledMessageManager {
   /// If it isn't listed, the request is made without these checks or changing
   /// the list first, then lists the copy it answers with.
   ///
-  /// Throws a [StateError] while it is still uploading attachments to be
-  /// scheduled.
+  /// Throws a [StateError] while its attachments upload, to be scheduled or
+  /// saved as an edit; only deleting it is allowed meanwhile.
   Future<UpdateScheduledMessageResponse> rescheduleMessage(
     String id, {
     required DateTime scheduledAt,
@@ -495,7 +495,7 @@ class ScheduledMessageManager {
     final scheduledMessage = _listedScheduledMessage(id);
     if (scheduledMessage == null) return _updateUnlisted(request);
 
-    _refuseWhileScheduling(scheduledMessage);
+    _refuseWhileUploading(scheduledMessage);
 
     // A failed edit isn't saved yet, so moving it saves the edit too.
     if (scheduledMessage.failureReason?.isEditFailure ?? false) {
@@ -530,25 +530,14 @@ class ScheduledMessageManager {
   /// it quotes a deleted message, which would fail it once sent. If it isn't
   /// listed, the request is made without these checks or changing the list.
   ///
-  /// Throws a [StateError] while it is still uploading attachments to be
-  /// scheduled.
+  /// Throws a [StateError] while its attachments upload, to be scheduled or
+  /// saved as an edit; only deleting it is allowed meanwhile.
   Future<SendScheduledMessageNowResponse> sendMessageNow(String id) async {
     final scheduledMessage = _listedScheduledMessage(id);
     if (scheduledMessage == null) return _api.sendScheduledMessageNow(id);
 
-    _refuseWhileScheduling(scheduledMessage);
+    _refuseWhileUploading(scheduledMessage);
     _refuseDeletedQuote(scheduledMessage.cid, scheduledMessage.message);
-    final wasWaiting = _cancelUploads(scheduledMessage.id);
-
-    // An edit stopped while it uploaded is listed again as failed, to save it
-    // again or delete it.
-    final restored = wasWaiting
-        ? scheduledMessage.copyWith(
-            status: ScheduledMessageStatus.failed,
-            failureReason: ScheduledMessageFailureReason.updateFailed,
-            localUpdatedAt: clock.now(),
-          )
-        : _restored(scheduledMessage);
 
     final generation = _generation;
     final preparing = scheduledMessage.copyWith(
@@ -562,7 +551,7 @@ class ScheduledMessageManager {
       scheduledMessage,
       generation,
       () => _api.sendScheduledMessageNow(scheduledMessage.id),
-      relistOnFailure: (_) => restored,
+      relistOnFailure: (_) => _restored(scheduledMessage),
     );
 
     // Its sent event can arrive first, which stops listing it.
@@ -683,6 +672,7 @@ class ScheduledMessageManager {
         _deletedWhileScheduling.contains(scheduledMessage.id),
       _ => false,
     };
+
     if (!isDeletedWhileScheduling) _eventHandler.handleEvent(event);
 
     if (event.type == EventType.connectionChanged && event.online == false) {
@@ -725,9 +715,6 @@ class ScheduledMessageManager {
     ScheduledMessage edited,
     Future<UpdateScheduledMessageResponse> Function(Message message) request,
   ) async {
-    // Stops the attachment upload of an earlier call for the message.
-    _cancelUploads(scheduledMessage.id);
-
     final generation = _generation;
     var saving = edited.copyWith(
       status: .preparingToSchedule,
@@ -827,12 +814,11 @@ class ScheduledMessageManager {
     return upload != null;
   }
 
-  // Refuses to change [scheduledMessage] while it is first being scheduled,
-  // as there is nothing to change yet.
-  void _refuseWhileScheduling(ScheduledMessage scheduledMessage) {
-    final isUploading = _uploads.containsKey(scheduledMessage.id);
-    if (isUploading && scheduledMessage.remoteCreatedAt == null) {
-      throw StateError('Scheduled message ${scheduledMessage.id} is not scheduled yet.');
+  // Refuses to change [scheduledMessage] while its attachments upload, to be
+  // scheduled or saved as an edit. Only deleting it is allowed meanwhile.
+  void _refuseWhileUploading(ScheduledMessage scheduledMessage) {
+    if (_uploads.containsKey(scheduledMessage.id)) {
+      throw StateError('Scheduled message ${scheduledMessage.id} is uploading attachments.');
     }
   }
 

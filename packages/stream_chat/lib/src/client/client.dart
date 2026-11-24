@@ -2616,8 +2616,8 @@ class StreamChatClient {
   /// Throws an [ArgumentError] if [ClientState.scheduledMessages] doesn't list
   /// it and an attachment of [message] is not uploaded yet.
   ///
-  /// Throws a [StateError] while it is still uploading attachments to be
-  /// scheduled.
+  /// Throws a [StateError] while its attachments upload, to be scheduled or
+  /// saved as an edit; only deleting it is allowed meanwhile.
   Future<UpdateScheduledMessageResponse> updateScheduledMessage(
     String id,
     Message message, {
@@ -2661,8 +2661,8 @@ class StreamChatClient {
   /// made without these checks or changing the list first, then lists the
   /// copy it answers with.
   ///
-  /// Throws a [StateError] while it is still uploading attachments to be
-  /// scheduled.
+  /// Throws a [StateError] while its attachments upload, to be scheduled or
+  /// saved as an edit; only deleting it is allowed meanwhile.
   Future<UpdateScheduledMessageResponse> rescheduleMessage(
     String id, {
     required DateTime scheduledAt,
@@ -2720,8 +2720,8 @@ class StreamChatClient {
   /// [ClientState.scheduledMessages] doesn't list it, the request is made
   /// without these checks or changing the list.
   ///
-  /// Throws a [StateError] while it is still uploading attachments to be
-  /// scheduled.
+  /// Throws a [StateError] while its attachments upload, to be scheduled or
+  /// saved as an edit; only deleting it is allowed meanwhile.
   Future<SendScheduledMessageNowResponse> sendScheduledMessageNow(String id) {
     return _scheduledMessageManager.sendMessageNow(id);
   }
