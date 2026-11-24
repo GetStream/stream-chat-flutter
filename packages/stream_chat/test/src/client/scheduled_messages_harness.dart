@@ -196,12 +196,25 @@ class ScheduledMessageHarness {
     await settle();
   }
 
-  // The scheduled message events while [run] runs, as type and status. What
+  // The statuses the scheduled message [id] is listed with while [run] runs,
+  // one for each copy of it listed, and null when it stops being listed. What
   // [run] throws is thrown, so a test of a failing request asserts it.
-  Future<List<(String, ScheduledMessageStatus?)>> eventsDuring(Future<void> Function() run) async {
-    final events = <(String, ScheduledMessageStatus?)>[];
-    final subscription = client.on().where((it) => it.scheduledMessage != null).listen((it) {
-      events.add((it.type, it.scheduledMessage?.status));
+  Future<List<ScheduledMessageStatus?>> statusesDuring(
+    Future<void> Function() run, {
+    String id = 'a',
+  }) async {
+    ScheduledMessage? listed(List<ScheduledMessage> scheduledMessages) {
+      return scheduledMessages.where((it) => it.id == id).firstOrNull;
+    }
+
+    final statuses = <ScheduledMessageStatus?>[];
+    var last = listed(client.state.scheduledMessages);
+    final subscription = client.state.scheduledMessagesStream.listen((scheduledMessages) {
+      final copy = listed(scheduledMessages);
+      if (copy == last) return;
+
+      last = copy;
+      statuses.add(copy?.status);
     });
 
     try {
@@ -211,7 +224,7 @@ class ScheduledMessageHarness {
       await subscription.cancel();
     }
 
-    return events;
+    return statuses;
   }
 
   // Makes the client hold [messages], as if each had just been scheduled.

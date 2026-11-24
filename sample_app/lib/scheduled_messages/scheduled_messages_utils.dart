@@ -32,8 +32,8 @@ ScheduleErrorTexts scheduleErrorTexts(BuildContext context) {
 String describeScheduleError(Object error, ScheduleErrorTexts texts) {
   if (error is ScheduledMessageRefusedError) {
     return switch (error.reason) {
-      .slashCommand => texts.commandRefused,
-      .quotedMessageDeleted => texts.quotedMessageDeleted,
+      .scheduledMessageIsCommand => texts.commandRefused,
+      .scheduledMessageQuoteDeleted => texts.quotedMessageDeleted,
       _ => texts.refused,
     };
   }
@@ -52,6 +52,7 @@ String describeScheduleError(Object error, ScheduleErrorTexts texts) {
     .scheduledMessageAlreadySent => ScheduledMessagesStrings.alreadySentError,
     .scheduledMessageCanceled => ScheduledMessagesStrings.canceled,
     _ when error.isScheduledMessageNotFound => ScheduledMessagesStrings.sentOrDeleted,
+    _ when !error.isRetriable => texts.refused,
     _ => texts.generic,
   };
 }

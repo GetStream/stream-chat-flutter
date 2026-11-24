@@ -448,10 +448,10 @@ void main() {
           ScheduledMessageSendingFailed(reason: reason),
         null,
       ]) {
-        expect(localizations.scheduledMessageFailureReasonText(failure: failure), isNotNull);
+        expect(localizations.scheduledMessageFailureText(failure: failure), isNotNull);
       }
       expect(
-        localizations.scheduledMessageFailureReasonText(
+        localizations.scheduledMessageFailureText(
           failure: const ScheduledMessageSendingFailed(reason: ScheduledMessageSendingFailureReason.invalidMessage),
           isQuoteDeleted: true,
         ),
@@ -459,11 +459,11 @@ void main() {
       );
       // A failed edit says the earlier version is still scheduled, unlike any
       // other failure.
-      final editNotSaved = localizations.scheduledMessageFailureReasonText(
+      final editNotSaved = localizations.scheduledMessageFailureText(
         failure: const ScheduledMessageUpdatingFailed(isRetriable: true),
       );
       expect(
-        localizations.scheduledMessageFailureReasonText(
+        localizations.scheduledMessageFailureText(
           failure: const ScheduledMessageUpdatingFailed(isRetriable: false),
         ),
         editNotSaved,
@@ -471,7 +471,7 @@ void main() {
       expect(
         editNotSaved,
         isNot(
-          localizations.scheduledMessageFailureReasonText(
+          localizations.scheduledMessageFailureText(
             failure: const ScheduledMessageSendingFailed(reason: ScheduledMessageSendingFailureReason.internalError),
           ),
         ),

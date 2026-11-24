@@ -191,128 +191,94 @@ void main() {
     expect(idsOf(harness.client.state.scheduledMessages), ['a', 'b']);
   });
 
-  test('scheduleMessage reports it as created while preparing, then as created once scheduled', () async {
+  test('scheduleMessage lists it as preparing to schedule, then as scheduled', () async {
     final message = Message(id: 'a', text: 'Good morning');
     harness.stubSchedule(message, () async => scheduled(message, fakeScheduledMessage('a', scheduledAt: scheduledAt)));
 
-    final events = await harness.eventsDuring(() => harness.schedule(message));
+    final statuses = await harness.statusesDuring(() => harness.schedule(message));
 
-    expect(events, [
-      (EventType.scheduledMessageCreated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageCreated, ScheduledMessageStatus.scheduled),
+    expect(statuses, [
+      ScheduledMessageStatus.preparingToSchedule,
+      ScheduledMessageStatus.scheduled,
     ]);
   });
 
-  test('scheduleMessage reports one that could not reach the server as updated to failed', () async {
+  test('scheduleMessage lists one that could not reach the server as preparing, then as failed', () async {
     final message = Message(id: 'a', text: 'Good morning');
     harness.stubSchedule(message, () async => throw offline);
 
-    final events = await harness.eventsDuring(() => expectRequest(harness.schedule(message), offline));
+    final statuses = await harness.statusesDuring(() => expectRequest(harness.schedule(message), offline));
 
-    expect(events, [
-      (EventType.scheduledMessageCreated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.failed),
+    expect(statuses, [
+      ScheduledMessageStatus.preparingToSchedule,
+      ScheduledMessageStatus.failed,
     ]);
   });
 
-  test('scheduleMessage reports one the server refuses as deleted', () async {
+  test('scheduleMessage lists one the server refuses as preparing, then stops listing it', () async {
     final message = Message(id: 'a', text: 'Good morning');
     harness.stubSchedule(message, () async => throw rejected);
 
-    final events = await harness.eventsDuring(() => expectRequest(harness.schedule(message), rejected));
+    final statuses = await harness.statusesDuring(() => expectRequest(harness.schedule(message), rejected));
 
-    expect(events, [
-      (EventType.scheduledMessageCreated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
+    expect(statuses, [
+      ScheduledMessageStatus.preparingToSchedule,
+      null,
     ]);
   });
 
-  test('scheduleMessage reports one refused with an error other than a network one as deleted', () async {
+  test('scheduleMessage stops listing one refused with an error other than a network one', () async {
     final message = Message(id: 'a', text: 'Good morning');
     harness.stubSchedule(message, () async => throw StateError('Broken'));
 
-    final events = await harness.eventsDuring(() async {
+    final statuses = await harness.statusesDuring(() async {
       await expectLater(harness.schedule(message), throwsStateError);
     });
 
-    expect(events, [
-      (EventType.scheduledMessageCreated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
+    expect(statuses, [
+      ScheduledMessageStatus.preparingToSchedule,
+      null,
     ]);
   });
 
-  test('scheduleMessage reports its own events as local', () async {
-    final local = harness.client.on(EventType.scheduledMessageCreated).first;
-    final message = Message(id: 'a', text: 'Good morning');
-    harness.stubSchedule(message, () => Completer<ScheduleMessageResponse>().future);
-    unawaited(harness.schedule(message));
-
-    expect((await local).isLocal, isTrue);
-  });
-
-  for (final (refusal, code, type, status) in [
-    ('already sent', scheduledMessageAlreadySentCode, EventType.scheduledMessageSent, ScheduledMessageStatus.sent),
-    ('deleted', scheduledMessageCanceledCode, EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
+  for (final (refusal, code) in [
+    ('already sent', scheduledMessageAlreadySentCode),
+    ('deleted', scheduledMessageCanceledCode),
   ]) {
-    test('reports one the server refuses to schedule as $refusal with a $type event', () async {
+    test('scheduleMessage stops listing one the server reports $refusal', () async {
       final message = Message(id: 'a', text: 'Good morning');
       final error = refusedWith(code);
       harness.stubSchedule(message, () async => throw error);
 
-      final events = await harness.eventsDuring(() => expectRequest(harness.schedule(message), error));
+      final statuses = await harness.statusesDuring(() => expectRequest(harness.schedule(message), error));
 
-      expect(events, [
-        (EventType.scheduledMessageCreated, ScheduledMessageStatus.preparingToSchedule),
-        (type, status),
-      ]);
-      expect(harness.client.state.scheduledMessages, isEmpty);
+      expect(statuses, [ScheduledMessageStatus.preparingToSchedule, null]);
     });
 
-    test('reports one the server refuses to schedule again as $refusal with a $type event', () async {
+    test('resendScheduledMessage stops listing one the server reports $refusal', () async {
       final message = Message(id: 'a', text: 'Good morning');
       final failed = await harness.scheduleUnreachable(message);
       final error = refusedWith(code);
       harness.stubSchedule(message, () async => throw error);
 
-      final events = await harness.eventsDuring(
+      final statuses = await harness.statusesDuring(
         () => expectRequest(harness.client.resendScheduledMessage(failed.id), error),
       );
 
-      expect(events.last, (type, status));
+      expect(statuses.last, isNull);
     });
   }
 
-  test('scheduleMessage reports one sent right away as sent', () async {
+  test('scheduleMessage stops listing one sent right away', () async {
     final message = Message(id: 'a', text: 'Good morning');
     harness.stubSchedule(message, () async => sentRightAway(message));
 
-    final events = await harness.eventsDuring(() => harness.schedule(message));
+    final statuses = await harness.statusesDuring(() => harness.schedule(message));
 
-    expect(events, [
-      (EventType.scheduledMessageCreated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageSent, ScheduledMessageStatus.sent),
+    expect(statuses, [
+      ScheduledMessageStatus.preparingToSchedule,
+      null,
     ]);
-  });
-
-  test("scheduleMessage reports the sent message's ID when it is sent right away", () async {
-    final message = Message(id: 'a', text: 'Good morning');
-    harness.stubSchedule(message, () async => sentRightAway(message));
-    final sent = harness.client.on(EventType.scheduledMessageSent).first;
-
-    await harness.schedule(message);
-
-    expect((await sent).messageId, 'a');
-  });
-
-  test('scheduleMessage reports no message ID when the message was already sent', () async {
-    final message = Message(id: 'a', text: 'Good morning');
-    final error = refusedWith(scheduledMessageAlreadySentCode);
-    harness.stubSchedule(message, () async => throw error);
-    final sent = harness.client.on(EventType.scheduledMessageSent).first;
-
-    await expectLater(harness.schedule(message), throwsA(error));
-
-    expect((await sent).messageId, isNull);
   });
 
   test('scheduleMessage rethrows an error other than a network one and stops listing it', () async {
@@ -355,7 +321,6 @@ void main() {
     final failed = await harness.scheduleUnreachable(message);
 
     await expectLater(resend(failed.id), throwsA(offline));
-    await settle();
 
     final [again] = harness.client.state.scheduledMessages;
     expect(again.status, ScheduledMessageStatus.failed);

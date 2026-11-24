@@ -192,7 +192,7 @@ class ScheduledMessageListStateNotifier {
 
   void _emit(ScheduledMessageListState next) {
     if (next == state) return;
-    _state.safeAdd(next);
+    return _state.safeAdd(next);
   }
 }
 
@@ -206,16 +206,15 @@ extension ScheduledMessageProgress on ScheduledMessage {
   bool get isSchedulingFailed => failure is ScheduledMessageSchedulingFailed;
 
   /// Whether saving a change to it failed, so it is still scheduled as it was.
-  bool get isEditFailed => failure is ScheduledMessageUpdatingFailed;
+  bool get isUpdatingFailed => failure is ScheduledMessageUpdatingFailed;
 
-  /// Whether it isn't scheduled yet: it is being scheduled, or scheduling it
-  /// failed.
+  /// Whether it is being scheduled, or scheduling it failed.
   bool get isNotScheduledYet => isBeingScheduled || isSchedulingFailed;
 
   /// Whether it holds a change not saved yet of a message already scheduled.
   bool get hasUnsavedChange {
     final isBeingChanged = status == .preparingToSchedule && remoteCreatedAt != null;
-    return isBeingChanged || isEditFailed;
+    return isBeingChanged || isUpdatingFailed;
   }
 
   /// Whether it is kept when [incoming] replaces the list.

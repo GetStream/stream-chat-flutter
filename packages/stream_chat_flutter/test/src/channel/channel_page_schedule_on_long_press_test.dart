@@ -37,7 +37,7 @@ void main() {
 
   testWidgets('keeps the text and the mentions in the composer when scheduling is refused', (tester) async {
     final channel = await pumpChannelPage(tester);
-    stubSchedule(channel, () async => throw const ScheduledMessageRefusedError(.slashCommand, 'Refused'));
+    stubSchedule(channel, () async => throw const ScheduledMessageRefusedError(.scheduledMessageIsCommand, 'Refused'));
     final maya = User(id: 'maya', name: 'Maya');
     await _type(tester, 'Hi @Maya');
     final controller = composerController(tester)..addMentionedUser(maya);
@@ -52,7 +52,10 @@ void main() {
 
   testWidgets('says the quoted message was deleted when scheduling is refused for it', (tester) async {
     final channel = await pumpChannelPage(tester);
-    stubSchedule(channel, () async => throw const ScheduledMessageRefusedError(.quotedMessageDeleted, 'Refused'));
+    stubSchedule(
+      channel,
+      () async => throw const ScheduledMessageRefusedError(.scheduledMessageQuoteDeleted, 'Refused'),
+    );
     await _type(tester, 'Hello');
 
     await _scheduleWithPreset(tester);
@@ -62,7 +65,10 @@ void main() {
 
   testWidgets("says the message can't be scheduled when trying again won't help", (tester) async {
     final channel = await pumpChannelPage(tester);
-    stubSchedule(channel, () async => throw const ScheduledMessageRefusedError(.pinExpiresTooSoon, 'Refused'));
+    stubSchedule(
+      channel,
+      () async => throw const ScheduledMessageRefusedError(.scheduledMessageNotEditable, 'Refused'),
+    );
     await _type(tester, 'Hello');
 
     await _scheduleWithPreset(tester);
@@ -70,7 +76,7 @@ void main() {
     expect(find.text(DefaultTranslations.instance.scheduleMessageRefusedError), findsOneWidget);
   });
 
-  testWidgets('asks to try again when the server refuses for a reason it gives no more of', (tester) async {
+  testWidgets("says the message can't be scheduled when the server refuses it without a reason", (tester) async {
     final channel = await pumpChannelPage(tester);
     final refused = StreamChatNetworkError.raw(
       code: 4,
@@ -86,7 +92,7 @@ void main() {
 
     await _scheduleWithPreset(tester);
 
-    expect(find.text(DefaultTranslations.instance.scheduleMessageError), findsOneWidget);
+    expect(find.text(DefaultTranslations.instance.scheduleMessageRefusedError), findsOneWidget);
   });
 
   testWidgets('says why the server refused to schedule the message', (tester) async {
@@ -173,7 +179,7 @@ void main() {
 
   testWidgets('puts a refused message back in the composer', (tester) async {
     final channel = await pumpChannelPage(tester);
-    stubSchedule(channel, () async => throw const ScheduledMessageRefusedError(.slashCommand, 'Refused'));
+    stubSchedule(channel, () async => throw const ScheduledMessageRefusedError(.scheduledMessageIsCommand, 'Refused'));
     await _type(tester, 'Hello');
 
     await _scheduleWithPreset(tester);
@@ -189,7 +195,7 @@ void main() {
 
     await _scheduleWithPreset(tester);
     await _type(tester, 'Something else');
-    answer.completeError(const ScheduledMessageRefusedError(.slashCommand, 'Refused'));
+    answer.completeError(const ScheduledMessageRefusedError(.scheduledMessageIsCommand, 'Refused'));
     await tester.pumpAndSettle();
 
     expect(composerController(tester).text, 'Something else');

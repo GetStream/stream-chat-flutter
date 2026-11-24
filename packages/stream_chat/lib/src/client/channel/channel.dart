@@ -911,10 +911,8 @@ class Channel {
   /// [ScheduledMessageSchedulingFailed].
   ///
   /// Throws a [ScheduledMessageRefusedError] without making the request when
-  /// [message] is a command in a channel that has commands, quotes a deleted
-  /// message, or can't be sent at its time: one past the channel's
-  /// [ChannelConfig.scheduledMessagesMaxLeadTime], at or after its pin
-  /// expires, or less than a minute before its shared location ends.
+  /// [message] is a command in a channel that has commands, or quotes a
+  /// deleted message.
   ///
   /// Throws an [ArgumentError] if [scheduledAt] is not in the future, or if an
   /// attachment of [message] is not uploaded yet. A message to send right

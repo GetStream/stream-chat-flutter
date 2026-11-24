@@ -904,7 +904,7 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String scheduledMessageFailureReasonText({
+  String scheduledMessageFailureText({
     ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {

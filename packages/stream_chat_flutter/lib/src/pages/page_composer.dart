@@ -144,16 +144,19 @@ Future<void> _scheduleOnSendLongPress(
 
 // Why scheduling failed with [error], in the words of [translations].
 String _scheduleErrorText(Translations translations, Channel channel, Object error) {
-  final (reason, isRefusedOnDevice) = switch (error) {
+  final (reason, isRefused) = switch (error) {
     ScheduledMessageRefusedError(:final reason) => (reason, true),
-    StreamChatNetworkError(:final scheduledMessageErrorReason) => (scheduledMessageErrorReason, false),
+    StreamChatNetworkError(:final scheduledMessageErrorReason, :final isRetriable) => (
+      scheduledMessageErrorReason,
+      !isRetriable,
+    ),
     _ => (null, false),
   };
 
   final config = channel.config;
   return switch (reason) {
-    .slashCommand => translations.scheduleCommandRefusedError,
-    .quotedMessageDeleted => translations.scheduleQuotedMessageDeletedError,
+    .scheduledMessageIsCommand => translations.scheduleCommandRefusedError,
+    .scheduledMessageQuoteDeleted => translations.scheduleQuotedMessageDeletedError,
     .scheduledAtTooFar => translations.scheduleTooFarError,
     .scheduledLimitChannel => switch (config?.scheduledMessagesMaxPerChannel) {
       final limit? => translations.scheduleLimitReachedLabel(limit: limit),
@@ -164,8 +167,9 @@ String _scheduleErrorText(Translations translations, Channel channel, Object err
       null => translations.scheduleMessageError,
     },
     .scheduledAtTooSoon => translations.scheduleMessageRefusedError,
-    // Any other refusal on this device fails again when retried.
-    _ when isRefusedOnDevice => translations.scheduleMessageRefusedError,
+    // Any other refusal, on this device or by the server, fails again when
+    // retried.
+    _ when isRefused => translations.scheduleMessageRefusedError,
     _ => translations.scheduleMessageError,
   };
 }

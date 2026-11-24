@@ -18,16 +18,14 @@ void main() {
     );
   }
 
-  // Loads the channel [testCid], with [commands], [messages] and
-  // [maxLeadTime].
+  // Loads the channel [testCid], with [commands] and [messages].
   void loadChannel({
     List<Command> commands = const [],
     List<Message> messages = const [],
-    Duration? maxLeadTime,
   }) {
     final model = ChannelModel(
       cid: testCid,
-      config: ChannelConfig(commands: commands, scheduledMessagesMaxLeadTime: maxLeadTime),
+      config: ChannelConfig(commands: commands),
     );
     Channel.fromState(harness.client, ChannelState(channel: model, messages: messages));
   }
@@ -82,7 +80,7 @@ void main() {
   test('scheduleMessage refuses a command in a channel that has commands, without a request', () async {
     loadChannel(commands: [giphy]);
 
-    await expectLater(schedule(Message(id: 'b', text: '/giphy cats')), throwsA(refusedFor(.slashCommand)));
+    await expectLater(schedule(Message(id: 'b', text: '/giphy cats')), throwsA(refusedFor(.scheduledMessageIsCommand)));
 
     verifyNotScheduled();
   });
@@ -90,8 +88,7 @@ void main() {
   test('scheduleMessage lists nothing for a command it refuses', () async {
     loadChannel(commands: [giphy]);
 
-    await expectLater(schedule(Message(id: 'b', text: '/unknown')), throwsA(refusedFor(.slashCommand)));
-    await settle();
+    await expectLater(schedule(Message(id: 'b', text: '/unknown')), throwsA(refusedFor(.scheduledMessageIsCommand)));
 
     expect(harness.client.state.scheduledMessages, isEmpty);
   });
@@ -125,7 +122,7 @@ void main() {
 
     await expectLater(
       harness.client.updateScheduledMessage(a.id, a.message.copyWith(text: '/giphy cats')),
-      throwsA(refusedFor(.slashCommand)),
+      throwsA(refusedFor(.scheduledMessageIsCommand)),
     );
 
     verifyNotUpdated();
@@ -134,7 +131,7 @@ void main() {
   test('scheduleMessage refuses a quote of a deleted message, without a request', () async {
     final message = Message(id: 'b', text: 'About that', quotedMessageId: 'quoted', quotedMessage: deleted);
 
-    await expectLater(schedule(message), throwsA(refusedFor(.quotedMessageDeleted)));
+    await expectLater(schedule(message), throwsA(refusedFor(.scheduledMessageQuoteDeleted)));
 
     verifyNotScheduled();
   });
@@ -143,7 +140,7 @@ void main() {
     loadChannel(messages: [deleted]);
     final message = Message(id: 'b', text: 'About that', quotedMessageId: 'quoted');
 
-    await expectLater(schedule(message), throwsA(refusedFor(.quotedMessageDeleted)));
+    await expectLater(schedule(message), throwsA(refusedFor(.scheduledMessageQuoteDeleted)));
 
     verifyNotScheduled();
   });
@@ -153,7 +150,10 @@ void main() {
     await harness.hold([a]);
     final edited = a.message.copyWith(quotedMessageId: 'quoted', quotedMessage: deleted);
 
-    await expectLater(harness.client.updateScheduledMessage(a.id, edited), throwsA(refusedFor(.quotedMessageDeleted)));
+    await expectLater(
+      harness.client.updateScheduledMessage(a.id, edited),
+      throwsA(refusedFor(.scheduledMessageQuoteDeleted)),
+    );
 
     verifyNotUpdated();
   });
@@ -166,7 +166,7 @@ void main() {
 
     await expectLater(
       harness.client.rescheduleMessage(quoting.id, scheduledAt: DateTime.utc(2026, 11, 3)),
-      throwsA(refusedFor(.quotedMessageDeleted)),
+      throwsA(refusedFor(.scheduledMessageQuoteDeleted)),
     );
 
     verifyNotUpdated();
@@ -196,7 +196,7 @@ void main() {
 
     await expectLater(
       harness.client.sendScheduledMessageNow(quoting.id),
-      throwsA(refusedFor(.quotedMessageDeleted)),
+      throwsA(refusedFor(.scheduledMessageQuoteDeleted)),
     );
 
     verifyNever(() => harness.api.scheduledMessages.sendScheduledMessageNow(any()));
@@ -212,7 +212,7 @@ void main() {
 
       await expectLater(
         harness.client.rescheduleMessage(command.id, scheduledAt: DateTime.utc(2026, 11, 3)),
-        throwsA(refusedFor(.slashCommand)),
+        throwsA(refusedFor(.scheduledMessageIsCommand)),
       );
 
       verifyNotUpdated();
@@ -235,127 +235,25 @@ void main() {
     ).called(1);
   });
 
-  group('the time of a scheduled message', () {
-    const maxLeadTime = Duration(days: 7);
-    final latest = now.add(maxLeadTime);
-
-    test("scheduleMessage refuses a time past the channel's maximum lead time, without a request", () async {
-      loadChannel(maxLeadTime: maxLeadTime);
-
-      await expectLater(
-        schedule(
-          Message(id: 'b', text: 'Hi'),
-          at: latest.add(const Duration(minutes: 2)),
-        ),
-        throwsA(refusedFor(.scheduledAtTooFar)),
-      );
-
-      verifyNotScheduled();
-    });
-
-    test('scheduleMessage schedules a time within a minute past the maximum lead time', () async {
-      loadChannel(maxLeadTime: maxLeadTime);
-      stubSchedule();
-
-      await schedule(
-        Message(id: 'b', text: 'Hi'),
-        at: latest.add(const Duration(seconds: 30)),
-      );
-
-      expect(idsOf(harness.client.state.scheduledMessages), ['b']);
-    });
-
-    test('scheduleMessage refuses a message whose pin expires before it is sent, without a request', () async {
-      final pinned = Message(id: 'b', text: 'Hi', pinned: true, pinExpires: scheduledAt);
-
-      await expectLater(schedule(pinned), throwsA(refusedFor(.pinExpiresTooSoon)));
-
-      verifyNotScheduled();
-    });
-
-    test('scheduleMessage refuses a location shared for less than a minute once sent, without a request', () async {
-      final location = Location(latitude: 52.37, longitude: 4.89, endAt: scheduledAt.add(const Duration(seconds: 30)));
-
-      await expectLater(
-        schedule(Message(id: 'b', text: 'Hi', sharedLocation: location)),
-        throwsA(refusedFor(.locationEndsTooSoon)),
-      );
-
-      verifyNotScheduled();
-    });
-
-    test('scheduleMessage schedules a location shared for a minute once sent', () async {
-      stubSchedule();
-      final location = Location(latitude: 52.37, longitude: 4.89, endAt: scheduledAt.add(const Duration(minutes: 1)));
-
-      await schedule(Message(id: 'b', text: 'Hi', sharedLocation: location));
-
-      expect(idsOf(harness.client.state.scheduledMessages), ['b']);
-    });
-
-    test('rescheduleMessage refuses moving one past the maximum lead time, without a request', () async {
-      loadChannel(maxLeadTime: maxLeadTime);
-      final a = fakeScheduledMessage('a');
-      await harness.hold([a]);
-
-      await expectLater(
-        withClock(
-          Clock.fixed(now),
-          () => harness.client.rescheduleMessage(a.id, scheduledAt: latest.add(const Duration(minutes: 2))),
-        ),
-        throwsA(refusedFor(.scheduledAtTooFar)),
-      );
-
-      verifyNotUpdated();
-    });
-
-    test('rescheduleMessage refuses moving one past the time its pin expires, without a request', () async {
-      final a = fakeScheduledMessage('a');
-      final pinned = a.copyWith(
-        message: a.message.copyWith(pinned: true, pinExpires: a.scheduledAt.add(const Duration(hours: 1))),
-      );
-      await harness.hold([pinned]);
-
-      await expectLater(
-        harness.client.rescheduleMessage(a.id, scheduledAt: a.scheduledAt.add(const Duration(hours: 2))),
-        throwsA(refusedFor(.pinExpiresTooSoon)),
-      );
-
-      verifyNotUpdated();
-    });
-
-    test('updateScheduledMessage refuses an edit whose pin expires before its time, without a request', () async {
-      final a = fakeScheduledMessage('a');
-      await harness.hold([a]);
-      final edited = a.message.copyWith(pinned: true, pinExpires: a.scheduledAt.subtract(const Duration(hours: 1)));
-
-      await expectLater(
-        harness.client.updateScheduledMessage(a.id, edited),
-        throwsA(refusedFor(.pinExpiresTooSoon)),
-      );
-
-      verifyNotUpdated();
-    });
-  });
-
   group('a scheduled message that is not listed', () {
     final missing = fakeScheduledMessage('missing');
     final saved = fakeScheduledMessage('missing', text: 'Good evening', updatedAt: DateTime.utc(2026, 10, 30));
 
-    // The events [run] emits, and the list just before its request answers.
-    Future<(List<(String, ScheduledMessageStatus?)>, List<ScheduledMessage>)> requestWith(
+    // The statuses [run] lists it with, and the list just before its request
+    // answers.
+    Future<(List<ScheduledMessageStatus?>, List<ScheduledMessage>)> requestWith(
       Future<void> Function() run,
       void Function(Future<void> Function() answered) stub,
     ) async {
       late List<ScheduledMessage> listedBeforeAnswer;
       stub(() async => listedBeforeAnswer = harness.client.state.scheduledMessages);
-      final events = await harness.eventsDuring(run);
-      return (events, listedBeforeAnswer);
+      final statuses = await harness.statusesDuring(run, id: 'missing');
+      return (statuses, listedBeforeAnswer);
     }
 
     test('updateScheduledMessage makes the request, then lists the server copy', () async {
       final edited = Message(id: 'missing', text: 'Good evening');
-      final (events, listedBeforeAnswer) = await requestWith(
+      final (statuses, listedBeforeAnswer) = await requestWith(
         () => harness.client.updateScheduledMessage(missing.id, edited),
         (answered) =>
             when(
@@ -367,14 +265,14 @@ void main() {
       );
 
       expect(listedBeforeAnswer, isEmpty);
-      expect(events, [(EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled)]);
+      expect(statuses, [ScheduledMessageStatus.scheduled]);
       expect(harness.client.state.scheduledMessages, [saved]);
     });
 
     test('rescheduleMessage makes the request, then lists the server copy', () async {
       final later = DateTime.utc(2026, 11, 3, 9);
       final moved = fakeScheduledMessage('missing', scheduledAt: later, updatedAt: DateTime.utc(2026, 10, 30));
-      final (events, listedBeforeAnswer) = await requestWith(
+      final (statuses, listedBeforeAnswer) = await requestWith(
         () => harness.client.rescheduleMessage(missing.id, scheduledAt: later),
         (answered) =>
             when(
@@ -386,7 +284,7 @@ void main() {
       );
 
       expect(listedBeforeAnswer, isEmpty);
-      expect(events, [(EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled)]);
+      expect(statuses, [ScheduledMessageStatus.scheduled]);
       expect(harness.client.state.scheduledMessages, [moved]);
     });
 
@@ -395,9 +293,12 @@ void main() {
         () => harness.api.scheduledMessages.sendScheduledMessageNow('missing'),
       ).thenAnswer((_) async => fakeSendNow(missing));
 
-      final events = await harness.eventsDuring(() => harness.client.sendScheduledMessageNow(missing.id));
+      final statuses = await harness.statusesDuring(
+        () => harness.client.sendScheduledMessageNow(missing.id),
+        id: 'missing',
+      );
 
-      expect(events, isEmpty);
+      expect(statuses, isEmpty);
       expect(harness.client.state.scheduledMessages, isEmpty);
       verify(() => harness.api.scheduledMessages.sendScheduledMessageNow('missing')).called(1);
     });
@@ -409,17 +310,17 @@ void main() {
       verifyNotUpdated();
     });
 
-    test('deleteScheduledMessage asks the server to delete it, without an event', () async {
+    test('deleteScheduledMessage asks the server to delete it without changing the list', () async {
       final deleted = fakeDelete(missing);
       when(() => harness.api.scheduledMessages.deleteScheduledMessage('missing')).thenAnswer((_) async => deleted);
 
       late DeleteScheduledMessageResponse response;
-      final events = await harness.eventsDuring(() async {
+      final statuses = await harness.statusesDuring(() async {
         response = await harness.client.deleteScheduledMessage(missing.id);
-      });
+      }, id: 'missing');
 
       expect(response, same(deleted));
-      expect(events, isEmpty);
+      expect(statuses, isEmpty);
       verify(() => harness.api.scheduledMessages.deleteScheduledMessage('missing')).called(1);
     });
 

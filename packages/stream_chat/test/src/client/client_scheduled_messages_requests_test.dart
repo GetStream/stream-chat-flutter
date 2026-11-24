@@ -36,7 +36,6 @@ void main() {
     ).thenAnswer((_) async => fakeUpdate(moved));
 
     await harness.client.rescheduleMessage(a.id, scheduledAt: scheduledAt);
-    await settle();
 
     expect(harness.client.state.scheduledMessages, [moved]);
   });
@@ -94,31 +93,29 @@ void main() {
     ).thenAnswer((_) async => fakeUpdate(updated));
 
     await harness.client.updateScheduledMessage(a.id, edited, scheduledAt: scheduledAt);
-    await settle();
 
     expect(harness.client.state.scheduledMessages, [updated]);
   });
 
-  test('updateScheduledMessage reports only the edit when the user disconnects before the server answers', () async {
-    await harness.hold([a]);
-    final edited = Message(id: 'a', text: 'Good evening');
-    final answer = Completer<UpdateScheduledMessageResponse>();
-    when(
-      () => harness.api.scheduledMessages.updateScheduledMessage('a', message: edited),
-    ).thenAnswer((_) => answer.future);
-    final updates = <Event>[];
-    final subscription = harness.client.on(EventType.scheduledMessageUpdated).listen(updates.add);
-    addTearDown(subscription.cancel);
-    final request = harness.client.updateScheduledMessage(a.id, edited);
+  test(
+    "updateScheduledMessage doesn't list the saved copy when the user disconnects before the server answers",
+    () async {
+      await harness.hold([a]);
+      final edited = Message(id: 'a', text: 'Good evening');
+      final answer = Completer<UpdateScheduledMessageResponse>();
+      when(
+        () => harness.api.scheduledMessages.updateScheduledMessage('a', message: edited),
+      ).thenAnswer((_) => answer.future);
+      final request = harness.client.updateScheduledMessage(a.id, edited);
 
-    await harness.client.disconnectUser();
-    await harness.client.connectUser(testUser, testToken);
-    answer.complete(fakeUpdate(fakeScheduledMessage('a', text: 'Good evening')));
-    await request;
-    await settle();
+      await harness.client.disconnectUser();
+      await harness.client.connectUser(testUser, testToken);
+      answer.complete(fakeUpdate(fakeScheduledMessage('a', text: 'Good evening')));
+      await request;
 
-    expect(updates.map((it) => it.scheduledMessage?.status), [ScheduledMessageStatus.preparingToSchedule]);
-  });
+      expect(harness.client.state.scheduledMessages, isEmpty);
+    },
+  );
 
   test('updateScheduledMessage refuses an attachment that is not uploaded', () async {
     await harness.hold([a]);
@@ -151,7 +148,6 @@ void main() {
     ).thenAnswer((_) async => fakeDelete(fakeScheduledMessage('a', status: ScheduledMessageStatus.canceled)));
 
     await harness.client.deleteScheduledMessage(a.id);
-    await settle();
 
     expect(harness.client.state.scheduledMessages, isEmpty);
   });
@@ -168,7 +164,6 @@ void main() {
     ).thenAnswer((_) async => fakeSendNow(sending));
 
     await harness.client.sendScheduledMessageNow(a.id);
-    await settle();
 
     final [listed] = harness.client.state.scheduledMessages;
     expect(listed.status, ScheduledMessageStatus.sending);
@@ -207,24 +202,11 @@ void main() {
   ];
 
   for (final (name, stub, request) in requests) {
-    test('$name reports one that no longer exists as deleted', () async {
-      await harness.hold([a]);
-      final deleted = harness.client.on(EventType.scheduledMessageDeleted).first;
-      stub(harness.api, missingError);
-
-      await expectLater(request(harness.client), throwsA(missingError));
-
-      final event = await deleted;
-      expect(event.scheduledMessage?.id, 'a');
-      expect(event.scheduledMessage?.status, ScheduledMessageStatus.canceled);
-    });
-
     test('$name keeps one when something else is not found', () async {
       await harness.hold([a]);
       stub(harness.api, quoteDeletedError);
 
       await expectLater(request(harness.client), throwsA(quoteDeletedError));
-      await settle();
 
       expect(idsOf(harness.client.state.scheduledMessages), ['a']);
     });
@@ -234,7 +216,6 @@ void main() {
       stub(harness.api, missingError);
 
       await expectLater(request(harness.client), throwsA(missingError));
-      await settle();
 
       expect(harness.client.state.scheduledMessages, isEmpty);
     });
@@ -246,7 +227,6 @@ void main() {
     when(() => harness.api.scheduledMessages.sendScheduledMessageNow('a')).thenAnswer((_) async => throw error);
 
     await expectLater(harness.client.sendScheduledMessageNow(a.id), throwsA(error));
-    await settle();
 
     expect(idsOf(harness.client.state.scheduledMessages), ['a']);
   });
@@ -257,7 +237,6 @@ void main() {
     when(() => harness.api.scheduledMessages.sendScheduledMessageNow('a')).thenAnswer((_) async => throw error);
 
     await expectLater(harness.client.sendScheduledMessageNow(a.id), throwsA(error));
-    await settle();
 
     expect(idsOf(harness.client.state.scheduledMessages), ['a']);
   });
@@ -324,7 +303,6 @@ void main() {
     );
 
     await expectLater(schedule(message, scheduledAt), throwsArgumentError);
-    await settle();
 
     expect(harness.client.state.scheduledMessages, isEmpty);
     verifyNever(
@@ -358,11 +336,11 @@ void main() {
         () => harness.api.scheduledMessages.updateScheduledMessage('a', message: edited),
       ).thenAnswer((_) async => throw alreadySent);
 
-      final events = await harness.eventsDuring(
+      final statuses = await harness.statusesDuring(
         () => expectRequest(harness.client.updateScheduledMessage(a.id, edited), alreadySent),
       );
 
-      expect(events.last, (EventType.scheduledMessageSent, ScheduledMessageStatus.sent));
+      expect(statuses.last, isNull);
       expect(harness.client.state.scheduledMessages, isEmpty);
     });
 

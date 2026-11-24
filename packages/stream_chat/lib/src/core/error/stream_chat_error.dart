@@ -300,16 +300,10 @@ extension type const ScheduledMessageErrorReason(String _) implements String {
   /// The message is a command, such as `/giphy`.
   ///
   /// A command runs when the message is sent, so it can't be scheduled.
-  static const slashCommand = ScheduledMessageErrorReason('slash_command');
+  static const scheduledMessageIsCommand = ScheduledMessageErrorReason('scheduled_message_is_command');
 
   /// The message quotes a message that was deleted.
-  static const quotedMessageDeleted = ScheduledMessageErrorReason('quoted_message_deleted');
-
-  /// The message's pin expires before the message is sent.
-  static const pinExpiresTooSoon = ScheduledMessageErrorReason('pin_expires_too_soon');
-
-  /// The message's location stops being shared too soon after it is sent.
-  static const locationEndsTooSoon = ScheduledMessageErrorReason('location_ends_too_soon');
+  static const scheduledMessageQuoteDeleted = ScheduledMessageErrorReason('scheduled_message_quote_deleted');
 }
 
 /// A request about a scheduled message, refused before it was made.

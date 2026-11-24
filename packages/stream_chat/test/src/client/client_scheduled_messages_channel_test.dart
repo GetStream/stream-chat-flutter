@@ -111,7 +111,6 @@ void main() {
     addTearDown(subscription.cancel);
 
     await harness.client.queryChannelsOnline(filter: const Filter.empty(), includeScheduledMessages: true);
-    await settle();
 
     expect(emissions, 1);
     expect(idsOf(harness.client.state.scheduledMessages), ['in-a', 'in-b']);

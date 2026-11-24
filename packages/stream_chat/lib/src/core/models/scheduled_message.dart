@@ -203,7 +203,7 @@ final class ScheduledMessage extends Equatable {
 /// A status without a constant here can still be named by wrapping its value:
 /// `ScheduledMessageStatus('paused')`.
 extension type const ScheduledMessageStatus(String _) implements String {
-  /// Being scheduled, edited or rescheduled from this device.
+  /// Being scheduled, changed or sent now from this device.
   ///
   /// Only set until the request completes.
   static const preparingToSchedule = ScheduledMessageStatus('preparing_to_schedule');

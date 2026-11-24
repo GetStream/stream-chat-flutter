@@ -1,8 +1,3 @@
-/// @docImport 'client/client.dart';
-/// @docImport 'core/models/event.dart';
-/// @docImport 'core/models/scheduled_message.dart';
-library;
-
 /// This class defines some basic event types
 class EventType {
   /// Indicates any type of events
@@ -177,32 +172,15 @@ class EventType {
   static const String notificationReminderDue = 'notification.reminder_due';
 
   /// Event sent when the current user schedules a message.
-  ///
-  /// The client also sends one with [Event.isLocal] true while the message is
-  /// being scheduled, as [ScheduledMessageStatus.preparingToSchedule], and one
-  /// with the scheduled copy once the request succeeds.
   static const String scheduledMessageCreated = 'scheduled_message.created';
 
   /// Event sent when the current user edits or reschedules a scheduled message.
-  ///
-  /// The client also sends one with [Event.isLocal] true for its own
-  /// requests: while an edit is saved, as
-  /// [ScheduledMessageStatus.preparingToSchedule], once a request succeeds, and
-  /// when one fails and leaves the scheduled message failed or being sent.
   static const String scheduledMessageUpdated = 'scheduled_message.updated';
 
   /// Event sent when the current user deletes a scheduled message.
-  ///
-  /// The client also sends one with [Event.isLocal] true before the request
-  /// of [StreamChatClient.deleteScheduledMessage], when it finds a scheduled
-  /// message deleted or gone, or when scheduling it fails in a way that cannot
-  /// be retried.
   static const String scheduledMessageDeleted = 'scheduled_message.deleted';
 
   /// Event sent when a scheduled message of the current user is sent.
-  ///
-  /// The client also sends one with [Event.isLocal] true when it finds a
-  /// scheduled message already sent, such as one sent right away.
   static const String scheduledMessageSent = 'scheduled_message.sent';
 
   /// Event sent when a scheduled message of the current user fails.

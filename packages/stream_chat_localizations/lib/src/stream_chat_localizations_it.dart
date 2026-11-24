@@ -933,7 +933,7 @@ Attenzione: il limite massimo di $limit file è stato superato.
   }
 
   @override
-  String scheduledMessageFailureReasonText({
+  String scheduledMessageFailureText({
     ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {

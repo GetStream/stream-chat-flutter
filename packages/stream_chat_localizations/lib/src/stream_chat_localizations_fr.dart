@@ -925,7 +925,7 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   }
 
   @override
-  String scheduledMessageFailureReasonText({
+  String scheduledMessageFailureText({
     ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {

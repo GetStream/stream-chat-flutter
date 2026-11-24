@@ -922,7 +922,7 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   }
 
   @override
-  String scheduledMessageFailureReasonText({
+  String scheduledMessageFailureText({
     ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {

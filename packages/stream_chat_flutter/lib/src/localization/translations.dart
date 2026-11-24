@@ -871,7 +871,7 @@ abstract class Translations {
   /// A null or unrecognized [failure] gives a generic text. [isQuoteDeleted]
   /// explains a [ScheduledMessageSendingFailureReason.invalidMessage] whose
   /// quoted message was deleted.
-  String scheduledMessageFailureReasonText({
+  String scheduledMessageFailureText({
     ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   });
@@ -1943,7 +1943,7 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   }
 
   @override
-  String scheduledMessageFailureReasonText({
+  String scheduledMessageFailureText({
     ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {

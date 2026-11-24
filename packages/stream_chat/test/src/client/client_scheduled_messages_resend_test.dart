@@ -260,14 +260,14 @@ void main() {
       final canceled = refusedWith(scheduledMessageCanceledCode);
       stubScheduleAgain(() async => throw canceled);
 
-      final events = await harness.eventsDuring(
+      final statuses = await harness.statusesDuring(
         () => expectRequest(
           withClock(Clock.fixed(now), () => harness.client.sendScheduledMessageNow(failed.id)),
           canceled,
         ),
       );
 
-      expect(events.last, (EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled));
+      expect(statuses.last, isNull);
       expect(harness.client.state.scheduledMessages, isEmpty);
     });
 
@@ -327,7 +327,6 @@ void main() {
 
         answer.complete(scheduled(message, fakeScheduledMessage('a', scheduledAt: later)));
         await changed;
-        await settle();
 
         verify(() => harness.api.scheduledMessages.deleteScheduledMessage('a')).called(1);
         expect(harness.client.state.scheduledMessages, isEmpty);

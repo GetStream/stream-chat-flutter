@@ -31,19 +31,19 @@ void main() {
     ).thenAnswer((_) => answer());
   }
 
-  Future<List<(String, ScheduledMessageStatus?)>> reschedule({Object? throws}) async {
+  Future<List<ScheduledMessageStatus?>> reschedule({Object? throws}) async {
     await harness.hold([original]);
-    return harness.eventsDuring(
+    return harness.statusesDuring(
       () => expectRequest(harness.client.rescheduleMessage(original.id, scheduledAt: later), throws),
     );
   }
 
-  test('rescheduleMessage reports it at its new time as updating, then the saved copy', () async {
+  test('rescheduleMessage lists it at its new time as preparing, then the saved copy', () async {
     stubReschedule(() async => fakeUpdate(moved));
 
     expect(await reschedule(), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
+      ScheduledMessageStatus.preparingToSchedule,
+      ScheduledMessageStatus.scheduled,
     ]);
     expect(harness.client.state.scheduledMessages, [moved]);
   });
@@ -52,8 +52,8 @@ void main() {
     stubReschedule(() async => throw offline);
 
     expect(await reschedule(throws: offline), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.failed),
+      ScheduledMessageStatus.preparingToSchedule,
+      ScheduledMessageStatus.failed,
     ]);
     final [failed] = harness.client.state.scheduledMessages;
     expect(failed.failure, const ScheduledMessageUpdatingFailed(isRetriable: true));
@@ -64,8 +64,8 @@ void main() {
     stubReschedule(() async => throw tooFar);
 
     expect(await reschedule(throws: tooFar), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.failed),
+      ScheduledMessageStatus.preparingToSchedule,
+      ScheduledMessageStatus.failed,
     ]);
     final [failed] = harness.client.state.scheduledMessages;
     expect(failed.failure, const ScheduledMessageUpdatingFailed(isRetriable: false));
@@ -76,18 +76,18 @@ void main() {
     stubReschedule(() async => throw sendingError);
 
     expect(await reschedule(throws: sendingError), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
+      ScheduledMessageStatus.preparingToSchedule,
+      ScheduledMessageStatus.scheduled,
     ]);
     expect(harness.client.state.scheduledMessages.single.scheduledAt, original.scheduledAt);
   });
 
-  test('rescheduleMessage reports one the server no longer has as deleted', () async {
+  test('rescheduleMessage stops listing one the server no longer has', () async {
     stubReschedule(() async => throw missingError);
 
     expect(await reschedule(throws: missingError), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
+      ScheduledMessageStatus.preparingToSchedule,
+      null,
     ]);
     expect(harness.client.state.scheduledMessages, isEmpty);
   });
@@ -99,7 +99,6 @@ void main() {
     await harness.hold([original]);
 
     await harness.client.rescheduleMessage(original.id, scheduledAt: original.scheduledAt);
-    await settle();
 
     expect(harness.client.state.scheduledMessages.single.status, ScheduledMessageStatus.scheduled);
   });
