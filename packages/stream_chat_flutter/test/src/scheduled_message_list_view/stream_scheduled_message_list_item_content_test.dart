@@ -97,31 +97,24 @@ void main() {
     expect(find.text('Maya Ross'), findsOneWidget);
   });
 
-  testWidgets('StreamScheduledMessageListItem names the author of a quoted message it finds in the channel', (
+  testWidgets('StreamScheduledMessageListItem names no one when it only knows the ID of the message it quotes', (
     tester,
   ) async {
-    final quoted = Message(
-      id: 'quoted-id',
-      text: 'The venues',
-      user: User(id: 'maya', name: 'Maya Ross'),
-    );
-    final scheduledMessage = fakeScheduledMessage(quotedMessageId: quoted.id);
+    final scheduledMessage = fakeScheduledMessage(quotedMessageId: 'quoted-id');
 
     await tester.pumpWidget(
       wrapWithMaterialApp(
         StreamScheduledMessageListItem(scheduledMessage: scheduledMessage),
-        channels: {
-          'messaging:general': _loadedDirectMessage(messages: [quoted]),
-        },
+        channels: {'messaging:general': _loadedDirectMessage()},
       ),
     );
 
-    expect(find.text('Reply to Maya Ross:'), findsOneWidget);
+    expect(find.text(DefaultTranslations.instance.scheduledQuoteReplyPrefixText()), findsOneWidget);
   });
 }
 
-// A loaded direct message channel without a name, with [messages] loaded.
-Channel _loadedDirectMessage({List<Message> messages = const []}) {
+// A loaded direct message channel without a name.
+Channel _loadedDirectMessage() {
   final channel = MockChannel(type: 'messaging', id: 'general');
   final state = MockChannelState();
   final members = [
@@ -148,7 +141,5 @@ Channel _loadedDirectMessage({List<Message> messages = const []}) {
   when(() => state.membersStream).thenAnswer((_) => const Stream.empty());
   when(() => state.channelState).thenReturn(ChannelState(channel: ChannelModel(cid: 'messaging:general')));
   when(() => state.members).thenReturn(members);
-  when(() => state.messages).thenReturn(messages);
-  when(() => state.threads).thenReturn({});
   return channel;
 }

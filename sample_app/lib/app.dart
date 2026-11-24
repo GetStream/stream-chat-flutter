@@ -305,6 +305,7 @@ extension on SampleAppConfigData {
   StreamChatConfigurationData toStreamChatConfigurationData() {
     return StreamChatConfigurationData(
       draftMessagesEnabled: draftMessagesEnabled,
+      scheduledMessagesEnabled: enableScheduledMessages,
       enforceUniqueReactions: enforceUniqueReactions,
       reactionType: reactionType,
       reactionPosition: reactionPosition,

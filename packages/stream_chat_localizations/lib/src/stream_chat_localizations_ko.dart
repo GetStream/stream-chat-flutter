@@ -873,11 +873,19 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String notifyRoleText(String role) => '모든 $role 멤버에게 알림';
 
   @override
-  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+  String scheduledMessageSendAtText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
-    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return '$date $time에 전송';
+  }
+
+  @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
+    return '$date $time에 예약됨';
   }
 
   @override
@@ -896,24 +904,26 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+  String scheduledMessageFailureText({
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {
-    return switch (reason) {
-      .requestFailed => '보내지 못했습니다. 다시 시도하세요',
-      .internalError => '문제가 발생했습니다. 다시 시도하세요',
-      .channelDeleted => '이 채널은 삭제되었습니다',
-      .userDeleted => '계정이 삭제되었습니다',
-      .channelFrozen => '이 채널은 동결되었습니다',
-      .banned => '이 채널에서는 메시지를 보낼 수 없습니다',
-      .noPermission => '더 이상 여기에 게시할 수 없습니다',
-      .moderationBlocked => '조정 정책에 의해 차단됨',
-      .hookRejected => '앱에서 거부됨',
-      .expired => '전송되지 않음: 서비스가 지연되었습니다',
-      .pendingNotSupported => '이제 이 채널은 승인이 필요합니다. 다시 예약하세요.',
-      .invalidMessage when isQuoteDeleted => '인용한 메시지가 삭제되었습니다. 인용을 제거하려면 메시지를 수정하세요.',
-      .invalidMessage => '메시지가 더 이상 앱의 제한을 충족하지 않습니다. 수정하세요.',
+    return switch (failure) {
+      ScheduledMessageUpdatingFailed() => '수정 내용이 저장되지 않았습니다. 이전 버전이 계속 예약되어 있습니다.',
+      ScheduledMessageSchedulingFailed() => '예약하지 못했습니다.',
+      ScheduledMessageSendingFailed(reason: .internalError) => '문제가 발생했습니다. 다시 시도하세요',
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => '이 채널은 삭제되었습니다',
+      ScheduledMessageSendingFailed(reason: .userDeleted) => '계정이 삭제되었습니다',
+      ScheduledMessageSendingFailed(reason: .channelFrozen) => '이 채널은 동결되었습니다',
+      ScheduledMessageSendingFailed(reason: .banned) => '이 채널에서는 메시지를 보낼 수 없습니다',
+      ScheduledMessageSendingFailed(reason: .noPermission) => '더 이상 여기에 게시할 수 없습니다',
+      ScheduledMessageSendingFailed(reason: .moderationBlocked) => '조정 정책에 의해 차단됨',
+      ScheduledMessageSendingFailed(reason: .hookRejected) => '앱에서 거부됨',
+      ScheduledMessageSendingFailed(reason: .expired) => '전송되지 않음: 서비스가 지연되었습니다',
+      ScheduledMessageSendingFailed(reason: .pendingNotSupported) => '이제 이 채널은 승인이 필요합니다. 다시 예약하세요.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) when isQuoteDeleted =>
+        '인용한 메시지가 삭제되었습니다. 인용을 제거하려면 메시지를 수정하세요.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) => '메시지가 더 이상 앱의 제한을 충족하지 않습니다. 수정하세요.',
       _ => '문제가 발생했습니다. 다시 시도하세요',
     };
   }
@@ -932,6 +942,114 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
 
   @override
   String get sendNowLabel => '지금 보내기';
+
+  @override
+  String get scheduleMessageLabel => '메시지 예약';
+
+  @override
+  String get rescheduleMessageLabel => '메시지 예약 변경';
+
+  @override
+  String get customTimeLabel => '시간 직접 설정';
+
+  @override
+  String scheduleTomorrowText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final time = _formatTime(scheduledAt.toLocal(), use24HourFormat: use24HourFormat);
+    return '내일 $time';
+  }
+
+  @override
+  String scheduleWeekdayText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final local = scheduledAt.toLocal();
+    final weekday = DateFormat.EEEE(localeName).format(local);
+    final time = _formatTime(local, use24HourFormat: use24HourFormat);
+    return '$weekday $time';
+  }
+
+  @override
+  String messageToLabel({required String channelName}) => '$channelName에게 보낼 메시지';
+
+  @override
+  String get dateLabel => '날짜';
+
+  @override
+  String get timeLabel => '시간';
+
+  @override
+  String get scheduleLabel => '예약';
+
+  @override
+  String sentInYourTimeZoneText({required String timeZone}) => '내 시간대 기준으로 전송됩니다($timeZone)';
+
+  @override
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: '지금부터 $minutes분 이후의 시간을 선택하세요',
+      other: '지금부터 $minutes분 이후의 시간을 선택하세요',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError => '더 늦은 시간을 선택하세요. 수정 중에는 메시지를 바로 보낼 수 없습니다.';
+
+  @override
+  String get scheduleTooFarError => '앱에서 허용하는 기간보다 먼 시간입니다';
+
+  @override
+  String scheduleLimitReachedLabel({required int limit}) => '한도에 도달했습니다(최대 $limit개)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) => '예약 메시지 한도($limit개)에 도달했습니다.';
+
+  @override
+  String get scheduleMessageError => '메시지를 예약하지 못했습니다. 다시 시도하세요';
+
+  @override
+  String get scheduleCommandRefusedError => '명령어는 예약할 수 없습니다. 계속하려면 / 명령어를 삭제하세요.';
+
+  @override
+  String get scheduleQuotedMessageDeletedError => '인용한 메시지가 삭제되었습니다';
+
+  @override
+  String get scheduleMessageRefusedError => '이 메시지는 예약할 수 없습니다';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '예약 메시지 $count개',
+      other: '예약 메시지 $count개',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '예약 답글 $count개',
+      other: '예약 답글 $count개',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '전송 실패 $count개',
+      other: '전송 실패 $count개',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '예약 메시지 $count/$limit개';
+  }
 }
 
 class _AccessibilityTranslationsKo extends AccessibilityTranslations {
@@ -953,6 +1071,9 @@ class _AccessibilityTranslationsKo extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => '음성 메시지 녹음';
+
+  @override
+  String get scheduleMessageHint => '메시지 예약';
 
   @override
   String get cancelRecordingTooltip => '녹음 취소';

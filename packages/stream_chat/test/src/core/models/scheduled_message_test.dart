@@ -35,7 +35,10 @@ void main() {
     expect(scheduledMessage.user.id, 'alice');
     expect(scheduledMessage.scheduledAt, DateTime.utc(2026, 11, 2, 9));
     expect(scheduledMessage.status, ScheduledMessageStatus.failed);
-    expect(scheduledMessage.failureReason, ScheduledMessageFailureReason.channelFrozen);
+    expect(
+      scheduledMessage.failure,
+      const ScheduledMessageSendingFailed(reason: ScheduledMessageSendingFailureReason.channelFrozen),
+    );
     expect(scheduledMessage.createdAt, DateTime.utc(2026, 10, 29, 10));
     expect(scheduledMessage.updatedAt, DateTime.utc(2026, 10, 29, 10, 5));
   });
@@ -153,5 +156,56 @@ void main() {
 
     expect(scheduledMessage.createdAt, DateTime.utc(2026, 10, 29, 10));
     expect(scheduledMessage.updatedAt, DateTime.utc(2026, 10, 29, 10, 5));
+  });
+
+  test('ScheduledMessageStatus.isPending is true until the message is sent or fails', () {
+    expect(ScheduledMessageStatus.preparingToSchedule.isPending, isTrue);
+    expect(ScheduledMessageStatus.scheduled.isPending, isTrue);
+    expect(ScheduledMessageStatus.sending.isPending, isTrue);
+    expect(ScheduledMessageStatus.failed.isPending, isFalse);
+    expect(ScheduledMessageStatus.canceled.isPending, isFalse);
+    expect(ScheduledMessageStatus.sent.isPending, isFalse);
+  });
+
+  test('ScheduledMessage.copyWith clears the failure reason only when told to', () {
+    final failed = ScheduledMessage(
+      cid: 'messaging:general',
+      user: User(id: 'alice'),
+      message: Message(id: 'message-id', text: 'Good morning'),
+      scheduledAt: DateTime.utc(2026, 11, 2, 9),
+      status: ScheduledMessageStatus.failed,
+      failure: const ScheduledMessageUpdatingFailed(isRetriable: true),
+    );
+
+    expect(failed.copyWith().failure, const ScheduledMessageUpdatingFailed(isRetriable: true));
+    expect(failed.copyWith(failure: null).failure, isNull);
+  });
+
+  test('ScheduledMessage.fromJson reads the failure to send it from the failure reason', () {
+    final json = scheduledMessageJson()..['failure_reason'] = 'banned';
+
+    final failure = ScheduledMessage.fromJson(json).failure;
+
+    expect(failure, const ScheduledMessageSendingFailed(reason: ScheduledMessageSendingFailureReason.banned));
+  });
+
+  test('ScheduledMessage.fromJson reads a failure to send one that failed without a reason', () {
+    final json = scheduledMessageJson()..remove('failure_reason');
+
+    expect(ScheduledMessage.fromJson(json).failure, const ScheduledMessageSendingFailed());
+  });
+
+  test('ScheduledMessage.fromJson reads no failure for one that has not failed', () {
+    final json = scheduledMessageJson(status: 'scheduled')..remove('failure_reason');
+
+    expect(ScheduledMessage.fromJson(json).failure, isNull);
+  });
+
+  test('ScheduledMessage.fromJson keeps a failure reason it has no constant for', () {
+    final json = scheduledMessageJson()..['failure_reason'] = 'rate_limited';
+
+    final failure = ScheduledMessage.fromJson(json).failure;
+
+    expect(failure, const ScheduledMessageSendingFailed(reason: ScheduledMessageSendingFailureReason('rate_limited')));
   });
 }

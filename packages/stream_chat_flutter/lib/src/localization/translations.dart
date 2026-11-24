@@ -826,37 +826,53 @@ abstract class Translations {
   /// describing that it notifies every member holding the role named [role].
   String notifyRoleText(String role);
 
-  /// The send time of a scheduled message, such as "Send Wed, Oct 21 at
-  /// 8:00 AM".
+  /// The send time of a scheduled message.
+  ///
+  /// For example, "Send Wed, Oct 21 at 8:00 AM".
   ///
   /// The [scheduledAt] is shown in local time.
-  String scheduledMessageSendAtText({required DateTime scheduledAt});
+  ///
+  /// With [use24HourFormat], the time is shown in 24-hour format.
+  String scheduledMessageSendAtText({required DateTime scheduledAt, bool use24HourFormat = false});
 
-  /// The status of a scheduled message while it is being sent, such as
-  /// "Sending…".
+  /// The time a message is scheduled for.
+  ///
+  /// For example, "Scheduled for Fri, Oct 23 at 9:00 AM".
+  ///
+  /// The [scheduledAt] is shown in local time.
+  ///
+  /// With [use24HourFormat], the time is shown in 24-hour format.
+  String scheduledMessageScheduledForText({required DateTime scheduledAt, bool use24HourFormat = false});
+
+  /// The status of a scheduled message while it is being scheduled or sent.
+  ///
+  /// For example, "Sending…".
   String get scheduledMessageSendingLabel;
 
-  /// The status of a scheduled message while its attachments upload, such as
-  /// "Uploading…".
+  /// The status of a scheduled message while its attachments upload.
+  ///
+  /// For example, "Uploading…".
   String get scheduledMessageUploadingLabel;
 
-  /// The prefix of the preview of a scheduled reply in a thread, such as
-  /// "Thread reply:".
+  /// The prefix of the preview of a scheduled reply in a thread.
+  ///
+  /// For example, "Thread reply:".
   String get scheduledThreadReplyPrefixText;
 
-  /// The prefix of the preview of a scheduled message quoting another, such
-  /// as "Reply to Maya:".
+  /// The prefix of the preview of a scheduled message quoting another.
+  ///
+  /// For example, "Reply to Maya:".
   ///
   /// [name] is the quoted message's author, or null when it is not known.
   String scheduledQuoteReplyPrefixText({String? name});
 
   /// The reason a scheduled message failed, such as "This channel is frozen".
   ///
-  /// A null or unrecognized [reason] gives a generic text. [isQuoteDeleted]
-  /// explains a [ScheduledMessageFailureReason.invalidMessage] whose quoted
-  /// message was deleted.
-  String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+  /// A null or unrecognized [failure] gives a generic text. [isQuoteDeleted]
+  /// explains a [ScheduledMessageSendingFailureReason.invalidMessage] whose
+  /// quoted message was deleted.
+  String scheduledMessageFailureText({
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   });
 
@@ -866,8 +882,9 @@ abstract class Translations {
   /// The error shown when the scheduled messages could not be loaded.
   String get loadingScheduledMessagesError;
 
-  /// The label of the action that edits a scheduled message that failed and
-  /// schedules it again, such as "Edit & Reschedule".
+  /// The label of the action that edits and reschedules a failed message.
+  ///
+  /// For example, "Edit & Reschedule".
   String get editAndRescheduleLabel;
 
   /// The label of the action that changes when a scheduled message is sent.
@@ -875,6 +892,126 @@ abstract class Translations {
 
   /// The label of the action that sends a scheduled message right away.
   String get sendNowLabel;
+
+  /// The title of the sheet of times a message can be scheduled for.
+  ///
+  /// For example, "Schedule message".
+  String get scheduleMessageLabel;
+
+  /// The title of the sheet that changes when a scheduled message is sent.
+  ///
+  /// For example, "Reschedule message".
+  String get rescheduleMessageLabel;
+
+  /// The label of the option that opens a sheet to pick a date and time.
+  ///
+  /// For example, "Custom time".
+  String get customTimeLabel;
+
+  /// A preset time tomorrow, such as "Tomorrow at 9:00 AM".
+  ///
+  /// The [scheduledAt] is shown in local time.
+  ///
+  /// With [use24HourFormat], the time is shown in 24-hour format.
+  String scheduleTomorrowText({required DateTime scheduledAt, bool use24HourFormat = false});
+
+  /// A preset time on a day of the coming week, such as "Monday at 9:00 AM".
+  ///
+  /// The [scheduledAt] is shown in local time.
+  ///
+  /// With [use24HourFormat], the time is shown in 24-hour format.
+  String scheduleWeekdayText({required DateTime scheduledAt, bool use24HourFormat = false});
+
+  /// The label above a preview of a message sent to [channelName].
+  ///
+  /// For example, "Message to Maya".
+  String messageToLabel({required String channelName});
+
+  /// The label of the date a message is scheduled for, such as "Date".
+  String get dateLabel;
+
+  /// The label of the time a message is scheduled for, such as "Time".
+  String get timeLabel;
+
+  /// The label of the action that schedules a message, such as "Schedule".
+  String get scheduleLabel;
+
+  /// A note that a scheduled message is sent in [timeZone].
+  ///
+  /// For example, "Sent in your time zone (GMT+2)".
+  String sentInYourTimeZoneText({required String timeZone});
+
+  /// The error shown when a picked time is too soon for scheduling.
+  ///
+  /// For example, "Pick a time at least 1 minute from now".
+  ///
+  /// [minLeadTime] is how far ahead a message must be scheduled.
+  String scheduleTooSoonError({required Duration minLeadTime});
+
+  /// The error shown when a picked time is too soon for rescheduling.
+  ///
+  /// For example, "Pick a later time. Editing can't send a message right
+  /// away.".
+  String get rescheduleTooSoonError;
+
+  /// The error shown when a picked time is further ahead than allowed.
+  ///
+  /// For example, "That's further ahead than your app allows".
+  String get scheduleTooFarError;
+
+  /// The label shown when the [limit] of scheduled messages is reached.
+  ///
+  /// For example, "Limit reached (10 max)". It titles the schedule sheet when
+  /// the channel or the user holds its limit, and is the custom time sheet's
+  /// error when the channel does. [StreamChannelPage] and [StreamThreadPage]
+  /// also show it when scheduling is refused at the channel's limit.
+  String scheduleLimitReachedLabel({required int limit});
+
+  /// The error shown when the user's [limit] of scheduled messages is reached.
+  ///
+  /// For example, "You've reached your limit of 100 scheduled messages.".
+  String scheduleUserLimitReachedError({required int limit});
+
+  /// The error shown when a message could not be scheduled.
+  ///
+  /// For example, "Couldn't schedule message. Try again".
+  String get scheduleMessageError;
+
+  /// The error shown when a command can't be scheduled.
+  ///
+  /// For example, "Commands can't be scheduled. Remove the / command to
+  /// continue.".
+  String get scheduleCommandRefusedError;
+
+  /// The error shown when the message quotes a deleted message.
+  ///
+  /// For example, "The quoted message was deleted".
+  String get scheduleQuotedMessageDeletedError;
+
+  /// The error shown when a message can't be scheduled, even on a retry.
+  ///
+  /// For example, "This message can't be scheduled".
+  String get scheduleMessageRefusedError;
+
+  /// The count of scheduled messages in a channel.
+  ///
+  /// For example, "3 scheduled messages".
+  String scheduledMessagesCountText({required int count});
+
+  /// The count of scheduled replies in a thread.
+  ///
+  /// For example, "2 scheduled replies".
+  String scheduledRepliesCountText({required int count});
+
+  /// The count of scheduled messages that failed to send.
+  ///
+  /// For example, "2 failed to send".
+  String scheduledMessagesFailedCountText({required int count});
+
+  /// The count of scheduled messages in a channel out of its [limit].
+  ///
+  /// For example, "10 of 10 scheduled messages".
+  String scheduledMessagesLimitText({required int count, required int limit});
 }
 
 /// Default implementation of Translation strings for the stream chat widgets
@@ -883,6 +1020,12 @@ class DefaultTranslations implements Translations {
 
   /// Singleton instance of [DefaultTranslations]
   static const instance = DefaultTranslations._();
+
+  // The time of [dateTime], in 24-hour format with [use24HourFormat].
+  String _formatTime(DateTime dateTime, {required bool use24HourFormat}) {
+    final format = use24HourFormat ? DateFormat.Hm('en_US') : DateFormat.jm('en_US');
+    return format.format(dateTime);
+  }
 
   @override
   AccessibilityTranslations get accessibility => const DefaultAccessibilityTranslations();
@@ -1769,11 +1912,19 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String notifyRoleText(String role) => 'Notify all $role members';
 
   @override
-  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+  String scheduledMessageSendAtText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd('en_US').format(localScheduledAt);
-    final time = DateFormat.jm('en_US').format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return 'Send $date at $time';
+  }
+
+  @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd('en_US').format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
+    return 'Scheduled for $date at $time';
   }
 
   @override
@@ -1792,24 +1943,28 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   }
 
   @override
-  String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+  String scheduledMessageFailureText({
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {
-    return switch (reason) {
-      .requestFailed => "Couldn't send. Try again",
-      .internalError => 'Something went wrong. Try again',
-      .channelDeleted => 'This channel was deleted',
-      .userDeleted => 'Your account was deleted',
-      .channelFrozen => 'This channel is frozen',
-      .banned => "You can't send messages in this channel",
-      .noPermission => "You're no longer allowed to post here",
-      .moderationBlocked => 'Blocked by moderation',
-      .hookRejected => 'Rejected by the app',
-      .expired => 'Not sent: the service was delayed',
-      .pendingNotSupported => 'This channel now needs approval. Schedule it again.',
-      .invalidMessage when isQuoteDeleted => 'The quoted message was deleted. Edit it to remove the quote.',
-      .invalidMessage => "The message no longer meets the app's limits. Edit it.",
+    return switch (failure) {
+      ScheduledMessageUpdatingFailed() => "The edit wasn't saved. The earlier version is still scheduled.",
+      ScheduledMessageSchedulingFailed() => "Couldn't schedule.",
+      ScheduledMessageSendingFailed(reason: .internalError) => 'Something went wrong. Try again',
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => 'This channel was deleted',
+      ScheduledMessageSendingFailed(reason: .userDeleted) => 'Your account was deleted',
+      ScheduledMessageSendingFailed(reason: .channelFrozen) => 'This channel is frozen',
+      ScheduledMessageSendingFailed(reason: .banned) => "You can't send messages in this channel",
+      ScheduledMessageSendingFailed(reason: .noPermission) => "You're no longer allowed to post here",
+      ScheduledMessageSendingFailed(reason: .moderationBlocked) => 'Blocked by moderation',
+      ScheduledMessageSendingFailed(reason: .hookRejected) => 'Rejected by the app',
+      ScheduledMessageSendingFailed(reason: .expired) => 'Not sent: the service was delayed',
+      ScheduledMessageSendingFailed(reason: .pendingNotSupported) =>
+        'This channel now needs approval. Schedule it again.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) when isQuoteDeleted =>
+        'The quoted message was deleted. Edit it to remove the quote.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) =>
+        "The message no longer meets the app's limits. Edit it.",
       _ => 'Something went wrong. Try again',
     };
   }
@@ -1828,6 +1983,108 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
 
   @override
   String get sendNowLabel => 'Send Now';
+
+  @override
+  String get scheduleMessageLabel => 'Schedule message';
+
+  @override
+  String get rescheduleMessageLabel => 'Reschedule message';
+
+  @override
+  String get customTimeLabel => 'Custom time';
+
+  @override
+  String scheduleTomorrowText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final time = _formatTime(scheduledAt.toLocal(), use24HourFormat: use24HourFormat);
+    return 'Tomorrow at $time';
+  }
+
+  @override
+  String scheduleWeekdayText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final local = scheduledAt.toLocal();
+    final weekday = DateFormat.EEEE('en_US').format(local);
+    final time = _formatTime(local, use24HourFormat: use24HourFormat);
+    return '$weekday at $time';
+  }
+
+  @override
+  String messageToLabel({required String channelName}) => 'Message to $channelName';
+
+  @override
+  String get dateLabel => 'Date';
+
+  @override
+  String get timeLabel => 'Time';
+
+  @override
+  String get scheduleLabel => 'Schedule';
+
+  @override
+  String sentInYourTimeZoneText({required String timeZone}) => 'Sent in your time zone ($timeZone)';
+
+  @override
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: 'Pick a time at least $minutes minute from now',
+      other: 'Pick a time at least $minutes minutes from now',
+      locale: 'en',
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError => "Pick a later time. Editing can't send a message right away.";
+
+  @override
+  String get scheduleTooFarError => "That's further ahead than your app allows";
+
+  @override
+  String scheduleLimitReachedLabel({required int limit}) => 'Limit reached ($limit max)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) =>
+      "You've reached your limit of $limit scheduled messages.";
+
+  @override
+  String get scheduleMessageError => "Couldn't schedule message. Try again";
+
+  @override
+  String get scheduleCommandRefusedError => "Commands can't be scheduled. Remove the / command to continue.";
+
+  @override
+  String get scheduleQuotedMessageDeletedError => 'The quoted message was deleted';
+
+  @override
+  String get scheduleMessageRefusedError => "This message can't be scheduled";
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count scheduled message',
+      other: '$count scheduled messages',
+      locale: 'en',
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count scheduled reply',
+      other: '$count scheduled replies',
+      locale: 'en',
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) => '$count failed to send';
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count of $limit scheduled messages';
+  }
 }
 
 // Display name for each language code Stream Chat's translation API

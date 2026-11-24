@@ -122,6 +122,12 @@ abstract class GlobalStreamChatLocalizations implements StreamChatLocalizations 
   /// (e.g. `'en'`, `'de'`, `'fr'`).
   final String localeName;
 
+  // The time of [dateTime], in 24-hour format with [use24HourFormat].
+  String _formatTime(DateTime dateTime, {required bool use24HourFormat}) {
+    final format = use24HourFormat ? DateFormat.Hm(localeName) : DateFormat.jm(localeName);
+    return format.format(dateTime);
+  }
+
   /// The label for the unread messages separator, e.g. "5 unread messages".
   ///
   /// Falls back to the count-less `unreadMessagesSeparatorText`, so a

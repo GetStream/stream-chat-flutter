@@ -16,10 +16,35 @@ void main() {
     expect(find.text('Sending…'), findsNothing);
   });
 
+  testWidgets('StreamScheduledMessageListItem shows nothing under the preview while an edit of it is saved', (
+    tester,
+  ) async {
+    // Already scheduled, so it has a server creation time.
+    final saving = fakeScheduledMessage(
+      status: ScheduledMessageStatus.preparingToSchedule,
+      createdAt: DateTime.utc(2026, 10, 20),
+    );
+
+    await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: saving)));
+
+    expect(find.byType(StreamLoadingSpinner), findsNothing);
+    expect(find.text('Sending…'), findsNothing);
+    expect(find.text('Uploading…'), findsNothing);
+  });
+
   testWidgets('StreamScheduledMessageListItem says it is sending while it is being sent', (tester) async {
     final sending = fakeScheduledMessage(status: ScheduledMessageStatus.sending);
 
     await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: sending)));
+
+    expect(find.byType(StreamLoadingSpinner), findsOneWidget);
+    expect(find.text('Sending…'), findsOneWidget);
+  });
+
+  testWidgets('StreamScheduledMessageListItem says it is sending while a new message is scheduled', (tester) async {
+    final scheduling = fakeScheduledMessage(status: ScheduledMessageStatus.preparingToSchedule);
+
+    await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: scheduling)));
 
     expect(find.byType(StreamLoadingSpinner), findsOneWidget);
     expect(find.text('Sending…'), findsOneWidget);
@@ -37,13 +62,34 @@ void main() {
     expect(find.text('This channel now needs approval. Schedule it again.'), findsOneWidget);
   });
 
+  testWidgets('StreamScheduledMessageListItem says a failed edit left the earlier version scheduled', (tester) async {
+    final editFailed = fakeScheduledMessage(
+      status: ScheduledMessageStatus.failed,
+      failure: const ScheduledMessageUpdatingFailed(isRetriable: true),
+      createdAt: DateTime(2026, 10, 20),
+    );
+
+    await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: editFailed)));
+
+    expect(find.text("The edit wasn't saved. The earlier version is still scheduled."), findsOneWidget);
+  });
+
+  testWidgets("StreamScheduledMessageListItem says why the server couldn't send one, not that an edit failed", (
+    tester,
+  ) async {
+    await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: failed())));
+
+    expect(find.text("The edit wasn't saved. The earlier version is still scheduled."), findsNothing);
+  });
+
   testWidgets(
     'StreamScheduledMessageListItem says the quoted message was deleted when an invalid message quotes a deleted one',
     (tester) async {
       final quoted = Message(id: 'quoted', text: 'Ready?', type: MessageType.deleted);
       final invalid = fakeScheduledMessage(
         status: ScheduledMessageStatus.failed,
-        failureReason: ScheduledMessageFailureReason.invalidMessage,
+        failure: const ScheduledMessageSendingFailed(reason: ScheduledMessageSendingFailureReason.invalidMessage),
+        createdAt: DateTime(2026, 10, 20),
         quotedMessage: quoted,
       );
 

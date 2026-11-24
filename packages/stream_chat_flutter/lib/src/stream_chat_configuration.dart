@@ -160,6 +160,7 @@ class StreamChatConfigurationData {
     ReactionIconResolver? reactionIconResolver,
     bool? enforceUniqueReactions,
     bool draftMessagesEnabled = true,
+    bool scheduledMessagesEnabled = true,
     MessagePreviewFormatter? messagePreviewFormatter,
     StreamImageCDN imageCDN = const StreamImageCDN(),
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
@@ -172,6 +173,7 @@ class StreamChatConfigurationData {
       reactionIconResolver: reactionIconResolver ?? const DefaultReactionIconResolver(),
       enforceUniqueReactions: enforceUniqueReactions ?? false,
       draftMessagesEnabled: draftMessagesEnabled,
+      scheduledMessagesEnabled: scheduledMessagesEnabled,
       messagePreviewFormatter: messagePreviewFormatter ?? MessagePreviewFormatter(),
       imageCDN: imageCDN,
       attachmentBuilders: attachmentBuilders,
@@ -186,6 +188,7 @@ class StreamChatConfigurationData {
     required this.reactionIconResolver,
     required this.enforceUniqueReactions,
     required this.draftMessagesEnabled,
+    required this.scheduledMessagesEnabled,
     required this.messagePreviewFormatter,
     required this.imageCDN,
     required this.attachmentBuilders,
@@ -201,6 +204,7 @@ class StreamChatConfigurationData {
     ReactionIconResolver? reactionIconResolver,
     bool? enforceUniqueReactions,
     bool? draftMessagesEnabled,
+    bool? scheduledMessagesEnabled,
     MessagePreviewFormatter? messagePreviewFormatter,
     StreamImageCDN? imageCDN,
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
@@ -213,6 +217,7 @@ class StreamChatConfigurationData {
       reactionIconResolver: reactionIconResolver ?? this.reactionIconResolver,
       enforceUniqueReactions: enforceUniqueReactions ?? this.enforceUniqueReactions,
       draftMessagesEnabled: draftMessagesEnabled ?? this.draftMessagesEnabled,
+      scheduledMessagesEnabled: scheduledMessagesEnabled ?? this.scheduledMessagesEnabled,
       messagePreviewFormatter: messagePreviewFormatter ?? this.messagePreviewFormatter,
       imageCDN: imageCDN ?? this.imageCDN,
       attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
@@ -227,6 +232,13 @@ class StreamChatConfigurationData {
   ///
   /// Defaults to False.
   final bool draftMessagesEnabled;
+
+  /// Whether [StreamChannelPage] and [StreamThreadPage] offer scheduling.
+  ///
+  /// When true, they show a banner of scheduled messages above the composer
+  /// and schedule the message on a long press of send, where the current user
+  /// can schedule messages. Defaults to true.
+  final bool scheduledMessagesEnabled;
 
   /// The resolver used to convert reaction types into [StreamEmojiContent]
   /// models and to provide the list of supported/default reaction types.

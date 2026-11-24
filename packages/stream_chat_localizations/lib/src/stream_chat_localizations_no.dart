@@ -873,11 +873,19 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String notifyRoleText(String role) => 'Varsle alle $role-medlemmer';
 
   @override
-  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+  String scheduledMessageSendAtText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
-    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return 'Sendes $date kl. $time';
+  }
+
+  @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
+    return 'Planlagt $date kl. $time';
   }
 
   @override
@@ -896,25 +904,28 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+  String scheduledMessageFailureText({
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {
-    return switch (reason) {
-      .requestFailed => 'Kunne ikke sende. Prøv igjen',
-      .internalError => 'Noe gikk galt. Prøv igjen',
-      .channelDeleted => 'Denne kanalen ble slettet',
-      .userDeleted => 'Kontoen din ble slettet',
-      .channelFrozen => 'Denne kanalen er frosset',
-      .banned => 'Du kan ikke sende meldinger i denne kanalen',
-      .noPermission => 'Du har ikke lenger lov til å publisere her',
-      .moderationBlocked => 'Blokkert av moderering',
-      .hookRejected => 'Avvist av appen',
-      .expired => 'Ikke sendt: tjenesten ble forsinket',
-      .pendingNotSupported => 'Denne kanalen krever nå godkjenning. Planlegg den på nytt.',
-      .invalidMessage when isQuoteDeleted =>
+    return switch (failure) {
+      ScheduledMessageUpdatingFailed() => 'Endringen ble ikke lagret. Den forrige versjonen er fortsatt planlagt.',
+      ScheduledMessageSchedulingFailed() => 'Kunne ikke planlegge.',
+      ScheduledMessageSendingFailed(reason: .internalError) => 'Noe gikk galt. Prøv igjen',
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => 'Denne kanalen ble slettet',
+      ScheduledMessageSendingFailed(reason: .userDeleted) => 'Kontoen din ble slettet',
+      ScheduledMessageSendingFailed(reason: .channelFrozen) => 'Denne kanalen er frosset',
+      ScheduledMessageSendingFailed(reason: .banned) => 'Du kan ikke sende meldinger i denne kanalen',
+      ScheduledMessageSendingFailed(reason: .noPermission) => 'Du har ikke lenger lov til å publisere her',
+      ScheduledMessageSendingFailed(reason: .moderationBlocked) => 'Blokkert av moderering',
+      ScheduledMessageSendingFailed(reason: .hookRejected) => 'Avvist av appen',
+      ScheduledMessageSendingFailed(reason: .expired) => 'Ikke sendt: tjenesten ble forsinket',
+      ScheduledMessageSendingFailed(reason: .pendingNotSupported) =>
+        'Denne kanalen krever nå godkjenning. Planlegg den på nytt.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) when isQuoteDeleted =>
         'Den siterte meldingen ble slettet. Rediger meldingen for å fjerne sitatet.',
-      .invalidMessage => 'Meldingen oppfyller ikke lenger appens grenser. Rediger den.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) =>
+        'Meldingen oppfyller ikke lenger appens grenser. Rediger den.',
       _ => 'Noe gikk galt. Prøv igjen',
     };
   }
@@ -933,6 +944,115 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
 
   @override
   String get sendNowLabel => 'Send nå';
+
+  @override
+  String get scheduleMessageLabel => 'Planlegg melding';
+
+  @override
+  String get rescheduleMessageLabel => 'Planlegg melding på nytt';
+
+  @override
+  String get customTimeLabel => 'Egendefinert tid';
+
+  @override
+  String scheduleTomorrowText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final time = _formatTime(scheduledAt.toLocal(), use24HourFormat: use24HourFormat);
+    return 'I morgen kl. $time';
+  }
+
+  @override
+  String scheduleWeekdayText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final local = scheduledAt.toLocal();
+    final weekday = toBeginningOfSentenceCase(DateFormat.EEEE(localeName).format(local), localeName);
+    final time = _formatTime(local, use24HourFormat: use24HourFormat);
+    return '$weekday kl. $time';
+  }
+
+  @override
+  String messageToLabel({required String channelName}) => 'Melding til $channelName';
+
+  @override
+  String get dateLabel => 'Dato';
+
+  @override
+  String get timeLabel => 'Tid';
+
+  @override
+  String get scheduleLabel => 'Planlegg';
+
+  @override
+  String sentInYourTimeZoneText({required String timeZone}) => 'Sendes i din tidssone ($timeZone)';
+
+  @override
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: 'Velg et tidspunkt minst $minutes minutt fra nå',
+      other: 'Velg et tidspunkt minst $minutes minutter fra nå',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError =>
+      'Velg et senere tidspunkt. Ved redigering kan en melding ikke sendes med en gang.';
+
+  @override
+  String get scheduleTooFarError => 'Det er lenger frem enn appen tillater';
+
+  @override
+  String scheduleLimitReachedLabel({required int limit}) => 'Grensen er nådd (maks. $limit)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) => 'Du har nådd grensen på $limit planlagte meldinger.';
+
+  @override
+  String get scheduleMessageError => 'Kunne ikke planlegge meldingen. Prøv igjen';
+
+  @override
+  String get scheduleCommandRefusedError => 'Kommandoer kan ikke planlegges. Fjern /-kommandoen for å fortsette.';
+
+  @override
+  String get scheduleQuotedMessageDeletedError => 'Den siterte meldingen ble slettet';
+
+  @override
+  String get scheduleMessageRefusedError => 'Denne meldingen kan ikke planlegges';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count planlagt melding',
+      other: '$count planlagte meldinger',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count planlagt svar',
+      other: '$count planlagte svar',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count kunne ikke sendes',
+      other: '$count kunne ikke sendes',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count av $limit planlagte meldinger';
+  }
 }
 
 class _AccessibilityTranslationsNo extends AccessibilityTranslations {
@@ -955,6 +1075,9 @@ class _AccessibilityTranslationsNo extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'Ta opp talemelding';
+
+  @override
+  String get scheduleMessageHint => 'Planlegg melding';
 
   @override
   String get cancelRecordingTooltip => 'Avbryt opptak';

@@ -890,11 +890,19 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String notifyRoleText(String role) => 'सभी $role सदस्यों को सूचित करें';
 
   @override
-  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+  String scheduledMessageSendAtText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
-    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return '$date को $time पर भेजें';
+  }
+
+  @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
+    return '$date को $time के लिए शेड्यूल किया गया';
   }
 
   @override
@@ -913,24 +921,28 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+  String scheduledMessageFailureText({
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {
-    return switch (reason) {
-      .requestFailed => 'नहीं भेजा जा सका। फिर से कोशिश करें',
-      .internalError => 'कुछ गलत हो गया। फिर से कोशिश करें',
-      .channelDeleted => 'यह चैनल हटा दिया गया था',
-      .userDeleted => 'आपका खाता हटा दिया गया',
-      .channelFrozen => 'यह चैनल फ़्रीज़ है',
-      .banned => 'आप इस चैनल में संदेश नहीं भेज सकते',
-      .noPermission => 'अब आपको यहाँ पोस्ट करने की अनुमति नहीं है',
-      .moderationBlocked => 'मॉडरेशन द्वारा ब्लॉक किया गया',
-      .hookRejected => 'ऐप द्वारा अस्वीकार किया गया',
-      .expired => 'नहीं भेजा गया: सेवा में देरी हुई',
-      .pendingNotSupported => 'इस चैनल में अब अनुमोदन ज़रूरी है। इसे फिर से शेड्यूल करें।',
-      .invalidMessage when isQuoteDeleted => 'उद्धृत संदेश हटा दिया गया था। उद्धरण हटाने के लिए इसे संपादित करें।',
-      .invalidMessage => 'संदेश अब ऐप की सीमाओं को पूरा नहीं करता। इसे संपादित करें।',
+    return switch (failure) {
+      ScheduledMessageUpdatingFailed() => 'बदलाव सेव नहीं हुआ। पिछला संस्करण अभी भी शेड्यूल है।',
+      ScheduledMessageSchedulingFailed() => 'शेड्यूल नहीं हो सका।',
+      ScheduledMessageSendingFailed(reason: .internalError) => 'कुछ गलत हो गया। फिर से कोशिश करें',
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => 'यह चैनल हटा दिया गया था',
+      ScheduledMessageSendingFailed(reason: .userDeleted) => 'आपका खाता हटा दिया गया',
+      ScheduledMessageSendingFailed(reason: .channelFrozen) => 'यह चैनल फ़्रीज़ है',
+      ScheduledMessageSendingFailed(reason: .banned) => 'आप इस चैनल में संदेश नहीं भेज सकते',
+      ScheduledMessageSendingFailed(reason: .noPermission) => 'अब आपको यहाँ पोस्ट करने की अनुमति नहीं है',
+      ScheduledMessageSendingFailed(reason: .moderationBlocked) => 'मॉडरेशन द्वारा ब्लॉक किया गया',
+      ScheduledMessageSendingFailed(reason: .hookRejected) => 'ऐप द्वारा अस्वीकार किया गया',
+      ScheduledMessageSendingFailed(reason: .expired) => 'नहीं भेजा गया: सेवा में देरी हुई',
+      ScheduledMessageSendingFailed(reason: .pendingNotSupported) =>
+        'इस चैनल में अब अनुमोदन ज़रूरी है। इसे फिर से शेड्यूल करें।',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) when isQuoteDeleted =>
+        'उद्धृत संदेश हटा दिया गया था। उद्धरण हटाने के लिए इसे संपादित करें।',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) =>
+        'संदेश अब ऐप की सीमाओं को पूरा नहीं करता। इसे संपादित करें।',
       _ => 'कुछ गलत हो गया। फिर से कोशिश करें',
     };
   }
@@ -949,6 +961,115 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
 
   @override
   String get sendNowLabel => 'अभी भेजें';
+
+  @override
+  String get scheduleMessageLabel => 'संदेश शेड्यूल करें';
+
+  @override
+  String get rescheduleMessageLabel => 'संदेश फिर से शेड्यूल करें';
+
+  @override
+  String get customTimeLabel => 'कस्टम समय';
+
+  @override
+  String scheduleTomorrowText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final time = _formatTime(scheduledAt.toLocal(), use24HourFormat: use24HourFormat);
+    return 'कल $time पर';
+  }
+
+  @override
+  String scheduleWeekdayText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final local = scheduledAt.toLocal();
+    final weekday = DateFormat.EEEE(localeName).format(local);
+    final time = _formatTime(local, use24HourFormat: use24HourFormat);
+    return '$weekday $time पर';
+  }
+
+  @override
+  String messageToLabel({required String channelName}) => '$channelName को संदेश';
+
+  @override
+  String get dateLabel => 'तारीख';
+
+  @override
+  String get timeLabel => 'समय';
+
+  @override
+  String get scheduleLabel => 'शेड्यूल करें';
+
+  @override
+  String sentInYourTimeZoneText({required String timeZone}) => 'आपके समय क्षेत्र में भेजा जाएगा ($timeZone)';
+
+  @override
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: 'अभी से कम से कम $minutes मिनट बाद का समय चुनें',
+      other: 'अभी से कम से कम $minutes मिनट बाद का समय चुनें',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError => 'बाद का समय चुनें। संपादन करते समय संदेश तुरंत नहीं भेजा जा सकता।';
+
+  @override
+  String get scheduleTooFarError => 'यह ऐप की अनुमति से आगे का समय है';
+
+  @override
+  String scheduleLimitReachedLabel({required int limit}) => 'सीमा पूरी हो गई (अधिकतम $limit)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) =>
+      'आप $limit शेड्यूल किए गए संदेशों की सीमा तक पहुँच गए हैं।';
+
+  @override
+  String get scheduleMessageError => 'संदेश शेड्यूल नहीं हो सका। फिर से कोशिश करें';
+
+  @override
+  String get scheduleCommandRefusedError => 'कमांड शेड्यूल नहीं किए जा सकते। जारी रखने के लिए / कमांड हटाएं।';
+
+  @override
+  String get scheduleQuotedMessageDeletedError => 'उद्धृत संदेश हटा दिया गया था';
+
+  @override
+  String get scheduleMessageRefusedError => 'यह संदेश शेड्यूल नहीं किया जा सकता';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count शेड्यूल किया गया संदेश',
+      other: '$count शेड्यूल किए गए संदेश',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count शेड्यूल किया गया जवाब',
+      other: '$count शेड्यूल किए गए जवाब',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count भेजा नहीं जा सका',
+      other: '$count भेजे नहीं जा सके',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$limit में से $count शेड्यूल किए गए संदेश';
+  }
 }
 
 class _AccessibilityTranslationsHi extends AccessibilityTranslations {
@@ -970,6 +1091,9 @@ class _AccessibilityTranslationsHi extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'वॉइस संदेश रिकॉर्ड करें';
+
+  @override
+  String get scheduleMessageHint => 'संदेश शेड्यूल करें';
 
   @override
   String get cancelRecordingTooltip => 'रिकॉर्डिंग रद्द करें';

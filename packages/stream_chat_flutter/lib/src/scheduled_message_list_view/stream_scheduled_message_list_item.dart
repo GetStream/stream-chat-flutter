@@ -1,8 +1,8 @@
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../stream_chat_flutter.dart';
+import '../utils/channel_name.dart';
 
 /// A row that shows a [ScheduledMessage] in a list of scheduled messages.
 ///
@@ -194,9 +194,7 @@ class _ScheduledMessageBody extends StatelessWidget {
     final loadedChannel = channelState != null ? channel : null;
     final summary = scheduledMessage.channel;
 
-    // A loaded channel keeps its members on its state, not on its model.
-    final loadedModel = channelState?.channelState.channel?.copyWith(members: channelState.members);
-    final loadedName = loadedModel?.formatName(currentUser: streamChat.currentUser);
+    final loadedName = loadedChannelName(channel, currentUser: streamChat.currentUser);
     final summaryName = switch (summary?.name) {
       final name? when name.trim().isNotEmpty => name,
       _ => null,
@@ -316,7 +314,7 @@ class _ScheduledMessagePreview extends StatelessWidget {
     final prefix = switch (message) {
       Message(parentId: _?) => translations.scheduledThreadReplyPrefixText,
       Message(quotedMessageId: _?) => translations.scheduledQuoteReplyPrefixText(
-        name: _quotedMessage(context, scheduledMessage)?.user?.name,
+        name: message.quotedMessage?.user?.name,
       ),
       _ => null,
     };
@@ -360,9 +358,9 @@ class _ScheduledMessageStatusLine extends core.NullableStatelessWidget {
     final status = scheduledMessage.status;
 
     if (status == .failed) {
-      final quoted = _quotedMessage(context, scheduledMessage);
-      final reason = translations.scheduledMessageFailureReasonText(
-        reason: scheduledMessage.failureReason,
+      final quoted = scheduledMessage.message.quotedMessage;
+      final reason = translations.scheduledMessageFailureText(
+        failure: scheduledMessage.failure,
         isQuoteDeleted: quoted?.isDeleted ?? false,
       );
 
@@ -383,7 +381,9 @@ class _ScheduledMessageStatusLine extends core.NullableStatelessWidget {
       );
     }
 
-    if (status != .preparingToSchedule && status != .sending) return null;
+    // An edit in flight keeps showing the scheduled message.
+    final isBeingScheduled = status == .preparingToSchedule && scheduledMessage.remoteCreatedAt == null;
+    if (!isBeingScheduled && status != .sending) return null;
 
     final attachments = scheduledMessage.message.attachments;
     final isUploading = attachments.any((it) => !it.uploadState.isSuccess);
@@ -400,25 +400,6 @@ class _ScheduledMessageStatusLine extends core.NullableStatelessWidget {
       ],
     );
   }
-}
-
-// The message a scheduled message quotes, when it is loaded in the channel or
-// in the thread the message is sent to.
-Message? _quotedMessage(
-  BuildContext context,
-  ScheduledMessage scheduledMessage,
-) {
-  final message = scheduledMessage.message;
-  if (message.quotedMessage case final quoted?) return quoted;
-
-  final quotedMessageId = message.quotedMessageId;
-  if (quotedMessageId == null) return null;
-
-  final client = StreamChat.of(context).client;
-  final state = client.state.channels[scheduledMessage.cid]?.state;
-  final loaded = [...?state?.messages, ...?state?.threads[message.parentId]];
-
-  return loaded.firstWhereOrNull((it) => it.id == quotedMessageId);
 }
 
 class _StreamScheduledMessageListItemThemeDefaults extends StreamScheduledMessageListItemThemeData {
@@ -452,7 +433,10 @@ class _StreamScheduledMessageListItemThemeDefaults extends StreamScheduledMessag
   @override
   DateFormatter get scheduledAtFormatter {
     return (context, date) {
-      return context.translations.scheduledMessageSendAtText(scheduledAt: date);
+      return context.translations.scheduledMessageSendAtText(
+        scheduledAt: date,
+        use24HourFormat: MediaQuery.alwaysUse24HourFormatOf(context),
+      );
     };
   }
 
