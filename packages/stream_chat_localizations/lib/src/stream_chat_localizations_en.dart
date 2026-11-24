@@ -910,6 +910,9 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String get scheduledMessageUploadingLabel => 'Uploading…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => "Couldn't upload attachment.";
+
+  @override
   String get scheduledThreadReplyPrefixText => 'Thread reply:';
 
   @override

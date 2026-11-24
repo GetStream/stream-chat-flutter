@@ -892,6 +892,9 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get scheduledMessageUploadingLabel => 'アップロード中…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => '添付ファイルをアップロードできませんでした。';
+
+  @override
   String get scheduledThreadReplyPrefixText => 'スレッドへの返信：';
 
   @override

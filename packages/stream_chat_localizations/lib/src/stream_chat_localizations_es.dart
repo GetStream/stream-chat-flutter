@@ -914,6 +914,9 @@ No es posible añadir más de $limit archivos adjuntos
   String get scheduledMessageUploadingLabel => 'Subiendo…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => 'No se pudo subir el archivo adjunto.';
+
+  @override
   String get scheduledThreadReplyPrefixText => 'Respuesta en hilo:';
 
   @override

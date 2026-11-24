@@ -912,6 +912,9 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   String get scheduledMessageUploadingLabel => 'Pujant…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => "No s'ha pogut pujar el fitxer adjunt.";
+
+  @override
   String get scheduledThreadReplyPrefixText => 'Resposta al fil:';
 
   @override

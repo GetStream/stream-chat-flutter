@@ -895,6 +895,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get scheduledMessageUploadingLabel => 'Laster opp…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => 'Kunne ikke laste opp vedlegget.';
+
+  @override
   String get scheduledThreadReplyPrefixText => 'Svar i tråd:';
 
   @override

@@ -916,6 +916,9 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get scheduledMessageUploadingLabel => 'Téléversement en cours…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => "Impossible d'envoyer la pièce jointe.";
+
+  @override
   String get scheduledThreadReplyPrefixText => 'Réponse dans le fil :';
 
   @override

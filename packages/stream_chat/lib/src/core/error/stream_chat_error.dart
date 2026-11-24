@@ -304,11 +304,16 @@ extension type const ScheduledMessageErrorReason(String _) implements String {
 
   /// The message quotes a message that was deleted.
   static const scheduledMessageQuoteDeleted = ScheduledMessageErrorReason('scheduled_message_quote_deleted');
+
+  /// Sending the message right away, as its time had passed, was refused.
+  ///
+  /// This happens in a frozen channel, for example.
+  static const scheduledMessageSendRefused = ScheduledMessageErrorReason('scheduled_message_send_refused');
 }
 
-/// A request about a scheduled message, refused before it was made.
+/// A refused request about a scheduled message.
 ///
-/// Its [reason] says why.
+/// The message isn't scheduled or changed, and its [reason] says why.
 ///
 /// See also:
 ///

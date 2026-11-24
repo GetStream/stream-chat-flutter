@@ -109,9 +109,6 @@ Future<void> _scheduleOnSendLongPress(
   StreamMessageComposerController controller,
 ) async {
   final message = controller.value;
-  final isUploaded = message.attachments.every((it) => it.uploadState.isSuccess);
-  if (!isUploaded) return;
-
   final channel = StreamChannel.of(context).channel;
   final messenger = StreamSnackbarMessenger.of(context);
   final translations = context.translations;
@@ -126,20 +123,35 @@ Future<void> _scheduleOnSendLongPress(
   try {
     await channel.scheduleMessage(message, scheduledAt: scheduledAt);
   } catch (error) {
-    // A temporary failure leaves it listed as failed, to retry from there, and
-    // one already sent is done, so neither goes back in the composer.
-    final countsAsScheduled = switch (error) {
-      StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) => true,
-      StreamChatNetworkError() => error.isRetriable,
-      _ => false,
-    };
-    if (countsAsScheduled) return;
+    // One listed as failed is retried from the scheduled messages.
+    final listed = channel.client.state.scheduledMessages.where((it) => it.id == message.id).firstOrNull;
+    if (listed != null) {
+      final attachments = listed.message.attachments;
+      if (attachments.any((it) => it.uploadState.isFailed)) {
+        final text = translations.scheduledMessageAttachmentUploadFailedText;
+        messenger.show(StreamSnackbar(message: Text(text), variant: .error));
+      }
+      return;
+    }
+
+    // One deleted, replaced or sent meanwhile is done with.
+    if (!_isRefused(error)) return;
 
     final text = _scheduleErrorText(translations, channel, error);
     messenger.show(StreamSnackbar(message: Text(text), variant: .error));
 
     if (context.mounted && controller.value == cleared) controller.message = message;
   }
+}
+
+// Whether scheduling was refused with [error], so the message isn't scheduled.
+bool _isRefused(Object error) {
+  return switch (error) {
+    ScheduledMessageRefusedError() || ArgumentError() || StateError() => true,
+    StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) => false,
+    StreamChatNetworkError() => !error.isRetriable,
+    _ => false,
+  };
 }
 
 // Why scheduling failed with [error], in the words of [translations].

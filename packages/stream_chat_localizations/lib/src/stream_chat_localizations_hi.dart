@@ -912,6 +912,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   String get scheduledMessageUploadingLabel => 'अपलोड हो रहा है…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => 'अटैचमेंट अपलोड नहीं हो सका।';
+
+  @override
   String get scheduledThreadReplyPrefixText => 'थ्रेड में जवाब:';
 
   @override

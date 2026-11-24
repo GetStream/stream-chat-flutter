@@ -96,6 +96,55 @@ void main() {
     expect(harness.client.state.scheduledMessages, isEmpty);
   });
 
+  test('scheduleMessage stops listing one whose sending right away is refused', () async {
+    final message = Message(id: 'a', text: 'Good morning');
+    final refused = Message(id: 'a', text: 'The channel is frozen', type: MessageType.error);
+    harness.stubSchedule(message, () async => sentRightAway(refused));
+
+    await expectLater(harness.schedule(message), throwsA(isA<ScheduledMessageRefusedError>()));
+
+    expect(harness.client.state.scheduledMessages, isEmpty);
+  });
+
+  test('resendScheduledMessage lists the failed copy again when sending it right away is refused', () async {
+    final message = Message(id: 'a', text: 'Good morning');
+    final failed = await harness.scheduleUnreachable(message);
+    final refused = Message(id: 'a', text: 'The channel is frozen', type: MessageType.error);
+    harness.stubSchedule(message, () async => sentRightAway(refused));
+
+    await expectLater(resend(failed.id), throwsA(isA<ScheduledMessageRefusedError>()));
+
+    final [listed] = harness.client.state.scheduledMessages;
+    expect(listed.failure, const ScheduledMessageSchedulingFailed());
+  });
+
+  test('scheduleMessage throws the refusal of sending it right away', () async {
+    final message = Message(id: 'a', text: 'Good morning');
+    final refused = Message(id: 'a', text: 'The channel is frozen', type: MessageType.error);
+    harness.stubSchedule(message, () async => sentRightAway(refused));
+
+    await expectLater(
+      harness.schedule(message),
+      throwsA(
+        isA<ScheduledMessageRefusedError>().having(
+          (it) => it.reason,
+          'reason',
+          ScheduledMessageErrorReason.scheduledMessageSendRefused,
+        ),
+      ),
+    );
+  });
+
+  test('resendScheduledMessage removes one whose first attempt was sent right away', () async {
+    final message = Message(id: 'a', text: 'Good morning');
+    final failed = await harness.scheduleUnreachable(message);
+    harness.stubSchedule(message, () async => throw _messageAlreadyExists('a'));
+
+    await resend(failed.id).then<void>((_) {}, onError: (_) {});
+
+    expect(harness.client.state.scheduledMessages, isEmpty);
+  });
+
   test('scheduleMessage lists a message that could not reach the server as failed', () async {
     final failed = await harness.scheduleUnreachable(Message(id: 'a', text: 'Good morning'));
 
@@ -356,4 +405,19 @@ void main() {
 
     expect(harness.client.state.scheduledMessages, [server]);
   });
+}
+
+// The error that refuses a message whose ID [id] is already taken by a sent
+// message.
+StreamChatNetworkError _messageAlreadyExists(String id) {
+  final message = 'SendMessage failed with error: "a message with ID $id already exists"';
+  return StreamChatNetworkError.raw(
+    code: ChatErrorCode.inputError.code,
+    message: message,
+    statusCode: 400,
+    data: ErrorResponse()
+      ..code = ChatErrorCode.inputError.code
+      ..statusCode = 400
+      ..message = message,
+  );
 }

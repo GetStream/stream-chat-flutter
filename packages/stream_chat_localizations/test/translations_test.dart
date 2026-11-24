@@ -425,12 +425,12 @@ void main() {
       expect(scheduledFor, contains(DateFormat.jm(language).format(localScheduledAt)));
       expect(localizations.scheduledMessageSendingLabel, isNotNull);
       expect(localizations.scheduledMessageUploadingLabel, isNotNull);
+      expect(localizations.scheduledMessageAttachmentUploadFailedText, isNotNull);
       expect(localizations.scheduledThreadReplyPrefixText, isNotNull);
       // A known and an unknown quoted author.
       expect(localizations.scheduledQuoteReplyPrefixText(name: 'Maya'), contains('Maya'));
       expect(localizations.scheduledQuoteReplyPrefixText(), isNotNull);
       for (final failure in [
-        const ScheduledMessageSchedulingFailed(),
         const ScheduledMessageSchedulingFailed(),
         for (final reason in [
           ScheduledMessageSendingFailureReason.internalError,

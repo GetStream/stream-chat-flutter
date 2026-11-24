@@ -913,6 +913,9 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get scheduledMessageUploadingLabel => 'Enviando arquivos…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => 'Não foi possível enviar o anexo.';
+
+  @override
   String get scheduledThreadReplyPrefixText => 'Resposta na conversa:';
 
   @override

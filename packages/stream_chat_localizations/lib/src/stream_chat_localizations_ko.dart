@@ -895,6 +895,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get scheduledMessageUploadingLabel => '업로드 중…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => '첨부 파일을 업로드하지 못했습니다.';
+
+  @override
   String get scheduledThreadReplyPrefixText => '스레드 답장:';
 
   @override

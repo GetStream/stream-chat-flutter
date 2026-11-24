@@ -924,6 +924,9 @@ Attenzione: il limite massimo di $limit file è stato superato.
   String get scheduledMessageUploadingLabel => 'Caricamento…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => "Impossibile caricare l'allegato.";
+
+  @override
   String get scheduledThreadReplyPrefixText => 'Risposta nel thread:';
 
   @override

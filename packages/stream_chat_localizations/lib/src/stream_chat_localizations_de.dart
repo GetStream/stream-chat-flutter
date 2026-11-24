@@ -911,6 +911,9 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get scheduledMessageUploadingLabel => 'Wird hochgeladen…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => 'Anhang konnte nicht hochgeladen werden.';
+
+  @override
   String get scheduledThreadReplyPrefixText => 'Antwort im Thread:';
 
   @override

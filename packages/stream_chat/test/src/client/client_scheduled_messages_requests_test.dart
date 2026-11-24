@@ -117,30 +117,6 @@ void main() {
     },
   );
 
-  test('updateScheduledMessage refuses an attachment that is not uploaded', () async {
-    await harness.hold([a]);
-    final edited = Message(
-      id: 'a',
-      text: 'Good evening',
-      attachments: [
-        Attachment(
-          type: AttachmentType.image,
-          file: AttachmentFile(size: 100, path: 'image.png'),
-        ),
-      ],
-    );
-
-    await expectLater(harness.client.updateScheduledMessage(a.id, edited), throwsA(isA<ArgumentError>()));
-
-    verifyNever(
-      () => harness.api.scheduledMessages.updateScheduledMessage(
-        any(),
-        message: any(named: 'message'),
-        scheduledAt: any(named: 'scheduledAt'),
-      ),
-    );
-  });
-
   test('deleteScheduledMessage drops it', () async {
     await harness.hold([a]);
     when(
@@ -288,32 +264,6 @@ void main() {
     await expectLater(
       schedule(Message(text: 'Good morning'), past),
       throwsA(isA<ArgumentError>().having((it) => it.message, 'message', contains('sendMessage'))),
-    );
-  });
-
-  test('scheduleMessage refuses attachments that are not uploaded', () async {
-    final message = Message(
-      text: 'Good morning',
-      attachments: [
-        Attachment(
-          type: AttachmentType.image,
-          file: AttachmentFile(size: 100, path: 'image.png'),
-        ),
-      ],
-    );
-
-    await expectLater(schedule(message, scheduledAt), throwsArgumentError);
-
-    expect(harness.client.state.scheduledMessages, isEmpty);
-    verifyNever(
-      () => harness.api.scheduledMessages.scheduleMessage(
-        any(),
-        any(),
-        any(),
-        any(),
-        skipPush: any(named: 'skipPush'),
-        skipEnrichUrl: any(named: 'skipEnrichUrl'),
-      ),
     );
   });
 
