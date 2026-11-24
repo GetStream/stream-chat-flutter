@@ -21,25 +21,29 @@ class StreamScheduledMessageActionsBuilder {
   /// and rescheduling are left out when the loaded channel doesn't allow
   /// scheduling.
   ///
-  /// One being saved can only be deleted until it is saved. Any other message
-  /// has no actions.
+  /// A new one still being scheduled can only be deleted. Any other message,
+  /// such as one whose change is being saved, has no actions.
   static List<StreamScheduledMessageActionTile> buildActions({
     required BuildContext context,
     required ScheduledMessage scheduledMessage,
   }) {
     final isScheduled = scheduledMessage.status == .scheduled;
     final isFailed = scheduledMessage.status == .failed;
-    final isSaving = scheduledMessage.status == .preparingToSchedule;
+    final isBeingScheduled =
+        scheduledMessage.status == .preparingToSchedule && scheduledMessage.remoteCreatedAt == null;
 
-    if (!isScheduled && !isFailed && !isSaving) return [];
+    if (!isScheduled && !isFailed && !isBeingScheduled) return [];
 
     final icons = context.streamIcons;
     final translations = context.translations;
 
     // A message whose channel was deleted can't be scheduled again.
-    final isChannelDeleted = scheduledMessage.failureReason == .channelDeleted;
+    final isChannelDeleted = switch (scheduledMessage.failure) {
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => true,
+      _ => false,
+    };
     // A failed edit is still scheduled as it was, so it can be changed again.
-    final isEditFailed = scheduledMessage.failureReason?.isEditFailure ?? false;
+    final isEditFailed = scheduledMessage.failure is ScheduledMessageUpdatingFailed;
     final hasText = scheduledMessage.message.text?.isNotEmpty ?? false;
 
     // A channel that isn't loaded can't tell, so every action is offered and

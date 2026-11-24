@@ -9,14 +9,13 @@ import 'schedule_message_bounds.dart';
 import 'schedule_message_picker_theme.dart';
 import 'scheduled_message_counts.dart';
 
-/// Shows a sheet to pick the date and time [message] is sent at in [channel],
-/// which must be initialized.
+/// Shows a sheet to pick when [message] is sent in [channel].
 ///
-/// The sheet starts at [initialScheduledAt], or an hour from now. A time
-/// sooner or further ahead than the channel allows shows an error, and can't
-/// be picked. With [initialScheduledAt] set, the sheet reschedules a message:
-/// it is headed for rescheduling, and the channel's and user's limits aren't
-/// checked.
+/// The [channel] must be initialized. The sheet starts at
+/// [initialScheduledAt], or an hour from now. A time sooner or further ahead
+/// than the channel allows shows an error, and can't be picked. With
+/// [initialScheduledAt] set, the sheet reschedules a message: it is headed for
+/// rescheduling, and the channel's and user's limits aren't checked.
 ///
 /// Returns the picked time, or null when dismissed.
 Future<DateTime?> showStreamScheduleTimeSheet({

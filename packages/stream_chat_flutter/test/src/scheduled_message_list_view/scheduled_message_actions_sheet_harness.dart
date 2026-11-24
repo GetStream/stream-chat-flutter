@@ -8,7 +8,8 @@ import '../mocks.dart';
 ScheduledMessage fakeScheduledMessage({
   String text = 'Can you review the venue shortlist?',
   ScheduledMessageStatus status = ScheduledMessageStatus.scheduled,
-  ScheduledMessageFailureReason? failureReason,
+  ScheduledMessageFailure? failure,
+  DateTime? createdAt,
 }) {
   return ScheduledMessage(
     cid: 'messaging:general',
@@ -16,7 +17,8 @@ ScheduledMessage fakeScheduledMessage({
     message: Message(id: 'scheduled-id', text: text),
     scheduledAt: DateTime(2026, 10, 21, 8),
     status: status,
-    failureReason: failureReason,
+    failure: failure,
+    createdAt: createdAt,
   );
 }
 

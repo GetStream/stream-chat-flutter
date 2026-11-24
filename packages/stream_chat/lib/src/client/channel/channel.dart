@@ -817,14 +817,12 @@ class Channel {
   /// Also stops the current user's typing.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails. If it fails in a
-  /// way that can be retried, the message stays listed as failed with
-  /// [ScheduledMessageFailureReason.requestFailed].
+  /// way that can be retried, the message stays listed as failed with a
+  /// [ScheduledMessageSchedulingFailed].
   ///
   /// Throws a [ScheduledMessageRefusedError] without making the request when
-  /// [message] is a command in a channel that has commands, quotes a deleted
-  /// message, or can't be sent at its time: one past the channel's
-  /// [ChannelConfig.scheduledMessagesMaxLeadTime], at or after its pin
-  /// expires, or less than a minute before its shared location ends.
+  /// [message] is a command in a channel that has commands, or quotes a
+  /// deleted message.
   ///
   /// Throws an [ArgumentError] if [scheduledAt] is not in the future. A
   /// message to send right away goes through [sendMessage].

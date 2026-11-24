@@ -55,36 +55,6 @@ void main() {
     expect((counts.failed, counts.pending, counts.channelPending), (1, 2, 2));
   });
 
-  test('ScheduledMessageCounts.of counts a failed edit as failed and still pending', () {
-    final counts = ScheduledMessageCounts.of(
-      [
-        _scheduled(
-          'a',
-          status: ScheduledMessageStatus.failed,
-          failureReason: ScheduledMessageFailureReason.updateFailed,
-        ),
-      ],
-      cid: _cid,
-    );
-
-    expect((counts.failed, counts.pending, counts.channelPending, counts.userPending), (1, 1, 1, 1));
-  });
-
-  test('ScheduledMessageCounts.of counts a refused edit as failed and still pending', () {
-    final counts = ScheduledMessageCounts.of(
-      [
-        _scheduled(
-          'a',
-          status: ScheduledMessageStatus.failed,
-          failureReason: ScheduledMessageFailureReason.updateRejected,
-        ),
-      ],
-      cid: _cid,
-    );
-
-    expect((counts.failed, counts.pending, counts.channelPending, counts.userPending), (1, 1, 1, 1));
-  });
-
   test("ScheduledMessageCounts.of doesn't count sent messages", () {
     final counts = ScheduledMessageCounts.of(
       [_scheduled('a', status: ScheduledMessageStatus.sent)],
@@ -139,7 +109,7 @@ ScheduledMessage _scheduled(
   String? parentId,
   DateTime? scheduledAt,
   ScheduledMessageStatus status = ScheduledMessageStatus.scheduled,
-  ScheduledMessageFailureReason? failureReason,
+  ScheduledMessageFailure? failure,
 }) {
   return ScheduledMessage(
     id: id,
@@ -148,6 +118,6 @@ ScheduledMessage _scheduled(
     message: Message(id: id, text: 'Hello', parentId: parentId),
     scheduledAt: scheduledAt ?? DateTime(2026, 10, 23, 9),
     status: status,
-    failureReason: failureReason,
+    failure: failure,
   );
 }

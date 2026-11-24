@@ -1,3 +1,6 @@
+/// @docImport '../error/stream_chat_error.dart';
+library;
+
 import '../../client/channel/channel.dart';
 import '../models/message.dart';
 
@@ -5,6 +8,11 @@ import '../models/message.dart';
 ///
 /// Determines whether a message can be scheduled in a channel, as far as the
 /// channel's loaded state tells.
+///
+/// See also:
+///
+///  * [ScheduledMessageRefusedError], which is thrown when a request breaks
+///    these rules.
 class ScheduledMessageRules {
   const ScheduledMessageRules._();
 
@@ -22,8 +30,8 @@ class ScheduledMessageRules {
 
   /// Whether [message] quotes a message known to be deleted.
   ///
-  /// The quoted message is looked up among the messages [channel] has loaded,
-  /// then taken from [message] itself.
+  /// The latest copy of the quoted message that [channel] has loaded is used,
+  /// if any.
   static bool quotesDeletedMessage(Message message, Channel? channel) {
     final quotedMessageId = message.quotedMessageId ?? message.quotedMessage?.id;
     if (quotedMessageId == null) return false;

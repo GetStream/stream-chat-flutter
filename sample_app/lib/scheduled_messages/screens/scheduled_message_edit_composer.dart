@@ -57,7 +57,7 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
 
     // A failed one can't be changed, unless only its edit failed, so the edit
     // is scheduled again as a new message and the failed one is deleted.
-    final isEditFailed = scheduledMessage.failureReason?.isEditFailure ?? false;
+    final isEditFailed = scheduledMessage.failure is ScheduledMessageUpdatingFailed;
     final isScheduledAgain = scheduledMessage.status == .failed && !isEditFailed;
 
     // Refused before the composer closes, so the text can still be fixed.
@@ -84,7 +84,7 @@ class _ScheduledMessageEditComposerState extends State<ScheduledMessageEditCompo
         // move too. Any other keeps the time the list has for it now.
         final listed = client.state.scheduledMessages.where((it) => it.id == scheduledMessage.id).firstOrNull;
         final scheduledAt = switch (listed) {
-          final it? when it.failureReason?.isEditFailure ?? false => it.scheduledAt,
+          final it? when it.failure is ScheduledMessageUpdatingFailed => it.scheduledAt,
           _ => null,
         };
         await client.updateScheduledMessage(scheduledMessage.id, edited, scheduledAt: scheduledAt);

@@ -8,7 +8,7 @@ import '../mocks.dart';
 ScheduledMessage fakeScheduledMessage({
   String text = 'Can you review the venue shortlist?',
   ScheduledMessageStatus status = ScheduledMessageStatus.scheduled,
-  ScheduledMessageFailureReason? failureReason,
+  ScheduledMessageFailure? failure,
   List<Attachment> attachments = const [],
   String? parentId,
   Message? quotedMessage,
@@ -30,7 +30,7 @@ ScheduledMessage fakeScheduledMessage({
     ),
     scheduledAt: DateTime(2026, 10, 21, 8),
     status: status,
-    failureReason: failureReason,
+    failure: failure,
     createdAt: createdAt,
   );
 }
@@ -52,7 +52,8 @@ ScheduledMessage uploading() {
 ScheduledMessage failed() {
   return fakeScheduledMessage(
     status: ScheduledMessageStatus.failed,
-    failureReason: ScheduledMessageFailureReason.pendingNotSupported,
+    failure: const ScheduledMessageSendingFailed(reason: ScheduledMessageSendingFailureReason.pendingNotSupported),
+    createdAt: DateTime(2026, 10, 20),
   );
 }
 

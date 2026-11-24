@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:meta/meta.dart';
 import 'package:stream_core_flutter/chat.dart';
 
-/// Wraps [child], a Material date or time picker, in a theme of the design
-/// system's colors and type.
+/// Wraps [child] in a theme of the design system's colors and type.
+///
+/// The [child] is a Material date or time picker.
 ///
 /// Used as the `builder` of [showDatePicker] and [showTimePicker].
 @internal

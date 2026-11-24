@@ -5,8 +5,9 @@
 - Added `StreamScheduledMessageListView` to list the current user's scheduled messages.
 - Added `showStreamScheduledMessageActionsSheet` to act on a scheduled message.
 - Added `showStreamScheduleMessageSheet` and `showStreamScheduleTimeSheet`, to pick when a message is sent.
-- Added `StreamScheduledMessagesBanner`, which shows how many scheduled messages a channel or thread has, styled with `StreamScheduledMessagesBannerTheme`. `StreamChannelPage` and `StreamThreadPage` call `onScheduledMessagesBannerTap` when it is tapped.
-- Added `onSendMessage` to `StreamMessageComposer`, which replaces sending a message or saving an edit.
+- Added `StreamScheduledMessagesBanner`, which counts a channel's or thread's scheduled messages, themed with `StreamScheduledMessagesBannerTheme` and `StreamScheduledMessagesBannerThemeData`, and replaceable through the `scheduledMessagesBanner` component builder.
+- Added `onScheduledMessagesBannerTap` to `StreamChannelPage` and `StreamThreadPage`.
+- Added `onSendMessage` to `StreamMessageComposer`, a `StreamMessageComposerCallback` that replaces sending a message or saving an edit.
 - Added `onSendLongPress` to `StreamMessageComposer` and `StreamChatMessageInput`, called when send is long-pressed, such as to schedule the message.
 
 🔄 Changed

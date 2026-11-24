@@ -19,11 +19,15 @@ Message messageToSchedule() {
 
 /// A message scheduled in the [scheduleChannel], or in the thread of
 /// [parentId].
+///
+/// A failed one failed with [failure], or to send by default.
 ScheduledMessage scheduledMessage(
   String id, {
   ScheduledMessageStatus status = ScheduledMessageStatus.scheduled,
+  ScheduledMessageFailure? failure,
   String? parentId,
 }) {
+  final isFailed = status == ScheduledMessageStatus.failed;
   return ScheduledMessage(
     id: id,
     cid: scheduleCid,
@@ -31,6 +35,7 @@ ScheduledMessage scheduledMessage(
     message: Message(id: id, text: 'Hello', parentId: parentId),
     scheduledAt: DateTime(2026, 10, 23, 9),
     status: status,
+    failure: failure ?? (isFailed ? const ScheduledMessageSendingFailed() : null),
   );
 }
 

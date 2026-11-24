@@ -920,26 +920,30 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+  String scheduledMessageFailureText({
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {
-    return switch (reason) {
-      .requestFailed => 'Senden fehlgeschlagen. Versuche es erneut',
-      .attachmentUploadFailed => 'Anhang konnte nicht hochgeladen werden',
-      .internalError => 'Etwas ist schiefgelaufen. Versuche es erneut',
-      .channelDeleted => 'Dieser Kanal wurde gelöscht',
-      .userDeleted => 'Dein Konto wurde gelöscht',
-      .channelFrozen => 'Dieser Kanal ist eingefroren',
-      .banned => 'Du kannst in diesem Kanal keine Nachrichten senden',
-      .noPermission => 'Du darfst hier nicht mehr posten',
-      .moderationBlocked => 'Von der Moderation blockiert',
-      .hookRejected => 'Von der App abgelehnt',
-      .expired => 'Nicht gesendet: Der Dienst war verzögert',
-      .pendingNotSupported => 'Dieser Kanal erfordert jetzt eine Freigabe. Plane die Nachricht erneut.',
-      .invalidMessage when isQuoteDeleted =>
+    return switch (failure) {
+      ScheduledMessageUpdatingFailed() =>
+        'Die Änderung wurde nicht gespeichert. Die vorherige Version ist weiterhin geplant.',
+      ScheduledMessageUploadFailed() => 'Anhang konnte nicht hochgeladen werden',
+      ScheduledMessageSchedulingFailed() => 'Konnte nicht geplant werden.',
+      ScheduledMessageSendingFailed(reason: .internalError) => 'Etwas ist schiefgelaufen. Versuche es erneut',
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => 'Dieser Kanal wurde gelöscht',
+      ScheduledMessageSendingFailed(reason: .userDeleted) => 'Dein Konto wurde gelöscht',
+      ScheduledMessageSendingFailed(reason: .channelFrozen) => 'Dieser Kanal ist eingefroren',
+      ScheduledMessageSendingFailed(reason: .banned) => 'Du kannst in diesem Kanal keine Nachrichten senden',
+      ScheduledMessageSendingFailed(reason: .noPermission) => 'Du darfst hier nicht mehr posten',
+      ScheduledMessageSendingFailed(reason: .moderationBlocked) => 'Von der Moderation blockiert',
+      ScheduledMessageSendingFailed(reason: .hookRejected) => 'Von der App abgelehnt',
+      ScheduledMessageSendingFailed(reason: .expired) => 'Nicht gesendet: Der Dienst war verzögert',
+      ScheduledMessageSendingFailed(reason: .pendingNotSupported) =>
+        'Dieser Kanal erfordert jetzt eine Freigabe. Plane die Nachricht erneut.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) when isQuoteDeleted =>
         'Die zitierte Nachricht wurde gelöscht. Bearbeite die Nachricht, um das Zitat zu entfernen.',
-      .invalidMessage => 'Die Nachricht entspricht nicht mehr den Vorgaben der App. Bearbeite sie.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) =>
+        'Die Nachricht entspricht nicht mehr den Vorgaben der App. Bearbeite sie.',
       _ => 'Etwas ist schiefgelaufen. Versuche es erneut',
     };
   }

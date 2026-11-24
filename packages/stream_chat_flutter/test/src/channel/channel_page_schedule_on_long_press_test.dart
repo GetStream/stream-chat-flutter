@@ -55,6 +55,47 @@ void main() {
     expect(composerController(tester).text, isEmpty);
   });
 
+  testWidgets('keeps the composer clear and says so when an attachment fails to upload', (tester) async {
+    final channel = await pumpChannelPage(tester);
+    final clientState = channel.client.state;
+    when(() => channel.scheduleMessage(any(), scheduledAt: any(named: 'scheduledAt'))).thenAnswer((invocation) async {
+      final message = invocation.positionalArguments.first as Message;
+      final failed = ScheduledMessage(
+        id: message.id,
+        cid: 'test-channel-type:test-channel-id',
+        user: User(id: 'user-id'),
+        message: message,
+        scheduledAt: DateTime(2026, 10, 23, 9),
+        status: ScheduledMessageStatus.failed,
+        failure: const ScheduledMessageFailure.uploadFailed(),
+      );
+      when(() => clientState.scheduledMessages).thenReturn([failed]);
+      throw const StreamChatError('Failed to upload one or more attachments');
+    });
+    await _type(tester, 'Hello');
+
+    await _scheduleWithPreset(tester);
+
+    final text = DefaultTranslations.instance.scheduledMessageFailureText(
+      failure: const ScheduledMessageFailure.uploadFailed(),
+    );
+    expect(find.text(text), findsOneWidget);
+    expect(composerController(tester).text, isEmpty);
+  });
+
+  testWidgets('keeps the composer clear and says nothing when the message is deleted while scheduled', (
+    tester,
+  ) async {
+    final channel = await pumpChannelPage(tester);
+    stubSchedule(channel, () async => throw const StreamChatError('The attachment uploads were canceled'));
+    await _type(tester, 'Hello');
+
+    await _scheduleWithPreset(tester);
+
+    expect(find.byType(StreamSnackbar), findsNothing);
+    expect(composerController(tester).text, isEmpty);
+  });
+
   testWidgets('schedules a message whose attachment is not uploaded yet', (tester) async {
     final channel = await pumpChannelPage(tester);
     stubSchedule(channel, () async => ScheduleMessageResponse()..message = Message());
@@ -79,7 +120,7 @@ void main() {
 
   testWidgets('keeps the text and the mentions in the composer when scheduling is refused', (tester) async {
     final channel = await pumpChannelPage(tester);
-    stubSchedule(channel, () async => throw const ScheduledMessageRefusedError(.slashCommand, 'Refused'));
+    stubSchedule(channel, () async => throw const ScheduledMessageRefusedError(.scheduledMessageIsCommand, 'Refused'));
     final maya = User(id: 'maya', name: 'Maya');
     await _type(tester, 'Hi @Maya');
     final controller = composerController(tester)..addMentionedUser(maya);
@@ -94,7 +135,10 @@ void main() {
 
   testWidgets('says the quoted message was deleted when scheduling is refused for it', (tester) async {
     final channel = await pumpChannelPage(tester);
-    stubSchedule(channel, () async => throw const ScheduledMessageRefusedError(.quotedMessageDeleted, 'Refused'));
+    stubSchedule(
+      channel,
+      () async => throw const ScheduledMessageRefusedError(.scheduledMessageQuoteDeleted, 'Refused'),
+    );
     await _type(tester, 'Hello');
 
     await _scheduleWithPreset(tester);
@@ -104,7 +148,10 @@ void main() {
 
   testWidgets("says the message can't be scheduled when trying again won't help", (tester) async {
     final channel = await pumpChannelPage(tester);
-    stubSchedule(channel, () async => throw const ScheduledMessageRefusedError(.pinExpiresTooSoon, 'Refused'));
+    stubSchedule(
+      channel,
+      () async => throw const ScheduledMessageRefusedError(.scheduledMessageNotEditable, 'Refused'),
+    );
     await _type(tester, 'Hello');
 
     await _scheduleWithPreset(tester);
@@ -112,7 +159,7 @@ void main() {
     expect(find.text(DefaultTranslations.instance.scheduleMessageRefusedError), findsOneWidget);
   });
 
-  testWidgets('asks to try again when the server refuses for a reason it gives no more of', (tester) async {
+  testWidgets("says the message can't be scheduled when the server refuses it without a reason", (tester) async {
     final channel = await pumpChannelPage(tester);
     final refused = StreamChatNetworkError.raw(
       code: 4,
@@ -128,7 +175,7 @@ void main() {
 
     await _scheduleWithPreset(tester);
 
-    expect(find.text(DefaultTranslations.instance.scheduleMessageError), findsOneWidget);
+    expect(find.text(DefaultTranslations.instance.scheduleMessageRefusedError), findsOneWidget);
   });
 
   testWidgets('says why the server refused to schedule the message', (tester) async {
@@ -186,6 +233,113 @@ void main() {
 
     expect(_sendButton(tester).props.onLongPress, isNull);
     expect(find.byType(StreamScheduledMessagesBanner), findsNothing);
+  });
+
+  testWidgets('schedules on the channel the page is swapped to', (tester) async {
+    final swap = ValueNotifier<MockChannel?>(null);
+    addTearDown(swap.dispose);
+    final first = await pumpChannelPage(tester, canSchedule: false, channelSwap: swap);
+    final second = stubPageChannel(first.client as MockClient);
+    stubSchedule(second, () async => ScheduleMessageResponse()..message = Message());
+
+    swap.value = second;
+    await tester.pumpAndSettle();
+    await _type(tester, 'Hello');
+    await _scheduleWithPreset(tester);
+
+    verify(() => second.scheduleMessage(any(), scheduledAt: any(named: 'scheduledAt'))).called(1);
+  });
+
+  testWidgets('clears the composer once a time is picked', (tester) async {
+    final channel = await pumpChannelPage(tester);
+    stubSchedule(channel, () => Completer<ScheduleMessageResponse>().future);
+    await _type(tester, 'Hello');
+
+    await _scheduleWithPreset(tester);
+
+    expect(composerController(tester).text, isEmpty);
+  });
+
+  testWidgets('puts a refused message back in the composer', (tester) async {
+    final channel = await pumpChannelPage(tester);
+    stubSchedule(channel, () async => throw const ScheduledMessageRefusedError(.scheduledMessageIsCommand, 'Refused'));
+    await _type(tester, 'Hello');
+
+    await _scheduleWithPreset(tester);
+
+    expect(composerController(tester).text, 'Hello');
+  });
+
+  testWidgets("doesn't put a refused message back over text typed meanwhile", (tester) async {
+    final channel = await pumpChannelPage(tester);
+    final answer = Completer<ScheduleMessageResponse>();
+    stubSchedule(channel, () => answer.future);
+    await _type(tester, 'Hello');
+
+    await _scheduleWithPreset(tester);
+    await _type(tester, 'Something else');
+    answer.completeError(const ScheduledMessageRefusedError(.scheduledMessageIsCommand, 'Refused'));
+    await tester.pumpAndSettle();
+
+    expect(composerController(tester).text, 'Something else');
+  });
+
+  for (final (name, error) in [
+    ('the server is unreachable', StreamChatNetworkError.raw(code: -1, message: 'No connection')),
+    (
+      'it was already sent',
+      StreamChatNetworkError.raw(
+        code: 123,
+        message: 'Already sent',
+        statusCode: 400,
+        data: ErrorResponse()
+          ..code = 123
+          ..statusCode = 400
+          ..message = 'Already sent',
+      ),
+    ),
+  ]) {
+    testWidgets('keeps the composer cleared when $name', (tester) async {
+      final channel = await pumpChannelPage(tester);
+      stubSchedule(channel, () async => throw error);
+      await _type(tester, 'Hello');
+
+      await _scheduleWithPreset(tester);
+
+      expect(composerController(tester).text, isEmpty);
+      expect(find.byType(StreamSnackbar), findsNothing);
+    });
+  }
+
+  testWidgets('clears the attachments and the quote once scheduled', (tester) async {
+    final channel = await pumpChannelPage(tester);
+    stubSchedule(channel, () async => ScheduleMessageResponse()..message = Message());
+    await _type(tester, 'Hello');
+    final controller = composerController(tester)
+      ..attachments = [
+        Attachment(type: AttachmentType.image, imageUrl: 'https://example.com/a.png', uploadState: const .success()),
+      ]
+      ..quotedMessage = Message(id: 'quoted-id', text: 'Earlier');
+    await tester.pumpAndSettle();
+
+    await _scheduleWithPreset(tester);
+
+    expect(controller.attachments, isEmpty);
+    expect(controller.message.quotedMessage, isNull);
+  });
+
+  testWidgets('offers the long press once the user can schedule', (tester) async {
+    // Broadcast, as the page and its composer each follow the capabilities.
+    final capabilities = StreamController<List<ChannelCapability>>.broadcast();
+    addTearDown(capabilities.close);
+    await pumpChannelPage(tester, canSchedule: false, capabilitiesUpdates: capabilities.stream);
+    await _type(tester, 'Hello');
+    expect(_sendButton(tester).props.onLongPress, isNull);
+
+    capabilities.add([ChannelCapability.sendMessage, ChannelCapability.scheduleMessage]);
+    await tester.pumpAndSettle();
+
+    expect(_sendButton(tester).props.onLongPress, isNotNull);
   });
 }
 

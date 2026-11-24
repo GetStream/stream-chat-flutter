@@ -14,7 +14,9 @@ ScheduledMessage _$ScheduledMessageFromJson(Map<String, dynamic> json) => Schedu
   message: Message.fromJson(json['message'] as Map<String, dynamic>),
   scheduledAt: DateTime.parse(json['scheduled_at'] as String),
   status: json['status'] as ScheduledMessageStatus,
-  failureReason: json['failure_reason'] as ScheduledMessageFailureReason?,
+  failure: ScheduledMessage._failureFromJson(
+    json['failure_reason'] as String?,
+  ),
   createdAt: json['created_at'] == null ? null : DateTime.parse(json['created_at'] as String),
   updatedAt: json['updated_at'] == null ? null : DateTime.parse(json['updated_at'] as String),
 );

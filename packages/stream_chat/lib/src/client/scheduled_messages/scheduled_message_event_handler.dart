@@ -2,7 +2,7 @@ import '../../core/models/event.dart';
 import '../../event_type.dart';
 import 'scheduled_message_list_state.dart';
 
-/// A handler that applies scheduled message events to a
+/// A handler that applies the server's events to a
 /// [ScheduledMessageListStateNotifier].
 class ScheduledMessageEventHandler {
   /// Creates a handler applying events to [state].
@@ -14,10 +14,11 @@ class ScheduledMessageEventHandler {
   /// Applies [event] to [state].
   void handleEvent(Event event) {
     // A scheduled message shows the latest copy of the message it quotes.
-    if (event.type == EventType.messageUpdated || event.type == EventType.messageDeleted) {
+    if (event.type case EventType.messageUpdated || EventType.messageDeleted) {
       final message = event.message;
-      if (message != null) state.onQuotedMessageUpdated(message);
-      return;
+      if (message == null) return;
+
+      return state.onQuotedMessageUpdated(message);
     }
 
     final scheduledMessage = event.scheduledMessage;

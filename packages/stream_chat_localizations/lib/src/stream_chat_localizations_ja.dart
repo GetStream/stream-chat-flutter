@@ -901,25 +901,27 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+  String scheduledMessageFailureText({
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {
-    return switch (reason) {
-      .requestFailed => '送信できませんでした。もう一度お試しください',
-      .attachmentUploadFailed => '添付ファイルをアップロードできませんでした',
-      .internalError => '問題が発生しました。もう一度お試しください',
-      .channelDeleted => 'このチャンネルは削除されました',
-      .userDeleted => 'アカウントが削除されました',
-      .channelFrozen => 'このチャンネルは凍結されています',
-      .banned => 'このチャンネルではメッセージを送信できません',
-      .noPermission => 'ここに投稿する権限がなくなりました',
-      .moderationBlocked => 'モデレーションによりブロックされました',
-      .hookRejected => 'アプリにより拒否されました',
-      .expired => '送信されませんでした：サービスが遅延しました',
-      .pendingNotSupported => 'このチャンネルでは承認が必要になりました。もう一度予約してください。',
-      .invalidMessage when isQuoteDeleted => '引用元のメッセージが削除されました。編集して引用を削除してください。',
-      .invalidMessage => 'メッセージがアプリの制限を満たさなくなりました。編集してください。',
+    return switch (failure) {
+      ScheduledMessageUpdatingFailed() => '編集は保存されませんでした。以前のバージョンが引き続き予約されています。',
+      ScheduledMessageUploadFailed() => '添付ファイルをアップロードできませんでした',
+      ScheduledMessageSchedulingFailed() => '予約できませんでした。',
+      ScheduledMessageSendingFailed(reason: .internalError) => '問題が発生しました。もう一度お試しください',
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => 'このチャンネルは削除されました',
+      ScheduledMessageSendingFailed(reason: .userDeleted) => 'アカウントが削除されました',
+      ScheduledMessageSendingFailed(reason: .channelFrozen) => 'このチャンネルは凍結されています',
+      ScheduledMessageSendingFailed(reason: .banned) => 'このチャンネルではメッセージを送信できません',
+      ScheduledMessageSendingFailed(reason: .noPermission) => 'ここに投稿する権限がなくなりました',
+      ScheduledMessageSendingFailed(reason: .moderationBlocked) => 'モデレーションによりブロックされました',
+      ScheduledMessageSendingFailed(reason: .hookRejected) => 'アプリにより拒否されました',
+      ScheduledMessageSendingFailed(reason: .expired) => '送信されませんでした：サービスが遅延しました',
+      ScheduledMessageSendingFailed(reason: .pendingNotSupported) => 'このチャンネルでは承認が必要になりました。もう一度予約してください。',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) when isQuoteDeleted =>
+        '引用元のメッセージが削除されました。編集して引用を削除してください。',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) => 'メッセージがアプリの制限を満たさなくなりました。編集してください。',
       _ => '問題が発生しました。もう一度お試しください',
     };
   }

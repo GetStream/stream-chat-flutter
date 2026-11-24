@@ -32,8 +32,8 @@ ScheduleErrorTexts scheduleErrorTexts(BuildContext context) {
 String describeScheduleError(Object error, ScheduleErrorTexts texts) {
   if (error is ScheduledMessageRefusedError) {
     return switch (error.reason) {
-      .slashCommand => texts.commandRefused,
-      .quotedMessageDeleted => texts.quotedMessageDeleted,
+      .scheduledMessageIsCommand => texts.commandRefused,
+      .scheduledMessageQuoteDeleted => texts.quotedMessageDeleted,
       _ => texts.refused,
     };
   }
@@ -52,6 +52,7 @@ String describeScheduleError(Object error, ScheduleErrorTexts texts) {
     .scheduledMessageAlreadySent => ScheduledMessagesStrings.alreadySentError,
     .scheduledMessageCanceled => ScheduledMessagesStrings.canceled,
     _ when error.isScheduledMessageNotFound => ScheduledMessagesStrings.sentOrDeleted,
+    _ when !error.isRetriable => texts.refused,
     _ => texts.generic,
   };
 }
@@ -63,12 +64,12 @@ String describeScheduleError(Object error, ScheduleErrorTexts texts) {
 /// there is nothing left to change.
 void showScheduleError(StreamSnackbarMessenger messenger, Object error, ScheduleErrorTexts texts) {
   final description = describeScheduleError(error, texts);
-  final variant = isScheduledMessageGone(error) ? StreamSnackbarVariant.neutral : StreamSnackbarVariant.error;
+  final variant = _isScheduledMessageGone(error) ? StreamSnackbarVariant.neutral : StreamSnackbarVariant.error;
   messenger.show(StreamSnackbar(message: Text(description), variant: variant));
 }
 
-/// Whether [error] says the scheduled message was already sent or deleted.
-bool isScheduledMessageGone(Object error) {
+// Whether [error] says the scheduled message was already sent or deleted.
+bool _isScheduledMessageGone(Object error) {
   if (error is! StreamChatNetworkError) return false;
   if (error.scheduledMessageErrorReason == .scheduledMessageAlreadySent) return true;
   return error.isScheduledMessageNotFound;

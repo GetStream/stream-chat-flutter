@@ -7,8 +7,9 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 const _defaultMinLeadTime = Duration(minutes: 1);
 const _defaultMaxLeadTime = Duration(days: 120);
 
-/// The earliest and latest times a message can be scheduled for in a
-/// channel, measured from now.
+/// The earliest and latest times a message can be scheduled for in a channel.
+///
+/// Both are measured from now.
 @internal
 class ScheduleMessageBounds {
   /// Creates the bounds a channel's [config] sets, measured from now.
@@ -71,8 +72,9 @@ List<DateTime> schedulePresets() {
   ];
 }
 
-/// The label of a time-zone [offset] from UTC, such as "GMT", "GMT+2" or
-/// "GMT+5:30".
+/// The label of a time-zone [offset] from UTC.
+///
+/// For example, "GMT", "GMT+2" or "GMT+5:30".
 @internal
 String timeZoneLabel(Duration offset) {
   if (offset == Duration.zero) return 'GMT';

@@ -36,8 +36,8 @@ FocusNode composerFocusNode(WidgetTester tester) {
 }
 
 /// Pumps a [StreamThreadPage] for [parent], in a channel holding
-/// [scheduledMessages].
-Future<void> pumpThreadPage(
+/// [scheduledMessages], and returns the channel.
+Future<MockChannel> pumpThreadPage(
   WidgetTester tester, {
   Message? parent,
   StreamSurfaceStyle surfaceStyle = StreamSurfaceStyle.regular,
@@ -48,6 +48,7 @@ Future<void> pumpThreadPage(
   bool pushOntoARoute = false,
   List<ScheduledMessage> scheduledMessages = const [],
   StreamScheduledMessagesBannerTapCallback? onScheduledMessagesBannerTap,
+  StreamChatConfigurationData? configData,
 }) async {
   final originalRecordPlatform = RecordPlatform.instance;
   RecordPlatform.instance = FakeRecordPlatform();
@@ -133,6 +134,7 @@ Future<void> pumpThreadPage(
       // Chat context lives above the navigator so it survives a pop.
       builder: (context, child) => StreamChat(
         client: client,
+        configData: configData,
         themeData: switch (headerSurfaceStyle) {
           final surfaceStyle? => StreamChatThemeData(
             threadHeaderTheme: StreamAppBarThemeData(style: StreamAppBarStyle(surfaceStyle: surfaceStyle)),
@@ -152,4 +154,5 @@ Future<void> pumpThreadPage(
   );
 
   await tester.pumpAndSettle();
+  return channel;
 }

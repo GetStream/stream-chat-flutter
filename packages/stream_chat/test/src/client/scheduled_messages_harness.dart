@@ -1,3 +1,4 @@
+import 'package:clock/clock.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -27,12 +28,52 @@ final quoteDeletedError = StreamChatNetworkError.raw(
 final offline = StreamChatNetworkError.raw(code: -1, message: 'No connection');
 
 // The codes of the errors that refuse a scheduled message request because the
-// message is being sent, was changed at the same time, was already sent, or
-// was deleted.
+// time is too far ahead, the message can no longer be changed, is being sent,
+// was changed at the same time, was already sent, or was deleted.
+const scheduledAtTooFarCode = 116;
+const scheduledMessageNotEditableCode = 120;
 const scheduledMessageSendingCode = 121;
 const scheduledMessageConflictCode = 122;
 const scheduledMessageAlreadySentCode = 123;
 const scheduledMessageCanceledCode = 124;
+
+// The error that refuses a scheduled message request with [code].
+StreamChatNetworkError refusedWith(int code) {
+  return StreamChatNetworkError.raw(
+    code: code,
+    message: 'Refused',
+    statusCode: 400,
+    data: ErrorResponse()
+      ..code = code
+      ..statusCode = 400
+      ..message = 'Refused',
+  );
+}
+
+// The time the scheduling tests run at, and the time they schedule for.
+final now = DateTime.utc(2026, 10, 30, 12);
+final scheduledAt = now.add(const Duration(days: 1));
+
+// An error that refuses to schedule a message.
+final rejected = StreamChatNetworkError(
+  ChatErrorCode.inputError,
+  data: ErrorResponse()
+    ..code = 4
+    ..statusCode = 400
+    ..message = 'Too many scheduled messages',
+);
+
+// The response for [message] scheduled as [scheduledMessage].
+ScheduleMessageResponse scheduled(Message message, ScheduledMessage scheduledMessage) {
+  return ScheduleMessageResponse()
+    ..message = message
+    ..scheduledMessage = scheduledMessage;
+}
+
+// The response for [message] when its time had passed and it was sent.
+ScheduleMessageResponse sentRightAway(Message message) {
+  return ScheduleMessageResponse()..message = message;
+}
 
 // A scheduled message in a channel other than [testCid].
 final elsewhere = fakeScheduledMessage('there', cid: 'messaging:other', scheduledAt: DateTime.utc(2026, 11, 3));
@@ -47,7 +88,7 @@ ScheduledMessage fakeScheduledMessage(
   String text = 'Good morning',
   String? parentId,
   ScheduledMessageStatus status = ScheduledMessageStatus.scheduled,
-  ScheduledMessageFailureReason? failureReason,
+  ScheduledMessageFailure? failure,
   bool isOnServer = true,
 }) => ScheduledMessage(
   id: id,
@@ -56,7 +97,7 @@ ScheduledMessage fakeScheduledMessage(
   message: Message(id: id, text: text, parentId: parentId),
   scheduledAt: scheduledAt ?? DateTime.utc(2026, 11, 2, 9),
   status: status,
-  failureReason: failureReason,
+  failure: failure,
   createdAt: isOnServer ? DateTime.utc(2026, 10, 29) : null,
   updatedAt: isOnServer ? updatedAt ?? DateTime.utc(2026, 10, 29) : null,
 );
@@ -155,12 +196,25 @@ class ScheduledMessageHarness {
     await settle();
   }
 
-  // The scheduled message events while [run] runs, as type and status. What
+  // The statuses the scheduled message [id] is listed with while [run] runs,
+  // one for each copy of it listed, and null when it stops being listed. What
   // [run] throws is thrown, so a test of a failing request asserts it.
-  Future<List<(String, ScheduledMessageStatus?)>> eventsDuring(Future<void> Function() run) async {
-    final events = <(String, ScheduledMessageStatus?)>[];
-    final subscription = client.on().where((it) => it.scheduledMessage != null).listen((it) {
-      events.add((it.type, it.scheduledMessage?.status));
+  Future<List<ScheduledMessageStatus?>> statusesDuring(
+    Future<void> Function() run, {
+    String id = 'a',
+  }) async {
+    ScheduledMessage? listed(List<ScheduledMessage> scheduledMessages) {
+      return scheduledMessages.where((it) => it.id == id).firstOrNull;
+    }
+
+    final statuses = <ScheduledMessageStatus?>[];
+    var last = listed(client.state.scheduledMessages);
+    final subscription = client.state.scheduledMessagesStream.listen((scheduledMessages) {
+      final copy = listed(scheduledMessages);
+      if (copy == last) return;
+
+      last = copy;
+      statuses.add(copy?.status);
     });
 
     try {
@@ -170,7 +224,7 @@ class ScheduledMessageHarness {
       await subscription.cancel();
     }
 
-    return events;
+    return statuses;
   }
 
   // Makes the client hold [messages], as if each had just been scheduled.
@@ -178,6 +232,33 @@ class ScheduledMessageHarness {
     for (final message in messages) {
       await receive(EventType.scheduledMessageCreated, message);
     }
+  }
+
+  // Schedules [message] at [scheduledAt], then lets the events it emits
+  // through.
+  Future<ScheduleMessageResponse> schedule(Message message) async {
+    try {
+      return await withClock(
+        Clock.fixed(now),
+        () => client.scheduleMessage(message, 'general', 'messaging', scheduledAt: scheduledAt),
+      );
+    } finally {
+      await settle();
+    }
+  }
+
+  // Answers scheduling [message] at [scheduledAt] with [answer].
+  void stubSchedule(Message message, Future<ScheduleMessageResponse> Function() answer) {
+    when(
+      () => api.scheduledMessages.scheduleMessage('general', 'messaging', message, scheduledAt),
+    ).thenAnswer((_) => answer());
+  }
+
+  // Schedules [message] while the server can't be reached.
+  Future<ScheduledMessage> scheduleUnreachable(Message message) async {
+    stubSchedule(message, () async => throw offline);
+    await expectLater(schedule(message), throwsA(offline));
+    return client.state.scheduledMessages.single;
   }
 
   // Answers every query with [response].

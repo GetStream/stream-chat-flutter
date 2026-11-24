@@ -5,6 +5,7 @@
 abstract final class ScheduledMessagesStrings {
   static const title = 'Scheduled messages';
   static const stillSending = 'Still sending. Try again in a moment.';
+  static const stillSaving = 'Still saving. Try again in a moment.';
   static const rescheduled = 'Message rescheduled';
   static const sendingNow = 'Sending message';
   static const copied = 'Message copied';

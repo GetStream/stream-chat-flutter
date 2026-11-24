@@ -20,17 +20,17 @@ void main() {
     when(() => harness.api.scheduledMessages.sendScheduledMessageNow('a')).thenAnswer((_) => answer());
   }
 
-  Future<List<(String, ScheduledMessageStatus?)>> sendNow({Object? throws}) async {
+  Future<List<ScheduledMessageStatus?>> sendNow({Object? throws}) async {
     await harness.hold([original]);
-    return harness.eventsDuring(() => expectRequest(harness.client.sendScheduledMessageNow(original.id), throws));
+    return harness.statusesDuring(() => expectRequest(harness.client.sendScheduledMessageNow(original.id), throws));
   }
 
   test('sendScheduledMessageNow lists it as preparing while the request runs, then as the server answers', () async {
     stubSendNow(() async => fakeSendNow(accepted));
 
     expect(await sendNow(), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
+      ScheduledMessageStatus.preparingToSchedule,
+      ScheduledMessageStatus.scheduled,
     ]);
     expect(harness.client.state.scheduledMessages, [accepted]);
   });
@@ -53,7 +53,6 @@ void main() {
     });
 
     await harness.client.sendScheduledMessageNow(original.id);
-    await settle();
 
     expect(harness.client.state.scheduledMessages, isEmpty);
   });
@@ -62,8 +61,8 @@ void main() {
     stubSendNow(() async => throw offline);
 
     expect(await sendNow(throws: offline), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
+      ScheduledMessageStatus.preparingToSchedule,
+      ScheduledMessageStatus.scheduled,
     ]);
     expect(harness.client.state.scheduledMessages.single.updatedAt, original.updatedAt);
   });
@@ -72,8 +71,8 @@ void main() {
     stubSendNow(() async => throw refused);
 
     expect(await sendNow(throws: refused), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
+      ScheduledMessageStatus.preparingToSchedule,
+      ScheduledMessageStatus.scheduled,
     ]);
   });
 
@@ -81,17 +80,17 @@ void main() {
     stubSendNow(() async => throw sendingError);
 
     expect(await sendNow(throws: sendingError), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.scheduled),
+      ScheduledMessageStatus.preparingToSchedule,
+      ScheduledMessageStatus.scheduled,
     ]);
   });
 
-  test('sendScheduledMessageNow reports one the server no longer has as deleted', () async {
+  test('sendScheduledMessageNow stops listing one the server no longer has', () async {
     stubSendNow(() async => throw missingError);
 
     expect(await sendNow(throws: missingError), [
-      (EventType.scheduledMessageUpdated, ScheduledMessageStatus.preparingToSchedule),
-      (EventType.scheduledMessageDeleted, ScheduledMessageStatus.canceled),
+      ScheduledMessageStatus.preparingToSchedule,
+      null,
     ]);
     expect(harness.client.state.scheduledMessages, isEmpty);
   });

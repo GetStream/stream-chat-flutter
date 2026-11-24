@@ -18,8 +18,9 @@ class ScheduledMessageCounts extends Equatable {
     this.nextScheduledAt,
   });
 
-  /// Counts [scheduledMessages] in the channel [cid], or in the thread of
-  /// [parentId] when it is set.
+  /// Counts [scheduledMessages] in the channel [cid].
+  ///
+  /// With [parentId], it counts the ones in that thread instead.
   factory ScheduledMessageCounts.of(
     List<ScheduledMessage> scheduledMessages, {
     required String cid,
@@ -31,16 +32,19 @@ class ScheduledMessageCounts extends Equatable {
     var userPending = 0;
     DateTime? nextScheduledAt;
     for (final it in scheduledMessages) {
-      // A failed edit is still scheduled as it was before.
-      final isPending = it.status.isPending || (it.failureReason?.isEditFailure ?? false);
+      // A failed edit is still scheduled as it was before, so it is pending,
+      // not failed.
+      final isPending = it.status.isPending || it.failure is ScheduledMessageUpdatingFailed;
       if (isPending) userPending += 1;
       if (it.cid != cid) continue;
       if (isPending) channelPending += 1;
 
       // A channel counts its own messages, a thread its replies.
       if (it.message.parentId != parentId) continue;
-      if (it.status == .failed) failed += 1;
-      if (!isPending) continue;
+      if (!isPending) {
+        if (it.status == .failed) failed += 1;
+        continue;
+      }
 
       pending += 1;
       final scheduledAt = it.scheduledAt;
@@ -58,7 +62,7 @@ class ScheduledMessageCounts extends Equatable {
     );
   }
 
-  /// The failed messages in the channel or thread.
+  /// The failed messages in the channel or thread that won't be sent.
   final int failed;
 
   /// The messages still to be sent in the channel or thread.
@@ -70,8 +74,9 @@ class ScheduledMessageCounts extends Equatable {
   /// The pending messages of every channel.
   final int userPending;
 
-  /// When the first pending message in the channel or thread is sent, or null
-  /// when none is pending.
+  /// When the first pending message in the channel or thread is sent.
+  ///
+  /// Null when none is pending.
   final DateTime? nextScheduledAt;
 
   /// Whether any message failed.

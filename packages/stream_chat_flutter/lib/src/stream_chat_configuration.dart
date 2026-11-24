@@ -233,12 +233,11 @@ class StreamChatConfigurationData {
   /// Defaults to False.
   final bool draftMessagesEnabled;
 
-  /// Whether [StreamChannelPage] and [StreamThreadPage] offer scheduled
-  /// messages: a banner of them above the composer, and scheduling the
-  /// message on a long press of send.
+  /// Whether [StreamChannelPage] and [StreamThreadPage] offer scheduling.
   ///
-  /// They are offered only where the current user can schedule messages.
-  /// Defaults to true.
+  /// When true, they show a banner of scheduled messages above the composer
+  /// and schedule the message on a long press of send, where the current user
+  /// can schedule messages. Defaults to true.
   final bool scheduledMessagesEnabled;
 
   /// The resolver used to convert reaction types into [StreamEmojiContent]

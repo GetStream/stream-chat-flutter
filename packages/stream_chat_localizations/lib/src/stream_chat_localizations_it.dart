@@ -933,26 +933,30 @@ Attenzione: il limite massimo di $limit file è stato superato.
   }
 
   @override
-  String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+  String scheduledMessageFailureText({
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {
-    return switch (reason) {
-      .requestFailed => 'Invio non riuscito. Riprova',
-      .attachmentUploadFailed => "Impossibile caricare l'allegato",
-      .internalError => 'Si è verificato un errore. Riprova',
-      .channelDeleted => 'Questo canale è stato eliminato',
-      .userDeleted => 'Il tuo account è stato eliminato',
-      .channelFrozen => 'Questo canale è congelato',
-      .banned => 'Non puoi inviare messaggi in questo canale',
-      .noPermission => 'Non sei più autorizzato a pubblicare qui',
-      .moderationBlocked => 'Bloccato dalla moderazione',
-      .hookRejected => "Rifiutato dall'app",
-      .expired => 'Non inviato: il servizio ha subito un ritardo',
-      .pendingNotSupported => 'Questo canale ora richiede approvazione. Programmalo di nuovo.',
-      .invalidMessage when isQuoteDeleted =>
+    return switch (failure) {
+      ScheduledMessageUpdatingFailed() =>
+        'La modifica non è stata salvata. La versione precedente è ancora programmata.',
+      ScheduledMessageUploadFailed() => "Impossibile caricare l'allegato",
+      ScheduledMessageSchedulingFailed() => 'Impossibile programmare.',
+      ScheduledMessageSendingFailed(reason: .internalError) => 'Si è verificato un errore. Riprova',
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => 'Questo canale è stato eliminato',
+      ScheduledMessageSendingFailed(reason: .userDeleted) => 'Il tuo account è stato eliminato',
+      ScheduledMessageSendingFailed(reason: .channelFrozen) => 'Questo canale è congelato',
+      ScheduledMessageSendingFailed(reason: .banned) => 'Non puoi inviare messaggi in questo canale',
+      ScheduledMessageSendingFailed(reason: .noPermission) => 'Non sei più autorizzato a pubblicare qui',
+      ScheduledMessageSendingFailed(reason: .moderationBlocked) => 'Bloccato dalla moderazione',
+      ScheduledMessageSendingFailed(reason: .hookRejected) => "Rifiutato dall'app",
+      ScheduledMessageSendingFailed(reason: .expired) => 'Non inviato: il servizio ha subito un ritardo',
+      ScheduledMessageSendingFailed(reason: .pendingNotSupported) =>
+        'Questo canale ora richiede approvazione. Programmalo di nuovo.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) when isQuoteDeleted =>
         'Il messaggio citato è stato eliminato. Modificalo per rimuovere la citazione.',
-      .invalidMessage => "Il messaggio non rispetta più i limiti dell'app. Modificalo.",
+      ScheduledMessageSendingFailed(reason: .invalidMessage) =>
+        "Il messaggio non rispetta più i limiti dell'app. Modificalo.",
       _ => 'Si è verificato un errore. Riprova',
     };
   }

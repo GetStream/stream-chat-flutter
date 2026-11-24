@@ -922,25 +922,29 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   }
 
   @override
-  String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+  String scheduledMessageFailureText({
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {
-    return switch (reason) {
-      .requestFailed => 'Não foi possível enviar. Tente novamente',
-      .attachmentUploadFailed => 'Não foi possível enviar o anexo',
-      .internalError => 'Algo deu errado. Tente novamente',
-      .channelDeleted => 'Este canal foi excluído',
-      .userDeleted => 'Sua conta foi excluída',
-      .channelFrozen => 'Este canal está congelado',
-      .banned => 'Você não pode enviar mensagens neste canal',
-      .noPermission => 'Você não tem mais permissão para publicar aqui',
-      .moderationBlocked => 'Bloqueada pela moderação',
-      .hookRejected => 'Rejeitada pelo aplicativo',
-      .expired => 'Não enviada: o serviço atrasou',
-      .pendingNotSupported => 'Este canal agora exige aprovação. Agende novamente.',
-      .invalidMessage when isQuoteDeleted => 'A mensagem citada foi excluída. Edite para remover a citação.',
-      .invalidMessage => 'A mensagem não atende mais aos limites do aplicativo. Edite-a.',
+    return switch (failure) {
+      ScheduledMessageUpdatingFailed() => 'A edição não foi salva. A versão anterior continua agendada.',
+      ScheduledMessageUploadFailed() => 'Não foi possível enviar o anexo',
+      ScheduledMessageSchedulingFailed() => 'Não foi possível agendar.',
+      ScheduledMessageSendingFailed(reason: .internalError) => 'Algo deu errado. Tente novamente',
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => 'Este canal foi excluído',
+      ScheduledMessageSendingFailed(reason: .userDeleted) => 'Sua conta foi excluída',
+      ScheduledMessageSendingFailed(reason: .channelFrozen) => 'Este canal está congelado',
+      ScheduledMessageSendingFailed(reason: .banned) => 'Você não pode enviar mensagens neste canal',
+      ScheduledMessageSendingFailed(reason: .noPermission) => 'Você não tem mais permissão para publicar aqui',
+      ScheduledMessageSendingFailed(reason: .moderationBlocked) => 'Bloqueada pela moderação',
+      ScheduledMessageSendingFailed(reason: .hookRejected) => 'Rejeitada pelo aplicativo',
+      ScheduledMessageSendingFailed(reason: .expired) => 'Não enviada: o serviço atrasou',
+      ScheduledMessageSendingFailed(reason: .pendingNotSupported) =>
+        'Este canal agora exige aprovação. Agende novamente.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) when isQuoteDeleted =>
+        'A mensagem citada foi excluída. Edite para remover a citação.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) =>
+        'A mensagem não atende mais aos limites do aplicativo. Edite-a.',
       _ => 'Algo deu errado. Tente novamente',
     };
   }

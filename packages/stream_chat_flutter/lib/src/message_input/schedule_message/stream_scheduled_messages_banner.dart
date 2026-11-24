@@ -27,8 +27,9 @@ import 'scheduled_message_counts.dart';
 ///  * [StreamChannelPage] and [StreamThreadPage], which show this banner above
 ///    their composer.
 class StreamScheduledMessagesBanner extends StatelessWidget {
-  /// Creates a banner of the scheduled messages of the enclosing channel, or
-  /// of the thread of [parentId].
+  /// Creates a banner of the enclosing channel's scheduled messages.
+  ///
+  /// With [parentId], it counts the scheduled replies of that thread instead.
   StreamScheduledMessagesBanner({
     super.key,
     String? parentId,
@@ -125,18 +126,6 @@ class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamSche
   Stream<ScheduledMessageCounts>? _counts;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    final channel = StreamChannel.of(context).channel;
-    if (channel == _channel) return;
-
-    _channel = channel;
-    _initialized = channel.initialized;
-    _canSchedule = null;
-    _counts = null;
-  }
-
-  @override
   void didUpdateWidget(covariant DefaultStreamScheduledMessagesBanner oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.props.parentId == oldWidget.props.parentId) return;
@@ -152,9 +141,21 @@ class _DefaultStreamScheduledMessagesBannerState extends State<DefaultStreamSche
     );
   }
 
+  // Follows the enclosing channel, which can be swapped without notifying
+  // this state.
+  void _followChannel(Channel channel) {
+    if (channel == _channel) return;
+
+    _channel = channel;
+    _initialized = channel.initialized;
+    _canSchedule = null;
+    _counts = null;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final channel = _channel!;
+    final channel = StreamChannel.of(context).channel;
+    _followChannel(channel);
     final cid = channel.cid;
     if (cid != null && channel.state != null) return _buildForChannel(channel, cid);
 
@@ -226,8 +227,8 @@ class _ScheduledMessagesBanner extends StatelessWidget {
     final ScheduledMessageCounts(:failed, :pending, :channelPending, :hasFailed, :hasPending) = counts;
     if (!hasFailed && !hasPending) return const SizedBox.shrink();
 
-    // The channel's limit isn't shown in a thread.
-    final limit = isThread ? null : channel.config?.scheduledMessagesMaxPerChannel;
+    // The channel's limit counts its thread replies too, so a thread shows it.
+    final limit = channel.config?.scheduledMessagesMaxPerChannel;
     final isAtLimit = limit != null && channelPending >= limit;
     // The only scheduled message, or reply, is named by when it is sent.
     final onlyScheduledAt = switch (counts.nextScheduledAt) {

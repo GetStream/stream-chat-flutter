@@ -4,14 +4,15 @@ import '../../../stream_chat_flutter.dart';
 import 'schedule_message_bounds.dart';
 import 'scheduled_message_counts.dart';
 
-/// Shows the times [message] can be scheduled for in [channel], which must be
-/// initialized, in a sheet.
+/// Shows a sheet of the times [message] can be scheduled for in [channel].
 ///
-/// The sheet offers tomorrow morning and afternoon, the next Monday morning,
-/// and a custom time, which opens [showStreamScheduleTimeSheet]. A preset the
-/// channel doesn't allow is disabled, and none can be picked once the channel
-/// or the user holds its limit. Returns the chosen time, or null when
-/// the sheet is dismissed.
+/// The [channel] must be initialized. The sheet offers tomorrow morning and
+/// afternoon, the next Monday morning, and a custom time, which opens
+/// [showStreamScheduleTimeSheet]. A preset the channel doesn't allow is
+/// disabled, and none can be picked once the channel or the user holds its
+/// limit.
+///
+/// Returns the chosen time, or null when the sheet is dismissed.
 Future<DateTime?> showStreamScheduleMessageSheet({
   required BuildContext context,
   required Channel channel,

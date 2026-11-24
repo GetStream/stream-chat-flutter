@@ -4,8 +4,9 @@ import 'package:meta/meta.dart';
 import '../../stream_chat_flutter.dart';
 import '../localization/translations.dart';
 
-/// The composer of a [StreamChannelPage] or [StreamThreadPage], with a
-/// [StreamScheduledMessagesBanner] above it.
+/// The composer of a [StreamChannelPage] or [StreamThreadPage].
+///
+/// A [StreamScheduledMessagesBanner] is shown above it.
 ///
 /// The banner is hidden while [controller] edits a message. Where the user can
 /// schedule messages, a long press of send schedules the message, unless
@@ -13,8 +14,9 @@ import '../localization/translations.dart';
 /// hides the banner.
 @internal
 class PageComposer extends StatefulWidget {
-  /// Creates a page composer that shows the composer [builder] builds below
-  /// the banner.
+  /// Creates a page composer around the composer [builder] builds.
+  ///
+  /// The composer is shown below the banner.
   const PageComposer({
     super.key,
     required this.controller,
@@ -26,8 +28,10 @@ class PageComposer extends StatefulWidget {
   /// The controller of the composer, whose editing hides the banner.
   final StreamMessageComposerController controller;
 
-  /// Builds the composer shown below the banner, given what a long press of
-  /// send does, or null when it does nothing.
+  /// Builds the composer shown below the banner.
+  ///
+  /// It is given what a long press of send does, or null when it does
+  /// nothing.
   final Widget Function(BuildContext context, StreamMessageComposerCallback? onSendLongPress) builder;
 
   /// The ID of the message whose thread's scheduled replies the banner counts.
@@ -97,69 +101,70 @@ class _PageComposerState extends State<PageComposer> {
   }
 }
 
-// Schedules the composer's message for a time picked from the schedule sheet.
-// The composer is cleared right away, as sending does, and gets the message
-// back only when it is refused before it is listed.
-Future<void> _scheduleOnSendLongPress(BuildContext context, StreamMessageComposerController controller) async {
+// Schedules the composer's message for a time picked from the schedule sheet,
+// clearing the composer as soon as the time is picked. A refused one is put
+// back, unless something was typed meanwhile.
+Future<void> _scheduleOnSendLongPress(
+  BuildContext context,
+  StreamMessageComposerController controller,
+) async {
   final message = controller.value;
   final channel = StreamChannel.of(context).channel;
   final messenger = StreamSnackbarMessenger.of(context);
   final translations = context.translations;
 
   final scheduledAt = await showStreamScheduleMessageSheet(context: context, channel: channel, message: message);
-  if (scheduledAt == null) return;
+  if (scheduledAt == null || !context.mounted) return;
 
-  // The next message gets an ID of its own, as the scheduled one took this
-  // one's.
+  // Cleared before it is scheduled, so it can't be sent as well meanwhile.
   controller.reset();
   final cleared = controller.value;
 
   try {
     await channel.scheduleMessage(message, scheduledAt: scheduledAt);
   } catch (error) {
-    // Its failure is shown on the scheduled messages, to retry from there.
-    if (_isListedOnFailure(error)) return;
+    // One listed as failed is retried from the scheduled messages.
+    final listed = channel.client.state.scheduledMessages.where((it) => it.id == message.id).firstOrNull;
+    if (listed != null) {
+      if (listed.failure case final ScheduledMessageUploadFailed failure) {
+        final text = translations.scheduledMessageFailureText(failure: failure);
+        messenger.show(StreamSnackbar(message: Text(text), variant: .error));
+      }
+      return;
+    }
 
-    // Unless something was typed since, the composer gets it back to fix.
-    final isUntouched = controller.value == cleared;
-    if (_isRefusedBeforeListed(error) && isUntouched) controller.value = message;
+    // One deleted, replaced or sent meanwhile is done with.
+    if (!_isRefused(error)) return;
 
     final text = _scheduleErrorText(translations, channel, error);
     messenger.show(StreamSnackbar(message: Text(text), variant: .error));
+
+    if (context.mounted && controller.value == cleared) controller.message = message;
   }
 }
 
-// Whether the message stays listed as failed after [error], or was sent.
-bool _isListedOnFailure(Object error) {
+// Whether scheduling was refused with [error], so the message isn't scheduled.
+bool _isRefused(Object error) {
   return switch (error) {
-    StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) => true,
-    StreamChatNetworkError(:final isRetriable) => isRetriable,
-    _ => false,
-  };
-}
-
-// Whether [error] refused the message before it was listed, or stopped
-// listing it, so only the composer still has it.
-bool _isRefusedBeforeListed(Object error) {
-  return switch (error) {
-    ArgumentError() || StateError() || ScheduledMessageRefusedError() => true,
-    StreamChatNetworkError(:final isRetriable) => !isRetriable,
+    ScheduledMessageRefusedError() || ArgumentError() || StateError() => true,
+    StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) => false,
+    StreamChatNetworkError() => !error.isRetriable,
     _ => false,
   };
 }
 
 // Why scheduling failed with [error], in the words of [translations].
 String _scheduleErrorText(Translations translations, Channel channel, Object error) {
-  final (reason, isRefusedOnDevice) = switch (error) {
-    ScheduledMessageRefusedError(:final reason) => (reason, true),
-    StreamChatNetworkError(:final scheduledMessageErrorReason) => (scheduledMessageErrorReason, false),
+  final (reason, isRefused) = switch (error) {
+    ScheduledMessageRefusedError() => (error.reason, true),
+    StreamChatNetworkError() => (error.scheduledMessageErrorReason, !error.isRetriable),
     _ => (null, false),
   };
 
   final config = channel.config;
   return switch (reason) {
-    .slashCommand => translations.scheduleCommandRefusedError,
-    .quotedMessageDeleted => translations.scheduleQuotedMessageDeletedError,
+    .scheduledMessageIsCommand => translations.scheduleCommandRefusedError,
+    .scheduledMessageQuoteDeleted => translations.scheduleQuotedMessageDeletedError,
     .scheduledAtTooFar => translations.scheduleTooFarError,
     .scheduledLimitChannel => switch (config?.scheduledMessagesMaxPerChannel) {
       final limit? => translations.scheduleLimitReachedLabel(limit: limit),
@@ -170,8 +175,9 @@ String _scheduleErrorText(Translations translations, Channel channel, Object err
       null => translations.scheduleMessageError,
     },
     .scheduledAtTooSoon => translations.scheduleMessageRefusedError,
-    // Any other refusal on this device fails again when retried.
-    _ when isRefusedOnDevice => translations.scheduleMessageRefusedError,
+    // Any other refusal, on this device or by the server, fails again when
+    // retried.
+    _ when isRefused => translations.scheduleMessageRefusedError,
     _ => translations.scheduleMessageError,
   };
 }

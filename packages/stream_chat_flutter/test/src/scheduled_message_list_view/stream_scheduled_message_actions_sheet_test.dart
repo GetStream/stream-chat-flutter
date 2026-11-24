@@ -10,7 +10,10 @@ void main() {
     (
       tester,
     ) async {
-      final failed = fakeScheduledMessage(status: .failed, failureReason: .requestFailed);
+      final failed = fakeScheduledMessage(
+        status: .failed,
+        failure: const ScheduledMessageSchedulingFailed(),
+      );
       final results = await showActions(tester, failed);
 
       await tester.tap(find.text('Edit & Reschedule'));
@@ -116,7 +119,10 @@ void main() {
     (
       tester,
     ) async {
-      final failed = fakeScheduledMessage(status: .failed, failureReason: .requestFailed);
+      final failed = fakeScheduledMessage(
+        status: .failed,
+        failure: const ScheduledMessageSchedulingFailed(),
+      );
       final results = await showActions(tester, failed);
 
       await tester.tap(find.text('Edit & Reschedule'));
@@ -132,7 +138,11 @@ void main() {
     (
       tester,
     ) async {
-      final failed = fakeScheduledMessage(status: .failed, failureReason: .channelDeleted);
+      final failed = fakeScheduledMessage(
+        status: .failed,
+        failure: const ScheduledMessageSendingFailed(reason: ScheduledMessageSendingFailureReason.channelDeleted),
+        createdAt: DateTime(2026, 10, 20),
+      );
       final results = await showActions(tester, failed);
 
       await tester.tap(find.text('Copy Message'));

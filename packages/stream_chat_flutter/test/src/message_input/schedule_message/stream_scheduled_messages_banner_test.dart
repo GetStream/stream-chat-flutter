@@ -30,6 +30,28 @@ void main() {
     );
   }
 
+  testWidgets('StreamScheduledMessagesBanner follows the channel it is swapped to', (tester) async {
+    final first = scheduleChannel(canSchedule: false);
+    final second = scheduleChannel(scheduledMessages: [scheduledMessage('a'), scheduledMessage('b')]);
+    Widget app(Channel channel) => MaterialApp(
+      home: StreamChat(
+        client: first.client,
+        connectivityStream: Stream.value([ConnectivityResult.wifi]),
+        child: StreamChannel(
+          channel: channel,
+          child: Scaffold(body: StreamScheduledMessagesBanner()),
+        ),
+      ),
+    );
+
+    await tester.pumpWidget(app(first));
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(app(second));
+    await tester.pumpAndSettle();
+
+    expect(find.text('2 scheduled messages'), findsOneWidget);
+  });
+
   testWidgets('StreamScheduledMessagesBanner is empty without scheduled messages', (tester) async {
     await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessagesBanner(), channel: scheduleChannel()));
     await tester.pumpAndSettle();
@@ -88,7 +110,7 @@ void main() {
     expect(find.text('View all'), findsOneWidget);
   });
 
-  testWidgets("StreamScheduledMessagesBanner doesn't show the channel's limit in a thread", (tester) async {
+  testWidgets("StreamScheduledMessagesBanner shows the channel's limit in a thread", (tester) async {
     final channel = scheduleChannel(
       config: ChannelConfig(scheduledMessagesMaxPerChannel: 2),
       scheduledMessages: [
@@ -102,7 +124,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('2 scheduled replies'), findsOneWidget);
+    expect(find.text('2 of 2 scheduled messages'), findsOneWidget);
   });
 
   testWidgets("StreamScheduledMessagesBanner shows a thread's failed replies first", (tester) async {
@@ -119,6 +141,42 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('1 failed to send'), findsOneWidget);
+  });
+
+  testWidgets('StreamScheduledMessagesBanner counts a failed edit as scheduled', (tester) async {
+    final channel = scheduleChannel(
+      scheduledMessages: [
+        scheduledMessage(
+          'a',
+          status: ScheduledMessageStatus.failed,
+          failure: const ScheduledMessageUpdatingFailed(isRetriable: true),
+        ),
+        scheduledMessage('b'),
+      ],
+    );
+
+    await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessagesBanner(), channel: channel));
+    await tester.pumpAndSettle();
+
+    expect(find.text('2 scheduled messages'), findsOneWidget);
+  });
+
+  testWidgets('StreamScheduledMessagesBanner counts a refused edit as scheduled', (tester) async {
+    final channel = scheduleChannel(
+      scheduledMessages: [
+        scheduledMessage(
+          'a',
+          status: ScheduledMessageStatus.failed,
+          failure: const ScheduledMessageUpdatingFailed(isRetriable: false),
+        ),
+        scheduledMessage('b'),
+      ],
+    );
+
+    await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessagesBanner(), channel: channel));
+    await tester.pumpAndSettle();
+
+    expect(find.text('2 scheduled messages'), findsOneWidget);
   });
 
   testWidgets('StreamScheduledMessagesBanner shows the failed count instead of the scheduled count', (tester) async {

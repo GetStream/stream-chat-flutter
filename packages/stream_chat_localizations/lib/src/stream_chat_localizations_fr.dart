@@ -925,25 +925,30 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   }
 
   @override
-  String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+  String scheduledMessageFailureText({
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {
-    return switch (reason) {
-      .requestFailed => "Échec de l'envoi. Réessayez",
-      .attachmentUploadFailed => "Impossible d'envoyer la pièce jointe",
-      .internalError => 'Une erreur est survenue. Réessayez',
-      .channelDeleted => 'Ce canal a été supprimé',
-      .userDeleted => 'Votre compte a été supprimé',
-      .channelFrozen => 'Ce canal est gelé',
-      .banned => 'Vous ne pouvez pas envoyer de messages dans ce canal',
-      .noPermission => "Vous n'êtes plus autorisé à publier ici",
-      .moderationBlocked => 'Bloqué par la modération',
-      .hookRejected => "Refusé par l'application",
-      .expired => 'Non envoyé : le service a été retardé',
-      .pendingNotSupported => 'Ce canal nécessite désormais une approbation. Programmez-le à nouveau.',
-      .invalidMessage when isQuoteDeleted => 'Le message cité a été supprimé. Modifiez-le pour retirer la citation.',
-      .invalidMessage => "Le message ne respecte plus les limites de l'application. Modifiez-le.",
+    return switch (failure) {
+      ScheduledMessageUpdatingFailed() =>
+        "La modification n'a pas été enregistrée. La version précédente reste programmée.",
+      ScheduledMessageUploadFailed() => "Impossible d'envoyer la pièce jointe",
+      ScheduledMessageSchedulingFailed() => 'Impossible de programmer.',
+      ScheduledMessageSendingFailed(reason: .internalError) => 'Une erreur est survenue. Réessayez',
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => 'Ce canal a été supprimé',
+      ScheduledMessageSendingFailed(reason: .userDeleted) => 'Votre compte a été supprimé',
+      ScheduledMessageSendingFailed(reason: .channelFrozen) => 'Ce canal est gelé',
+      ScheduledMessageSendingFailed(reason: .banned) => 'Vous ne pouvez pas envoyer de messages dans ce canal',
+      ScheduledMessageSendingFailed(reason: .noPermission) => "Vous n'êtes plus autorisé à publier ici",
+      ScheduledMessageSendingFailed(reason: .moderationBlocked) => 'Bloqué par la modération',
+      ScheduledMessageSendingFailed(reason: .hookRejected) => "Refusé par l'application",
+      ScheduledMessageSendingFailed(reason: .expired) => 'Non envoyé : le service a été retardé',
+      ScheduledMessageSendingFailed(reason: .pendingNotSupported) =>
+        'Ce canal nécessite désormais une approbation. Programmez-le à nouveau.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) when isQuoteDeleted =>
+        'Le message cité a été supprimé. Modifiez-le pour retirer la citation.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) =>
+        "Le message ne respecte plus les limites de l'application. Modifiez-le.",
       _ => 'Une erreur est survenue. Réessayez',
     };
   }

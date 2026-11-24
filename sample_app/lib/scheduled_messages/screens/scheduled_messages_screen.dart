@@ -122,14 +122,17 @@ Future<void> _openScheduledMessageActions(
   ScheduledMessage scheduledMessage,
   ValueSetter<_Edit> startEdit,
 ) async {
-  // A message being sent has no actions, so its sheet wouldn't open.
+  // A message being sent, or whose change is being saved, has no actions, so
+  // its sheet wouldn't open.
   final actions = StreamScheduledMessageActionsBuilder.buildActions(
     context: context,
     scheduledMessage: scheduledMessage,
   );
   if (actions.isEmpty) {
+    final isSaving = scheduledMessage.status == .preparingToSchedule;
+    final busy = isSaving ? ScheduledMessagesStrings.stillSaving : ScheduledMessagesStrings.stillSending;
     final messenger = StreamSnackbarMessenger.of(context);
-    messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.stillSending)));
+    messenger.show(StreamSnackbar(message: Text(busy)));
     return;
   }
 
@@ -148,12 +151,12 @@ Future<void> _onScheduledMessageAction(
   ValueSetter<_Edit> startEdit,
 ) async {
   return switch (action) {
-    EditScheduledMessage(:final scheduledMessage) => _edit(context, scheduledMessage, startEdit),
-    EditAndRescheduleMessage(:final scheduledMessage) => _edit(context, scheduledMessage, startEdit),
-    RescheduleMessage(:final scheduledMessage) => _reschedule(context, scheduledMessage),
-    SendScheduledMessageNow(:final scheduledMessage) => _sendNow(context, scheduledMessage),
-    CopyScheduledMessageText(:final scheduledMessage) => _copyText(context, scheduledMessage),
-    DeleteScheduledMessage(:final scheduledMessage) => _maybeDelete(context, scheduledMessage),
+    EditScheduledMessage() => _edit(context, action.scheduledMessage, startEdit),
+    EditAndRescheduleMessage() => _edit(context, action.scheduledMessage, startEdit),
+    RescheduleMessage() => _reschedule(context, action.scheduledMessage),
+    SendScheduledMessageNow() => _sendNow(context, action.scheduledMessage),
+    CopyScheduledMessageText() => _copyText(context, action.scheduledMessage),
+    DeleteScheduledMessage() => _maybeDelete(context, action.scheduledMessage),
   };
 }
 
@@ -197,7 +200,8 @@ Future<void> _edit(
 // only their IDs. A mention whose name isn't known is dropped when it is
 // saved, even if it is still in the text.
 //
-// TODO: Remove once scheduled messages come with their mentioned users resolved.
+// TODO: Remove once scheduled messages come with their mentioned users
+// resolved.
 Future<ScheduledMessage> _withMentionedUsers(StreamChatClient client, ScheduledMessage scheduledMessage) async {
   final content = scheduledMessage.message;
   final ids = [for (final user in content.mentionedUsers) user.id];
@@ -297,8 +301,16 @@ Future<void> _maybeDelete(BuildContext context, ScheduledMessage scheduledMessag
     await client.deleteScheduledMessage(scheduledMessage.id);
     messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.deleted), variant: .success));
   } catch (error) {
-    if (isScheduledMessageGone(error)) {
-      messenger.show(StreamSnackbar(message: const Text(ScheduledMessagesStrings.alreadySent)));
+    // Not found also covers one deleted on another device.
+    final notice = switch (error) {
+      StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) =>
+        ScheduledMessagesStrings.alreadySent,
+      StreamChatNetworkError(isScheduledMessageNotFound: true) => ScheduledMessagesStrings.sentOrDeleted,
+      _ => null,
+    };
+
+    if (notice != null) {
+      messenger.show(StreamSnackbar(message: Text(notice)));
     } else {
       showScheduleError(messenger, error, texts);
     }

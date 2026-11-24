@@ -941,24 +941,28 @@ class NnStreamChatLocalizations extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+  String scheduledMessageFailureText({
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {
-    return switch (reason) {
-      .requestFailed => "Couldn't send. Try again",
-      .internalError => 'Something went wrong. Try again',
-      .channelDeleted => 'This channel was deleted',
-      .userDeleted => 'Your account was deleted',
-      .channelFrozen => 'This channel is frozen',
-      .banned => "You can't send messages in this channel",
-      .noPermission => "You're no longer allowed to post here",
-      .moderationBlocked => 'Blocked by moderation',
-      .hookRejected => 'Rejected by the app',
-      .expired => 'Not sent: the service was delayed',
-      .pendingNotSupported => 'This channel now needs approval. Schedule it again.',
-      .invalidMessage when isQuoteDeleted => 'The quoted message was deleted. Edit it to remove the quote.',
-      .invalidMessage => "The message no longer meets the app's limits. Edit it.",
+    return switch (failure) {
+      ScheduledMessageUpdatingFailed() => "The edit wasn't saved. The earlier version is still scheduled.",
+      ScheduledMessageSchedulingFailed() => "Couldn't schedule.",
+      ScheduledMessageSendingFailed(reason: .internalError) => 'Something went wrong. Try again',
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => 'This channel was deleted',
+      ScheduledMessageSendingFailed(reason: .userDeleted) => 'Your account was deleted',
+      ScheduledMessageSendingFailed(reason: .channelFrozen) => 'This channel is frozen',
+      ScheduledMessageSendingFailed(reason: .banned) => "You can't send messages in this channel",
+      ScheduledMessageSendingFailed(reason: .noPermission) => "You're no longer allowed to post here",
+      ScheduledMessageSendingFailed(reason: .moderationBlocked) => 'Blocked by moderation',
+      ScheduledMessageSendingFailed(reason: .hookRejected) => 'Rejected by the app',
+      ScheduledMessageSendingFailed(reason: .expired) => 'Not sent: the service was delayed',
+      ScheduledMessageSendingFailed(reason: .pendingNotSupported) =>
+        'This channel now needs approval. Schedule it again.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) when isQuoteDeleted =>
+        'The quoted message was deleted. Edit it to remove the quote.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) =>
+        "The message no longer meets the app's limits. Edit it.",
       _ => 'Something went wrong. Try again',
     };
   }

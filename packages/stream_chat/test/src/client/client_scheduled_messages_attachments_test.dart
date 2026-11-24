@@ -79,7 +79,7 @@ void main() {
     await settle();
 
     final [failed] = harness.client.state.scheduledMessages;
-    expect(failed.failureReason, ScheduledMessageFailureReason.attachmentUploadFailed);
+    expect(failed.failure, isA<ScheduledMessageUploadFailed>());
   });
 
   test('scheduleMessage marks an attachment that failed to upload as failed', () async {
@@ -363,7 +363,7 @@ void main() {
     await settle();
 
     final [listed] = harness.client.state.scheduledMessages;
-    expect(listed.failureReason, ScheduledMessageFailureReason.updateFailed);
+    expect(listed.failure, const ScheduledMessageFailure.updatingFailed(isRetriable: true));
   });
 
   test('sendScheduledMessageNow refuses one whose edit is uploading', () async {

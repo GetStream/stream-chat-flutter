@@ -46,8 +46,9 @@ class StreamChatMessageInput extends StatefulWidget {
   /// The callback for when the send button is pressed.
   final VoidCallback onSendPressed;
 
-  /// The callback for when the send button is long-pressed while it would
-  /// send a new message.
+  /// The callback for when the send button is long-pressed.
+  ///
+  /// Only called while the button would send a new message.
   final VoidCallback? onSendLongPress;
 
   /// The callback for when the attachment button is pressed.

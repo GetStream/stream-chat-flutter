@@ -22,11 +22,10 @@ import 'scheduled_message_event_handler.dart';
 import 'scheduled_message_list_state.dart';
 import 'scheduled_messages_query.dart';
 
-/// The runner of the current user's scheduled message requests, which applies
-/// their events.
+/// The runner of the current user's scheduled message requests.
 ///
-/// The events of its client, including the ones its own requests emit, update
-/// its [state].
+/// Its requests update its [state] as they go, and the scheduled message
+/// events the server sends update it too.
 class ScheduledMessageManager {
   /// Creates a manager for the scheduled messages of `client`.
   ///
@@ -51,12 +50,8 @@ class ScheduledMessageManager {
   // Whether the complete list was loaded when the connection was lost.
   var _wasLoadedBeforeConnectionLost = false;
 
-  // Bumped by clear, so a request that started before it is not applied.
+  // Bumped by clear(), so a request that completes afterwards writes nothing.
   var _generation = 0;
-
-  // The IDs of the new scheduled messages deleted while being scheduled, to
-  // delete on the server once scheduling them ends.
-  final _deletedWhileScheduling = <String>{};
 
   // The attachment uploaders, one per channel cid.
   final _uploaders = <String, ChannelAttachmentUploader>{};
@@ -78,33 +73,104 @@ class ScheduledMessageManager {
   /// The [state], emitted on listen and again each time it changes.
   Stream<ScheduledMessageListState> get stream => _stateNotifier.stream;
 
-  /// Queries the page of the scheduled messages that [query] describes.
+  /// Forgets the scheduled messages.
   ///
-  /// The page is added to [ScheduledMessageListState.scheduledMessages];
-  /// nothing is removed.
+  /// Used when the user disconnects.
+  void clear() {
+    _generation++;
+    for (final upload in _uploads.values) {
+      upload.cancel();
+    }
+    _uploads.clear();
+    _loadCache = InFlightCache<String, ScheduledMessageListState>();
+    _wasLoadedBeforeConnectionLost = false;
+    _stateNotifier.clear();
+  }
+
+  /// Stops following the events and updating the [state].
+  Future<void> dispose() async {
+    await _eventsSubscription.cancel();
+    await _stateNotifier.dispose();
+  }
+
+  /// Replaces the scheduled messages of each channel in [channelStates] with
+  /// its [ChannelState.scheduledMessages].
+  ///
+  /// A channel whose state has none is left as it is. The ones still being
+  /// scheduled, or whose request failed, are kept.
+  void onChannelsQueried(List<ChannelState> channelStates) {
+    final channels = <ChannelScheduledMessages>[];
+    for (final channelState in channelStates) {
+      final cid = channelState.channel?.cid;
+      final scheduledMessages = channelState.scheduledMessages;
+      if (cid == null || scheduledMessages == null) continue;
+
+      channels.add((cid: cid, scheduledMessages: scheduledMessages));
+    }
+
+    if (channels.isEmpty) return;
+    _stateNotifier.onChannelsQueried(channels);
+  }
+
+  void _onEvent(Event event) {
+    _eventHandler.handleEvent(event);
+
+    if (event.type == EventType.connectionChanged && event.online == false) {
+      _onConnectionLost();
+    }
+
+    if (event.type == EventType.connectionRecovered) {
+      _onConnectionRecovered().ignore();
+    }
+  }
+
+  // Changes may be missed while the connection is down.
+  void _onConnectionLost() {
+    _wasLoadedBeforeConnectionLost |= state.hasLoadedAll;
+    _stateNotifier.onConnectionLost();
+  }
+
+  Future<void> _onConnectionRecovered() async {
+    if (!_wasLoadedBeforeConnectionLost) return;
+
+    try {
+      await loadMessages();
+      _wasLoadedBeforeConnectionLost = false;
+    } catch (error, stackTrace) {
+      _logger?.warning('Failed to reload the scheduled messages', error, stackTrace);
+    }
+  }
+
+  /// {@template scheduledMessages.query}
+  /// Queries one page of the current user's scheduled messages.
+  ///
+  /// Adds the page [query] picks to the list, without removing any.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails.
+  /// {@endtemplate}
   Future<QueryScheduledMessagesResponse> queryMessages(
     ScheduledMessagesQuery query,
   ) async {
     final generation = _generation;
     final response = await _api.queryScheduledMessages(query);
 
-    if (generation == _generation) {
-      _stateNotifier.onQueryScheduledMessages(response.scheduledMessages);
+    if (_isCurrent(generation)) {
+      _stateNotifier.onQueried(response.scheduledMessages);
     }
 
     return response;
   }
 
-  /// Loads the complete list of scheduled messages.
+  /// {@template scheduledMessages.load}
+  /// Loads all of the current user's scheduled messages.
   ///
-  /// It replaces [ScheduledMessageListState.scheduledMessages], keeping the
-  /// ones still being scheduled or whose request failed. If a page fails, the
-  /// ones before it are added, nothing is removed, and the error is rethrown.
-  /// Calling this again while it runs shares the load.
+  /// The list then holds all of them, and
+  /// [ScheduledMessageListState.hasLoadedAll] is true. Resolves to the list's
+  /// state. Calling this again while it runs returns the same result.
   ///
-  /// Returns the [state] once the list is loaded.
+  /// Throws a [StreamChatNetworkError] if a request fails; the ones loaded
+  /// before it stay listed.
+  /// {@endtemplate}
   Future<ScheduledMessageListState> loadMessages() {
     return _loadCache.run('all', () async {
       final generation = _generation;
@@ -116,46 +182,35 @@ class ScheduledMessageManager {
 
         loaded.addAll(response.scheduledMessages);
         next = response.next;
-      } while (next != null && next.isNotEmpty && generation == _generation);
+      } while (next != null && next.isNotEmpty && _isCurrent(generation));
 
-      if (generation == _generation) {
-        _stateNotifier.onLoadScheduledMessages(loaded);
+      if (_isCurrent(generation)) {
+        _stateNotifier.onLoaded(loaded);
       }
 
       return state;
     });
   }
 
+  /// {@template scheduledMessages.schedule}
   /// Schedules [message] to be sent at [scheduledAt].
   ///
-  /// The message goes to the channel [channelId] of [channelType]. It is
-  /// listed right away as [ScheduledMessageStatus.preparingToSchedule], then
-  /// replaced by the scheduled one. If the request fails in a way that can be
-  /// retried, it stays listed as failed with
-  /// [ScheduledMessageFailureReason.requestFailed]; any other failure removes
-  /// it.
+  /// It goes to the channel [channelId] of [channelType], and is listed right
+  /// away. If the request fails in a way that can be retried, it stays listed
+  /// as failed. If [scheduledAt] has passed by then, it is sent right away and
+  /// [ScheduleMessageResponse.scheduledMessage] is null.
   ///
-  /// The attachments of [message] not uploaded yet are uploaded first, with
-  /// their progress shown on the listed message. If one fails, its
-  /// [Attachment.uploadState] is failed and the message stays listed as failed
-  /// with [ScheduledMessageFailureReason.attachmentUploadFailed].
+  /// Its attachments not uploaded yet are uploaded first, with their progress
+  /// shown on the listed message. If one fails, the message stays listed with
+  /// a [ScheduledMessageUploadFailed].
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails.
-  ///
-  /// Throws a [ScheduledMessageRefusedError] without making the request when
-  /// [message] is a command in a channel that has commands, quotes a deleted
-  /// message, or can't be sent at its time: one past the channel's
-  /// [ChannelConfig.scheduledMessagesMaxLeadTime], at or after its pin
-  /// expires, or less than a minute before its shared location ends.
-  ///
-  /// Throws an [ArgumentError] if [scheduledAt] is not in the future. A
-  /// message to send right away goes through [StreamChatClient.sendMessage].
-  ///
-  /// Throws a [StreamChatError] if an attachment fails to upload, if
-  /// [deleteMessage] deletes it while its attachments upload, or if sending it
-  /// right away is refused.
-  ///
-  /// Throws a [StateError] if no user is connected.
+  /// Throws a [StreamChatNetworkError] if the request fails, a
+  /// [ScheduledMessageRefusedError] if it can't be scheduled in that channel or
+  /// sending it right away is refused, a [StreamChatError] if an attachment
+  /// fails to upload or it is deleted while its attachments upload, an
+  /// [ArgumentError] if [scheduledAt] isn't in the future, and a [StateError]
+  /// if no user is connected.
+  /// {@endtemplate}
   Future<ScheduleMessageResponse> scheduleMessage(
     Message message,
     String channelId,
@@ -182,251 +237,26 @@ class ScheduledMessageManager {
     );
   }
 
-  // Schedules [message] at [scheduledAt], which can have passed: it is then
-  // sent right away.
-  Future<ScheduleMessageResponse> _schedule(
-    Message message,
-    String channelId,
-    String channelType, {
-    required DateTime scheduledAt,
-    bool skipPush = false,
-    bool skipEnrichUrl = false,
-  }) async {
-    final user = _client.state.currentUser;
-    if (user == null) throw StateError('Connect a user before scheduling messages.');
-
-    final cid = '$channelType:$channelId';
-    _refuseUnschedulable(cid, message);
-    _refuseUnschedulableAt(cid, message, scheduledAt);
-
-    final generation = _generation;
-
-    // ignore: parameter_assignments
-    message = message.copyWith(
-      attachments: message.attachments.map(
-        (it) {
-          if (it.uploadState.isSuccess) return it;
-          return it.copyWith(uploadState: const UploadState.preparing());
-        },
-      ).toList(),
-    );
-
-    final now = clock.now();
-    var local = ScheduledMessage(
-      cid: cid,
-      user: user,
-      message: message,
-      scheduledAt: scheduledAt,
-      status: .preparingToSchedule,
-      localCreatedAt: now,
-      localUpdatedAt: now,
-    );
-
-    // Stops the attachment upload of an earlier call for the message.
-    _cancelUploads(local.id);
-
-    _emitEvent(EventType.scheduledMessageCreated, local, generation);
-
-    // Whether it was deleted while it was being scheduled.
-    bool isDeleted() => _deletedWhileScheduling.contains(local.id);
-
-    try {
-      if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
-        final result = await _uploadAttachments(local, generation);
-        // ignore: parameter_assignments
-        message = result.message;
-        local = local.copyWith(message: message);
-
-        if (result is MessageAttachmentsUploadFailed) {
-          throw _attachmentUploadFailed;
-        }
-      }
-
-      final response = await _api.scheduleMessage(
-        channelId,
-        channelType,
-        message,
-        scheduledAt,
-        skipPush: skipPush,
-        skipEnrichUrl: skipEnrichUrl,
-      );
-
-      // One taken out of the list meanwhile isn't listed again.
-      final isListed = _listedScheduledMessage(local.id) != null;
-      if (response.scheduledMessage case final created?) {
-        if (isDeleted()) {
-          // Listed again if deleting it fails, so it can be deleted again.
-          final isGone = await _deleteScheduledOnServer(created.id);
-          if (!isGone) _emitEvent(EventType.scheduledMessageCreated, created, generation);
-        } else if (isListed) {
-          _emitEvent(EventType.scheduledMessageCreated, created, generation);
-        }
-      } else if (response.message.type == MessageType.error) {
-        // Its time had passed, but sending it right away was refused, for
-        // example in a frozen channel.
-        throw StreamChatError(response.message.text ?? 'The message was refused');
-      } else {
-        // Its time had passed, so it was sent right away.
-        final messageId = response.message.id;
-        _emitEvent(EventType.scheduledMessageSent, _sent(local), generation, messageId: messageId);
-      }
-
-      return response;
-    } on StreamChatNetworkError catch (error) {
-      // Already sent: on a retry, the first attempt went through, scheduled
-      // or sent right away.
-      final isSent = error.scheduledMessageErrorReason == .scheduledMessageAlreadySent;
-      if (isSent || error.isMessageAlreadyExistsError) {
-        _emitEvent(EventType.scheduledMessageSent, _sent(local), generation);
-        rethrow;
-      }
-
-      final failed = local.copyWith(
-        status: .failed,
-        failureReason: ScheduledMessageFailureReason.requestFailed,
-        localUpdatedAt: clock.now(),
-      );
-
-      // A deleted one is already taken out of the list. Unless the server
-      // refused it, it may have stored it, so it is deleted there too, and
-      // listed as failed again if that fails, so it can be deleted again.
-      if (isDeleted()) {
-        if (error.isRetriable && !await _deleteScheduledOnServer(local.id)) {
-          _emitEvent(EventType.scheduledMessageUpdated, failed, generation);
-        }
-        rethrow;
-      }
-
-      if (!error.isRetriable) {
-        _emitEvent(EventType.scheduledMessageDeleted, _canceled(local), generation);
-        rethrow;
-      }
-
-      // One taken out of the list meanwhile isn't listed again.
-      final isListed = _listedScheduledMessage(local.id) != null;
-      if (isListed) _emitEvent(EventType.scheduledMessageUpdated, failed, generation);
-      rethrow;
-    } catch (error) {
-      // Canceled by a deletion or a newer call for the message, which now owns
-      // its state.
-      if (error == _uploadCanceled || isDeleted()) rethrow;
-
-      if (error == _attachmentUploadFailed) {
-        final failed = local.copyWith(
-          status: .failed,
-          failureReason: ScheduledMessageFailureReason.attachmentUploadFailed,
-          localUpdatedAt: clock.now(),
-        );
-
-        _emitEvent(EventType.scheduledMessageUpdated, failed, generation);
-        rethrow;
-      }
-
-      _emitEvent(EventType.scheduledMessageDeleted, _canceled(local), generation);
-      rethrow;
-    } finally {
-      _deletedWhileScheduling.remove(local.id);
-    }
-  }
-
-  // Deletes the scheduled message [id] on the server after it was deleted
-  // while being scheduled, and returns whether it is gone. One the server no
-  // longer has, or already sent, is gone too.
-  Future<bool> _deleteScheduledOnServer(String id) async {
-    try {
-      await _api.deleteScheduledMessage(id);
-      return true;
-    } on StreamChatNetworkError catch (error, stackTrace) {
-      final isGone = switch (error) {
-        StreamChatNetworkError(isScheduledMessageNotFound: true) => true,
-        StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) => true,
-        StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageCanceled) => true,
-        _ => false,
-      };
-
-      if (!isGone) _logger?.warning('Failed to delete the scheduled message $id', error, stackTrace);
-      return isGone;
-    } catch (error, stackTrace) {
-      _logger?.warning('Failed to delete the scheduled message $id', error, stackTrace);
-      return false;
-    }
-  }
-
-  /// Makes the request of the scheduled message [id] again after it failed.
-  ///
-  /// One whose scheduling failed is scheduled again, keeping its ID so it is
-  /// never scheduled twice. One whose edit failed is saved again with its
-  /// message and time, as [updateMessage] does. Resolves to the scheduled
-  /// message, or null when its time had passed and it was sent right away.
-  ///
-  /// Its attachments that failed to upload are uploaded again.
-  ///
-  /// Throws a [StreamChatNetworkError] if the request fails, or a
-  /// [StreamChatError] if an attachment fails to upload again.
-  ///
-  /// Throws a [StateError] if [id] isn't listed, or failed in a way that
-  /// can't be retried, as there is no failed request to make again, or if no
-  /// user is connected when it is scheduled again.
-  Future<ScheduledMessage?> resendMessage(String id) async {
-    final scheduledMessage = _listedScheduledMessage(id);
-    if (scheduledMessage == null) throw StateError('No scheduled message $id to resend.');
-
-    final failureReason = scheduledMessage.failureReason;
-    if (failureReason?.isEditFailure ?? false) {
-      final response = await updateMessage(
-        id,
-        scheduledMessage.message,
-        scheduledAt: scheduledMessage.scheduledAt,
-      );
-
-      return response.scheduledMessage;
-    }
-
-    if (!(failureReason?.isRetriable ?? false)) {
-      throw StateError('Only a scheduled message whose request failed can be resent.');
-    }
-
-    final [channelType, channelId] = scheduledMessage.cid.split(':');
-    final response = await _schedule(
-      scheduledMessage.message,
-      channelId,
-      channelType,
-      scheduledAt: scheduledMessage.scheduledAt,
-    );
-
-    return response.scheduledMessage;
-  }
-
+  /// {@template scheduledMessages.update}
   /// Edits the scheduled message [id].
   ///
-  /// Its message is replaced with [message], and it is moved to [scheduledAt]
-  /// if given. The edit is listed right away as
-  /// [ScheduledMessageStatus.preparingToSchedule], and the attachments of
-  /// [message] not uploaded yet are uploaded first, with their progress shown
-  /// on it. If an upload or the request fails, it stays listed as failed: with
-  /// [ScheduledMessageFailureReason.updateFailed] when the error is temporary,
-  /// or with [ScheduledMessageFailureReason.updateRejected] otherwise.
+  /// Replaces its message with [message] and, if given, moves it to
+  /// [scheduledAt]. The edit is listed right away, its attachments not uploaded
+  /// yet are uploaded first, and it stays listed with a
+  /// [ScheduledMessageUpdatingFailed] if an upload or saving it fails. One
+  /// whose scheduling failed is scheduled again with the edit.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, even when the
-  /// scheduled message is already gone. If it is, an
-  /// [EventType.scheduledMessageDeleted] event reports it, so [state] stops
-  /// listing it.
+  /// Throws a [StreamChatNetworkError] if the request fails, such as with
+  /// [ScheduledMessageErrorReason.scheduledAtTooSoon] for a time that isn't in
+  /// the future.
   ///
-  /// Throws a [ScheduledMessageRefusedError] without making the request when
-  /// [message] is a command in a channel that has commands, quotes a deleted
-  /// message, or can't be sent at its time: one past the channel's
-  /// [ChannelConfig.scheduledMessagesMaxLeadTime], at or after its pin
-  /// expires, or less than a minute before its shared location ends.
-  /// If it isn't listed, the request is made without these checks or changing
-  /// the list first, then lists the copy it answers with.
+  /// Throws a [ScheduledMessageRefusedError] if the edit can't be scheduled, or
+  /// once sending the message failed.
   ///
-  /// Throws a [StreamChatError] if an attachment of [message] fails to upload.
-  ///
-  /// Throws an [ArgumentError] if it isn't listed and an attachment of
-  /// [message] is not uploaded yet, as its channel to upload to is unknown.
-  ///
-  /// Throws a [StateError] while its attachments upload, to be scheduled or
-  /// saved as an edit; only deleting it is allowed meanwhile.
+  /// Throws a [StreamChatError] if an attachment fails to upload, an
+  /// [ArgumentError] if the message isn't listed and an attachment isn't
+  /// uploaded, and a [StateError] while its attachments upload.
+  /// {@endtemplate}
   Future<UpdateScheduledMessageResponse> updateMessage(
     String id,
     Message message, {
@@ -436,8 +266,9 @@ class ScheduledMessageManager {
       return _api.updateScheduledMessage(id, message: message, scheduledAt: scheduledAt);
     }
 
-    final scheduledMessage = _listedScheduledMessage(id);
+    final scheduledMessage = _listed(id);
     if (scheduledMessage == null) {
+      // Its channel, to upload to, is unknown.
       if (message.attachments.any((it) => !it.uploadState.isSuccess)) {
         throw ArgumentError.value(message, 'message', 'Attachments must be uploaded before updating');
       }
@@ -445,45 +276,40 @@ class ScheduledMessageManager {
       return _updateUnlisted(() => request(message));
     }
 
+    _refuseChange(scheduledMessage);
     _refuseWhileUploading(scheduledMessage);
-    _refuseUnschedulable(scheduledMessage.cid, message);
-    _refuseUnschedulableAt(
-      scheduledMessage.cid,
-      message,
-      scheduledAt ?? scheduledMessage.scheduledAt,
-      // A message kept at its time isn't checked against the lead time again.
-      checkLeadTime: scheduledAt != null && !scheduledAt.isAtSameMomentAs(scheduledMessage.scheduledAt),
-    );
 
-    return _edit(
-      scheduledMessage,
-      scheduledMessage.copyWith(message: message, scheduledAt: scheduledAt),
-      request,
-    );
+    if (scheduledMessage.isSchedulingFailed) {
+      _refuseTimePassed(scheduledAt ?? scheduledMessage.scheduledAt);
+      final scheduled = await _scheduleAgain(scheduledMessage, message: message, scheduledAt: scheduledAt);
+      if (scheduled.status == .sent || _listed(id) == null) {
+        return UpdateScheduledMessageResponse()..scheduledMessage = scheduled;
+      }
+
+      final edited = scheduled.copyWith(message: message, scheduledAt: scheduledAt);
+      return _saveChange(scheduled, edited, request);
+    }
+
+    _refuseUnschedulable(scheduledMessage.cid, message);
+
+    final edited = scheduledMessage.copyWith(message: message, scheduledAt: scheduledAt);
+    return _saveChange(scheduledMessage, edited, request);
   }
 
+  /// {@template scheduledMessages.reschedule}
   /// Moves the scheduled message [id] to [scheduledAt].
   ///
-  /// Its message stays as it is; one whose edit failed has that edit saved
-  /// with the move. It is listed at its new time right away, as with
-  /// [updateMessage].
+  /// It is listed at its new time right away, and stays listed with a
+  /// [ScheduledMessageUpdatingFailed] if saving the move fails. An edit that
+  /// failed to save is saved with it.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, even when the
-  /// scheduled message is already gone. If it is, an
-  /// [EventType.scheduledMessageDeleted] event reports it, so [state] stops
-  /// listing it.
+  /// Throws a [StreamChatNetworkError] if the request fails, such as with
+  /// [ScheduledMessageErrorReason.scheduledAtTooSoon] for a time that isn't in
+  /// the future.
   ///
-  /// Throws a [ScheduledMessageRefusedError] without making the request when
-  /// it is moved to another time but is a command in a channel that has
-  /// commands, quotes a deleted message, or can't be sent at the new time: one
-  /// past the channel's [ChannelConfig.scheduledMessagesMaxLeadTime], at or
-  /// after its pin expires, or less than a minute before its shared location
-  /// ends.
-  /// If it isn't listed, the request is made without these checks or changing
-  /// the list first, then lists the copy it answers with.
-  ///
-  /// Throws a [StateError] while its attachments upload, to be scheduled or
-  /// saved as an edit; only deleting it is allowed meanwhile.
+  /// Throws a [ScheduledMessageRefusedError] if it can't be scheduled, or once
+  /// sending it failed, and a [StateError] while its attachments upload.
+  /// {@endtemplate}
   Future<UpdateScheduledMessageResponse> rescheduleMessage(
     String id, {
     required DateTime scheduledAt,
@@ -492,146 +318,102 @@ class ScheduledMessageManager {
       return _api.updateScheduledMessage(id, scheduledAt: scheduledAt);
     }
 
-    final scheduledMessage = _listedScheduledMessage(id);
+    final scheduledMessage = _listed(id);
     if (scheduledMessage == null) return _updateUnlisted(request);
-
+    _refuseChange(scheduledMessage);
     _refuseWhileUploading(scheduledMessage);
 
-    // A failed edit isn't saved yet, so moving it saves the edit too.
-    if (scheduledMessage.failureReason?.isEditFailure ?? false) {
+    if (scheduledMessage.isSchedulingFailed) {
+      _refuseTimePassed(scheduledAt);
+      final scheduled = await _scheduleAgain(scheduledMessage, scheduledAt: scheduledAt);
+      if (scheduled.status == .sent || _listed(id) == null) {
+        return UpdateScheduledMessageResponse()..scheduledMessage = scheduled;
+      }
+
+      return _saveChange(scheduled, scheduled.copyWith(scheduledAt: scheduledAt), (_) => request());
+    }
+
+    if (scheduledMessage.isUpdatingFailed) {
       return updateMessage(id, scheduledMessage.message, scheduledAt: scheduledAt);
     }
 
-    // A message kept at its time isn't checked again.
-    if (!scheduledAt.isAtSameMomentAs(scheduledMessage.scheduledAt)) {
+    final isMoved = !scheduledAt.isAtSameMomentAs(scheduledMessage.scheduledAt);
+    if (isMoved) {
       _refuseUnschedulable(scheduledMessage.cid, scheduledMessage.message);
-      _refuseUnschedulableAt(scheduledMessage.cid, scheduledMessage.message, scheduledAt);
     }
 
-    return _edit(
-      scheduledMessage,
-      scheduledMessage.copyWith(scheduledAt: scheduledAt),
-      (_) => request(),
-    );
+    return _saveChange(scheduledMessage, scheduledMessage.copyWith(scheduledAt: scheduledAt), (_) => request());
   }
 
+  /// {@template scheduledMessages.sendNow}
   /// Sends the scheduled message [id] right away.
   ///
-  /// It is listed as [ScheduledMessageStatus.preparingToSchedule] while the
-  /// request runs, then as the server answers until it is sent, and as it
-  /// was if the request fails.
+  /// It is listed as [ScheduledMessageStatus.preparingToSchedule] until the
+  /// request completes, and as it was if the request fails. One whose edit
+  /// failed is sent as last saved, and one whose scheduling failed is
+  /// scheduled first. An [EventType.scheduledMessageSent] event follows once
+  /// it has been sent.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, even when the
-  /// scheduled message is already gone. If it is, an
-  /// [EventType.scheduledMessageDeleted] event reports it, so [state] stops
-  /// listing it.
-  ///
-  /// Throws a [ScheduledMessageRefusedError] without making the request when
-  /// it quotes a deleted message, which would fail it once sent. If it isn't
-  /// listed, the request is made without these checks or changing the list.
-  ///
-  /// Throws a [StateError] while its attachments upload, to be scheduled or
-  /// saved as an edit; only deleting it is allowed meanwhile.
+  /// Throws a [StreamChatNetworkError] if the request fails, a
+  /// [ScheduledMessageRefusedError] if it quotes a deleted message or sending
+  /// it already failed, and a [StateError] while its attachments upload.
+  /// {@endtemplate}
   Future<SendScheduledMessageNowResponse> sendMessageNow(String id) async {
-    final scheduledMessage = _listedScheduledMessage(id);
+    final scheduledMessage = _listed(id);
     if (scheduledMessage == null) return _api.sendScheduledMessageNow(id);
-
+    _refuseChange(scheduledMessage);
     _refuseWhileUploading(scheduledMessage);
-    _refuseDeletedQuote(scheduledMessage.cid, scheduledMessage.message);
 
-    final generation = _generation;
-    final preparing = scheduledMessage.copyWith(
-      status: .preparingToSchedule,
-      failureReason: null,
-      localUpdatedAt: clock.now(),
-    );
-    _emitEvent(EventType.scheduledMessageUpdated, preparing, generation);
+    if (!scheduledMessage.isSchedulingFailed) return _sendNow(scheduledMessage);
 
-    final response = await _request(
-      scheduledMessage,
-      generation,
-      () => _api.sendScheduledMessageNow(scheduledMessage.id),
-      relistOnFailure: (_) => _restored(scheduledMessage),
-    );
-
-    // Its sent event can arrive first, which stops listing it.
-    final isListed = _listedScheduledMessage(id) != null;
-    if (isListed) {
-      // A copy of the version it had replaces the one being prepared too.
-      final answered = response.scheduledMessage;
-      final isSameVersion = answered.remoteUpdatedAt == scheduledMessage.remoteUpdatedAt;
-      final listed = isSameVersion ? answered.copyWith(localUpdatedAt: clock.now()) : answered;
-      _emitEvent(EventType.scheduledMessageUpdated, listed, generation);
+    final scheduled = await _scheduleAgain(scheduledMessage);
+    if (scheduled.status == .sent || _listed(id) == null) {
+      return SendScheduledMessageNowResponse()..scheduledMessage = scheduled;
     }
 
-    return response;
+    return _sendNow(scheduled);
   }
 
-  /// Deletes the scheduled message [id].
+  /// {@template scheduledMessages.delete}
+  /// Deletes the scheduled message [id] before it is sent.
   ///
-  /// One still uploading attachments to be scheduled has its uploads canceled.
-  /// One whose attachments failed to upload is removed without a request. An
-  /// edit still uploading attachments is stopped, and listed again as failed if
-  /// the request fails.
+  /// It stops being listed right away, and is listed again if the request
+  /// fails, unless it no longer exists. Returns it with the status it had when
+  /// it was deleted.
   ///
-  /// A listed one stops being listed right away, and is listed again if the
-  /// request fails, unless it is already gone. One still being scheduled is
-  /// deleted on the server once scheduling it ends, without a request now,
-  /// and listed again if deleting it there fails.
-  /// One whose scheduling failed is deleted even if scheduling it never went
-  /// through. One not listed is deleted without changing the list.
-  ///
-  /// The returned scheduled message has the status it had when it was
-  /// deleted.
+  /// Its attachment uploads are canceled. One never scheduled, still
+  /// uploading or whose upload failed, is deleted without a request.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails, including when it
-  /// is already gone, unless its scheduling had failed.
+  /// no longer exists or was already sent. One whose scheduling failed and
+  /// that no longer exists is deleted without an error.
+  /// {@endtemplate}
   Future<DeleteScheduledMessageResponse> deleteMessage(String id) async {
-    final scheduledMessage = _listedScheduledMessage(id);
+    final scheduledMessage = _listed(id);
     if (scheduledMessage == null) return _api.deleteScheduledMessage(id);
 
     final generation = _generation;
-    final wasWaiting = _cancelUploads(scheduledMessage.id);
+    final canceled = scheduledMessage.asCanceled();
+    _remove(scheduledMessage.id, generation);
+    final wasUploading = _cancelUploads(id);
 
-    // Never scheduled, so there is nothing to delete on the server.
-    if (scheduledMessage.failureReason == .attachmentUploadFailed) {
-      final canceled = _canceled(scheduledMessage);
-      _emitEvent(EventType.scheduledMessageDeleted, canceled, generation);
+    // Scheduling it deletes it once it ends. One whose upload failed was never
+    // scheduled.
+    final isUploadFailed = scheduledMessage.failure is ScheduledMessageUploadFailed;
+    if (scheduledMessage.isBeingScheduled || isUploadFailed) {
       return DeleteScheduledMessageResponse()..scheduledMessage = canceled;
     }
 
-    // Still being scheduled, so it is deleted on the server once scheduling it
-    // ends.
-    final isBeingScheduled =
-        scheduledMessage.status == .preparingToSchedule && scheduledMessage.remoteCreatedAt == null;
-    if (isBeingScheduled) {
-      final canceled = _canceled(scheduledMessage);
-      _deletedWhileScheduling.add(id);
-      _emitEvent(EventType.scheduledMessageDeleted, canceled, generation);
-      return DeleteScheduledMessageResponse()..scheduledMessage = canceled;
+    if (scheduledMessage.isSchedulingFailed) {
+      return _deleteFailedToSchedule(scheduledMessage, canceled, generation);
     }
-    if (scheduledMessage.failureReason == .requestFailed) {
-      try {
-        final response = await _api.deleteScheduledMessage(scheduledMessage.id);
-        _emitEvent(EventType.scheduledMessageDeleted, response.scheduledMessage, generation);
-        return response;
-      } on StreamChatNetworkError catch (error) {
-        if (!error.isScheduledMessageNotFound) rethrow;
-
-        final canceled = _canceled(scheduledMessage);
-        _emitEvent(EventType.scheduledMessageDeleted, canceled, generation);
-        return DeleteScheduledMessageResponse()..scheduledMessage = canceled;
-      }
-    }
-
-    _emitEvent(EventType.scheduledMessageDeleted, _canceled(scheduledMessage), generation);
 
     // An edit stopped while it uploaded is listed again as failed, to save it
     // again or delete it.
-    final relisted = wasWaiting
+    final relisted = wasUploading
         ? scheduledMessage.copyWith(
             status: ScheduledMessageStatus.failed,
-            failureReason: ScheduledMessageFailureReason.updateFailed,
+            failure: const ScheduledMessageFailure.updatingFailed(isRetriable: true),
             localUpdatedAt: clock.now(),
           )
         : scheduledMessage;
@@ -639,111 +421,255 @@ class ScheduledMessageManager {
     return _request(
       scheduledMessage,
       generation,
-      () => _api.deleteScheduledMessage(scheduledMessage.id),
+      () => _api.deleteScheduledMessage(id),
       relistOnFailure: (_) => relisted,
       relistIfUnlisted: true,
     );
   }
 
-  /// Replaces the scheduled messages of each channel in [channelStates] with
-  /// its [ChannelState.scheduledMessages].
+  /// {@template scheduledMessages.resend}
+  /// Makes the failed request of the scheduled message [id] again.
   ///
-  /// A channel whose state has none is left as it is. The ones still being
-  /// scheduled, or whose request failed, are kept.
-  void onChannelsQueried(List<ChannelState> channelStates) {
-    final channels = <ChannelScheduledMessages>[];
-    for (final channelState in channelStates) {
-      final cid = channelState.channel?.cid;
-      final scheduledMessages = channelState.scheduledMessages;
-      if (cid == null || scheduledMessages == null) continue;
+  /// Schedules one whose scheduling failed, or saves the edit of one whose edit
+  /// failed. Resolves to the scheduled message, or null when its time had
+  /// passed and it was sent right away. One that is refused stays listed as
+  /// failed.
+  ///
+  /// Its attachments that failed to upload are uploaded again.
+  ///
+  /// Throws a [StreamChatNetworkError] if the request fails, a
+  /// [ScheduledMessageRefusedError] if it is refused, a [StreamChatError] if an
+  /// attachment fails to upload again, and a [StateError] if [id] isn't listed
+  /// with a failure that can be resent, or no user is connected.
+  /// {@endtemplate}
+  Future<ScheduledMessage?> resendMessage(String id) async {
+    final scheduledMessage = _listed(id);
+    if (scheduledMessage == null) throw StateError('No scheduled message $id to resend.');
 
-      channels.add((cid: cid, scheduledMessages: scheduledMessages));
+    if (scheduledMessage.isUpdatingFailed) {
+      final response = await updateMessage(
+        id,
+        scheduledMessage.message,
+        scheduledAt: scheduledMessage.scheduledAt,
+      );
+
+      return response.scheduledMessage;
     }
 
-    if (channels.isEmpty) return;
-    _stateNotifier.onChannelsQueried(channels);
-  }
-
-  void _onEvent(Event event) {
-    // The server can report one deleted while being scheduled before its
-    // scheduling ends; it isn't listed again meanwhile.
-    final isDeletedWhileScheduling = switch (event) {
-      Event(isLocal: false, :final scheduledMessage?) when _isCreatedOrUpdated(event.type) =>
-        _deletedWhileScheduling.contains(scheduledMessage.id),
-      _ => false,
-    };
-
-    if (!isDeletedWhileScheduling) _eventHandler.handleEvent(event);
-
-    if (event.type == EventType.connectionChanged && event.online == false) {
-      _onConnectionLost();
+    if (!scheduledMessage.isSchedulingFailed) {
+      throw StateError('Only a scheduled message whose request failed can be resent.');
     }
 
-    if (event.type == EventType.connectionRecovered) {
-      _onConnectionRecovered().ignore();
+    final scheduled = await _scheduleAgain(scheduledMessage);
+    return scheduled.status == .sent ? null : scheduled;
+  }
+
+  // Schedules [message] at [scheduledAt], which can have passed: it is then
+  // sent right away. If it is refused, [restoreOnRefusal] is listed in its
+  // place, if given.
+  Future<ScheduleMessageResponse> _schedule(
+    Message message,
+    String channelId,
+    String channelType, {
+    required DateTime scheduledAt,
+    bool skipPush = false,
+    bool skipEnrichUrl = false,
+    ScheduledMessage? restoreOnRefusal,
+  }) async {
+    final user = _client.state.currentUser;
+    if (user == null) throw StateError('Connect a user before scheduling messages.');
+
+    final cid = '$channelType:$channelId';
+    _refuseUnschedulable(cid, message);
+
+    final generation = _generation;
+
+    final now = clock.now();
+    var local = ScheduledMessage(
+      cid: cid,
+      user: user,
+      message: message.withPendingAttachmentsPreparing(),
+      scheduledAt: scheduledAt,
+      status: .preparingToSchedule,
+      localCreatedAt: now,
+      localUpdatedAt: now,
+    );
+
+    // Stops the attachment upload of an earlier call for the message.
+    _cancelUploads(local.id);
+    _upsert(local, generation);
+
+    // A list cleared by a disconnect doesn't mean it was deleted.
+    bool wasDeletedMeanwhile() {
+      if (!_isCurrent(generation)) return false;
+      return _listed(local.id) == null;
     }
-  }
-
-  // Whether an event of [type] lists a scheduled message.
-  static bool _isCreatedOrUpdated(String type) {
-    return type == EventType.scheduledMessageCreated || type == EventType.scheduledMessageUpdated;
-  }
-
-  // Changes may be missed while the connection is down.
-  void _onConnectionLost() {
-    _wasLoadedBeforeConnectionLost |= state.hasLoadedAll;
-    _stateNotifier.onConnectionLost();
-  }
-
-  Future<void> _onConnectionRecovered() async {
-    if (!_wasLoadedBeforeConnectionLost) return;
 
     try {
-      await loadMessages();
-      _wasLoadedBeforeConnectionLost = false;
-    } catch (error, stackTrace) {
-      _logger?.warning('Failed to reload the scheduled messages', error, stackTrace);
+      if (local.message.hasPendingAttachments) {
+        final result = await _uploadAttachments(local, generation);
+        local = local.copyWith(message: result.message);
+
+        if (result is MessageAttachmentsUploadFailed) {
+          final failed = local.copyWith(
+            status: .failed,
+            failure: const ScheduledMessageFailure.uploadFailed(),
+            localUpdatedAt: clock.now(),
+          );
+
+          _upsert(failed, generation);
+          throw _attachmentUploadFailed;
+        }
+      }
+
+      final response = await _api.scheduleMessage(
+        channelId,
+        channelType,
+        local.message,
+        scheduledAt,
+        skipPush: skipPush,
+        skipEnrichUrl: skipEnrichUrl,
+      );
+
+      final created = response.scheduledMessage;
+      if (created == null) {
+        // Its time had passed, but sending it right away was refused, for
+        // example in a frozen channel.
+        if (response.message.type == MessageType.error) {
+          throw ScheduledMessageRefusedError(
+            .scheduledMessageSendRefused,
+            response.message.text ?? 'Sending the message right away was refused',
+          );
+        }
+
+        // Its time had passed, so it was sent right away.
+        _remove(local.id, generation);
+        return response;
+      }
+
+      await _upsertUnlessDeleted(created, generation, wasDeletedMeanwhile: wasDeletedMeanwhile());
+      return response;
+    } on StreamChatNetworkError catch (error) {
+      // Sent or deleted: on a retry, the first attempt went through, scheduled
+      // or sent right away.
+      if (error.isGone || error.isMessageAlreadyExistsError) {
+        _remove(local.id, generation);
+        rethrow;
+      }
+
+      if (!error.isRetriable) {
+        _undoRefused(local, restoreOnRefusal, generation, wasDeletedMeanwhile: wasDeletedMeanwhile());
+        rethrow;
+      }
+
+      final failed = local.copyWith(
+        status: .failed,
+        failure: const ScheduledMessageFailure.schedulingFailed(),
+        localUpdatedAt: clock.now(),
+      );
+
+      // It may have been stored all the same.
+      await _upsertUnlessDeleted(failed, generation, wasDeletedMeanwhile: wasDeletedMeanwhile());
+      rethrow;
+    } catch (error) {
+      // Listed as failed already, or stopped by a deletion or a newer call for
+      // the message, which now owns its state.
+      if (error == _attachmentUploadFailed || error == _uploadCanceled) rethrow;
+
+      _undoRefused(local, restoreOnRefusal, generation, wasDeletedMeanwhile: wasDeletedMeanwhile());
+      rethrow;
     }
+  }
+
+  // Takes [local], refused, out of the list, or lists [restored] in its place,
+  // unless [local] was deleted meanwhile.
+  void _undoRefused(
+    ScheduledMessage local,
+    ScheduledMessage? restored,
+    int generation, {
+    required bool wasDeletedMeanwhile,
+  }) {
+    if (restored != null && !wasDeletedMeanwhile) {
+      _upsert(restored, generation);
+    } else {
+      _remove(local.id, generation);
+    }
+  }
+
+  // Lists [scheduledMessage], unless the user deleted it meanwhile and
+  // deleting it again succeeds, so one still there can be deleted again.
+  Future<void> _upsertUnlessDeleted(
+    ScheduledMessage scheduledMessage,
+    int generation, {
+    required bool wasDeletedMeanwhile,
+  }) async {
+    if (wasDeletedMeanwhile && await _deleteOnServer(scheduledMessage.id)) return;
+    _upsert(scheduledMessage, generation);
+  }
+
+  // Deletes the scheduled message [id], deleted while it was being scheduled,
+  // and returns whether it is gone, including when it was already sent or
+  // deleted.
+  Future<bool> _deleteOnServer(String id) async {
+    try {
+      await _api.deleteScheduledMessage(id);
+      return true;
+    } on StreamChatNetworkError catch (error, stackTrace) {
+      if (!error.isGone) _logger?.warning('Failed to delete the scheduled message $id', error, stackTrace);
+      return error.isGone;
+    } catch (error, stackTrace) {
+      _logger?.warning('Failed to delete the scheduled message $id', error, stackTrace);
+      return false;
+    }
+  }
+
+  // Schedules [scheduledMessage], whose scheduling failed, again with its ID,
+  // with [message] and at [scheduledAt], if given. Returns the scheduled copy,
+  // which can be the one an earlier attempt stored, without the change; or it
+  // marked sent when its time had passed and it was sent right away.
+  Future<ScheduledMessage> _scheduleAgain(
+    ScheduledMessage scheduledMessage, {
+    Message? message,
+    DateTime? scheduledAt,
+  }) async {
+    final [channelType, channelId] = scheduledMessage.cid.split(':');
+    final response = await _schedule(
+      (message ?? scheduledMessage.message).copyWith(id: scheduledMessage.id),
+      channelId,
+      channelType,
+      scheduledAt: scheduledAt ?? scheduledMessage.scheduledAt,
+      restoreOnRefusal: scheduledMessage,
+    );
+
+    return response.scheduledMessage ?? scheduledMessage.asSent();
   }
 
   // Lists [edited] as being saved while its attachments upload and [request]
   // saves it over [scheduledMessage], then the saved copy. If an upload or the
   // request fails, [edited] stays listed as failed, unless the message is
   // being sent or is gone.
-  Future<UpdateScheduledMessageResponse> _edit(
+  Future<UpdateScheduledMessageResponse> _saveChange(
     ScheduledMessage scheduledMessage,
     ScheduledMessage edited,
     Future<UpdateScheduledMessageResponse> Function(Message message) request,
   ) async {
     final generation = _generation;
-    var saving = edited.copyWith(
-      status: .preparingToSchedule,
-      failureReason: null,
-      localUpdatedAt: clock.now(),
-      message: edited.message.copyWith(
-        attachments: edited.message.attachments.map(
-          (it) {
-            if (it.uploadState.isSuccess) return it;
-            return it.copyWith(uploadState: const UploadState.preparing());
-          },
-        ).toList(),
-      ),
-    );
+    var saving = edited.asPreparing();
+    saving = saving.copyWith(message: saving.message.withPendingAttachmentsPreparing());
+    _upsert(saving, generation);
 
-    _emitEvent(EventType.scheduledMessageUpdated, saving, generation);
-
-    if (saving.message.attachments.any((it) => !it.uploadState.isSuccess)) {
+    if (saving.message.hasPendingAttachments) {
       final result = await _uploadAttachments(saving, generation);
       saving = saving.copyWith(message: result.message);
 
       if (result is MessageAttachmentsUploadFailed) {
         final failed = saving.copyWith(
           status: .failed,
-          failureReason: ScheduledMessageFailureReason.updateFailed,
+          failure: const ScheduledMessageFailure.updatingFailed(isRetriable: true),
           localUpdatedAt: clock.now(),
         );
 
-        _emitEvent(EventType.scheduledMessageUpdated, failed, generation);
+        _upsert(failed, generation);
         throw _attachmentUploadFailed;
       }
     }
@@ -755,26 +681,56 @@ class ScheduledMessageManager {
       () => request(edit.message),
       relistOnFailure: (error) => edit.copyWith(
         status: .failed,
-        failureReason: _editFailureReason(error),
+        failure: _updatingFailureOf(error),
       ),
     );
 
-    // The API answers a move to the same time with the version it already had.
-    // Mark it as changed here, so it still replaces the copy being saved.
-    final saved = response.scheduledMessage;
-    final isSameVersion = saved.remoteUpdatedAt == scheduledMessage.remoteUpdatedAt;
-    final listed = isSameVersion ? saved.copyWith(localUpdatedAt: clock.now()) : saved;
-
-    // It can be sent or deleted while the edit is saved.
-    if (_listedScheduledMessage(scheduledMessage.id) != null) {
-      _emitEvent(EventType.scheduledMessageUpdated, listed, generation);
-    }
-
+    _upsertAnswer(scheduledMessage, response.scheduledMessage, generation);
     return response;
   }
 
-  // Uploads the attachments of [scheduledMessage] that are not uploaded yet,
-  // showing their progress on it, and resolves to how the upload ended.
+  // Sends [scheduledMessage], which is scheduled, right away.
+  Future<SendScheduledMessageNowResponse> _sendNow(ScheduledMessage scheduledMessage) async {
+    _refuseDeletedQuote(scheduledMessage.cid, scheduledMessage.message);
+
+    final generation = _generation;
+    _upsert(scheduledMessage.asPreparing(), generation);
+
+    final response = await _request(
+      scheduledMessage,
+      generation,
+      () => _api.sendScheduledMessageNow(scheduledMessage.id),
+      relistOnFailure: (_) => scheduledMessage.asLocallyNewer(),
+    );
+
+    _upsertAnswer(scheduledMessage, response.scheduledMessage, generation);
+    return response;
+  }
+
+  // Deletes [scheduledMessage], whose scheduling failed, so it may never have
+  // been scheduled. It is listed again if deleting it fails.
+  Future<DeleteScheduledMessageResponse> _deleteFailedToSchedule(
+    ScheduledMessage scheduledMessage,
+    ScheduledMessage canceled,
+    int generation,
+  ) async {
+    try {
+      return await _api.deleteScheduledMessage(scheduledMessage.id);
+    } catch (error) {
+      // One already sent stays out of the list, and the error says so.
+      if (error is StreamChatNetworkError && error.isAlreadySent) rethrow;
+
+      if (error is StreamChatNetworkError && error.isGone) {
+        return DeleteScheduledMessageResponse()..scheduledMessage = canceled;
+      }
+
+      _upsert(scheduledMessage, generation);
+      rethrow;
+    }
+  }
+
+  // Uploads the attachments of [scheduledMessage] not uploaded yet, showing
+  // their progress on it, and resolves to how the upload ended.
   //
   // Throws [_uploadCanceled] if [_cancelUploads] stops them, even once they
   // have finished.
@@ -783,8 +739,7 @@ class ScheduledMessageManager {
     int generation,
   ) async {
     void onUpdated(ScheduledMessage scheduledMessage) {
-      final updated = scheduledMessage.copyWith(localUpdatedAt: clock.now());
-      _emitEvent(EventType.scheduledMessageUpdated, updated, generation);
+      _upsert(scheduledMessage.asLocallyNewer(), generation);
     }
 
     final uploader = _uploaderFor(scheduledMessage.cid);
@@ -818,7 +773,7 @@ class ScheduledMessageManager {
   // scheduled or saved as an edit. Only deleting it is allowed meanwhile.
   void _refuseWhileUploading(ScheduledMessage scheduledMessage) {
     if (_uploads.containsKey(scheduledMessage.id)) {
-      throw StateError('Scheduled message ${scheduledMessage.id} is uploading attachments.');
+      throw StateError('The scheduled message ${scheduledMessage.id} is uploading attachments.');
     }
   }
 
@@ -834,52 +789,40 @@ class ScheduledMessageManager {
     });
   }
 
-  // Runs [request] on [scheduledMessage]. If it fails, one the request finds
-  // gone is reported deleted, as its own event may have been missed; one
-  // being sent is listed again as it was, if it still is listed, until its
-  // own events tell how sending goes; any other lists what [relistOnFailure]
-  // returns for the error, if given.
+  // Runs [request] on [scheduledMessage]. If it fails, one found sent or gone
+  // stops being listed. Otherwise, if it is still listed or [relistIfUnlisted]
+  // is true, it is listed as [relistOnFailure] returns, or as it was when it
+  // can no longer be changed.
   Future<T> _request<T>(
     ScheduledMessage scheduledMessage,
     int generation,
     Future<T> Function() request, {
-    ScheduledMessage Function(Object error)? relistOnFailure,
+    required ScheduledMessage Function(Object error) relistOnFailure,
     bool relistIfUnlisted = false,
   }) async {
     try {
       return await request();
     } catch (error) {
-      // Gone already, so it isn't listed again.
-      if (error case StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent)) {
-        _emitEvent(EventType.scheduledMessageSent, _sent(scheduledMessage), generation);
-        rethrow;
-      }
-      if (error
-          case StreamChatNetworkError(isScheduledMessageNotFound: true) ||
-              StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageCanceled)) {
-        _emitEvent(EventType.scheduledMessageDeleted, _canceled(scheduledMessage), generation);
+      final networkError = error is StreamChatNetworkError ? error : null;
+      if (networkError != null && networkError.isGone) {
+        _remove(scheduledMessage.id, generation);
         rethrow;
       }
 
-      // One sent or deleted while the request ran isn't listed again, unless
-      // [relistIfUnlisted], as for one taken out of the list before it.
-      final isListed = _listedScheduledMessage(scheduledMessage.id) != null;
+      final isListed = _listed(scheduledMessage.id) != null;
       if (!isListed && !relistIfUnlisted) rethrow;
 
-      if (_isRefusedAsSending(error)) {
-        // Not listed again if taken out of the list, as it may be sent by now.
-        if (isListed) _emitEvent(EventType.scheduledMessageUpdated, _restored(scheduledMessage), generation);
-      } else if (relistOnFailure != null) {
-        _emitEvent(EventType.scheduledMessageUpdated, relistOnFailure(error), generation);
+      if (networkError == null || !networkError.isNotEditable) {
+        _upsert(relistOnFailure(error), generation);
+        rethrow;
       }
 
+      // One taken out of the list may be sent by now.
+      if (isListed) {
+        _upsert(scheduledMessage.asLocallyNewer(), generation);
+      }
       rethrow;
     }
-  }
-
-  // The scheduled message with [id] in the client's list, if it is listed.
-  ScheduledMessage? _listedScheduledMessage(String id) {
-    return state.scheduledMessages.where((it) => it.id == id).firstOrNull;
   }
 
   // Makes [request] to change a scheduled message that isn't listed, so
@@ -889,18 +832,42 @@ class ScheduledMessageManager {
   ) async {
     final generation = _generation;
     final response = await request();
-    _emitEvent(EventType.scheduledMessageUpdated, response.scheduledMessage, generation);
+    _upsert(response.scheduledMessage, generation);
     return response;
   }
 
-  // Refuses [message] in the channel [cid] when it can't be scheduled: when
-  // it quotes a deleted message, or when it is a command.
+  // Refuses a change to [scheduledMessage] while it is first scheduled, which
+  // ends by listing the answer, or once sending it failed, as it can then
+  // only be deleted.
+  static void _refuseChange(ScheduledMessage scheduledMessage) {
+    if (scheduledMessage.isBeingScheduled) {
+      throw StateError('The scheduled message ${scheduledMessage.id} is still being scheduled.');
+    }
+
+    if (scheduledMessage.failure is ScheduledMessageSendingFailed) {
+      throw const ScheduledMessageRefusedError(
+        .scheduledMessageNotEditable,
+        "A message that couldn't be sent can't be changed",
+      );
+    }
+  }
+
+  // Refuses to schedule a failed message again at [scheduledAt] once it has
+  // passed, which would send it right away.
+  static void _refuseTimePassed(DateTime scheduledAt) {
+    if (scheduledAt.isAfter(clock.now())) return;
+
+    throw const ScheduledMessageRefusedError(.scheduledAtTooSoon, 'The time has passed');
+  }
+
+  // Refuses [message] in the channel [cid] when it quotes a deleted message or
+  // is a command.
   void _refuseUnschedulable(String cid, Message message) {
     _refuseDeletedQuote(cid, message);
 
     final channel = _client.state.channels[cid];
     if (ScheduledMessageRules.isCommand(message, channel)) {
-      throw const ScheduledMessageRefusedError(.slashCommand, "Commands can't be scheduled");
+      throw const ScheduledMessageRefusedError(.scheduledMessageIsCommand, "Commands can't be scheduled");
     }
   }
 
@@ -909,134 +876,123 @@ class ScheduledMessageManager {
   void _refuseDeletedQuote(String cid, Message message) {
     final channel = _client.state.channels[cid];
     if (ScheduledMessageRules.quotesDeletedMessage(message, channel)) {
-      throw const ScheduledMessageRefusedError(.quotedMessageDeleted, "Can't quote a deleted message");
+      throw const ScheduledMessageRefusedError(.scheduledMessageQuoteDeleted, "Can't quote a deleted message");
     }
   }
 
-  // Refuses to send [message] in the channel [cid] at [scheduledAt] when the
-  // server would: past the channel's maximum lead time, unless not
-  // [checkLeadTime], at or after its pin expires, or less than a minute before
-  // the location it shares stops being shared.
-  void _refuseUnschedulableAt(
-    String cid,
-    Message message,
-    DateTime scheduledAt, {
-    bool checkLeadTime = true,
-  }) {
-    // As the server does, the time is checked rounded up to the minute, the
-    // time it is sent at.
-    final sendAt = _roundedUpToMinute(scheduledAt);
+  // The failure a change that failed with [error] is listed with. One stopped
+  // by a temporary error, or by a change made at the same time, can be
+  // retried.
+  static ScheduledMessageFailure _updatingFailureOf(Object error) {
+    final reason = error is StreamChatNetworkError ? error.scheduledMessageErrorReason : null;
+    final isRetriable = switch (error) {
+      StreamChatNetworkError(isRetriable: true) => true,
+      StreamChatNetworkError() => reason == .scheduledMessageConflict,
+      _ => true,
+    };
 
-    final maxLeadTime = _client.state.channels[cid]?.config?.scheduledMessagesMaxLeadTime;
-    if (checkLeadTime && maxLeadTime != null) {
-      // With a minute of slack, as the server has.
-      final latest = clock.now().add(maxLeadTime + const Duration(minutes: 1));
-      if (sendAt.isAfter(latest)) {
-        throw const ScheduledMessageRefusedError(.scheduledAtTooFar, 'The time is too far ahead');
-      }
-    }
-
-    if (message.pinExpires case final pinExpires? when !pinExpires.isAfter(sendAt)) {
-      throw const ScheduledMessageRefusedError(.pinExpiresTooSoon, 'The pin expires before the message is sent');
-    }
-
-    if (message.sharedLocation?.endAt case final endAt? when endAt.isBefore(sendAt.add(_minLocationTime))) {
-      throw const ScheduledMessageRefusedError(.locationEndsTooSoon, 'The location stops being shared too soon');
-    }
+    return .updatingFailed(reason: reason, isRetriable: isRetriable);
   }
 
-  // How long a shared location must still be shared once its message is sent.
-  static const _minLocationTime = Duration(seconds: 59);
-
-  // [time], rounded up to a whole minute.
-  static DateTime _roundedUpToMinute(DateTime time) {
-    final remainder = time.microsecondsSinceEpoch % Duration.microsecondsPerMinute;
-    if (remainder == 0) return time;
-
-    return time.add(Duration(microseconds: Duration.microsecondsPerMinute - remainder));
+  // The scheduled message with [id] in the client's list, if it is listed.
+  ScheduledMessage? _listed(String id) {
+    return state.scheduledMessages.where((it) => it.id == id).firstOrNull;
   }
 
-  // The reason a failed edit is listed with. One stopped by a temporary
-  // error, or by a change made at the same time, can be saved again.
-  ScheduledMessageFailureReason _editFailureReason(Object error) {
-    if (error is! StreamChatNetworkError) return .updateRejected;
-    if (error.isRetriable) return .updateFailed;
-    if (error.scheduledMessageErrorReason == .scheduledMessageConflict) return .updateFailed;
-
-    return .updateRejected;
-  }
-
-  // Whether [error] refused a request as the message is being sent.
-  bool _isRefusedAsSending(Object error) {
-    if (error is! StreamChatNetworkError) return false;
-    return error.scheduledMessageErrorReason == .scheduledMessageSending;
-  }
-
-  // [scheduledMessage], marked sent.
-  ScheduledMessage _sent(ScheduledMessage scheduledMessage) {
-    return scheduledMessage.copyWith(
-      status: .sent,
-      localUpdatedAt: clock.now(),
-    );
-  }
-
-  // [scheduledMessage] as it was, replacing any copy of it being prepared.
-  ScheduledMessage _restored(ScheduledMessage scheduledMessage) {
-    return scheduledMessage.copyWith(localUpdatedAt: clock.now());
-  }
-
-  // [scheduledMessage], marked canceled.
-  ScheduledMessage _canceled(ScheduledMessage scheduledMessage) {
-    return scheduledMessage.copyWith(
-      status: .canceled,
-      failureReason: null,
-      localUpdatedAt: clock.now(),
-    );
-  }
-
-  // Reports [scheduledMessage] as an event of [type], unless the user changed
-  // since the request that produced it started.
-  //
-  // [messageId] is the ID of the message it was sent as, when known.
-  void _emitEvent(
-    String type,
+  // Lists [answered] in place of the copy being prepared, unless
+  // [scheduledMessage] was sent or deleted meanwhile. An answer of the same
+  // version is marked changed, so it still replaces that copy.
+  void _upsertAnswer(
     ScheduledMessage scheduledMessage,
-    int generation, {
-    String? messageId,
-  }) {
-    if (generation != _generation) return;
+    ScheduledMessage answered,
+    int generation,
+  ) {
+    if (_listed(scheduledMessage.id) == null) return;
 
-    final event = Event(
-      type: type,
-      cid: scheduledMessage.cid,
-      // The owner is the current user, whose latest data a replayed copy
-      // could otherwise overwrite.
-      user: _client.state.currentUser,
-      messageId: messageId,
-      scheduledMessage: scheduledMessage,
+    final isSameVersion = answered.remoteUpdatedAt == scheduledMessage.remoteUpdatedAt;
+    final listed = isSameVersion ? answered.asLocallyNewer() : answered;
+    _upsert(listed, generation);
+  }
+
+  // Whether the user is the one who was connected at [generation].
+  bool _isCurrent(int generation) => generation == _generation;
+
+  // Lists [scheduledMessage], unless the user changed since [generation].
+  void _upsert(ScheduledMessage scheduledMessage, int generation) {
+    if (!_isCurrent(generation)) return;
+    _stateNotifier.onScheduledMessageUpserted(scheduledMessage);
+  }
+
+  // Stops listing the scheduled message [id], unless the user changed since
+  // [generation].
+  void _remove(String id, int generation) {
+    if (!_isCurrent(generation)) return;
+    _stateNotifier.onScheduledMessageRemoved(id);
+  }
+}
+
+// Why a request on a scheduled message was refused.
+extension on StreamChatNetworkError {
+  /// Whether the scheduled message was already sent.
+  bool get isAlreadySent => scheduledMessageErrorReason == .scheduledMessageAlreadySent;
+
+  /// Whether the scheduled message is not found, already sent, or deleted.
+  bool get isGone {
+    if (isAlreadySent || isScheduledMessageNotFound) return true;
+    return scheduledMessageErrorReason == .scheduledMessageCanceled;
+  }
+
+  /// Whether the scheduled message is being sent, or can no longer change.
+  bool get isNotEditable => switch (scheduledMessageErrorReason) {
+    .scheduledMessageSending || .scheduledMessageNotEditable => true,
+    _ => false,
+  };
+}
+
+extension on ScheduledMessage {
+  /// This copy, marked as being prepared.
+  ScheduledMessage asPreparing() => copyWith(
+    status: .preparingToSchedule,
+    failure: null,
+    localUpdatedAt: clock.now(),
+  );
+
+  /// This copy, marked sent.
+  ScheduledMessage asSent() => copyWith(
+    status: .sent,
+    localUpdatedAt: clock.now(),
+  );
+
+  /// A copy with a newer local time, so it replaces one being prepared that
+  /// has the same remote version.
+  ScheduledMessage asLocallyNewer() => copyWith(
+    localUpdatedAt: clock.now(),
+  );
+
+  /// This copy, marked canceled.
+  ScheduledMessage asCanceled() => copyWith(
+    status: .canceled,
+    failure: null,
+    localUpdatedAt: clock.now(),
+  );
+}
+
+extension on Message {
+  /// Whether an attachment isn't uploaded yet.
+  bool get hasPendingAttachments => attachments.any((it) => !it.uploadState.isSuccess);
+
+  /// This message, with its attachments not uploaded yet marked as preparing.
+  Message withPendingAttachmentsPreparing() {
+    if (!hasPendingAttachments) return this;
+
+    return copyWith(
+      attachments: [
+        for (final attachment in attachments)
+          if (attachment.uploadState.isSuccess)
+            attachment
+          else
+            attachment.copyWith(uploadState: const UploadState.preparing()),
+      ],
     );
-
-    _client.handleEvent(event);
-  }
-
-  /// Forgets the scheduled messages.
-  ///
-  /// Used when the user disconnects.
-  void clear() {
-    _generation++;
-    _deletedWhileScheduling.clear();
-    for (final upload in _uploads.values) {
-      upload.cancel();
-    }
-    _uploads.clear();
-    _loadCache = InFlightCache<String, ScheduledMessageListState>();
-    _wasLoadedBeforeConnectionLost = false;
-    _stateNotifier.clear();
-  }
-
-  /// Stops following the events and updating the [state].
-  Future<void> dispose() async {
-    await _eventsSubscription.cancel();
-    await _stateNotifier.dispose();
   }
 }
