@@ -84,19 +84,15 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
     return true;
   }
 
-  Future<DriftChatDatabase> _defaultDatabaseProvider(
-    String userId,
-    ConnectionMode mode,
-  ) => SharedDB.constructDatabase(
-    userId,
-    connectionMode: mode,
-    webUseIndexedDbIfSupported: _webUseIndexedDbIfSupported,
-    databaseName: [
-      if (_databaseNamePrefix.isNotEmpty) _databaseNamePrefix,
-      'db',
+  Future<DriftChatDatabase> _defaultDatabaseProvider(String userId, ConnectionMode mode) {
+    final databaseName = [if (_databaseNamePrefix.isNotEmpty) _databaseNamePrefix, 'db', userId].join('_');
+    return SharedDB.constructDatabase(
       userId,
-    ].join('_'),
-  );
+      connectionMode: mode,
+      webUseIndexedDbIfSupported: _webUseIndexedDbIfSupported,
+      databaseName: databaseName,
+    );
+  }
 
   @override
   bool get isConnected => db != null;

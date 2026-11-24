@@ -60,6 +60,20 @@ void main() {
     expect(await beta.getLastSyncAt(), syncedAt);
   });
 
+  test('StreamChatPersistenceClient accepts a databaseNamePrefix with inner _ and -', () {
+    expect(
+      () => StreamChatPersistenceClient(databaseNamePrefix: 'chat_beta-2'),
+      returnsNormally,
+    );
+  });
+
+  test('StreamChatPersistenceClient rejects a databaseNamePrefix starting with _', () {
+    expect(
+      () => StreamChatPersistenceClient(databaseNamePrefix: '_beta'),
+      throwsAssertionError,
+    );
+  });
+
   test('StreamChatPersistenceClient rejects a databaseNamePrefix ending in _', () {
     expect(
       () => StreamChatPersistenceClient(databaseNamePrefix: 'beta_'),
