@@ -114,7 +114,7 @@ jobs:
           BUILD_ARGS: ${{ steps.target.outputs.build-args }}
         run: |
           read -ra args <<< "$BUILD_ARGS"
-          flutter build web --release --wasm "${args[@]}"
+          flutter build web --release "${args[@]}"
 
       - name: Deploy
         uses: GetStream/stream-core-flutter/.github/actions/flutter-web-deploy@932fb06e4555b3556f211147f8915ce8a6bd0a6c
