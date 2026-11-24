@@ -90,12 +90,14 @@ abstract class Translations {
   /// The label for showing the message is edited
   String get editedMessageLabel;
 
-  /// The mark on a one-to-one voice recording the other member has played.
+  /// The mark on a voice recording or video the other member has played.
+  ///
+  /// Shown in a channel with exactly two members, such as "Played".
   String get messagePlayedLabel;
 
-  /// The mark on a voice recording with the [count] of members who played it.
+  /// The mark on a voice recording or video [count] members have played.
   ///
-  /// A count above 99 reads as "99+".
+  /// A [count] above 99 reads as "99+", such as "Played by 99+".
   String messagePlayedByLabel(int count);
 
   /// The label for message reactions

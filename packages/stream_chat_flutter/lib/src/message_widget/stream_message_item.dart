@@ -892,7 +892,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
   }
 
   // The played mark on its own, in place of the metadata row it would sit in,
-  // and as tall as that row.
+  // styled and sized like that row's mark.
   Widget? _playedMarkRow(
     BuildContext context,
     Message message, {
@@ -905,16 +905,25 @@ class DefaultStreamMessageItem extends StatelessWidget {
     final metadataStyle = core.StreamMessageItemTheme.of(context).metadata;
     final minHeight = metadataStyle?.minHeight?.resolve(placement) ?? _defaultMetadataRowMinHeight;
 
+    final markTextStyle = metadataStyle?.markTextStyle?.resolve(placement) ?? context.streamTextTheme.metadataDefault;
+    final defaultMarkColor = switch (placement.presentation) {
+      .standard => context.streamColorScheme.accentPrimary,
+      .preview => context.streamColorScheme.textOnAccent,
+    };
+    final markColor = metadataStyle?.markColor?.resolve(placement) ?? defaultMarkColor;
+
     return ConstrainedBox(
       constraints: BoxConstraints(minHeight: minHeight),
       child: Row(
         mainAxisSize: .min,
         children: [
-          StreamMessagePlayedMark(
-            message: message,
-            separator: null,
-            onTap: onTap,
-            excludeFromSemantics: excludeFromSemantics,
+          DefaultTextStyle.merge(
+            style: markTextStyle.copyWith(color: markColor),
+            child: StreamMessagePlayedMark(
+              message: message,
+              onTap: onTap,
+              excludeFromSemantics: excludeFromSemantics,
+            ),
           ),
         ],
       ),

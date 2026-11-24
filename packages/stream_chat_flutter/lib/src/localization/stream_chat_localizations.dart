@@ -32,4 +32,18 @@ abstract class StreamChatLocalizations implements Translations {
       StreamChatLocalizations,
     );
   }
+
+  /// The mark on a voice recording or video the other member has played.
+  ///
+  /// Defaults to the English "Played".
+  @override
+  String get messagePlayedLabel => 'Played';
+
+  /// The mark on a voice recording or video [count] members have played.
+  ///
+  /// Defaults to the English "Played by 3", capped at "Played by 99+".
+  @override
+  String messagePlayedByLabel(int count) {
+    return 'Played by ${count > 99 ? '99+' : count}';
+  }
 }

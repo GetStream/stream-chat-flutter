@@ -189,6 +189,49 @@ void main() {
     expect(find.text('Played by 2'), findsOneWidget);
   });
 
+  testWidgets('a dot separates the mark from the rest of the metadata', (tester) async {
+    await tester.pumpWidget(_wrap(_item(_voiceMessage(playedBy: 2))));
+    await tester.pumpAndSettle();
+
+    final markRight = tester.getTopRight(find.text('Played by 2')).dx;
+    final dotLeft = tester.getTopLeft(find.text('·')).dx;
+    expect(dotLeft, greaterThan(markRight));
+  });
+
+  testWidgets('an earlier voice message shows its mark without a dot', (tester) async {
+    await tester.pumpWidget(
+      _wrap(_item(_voiceMessage(playedBy: 2)), stackPosition: .top),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('·'), findsNothing);
+  });
+
+  testWidgets('an earlier voice message uses the accent color by default', (tester) async {
+    await tester.pumpWidget(
+      _wrap(_item(_voiceMessage(playedBy: 2)), stackPosition: .top),
+    );
+    await tester.pumpAndSettle();
+
+    final context = tester.element(find.text('Played by 2'));
+    final accent = context.streamColorScheme.accentPrimary;
+    expect(_textColor(tester, 'Played by 2'), accent);
+  });
+
+  testWidgets('an earlier voice message uses the themed mark color', (tester) async {
+    const themedColor = Color(0xFF00AA55);
+    final item = core.StreamMessageItemTheme(
+      data: core.StreamMessageItemThemeData(
+        metadata: core.StreamMessageMetadataStyle.from(markColor: themedColor),
+      ),
+      child: _item(_voiceMessage(playedBy: 2)),
+    );
+    await tester.pumpWidget(_wrap(item, stackPosition: .top));
+    await tester.pumpAndSettle();
+
+    expect(_textColor(tester, 'Played by 2'), themedColor);
+  });
+
   testWidgets('tapping the played by mark reports the message and mark type', (tester) async {
     MessageMarkTapDetails? tapped;
     final message = _voiceMessage(playedBy: 2);
@@ -207,6 +250,14 @@ void main() {
 }
 
 StreamMessageItem _item(Message message) => StreamMessageItem(message: message);
+
+Color? _textColor(WidgetTester tester, String text) {
+  final richText = find.descendant(
+    of: find.text(text),
+    matching: find.byType(RichText),
+  );
+  return tester.widget<RichText>(richText).text.style?.color;
+}
 
 Message _voiceMessage({User? user, int playedBy = 0}) {
   final markers = [
