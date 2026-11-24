@@ -24,6 +24,21 @@ const kDefaultStreamApiKey = String.fromEnvironment(
 /// have to use.
 const kStreamBaseUrl = String.fromEnvironment('STREAM_BASE_URL');
 
+/// Prefix of the offline database's name in a web build:
+/// `--dart-define=WEB_STORAGE_PREFIX=chat_beta_`.
+///
+/// The web demos on flutter.getstream.io share one origin, so one browser
+/// storage. The deploy jobs give prod, beta and every pull request build each
+/// their own prefix, so builds with different database schemas can't break
+/// each other. The preferences stay unprefixed: they only hold the `config.*`
+/// UI settings, which no other demo uses. Empty — the default — leaves the
+/// name unprefixed.
+const kWebStoragePrefix = String.fromEnvironment('WEB_STORAGE_PREFIX');
+
+/// The pull request a web build was made for:
+/// `--dart-define=WEB_PR_NUMBER=3229`. Empty for every other build.
+const kWebPrNumber = String.fromEnvironment('WEB_PR_NUMBER');
+
 /// Name of the server-side predefined filter backing the channel list.
 ///
 /// Predefined filters are saved queries that live on the Stream app, so this
