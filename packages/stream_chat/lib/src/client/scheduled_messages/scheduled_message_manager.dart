@@ -354,7 +354,7 @@ class ScheduledMessageManager {
 
     final generation = _generation;
     final canceled = scheduledMessage.asCanceled();
-    _remove(scheduledMessage.id);
+    _remove(scheduledMessage.id, generation);
 
     // Scheduling it deletes it once it ends.
     if (scheduledMessage.isBeingScheduled) {
@@ -465,7 +465,7 @@ class ScheduledMessageManager {
       final created = response.scheduledMessage;
       if (created == null) {
         // Its time had passed, so it was sent right away.
-        _remove(local.id);
+        _remove(local.id, generation);
         return response;
       }
 
@@ -474,7 +474,7 @@ class ScheduledMessageManager {
     } on StreamChatNetworkError catch (error) {
       // Sent or deleted: on a retry, the first attempt went through.
       if (error.isGone) {
-        _remove(local.id);
+        _remove(local.id, generation);
         rethrow;
       }
 
@@ -509,7 +509,7 @@ class ScheduledMessageManager {
     if (restored != null && !wasDeletedMeanwhile) {
       _upsert(restored, generation);
     } else {
-      _remove(local.id);
+      _remove(local.id, generation);
     }
   }
 
@@ -643,7 +643,7 @@ class ScheduledMessageManager {
     } catch (error) {
       final networkError = error is StreamChatNetworkError ? error : null;
       if (networkError != null && networkError.isGone) {
-        _remove(scheduledMessage.id);
+        _remove(scheduledMessage.id, generation);
         rethrow;
       }
 
@@ -761,8 +761,10 @@ class ScheduledMessageManager {
     _stateNotifier.onScheduledMessageUpserted(scheduledMessage);
   }
 
-  // Stops listing the scheduled message [id].
-  void _remove(String id) {
+  // Stops listing the scheduled message [id], unless the user changed since
+  // [generation].
+  void _remove(String id, int generation) {
+    if (!_isCurrent(generation)) return;
     _stateNotifier.onScheduledMessageRemoved(id);
   }
 }

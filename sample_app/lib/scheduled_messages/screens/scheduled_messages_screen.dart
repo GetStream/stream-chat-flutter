@@ -151,12 +151,12 @@ Future<void> _onScheduledMessageAction(
   ValueSetter<_Edit> startEdit,
 ) async {
   return switch (action) {
-    EditScheduledMessage(:final scheduledMessage) => _edit(context, scheduledMessage, startEdit),
-    EditAndRescheduleMessage(:final scheduledMessage) => _edit(context, scheduledMessage, startEdit),
-    RescheduleMessage(:final scheduledMessage) => _reschedule(context, scheduledMessage),
-    SendScheduledMessageNow(:final scheduledMessage) => _sendNow(context, scheduledMessage),
-    CopyScheduledMessageText(:final scheduledMessage) => _copyText(context, scheduledMessage),
-    DeleteScheduledMessage(:final scheduledMessage) => _maybeDelete(context, scheduledMessage),
+    EditScheduledMessage() => _edit(context, action.scheduledMessage, startEdit),
+    EditAndRescheduleMessage() => _edit(context, action.scheduledMessage, startEdit),
+    RescheduleMessage() => _reschedule(context, action.scheduledMessage),
+    SendScheduledMessageNow() => _sendNow(context, action.scheduledMessage),
+    CopyScheduledMessageText() => _copyText(context, action.scheduledMessage),
+    DeleteScheduledMessage() => _maybeDelete(context, action.scheduledMessage),
   };
 }
 

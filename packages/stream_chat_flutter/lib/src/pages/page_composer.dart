@@ -130,7 +130,7 @@ Future<void> _scheduleOnSendLongPress(
     // one already sent is done, so neither goes back in the composer.
     final countsAsScheduled = switch (error) {
       StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) => true,
-      StreamChatNetworkError(:final isRetriable) => isRetriable,
+      StreamChatNetworkError() => error.isRetriable,
       _ => false,
     };
     if (countsAsScheduled) return;
@@ -145,11 +145,8 @@ Future<void> _scheduleOnSendLongPress(
 // Why scheduling failed with [error], in the words of [translations].
 String _scheduleErrorText(Translations translations, Channel channel, Object error) {
   final (reason, isRefused) = switch (error) {
-    ScheduledMessageRefusedError(:final reason) => (reason, true),
-    StreamChatNetworkError(:final scheduledMessageErrorReason, :final isRetriable) => (
-      scheduledMessageErrorReason,
-      !isRetriable,
-    ),
+    ScheduledMessageRefusedError() => (error.reason, true),
+    StreamChatNetworkError() => (error.scheduledMessageErrorReason, !error.isRetriable),
     _ => (null, false),
   };
 
