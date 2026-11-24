@@ -40,7 +40,7 @@ jobs:
 
       - name: Look up the AVD
         id: avd
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.android/avd/*
@@ -73,7 +73,7 @@ jobs:
 
       - name: Save the AVD
         if: steps.avd.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v5
+        uses: actions/cache/save@v6
         with:
           path: |
             ~/.android/avd/*

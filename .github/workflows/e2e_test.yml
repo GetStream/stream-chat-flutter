@@ -134,7 +134,7 @@ jobs:
 
       - name: Restore the AVD
         id: avd
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.android/avd/*
