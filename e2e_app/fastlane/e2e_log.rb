@@ -34,6 +34,12 @@ module E2ELog
   # not build. It is not a test, so it is neither owed a result nor a `--name`.
   LOAD_FAILURE = /\Aloading \S+\.dart\z/
 
+  # The runner closing a test file's load suite as failed after its tests ran, e.g.
+  # when the coverage collector lost the app (`Service connection disposed`) because
+  # the device dropped off. Nothing of that file is left to run, yet `flutter test`
+  # has been seen on CI never exiting after printing it.
+  LOAD_SUITE_FAILED_AFTER_COMPLETION = /[✅❌] loading \S+\.dart#{Regexp.escape(POST_COMPLETION_SUFFIX)}/
+
   # The `github` reporter's collapsible header around the tests that passed. It
   # names a group of tests, not a test, so it is owed no result.
   PASSING_GROUP = 'Passing tests'
@@ -70,6 +76,13 @@ module E2ELog
     # A leaked async error fails the run but is NOT attributable to a test.
     def post_completion_failure?(log)
       read(log).include?(POST_COMPLETION)
+    end
+
+    # Whether the runner has given up on a test file after its tests ran (see
+    # LOAD_SUITE_FAILED_AFTER_COMPLETION), so a `flutter test` still running past
+    # that is only waiting on a lost app.
+    def load_suite_failed_after_completion?(log)
+      read(log).match?(LOAD_SUITE_FAILED_AFTER_COMPLETION)
     end
 
     # The test the runner pinned the leaked error on. Triage only — the

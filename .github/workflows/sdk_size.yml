@@ -31,10 +31,18 @@ jobs:
   measure-android:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     timeout-minutes: 60
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
+
+      # Android lint needs Java 21 or newer; the runner image defaults to 17.
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
 
       - uses: ./.github/actions/setup-flutter
         with:
@@ -119,7 +127,8 @@ jobs:
       && github.event.pull_request.head.repo.full_name == github.repository
       && !contains(github.head_ref, 'release/')
     timeout-minutes: 15
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     permissions:
       contents: read
       pull-requests: write
@@ -152,7 +161,8 @@ jobs:
         || (github.event.pull_request.head.repo.full_name == github.repository
           && contains(github.head_ref, 'release/')))
     timeout-minutes: 15
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     permissions:
       contents: read
       pull-requests: write

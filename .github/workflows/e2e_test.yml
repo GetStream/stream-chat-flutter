@@ -28,7 +28,8 @@ env:
 jobs:
   select:
     # Pull requests run the tests their changes can reach, per the nightly coverage map.
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     timeout-minutes: 10
     permissions:
       contents: read
@@ -57,7 +58,8 @@ jobs:
   allure_launch_android:
     needs: select
     if: (github.event_name != 'workflow_dispatch' || inputs.android) && needs.select.outputs.e2e_batches != '[]'
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     timeout-minutes: 10
     outputs:
       launch_id: ${{ steps.launch.outputs.launch_id }}
@@ -72,7 +74,8 @@ jobs:
   allure_launch_ios:
     needs: select
     if: github.event_name == 'workflow_dispatch' && inputs.ios && needs.select.outputs.e2e_batches != '[]'
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     timeout-minutes: 10
     outputs:
       launch_id: ${{ steps.launch.outputs.launch_id }}
@@ -88,14 +91,14 @@ jobs:
     # Always on pull_request; opt-out via the checkbox on workflow_dispatch.
     if: (github.event_name != 'workflow_dispatch' || inputs.android) && needs.select.outputs.e2e_batches != '[]'
     needs: [select, allure_launch_android]
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     timeout-minutes: 60
     strategy:
       fail-fast: false
       matrix:
         batch: ${{ fromJson(needs.select.outputs.e2e_batches) }}
     env:
-      ANDROID_API_LEVEL: "36"
       LAUNCH_ID: ${{ needs.allure_launch_android.outputs.launch_id }}
     steps:
       - uses: actions/checkout@v7
@@ -125,12 +128,32 @@ jobs:
           name: e2e-selection
           path: e2e_app/build
 
-      - name: Run e2e (Android emulator)
-        uses: reactivecircus/android-emulator-runner@v2
+      # Saved by the nightly run. A miss (e.g. after an emulator update) cold boots as before.
+      - uses: ./.github/actions/android-sdk-packages
+        id: sdk
+
+      - name: Restore the AVD
+        id: avd
+        uses: actions/cache/restore@v5
         with:
-          api-level: ${{ env.ANDROID_API_LEVEL }}
+          path: |
+            ~/.android/avd/*
+            ~/.android/adb*
+          key: ${{ steps.sdk.outputs.avd-key }}
+
+      - name: Run e2e (Android emulator)
+        uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
+        env:
+          # So an emulator the run_e2e_test lane restarts boots from the snapshot too.
+          E2E_EMULATOR_OPTIONS: -no-snapshot-save ${{ steps.sdk.outputs.emulator-options }}
+        with:
+          api-level: ${{ steps.sdk.outputs.api-level }}
+          target: ${{ steps.sdk.outputs.target }}
           arch: x86_64
-          profile: pixel_6
+          profile: ${{ steps.sdk.outputs.profile }}
+          cores: ${{ steps.sdk.outputs.cores }}
+          force-avd-creation: ${{ steps.avd.outputs.cache-hit != 'true' }}
+          emulator-options: -no-snapshot-save ${{ steps.sdk.outputs.emulator-options }}
           script: cd e2e_app && bundle exec fastlane run_e2e_test device:emulator-5554 selection:build/e2e_selection.json batch:${{ matrix.batch }} batch_count:${{ strategy.job-total }}
 
       - name: Attach videos to failed tests
@@ -228,7 +251,8 @@ jobs:
   # the per-batch job names come and go.
   result:
     name: E2E result
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     if: ${{ always() }}
     needs: [select, allure_launch_android, allure_launch_ios, android, ios]
     permissions: {}

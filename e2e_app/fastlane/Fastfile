@@ -214,14 +214,24 @@ def start_memory_log(interval: 30)
   end
 end
 
-# Whether the Android device is (back) online. On CI a dead emulator is restarted,
-# up to [max_restarts] times per lane run.
-def ensure_android_device(device:, avd:, restarts:, max_restarts: 3)
-  return true if android_device_online?(device)
-  return false unless is_ci && avd && restarts[:count] < max_restarts
+# Whether the Android device is (back) online and fit to run tests. On CI a dead
+# emulator is restarted, up to [max_restarts] times per lane run ([state][:count]).
+# [state][:suspect] (set when the app stalled or a run had to be killed) forces that
+# restart even though adb still answers: seen on CI, an emulator that answered
+# `echo ok` stalled every app launch for two hours. Once the restarts are used up a
+# suspect device counts as gone, so the lane stops instead of running out the job.
+def ensure_android_device(device:, avd:, state:, max_restarts: 3)
+  online = android_device_online?(device)
+  return true if online && !state[:suspect]
+  # Locally there is nothing to restart; carry on with whatever answers.
+  return online unless is_ci && avd
+  return false if state[:count] >= max_restarts
 
-  restarts[:count] += 1
-  restart_android_emulator(device: device, avd: avd)
+  state[:count] += 1
+  # Stays suspect if the restart fails, so the restart limit above still rejects it.
+  restarted = restart_android_emulator(device: device, avd: avd)
+  state[:suspect] = false if restarted
+  restarted
 end
 
 # How long one `flutter test` may run before the lane kills it: a build plus a generous
@@ -250,12 +260,20 @@ STARTUP_LIMIT = 4 * 60
 # Printed by the app as each test starts and ends.
 TEST_REPORTED = /ALLURE-(RESULT|ATTACH)::|E2E-TEST::/
 
+# How long `flutter test` may stay silent after the runner gave up on a test file
+# (E2ELog.load_suite_failed_after_completion?). Seen on CI: the device dropped off
+# while coverage was being collected and `flutter test` never exited, so each such
+# run held the job until its time limit (17 min, ten times in one nightly).
+FINISHED_SILENCE_LIMIT = 60
+
 # Runs [argv], whose output is copied to [log], and returns whether it succeeded.
 # A run whose app installs but starts no test within STARTUP_LIMIT calls
-# [on_stalled], is stopped and fails; a run that can't be started fails too.
+# [on_stalled], is stopped and fails. A run that stays silent for
+# FINISHED_SILENCE_LIMIT after the runner gave up on a test file calls [on_hung],
+# is stopped and fails. A run that can't be started fails too.
 # [argv] runs from the app folder with no shell in between, so its process group
 # is the one `timeout` leads and stopping it reaches flutter too.
-def run_watching_startup(argv, log, on_stalled:)
+def run_watching_startup(argv, log, on_stalled:, on_hung:)
   pid =
     begin
       Process.spawn(*argv, pgroup: true, chdir: root_path)
@@ -263,29 +281,46 @@ def run_watching_startup(argv, log, on_stalled:)
       UI.important("Could not start flutter test: #{e.message}")
       return false
     end
+  stop = lambda do
+    # The whole group: flutter, the tee pipeline and the `timeout` guard.
+    Process.kill('TERM', -pid) rescue nil
+    begin
+      Timeout.timeout(30) { Process.wait(pid) }
+    rescue Timeout::Error
+      Process.kill('KILL', -pid) rescue nil
+      Process.wait(pid) rescue nil
+    end
+    false
+  end
   installed_at = nil
+  started = false
+  log_size = -1
+  log_changed_at = Time.now
   loop do
     _, status = Process.wait2(pid, Process::WNOHANG)
     return status.success? if status
 
-    lines = File.exist?(log) ? File.readlines(log) : []
-    install = lines.rindex { |line| line.include?('Installing build/') }
-    reported = install && lines.drop(install + 1).any? { |line| line.match?(TEST_REPORTED) }
-    # A test started: only the run's time limit applies from here.
-    return Process.wait2(pid).last.success? if reported
-
-    installed_at ||= Time.now if install
-    if installed_at && Time.now - installed_at >= STARTUP_LIMIT
-      on_stalled.call
-      # The whole group: flutter, the tee pipeline and the `timeout` guard.
-      Process.kill('TERM', -pid) rescue nil
-      begin
-        Timeout.timeout(30) { Process.wait(pid) }
-      rescue Timeout::Error
-        Process.kill('KILL', -pid) rescue nil
-        Process.wait(pid) rescue nil
+    size = File.exist?(log) ? File.size(log) : 0
+    if size != log_size
+      log_size = size
+      log_changed_at = Time.now
+      unless started
+        lines = File.exist?(log) ? File.readlines(log) : []
+        install = lines.rindex { |line| line.include?('Installing build/') }
+        started = install && lines.drop(install + 1).any? { |line| line.match?(TEST_REPORTED) }
+        installed_at ||= Time.now if install
       end
-      return false
+    end
+
+    if started
+      # Only the run's time limit applies, unless the runner already gave up on a file.
+      if Time.now - log_changed_at >= FINISHED_SILENCE_LIMIT && E2ELog.load_suite_failed_after_completion?(log)
+        on_hung.call
+        return stop.call
+      end
+    elsif installed_at && Time.now - installed_at >= STARTUP_LIMIT
+      on_stalled.call
+      return stop.call
     end
     sleep(5)
   end
@@ -438,7 +473,7 @@ lane :run_e2e_test do |options|
     sh("adb #{serial}logcat -c")
     # Read while the emulator answers, so a dead one can be restarted with the same AVD.
     avd = android_avd_name(device)
-    emulator_restarts = { count: 0 }
+    emulator = { count: 0, suspect: false }
     memory_log = start_memory_log if is_ci
   end
 
@@ -495,7 +530,7 @@ lane :run_e2e_test do |options|
         # A dead emulator turns every remaining run into an instant "No supported devices"
         # failure. If it can't be restarted, stop instead, and count the remaining runs as
         # failed, so the coverage map keeps their previous coverage rather than dropping them.
-        if !ios && !ensure_android_device(device: device, avd: avd, restarts: emulator_restarts)
+        if !ios && !ensure_android_device(device: device, avd: avd, state: emulator)
           remaining = runs.drop(run_index)
           UI.important("Android device #{device || '(default)'} is gone; skipping the #{remaining.size} remaining run(s)")
           remaining.each do |t, s, f|
@@ -517,7 +552,7 @@ lane :run_e2e_test do |options|
           boot_simulator(udid: device) if ios && !first_attempt
           first_attempt = false
           # The emulator may have died during the attempt being retried.
-          if !ios && attempt.positive? && !ensure_android_device(device: device, avd: avd, restarts: emulator_restarts)
+          if !ios && attempt.positive? && !ensure_android_device(device: device, avd: avd, state: emulator)
             break
           end
 
@@ -556,11 +591,19 @@ lane :run_e2e_test do |options|
             on_stalled: -> {
               UI.important("#{target} (attempt #{attempt}/#{retries + 1}): the app installed but no test " \
                            "started within #{STARTUP_LIMIT / 60} min")
+              emulator[:suspect] = true if emulator
+            },
+            # Unlike a stall, a hang leaves the emulator usable: the retry passes, and a restart per
+            # hang would use up the restarts and skip the rest of the batch.
+            on_hung: -> {
+              UI.important("#{target} (attempt #{attempt}/#{retries + 1}): stopped flutter test, silent for " \
+                           "#{FINISHED_SILENCE_LIMIT} s after the runner gave up on the test file")
             },
           )
           if !ok && !guard.empty? && Time.now - started_at >= time_limit
             UI.important("#{target} (attempt #{attempt}/#{retries + 1}): killed after #{time_limit / 60} min " \
                          'with no exit from flutter test; the device may have died')
+            emulator[:suspect] = true if emulator
           end
 
           stop_screen_recording(rec)
