@@ -9,6 +9,7 @@
 🔄 Changed
 
 - Overrides of the channel query methods on `Channel` and `StreamChatClient` must add the new `includeScheduledMessages` parameter.
+- Attachment uploads go through the client's attachment file uploader, set with `attachmentFileUploaderProvider`, instead of `Channel.sendImage` and `Channel.sendFile`.
 
 🐞 Fixed
 
