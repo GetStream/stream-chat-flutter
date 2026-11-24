@@ -18,7 +18,7 @@ on:
 jobs:
   main:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: Close stale issues
         uses: actions/stale@v11

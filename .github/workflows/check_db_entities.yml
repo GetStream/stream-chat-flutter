@@ -23,7 +23,7 @@ jobs:
   # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
   gate:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     outputs:
       should_run: ${{ steps.filter.outputs.persistence }}
     steps:
@@ -43,7 +43,7 @@ jobs:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v7

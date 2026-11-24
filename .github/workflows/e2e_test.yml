@@ -29,7 +29,7 @@ jobs:
   select:
     # Pull requests run the tests their changes can reach, per the nightly coverage map.
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     timeout-minutes: 10
     permissions:
       contents: read
@@ -59,7 +59,7 @@ jobs:
     needs: select
     if: (github.event_name != 'workflow_dispatch' || inputs.android) && needs.select.outputs.e2e_batches != '[]'
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     timeout-minutes: 10
     outputs:
       launch_id: ${{ steps.launch.outputs.launch_id }}
@@ -75,7 +75,7 @@ jobs:
     needs: select
     if: github.event_name == 'workflow_dispatch' && inputs.ios && needs.select.outputs.e2e_batches != '[]'
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     timeout-minutes: 10
     outputs:
       launch_id: ${{ steps.launch.outputs.launch_id }}
@@ -92,7 +92,7 @@ jobs:
     if: (github.event_name != 'workflow_dispatch' || inputs.android) && needs.select.outputs.e2e_batches != '[]'
     needs: [select, allure_launch_android]
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -252,7 +252,7 @@ jobs:
   result:
     name: E2E result
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     if: ${{ always() }}
     needs: [select, allure_launch_android, allure_launch_ios, android, ios]
     permissions: {}

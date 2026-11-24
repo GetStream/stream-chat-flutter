@@ -20,7 +20,7 @@ jobs:
   update_sdk_goldens:
     if: inputs.target == 'sdk' || inputs.target == 'both'
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     outputs:
       changed: ${{ steps.detect.outputs.changed }}
     steps:
@@ -118,7 +118,7 @@ jobs:
       (needs.update_sdk_goldens.outputs.changed == 'true' ||
        needs.update_docs_goldens.outputs.changed == 'true')
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: 🔑 Mint CI Bot Token
         id: ci-bot-token
