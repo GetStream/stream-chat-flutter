@@ -653,7 +653,7 @@ class Channel {
   }
 
   // Uploads the attachments of [message] not uploaded yet, or only
-  // [attachmentIds], showing their progress on it, and resolves to how the
+  // [attachmentIds], with their progress on it, and resolves to how the
   // upload ended.
   //
   // Throws the cancel reason if canceled, even after they finished.
@@ -821,8 +821,9 @@ class Channel {
   ///
   /// Throws a [ScheduledMessageRefusedError] without making the request when
   /// [message] is a command in a channel that has commands, or quotes a
-  /// deleted message. It is also thrown when sending it right away is refused,
-  /// for example in a frozen channel.
+  /// deleted message. The same error is thrown when [scheduledAt] has passed
+  /// and sending [message] right away is refused, for example in a frozen
+  /// channel.
   ///
   /// Throws an [ArgumentError] if [scheduledAt] is not in the future. A
   /// message to send right away goes through [sendMessage].

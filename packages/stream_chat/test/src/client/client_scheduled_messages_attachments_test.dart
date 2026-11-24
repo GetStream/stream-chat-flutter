@@ -76,7 +76,6 @@ void main() {
     _stubImageUpload(harness, (_) async => throw uploadError);
 
     await _ignoringFailure(schedule(_withImage()));
-    await settle();
 
     final [failed] = harness.client.state.scheduledMessages;
     expect(failed.failure, isA<ScheduledMessageUploadFailed>());
@@ -86,7 +85,6 @@ void main() {
     _stubImageUpload(harness, (_) async => throw uploadError);
 
     await _ignoringFailure(schedule(_withImage()));
-    await settle();
 
     final [failed] = harness.client.state.scheduledMessages;
     expect(failed.message.attachments.single.uploadState.isFailed, isTrue);
@@ -123,7 +121,6 @@ void main() {
     });
     _stubSchedule(harness);
     await _ignoringFailure(schedule(_withImage()));
-    await settle();
 
     await harness.client.resendScheduledMessage(harness.client.state.scheduledMessages.single.id);
 
@@ -347,7 +344,6 @@ void main() {
 
     await _ignoringFailure(harness.client.deleteScheduledMessage(scheduledMessage.id));
     await editing;
-    await settle();
 
     final [listed] = harness.client.state.scheduledMessages;
     expect(listed.failure, const ScheduledMessageFailure.updatingFailed(isRetriable: true));
@@ -409,6 +405,86 @@ void main() {
     );
 
     _verifyNeverUpdated(harness);
+  });
+
+  test('updateScheduledMessage uploads the attachment of one whose upload failed only once more', () async {
+    var uploads = 0;
+    _stubImageUpload(harness, (_) async {
+      uploads += 1;
+      if (uploads == 1) throw uploadError;
+      return SendImageResponse()..file = imageUrl;
+    });
+    _stubSchedule(harness);
+    _stubUpdate(harness, fakeScheduledMessage('message'));
+    await _ignoringFailure(schedule(_withImage()));
+    final [failed] = harness.client.state.scheduledMessages;
+
+    await withClock(Clock.fixed(now), () => harness.client.updateScheduledMessage(failed.id, failed.message));
+
+    expect(uploads, 2);
+  });
+
+  test('updateScheduledMessage does not list again one sent while its attachment uploads', () async {
+    final scheduledMessage = fakeScheduledMessage('a');
+    await harness.hold([scheduledMessage]);
+    final upload = Completer<SendImageResponse>();
+    _stubImageUpload(harness, (_) => upload.future);
+    final editing = _ignoringFailure(harness.client.updateScheduledMessage(scheduledMessage.id, _withImage(id: 'a')));
+    await settle();
+
+    await harness.receive(EventType.scheduledMessageSent, scheduledMessage);
+    upload.completeError(uploadError);
+    await editing;
+
+    expect(harness.client.state.scheduledMessages, isEmpty);
+  });
+
+  test('updateScheduledMessage lists an edit whose attachment failed to upload as failed', () async {
+    final scheduledMessage = fakeScheduledMessage('a');
+    await harness.hold([scheduledMessage]);
+    _stubImageUpload(harness, (_) async => throw uploadError);
+
+    await _ignoringFailure(harness.client.updateScheduledMessage(scheduledMessage.id, _withImage(id: 'a')));
+
+    final [listed] = harness.client.state.scheduledMessages;
+    expect(listed.failure, const ScheduledMessageFailure.updatingFailed(isRetriable: true));
+  });
+
+  test('deleteScheduledMessage marks the attachment of an edit it stopped as failed when the request fails', () async {
+    final scheduledMessage = fakeScheduledMessage('a');
+    await harness.hold([scheduledMessage]);
+    _stubUploadUntilCanceled(harness);
+    final error = StreamChatNetworkError(ChatErrorCode.internalSystemError);
+    when(
+      () => harness.api.scheduledMessages.deleteScheduledMessage(any()),
+    ).thenAnswer((_) async => throw error);
+    final editing = _ignoringFailure(harness.client.updateScheduledMessage(scheduledMessage.id, _withImage(id: 'a')));
+    await settle();
+
+    await _ignoringFailure(harness.client.deleteScheduledMessage(scheduledMessage.id));
+    await editing;
+
+    final [listed] = harness.client.state.scheduledMessages;
+    expect(listed.message.attachments.single.uploadState.isFailed, isTrue);
+  });
+
+  test('rescheduleMessage uploads again the attachment of one whose upload failed', () async {
+    var uploads = 0;
+    _stubImageUpload(harness, (_) async {
+      uploads += 1;
+      if (uploads == 1) throw uploadError;
+      return SendImageResponse()..file = imageUrl;
+    });
+    _stubSchedule(harness);
+    _stubUpdate(harness, fakeScheduledMessage('message'));
+    await _ignoringFailure(schedule(_withImage()));
+    final [failed] = harness.client.state.scheduledMessages;
+
+    final later = scheduledAt.add(const Duration(hours: 1));
+    await withClock(Clock.fixed(now), () => harness.client.rescheduleMessage(failed.id, scheduledAt: later));
+
+    final sent = _verifyScheduled(harness).captured.last as Message;
+    expect(sent.attachments.single.imageUrl, imageUrl);
   });
 }
 

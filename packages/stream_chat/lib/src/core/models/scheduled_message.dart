@@ -280,7 +280,7 @@ abstract final class ScheduledMessageFailure extends Equatable {
 /// A failure to schedule a [ScheduledMessage].
 ///
 /// Only a temporary error, or an attachment that didn't upload, leaves one
-/// listed, so it can always be retried.
+/// listed, to be retried.
 final class ScheduledMessageSchedulingFailed extends ScheduledMessageFailure {
   /// Creates a failure to schedule.
   const ScheduledMessageSchedulingFailed() : super._();
@@ -294,7 +294,7 @@ final class ScheduledMessageSchedulingFailed extends ScheduledMessageFailure {
 
 /// A scheduling failure caused by an attachment that didn't upload.
 ///
-/// Resending it uploads that attachment again.
+/// Resending the message uploads that attachment again.
 final class ScheduledMessageUploadFailed extends ScheduledMessageSchedulingFailed {
   /// Creates a failure to upload an attachment.
   const ScheduledMessageUploadFailed();

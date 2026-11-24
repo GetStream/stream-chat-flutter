@@ -106,6 +106,18 @@ void main() {
     expect(harness.client.state.scheduledMessages, isEmpty);
   });
 
+  test('resendScheduledMessage lists the failed copy again when sending it right away is refused', () async {
+    final message = Message(id: 'a', text: 'Good morning');
+    final failed = await harness.scheduleUnreachable(message);
+    final refused = Message(id: 'a', text: 'The channel is frozen', type: MessageType.error);
+    harness.stubSchedule(message, () async => sentRightAway(refused));
+
+    await expectLater(resend(failed.id), throwsA(isA<ScheduledMessageRefusedError>()));
+
+    final [listed] = harness.client.state.scheduledMessages;
+    expect(listed.failure, const ScheduledMessageSchedulingFailed());
+  });
+
   test('scheduleMessage throws the refusal of sending it right away', () async {
     final message = Message(id: 'a', text: 'Good morning');
     final refused = Message(id: 'a', text: 'The channel is frozen', type: MessageType.error);
