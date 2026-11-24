@@ -27,7 +27,8 @@ jobs:
   # Saves the AVD with a quick-boot snapshot for the e2e_test.yml batches. Here, because a cache
   # saved by a pull request is visible to that pull request alone, and one saved on master to all.
   android_avd:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
@@ -80,7 +81,8 @@ jobs:
           key: ${{ steps.sdk.outputs.avd-key }}
 
   android:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     timeout-minutes: 360
     strategy:
       fail-fast: false
@@ -201,7 +203,8 @@ jobs:
     # Failed tests keep their previous coverage; only a batch that never finished blocks the map.
     # Coverage is only collected against the main mock server.
     if: ${{ !cancelled() && (inputs.mock_server_branch || 'main') == 'main' }}
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     timeout-minutes: 15
     permissions:
       contents: read
@@ -305,7 +308,8 @@ jobs:
 
   slack:
     name: Slack Report
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     timeout-minutes: 10
     needs: [android, coverage_map, ios]
     if: failure() && github.event_name == 'schedule'

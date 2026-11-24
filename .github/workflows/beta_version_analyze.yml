@@ -13,7 +13,8 @@ jobs:
   # Does a sanity check on packages for the next beta version so we are not surprised by any breaking changes.
   analyze_beta_versions:
     timeout-minutes: 15
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v7
@@ -37,7 +38,8 @@ jobs:
 
   slack:
     name: Slack Report
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     needs: [analyze_beta_versions]
     if: failure() && github.event_name == 'schedule'
     steps:

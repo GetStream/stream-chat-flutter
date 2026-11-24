@@ -22,7 +22,8 @@ jobs:
   # hangs forever) — see
   # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
   gate:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     outputs:
       should_run: ${{ steps.filter.outputs.persistence }}
     steps:
@@ -41,7 +42,8 @@ jobs:
   check_entity_modifications:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-ubuntu-static
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v7
