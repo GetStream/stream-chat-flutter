@@ -916,6 +916,9 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
   String get scheduledMessageUploadingLabel => 'Téléversement en cours…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => "Impossible d'envoyer la pièce jointe.";
+
+  @override
   String get scheduledThreadReplyPrefixText => 'Réponse dans le fil :';
 
   @override
@@ -932,7 +935,6 @@ Limite de pièces jointes dépassée : il n'est pas possible d'ajouter plus de $
     return switch (failure) {
       ScheduledMessageUpdatingFailed() =>
         "La modification n'a pas été enregistrée. La version précédente reste programmée.",
-      ScheduledMessageUploadFailed() => "Impossible d'envoyer la pièce jointe.",
       ScheduledMessageSchedulingFailed() => 'Impossible de programmer.',
       ScheduledMessageSendingFailed(reason: .internalError) => 'Une erreur est survenue. Réessayez',
       ScheduledMessageSendingFailed(reason: .channelDeleted) => 'Ce canal a été supprimé',

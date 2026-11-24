@@ -911,6 +911,9 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   String get scheduledMessageUploadingLabel => 'Wird hochgeladen…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => 'Anhang konnte nicht hochgeladen werden.';
+
+  @override
   String get scheduledThreadReplyPrefixText => 'Antwort im Thread:';
 
   @override
@@ -927,7 +930,6 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
     return switch (failure) {
       ScheduledMessageUpdatingFailed() =>
         'Die Änderung wurde nicht gespeichert. Die vorherige Version ist weiterhin geplant.',
-      ScheduledMessageUploadFailed() => 'Anhang konnte nicht hochgeladen werden.',
       ScheduledMessageSchedulingFailed() => 'Konnte nicht geplant werden.',
       ScheduledMessageSendingFailed(reason: .internalError) => 'Etwas ist schiefgelaufen. Versuche es erneut',
       ScheduledMessageSendingFailed(reason: .channelDeleted) => 'Dieser Kanal wurde gelöscht',

@@ -193,8 +193,8 @@ class ScheduledMessageManager {
   /// [ScheduleMessageResponse.scheduledMessage] is null.
   ///
   /// Its attachments not uploaded yet are uploaded first, and the listed
-  /// message carries their progress. If one fails, the message stays listed
-  /// with a [ScheduledMessageUploadFailed].
+  /// message carries their progress. If one fails, the message stays listed as
+  /// failed, with that attachment's [Attachment.uploadState] failed.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails, and a
   /// [StreamChatError] if an attachment fails to upload or its upload is
@@ -514,7 +514,7 @@ class ScheduledMessageManager {
       if (result is MessageAttachmentsUploadFailed) {
         final failed = local.copyWith(
           status: .failed,
-          failure: const ScheduledMessageFailure.uploadFailed(),
+          failure: const ScheduledMessageFailure.schedulingFailed(),
           localUpdatedAt: clock.now(),
         );
 

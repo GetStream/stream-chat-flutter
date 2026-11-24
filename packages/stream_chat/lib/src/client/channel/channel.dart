@@ -813,8 +813,8 @@ class Channel {
   /// [ScheduleMessageResponse.scheduledMessage] is null.
   ///
   /// The attachments of [message] not uploaded yet are uploaded first. If one
-  /// fails, it is marked failed and the message stays listed with a
-  /// [ScheduledMessageUploadFailed].
+  /// fails, its [Attachment.uploadState] is failed and the message stays
+  /// listed as failed.
   ///
   /// Also stops the current user's typing.
   ///

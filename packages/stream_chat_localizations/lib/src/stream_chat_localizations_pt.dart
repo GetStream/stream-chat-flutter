@@ -913,6 +913,9 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String get scheduledMessageUploadingLabel => 'Enviando arquivos…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => 'Não foi possível enviar o anexo.';
+
+  @override
   String get scheduledThreadReplyPrefixText => 'Resposta na conversa:';
 
   @override
@@ -928,7 +931,6 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   }) {
     return switch (failure) {
       ScheduledMessageUpdatingFailed() => 'A edição não foi salva. A versão anterior continua agendada.',
-      ScheduledMessageUploadFailed() => 'Não foi possível enviar o anexo.',
       ScheduledMessageSchedulingFailed() => 'Não foi possível agendar.',
       ScheduledMessageSendingFailed(reason: .internalError) => 'Algo deu errado. Tente novamente',
       ScheduledMessageSendingFailed(reason: .channelDeleted) => 'Este canal foi excluído',

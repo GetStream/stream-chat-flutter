@@ -854,6 +854,12 @@ abstract class Translations {
   /// For example, "Uploading…".
   String get scheduledMessageUploadingLabel;
 
+  /// The reason a scheduled message failed when an attachment failed to
+  /// upload.
+  ///
+  /// For example, "Couldn't upload attachment.".
+  String get scheduledMessageAttachmentUploadFailedText;
+
   /// The prefix of the preview of a scheduled reply in a thread.
   ///
   /// For example, "Thread reply:".
@@ -1934,6 +1940,9 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   String get scheduledMessageUploadingLabel => 'Uploading…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => "Couldn't upload attachment.";
+
+  @override
   String get scheduledThreadReplyPrefixText => 'Thread reply:';
 
   @override
@@ -1949,7 +1958,6 @@ Attachment limit exceeded: it's not possible to add more than $limit attachments
   }) {
     return switch (failure) {
       ScheduledMessageUpdatingFailed() => "The edit wasn't saved. The earlier version is still scheduled.",
-      ScheduledMessageUploadFailed() => "Couldn't upload attachment.",
       ScheduledMessageSchedulingFailed() => "Couldn't schedule.",
       ScheduledMessageSendingFailed(reason: .internalError) => 'Something went wrong. Try again',
       ScheduledMessageSendingFailed(reason: .channelDeleted) => 'This channel was deleted',

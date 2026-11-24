@@ -895,6 +895,9 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get scheduledMessageUploadingLabel => 'Laster opp…';
 
   @override
+  String get scheduledMessageAttachmentUploadFailedText => 'Kunne ikke laste opp vedlegget.';
+
+  @override
   String get scheduledThreadReplyPrefixText => 'Svar i tråd:';
 
   @override
@@ -910,7 +913,6 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   }) {
     return switch (failure) {
       ScheduledMessageUpdatingFailed() => 'Endringen ble ikke lagret. Den forrige versjonen er fortsatt planlagt.',
-      ScheduledMessageUploadFailed() => 'Kunne ikke laste opp vedlegget.',
       ScheduledMessageSchedulingFailed() => 'Kunne ikke planlegge.',
       ScheduledMessageSendingFailed(reason: .internalError) => 'Noe gikk galt. Prøv igjen',
       ScheduledMessageSendingFailed(reason: .channelDeleted) => 'Denne kanalen ble slettet',

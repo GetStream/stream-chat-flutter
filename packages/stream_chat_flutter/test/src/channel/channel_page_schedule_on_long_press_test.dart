@@ -50,14 +50,18 @@ void main() {
     final clientState = channel.client.state;
     when(() => channel.scheduleMessage(any(), scheduledAt: any(named: 'scheduledAt'))).thenAnswer((invocation) async {
       final message = invocation.positionalArguments.first as Message;
+      final image = Attachment(
+        type: AttachmentType.image,
+        uploadState: const .failed(error: 'Offline'),
+      );
       final failed = ScheduledMessage(
         id: message.id,
         cid: 'test-channel-type:test-channel-id',
         user: User(id: 'user-id'),
-        message: message,
+        message: message.copyWith(attachments: [image]),
         scheduledAt: DateTime(2026, 10, 23, 9),
         status: ScheduledMessageStatus.failed,
-        failure: const ScheduledMessageFailure.uploadFailed(),
+        failure: const ScheduledMessageFailure.schedulingFailed(),
       );
       when(() => clientState.scheduledMessages).thenReturn([failed]);
       throw const StreamChatError('Failed to upload one or more attachments');
@@ -66,9 +70,7 @@ void main() {
 
     await _scheduleWithPreset(tester);
 
-    final text = DefaultTranslations.instance.scheduledMessageFailureText(
-      failure: const ScheduledMessageFailure.uploadFailed(),
-    );
+    final text = DefaultTranslations.instance.scheduledMessageAttachmentUploadFailedText;
     expect(find.text(text), findsOneWidget);
   });
 

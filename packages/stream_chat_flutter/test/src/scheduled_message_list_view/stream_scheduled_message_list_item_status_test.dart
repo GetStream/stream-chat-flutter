@@ -62,6 +62,23 @@ void main() {
     expect(find.text('This channel now needs approval. Schedule it again.'), findsOneWidget);
   });
 
+  testWidgets('StreamScheduledMessageListItem says an attachment failed to upload', (tester) async {
+    final uploadFailed = fakeScheduledMessage(
+      status: ScheduledMessageStatus.failed,
+      failure: const ScheduledMessageSchedulingFailed(),
+      attachments: [
+        Attachment(
+          type: AttachmentType.image,
+          uploadState: const UploadState.failed(error: 'Offline'),
+        ),
+      ],
+    );
+
+    await tester.pumpWidget(wrapWithMaterialApp(StreamScheduledMessageListItem(scheduledMessage: uploadFailed)));
+
+    expect(find.text("Couldn't upload attachment."), findsOneWidget);
+  });
+
   testWidgets('StreamScheduledMessageListItem says a failed edit left the earlier version scheduled', (tester) async {
     final editFailed = fakeScheduledMessage(
       status: ScheduledMessageStatus.failed,

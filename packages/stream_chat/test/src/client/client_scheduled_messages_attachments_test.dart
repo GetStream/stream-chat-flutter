@@ -78,7 +78,7 @@ void main() {
     await _ignoringFailure(schedule(_withImage()));
 
     final [failed] = harness.client.state.scheduledMessages;
-    expect(failed.failure, isA<ScheduledMessageUploadFailed>());
+    expect(failed.failure, const ScheduledMessageSchedulingFailed());
   });
 
   test('scheduleMessage marks an attachment that failed to upload as failed', () async {
@@ -437,6 +437,28 @@ void main() {
     await editing;
 
     expect(harness.client.state.scheduledMessages, isEmpty);
+  });
+
+  test('updateScheduledMessage marks the attachment of an edit that failed to upload as failed', () async {
+    final scheduledMessage = fakeScheduledMessage('a');
+    await harness.hold([scheduledMessage]);
+    _stubImageUpload(harness, (_) async => throw uploadError);
+
+    await _ignoringFailure(harness.client.updateScheduledMessage(scheduledMessage.id, _withImage(id: 'a')));
+
+    final [listed] = harness.client.state.scheduledMessages;
+    expect(listed.message.attachments.single.uploadState.isFailed, isTrue);
+  });
+
+  test('resendScheduledMessage marks an attachment that failed to upload again as failed', () async {
+    _stubImageUpload(harness, (_) async => throw uploadError);
+    await _ignoringFailure(schedule(_withImage()));
+    final [failed] = harness.client.state.scheduledMessages;
+
+    await _ignoringFailure(withClock(Clock.fixed(now), () => harness.client.resendScheduledMessage(failed.id)));
+
+    final [listed] = harness.client.state.scheduledMessages;
+    expect(listed.message.attachments.single.uploadState.isFailed, isTrue);
   });
 
   test('updateScheduledMessage lists an edit whose attachment failed to upload as failed', () async {

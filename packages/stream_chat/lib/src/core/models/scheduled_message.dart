@@ -246,8 +246,6 @@ extension type const ScheduledMessageStatus(String _) implements String {
 /// See also:
 ///
 ///  * [ScheduledMessageSchedulingFailed], which can always be retried.
-///  * [ScheduledMessageUploadFailed], which is a scheduling failure caused by
-///    an attachment that didn't upload.
 ///  * [ScheduledMessageUpdatingFailed], which leaves the message scheduled as
 ///    it was.
 ///  * [ScheduledMessageSendingFailed], which can't be retried or changed.
@@ -256,9 +254,6 @@ abstract final class ScheduledMessageFailure extends Equatable {
 
   /// Scheduling the message failed.
   const factory ScheduledMessageFailure.schedulingFailed() = ScheduledMessageSchedulingFailed;
-
-  /// An attachment failed to upload before the message was scheduled.
-  const factory ScheduledMessageFailure.uploadFailed() = ScheduledMessageUploadFailed;
 
   /// Saving a change to the message failed.
   ///
@@ -290,14 +285,6 @@ final class ScheduledMessageSchedulingFailed extends ScheduledMessageFailure {
 
   @override
   List<Object?> get props => [];
-}
-
-/// A scheduling failure caused by an attachment that didn't upload.
-///
-/// Resending the message uploads that attachment again.
-final class ScheduledMessageUploadFailed extends ScheduledMessageSchedulingFailed {
-  /// Creates a failure to upload an attachment.
-  const ScheduledMessageUploadFailed();
 }
 
 /// A failure to save a change to a [ScheduledMessage].
