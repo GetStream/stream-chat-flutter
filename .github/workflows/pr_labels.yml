@@ -25,9 +25,9 @@ permissions:
 
 jobs:
   version_label:
-    uses: GetStream/stream-core-flutter/.github/workflows/pr_version_labels.yml@0f704a408abc4b87de03d0d15b9dea2622558d2e # main
+    uses: GetStream/stream-core-flutter/.github/workflows/pr_version_labels.yml@af3b680c0a214817915a935ddbaf5bb90f5cd190 # main
     with:
       version-file: packages/stream_chat/pubspec.yaml
 
   review_labels:
-    uses: GetStream/stream-core-flutter/.github/workflows/pr_review_labels.yml@0f704a408abc4b87de03d0d15b9dea2622558d2e # main
+    uses: GetStream/stream-core-flutter/.github/workflows/pr_review_labels.yml@af3b680c0a214817915a935ddbaf5bb90f5cd190 # main
