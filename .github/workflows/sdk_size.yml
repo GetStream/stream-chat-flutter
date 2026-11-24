@@ -37,6 +37,13 @@ jobs:
       - name: Git Checkout
         uses: actions/checkout@v7
 
+      # Android lint needs Java 21 or newer; the runner image defaults to 17.
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
       - uses: ./.github/actions/setup-flutter
         with:
           # Pinned, so a Flutter release doesn't change the sizes. Bump it on

@@ -276,6 +276,14 @@ jobs:
         if: matrix.platform == 'ios'
         uses: ./.github/actions/setup-xcode
 
+      # Android lint needs Java 21 or newer; the runner image defaults to 17.
+      - name: ☕ Set up Java
+        if: matrix.platform == 'android'
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
       - name: 💾 Cache Gradle
         if: matrix.platform == 'android'
         uses: ./.github/actions/cache-gradle
