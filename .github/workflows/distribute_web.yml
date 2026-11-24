@@ -36,7 +36,8 @@ permissions:
 jobs:
   flavor:
     name: Pick Flavor
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     timeout-minutes: 5
     outputs:
       flavor: ${{ steps.flavor.outputs.flavor }}
@@ -79,7 +80,8 @@ jobs:
     name: Deploy to flutter.getstream.io
     needs: flavor
     if: needs.flavor.outputs.flavor != ''
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     timeout-minutes: 30
     environment:
       name: flutter-web
