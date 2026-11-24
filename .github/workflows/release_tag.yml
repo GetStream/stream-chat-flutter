@@ -13,7 +13,7 @@ jobs:
     # Only run this job for commits that indicate a release
     if: "${{ startsWith(github.event.head_commit.message, 'chore(repo): release') }}"
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     permissions:
       contents: write  # Required to create and push tags
 

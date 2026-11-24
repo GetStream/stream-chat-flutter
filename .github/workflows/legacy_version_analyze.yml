@@ -30,7 +30,7 @@ jobs:
   # https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/collaborating-on-repositories-with-code-quality-features/troubleshooting-required-status-checks
   gate:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     outputs:
       should_run: ${{ github.event_name == 'push' || (steps.filter.outputs.packages == 'true' && github.event.pull_request.draft != true) }}
     steps:
@@ -59,7 +59,7 @@ jobs:
     if: needs.gate.outputs.should_run == 'true'
     timeout-minutes: 15
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v7

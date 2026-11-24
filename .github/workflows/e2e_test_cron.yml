@@ -28,7 +28,7 @@ jobs:
   # saved by a pull request is visible to that pull request alone, and one saved on master to all.
   android_avd:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v7
@@ -82,7 +82,7 @@ jobs:
 
   android:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     timeout-minutes: 360
     strategy:
       fail-fast: false
@@ -204,7 +204,7 @@ jobs:
     # Coverage is only collected against the main mock server.
     if: ${{ !cancelled() && (inputs.mock_server_branch || 'main') == 'main' }}
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     timeout-minutes: 15
     permissions:
       contents: read
@@ -309,7 +309,7 @@ jobs:
   slack:
     name: Slack Report
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     timeout-minutes: 10
     needs: [android, coverage_map, ios]
     if: failure() && github.event_name == 'schedule'

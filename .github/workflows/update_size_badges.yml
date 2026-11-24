@@ -19,7 +19,7 @@ permissions:
 jobs:
   update_size_badges:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     timeout-minutes: 15
     steps:
       # Reads stream-internal-metrics, and pushes the badge commit, which

@@ -14,7 +14,7 @@ jobs:
   analyze_beta_versions:
     timeout-minutes: 15
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: "Git Checkout"
         uses: actions/checkout@v7
@@ -39,7 +39,7 @@ jobs:
   slack:
     name: Slack Report
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     needs: [analyze_beta_versions]
     if: failure() && github.event_name == 'schedule'
     steps:

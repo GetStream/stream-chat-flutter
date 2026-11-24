@@ -19,7 +19,7 @@ permissions:
 jobs:
   stream_chat:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
@@ -31,7 +31,7 @@ jobs:
 
   stream_chat_persistence:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
@@ -43,7 +43,7 @@ jobs:
 
   stream_chat_flutter_core:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
@@ -55,7 +55,7 @@ jobs:
 
   stream_chat_flutter:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
@@ -67,7 +67,7 @@ jobs:
 
   stream_chat_localizations:
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7

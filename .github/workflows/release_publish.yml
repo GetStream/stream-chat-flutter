@@ -20,7 +20,7 @@ jobs:
       contents: write  # Required to creating release
       id-token: write # Required for authentication using OIDC
     runs-on:
-      group: github-public-ubuntu-static
+      group: github-public-amd64
     steps:
       - name: 🔑 Mint CI Bot Token
         id: ci-bot-token
