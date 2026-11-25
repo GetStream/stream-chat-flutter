@@ -1258,13 +1258,6 @@ class StreamChatClient {
   /// Fetches the users that match [filter].
   ///
   /// The users are ordered by [sort] and paged by [pagination].
-  ///
-  /// If [presence] is true, the client then receives an
-  /// [EventType.userPresenceChanged] event each time one of the returned users
-  /// goes online or offline. When [presence] is omitted, it is true while the
-  /// client is connected.
-  ///
-  /// The returned users are also stored in [state].
   Future<Result<QueryUsersResponse>> queryUsers({
     bool? presence,
     UserFilter? filter,

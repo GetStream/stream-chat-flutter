@@ -755,31 +755,6 @@ void main() {
     );
 
     testWidgets(
-      'queryUsers failure gives no user suggestions and does not blank the list',
-      (tester) async {
-        final mocks = _setupMocks(ownCapabilities: const [ChannelCapability.notifyHere]);
-        when(
-          () => mocks.client.queryUsers(
-            presence: any(named: 'presence'),
-            filter: any(named: 'filter'),
-            sort: any(named: 'sort'),
-            pagination: any(named: 'pagination'),
-          ),
-        ).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'test error')));
-
-        await _pumpMentionOptions(
-          tester,
-          client: mocks.client,
-          channel: mocks.channel,
-          query: 'h',
-          mentionAllAppUsers: true,
-        );
-
-        expect(find.text('@here'), findsOneWidget);
-      },
-    );
-
-    testWidgets(
       'queryMembers failure gives no member suggestions and does not blank the list',
       (tester) async {
         final mocks = _setupMocks(

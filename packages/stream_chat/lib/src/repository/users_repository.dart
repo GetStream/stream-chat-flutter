@@ -24,11 +24,9 @@ class UsersRepository {
 
   final api.DefaultApi _api;
 
-  /// Fetches the users that match [filter], ordered by [sort].
+  /// Fetches the users that match [filter].
   ///
-  /// The results are paged by [pagination]. If [presence] is true, the
-  /// connection is told each time one of the returned users goes online or
-  /// offline.
+  /// The users are ordered by [sort] and paged by [pagination].
   Future<Result<QueryUsersResponse>> queryUsers({
     bool? presence,
     UserFilter? filter,
