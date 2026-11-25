@@ -450,10 +450,12 @@ class WebSocket with TimerHelper {
   }
 
   void _onConnectionError(error, [stacktrace]) {
-    final wsError = switch (error) {
-      WebSocketChannelException() => StreamWebSocketError.fromWebSocketChannelError(error),
-      _ => StreamWebSocketError(error.toString()),
-    };
+    StreamWebSocketError wsError;
+    if (error is WebSocketChannelException) {
+      wsError = StreamWebSocketError.fromWebSocketChannelError(error);
+    } else {
+      wsError = StreamWebSocketError(error.toString());
+    }
 
     _logger?.warning('[onConnectionError] #ws; error occurred', wsError, stacktrace);
 
