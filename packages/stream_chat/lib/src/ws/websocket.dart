@@ -14,6 +14,7 @@ import '../core/http/token_manager.dart';
 import '../core/models/event.dart';
 import '../core/models/own_user.dart';
 import '../core/util/extension.dart';
+import '../core/util/url_redaction.dart';
 import '../event_type.dart';
 import 'connect_user_details.dart';
 import 'connection_status.dart';
@@ -251,7 +252,7 @@ class WebSocket with TimerHelper {
       final uri = await _buildUri(
         includeUserDetails: includeUserDetails,
       );
-      _logger?.info('[connect] #ws; uri: $uri');
+      _logger?.info('[connect] #ws; uri: ${withoutUrlQueries('$uri')}');
       _initWebSocketChannel(uri);
     } catch (e, stk) {
       _onConnectionError(e, stk);
@@ -329,7 +330,7 @@ class WebSocket with TimerHelper {
           );
           // Disconnected while the token was loading.
           if (_user == null) return;
-          _logger?.info('[reconnect] #ws; uri: $uri');
+          _logger?.info('[reconnect] #ws; uri: ${withoutUrlQueries('$uri')}');
           _initWebSocketChannel(uri);
         } catch (e, stk) {
           if (_user == null) return;
@@ -450,14 +451,12 @@ class WebSocket with TimerHelper {
   }
 
   void _onConnectionError(error, [stacktrace]) {
-    _logger?.warning('[onConnectionError] #ws; error occurred', error, stacktrace);
+    final wsError = switch (error) {
+      final WebSocketChannelException error => StreamWebSocketError.fromWebSocketChannelError(error),
+      _ => StreamWebSocketError(withoutUrlQueries(error.toString())),
+    };
 
-    StreamWebSocketError wsError;
-    if (error is WebSocketChannelException) {
-      wsError = StreamWebSocketError.fromWebSocketChannelError(error);
-    } else {
-      wsError = StreamWebSocketError(error.toString());
-    }
+    _logger?.warning('[onConnectionError] #ws; error occurred', wsError, stacktrace);
 
     final completer = connectionCompleter;
     // complete with error if not yet completed

@@ -127,6 +127,48 @@ void main() {
     addTearDown(timer.cancel);
   });
 
+  test('`connect` fails without the query string of the URL it connected to', () async {
+    when(() => webSocketChannel.stream).thenAnswer(
+      (_) => Stream.error(
+        WebSocketChannelException("Connection to 'ws://example.com:8800/connect?json=%7B%7D&version=1#' was closed"),
+      ),
+    );
+
+    await expectLater(
+      webSocket.connect(OwnUser(id: 'test-user')),
+      throwsA(isA<StreamWebSocketError>().having((it) => it.message, 'message', isNot(contains('version=1')))),
+    );
+  });
+
+  test('logs the connection without the query string of the URL', () async {
+    final logger = Logger.detached('ws')..level = Level.ALL;
+    final records = <LogRecord>[];
+    final subscription = logger.onRecord.listen(records.add);
+    addTearDown(subscription.cancel);
+
+    final loggedSocket = WebSocket(
+      apiKey: 'api-key',
+      baseUrl: 'ws://example.com:8800',
+      tokenManager: tokenManager,
+      logger: logger,
+      webSocketChannelProvider: (_, {protocols}) => webSocketChannel,
+    );
+    addTearDown(loggedSocket.disconnect);
+    when(() => webSocketChannel.stream).thenAnswer(
+      (_) => Stream.error(
+        WebSocketChannelException("Connection to 'ws://example.com:8800/connect?json=%7B%7D&version=1#' was closed"),
+      ),
+    );
+
+    await loggedSocket.connect(OwnUser(id: 'test-user')).then((_) {}, onError: (_) {});
+    await pumpEventQueue();
+
+    final logged = records.map((it) => '${it.message} ${it.error}');
+    expect(logged, contains(contains('ws://example.com:8800/connect?<redacted>')));
+    expect(logged, everyElement(isNot(contains('api_key'))));
+    expect(logged, everyElement(isNot(contains('version=1'))));
+  });
+
   test('`connect` successfully without user details', () async {
     final user = OwnUser(
       id: 'test-user',

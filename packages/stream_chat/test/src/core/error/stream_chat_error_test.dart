@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/error/error.dart';
 import 'package:test/test.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 DioException _dioException(DioExceptionType type) => DioException(
   requestOptions: RequestOptions(path: 'test-path'),
@@ -27,6 +28,17 @@ void main() {
   });
 
   group('StreamWebSocketError', () {
+    test('.fromWebSocketChannelError leaves out the query string of a URL in the message', () {
+      final error = StreamWebSocketError.fromWebSocketChannelError(
+        WebSocketChannelException(
+          "WebSocketException: Connection to 'http://example.com:443/connect?json=%7B%7D&version=1#' was not upgraded",
+        ),
+      );
+
+      expect(error.message, contains("'http://example.com:443/connect?<redacted>#'"));
+      expect(error.message, isNot(contains('version=1')));
+    });
+
     test('.fromStreamError', () {
       final data = ErrorResponse()..code = 333;
       final error = StreamWebSocketError.fromStreamError(data.toJson());
