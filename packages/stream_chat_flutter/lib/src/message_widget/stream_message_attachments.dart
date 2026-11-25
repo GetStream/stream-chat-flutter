@@ -63,7 +63,7 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
   @override
   Widget? nullableBuild(BuildContext context) {
     final channel = StreamChannel.maybeOf(context)?.channel;
-    void effectiveOnPlaybackStarted(AttachmentPlaybackStartedDetails details) {
+    void markPlayed(AttachmentPlaybackStartedDetails details) {
       if (channel == null) return;
       _markPlayed(channel, details.message).ignore();
     }
@@ -82,7 +82,7 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
         context,
         message,
         attachment,
-        onPlaybackStarted: effectiveOnPlaybackStarted,
+        onPlaybackStarted: markPlayed,
       );
     }
 
@@ -93,7 +93,7 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
     final builders = StreamAttachmentWidgetBuilder.defaultBuilders(
       message: message,
       onAttachmentTap: effectiveOnAttachmentTap,
-      onPlaybackStarted: effectiveOnPlaybackStarted,
+      onPlaybackStarted: markPlayed,
       customAttachmentBuilders: effectiveAttachmentBuilder,
     );
 

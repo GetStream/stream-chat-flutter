@@ -124,9 +124,9 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
 
 class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceRecordingAttachmentPlaylist>
     with WidgetsBindingObserver {
-  // Whether a track was playing at the last controller update, so only the
-  // start of playback calls onPlaybackStarted.
-  var _wasPlaying = false;
+  // The key of the track playing at the last controller update, so only the
+  // start of a track's playback calls onPlaybackStarted.
+  Object? _playingKey;
 
   late final _controller = StreamAudioPlaylistController(
     widget.voiceRecordings.toPlaylist(),
@@ -165,16 +165,18 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
     if (!mounted) return;
 
     final tracks = _controller.value.tracks;
-    final playingIndex = tracks.indexWhere((it) => it.state.isPlaying);
-    final isPlaying = playingIndex != -1;
-    if (isPlaying && !_wasPlaying) {
-      final details = AttachmentPlaybackStartedDetails(
-        message: widget.message,
-        attachment: widget.voiceRecordings[playingIndex],
-      );
-      widget.onPlaybackStarted?.call(details);
-    }
-    _wasPlaying = isPlaying;
+    final playingKey = tracks.firstWhereOrNull((it) => it.state.isPlaying)?.key;
+    final previousKey = _playingKey;
+    _playingKey = playingKey;
+
+    // Each track is keyed by the attachment it plays.
+    if (playingKey is! Attachment || playingKey == previousKey) return;
+
+    final details = AttachmentPlaybackStartedDetails(
+      message: widget.message,
+      attachment: playingKey,
+    );
+    widget.onPlaybackStarted?.call(details);
   }
 
   @override

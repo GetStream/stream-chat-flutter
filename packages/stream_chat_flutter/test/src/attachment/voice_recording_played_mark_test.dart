@@ -126,6 +126,26 @@ void main() {
     expect(started.single.attachment, message.attachments.single);
   });
 
+  testWidgets('a playlist skips a recording it cannot play when reporting', (tester) async {
+    final channel = _channel();
+    final unplayable = Attachment(type: AttachmentType.voiceRecording, title: 'missing.m4a');
+    final message = _voiceMessage(user: _otherUser).copyWith(
+      attachments: [unplayable, _voiceRecording],
+    );
+    final started = <AttachmentPlaybackStartedDetails>[];
+    final playlist = StreamVoiceRecordingAttachmentPlaylist(
+      message: message,
+      voiceRecordings: message.attachments,
+      onPlaybackStarted: started.add,
+    );
+    await tester.pumpWidget(_wrap(channel, playlist));
+    await tester.pump();
+
+    await _setTrackState(tester, TrackState.playing);
+
+    expect(started.single.attachment, _voiceRecording);
+  });
+
   testWidgets("playing the current user's own voice recording marks nothing", (tester) async {
     final channel = _channel();
     await tester.pumpWidget(_wrap(channel, _item(_voiceMessage(user: _currentUser))));
