@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../stream_chat_flutter.dart';
+import '../../audio/playback_start_tracker.dart';
 
 /// Plays a chat video attachment inside a [StreamMediaGalleryPreview].
 ///
@@ -211,7 +212,7 @@ class _ChewieVideoPlayer {
   VideoPlayerController? _video;
   ChewieController? _chewie;
   bool _disposed = false;
-  bool _wasPlaying = false;
+  final _playbackStart = PlaybackStartTracker();
   VoidCallback? _onPlay;
 
   /// The chewie controller used for playback once initialisation has
@@ -227,7 +228,7 @@ class _ChewieVideoPlayer {
   /// Initializes the controller pair for [attachment].
   ///
   /// Throws when there is no usable source URL. Calls [onPlay] each time
-  /// playback starts.
+  /// playback starts, once the video moves.
   Future<void> open(
     Attachment attachment, {
     VoidCallback? onPlay,
@@ -261,11 +262,15 @@ class _ChewieVideoPlayer {
     );
   }
 
-  // The controller notifies on every position update, so only the switch
-  // from paused to playing counts as a play.
   void _handleVideoChanged() {
-    if (isPlaying && !_wasPlaying) _onPlay?.call();
-    _wasPlaying = isPlaying;
+    final value = _video?.value;
+    if (value == null) return;
+
+    final started = _playbackStart.update(
+      isPlaying: value.isPlaying,
+      position: value.position,
+    );
+    if (started) _onPlay?.call();
   }
 
   /// Starts playback. No-op if not yet ready.

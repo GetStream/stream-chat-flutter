@@ -239,7 +239,8 @@ final class MessageMarkTapDetails {
 
 /// The action to perform when playback of an attachment starts.
 ///
-/// Called again each time playback resumes after a pause.
+/// Called once the attachment actually plays, after any loading or buffering,
+/// and again each time playback resumes after a pause.
 typedef OnPlaybackStarted = void Function(PlaybackStartedDetails details);
 
 /// Details of an attachment starting to play, passed to [OnPlaybackStarted].
@@ -254,7 +255,8 @@ final class PlaybackStartedDetails {
 
 /// The action to perform when playback of a message's attachment starts.
 ///
-/// Called again each time playback resumes after a pause or moves to another
+/// Called once the attachment actually plays, after any loading or buffering,
+/// and again each time playback resumes after a pause or moves to another
 /// attachment.
 typedef OnAttachmentPlaybackStarted = void Function(AttachmentPlaybackStartedDetails details);
 

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../stream_chat_flutter.dart';
 import '../audio/audio_playlist_controller.dart';
+import '../audio/playback_start_tracker.dart';
 
 /// Signature for decorating each voice recording item in a playlist.
 ///
@@ -124,9 +125,7 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
 
 class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceRecordingAttachmentPlaylist>
     with WidgetsBindingObserver {
-  // The key of the track playing at the last controller update, so only the
-  // start of a track's playback calls onPlaybackStarted.
-  Object? _playingKey;
+  final _playbackStart = PlaybackStartTracker();
 
   late final _controller = StreamAudioPlaylistController(
     widget.voiceRecordings.toPlaylist(),
@@ -164,19 +163,22 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
   void _handlePlaylistChanged() {
     if (!mounted) return;
 
-    final tracks = _controller.value.tracks;
-    final playingKey = tracks.firstWhereOrNull((it) => it.state.isPlaying)?.key;
-    final previousKey = _playingKey;
-    _playingKey = playingKey;
+    final playing = _controller.value.tracks.firstWhereOrNull((it) => it.state.isPlaying);
+    final started = _playbackStart.update(
+      isPlaying: playing != null,
+      position: playing?.position ?? Duration.zero,
+      key: playing?.key,
+    );
+    if (!started) return;
 
     // Each track is keyed by the attachment it plays.
-    if (playingKey is! Attachment || playingKey == previousKey) return;
-
-    final details = AttachmentPlaybackStartedDetails(
-      message: widget.message,
-      attachment: playingKey,
-    );
-    widget.onPlaybackStarted?.call(details);
+    if (playing?.key case final Attachment attachment) {
+      final details = AttachmentPlaybackStartedDetails(
+        message: widget.message,
+        attachment: attachment,
+      );
+      widget.onPlaybackStarted?.call(details);
+    }
   }
 
   @override

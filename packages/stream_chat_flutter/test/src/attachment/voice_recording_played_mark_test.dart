@@ -28,7 +28,7 @@ void main() {
     await tester.pumpWidget(_wrap(channel, _item(message)));
     await tester.pump();
 
-    await _setTrackState(tester, TrackState.playing);
+    await _play(tester);
 
     verify(() => channel.markMessage(message, MessageMarkType.played)).called(1);
   });
@@ -42,11 +42,21 @@ void main() {
     await tester.pumpWidget(_wrap(channel, _item(message)));
     await tester.pump();
 
-    await _setTrackState(tester, TrackState.playing);
+    await _play(tester);
     await tester.pump();
 
     verify(() => channel.markMessage(message, MessageMarkType.played)).called(1);
     expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('a voice recording that never starts moving marks nothing', (tester) async {
+    final channel = _channel();
+    await tester.pumpWidget(_wrap(channel, _item(_voiceMessage())));
+    await tester.pump();
+
+    await _setTrackState(tester, TrackState.playing);
+
+    verifyNever(() => channel.markMessage(any(), any()));
   });
 
   testWidgets('a voice recording that is still loading marks nothing', (tester) async {
@@ -65,8 +75,8 @@ void main() {
     await tester.pumpWidget(_wrap(channel, _item(message)));
     await tester.pump();
 
-    await _setTrackState(tester, TrackState.playing);
-    await _setTrackPosition(tester, const Duration(seconds: 1));
+    await _play(tester);
+    await _setTrackPosition(tester, const Duration(seconds: 2));
 
     verify(() => channel.markMessage(message, MessageMarkType.played)).called(1);
   });
@@ -81,7 +91,7 @@ void main() {
     await tester.pumpWidget(_wrap(channel, playlist));
     await tester.pump();
 
-    await _setTrackState(tester, TrackState.playing);
+    await _play(tester);
 
     verifyNever(() => channel.markMessage(any(), any()));
   });
@@ -97,7 +107,7 @@ void main() {
     await tester.pumpWidget(_wrap(_channel(), playlist));
     await tester.pump();
 
-    await _setTrackState(tester, TrackState.playing);
+    await _play(tester);
 
     expect(started.single.message, message);
     expect(started.single.attachment, message.attachments.single);
@@ -117,7 +127,7 @@ void main() {
     await tester.pumpWidget(_wrap(_channel(), playlist));
     await tester.pump();
 
-    await _setTrackState(tester, TrackState.playing);
+    await _play(tester);
 
     expect(started.single.attachment, _voiceRecording);
   });
@@ -147,10 +157,24 @@ void main() {
     );
     await tester.pump();
     controller.value = controller.value.copyWith(
+      tracks: [
+        first.copyWith(state: TrackState.playing, position: const Duration(seconds: 1)),
+        other,
+      ],
+    );
+    await tester.pump();
+    controller.value = controller.value.copyWith(
       currentIndex: 1,
       tracks: [
         first.copyWith(state: TrackState.paused),
         other.copyWith(state: TrackState.playing),
+      ],
+    );
+    await tester.pump();
+    controller.value = controller.value.copyWith(
+      tracks: [
+        first.copyWith(state: TrackState.paused),
+        other.copyWith(state: TrackState.playing, position: const Duration(seconds: 1)),
       ],
     );
     await tester.pump();
@@ -177,6 +201,13 @@ Future<void> _setTrackState(WidgetTester tester, TrackState trackState) async {
     tracks: [track, ...state.tracks.skip(1)],
   );
   await tester.pump();
+}
+
+// Plays the first track until its position moves, as the audio player
+// reports once the recording actually plays.
+Future<void> _play(WidgetTester tester) async {
+  await _setTrackState(tester, TrackState.playing);
+  await _setTrackPosition(tester, const Duration(seconds: 1));
 }
 
 // Advances the first track's position, as the audio player reports while it
