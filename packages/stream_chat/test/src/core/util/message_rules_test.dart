@@ -684,7 +684,7 @@ void main() {
       );
     });
 
-    group('canMarkAsPlayed', () {
+    group('canMark', () {
       late Channel channel;
 
       setUp(() {
@@ -698,7 +698,7 @@ void main() {
       test("should return true for another user's unplayed message", () {
         final message = _createMessage();
 
-        expect(MessageRules.canMarkAsPlayed(message, channel), isTrue);
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isTrue);
       });
 
       test('should return false when channel lacks the mark capability', () {
@@ -708,7 +708,7 @@ void main() {
           markTypes: [MessageMarkType.played],
         );
 
-        expect(MessageRules.canMarkAsPlayed(message, channel), isFalse);
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isFalse);
       });
 
       test('should return false when the channel type has no played marks', () {
@@ -718,14 +718,14 @@ void main() {
           capabilities: [ChannelCapability.sendMessageMark],
         );
 
-        expect(MessageRules.canMarkAsPlayed(message, channel), isFalse);
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isFalse);
       });
 
       test('should return false when the channel is not initialized', () {
         final message = _createMessage();
         final channel = Channel(client, 'messaging', 'not-initialized');
 
-        expect(MessageRules.canMarkAsPlayed(message, channel), isFalse);
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isFalse);
       });
 
       test('should return false for a deleted message', () {
@@ -733,13 +733,13 @@ void main() {
           (m) => m.copyWith(type: MessageType.deleted),
         );
 
-        expect(MessageRules.canMarkAsPlayed(message, channel), isFalse);
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isFalse);
       });
 
       test('should return false for a message without a sender', () {
         final message = Message(id: 'message-id', text: 'Draft');
 
-        expect(MessageRules.canMarkAsPlayed(message, channel), isFalse);
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isFalse);
       });
 
       test("should return false for the current user's own message", () {
@@ -748,7 +748,7 @@ void main() {
           (m) => m.copyWith(user: User(id: currentUserId)),
         );
 
-        expect(MessageRules.canMarkAsPlayed(message, channel), isFalse);
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isFalse);
       });
 
       test('should return false for a message already marked as played', () {
@@ -760,7 +760,37 @@ void main() {
           (m) => m.copyWith(ownMarks: [ownMark]),
         );
 
-        expect(MessageRules.canMarkAsPlayed(message, channel), isFalse);
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isFalse);
+      });
+
+      test('should return true for a custom type the channel type supports', () {
+        const viewed = MessageMarkType('acme.viewed');
+        final message = _createMessage();
+        final channel = _createChannel(
+          client,
+          capabilities: [ChannelCapability.sendMessageMark],
+          markTypes: [viewed],
+        );
+
+        expect(MessageRules.canMark(message, channel, viewed), isTrue);
+      });
+
+      test('should return true for a type the current user has not marked yet', () {
+        const viewed = MessageMarkType('acme.viewed');
+        final ownMark = OwnMark(
+          type: MessageMarkType.played,
+          createdAt: DateTime(2023, 1, 2),
+        );
+        final message = _createMessage(
+          (m) => m.copyWith(ownMarks: [ownMark]),
+        );
+        final channel = _createChannel(
+          client,
+          capabilities: [ChannelCapability.sendMessageMark],
+          markTypes: [MessageMarkType.played, viewed],
+        );
+
+        expect(MessageRules.canMark(message, channel, viewed), isTrue);
       });
     });
   });

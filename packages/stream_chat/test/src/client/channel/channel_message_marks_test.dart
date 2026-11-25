@@ -12,6 +12,7 @@ const _currentUserId = 'test-user-id';
 final _currentUser = User(id: _currentUserId);
 final _otherUser = User(id: 'other-user');
 final _markedAt = DateTime.utc(2026, 11, 20, 10);
+const _viewed = MessageMarkType('acme.viewed');
 
 void main() {
   setUpAll(() => registerFallbackValue(FakeEvent()));
@@ -113,7 +114,7 @@ void main() {
     expect(_playedGroup(storedPinned).count, 1);
   });
 
-  group('markMessagePlayed', () {
+  group('markMessage', () {
     setUpAll(() => registerFallbackValue(MessageMarkType.played));
 
     test("marks another user's message played once", () async {
@@ -122,8 +123,8 @@ void main() {
       when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
       final message = channel.state!.messages.single;
 
-      expect(await channel.markMessagePlayed(message), isNotNull);
-      expect(await channel.markMessagePlayed(message), isNull);
+      expect(await channel.markMessage(message, MessageMarkType.played), isNotNull);
+      expect(await channel.markMessage(message, MessageMarkType.played), isNull);
 
       verify(() => client.sendMessageMark('voice-note', MessageMarkType.played)).called(1);
     });
@@ -135,8 +136,8 @@ void main() {
       when(() => client.sendMessageMark(any(), any())).thenAnswer((_) => response.future);
       final message = channel.state!.messages.single;
 
-      final first = channel.markMessagePlayed(message);
-      expect(await channel.markMessagePlayed(message), isNull);
+      final first = channel.markMessage(message, MessageMarkType.played);
+      expect(await channel.markMessage(message, MessageMarkType.played), isNull);
       response.complete(SendMessageMarkResponse());
       expect(await first, isNotNull);
 
@@ -151,7 +152,7 @@ void main() {
       ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
       final message = channel.state!.messages.single;
 
-      await expectLater(channel.markMessagePlayed(message), throwsA(isA<StreamChatNetworkError>()));
+      await expectLater(channel.markMessage(message, MessageMarkType.played), throwsA(isA<StreamChatNetworkError>()));
     });
 
     test('tries again after a failed mark', () async {
@@ -161,18 +162,30 @@ void main() {
         () => client.sendMessageMark(any(), any()),
       ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
       final message = channel.state!.messages.single;
-      await expectLater(channel.markMessagePlayed(message), throwsA(isA<StreamChatNetworkError>()));
+      await expectLater(channel.markMessage(message, MessageMarkType.played), throwsA(isA<StreamChatNetworkError>()));
 
       when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
 
-      expect(await channel.markMessagePlayed(message), isNotNull);
+      expect(await channel.markMessage(message, MessageMarkType.played), isNotNull);
+    });
+
+    test('marks a message with another type after a played mark', () async {
+      final (client, channel) = _channel(author: _otherUser);
+      addTearDown(channel.dispose);
+      when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
+      final message = channel.state!.messages.single;
+
+      await channel.markMessage(message, MessageMarkType.played);
+
+      expect(await channel.markMessage(message, _viewed), isNotNull);
+      verify(() => client.sendMessageMark('voice-note', _viewed)).called(1);
     });
 
     test("skips the current user's own message", () async {
       final (client, channel) = _channel(author: _currentUser);
       addTearDown(channel.dispose);
 
-      expect(await channel.markMessagePlayed(channel.state!.messages.single), isNull);
+      expect(await channel.markMessage(channel.state!.messages.single, MessageMarkType.played), isNull);
 
       verifyNever(() => client.sendMessageMark(any(), any()));
     });
@@ -236,7 +249,7 @@ void main() {
       id: 'test-channel-id',
       type: 'messaging',
       ownCapabilities: [ChannelCapability.sendMessageMark],
-      config: ChannelConfig(markTypes: const [MessageMarkType.played]),
+      config: ChannelConfig(markTypes: const [MessageMarkType.played, _viewed]),
     ),
     messages: [voiceNote],
     pinnedMessages: pinnedMessages,

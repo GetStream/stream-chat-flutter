@@ -14,7 +14,7 @@ part 'message_mark.g.dart';
 ///
 ///  * [MessageMark], which records one mark of this type on a message.
 ///  * [StreamChatClient.sendMessageMark], which puts a mark on a message.
-///  * [Channel.markMessagePlayed], which marks a message played once.
+///  * [Channel.markMessage], which marks a message once.
 extension type const MessageMarkType(String _) implements String {
   /// A recipient played the audio or video of a message.
   static const played = MessageMarkType('played');

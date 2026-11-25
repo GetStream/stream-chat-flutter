@@ -208,22 +208,24 @@ class MessageRules {
     return true;
   }
 
-  /// Whether the current user can mark [message] as played in [channel].
+  /// Whether the current user can mark [message] with [type] in [channel].
   ///
   /// Returns `false` if any of the following is true:
   ///
   /// * There is no current user
   /// * [ChannelCapabilityCheck.canSendMessageMark] is false for [channel]
-  /// * [ChannelConfig.markTypes] doesn't include [MessageMarkType.played]
+  /// * [ChannelConfig.markTypes] doesn't include [type]
   /// * The message is deleted
   /// * The message has no sender
   /// * The message was sent by the current user
-  /// * The current user already marked the message as played
+  /// * The current user already marked the message with [type]
   ///
-  /// It doesn't check that [message] has an attachment that can be played.
-  static bool canMarkAsPlayed(
+  /// It doesn't check that [message] has an attachment the type applies to,
+  /// such as one that can be played for [MessageMarkType.played].
+  static bool canMark(
     Message message,
     Channel channel,
+    MessageMarkType type,
   ) {
     // Don't mark if the current user is not set.
     final currentUser = channel.client.state.currentUser;
@@ -232,10 +234,10 @@ class MessageRules {
     // Don't mark if the current user can't send message marks here.
     if (!channel.canSendMessageMark) return false;
 
-    // Don't mark if the channel type doesn't support played marks.
+    // Don't mark if the channel type doesn't support this mark type.
     final config = channel.state?.channelState.channel?.config;
     final markTypes = config?.markTypes ?? const [];
-    if (!markTypes.contains(MessageMarkType.played)) return false;
+    if (!markTypes.contains(type)) return false;
 
     // Don't mark a deleted message.
     if (message.isDeleted) return false;
@@ -247,8 +249,8 @@ class MessageRules {
     // Don't mark the current user's own messages.
     if (messageUser.id == currentUser.id) return false;
 
-    // Don't mark a message the current user already played.
+    // Don't mark a message the current user already marked with this type.
     final ownMarks = message.ownMarks ?? const [];
-    return !ownMarks.any((it) => it.type == MessageMarkType.played);
+    return !ownMarks.any((it) => it.type == type);
   }
 }

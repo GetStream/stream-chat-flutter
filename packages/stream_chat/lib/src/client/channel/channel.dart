@@ -2119,30 +2119,40 @@ class Channel {
     pagination: pagination,
   );
 
-  // The ids of the messages this channel is marking or has marked played.
-  final _playedMessageIds = <String>{};
+  // The marks this channel is sending or has sent, by message id and type.
+  final _sentMarks = <(String, MessageMarkType)>{};
 
-  /// Marks [message] played by the current user, at most once.
+  /// Marks [message] with [type] for the current user, at most once.
   ///
   /// Returns the response of the mark, or `null` if it was skipped:
-  /// [MessageRules.canMarkAsPlayed] is false for [message], or this channel
-  /// already marked it or is marking it. The mark appears in the message's
+  /// [MessageRules.canMark] is false, or this channel already marked [message]
+  /// with [type] or is marking it. The mark appears in the message's
   /// [Message.ownMarks] once [EventType.messageMarkAdded] arrives for it.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails; the next call then
   /// tries again.
   ///
+  /// ```dart
+  /// await channel.markMessage(message, MessageMarkType.played);
+  /// ```
+  ///
   /// See also:
   ///
-  ///  * [StreamChatClient.sendMessageMark], which puts a mark of any type.
-  Future<SendMessageMarkResponse?> markMessagePlayed(Message message) async {
-    if (!MessageRules.canMarkAsPlayed(message, this)) return null;
-    if (!_playedMessageIds.add(message.id)) return null;
+  ///  * [StreamChatClient.sendMessageMark], which sends a mark without these
+  ///    checks.
+  Future<SendMessageMarkResponse?> markMessage(
+    Message message,
+    MessageMarkType type,
+  ) async {
+    if (!MessageRules.canMark(message, this, type)) return null;
+
+    final mark = (message.id, type);
+    if (!_sentMarks.add(mark)) return null;
 
     try {
-      return await _client.sendMessageMark(message.id, MessageMarkType.played);
+      return await _client.sendMessageMark(message.id, type);
     } catch (_) {
-      _playedMessageIds.remove(message.id);
+      _sentMarks.remove(mark);
       rethrow;
     }
   }
