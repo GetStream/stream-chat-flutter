@@ -113,6 +113,7 @@ import '../core/models/response/query_polls_response.dart';
 import '../core/models/response/query_reactions_response.dart';
 import '../core/models/response/query_reminders_response.dart';
 import '../core/models/response/query_threads_response.dart';
+import '../core/models/response/query_users_response.dart';
 import '../core/models/response/remove_user_group_members_response.dart';
 import '../core/models/response/search_messages_response.dart';
 import '../core/models/response/search_roles_response.dart';
@@ -120,6 +121,8 @@ import '../core/models/response/search_user_groups_response.dart';
 import '../core/models/response/send_action_response.dart';
 import '../core/models/response/send_message_response.dart';
 import '../core/models/response/send_reaction_response.dart';
+import '../core/models/response/shared_location_response.dart';
+import '../core/models/response/shared_locations_response.dart';
 import '../core/models/response/show_channel_response.dart';
 import '../core/models/response/translate_message_response.dart';
 import '../core/models/response/truncate_channel_response.dart';
@@ -1252,21 +1255,23 @@ class StreamChatClient {
     return MapEntry(channels, newChannels);
   }
 
-  /// Requests users with a given query.
-  Future<QueryUsersResponse> queryUsers({
+  /// Fetches the users that match [filter].
+  ///
+  /// The users are ordered by [sort] and paged by [pagination].
+  Future<Result<QueryUsersResponse>> queryUsers({
     bool? presence,
     UserFilter? filter,
     List<UserSort>? sort,
     PaginationParams? pagination,
   }) async {
-    final response = await _chatApi.user.queryUsers(
+    final result = await _usersRepository.queryUsers(
       presence: presence ?? _hasConnectionId,
       filter: filter,
       sort: sort,
       pagination: pagination,
     );
-    state.updateUsers(response.users);
-    return response;
+
+    return result.onSuccess((response) => state.updateUsers(response.users));
   }
 
   /// Query banned users.
@@ -2347,50 +2352,28 @@ class StreamChatClient {
     String? prev,
   }) => _messagesRepository.queryDrafts(filter: filter, sort: sort, limit: limit, next: next, prev: prev);
 
-  /// Retrieves all the active live locations of the current user.
-  Future<GetActiveLiveLocationsResponse> getActiveLiveLocations() async {
-    try {
-      final response = await _chatApi.user.getActiveLiveLocations();
+  /// Fetches the current user's live locations that are still being shared.
+  ///
+  /// The returned locations are also stored in [state].
+  Future<Result<SharedLocationsResponse>> getUserLiveLocations() async {
+    final result = await _usersRepository.getUserLiveLocations();
 
-      // Update the active live locations in the state.
-      final activeLiveLocations = response.activeLiveLocations;
-      state.activeLiveLocations = activeLiveLocations;
-
-      return response;
-    } catch (e, stk) {
-      logger.e(() => 'Error getting active live locations', error: e, stackTrace: stk);
-      rethrow;
-    }
+    return result.onSuccess((response) => state.activeLiveLocations = response.activeLiveLocations);
   }
 
-  /// Updates an existing live location created by the current user.
-  Future<Location> updateLiveLocation({
+  /// Updates the live location shared in the message with the id [messageId].
+  ///
+  /// The location moves to [location], and its sharing ends at [endAt]. A value
+  /// that is omitted is left as it is.
+  Future<Result<SharedLocationResponse>> updateLiveLocation({
     required String messageId,
-    String? createdByDeviceId,
     LocationCoordinate? location,
     DateTime? endAt,
-  }) {
-    return _chatApi.user.updateLiveLocation(
-      messageId: messageId,
-      createdByDeviceId: createdByDeviceId,
-      location: location,
-      endAt: endAt,
-    );
-  }
+  }) => _usersRepository.updateLiveLocation(messageId: messageId, location: location, endAt: endAt);
 
-  /// Expire an existing live location created by the current user.
-  Future<Location> stopLiveLocation({
-    required String messageId,
-    String? createdByDeviceId,
-  }) {
-    return updateLiveLocation(
-      messageId: messageId,
-      createdByDeviceId: createdByDeviceId,
-      // Passing the current time as endAt will mark the location as expired
-      // and make it inactive.
-      endAt: DateTime.timestamp(),
-    );
-  }
+  /// Stops sharing the live location in the message with the id [messageId].
+  Future<Result<SharedLocationResponse>> stopLiveLocation({required String messageId}) =>
+      updateLiveLocation(messageId: messageId, endAt: DateTime.timestamp());
 
   /// Enables slow mode on a channel.
   ///

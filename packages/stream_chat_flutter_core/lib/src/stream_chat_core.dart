@@ -145,11 +145,11 @@ const _connectivityDebounceDuration = Duration(seconds: 3);
 
 /// State class associated with [StreamChatCore].
 class StreamChatCoreState extends State<StreamChatCore> with WidgetsBindingObserver {
-  /// The current user
-  User? get currentUser => client.state.currentUser;
+  /// The connected user, or null when no user is connected.
+  OwnUser? get currentUser => client.state.currentUser;
 
-  /// The current user as a stream
-  Stream<User?> get currentUserStream => client.state.currentUserStream;
+  /// The connected user as it changes, null while no user is connected.
+  Stream<OwnUser?> get currentUserStream => client.state.currentUserStream;
 
   /// Initialized client used throughout the application.
   StreamChatClient get client => widget.client;

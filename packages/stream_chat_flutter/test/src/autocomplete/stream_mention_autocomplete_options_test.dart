@@ -720,7 +720,12 @@ void main() {
             pagination: any(named: 'pagination'),
           ),
         ).thenAnswer(
-          (_) async => QueryUsersResponse()..users = [User(id: 'alice-id', name: 'Alice')],
+          (_) async => Result.success(
+            QueryUsersResponse(
+              duration: '0.01ms',
+              users: [User(id: 'alice-id', name: 'Alice')],
+            ),
+          ),
         );
 
         await _pumpMentionOptions(

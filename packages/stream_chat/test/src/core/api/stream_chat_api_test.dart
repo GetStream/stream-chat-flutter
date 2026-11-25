@@ -15,10 +15,6 @@ void main() {
     );
   });
 
-  test('`.user`', () {
-    expect(streamChatApi.user, isNotNull);
-  });
-
   test('`.channel`', () {
     expect(streamChatApi.channel, isNotNull);
   });

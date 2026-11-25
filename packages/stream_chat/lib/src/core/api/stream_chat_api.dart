@@ -7,7 +7,6 @@ import 'general_api.dart';
 import 'moderation_api.dart';
 import 'push_preferences_api.dart';
 import 'scheduled_messages_api.dart';
-import 'user_api.dart';
 
 /// ApiClient that wraps every other specific api
 class StreamChatApi {
@@ -34,10 +33,6 @@ class StreamChatApi {
            );
 
   final StreamHttpClient _client;
-
-  /// Api dedicated to users operations
-  UserApi get user => _user ??= UserApi(_client);
-  UserApi? _user;
 
   /// Api dedicated to channel operations
   ChannelApi get channel => _channel ??= ChannelApi(_client);

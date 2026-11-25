@@ -16,8 +16,8 @@ void main() {
     reset(client);
   });
 
-  QueryUsersResponse usersResponse(List<User> users) {
-    return QueryUsersResponse()..users = users;
+  Result<QueryUsersResponse> usersResponse(List<User> users) {
+    return Result.success(QueryUsersResponse(duration: '0.01ms', users: users));
   }
 
   test('an empty sort queries without a sort term', () async {
@@ -43,6 +43,85 @@ void main() {
     await controller.doInitialLoad();
 
     expect(sorts.single, isEmpty);
+  });
+
+  void stubQueryUsers(Result<QueryUsersResponse> result) {
+    when(
+      () => client.queryUsers(
+        filter: any(named: 'filter'),
+        sort: any(named: 'sort'),
+        presence: any(named: 'presence'),
+        pagination: any(named: 'pagination'),
+      ),
+    ).thenAnswer((_) async => result);
+  }
+
+  test('doInitialLoad reports the failure of the query as it is', () async {
+    const exception = StreamNetworkException(message: 'Network error');
+    stubQueryUsers(const Result.failure(exception));
+    final controller = StreamUserListController(client: client);
+    addTearDown(controller.dispose);
+
+    await controller.doInitialLoad();
+
+    expect(controller.value, isA<Error<int, User>>().having((it) => it.error, 'error', same(exception)));
+  });
+
+  test('doInitialLoad reports any other failure as a client error', () async {
+    final cause = Exception('boom');
+    stubQueryUsers(Result.failure(cause));
+    final controller = StreamUserListController(client: client);
+    addTearDown(controller.dispose);
+
+    await controller.doInitialLoad();
+
+    expect(
+      controller.value,
+      isA<Error<int, User>>().having(
+        (it) => it.error,
+        'error',
+        isA<StreamClientException>()
+            .having((it) => it.message, 'message', 'Failed to load users')
+            .having((it) => it.cause, 'cause', same(cause)),
+      ),
+    );
+  });
+
+  test('loadMore keeps the loaded users and reports the failure of the query as it is', () async {
+    const exception = StreamNetworkException(message: 'Network error');
+    stubQueryUsers(const Result.failure(exception));
+    final loadedUsers = [User(id: 'user-1')];
+    final controller = StreamUserListController.fromValue(
+      PagedValue(items: loadedUsers, nextPageKey: 1),
+      client: client,
+    );
+    addTearDown(controller.dispose);
+
+    await controller.loadMore(1);
+
+    expect(controller.value.asSuccess.items, loadedUsers);
+    expect(controller.value.asSuccess.error, same(exception));
+  });
+
+  test('loadMore keeps the loaded users and reports any other failure as a client error', () async {
+    final cause = Exception('boom');
+    stubQueryUsers(Result.failure(cause));
+    final loadedUsers = [User(id: 'user-1')];
+    final controller = StreamUserListController.fromValue(
+      PagedValue(items: loadedUsers, nextPageKey: 1),
+      client: client,
+    );
+    addTearDown(controller.dispose);
+
+    await controller.loadMore(1);
+
+    expect(controller.value.asSuccess.items, loadedUsers);
+    expect(
+      controller.value.asSuccess.error,
+      isA<StreamClientException>()
+          .having((it) => it.message, 'message', 'Failed to load more users')
+          .having((it) => it.cause, 'cause', same(cause)),
+    );
   });
 
   group('search', () {
@@ -317,9 +396,9 @@ void main() {
 
   group('superseded results', () {
     test('a slower earlier load does not overwrite a newer load', () async {
-      final responses = <Completer<QueryUsersResponse>>[
-        Completer<QueryUsersResponse>(),
-        Completer<QueryUsersResponse>(),
+      final responses = <Completer<Result<QueryUsersResponse>>>[
+        Completer<Result<QueryUsersResponse>>(),
+        Completer<Result<QueryUsersResponse>>(),
       ];
       var call = 0;
       when(
@@ -346,9 +425,9 @@ void main() {
     });
 
     test('a superseded load error does not overwrite a newer load', () async {
-      final responses = <Completer<QueryUsersResponse>>[
-        Completer<QueryUsersResponse>(),
-        Completer<QueryUsersResponse>(),
+      final responses = <Completer<Result<QueryUsersResponse>>>[
+        Completer<Result<QueryUsersResponse>>(),
+        Completer<Result<QueryUsersResponse>>(),
       ];
       var call = 0;
       when(
@@ -368,7 +447,7 @@ void main() {
 
       responses[1].complete(usersResponse([User(id: 'newer')]));
       await newer;
-      responses[0].completeError(Exception('stale failure'));
+      responses[0].complete(Result.failure(Exception('stale failure')));
       await earlier;
 
       expect(controller.value.isSuccess, isTrue);
@@ -376,7 +455,7 @@ void main() {
     });
 
     test('a loadMore superseded by clearResults does not repopulate', () async {
-      final page = Completer<QueryUsersResponse>();
+      final page = Completer<Result<QueryUsersResponse>>();
       when(
         () => client.queryUsers(
           filter: any(named: 'filter'),
@@ -405,9 +484,9 @@ void main() {
       fakeAsync((async) {
         // Created inside the zone: a Completer built outside it schedules its
         // completion on the real microtask queue, which async cannot drain.
-        final responses = <Completer<QueryUsersResponse>>[
-          Completer<QueryUsersResponse>(),
-          Completer<QueryUsersResponse>(),
+        final responses = <Completer<Result<QueryUsersResponse>>>[
+          Completer<Result<QueryUsersResponse>>(),
+          Completer<Result<QueryUsersResponse>>(),
         ];
         var call = 0;
         when(
@@ -472,7 +551,7 @@ void main() {
     });
 
     test('drops an in-flight load and resets the results', () async {
-      final response = Completer<QueryUsersResponse>();
+      final response = Completer<Result<QueryUsersResponse>>();
       when(
         () => client.queryUsers(
           filter: any(named: 'filter'),
