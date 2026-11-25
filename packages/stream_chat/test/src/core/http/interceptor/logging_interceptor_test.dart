@@ -6,14 +6,10 @@ import 'package:stream_chat/src/core/http/interceptor/logging_interceptor.dart';
 import 'package:test/test.dart';
 
 class _FakeAdapter implements HttpClientAdapter {
-  _FakeAdapter(this.body);
-
-  final Map<String, Object?> body;
-
   @override
   Future<ResponseBody> fetch(RequestOptions options, Stream<Uint8List>? requestStream, Future<void>? cancel) async {
     return ResponseBody.fromString(
-      jsonEncode(body),
+      jsonEncode(const {'duration': '12ms'}),
       200,
       headers: {
         Headers.contentTypeHeader: [Headers.jsonContentType],
@@ -25,30 +21,68 @@ class _FakeAdapter implements HttpClientAdapter {
   void close({bool force = false}) {}
 }
 
-Future<String> _logOf(Map<String, Object?> body, {Map<String, Object?> headers = const {}}) async {
+/// Sends one GET through [create]'s interceptor and returns every line it reported.
+Future<String> _linesOf(
+  LoggingInterceptor Function(LogPrint logPrint) create, {
+  String path = '/test',
+  Map<String, Object?> headers = const {},
+}) async {
   final lines = <String>[];
   final dio = Dio(BaseOptions(baseUrl: 'https://example.com', headers: headers))
-    ..httpClientAdapter = _FakeAdapter(body)
-    ..interceptors.add(LoggingInterceptor(requestHeader: true, logPrint: (_, line) => lines.add('$line')));
+    ..httpClientAdapter = _FakeAdapter()
+    ..interceptors.add(create((_, line) => lines.add('$line')));
 
-  await dio.get<void>('/guest');
+  await dio.get<void>(path);
   return lines.join('\n');
 }
 
 void main() {
-  test('reports the Authorization header as <redacted>', () async {
-    final log = await _logOf(const {'ok': true}, headers: const {'Authorization': 'header.payload.signature'});
+  test('redacts the Authorization header by default', () async {
+    final log = await _linesOf(
+      (logPrint) => LoggingInterceptor(requestHeader: true, logPrint: logPrint),
+      headers: const {'Authorization': 'authorization-value'},
+    );
 
     expect(log, contains('Authorization'));
-    expect(log, contains('<redacted>'));
-    expect(log, isNot(contains('header.payload.signature')));
+    expect(log, contains(LoggingInterceptor.redacted));
+    expect(log, isNot(contains('authorization-value')));
   });
 
-  test('reports an access_token in a response body as <redacted>', () async {
-    final log = await _logOf(const {'access_token': 'header.payload.signature', 'duration': '12ms'});
+  test('redacts the headers it is given in place of Authorization', () async {
+    final log = await _linesOf(
+      (logPrint) => LoggingInterceptor(requestHeader: true, redactHeaders: {'x-session'}, logPrint: logPrint),
+      headers: const {'X-Session': 'session-value', 'Authorization': 'authorization-value'},
+    );
 
-    expect(log, contains('access_token'));
-    expect(log, contains('12ms'));
-    expect(log, isNot(contains('header.payload.signature')));
+    expect(log, isNot(contains('session-value')));
+    expect(log, contains('authorization-value'));
+  });
+
+  test('reports every header as is when no header is to be redacted', () async {
+    final log = await _linesOf(
+      (logPrint) => LoggingInterceptor(requestHeader: true, redactHeaders: const {}, logPrint: logPrint),
+      headers: const {'Authorization': 'authorization-value'},
+    );
+
+    expect(log, contains('authorization-value'));
+  });
+
+  test('redacts the query parameters it is given, whatever their case', () async {
+    final log = await _linesOf(
+      (logPrint) => LoggingInterceptor(requestHeader: true, redactQueryParams: {'API_KEY'}, logPrint: logPrint),
+      path: '/test?api_key=key-value&page=2',
+    );
+
+    expect(log, contains('api_key=${LoggingInterceptor.redacted}&page=2'));
+    expect(log, isNot(contains('key-value')));
+  });
+
+  test('redacts a response header it is given', () async {
+    final log = await _linesOf(
+      (logPrint) => LoggingInterceptor(responseHeader: true, redactHeaders: {'Content-Type'}, logPrint: logPrint),
+    );
+
+    expect(log, contains('content-type'));
+    expect(log, isNot(contains(Headers.jsonContentType)));
   });
 }

@@ -25,6 +25,11 @@ void _defaultLogPrint(InterceptStep step, Object object) => print(object);
 /// Interceptor dedicated to logging
 class LoggingInterceptor extends Interceptor {
   /// Initialize a new logging interceptor
+  ///
+  /// The values of the headers named in [redactHeaders], and of the query
+  /// parameters named in [redactQueryParams], are reported as [redacted].
+  /// Names match regardless of case. [redactHeaders] defaults to
+  /// `Authorization`; pass an empty set to report every header as is.
   LoggingInterceptor({
     this.request = true,
     this.requestHeader = false,
@@ -35,7 +40,10 @@ class LoggingInterceptor extends Interceptor {
     this.maxWidth = 120,
     this.compact = true,
     this.logPrint = _defaultLogPrint,
-  });
+    Iterable<String> redactHeaders = const {'authorization'},
+    Iterable<String> redactQueryParams = const {},
+  }) : _redactedHeaders = {for (final name in redactHeaders) name.toLowerCase()},
+       _redactedQueryParams = {for (final name in redactQueryParams) name.toLowerCase()};
 
   /// Print request [Options]
   final bool request;
@@ -72,6 +80,38 @@ class LoggingInterceptor extends Interceptor {
   /// you can also write log in a file.
   void Function(InterceptStep step, Object object) logPrint;
 
+  /// The value reported in place of a redacted header or query parameter.
+  static const redacted = '██';
+
+  final Set<String> _redactedHeaders;
+
+  final Set<String> _redactedQueryParams;
+
+  Map<String, Object?> _withRedactedHeaders(Map<String, Object?> headers) => {
+    for (final MapEntry(:key, :value) in headers.entries)
+      key: _redactedHeaders.contains(key.toLowerCase()) ? redacted : value,
+  };
+
+  Map<String, Object?> _withRedactedQueryParams(Map<String, Object?> params) => {
+    for (final MapEntry(:key, :value) in params.entries)
+      key: _redactedQueryParams.contains(key.toLowerCase()) ? redacted : value,
+  };
+
+  String _describe(Uri uri) {
+    if (_redactedQueryParams.isEmpty || !uri.hasQuery) return '$uri';
+
+    final query = [
+      for (final MapEntry(:key, :value) in uri.queryParametersAll.entries)
+        for (final item in value)
+          switch (_redactedQueryParams.contains(key.toLowerCase())) {
+            true => '${Uri.encodeQueryComponent(key)}=$redacted',
+            false => '${Uri.encodeQueryComponent(key)}=${Uri.encodeQueryComponent(item)}',
+          },
+    ].join('&');
+
+    return '${'$uri'.split('?').first}?$query';
+  }
+
   @override
   void onRequest(RequestOptions options, RequestInterceptorHandler handler) {
     if (request) {
@@ -80,13 +120,10 @@ class LoggingInterceptor extends Interceptor {
     if (requestHeader) {
       _printMapAsTable(
         _logPrintRequest,
-        options.queryParameters,
+        _withRedactedQueryParams(options.queryParameters),
         header: 'Query Parameters',
       );
-      final requestHeaders = <String, Object?>{
-        for (final MapEntry(:key, :value) in options.headers.entries)
-          key: key.toLowerCase() == 'authorization' ? '<redacted>' : value,
-      };
+      final requestHeaders = _withRedactedHeaders(options.headers);
       requestHeaders['contentType'] = options.contentType?.toString();
       requestHeaders['responseType'] = options.responseType.toString();
       requestHeaders['followRedirects'] = options.followRedirects;
@@ -129,7 +166,7 @@ class LoggingInterceptor extends Interceptor {
         _printBoxed(
           _logPrintError,
           header: 'DioException ║ Status: ${exception.response?.statusCode} ${exception.response?.statusMessage}',
-          text: uri.toString(),
+          text: uri == null ? 'null' : _describe(uri),
         );
         if (exception.response != null && exception.response?.data != null) {
           _logPrintError('╔ ${exception.type.toString()}');
@@ -155,7 +192,7 @@ class LoggingInterceptor extends Interceptor {
     if (responseHeader) {
       final responseHeaders = <String, String>{};
       response.headers.forEach((k, list) => responseHeaders[k] = list.toString());
-      _printMapAsTable(_logPrintResponse, responseHeaders, header: 'Headers');
+      _printMapAsTable(_logPrintResponse, _withRedactedHeaders(responseHeaders), header: 'Headers');
     }
 
     if (responseBody) {
@@ -181,10 +218,8 @@ class LoggingInterceptor extends Interceptor {
 
   void _printResponse(void Function(Object) logPrint, Response response) {
     if (response.data != null) {
-      if (response.data case final Map<Object?, Object?> data) {
-        _printPrettyMap(logPrint, {
-          for (final MapEntry(:key, :value) in data.entries) key: key == 'access_token' ? '<redacted>' : value,
-        });
+      if (response.data is Map) {
+        _printPrettyMap(logPrint, response.data as Map);
       } else if (response.data is List) {
         logPrint('║${_indent()}[');
         _printList(logPrint, response.data as List);
@@ -201,7 +236,7 @@ class LoggingInterceptor extends Interceptor {
     _printBoxed(
       logPrint,
       header: 'Response ║ $method ║ Status: ${response.statusCode} ${response.statusMessage}',
-      text: uri.toString(),
+      text: _describe(uri),
     );
   }
 
@@ -211,7 +246,7 @@ class LoggingInterceptor extends Interceptor {
   ) {
     final uri = options.uri;
     final method = options.method;
-    _printBoxed(logPrint, header: 'Request ║ $method ', text: uri.toString());
+    _printBoxed(logPrint, header: 'Request ║ $method ', text: _describe(uri));
   }
 
   void _printLine(
