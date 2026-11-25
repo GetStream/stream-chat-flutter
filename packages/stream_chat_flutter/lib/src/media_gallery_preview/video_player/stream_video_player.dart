@@ -97,8 +97,8 @@ class StreamVideoPlayerProps {
   /// Called each time playback starts.
   ///
   /// Covers playback started from the controls and from [autoplay]. A custom
-  /// player built through [StreamComponentFactory] calls it with [attachment]
-  /// for its videos to be marked played.
+  /// player built through [StreamComponentFactory] must call it, with
+  /// [attachment] in the [PlaybackStartedDetails], to mark its videos played.
   final OnPlaybackStarted? onPlaybackStarted;
 }
 
