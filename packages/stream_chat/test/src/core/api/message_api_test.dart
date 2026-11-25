@@ -317,6 +317,97 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
+  test('sendMessageMark posts the mark type and returns the mark', () async {
+    const messageId = 'test-message-id';
+    const path = '/messages/$messageId/marks';
+    final mark = MessageMark(
+      type: MessageMarkType.played,
+      messageId: messageId,
+      userId: 'listener',
+      createdAt: DateTime.utc(2026, 11, 20, 10),
+    );
+
+    final requestBody = jsonEncode({'type': 'played'});
+
+    when(() => client.post(path, data: requestBody)).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {'mark': mark.toJson(), 'created': true},
+      ),
+    );
+
+    final res = await messageApi.sendMessageMark(
+      messageId,
+      MessageMarkType.played,
+    );
+
+    expect(res.mark, mark);
+    expect(res.created, isTrue);
+
+    verify(() => client.post(path, data: requestBody)).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('queryMessageMarks posts the type filter, limit and cursor', () async {
+    const messageId = 'test-message-id';
+    const path = '/messages/$messageId/marks/query';
+    final requestBody = jsonEncode({
+      'filter': {'type': 'played'},
+      'limit': 50,
+      'next': 'page-2',
+    });
+    final mark = MessageMark(
+      type: MessageMarkType.played,
+      messageId: messageId,
+      userId: 'listener',
+      user: User(id: 'listener'),
+      createdAt: DateTime.utc(2026, 11, 20, 10),
+    );
+
+    when(() => client.post(path, data: requestBody)).thenAnswer(
+      (_) async => successResponse(
+        path,
+        data: {
+          'marks': [mark.toJson()],
+          'next': 'page-3',
+        },
+      ),
+    );
+
+    const query = MessageMarksQuery(
+      messageId: messageId,
+      type: MessageMarkType.played,
+      limit: 50,
+      next: 'page-2',
+    );
+    final res = await messageApi.queryMessageMarks(query);
+
+    expect(res.marks.single.userId, 'listener');
+    expect(res.marks.single.user?.id, 'listener');
+    expect(res.next, 'page-3');
+
+    verify(() => client.post(path, data: requestBody)).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
+  test('queryMessageMarks for only a message posts an empty body', () async {
+    const messageId = 'test-message-id';
+    const path = '/messages/$messageId/marks/query';
+
+    when(() => client.post(path, data: jsonEncode({}))).thenAnswer(
+      (_) async => successResponse(path, data: {'marks': <Object?>[]}),
+    );
+
+    const query = MessageMarksQuery(messageId: messageId);
+    final res = await messageApi.queryMessageMarks(query);
+
+    expect(res.marks, isEmpty);
+    expect(res.next, isNull);
+
+    verify(() => client.post(path, data: jsonEncode({}))).called(1);
+    verifyNoMoreInteractions(client);
+  });
+
   test('sendReaction with enforceUnique: true', () async {
     const messageId = 'test-message-id';
     const reactionType = 'test-reaction-type';

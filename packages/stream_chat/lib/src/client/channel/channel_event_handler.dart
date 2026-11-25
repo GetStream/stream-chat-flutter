@@ -51,7 +51,8 @@ class ChannelEventHandler {
     }
   }
 
-  // Routes typing, message, draft, reaction, poll, read, and channel events.
+  // Routes typing, message, draft, reaction, mark, poll, read, and channel
+  // events.
   void _dispatchMessageAndChannelEvents(Event event) {
     switch (event.type) {
       // typing events
@@ -79,6 +80,9 @@ class ChannelEventHandler {
         _onReactionUpdated(event);
       case EventType.reactionDeleted:
         _onReactionDeleted(event);
+      // message mark events
+      case EventType.messageMarkAdded:
+        _onMessageMarkAdded(event);
       // poll events
       case EventType.pollCreated:
         _onPollCreated(event);
@@ -247,6 +251,13 @@ class ChannelEventHandler {
     if (eventReaction == null || eventMessage == null) return;
 
     return _mutations.onReactionDeleted(eventMessage, eventReaction);
+  }
+
+  void _onMessageMarkAdded(Event event) {
+    final mark = event.mark;
+    if (mark == null) return;
+
+    return _mutations.onMessageMarkAdded(mark, parentId: event.parentId);
   }
 
   void _onPollCreated(Event event) {

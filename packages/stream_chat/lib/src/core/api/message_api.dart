@@ -5,6 +5,7 @@ import '../models/draft.dart';
 import '../models/draft_message.dart';
 import '../models/filter.dart';
 import '../models/message.dart';
+import '../models/message_mark.dart';
 import '../models/reaction.dart';
 import 'requests.dart';
 import 'responses.dart';
@@ -277,6 +278,29 @@ class MessageApi {
       }),
     );
     return QueryReactionsResponse.fromJson(response.data);
+  }
+
+  /// Puts a mark of [type] on the message with [messageId].
+  Future<SendMessageMarkResponse> sendMessageMark(
+    String messageId,
+    MessageMarkType type,
+  ) async {
+    final response = await _client.post(
+      '/messages/$messageId/marks',
+      data: jsonEncode({'type': type}),
+    );
+    return SendMessageMarkResponse.fromJson(response.data);
+  }
+
+  /// Returns the page of marks the [query] asks for.
+  Future<QueryMessageMarksResponse> queryMessageMarks(
+    MessageMarksQuery query,
+  ) async {
+    final response = await _client.post(
+      '/messages/${query.messageId}/marks/query',
+      data: jsonEncode(query),
+    );
+    return QueryMessageMarksResponse.fromJson(response.data);
   }
 
   /// Translates the [messageId] in provided [language]

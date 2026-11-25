@@ -49,6 +49,7 @@ class Event {
     this.lastReadMessageId,
     this.draft,
     this.reminder,
+    this.mark,
     this.scheduledMessage,
     this.pushPreference,
     this.channelPushPreference,
@@ -181,6 +182,9 @@ class Event {
   /// The message reminder sent with the event.
   final MessageReminder? reminder;
 
+  /// The mark added, on an [EventType.messageMarkAdded] event.
+  final MessageMark? mark;
+
   /// The scheduled message this event is about.
   ///
   /// On [EventType.scheduledMessageSent], [messageId] is the ID of the sent
@@ -256,6 +260,7 @@ class Event {
     'last_read_message_id',
     'draft',
     'reminder',
+    'mark',
     'scheduled_message',
     'push_preference',
     'channel_push_preference',
@@ -306,6 +311,7 @@ class Event {
     String? lastReadMessageId,
     Draft? draft,
     MessageReminder? reminder,
+    MessageMark? mark,
     ScheduledMessage? scheduledMessage,
     PushPreference? pushPreference,
     ChannelPushPreference? channelPushPreference,
@@ -349,6 +355,7 @@ class Event {
     lastReadMessageId: lastReadMessageId ?? this.lastReadMessageId,
     draft: draft ?? this.draft,
     reminder: reminder ?? this.reminder,
+    mark: mark ?? this.mark,
     scheduledMessage: scheduledMessage ?? this.scheduledMessage,
     pushPreference: pushPreference ?? this.pushPreference,
     channelPushPreference: channelPushPreference ?? this.channelPushPreference,

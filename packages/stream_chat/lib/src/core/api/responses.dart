@@ -11,6 +11,7 @@ import '../models/event.dart';
 import '../models/location.dart';
 import '../models/member.dart';
 import '../models/message.dart';
+import '../models/message_mark.dart';
 import '../models/message_reminder.dart';
 import '../models/poll.dart';
 import '../models/poll_option.dart';
@@ -220,6 +221,41 @@ class SendReactionResponse extends MessageResponse {
 
   /// Create a new instance from a json
   static SendReactionResponse fromJson(Map<String, dynamic> json) => _$SendReactionResponseFromJson(json);
+}
+
+/// The response of [StreamChatClient.sendMessageMark].
+@JsonSerializable(createToJson: false)
+final class SendMessageMarkResponse extends _BaseResponse {
+  /// The mark on the message.
+  ///
+  /// When the user had already marked the message with this type, this is the
+  /// existing mark.
+  late MessageMark mark;
+
+  /// Whether this call marked the message.
+  ///
+  /// False when the user had already marked the message with this type, or
+  /// when the user is its author.
+  late bool created;
+
+  /// Creates a new instance from [json].
+  static SendMessageMarkResponse fromJson(Map<String, dynamic> json) => _$SendMessageMarkResponseFromJson(json);
+}
+
+/// The response of [StreamChatClient.queryMessageMarks].
+@JsonSerializable(createToJson: false)
+final class QueryMessageMarksResponse extends _BaseResponse {
+  /// The marks on the message, newest first.
+  @JsonKey(defaultValue: [])
+  late List<MessageMark> marks;
+
+  /// The cursor for the next page of results.
+  ///
+  /// Will be `null` if there are no more results.
+  late String? next;
+
+  /// Creates a new instance from [json].
+  static QueryMessageMarksResponse fromJson(Map<String, dynamic> json) => _$QueryMessageMarksResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.connectGuestUser] api call

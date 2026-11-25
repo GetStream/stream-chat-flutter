@@ -9,9 +9,12 @@ import 'attachment.dart';
 import 'comparable_field.dart';
 import 'draft.dart';
 import 'location.dart';
+import 'mark_group.dart';
+import 'message_mark.dart';
 import 'message_reminder.dart';
 import 'message_state.dart';
 import 'moderation.dart';
+import 'own_mark.dart';
 import 'poll.dart';
 import 'reaction.dart';
 import 'reaction_group.dart';
@@ -46,6 +49,8 @@ class Message extends Equatable implements ComparableFieldProvider {
     this.reactionGroups,
     this.latestReactions,
     this.ownReactions,
+    this.markGroups,
+    this.ownMarks,
     this.parentId,
     this.quotedMessage,
     this._quotedMessageId,
@@ -196,6 +201,30 @@ class Message extends Equatable implements ComparableFieldProvider {
   /// The reactions added to the message by the current user.
   @JsonKey(includeToJson: false)
   final List<Reaction>? ownReactions;
+
+  static Map<MessageMarkType, MarkGroup>? _markGroupsFromJson(
+    Map<String, dynamic>? json,
+  ) {
+    return json?.map(
+      (type, group) => MapEntry(
+        MessageMarkType(type),
+        MarkGroup.fromJson(group as Map<String, dynamic>),
+      ),
+    );
+  }
+
+  /// The users who marked this message, by mark type.
+  ///
+  /// Only set on the current user's own messages, and only for types with at
+  /// least one mark.
+  @JsonKey(includeToJson: false, fromJson: _markGroupsFromJson)
+  final Map<MessageMarkType, MarkGroup>? markGroups;
+
+  /// The marks the current user put on this message.
+  ///
+  /// Only set on other users' messages.
+  @JsonKey(includeToJson: false)
+  final List<OwnMark>? ownMarks;
 
   /// The ID of the parent message, if the message is a thread reply.
   final String? parentId;
@@ -380,6 +409,8 @@ class Message extends Equatable implements ComparableFieldProvider {
     'latest_reactions',
     'shadowed',
     'own_reactions',
+    'mark_groups',
+    'own_marks',
     'mentioned_channel',
     'mentioned_group_ids',
     'mentioned_groups',
@@ -452,6 +483,8 @@ class Message extends Equatable implements ComparableFieldProvider {
     Map<String, ReactionGroup>? reactionGroups,
     List<Reaction>? latestReactions,
     List<Reaction>? ownReactions,
+    Map<MessageMarkType, MarkGroup>? markGroups,
+    List<OwnMark>? ownMarks,
     String? parentId,
     Object? quotedMessage = _nullConst,
     Object? quotedMessageId = _nullConst,
@@ -525,6 +558,8 @@ class Message extends Equatable implements ComparableFieldProvider {
       reactionGroups: reactionGroups ?? this.reactionGroups,
       latestReactions: latestReactions ?? this.latestReactions,
       ownReactions: ownReactions ?? this.ownReactions,
+      markGroups: markGroups ?? this.markGroups,
+      ownMarks: ownMarks ?? this.ownMarks,
       parentId: parentId ?? this.parentId,
       quotedMessage: quotedMessage == _nullConst ? this.quotedMessage : quotedMessage as Message?,
       quotedMessageId: quotedMessageId == _nullConst ? _quotedMessageId : quotedMessageId as String?,
@@ -578,6 +613,8 @@ class Message extends Equatable implements ComparableFieldProvider {
       reactionGroups: other.reactionGroups,
       latestReactions: other.latestReactions,
       ownReactions: other.ownReactions,
+      markGroups: other.markGroups,
+      ownMarks: other.ownMarks,
       parentId: other.parentId,
       quotedMessage: other.quotedMessage,
       quotedMessageId: other.quotedMessageId,
@@ -645,6 +682,8 @@ class Message extends Equatable implements ComparableFieldProvider {
       poll: other.poll?.withTranslationsOf(poll) ?? poll,
       sharedLocation: other.sharedLocation ?? sharedLocation,
       ownReactions: other.ownReactions ?? ownReactions,
+      markGroups: other.markGroups ?? markGroups,
+      ownMarks: other.ownMarks ?? ownMarks,
       // Recursively merge so nested enrichment survives a stripped payload.
       quotedMessage: switch ((other.quotedMessage, quotedMessage)) {
         // Same target — merge to preserve local enrichment.
@@ -690,6 +729,8 @@ class Message extends Equatable implements ComparableFieldProvider {
     reactionGroups,
     latestReactions,
     ownReactions,
+    markGroups,
+    ownMarks,
     parentId,
     quotedMessage,
     quotedMessageId,
@@ -1042,5 +1083,47 @@ extension MessageReactionHelper on Message {
       latestReactions: latestReactions,
       reactionGroups: reactionGroups,
     );
+  }
+}
+
+/// Local updates of the marks on a [Message].
+///
+/// Each user is counted once per mark type.
+extension MessageMarkHelper on Message {
+  static const _latestByLimit = 100;
+
+  /// Adds the [mark] another user put on this message to [markGroups].
+  ///
+  /// A user already listed for the mark's type is not counted again. Returns
+  /// a new message, and does not contact the server.
+  Message addMark(MessageMark mark) {
+    final group = markGroups?[mark.type] ?? const MarkGroup();
+    if (group.latestBy.any((it) => it.userId == mark.userId)) return this;
+
+    final marker = MessageMarker(
+      userId: mark.userId,
+      createdAt: mark.createdAt,
+    );
+    final latestBy = [marker, ...group.latestBy].take(_latestByLimit);
+    final updatedGroup = group.copyWith(
+      count: group.count + 1,
+      latestBy: latestBy.toList(),
+    );
+
+    return copyWith(
+      markGroups: {...?markGroups, mark.type: updatedGroup},
+    );
+  }
+
+  /// Adds the [mark] the current user put on this message to [ownMarks].
+  ///
+  /// A mark of a type the current user already has is ignored. Returns a new
+  /// message, and does not contact the server.
+  Message addMyMark(MessageMark mark) {
+    final ownMarks = this.ownMarks ?? const [];
+    if (ownMarks.any((it) => it.type == mark.type)) return this;
+
+    final ownMark = OwnMark(type: mark.type, createdAt: mark.createdAt);
+    return copyWith(ownMarks: [...ownMarks, ownMark]);
   }
 }

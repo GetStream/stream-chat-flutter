@@ -32,6 +32,11 @@ extension ChannelCapabilityCheck on Channel {
     return ownCapabilities.contains(ChannelCapability.sendReaction);
   }
 
+  /// Whether the current user can mark other users' messages in this channel.
+  bool get canSendMessageMark {
+    return ownCapabilities.contains(ChannelCapability.sendMessageMark);
+  }
+
   /// True, if the current user can attach links to messages.
   bool get canSendLinks {
     return ownCapabilities.contains(ChannelCapability.sendLinks);

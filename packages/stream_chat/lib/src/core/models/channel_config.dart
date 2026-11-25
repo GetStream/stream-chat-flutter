@@ -5,6 +5,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'chat_preferences.dart';
 import 'command.dart';
 import 'converters/duration_in_seconds_converter.dart';
+import 'message_mark.dart';
 import 'push_level.dart';
 
 part 'channel_config.g.dart';
@@ -38,6 +39,7 @@ class ChannelConfig {
     this.markMessagesPending = false,
     this.deliveryEvents = false,
     this.sharedLocations = false,
+    this.markTypes = const [],
     this.scheduledMessagesMaxPerChannel,
     this.scheduledMessagesMaxPerUser,
     this.scheduledMessagesMinLeadTime,
@@ -133,6 +135,11 @@ class ChannelConfig {
 
   /// True if shared locations are enabled for this channel.
   final bool sharedLocations;
+
+  /// The types of marks members can put on messages in this channel.
+  ///
+  /// Empty when message marks are off for this channel.
+  final List<MessageMarkType> markTypes;
 
   /// The limit on the current user's scheduled messages in each channel.
   ///

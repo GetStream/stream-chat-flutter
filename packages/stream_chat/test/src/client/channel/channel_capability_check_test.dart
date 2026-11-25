@@ -89,6 +89,12 @@ void main() {
     );
 
     testCapability(
+      'SendMessageMark',
+      ChannelCapability.sendMessageMark,
+      (channel) => channel.canSendMessageMark,
+    );
+
+    testCapability(
       'SendLinks',
       ChannelCapability.sendLinks,
       (channel) => channel.canSendLinks,
