@@ -1933,9 +1933,7 @@ class StreamChatClient {
   /// [ClientState.currentUser]. A failure leaves it unchanged.
   Future<Result<BlockUserResponse>> blockUser(String userId) async {
     final result = await _userBlockLock.synchronized(() => _usersRepository.blockUser(userId));
-    return result
-        .onSuccess((response) => _addBlockedUserId(response.blockedUserId))
-        .onFailure((e, stk) => logger.e(() => 'Error blocking user', error: e, stackTrace: stk));
+    return result.onSuccess((response) => _addBlockedUserId(response.blockedUserId));
   }
 
   void _addBlockedUserId(String userId) {
@@ -1950,9 +1948,7 @@ class StreamChatClient {
   /// [ClientState.currentUser]. A failure leaves it unchanged.
   Future<Result<UnblockUserResponse>> unblockUser(String userId) async {
     final result = await _userBlockLock.synchronized(() => _usersRepository.unblockUser(userId));
-    return result
-        .onSuccess((_) => _removeBlockedUserId(userId))
-        .onFailure((e, stk) => logger.e(() => 'Error unblocking user', error: e, stackTrace: stk));
+    return result.onSuccess((_) => _removeBlockedUserId(userId));
   }
 
   void _removeBlockedUserId(String userId) {
@@ -1968,9 +1964,7 @@ class StreamChatClient {
   /// unchanged.
   Future<Result<GetBlockedUsersResponse>> getBlockedUsers() async {
     final result = await _userBlockLock.synchronized(_usersRepository.getBlockedUsers);
-    return result
-        .onSuccess((response) => _replaceBlockedUserIds(response.blocks))
-        .onFailure((e, stk) => logger.e(() => 'Error getting blocked users', error: e, stackTrace: stk));
+    return result.onSuccess((response) => _replaceBlockedUserIds(response.blocks));
   }
 
   void _replaceBlockedUserIds(List<UserBlock> blocks) {

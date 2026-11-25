@@ -1066,7 +1066,7 @@ GROUPS = [
               than v10, which typed `blockedUser`, `userId`, `blockedUserId` and `createdAt` nullable. The
               server always sends them; the break is approved for this group.
             - **`OwnUser.blockedUserIds` is updated only on success,** through `Result.onSuccess`, as v10 did by
-              throwing before it reached the update. Failures are still logged, through `Result.onFailure`.
+              throwing before it reached the update. A failure is returned to the caller, not logged.
             """),
         risks=[
             'A `try`/`catch` around `blockUser`, `unblockUser` or `getBlockedUsers` still compiles but no longer '
