@@ -189,13 +189,23 @@ void main() {
     expect(dotLeft, greaterThan(markRight));
   });
 
-  testWidgets('an earlier voice message shows its mark without a dot', (tester) async {
+  testWidgets('an earlier voice message keeps its metadata when played', (tester) async {
     await tester.pumpWidget(
       _wrap(_item(_voiceMessage(playedBy: 2)), stackPosition: .top),
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('·'), findsNothing);
+    expect(find.text('·'), findsOneWidget);
+    expect(find.byType(StreamTimestamp), findsOneWidget);
+  });
+
+  testWidgets('an earlier voice message nobody played shows no metadata', (tester) async {
+    await tester.pumpWidget(
+      _wrap(_item(_voiceMessage()), stackPosition: .top),
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.byType(StreamTimestamp), findsNothing);
   });
 
   testWidgets('an earlier voice message uses the accent color by default', (tester) async {

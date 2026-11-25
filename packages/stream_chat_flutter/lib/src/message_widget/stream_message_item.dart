@@ -15,10 +15,6 @@ import '../context_menu/context_menu_region.dart';
 import 'message_status_labels.dart';
 import 'played_mark_label.dart';
 
-// The height of the metadata row under a message bubble when its theme sets
-// none, which the played mark keeps when it stands alone.
-const _defaultMetadataRowMinHeight = 24.0;
-
 /// A chat message widget that renders a single message with its attachments,
 /// reactions, and interaction callbacks.
 ///
@@ -560,6 +556,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       context,
       isPinned: message.pinned,
       isEdited: message.messageTextUpdatedAt != null && !message.isDeleted,
+      isPlayed: playedMarkLabel(context, message) != null,
       isBouncedWithError: message.isBouncedWithError,
       state: message.state,
     );
@@ -610,20 +607,6 @@ class DefaultStreamMessageItem extends StatelessWidget {
       ),
     );
 
-    // By default only an earlier message in a group has no metadata row, so its
-    // played mark stands alone unless the theme sets the visibility itself.
-    final usesDefaultMetadataVisibility = theme.metadataVisibility == null;
-
-    Widget? playedMarkRow;
-    if (footerWidget == null && usesDefaultMetadataVisibility) {
-      playedMarkRow = _playedMarkRow(
-        context,
-        message,
-        excludeFromSemantics: announcedByRow,
-        onTap: props.onMessageMarkTap,
-      );
-    }
-
     Widget? repliesWidget;
     if (message.replyCount case final replyCount? when replyCount > 0) {
       repliesWidget = effectiveRepliesVisibility.apply(
@@ -648,7 +631,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       excludeTextFromSemantics: announcedByRow,
       header: headerWidget,
       errorBadge: errorBadgeWidget,
-      footer: footerWidget ?? playedMarkRow,
+      footer: footerWidget,
       replies: repliesWidget,
       attachmentBuilders: props.attachmentBuilders,
       reactionSorting: props.reactionSorting,
@@ -881,45 +864,6 @@ class DefaultStreamMessageItem extends StatelessWidget {
 
     if (action is! MessageAction || !context.mounted) return;
     return _onActionTap(context, channel, action).ignore();
-  }
-
-  // The played mark on its own, in place of the metadata row it would sit in,
-  // styled and sized like that row's mark.
-  Widget? _playedMarkRow(
-    BuildContext context,
-    Message message, {
-    required bool excludeFromSemantics,
-    OnMessageMarkTap? onTap,
-  }) {
-    if (playedMarkLabel(context, message) == null) return null;
-
-    final placement = StreamMessageLayout.of(context);
-    final metadataStyle = core.StreamMessageItemTheme.of(context).metadata;
-    final minHeight = metadataStyle?.minHeight?.resolve(placement) ?? _defaultMetadataRowMinHeight;
-
-    final markTextStyle = metadataStyle?.markTextStyle?.resolve(placement) ?? context.streamTextTheme.metadataDefault;
-    final defaultMarkColor = switch (placement.presentation) {
-      .standard => context.streamColorScheme.accentPrimary,
-      .preview => context.streamColorScheme.textOnAccent,
-    };
-    final markColor = metadataStyle?.markColor?.resolve(placement) ?? defaultMarkColor;
-
-    return ConstrainedBox(
-      constraints: BoxConstraints(minHeight: minHeight),
-      child: Row(
-        mainAxisSize: .min,
-        children: [
-          DefaultTextStyle.merge(
-            style: markTextStyle.copyWith(color: markColor),
-            child: StreamMessagePlayedMark(
-              message: message,
-              onTap: onTap,
-              excludeFromSemantics: excludeFromSemantics,
-            ),
-          ),
-        ],
-      ),
-    );
   }
 
   // Resolves the thread parent (fetching if shown in-channel) and invokes
@@ -1282,12 +1226,14 @@ class _StreamMessageItemDefaults extends core.StreamMessageItemThemeData {
     this._context, {
     this.isPinned = false,
     this.isEdited = false,
+    this.isPlayed = false,
     this.isBouncedWithError = false,
     required MessageState state,
   }) : _messageState = state;
 
   final bool isPinned;
   final bool isEdited;
+  final bool isPlayed;
   final bool isBouncedWithError;
 
   final BuildContext _context;
@@ -1330,7 +1276,7 @@ class _StreamMessageItemDefaults extends core.StreamMessageItemThemeData {
 
   @override
   core.StreamMessageLayoutVisibility get metadataVisibility {
-    if (isEdited) return .all(.visible);
+    if (isEdited || isPlayed) return .all(.visible);
     return .resolveWith(
       (placement) => switch (placement.stackPosition) {
         .single || .bottom => .visible,
