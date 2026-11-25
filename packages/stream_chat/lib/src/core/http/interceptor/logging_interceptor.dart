@@ -1,6 +1,7 @@
 // ignore_for_file: lines_longer_than_80_chars
 // coverage:ignore-file
 
+import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
@@ -24,12 +25,11 @@ void _defaultLogPrint(InterceptStep step, Object object) => print(object);
 
 /// Interceptor dedicated to logging
 class LoggingInterceptor extends Interceptor {
-  /// Initialize a new logging interceptor
+  /// Creates an interceptor that logs requests, responses and errors.
   ///
-  /// The values of the headers named in [redactHeaders], and of the query
-  /// parameters named in [redactQueryParams], are reported as [redacted].
-  /// Names match regardless of case. [redactHeaders] defaults to
-  /// `Authorization`; pass an empty set to report every header as is.
+  /// The values of the headers in [redactedHeaders] and of the query parameters in [redactedQueryParameters] are
+  /// logged as `██`, matching names regardless of case. [redactedHeaders] replaces [defaultRedactedHeaders], so
+  /// consider spreading it in when adding a header. An empty collection logs every header as is.
   LoggingInterceptor({
     this.request = true,
     this.requestHeader = false,
@@ -40,10 +40,10 @@ class LoggingInterceptor extends Interceptor {
     this.maxWidth = 120,
     this.compact = true,
     this.logPrint = _defaultLogPrint,
-    Iterable<String> redactHeaders = const {'authorization'},
-    Iterable<String> redactQueryParams = const {},
-  }) : _redactedHeaders = {for (final name in redactHeaders) name.toLowerCase()},
-       _redactedQueryParams = {for (final name in redactQueryParams) name.toLowerCase()};
+    Iterable<String> redactedHeaders = defaultRedactedHeaders,
+    Iterable<String> redactedQueryParameters = const {},
+  }) : _headersToRedact = _caseInsensitiveSetOf(redactedHeaders),
+       _queryParametersToRedact = _caseInsensitiveSetOf(redactedQueryParameters);
 
   /// Print request [Options]
   final bool request;
@@ -80,36 +80,35 @@ class LoggingInterceptor extends Interceptor {
   /// you can also write log in a file.
   void Function(InterceptStep step, Object object) logPrint;
 
-  /// The value reported in place of a redacted header or query parameter.
-  static const redacted = '██';
+  /// The headers whose values are logged as `██` when the constructor is given no others.
+  static const defaultRedactedHeaders = {'authorization'};
 
-  final Set<String> _redactedHeaders;
+  static const _redacted = '██';
 
-  final Set<String> _redactedQueryParams;
+  final Set<String> _headersToRedact;
 
-  Map<String, Object?> _withRedactedHeaders(Map<String, Object?> headers) => {
-    for (final MapEntry(:key, :value) in headers.entries)
-      key: _redactedHeaders.contains(key.toLowerCase()) ? redacted : value,
-  };
+  final Set<String> _queryParametersToRedact;
 
-  Map<String, Object?> _withRedactedQueryParams(Map<String, Object?> params) => {
-    for (final MapEntry(:key, :value) in params.entries)
-      key: _redactedQueryParams.contains(key.toLowerCase()) ? redacted : value,
-  };
+  static Set<String> _caseInsensitiveSetOf(Iterable<String> names) {
+    return SplayTreeSet<String>((a, b) => a.toLowerCase().compareTo(b.toLowerCase()))..addAll(names);
+  }
 
-  String _describe(Uri uri) {
-    if (_redactedQueryParams.isEmpty || !uri.hasQuery) return '$uri';
+  Object? _redactHeader(String name, Object? value) => _headersToRedact.contains(name) ? _redacted : value;
+
+  Object? _redactQueryParameter(String name, Object? value) {
+    return _queryParametersToRedact.contains(name) ? _redacted : value;
+  }
+
+  String _redactUrl(Uri uri) {
+    if (_queryParametersToRedact.isEmpty || !uri.hasQuery) return '$uri';
 
     final query = [
       for (final MapEntry(:key, :value) in uri.queryParametersAll.entries)
         for (final item in value)
-          switch (_redactedQueryParams.contains(key.toLowerCase())) {
-            true => '${Uri.encodeQueryComponent(key)}=$redacted',
-            false => '${Uri.encodeQueryComponent(key)}=${Uri.encodeQueryComponent(item)}',
-          },
+          '${Uri.encodeQueryComponent(key)}=${_redactQueryParameter(key, Uri.encodeQueryComponent(item))}',
     ].join('&');
 
-    return '${'$uri'.split('?').first}?$query';
+    return '${uri.scheme}://${uri.authority}${uri.path}?$query';
   }
 
   @override
@@ -120,10 +119,12 @@ class LoggingInterceptor extends Interceptor {
     if (requestHeader) {
       _printMapAsTable(
         _logPrintRequest,
-        _withRedactedQueryParams(options.queryParameters),
+        {for (final MapEntry(:key, :value) in options.queryParameters.entries) key: _redactQueryParameter(key, value)},
         header: 'Query Parameters',
       );
-      final requestHeaders = _withRedactedHeaders(options.headers);
+      final requestHeaders = {
+        for (final MapEntry(:key, :value) in options.headers.entries) key: _redactHeader(key, value),
+      };
       requestHeaders['contentType'] = options.contentType?.toString();
       requestHeaders['responseType'] = options.responseType.toString();
       requestHeaders['followRedirects'] = options.followRedirects;
@@ -166,7 +167,7 @@ class LoggingInterceptor extends Interceptor {
         _printBoxed(
           _logPrintError,
           header: 'DioException ║ Status: ${exception.response?.statusCode} ${exception.response?.statusMessage}',
-          text: uri == null ? 'null' : _describe(uri),
+          text: uri == null ? 'null' : _redactUrl(uri),
         );
         if (exception.response != null && exception.response?.data != null) {
           _logPrintError('╔ ${exception.type.toString()}');
@@ -190,9 +191,9 @@ class LoggingInterceptor extends Interceptor {
   void onResponse(Response response, ResponseInterceptorHandler handler) {
     _printResponseHeader(_logPrintResponse, response);
     if (responseHeader) {
-      final responseHeaders = <String, String>{};
-      response.headers.forEach((k, list) => responseHeaders[k] = list.toString());
-      _printMapAsTable(_logPrintResponse, _withRedactedHeaders(responseHeaders), header: 'Headers');
+      final responseHeaders = <String, Object?>{};
+      response.headers.forEach((name, values) => responseHeaders[name] = _redactHeader(name, values.toString()));
+      _printMapAsTable(_logPrintResponse, responseHeaders, header: 'Headers');
     }
 
     if (responseBody) {
@@ -236,7 +237,7 @@ class LoggingInterceptor extends Interceptor {
     _printBoxed(
       logPrint,
       header: 'Response ║ $method ║ Status: ${response.statusCode} ${response.statusMessage}',
-      text: _describe(uri),
+      text: _redactUrl(uri),
     );
   }
 
@@ -246,7 +247,7 @@ class LoggingInterceptor extends Interceptor {
   ) {
     final uri = options.uri;
     final method = options.method;
-    _printBoxed(logPrint, header: 'Request ║ $method ', text: _describe(uri));
+    _printBoxed(logPrint, header: 'Request ║ $method ', text: _redactUrl(uri));
   }
 
   void _printLine(

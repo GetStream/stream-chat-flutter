@@ -114,7 +114,6 @@ command:
       url_launcher: ^6.3.2
       uuid: ^4.5.3
       video_player: ^2.11.1
-      web_socket: '>=0.1.5 <2.0.0'
       web_socket_channel: ^3.0.3
 
     # List of all the dev_dependencies used in the project.

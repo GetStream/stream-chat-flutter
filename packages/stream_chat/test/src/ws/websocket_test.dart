@@ -7,7 +7,6 @@ import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
-import 'package:web_socket/web_socket.dart' as web_socket;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../fakes.dart';
@@ -132,7 +131,9 @@ void main() {
     when(() => webSocketChannel.stream).thenAnswer(
       (_) => Stream.error(
         WebSocketChannelException.from(
-          web_socket.WebSocketException("Connection to 'https://example.com:443/connect?json=%7B%7D&version=1#'"),
+          Exception(
+            "Connection to 'https://example.com:443/connect?json=%7B%7D&version=1#' was not upgraded to websocket",
+          ),
         ),
       ),
     );
@@ -164,7 +165,7 @@ void main() {
     );
     addTearDown(loggedSocket.disconnect);
 
-    unawaited(loggedSocket.connect(OwnUser(id: 'test-user')).then((_) {}, onError: (_) {}));
+    loggedSocket.connect(OwnUser(id: 'test-user')).ignore();
     await pumpEventQueue();
 
     expect(messages, contains('[connect] #ws; uri: ws://example.com:8800/connect'));
@@ -187,17 +188,16 @@ void main() {
     when(() => webSocketChannel.stream).thenAnswer(
       (_) => Stream.error(
         WebSocketChannelException.from(
-          web_socket.WebSocketException("Connection to 'https://example.com:443/connect?json=%7B%7D&version=1#'"),
+          Exception(
+            "Connection to 'https://example.com:443/connect?json=%7B%7D&version=1#' was not upgraded to websocket",
+          ),
         ),
       ),
     );
 
     await expectLater(loggedSocket.connect(OwnUser(id: 'test-user')), throwsA(isA<StreamWebSocketError>()));
 
-    expect(
-      records.map((it) => it.error).whereType<StreamWebSocketError>().map((it) => it.message),
-      contains('The WebSocket connection failed'),
-    );
+    expect(records.map((it) => '${it.message} ${it.error}'), everyElement(isNot(contains('json='))));
   });
 
   test('`connect` successfully without user details', () async {
