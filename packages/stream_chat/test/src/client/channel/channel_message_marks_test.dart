@@ -122,8 +122,8 @@ void main() {
       when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
       final message = channel.state!.messages.single;
 
-      expect(await channel.markMessagePlayed(message), isTrue);
-      expect(await channel.markMessagePlayed(message), isFalse);
+      expect(await channel.markMessagePlayed(message), isNotNull);
+      expect(await channel.markMessagePlayed(message), isNull);
 
       verify(() => client.sendMessageMark('voice-note', MessageMarkType.played)).called(1);
     });
@@ -136,9 +136,9 @@ void main() {
       final message = channel.state!.messages.single;
 
       final first = channel.markMessagePlayed(message);
-      expect(await channel.markMessagePlayed(message), isFalse);
+      expect(await channel.markMessagePlayed(message), isNull);
       response.complete(SendMessageMarkResponse());
-      expect(await first, isTrue);
+      expect(await first, isNotNull);
 
       verify(() => client.sendMessageMark(any(), any())).called(1);
     });
@@ -165,14 +165,14 @@ void main() {
 
       when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
 
-      expect(await channel.markMessagePlayed(message), isTrue);
+      expect(await channel.markMessagePlayed(message), isNotNull);
     });
 
     test("skips the current user's own message", () async {
       final (client, channel) = _channel(author: _currentUser);
       addTearDown(channel.dispose);
 
-      expect(await channel.markMessagePlayed(channel.state!.messages.single), isFalse);
+      expect(await channel.markMessagePlayed(channel.state!.messages.single), isNull);
 
       verifyNever(() => client.sendMessageMark(any(), any()));
     });

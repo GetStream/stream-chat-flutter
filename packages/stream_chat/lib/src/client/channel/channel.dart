@@ -2124,7 +2124,7 @@ class Channel {
 
   /// Marks [message] played by the current user, at most once.
   ///
-  /// Returns `true` if this call sent the mark, and `false` if it was skipped:
+  /// Returns the response of the mark, or `null` if it was skipped:
   /// [MessageRules.canMarkAsPlayed] is false for [message], or this channel
   /// already marked it or is marking it. The mark appears in the message's
   /// [Message.ownMarks] once [EventType.messageMarkAdded] arrives for it.
@@ -2135,13 +2135,12 @@ class Channel {
   /// See also:
   ///
   ///  * [StreamChatClient.sendMessageMark], which puts a mark of any type.
-  Future<bool> markMessagePlayed(Message message) async {
-    if (!MessageRules.canMarkAsPlayed(message, this)) return false;
-    if (!_playedMessageIds.add(message.id)) return false;
+  Future<SendMessageMarkResponse?> markMessagePlayed(Message message) async {
+    if (!MessageRules.canMarkAsPlayed(message, this)) return null;
+    if (!_playedMessageIds.add(message.id)) return null;
 
     try {
-      await _client.sendMessageMark(message.id, MessageMarkType.played);
-      return true;
+      return await _client.sendMessageMark(message.id, MessageMarkType.played);
     } catch (_) {
       _playedMessageIds.remove(message.id);
       rethrow;
