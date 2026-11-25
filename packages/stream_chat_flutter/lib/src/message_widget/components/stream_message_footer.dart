@@ -148,16 +148,9 @@ class DefaultStreamMessageFooter extends StatelessWidget {
 
     Widget? markWidget;
     if (playedMarkLabel(context, message) != null) {
-      final details = MessageMarkTapDetails(
-        message: message,
-        type: MessageMarkType.played,
-      );
       markWidget = StreamMessagePlayedMark(
         message: message,
-        onTap: switch (props.onMarkTap) {
-          final onTap? => () => onTap(context, details),
-          _ => null,
-        },
+        onTap: props.onMarkTap,
         excludeFromSemantics: excluding,
       );
     }

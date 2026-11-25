@@ -27,10 +27,10 @@ class StreamMessagePlayedMark extends StatelessWidget {
   /// The message whose played state to display.
   final Message message;
 
-  /// Called when the mark is tapped.
+  /// {@macro onMessageMarkTap}
   ///
   /// If null, the mark is not tappable.
-  final VoidCallback? onTap;
+  final OnMessageMarkTap? onTap;
 
   /// Whether the mark stays out of the semantics tree.
   ///
@@ -43,6 +43,7 @@ class StreamMessagePlayedMark extends StatelessWidget {
     final label = playedMarkLabel(context, message);
     if (label == null) return const Empty();
 
+    final onTap = this.onTap;
     if (onTap == null) {
       return ExcludeSemantics(
         excluding: excludeFromSemantics,
@@ -50,9 +51,13 @@ class StreamMessagePlayedMark extends StatelessWidget {
       );
     }
 
+    final details = MessageMarkTapDetails(
+      message: message,
+      type: MessageMarkType.played,
+    );
     return GestureDetector(
       behavior: .opaque,
-      onTap: onTap,
+      onTap: () => onTap(context, details),
       child: Text(label),
     );
   }

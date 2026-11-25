@@ -237,16 +237,18 @@ final class MessageMarkTapDetails {
   final MessageMarkType type;
 }
 
-/// The action to perform when a video starts playing.
-typedef OnVideoPlay = void Function(VideoPlayDetails details);
+/// The action to perform when playback of an attachment starts.
+///
+/// Called again each time playback resumes after a pause.
+typedef OnPlaybackStarted = void Function(PlaybackStartedDetails details);
 
-/// Details of a video starting to play, passed to [OnVideoPlay].
+/// Details of an attachment starting to play, passed to [OnPlaybackStarted].
 @immutable
-final class VideoPlayDetails {
-  /// Creates details for a video starting to play.
-  const VideoPlayDetails({required this.attachment});
+final class PlaybackStartedDetails {
+  /// Creates details for an attachment starting to play.
+  const PlaybackStartedDetails({required this.attachment});
 
-  /// The video attachment that started playing.
+  /// The attachment that started playing.
   final Attachment attachment;
 }
 

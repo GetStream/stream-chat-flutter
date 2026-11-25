@@ -602,15 +602,6 @@ class DefaultStreamMessageItem extends StatelessWidget {
       ),
     );
 
-    final markTapDetails = MessageMarkTapDetails(
-      message: message,
-      type: MessageMarkType.played,
-    );
-    final onMarkTap = switch (props.onMessageMarkTap) {
-      final onTap? => () => onTap(context, markTapDetails),
-      _ => null,
-    };
-
     final footerWidget = effectiveMetadataVisibility.apply(
       StreamMessageFooter(
         message: message,
@@ -629,7 +620,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
         context,
         message,
         excludeFromSemantics: announcedByRow,
-        onTap: onMarkTap,
+        onTap: props.onMessageMarkTap,
       );
     }
 
@@ -898,7 +889,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
     BuildContext context,
     Message message, {
     required bool excludeFromSemantics,
-    VoidCallback? onTap,
+    OnMessageMarkTap? onTap,
   }) {
     if (playedMarkLabel(context, message) == null) return null;
 

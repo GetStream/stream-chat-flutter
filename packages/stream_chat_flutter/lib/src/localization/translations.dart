@@ -92,7 +92,7 @@ abstract class Translations {
 
   /// The mark on a message the other member has played.
   ///
-  /// Shown in a channel with exactly two members, such as "Played".
+  /// Shown in a channel with exactly two members. Reads "Played" in English.
   String get messagePlayedLabel;
 
   /// The mark on a message [count] members have played.
