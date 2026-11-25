@@ -225,7 +225,7 @@ class SendReactionResponse extends MessageResponse {
 
 /// The response of [StreamChatClient.sendMessageMark].
 @JsonSerializable(createToJson: false)
-class SendMessageMarkResponse extends _BaseResponse {
+final class SendMessageMarkResponse extends _BaseResponse {
   /// The mark on the message.
   ///
   /// When the user had already marked the message with this type, this is the
@@ -244,7 +244,7 @@ class SendMessageMarkResponse extends _BaseResponse {
 
 /// The response of [StreamChatClient.queryMessageMarks].
 @JsonSerializable(createToJson: false)
-class QueryMessageMarksResponse extends _BaseResponse {
+final class QueryMessageMarksResponse extends _BaseResponse {
   /// The marks on the message, newest first.
   @JsonKey(defaultValue: [])
   late List<MessageMark> marks;

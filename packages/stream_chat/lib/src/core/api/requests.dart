@@ -249,10 +249,10 @@ final class MessageMarksQuery extends Equatable {
   /// A default page size is used when null.
   final int? limit;
 
-  /// The cursor of the page to return, from a previous
-  /// [QueryMessageMarksResponse.next].
+  /// The cursor of the page to return.
   ///
-  /// The first page is returned when null.
+  /// Taken from a previous [QueryMessageMarksResponse.next]. The first page is
+  /// returned when null.
   final String? next;
 
   /// Serializes this query to json.

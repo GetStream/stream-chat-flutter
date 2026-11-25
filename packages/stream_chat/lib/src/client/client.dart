@@ -2068,8 +2068,9 @@ class StreamChatClient {
   /// marking a message the user wrote, changes nothing and returns
   /// [SendMessageMarkResponse.created] as false.
   ///
-  /// The channel must allow the type in [ChannelConfig.markTypes], and the
-  /// user needs [ChannelCapability.sendMessageMark].
+  /// The returned future completes with a [StreamChatNetworkError] unless the
+  /// channel allows the type in [ChannelConfig.markTypes] and the user has
+  /// [ChannelCapability.sendMessageMark].
   Future<SendMessageMarkResponse> sendMessageMark(
     String messageId,
     MessageMarkType type,
