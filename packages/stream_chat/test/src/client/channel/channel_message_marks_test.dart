@@ -148,7 +148,7 @@ void main() {
       addTearDown(channel.dispose);
       when(
         () => client.sendMessageMark(any(), any()),
-      ).thenThrow(StreamChatNetworkError(ChatErrorCode.internalSystemError));
+      ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
       final message = channel.state!.messages.single;
 
       await expectLater(channel.markMessagePlayed(message), completes);
@@ -159,7 +159,7 @@ void main() {
       addTearDown(channel.dispose);
       when(
         () => client.sendMessageMark(any(), any()),
-      ).thenThrow(StreamChatNetworkError(ChatErrorCode.internalSystemError));
+      ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
       final message = channel.state!.messages.single;
 
       await channel.markMessagePlayed(message);
