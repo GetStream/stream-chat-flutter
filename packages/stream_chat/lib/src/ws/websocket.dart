@@ -451,7 +451,7 @@ class WebSocket with TimerHelper {
 
   void _onConnectionError(error, [stacktrace]) {
     final wsError = switch (error) {
-      final WebSocketChannelException channelError => StreamWebSocketError.fromWebSocketChannelError(channelError),
+      WebSocketChannelException() => StreamWebSocketError.fromWebSocketChannelError(error),
       _ => StreamWebSocketError(error.toString()),
     };
 
