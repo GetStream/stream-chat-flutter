@@ -99,6 +99,7 @@ class _ChannelMediaDisplayScreenState extends State<ChannelMediaDisplayScreen> {
           child: StreamMediaGalleryPreview(
             attachments: attachments,
             initialIndex: index,
+            onPlaybackStarted: (details) => channel.markMessagePlayed(details.message),
           ),
         ),
       ),

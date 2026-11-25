@@ -64,8 +64,7 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
   Widget? nullableBuild(BuildContext context) {
     final channel = StreamChannel.maybeOf(context)?.channel;
     void handlePlaybackStarted(AttachmentPlaybackStartedDetails details) {
-      if (channel == null) return;
-      _markPlayed(channel, details.message).ignore();
+      channel?.markMessagePlayed(details.message).ignore();
     }
 
     Future<void> effectiveOnAttachmentTap(
@@ -155,26 +154,5 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
         ),
       );
     }
-  }
-}
-
-// The ids of the messages each channel is marking or has marked played, so a
-// replay or another player sends nothing.
-final _markedMessageIds = Expando<Set<String>>();
-
-// Marks [message] played, at most once per channel, when
-// [MessageRules.canMarkAsPlayed] allows it. After a failed request the next
-// play tries again.
-Future<void> _markPlayed(Channel channel, Message message) async {
-  if (!MessageRules.canMarkAsPlayed(message, channel)) return;
-
-  final markedIds = _markedMessageIds[channel] ??= {};
-  if (!markedIds.add(message.id)) return;
-
-  try {
-    await channel.sendMessageMark(message, MessageMarkType.played);
-  } catch (error, stackTrace) {
-    markedIds.remove(message.id);
-    channel.client.logger.fine('Could not mark message ${message.id} played', error, stackTrace);
   }
 }
