@@ -7,7 +7,7 @@ part 'own_mark.g.dart';
 
 /// A mark the current user put on another user's message.
 @JsonSerializable()
-class OwnMark extends Equatable {
+final class OwnMark extends Equatable {
   /// Creates a new [OwnMark].
   const OwnMark({
     required this.type,

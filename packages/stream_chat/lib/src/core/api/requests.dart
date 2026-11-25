@@ -227,7 +227,7 @@ class ThreadOptions extends Equatable {
 /// );
 /// ```
 /// {@endtemplate}
-class MessageMarksQuery extends Equatable {
+final class MessageMarksQuery extends Equatable {
   /// {@macro messageMarksQuery}
   const MessageMarksQuery({
     required this.messageId,

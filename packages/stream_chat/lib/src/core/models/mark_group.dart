@@ -5,7 +5,7 @@ part 'mark_group.g.dart';
 
 /// The users who marked a message with one mark type.
 @JsonSerializable()
-class MarkGroup extends Equatable {
+final class MarkGroup extends Equatable {
   /// Creates a new [MarkGroup].
   const MarkGroup({
     this.count = 0,
@@ -43,7 +43,7 @@ class MarkGroup extends Equatable {
 
 /// A user who marked a message, and when.
 @JsonSerializable()
-class MessageMarker extends Equatable {
+final class MessageMarker extends Equatable {
   /// Creates a new [MessageMarker].
   const MessageMarker({
     required this.userId,

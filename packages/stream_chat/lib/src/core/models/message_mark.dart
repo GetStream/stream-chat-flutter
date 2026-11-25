@@ -30,7 +30,7 @@ extension type const MessageMarkType(String _) implements String {
 ///  * [Message.ownMarks], which lists the current user's marks on a message.
 ///  * [StreamChatClient.queryMessageMarks], which lists the marks on a message.
 @JsonSerializable()
-class MessageMark extends Equatable {
+final class MessageMark extends Equatable {
   /// Creates a new [MessageMark].
   const MessageMark({
     required this.type,
