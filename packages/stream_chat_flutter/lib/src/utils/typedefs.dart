@@ -254,7 +254,8 @@ final class PlaybackStartedDetails {
 
 /// The action to perform when playback of a message's attachment starts.
 ///
-/// Called again each time playback resumes after a pause.
+/// Called again each time playback resumes after a pause or moves to another
+/// attachment.
 typedef OnAttachmentPlaybackStarted = void Function(AttachmentPlaybackStartedDetails details);
 
 /// Details of a message's attachment starting to play.

@@ -146,6 +146,43 @@ void main() {
     expect(started.single.attachment, _voiceRecording);
   });
 
+  testWidgets('a playlist reports each recording it switches to', (tester) async {
+    final channel = _channel();
+    final second = _voiceRecording.copyWith(id: 'second', title: 'second.m4a');
+    final message = _voiceMessage(user: _otherUser).copyWith(
+      attachments: [_voiceRecording, second],
+    );
+    final started = <AttachmentPlaybackStartedDetails>[];
+    final playlist = StreamVoiceRecordingAttachmentPlaylist(
+      message: message,
+      voiceRecordings: message.attachments,
+      onPlaybackStarted: started.add,
+    );
+    await tester.pumpWidget(_wrap(channel, playlist));
+    await tester.pump();
+
+    final controller = _playlistController(tester);
+    final [first, other] = controller.value.tracks;
+    controller.value = controller.value.copyWith(
+      currentIndex: 0,
+      tracks: [
+        first.copyWith(state: TrackState.playing),
+        other,
+      ],
+    );
+    await tester.pump();
+    controller.value = controller.value.copyWith(
+      currentIndex: 1,
+      tracks: [
+        first.copyWith(state: TrackState.paused),
+        other.copyWith(state: TrackState.playing),
+      ],
+    );
+    await tester.pump();
+
+    expect(started.map((it) => it.attachment), [_voiceRecording, second]);
+  });
+
   testWidgets("playing the current user's own voice recording marks nothing", (tester) async {
     final channel = _channel();
     await tester.pumpWidget(_wrap(channel, _item(_voiceMessage(user: _currentUser))));
