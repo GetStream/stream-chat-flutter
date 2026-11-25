@@ -83,7 +83,10 @@ class LoggingInterceptor extends Interceptor {
         options.queryParameters,
         header: 'Query Parameters',
       );
-      final requestHeaders = <String, Object?>{...options.headers};
+      final requestHeaders = <String, Object?>{
+        for (final MapEntry(:key, :value) in options.headers.entries)
+          key: key.toLowerCase() == 'authorization' ? '<redacted>' : value,
+      };
       requestHeaders['contentType'] = options.contentType?.toString();
       requestHeaders['responseType'] = options.responseType.toString();
       requestHeaders['followRedirects'] = options.followRedirects;
@@ -178,8 +181,10 @@ class LoggingInterceptor extends Interceptor {
 
   void _printResponse(void Function(Object) logPrint, Response response) {
     if (response.data != null) {
-      if (response.data is Map) {
-        _printPrettyMap(logPrint, response.data as Map);
+      if (response.data case final Map<Object?, Object?> data) {
+        _printPrettyMap(logPrint, {
+          for (final MapEntry(:key, :value) in data.entries) key: key == 'access_token' ? '<redacted>' : value,
+        });
       } else if (response.data is List) {
         logPrint('║${_indent()}[');
         _printList(logPrint, response.data as List);

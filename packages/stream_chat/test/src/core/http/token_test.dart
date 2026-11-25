@@ -37,6 +37,22 @@ void main() {
     );
   });
 
+  test('`.fromRawValue` refuses a value that is not a JWT without quoting it', () {
+    const notAJwt = 'bad-token-without-a-user-id';
+
+    expect(
+      () => Token.fromRawValue(notAJwt),
+      throwsA(isA<ArgumentError>().having((it) => '$it', 'description', isNot(contains(notAJwt)))),
+    );
+  });
+
+  test('describes itself without its raw value', () {
+    final token = Token.development('test-user-id');
+
+    expect('$token', contains('test-user-id'));
+    expect('$token', isNot(contains(token.rawValue)));
+  });
+
   test('`.development` should create a dev-token with provided user-id', () {
     const userId = 'test-user-id';
     final token = Token.development(userId);

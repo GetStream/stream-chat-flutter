@@ -10,6 +10,9 @@
 
 - Overrides of the channel query methods on `Channel` and `StreamChatClient` must add the new `includeScheduledMessages` parameter.
 - Attachment uploads go through the client's attachment file uploader, set with `attachmentFileUploaderProvider`, instead of `Channel.sendImage` and `Channel.sendFile`.
+- `StreamWebSocketError.message` and the WebSocket connection logs no longer include the query string of the connection URL.
+- The HTTP request log reports the `Authorization` header, and an `access_token` in a response body, as `<redacted>`.
+- `Token.toString()` and the error `Token.fromRawValue` throws for an invalid value no longer include the raw token.
 
 🐞 Fixed
 

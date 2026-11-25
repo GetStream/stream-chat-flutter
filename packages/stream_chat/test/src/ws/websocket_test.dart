@@ -127,23 +127,33 @@ void main() {
     addTearDown(timer.cancel);
   });
 
-  test('`connect` fails without the query string of the URL it connected to', () async {
+  test('`connect` fails with an error that leaves out the query string of the URL', () async {
     when(() => webSocketChannel.stream).thenAnswer(
       (_) => Stream.error(
-        WebSocketChannelException("Connection to 'ws://example.com:8800/connect?json=%7B%7D&version=1#' was closed"),
+        WebSocketChannelException(
+          "WebSocketException: Connection to 'https://example.com:443/connect?json=%7B%7D&version=1#' "
+          'was not upgraded to websocket',
+        ),
       ),
     );
 
     await expectLater(
       webSocket.connect(OwnUser(id: 'test-user')),
-      throwsA(isA<StreamWebSocketError>().having((it) => it.message, 'message', isNot(contains('version=1')))),
+      throwsA(
+        isA<StreamWebSocketError>().having(
+          (it) => it.message,
+          'message',
+          "WebSocketException: Connection to 'https://example.com:443/connect?<redacted>#' "
+              'was not upgraded to websocket',
+        ),
+      ),
     );
   });
 
-  test('logs the connection without the query string of the URL', () async {
+  test('logs the URL it connects to without the query string', () async {
     final logger = Logger.detached('ws')..level = Level.ALL;
-    final records = <LogRecord>[];
-    final subscription = logger.onRecord.listen(records.add);
+    final messages = <String>[];
+    final subscription = logger.onRecord.listen((it) => messages.add(it.message));
     addTearDown(subscription.cancel);
 
     final loggedSocket = WebSocket(
@@ -154,19 +164,45 @@ void main() {
       webSocketChannelProvider: (_, {protocols}) => webSocketChannel,
     );
     addTearDown(loggedSocket.disconnect);
+
+    unawaited(loggedSocket.connect(OwnUser(id: 'test-user')).then((_) {}, onError: (_) {}));
+    await pumpEventQueue();
+
+    expect(messages, contains('[connect] #ws; uri: ws://example.com:8800/connect?<redacted>'));
+  });
+
+  test('logs a connection error without the query string of the URL it quotes', () async {
+    final logger = Logger.detached('ws')..level = Level.ALL;
+    final records = <LogRecord>[];
+    final subscription = logger.onRecord.listen(records.add);
+    addTearDown(subscription.cancel);
+
+    final loggedSocket = WebSocket(
+      apiKey: 'api-key',
+      baseUrl: 'wss://example.com',
+      tokenManager: tokenManager,
+      logger: logger,
+      webSocketChannelProvider: (_, {protocols}) => webSocketChannel,
+    );
+    addTearDown(loggedSocket.disconnect);
     when(() => webSocketChannel.stream).thenAnswer(
       (_) => Stream.error(
-        WebSocketChannelException("Connection to 'ws://example.com:8800/connect?json=%7B%7D&version=1#' was closed"),
+        WebSocketChannelException(
+          "WebSocketException: Connection to 'https://example.com:443/connect?json=%7B%7D&version=1#' "
+          'was not upgraded to websocket',
+        ),
       ),
     );
 
-    await loggedSocket.connect(OwnUser(id: 'test-user')).then((_) {}, onError: (_) {});
-    await pumpEventQueue();
+    await expectLater(loggedSocket.connect(OwnUser(id: 'test-user')), throwsA(isA<StreamWebSocketError>()));
 
-    final logged = records.map((it) => '${it.message} ${it.error}');
-    expect(logged, contains(contains('ws://example.com:8800/connect?<redacted>')));
-    expect(logged, everyElement(isNot(contains('api_key'))));
-    expect(logged, everyElement(isNot(contains('version=1'))));
+    expect(
+      records.map((it) => it.error).whereType<StreamWebSocketError>().map((it) => it.message),
+      contains(
+        "WebSocketException: Connection to 'https://example.com:443/connect?<redacted>#' "
+        'was not upgraded to websocket',
+      ),
+    );
   });
 
   test('`connect` successfully without user details', () async {

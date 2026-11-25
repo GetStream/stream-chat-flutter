@@ -14,7 +14,7 @@ import '../core/http/token_manager.dart';
 import '../core/models/event.dart';
 import '../core/models/own_user.dart';
 import '../core/util/extension.dart';
-import '../core/util/url_redaction.dart';
+import '../core/util/url_query.dart';
 import '../event_type.dart';
 import 'connect_user_details.dart';
 import 'connection_status.dart';
@@ -456,7 +456,8 @@ class WebSocket with TimerHelper {
       _ => StreamWebSocketError(withoutUrlQueries(error.toString())),
     };
 
-    _logger?.warning('[onConnectionError] #ws; error occurred', wsError, stacktrace);
+    final loggedError = withoutUrlQueries('$error') == '$error' ? error : wsError;
+    _logger?.warning('[onConnectionError] #ws; error occurred', loggedError, stacktrace);
 
     final completer = connectionCompleter;
     // complete with error if not yet completed

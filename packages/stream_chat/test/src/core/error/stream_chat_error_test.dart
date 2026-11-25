@@ -31,12 +31,16 @@ void main() {
     test('.fromWebSocketChannelError leaves out the query string of a URL in the message', () {
       final error = StreamWebSocketError.fromWebSocketChannelError(
         WebSocketChannelException(
-          "WebSocketException: Connection to 'http://example.com:443/connect?json=%7B%7D&version=1#' was not upgraded",
+          "WebSocketException: Connection to 'https://example.com:443/connect?json=%7B%7D&version=1#' "
+          'was not upgraded to websocket',
         ),
       );
 
-      expect(error.message, contains("'http://example.com:443/connect?<redacted>#'"));
-      expect(error.message, isNot(contains('version=1')));
+      expect(
+        error.message,
+        "WebSocketException: Connection to 'https://example.com:443/connect?<redacted>#' "
+        'was not upgraded to websocket',
+      );
     });
 
     test('.fromStreamError', () {

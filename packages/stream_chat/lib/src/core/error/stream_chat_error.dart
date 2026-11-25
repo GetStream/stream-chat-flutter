@@ -5,7 +5,7 @@ import 'package:meta/meta.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../../../stream_chat.dart';
-import '../util/url_redaction.dart';
+import '../util/url_query.dart';
 
 /// Base class for all errors surfaced by the Stream Chat SDK.
 ///
@@ -42,10 +42,10 @@ class StreamWebSocketError extends StreamChatError {
     return StreamWebSocketError(message, data: data);
   }
 
-  /// Creates a [StreamWebSocketError] from a [WebSocketChannelException].
+  /// Creates an error from a failure of the WebSocket channel.
   ///
-  /// A URL quoted in the exception's message has its query string replaced by
-  /// `<redacted>`.
+  /// The message is that of [error], with the query string of any URL it
+  /// quotes replaced by `<redacted>`.
   factory StreamWebSocketError.fromWebSocketChannelError(
     WebSocketChannelException error,
   ) {
