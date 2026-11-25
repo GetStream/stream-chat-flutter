@@ -244,9 +244,9 @@ class MessageMarksQuery extends Equatable {
   /// Marks of every type are returned when null.
   final MessageMarkType? type;
 
-  /// The most marks to return, between 1 and 100.
+  /// The most marks to return in one page.
   ///
-  /// 25 marks are returned when null.
+  /// A default page size is used when null.
   final int? limit;
 
   /// The cursor of the page to return, from a previous
@@ -254,21 +254,6 @@ class MessageMarksQuery extends Equatable {
   ///
   /// The first page is returned when null.
   final String? next;
-
-  /// Creates a copy of this query with the given fields replaced.
-  MessageMarksQuery copyWith({
-    String? messageId,
-    MessageMarkType? type,
-    int? limit,
-    String? next,
-  }) {
-    return MessageMarksQuery(
-      messageId: messageId ?? this.messageId,
-      type: type ?? this.type,
-      limit: limit ?? this.limit,
-      next: next ?? this.next,
-    );
-  }
 
   /// Serializes this query to json.
   Map<String, dynamic> toJson() => {

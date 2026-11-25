@@ -88,6 +88,29 @@ void main() {
     expect(_playedGroup(storedReply).count, 1);
   });
 
+  test('a mark on a pinned message outside the loaded page reaches it', () async {
+    final pinned = _voiceNote(
+      id: 'older-voice-note',
+      author: _currentUser,
+    ).copyWith(pinned: true);
+    final (client, channel) = _channel(
+      author: _currentUser,
+      pinnedMessages: [pinned],
+    );
+    addTearDown(channel.dispose);
+
+    final markAdded = _markAdded(
+      channel,
+      by: 'listener',
+      messageId: 'older-voice-note',
+    );
+    client.addEvent(markAdded);
+    await Future<void>.delayed(Duration.zero);
+
+    final storedPinned = channel.state!.pinnedMessages.single;
+    expect(_playedGroup(storedPinned).count, 1);
+  });
+
   test('an updated message keeps the marks the update leaves out', () async {
     final marker = MessageMarker(userId: 'listener', createdAt: _markedAt);
     final markGroups = {
@@ -115,10 +138,11 @@ void main() {
   });
 }
 
-// A channel holding one voice note by [author].
+// A channel holding one voice note by [author], plus any [pinnedMessages].
 (MockStreamChatClient, Channel) _channel({
   required User author,
-  Map<String, MarkGroup>? markGroups,
+  Map<MessageMarkType, MarkGroup>? markGroups,
+  List<Message>? pinnedMessages,
 }) {
   final client = MockStreamChatClient();
   final logger = Logger.detached('test');
@@ -143,6 +167,7 @@ void main() {
   final channelState = ChannelState(
     channel: ChannelModel(id: 'test-channel-id', type: 'messaging'),
     messages: [voiceNote],
+    pinnedMessages: pinnedMessages,
   );
 
   return (client, Channel.fromState(client, channelState));
@@ -153,7 +178,7 @@ Message _voiceNote({
   required User author,
   String? parentId,
   String text = 'voice note',
-  Map<String, MarkGroup>? markGroups,
+  Map<MessageMarkType, MarkGroup>? markGroups,
 }) {
   return Message(
     id: id,

@@ -113,7 +113,11 @@ class ChannelStateMutations {
     final currentUserId = _client.state.currentUser?.id;
     if (currentUserId == null) return;
 
-    final messages = [..._state.messages, ...?_state.threads[parentId]];
+    final messages = [
+      ..._state.messages,
+      ...?_state.threads[parentId],
+      ..._state.pinnedMessages,
+    ];
     final message = messages.firstWhereOrNull((it) => it.id == mark.messageId);
     if (message == null) return;
 

@@ -206,8 +206,19 @@ class Message extends Equatable implements ComparableFieldProvider {
   ///
   /// Only set on the current user's own messages, and only for types with at
   /// least one mark.
-  @JsonKey(includeToJson: false)
-  final Map<String, MarkGroup>? markGroups;
+  @JsonKey(includeToJson: false, fromJson: _markGroupsFromJson)
+  final Map<MessageMarkType, MarkGroup>? markGroups;
+
+  static Map<MessageMarkType, MarkGroup>? _markGroupsFromJson(
+    Map<String, dynamic>? json,
+  ) {
+    return json?.map(
+      (type, group) => MapEntry(
+        MessageMarkType(type),
+        MarkGroup.fromJson(group as Map<String, dynamic>),
+      ),
+    );
+  }
 
   /// The marks the current user put on this message.
   ///
@@ -472,7 +483,7 @@ class Message extends Equatable implements ComparableFieldProvider {
     Map<String, ReactionGroup>? reactionGroups,
     List<Reaction>? latestReactions,
     List<Reaction>? ownReactions,
-    Map<String, MarkGroup>? markGroups,
+    Map<MessageMarkType, MarkGroup>? markGroups,
     List<OwnMark>? ownMarks,
     String? parentId,
     Object? quotedMessage = _nullConst,

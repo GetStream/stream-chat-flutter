@@ -1078,14 +1078,14 @@ class $MessagesTable extends Messages with TableInfo<$MessagesTable, MessageEnti
         $MessagesTable.$converterreactionGroupsn,
       );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, MarkGroup>?, String> markGroups =
+  late final GeneratedColumnWithTypeConverter<Map<MessageMarkType, MarkGroup>?, String> markGroups =
       GeneratedColumn<String>(
         'mark_groups',
         aliasedName,
         true,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-      ).withConverter<Map<String, MarkGroup>?>(
+      ).withConverter<Map<MessageMarkType, MarkGroup>?>(
         $MessagesTable.$convertermarkGroupsn,
       );
   @override
@@ -1857,8 +1857,8 @@ class $MessagesTable extends Messages with TableInfo<$MessagesTable, MessageEnti
   static TypeConverter<Map<String, ReactionGroup>?, String?> $converterreactionGroupsn = NullAwareTypeConverter.wrap(
     $converterreactionGroups,
   );
-  static TypeConverter<Map<String, MarkGroup>, String> $convertermarkGroups = MarkGroupsConverter();
-  static TypeConverter<Map<String, MarkGroup>?, String?> $convertermarkGroupsn = NullAwareTypeConverter.wrap(
+  static TypeConverter<Map<MessageMarkType, MarkGroup>, String> $convertermarkGroups = MarkGroupsConverter();
+  static TypeConverter<Map<MessageMarkType, MarkGroup>?, String?> $convertermarkGroupsn = NullAwareTypeConverter.wrap(
     $convertermarkGroups,
   );
   static TypeConverter<List<String>, String> $converterownMarks = ListConverter<String>();
@@ -1914,7 +1914,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
   final Map<String, ReactionGroup>? reactionGroups;
 
   /// The users who marked the message, by mark type.
-  final Map<String, MarkGroup>? markGroups;
+  final Map<MessageMarkType, MarkGroup>? markGroups;
 
   /// The marks the current user put on the message.
   final List<String>? ownMarks;
@@ -2193,7 +2193,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       reactionGroups: serializer.fromJson<Map<String, ReactionGroup>?>(
         json['reactionGroups'],
       ),
-      markGroups: serializer.fromJson<Map<String, MarkGroup>?>(
+      markGroups: serializer.fromJson<Map<MessageMarkType, MarkGroup>?>(
         json['markGroups'],
       ),
       ownMarks: serializer.fromJson<List<String>?>(json['ownMarks']),
@@ -2246,7 +2246,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
       'reactionGroups': serializer.toJson<Map<String, ReactionGroup>?>(
         reactionGroups,
       ),
-      'markGroups': serializer.toJson<Map<String, MarkGroup>?>(markGroups),
+      'markGroups': serializer.toJson<Map<MessageMarkType, MarkGroup>?>(markGroups),
       'ownMarks': serializer.toJson<List<String>?>(ownMarks),
       'parentId': serializer.toJson<String?>(parentId),
       'quotedMessageId': serializer.toJson<String?>(quotedMessageId),
@@ -2293,7 +2293,7 @@ class MessageEntity extends DataClass implements Insertable<MessageEntity> {
     Value<List<String>?> mentionedRoles = const Value.absent(),
     List<String>? mentionedUsers,
     Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
-    Value<Map<String, MarkGroup>?> markGroups = const Value.absent(),
+    Value<Map<MessageMarkType, MarkGroup>?> markGroups = const Value.absent(),
     Value<List<String>?> ownMarks = const Value.absent(),
     Value<String?> parentId = const Value.absent(),
     Value<String?> quotedMessageId = const Value.absent(),
@@ -2555,7 +2555,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
   final Value<List<String>?> mentionedRoles;
   final Value<List<String>> mentionedUsers;
   final Value<Map<String, ReactionGroup>?> reactionGroups;
-  final Value<Map<String, MarkGroup>?> markGroups;
+  final Value<Map<MessageMarkType, MarkGroup>?> markGroups;
   final Value<List<String>?> ownMarks;
   final Value<String?> parentId;
   final Value<String?> quotedMessageId;
@@ -2770,7 +2770,7 @@ class MessagesCompanion extends UpdateCompanion<MessageEntity> {
     Value<List<String>?>? mentionedRoles,
     Value<List<String>>? mentionedUsers,
     Value<Map<String, ReactionGroup>?>? reactionGroups,
-    Value<Map<String, MarkGroup>?>? markGroups,
+    Value<Map<MessageMarkType, MarkGroup>?>? markGroups,
     Value<List<String>?>? ownMarks,
     Value<String?>? parentId,
     Value<String?>? quotedMessageId,
@@ -4557,14 +4557,14 @@ class $PinnedMessagesTable extends PinnedMessages with TableInfo<$PinnedMessages
         $PinnedMessagesTable.$converterreactionGroupsn,
       );
   @override
-  late final GeneratedColumnWithTypeConverter<Map<String, MarkGroup>?, String> markGroups =
+  late final GeneratedColumnWithTypeConverter<Map<MessageMarkType, MarkGroup>?, String> markGroups =
       GeneratedColumn<String>(
         'mark_groups',
         aliasedName,
         true,
         type: DriftSqlType.string,
         requiredDuringInsert: false,
-      ).withConverter<Map<String, MarkGroup>?>(
+      ).withConverter<Map<MessageMarkType, MarkGroup>?>(
         $PinnedMessagesTable.$convertermarkGroupsn,
       );
   @override
@@ -5336,8 +5336,8 @@ class $PinnedMessagesTable extends PinnedMessages with TableInfo<$PinnedMessages
   static TypeConverter<Map<String, ReactionGroup>?, String?> $converterreactionGroupsn = NullAwareTypeConverter.wrap(
     $converterreactionGroups,
   );
-  static TypeConverter<Map<String, MarkGroup>, String> $convertermarkGroups = MarkGroupsConverter();
-  static TypeConverter<Map<String, MarkGroup>?, String?> $convertermarkGroupsn = NullAwareTypeConverter.wrap(
+  static TypeConverter<Map<MessageMarkType, MarkGroup>, String> $convertermarkGroups = MarkGroupsConverter();
+  static TypeConverter<Map<MessageMarkType, MarkGroup>?, String?> $convertermarkGroupsn = NullAwareTypeConverter.wrap(
     $convertermarkGroups,
   );
   static TypeConverter<List<String>, String> $converterownMarks = ListConverter<String>();
@@ -5393,7 +5393,7 @@ class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageE
   final Map<String, ReactionGroup>? reactionGroups;
 
   /// The users who marked the message, by mark type.
-  final Map<String, MarkGroup>? markGroups;
+  final Map<MessageMarkType, MarkGroup>? markGroups;
 
   /// The marks the current user put on the message.
   final List<String>? ownMarks;
@@ -5676,7 +5676,7 @@ class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageE
       reactionGroups: serializer.fromJson<Map<String, ReactionGroup>?>(
         json['reactionGroups'],
       ),
-      markGroups: serializer.fromJson<Map<String, MarkGroup>?>(
+      markGroups: serializer.fromJson<Map<MessageMarkType, MarkGroup>?>(
         json['markGroups'],
       ),
       ownMarks: serializer.fromJson<List<String>?>(json['ownMarks']),
@@ -5729,7 +5729,7 @@ class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageE
       'reactionGroups': serializer.toJson<Map<String, ReactionGroup>?>(
         reactionGroups,
       ),
-      'markGroups': serializer.toJson<Map<String, MarkGroup>?>(markGroups),
+      'markGroups': serializer.toJson<Map<MessageMarkType, MarkGroup>?>(markGroups),
       'ownMarks': serializer.toJson<List<String>?>(ownMarks),
       'parentId': serializer.toJson<String?>(parentId),
       'quotedMessageId': serializer.toJson<String?>(quotedMessageId),
@@ -5776,7 +5776,7 @@ class PinnedMessageEntity extends DataClass implements Insertable<PinnedMessageE
     Value<List<String>?> mentionedRoles = const Value.absent(),
     List<String>? mentionedUsers,
     Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
-    Value<Map<String, MarkGroup>?> markGroups = const Value.absent(),
+    Value<Map<MessageMarkType, MarkGroup>?> markGroups = const Value.absent(),
     Value<List<String>?> ownMarks = const Value.absent(),
     Value<String?> parentId = const Value.absent(),
     Value<String?> quotedMessageId = const Value.absent(),
@@ -6038,7 +6038,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
   final Value<List<String>?> mentionedRoles;
   final Value<List<String>> mentionedUsers;
   final Value<Map<String, ReactionGroup>?> reactionGroups;
-  final Value<Map<String, MarkGroup>?> markGroups;
+  final Value<Map<MessageMarkType, MarkGroup>?> markGroups;
   final Value<List<String>?> ownMarks;
   final Value<String?> parentId;
   final Value<String?> quotedMessageId;
@@ -6253,7 +6253,7 @@ class PinnedMessagesCompanion extends UpdateCompanion<PinnedMessageEntity> {
     Value<List<String>?>? mentionedRoles,
     Value<List<String>>? mentionedUsers,
     Value<Map<String, ReactionGroup>?>? reactionGroups,
-    Value<Map<String, MarkGroup>?>? markGroups,
+    Value<Map<MessageMarkType, MarkGroup>?>? markGroups,
     Value<List<String>?>? ownMarks,
     Value<String?>? parentId,
     Value<String?>? quotedMessageId,
@@ -13165,7 +13165,7 @@ typedef $$MessagesTableCreateCompanionBuilder =
       Value<List<String>?> mentionedRoles,
       required List<String> mentionedUsers,
       Value<Map<String, ReactionGroup>?> reactionGroups,
-      Value<Map<String, MarkGroup>?> markGroups,
+      Value<Map<MessageMarkType, MarkGroup>?> markGroups,
       Value<List<String>?> ownMarks,
       Value<String?> parentId,
       Value<String?> quotedMessageId,
@@ -13208,7 +13208,7 @@ typedef $$MessagesTableUpdateCompanionBuilder =
       Value<List<String>?> mentionedRoles,
       Value<List<String>> mentionedUsers,
       Value<Map<String, ReactionGroup>?> reactionGroups,
-      Value<Map<String, MarkGroup>?> markGroups,
+      Value<Map<MessageMarkType, MarkGroup>?> markGroups,
       Value<List<String>?> ownMarks,
       Value<String?> parentId,
       Value<String?> quotedMessageId,
@@ -13387,11 +13387,11 @@ class $$MessagesTableFilterComposer extends Composer<_$DriftChatDatabase, $Messa
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
-  ColumnWithTypeConverterFilters<Map<String, MarkGroup>?, Map<String, MarkGroup>, String> get markGroups =>
-      $composableBuilder(
-        column: $table.markGroups,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
+  ColumnWithTypeConverterFilters<Map<MessageMarkType, MarkGroup>?, Map<MessageMarkType, MarkGroup>, String>
+  get markGroups => $composableBuilder(
+    column: $table.markGroups,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
 
   ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get ownMarks => $composableBuilder(
     column: $table.ownMarks,
@@ -13894,7 +13894,7 @@ class $$MessagesTableAnnotationComposer extends Composer<_$DriftChatDatabase, $M
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<Map<String, MarkGroup>?, String> get markGroups => $composableBuilder(
+  GeneratedColumnWithTypeConverter<Map<MessageMarkType, MarkGroup>?, String> get markGroups => $composableBuilder(
     column: $table.markGroups,
     builder: (column) => column,
   );
@@ -14134,7 +14134,7 @@ class $$MessagesTableTableManager
                 Value<List<String>?> mentionedRoles = const Value.absent(),
                 Value<List<String>> mentionedUsers = const Value.absent(),
                 Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
-                Value<Map<String, MarkGroup>?> markGroups = const Value.absent(),
+                Value<Map<MessageMarkType, MarkGroup>?> markGroups = const Value.absent(),
                 Value<List<String>?> ownMarks = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
                 Value<String?> quotedMessageId = const Value.absent(),
@@ -14218,7 +14218,7 @@ class $$MessagesTableTableManager
                 Value<List<String>?> mentionedRoles = const Value.absent(),
                 required List<String> mentionedUsers,
                 Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
-                Value<Map<String, MarkGroup>?> markGroups = const Value.absent(),
+                Value<Map<MessageMarkType, MarkGroup>?> markGroups = const Value.absent(),
                 Value<List<String>?> ownMarks = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
                 Value<String?> quotedMessageId = const Value.absent(),
@@ -15451,7 +15451,7 @@ typedef $$PinnedMessagesTableCreateCompanionBuilder =
       Value<List<String>?> mentionedRoles,
       required List<String> mentionedUsers,
       Value<Map<String, ReactionGroup>?> reactionGroups,
-      Value<Map<String, MarkGroup>?> markGroups,
+      Value<Map<MessageMarkType, MarkGroup>?> markGroups,
       Value<List<String>?> ownMarks,
       Value<String?> parentId,
       Value<String?> quotedMessageId,
@@ -15494,7 +15494,7 @@ typedef $$PinnedMessagesTableUpdateCompanionBuilder =
       Value<List<String>?> mentionedRoles,
       Value<List<String>> mentionedUsers,
       Value<Map<String, ReactionGroup>?> reactionGroups,
-      Value<Map<String, MarkGroup>?> markGroups,
+      Value<Map<MessageMarkType, MarkGroup>?> markGroups,
       Value<List<String>?> ownMarks,
       Value<String?> parentId,
       Value<String?> quotedMessageId,
@@ -15625,11 +15625,11 @@ class $$PinnedMessagesTableFilterComposer extends Composer<_$DriftChatDatabase, 
         builder: (column) => ColumnWithTypeConverterFilters(column),
       );
 
-  ColumnWithTypeConverterFilters<Map<String, MarkGroup>?, Map<String, MarkGroup>, String> get markGroups =>
-      $composableBuilder(
-        column: $table.markGroups,
-        builder: (column) => ColumnWithTypeConverterFilters(column),
-      );
+  ColumnWithTypeConverterFilters<Map<MessageMarkType, MarkGroup>?, Map<MessageMarkType, MarkGroup>, String>
+  get markGroups => $composableBuilder(
+    column: $table.markGroups,
+    builder: (column) => ColumnWithTypeConverterFilters(column),
+  );
 
   ColumnWithTypeConverterFilters<List<String>?, List<String>, String> get ownMarks => $composableBuilder(
     column: $table.ownMarks,
@@ -16050,7 +16050,7 @@ class $$PinnedMessagesTableAnnotationComposer extends Composer<_$DriftChatDataba
     builder: (column) => column,
   );
 
-  GeneratedColumnWithTypeConverter<Map<String, MarkGroup>?, String> get markGroups => $composableBuilder(
+  GeneratedColumnWithTypeConverter<Map<MessageMarkType, MarkGroup>?, String> get markGroups => $composableBuilder(
     column: $table.markGroups,
     builder: (column) => column,
   );
@@ -16222,7 +16222,7 @@ class $$PinnedMessagesTableTableManager
                 Value<List<String>?> mentionedRoles = const Value.absent(),
                 Value<List<String>> mentionedUsers = const Value.absent(),
                 Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
-                Value<Map<String, MarkGroup>?> markGroups = const Value.absent(),
+                Value<Map<MessageMarkType, MarkGroup>?> markGroups = const Value.absent(),
                 Value<List<String>?> ownMarks = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
                 Value<String?> quotedMessageId = const Value.absent(),
@@ -16306,7 +16306,7 @@ class $$PinnedMessagesTableTableManager
                 Value<List<String>?> mentionedRoles = const Value.absent(),
                 required List<String> mentionedUsers,
                 Value<Map<String, ReactionGroup>?> reactionGroups = const Value.absent(),
-                Value<Map<String, MarkGroup>?> markGroups = const Value.absent(),
+                Value<Map<MessageMarkType, MarkGroup>?> markGroups = const Value.absent(),
                 Value<List<String>?> ownMarks = const Value.absent(),
                 Value<String?> parentId = const Value.absent(),
                 Value<String?> quotedMessageId = const Value.absent(),
