@@ -29,7 +29,7 @@ class VoiceRecordingAttachmentPlaylistBuilder extends StreamAttachmentWidgetBuil
 
   /// Called each time playback of a voice recording starts.
   ///
-  /// A builder you add yourself marks nothing unless this calls
+  /// A builder constructed directly marks nothing unless this calls
   /// [Channel.markMessage].
   final OnAttachmentPlaybackStarted? onPlaybackStarted;
 

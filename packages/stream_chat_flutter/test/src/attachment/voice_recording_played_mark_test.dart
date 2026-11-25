@@ -113,7 +113,7 @@ void main() {
     expect(started.single.attachment, message.attachments.single);
   });
 
-  testWidgets('a playlist skips a recording it cannot play when reporting', (tester) async {
+  testWidgets('a playlist reports the right recording when an earlier one cannot play', (tester) async {
     final unplayable = Attachment(type: AttachmentType.voiceRecording, title: 'missing.m4a');
     final message = _voiceMessage().copyWith(
       attachments: [unplayable, _voiceRecording],
@@ -146,38 +146,8 @@ void main() {
     await tester.pumpWidget(_wrap(_channel(), playlist));
     await tester.pump();
 
-    final controller = _playlistController(tester);
-    final [first, other] = controller.value.tracks;
-    controller.value = controller.value.copyWith(
-      currentIndex: 0,
-      tracks: [
-        first.copyWith(state: TrackState.playing),
-        other,
-      ],
-    );
-    await tester.pump();
-    controller.value = controller.value.copyWith(
-      tracks: [
-        first.copyWith(state: TrackState.playing, position: const Duration(seconds: 1)),
-        other,
-      ],
-    );
-    await tester.pump();
-    controller.value = controller.value.copyWith(
-      currentIndex: 1,
-      tracks: [
-        first.copyWith(state: TrackState.paused),
-        other.copyWith(state: TrackState.playing),
-      ],
-    );
-    await tester.pump();
-    controller.value = controller.value.copyWith(
-      tracks: [
-        first.copyWith(state: TrackState.paused),
-        other.copyWith(state: TrackState.playing, position: const Duration(seconds: 1)),
-      ],
-    );
-    await tester.pump();
+    await _playTrack(tester, 0);
+    await _playTrack(tester, 1);
 
     expect(started.map((it) => it.attachment), [_voiceRecording, second]);
   });
@@ -208,6 +178,28 @@ Future<void> _setTrackState(WidgetTester tester, TrackState trackState) async {
 Future<void> _play(WidgetTester tester) async {
   await _setTrackState(tester, TrackState.playing);
   await _setTrackPosition(tester, const Duration(seconds: 1));
+}
+
+// Plays the track at [index] until its position moves and pauses the others,
+// as the audio player reports when the playlist moves to that track.
+Future<void> _playTrack(WidgetTester tester, int index) async {
+  final controller = _playlistController(tester);
+  for (final position in const [Duration.zero, Duration(seconds: 1)]) {
+    final tracks = controller.value.tracks;
+    controller.value = controller.value.copyWith(
+      currentIndex: index,
+      tracks: [
+        for (final (i, track) in tracks.indexed)
+          if (i == index)
+            track.copyWith(state: TrackState.playing, position: position)
+          else if (track.state.isPlaying)
+            track.copyWith(state: TrackState.paused)
+          else
+            track,
+      ],
+    );
+    await tester.pump();
+  }
 }
 
 // Advances the first track's position, as the audio player reports while it

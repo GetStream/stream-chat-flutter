@@ -2,12 +2,10 @@ import 'package:flutter/foundation.dart';
 
 /// Tells when playback has really started, from a player's updates.
 ///
-/// Pressing play only asks the player to play: it may still be loading,
-/// buffering or failing. Playback counts as started once the position moves
-/// past where it was when play was pressed, and [onStarted] is then called
-/// once with the [handleUpdate] key. A pause, or a switch to another key,
-/// starts the count again. Playback that never moves, such as an empty clip
-/// or a resume at the very end, is never reported.
+/// Playback counts as started once the position moves past where playing
+/// began, so loading, buffering and failures don't count; [onStarted] is then
+/// called once with the [handleUpdate] key. A pause, or a switch to another
+/// key, starts the count again.
 @internal
 class PlaybackStartTracker {
   /// Creates a tracker that calls [onStarted] each time playback starts.
