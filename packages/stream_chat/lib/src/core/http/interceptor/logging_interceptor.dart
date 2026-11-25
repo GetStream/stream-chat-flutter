@@ -81,7 +81,7 @@ class LoggingInterceptor extends Interceptor {
   void Function(InterceptStep step, Object object) logPrint;
 
   /// The headers whose values are logged as `██` when the constructor is given no others.
-  static const defaultRedactedHeaders = {'authorization'};
+  static const defaultRedactedHeaders = {'Authorization'};
 
   static const _redacted = '██';
 
