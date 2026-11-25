@@ -26,9 +26,7 @@ import 'stream_media_grid_delegate.dart';
 ///         child: StreamMediaGalleryPreview(
 ///           attachments: attachments,
 ///           initialIndex: index,
-///           onPlaybackStarted: (details) {
-///             channel.markMessagePlayed(details.message);
-///           },
+///           onPlaybackStarted: (details) => channel.markMessagePlayed(details.message),
 ///         ),
 ///       ),
 ///     ),
