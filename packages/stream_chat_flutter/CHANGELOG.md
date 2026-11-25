@@ -17,7 +17,7 @@
 
 - `StreamChannelPage` and `StreamThreadPage` show the scheduled messages banner above their composer, and schedule the message, uploading its attachments first, on a long press of send, in channels where the user can schedule messages. Turn both off with `StreamChatConfigurationData.scheduledMessagesEnabled`.
 - A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
-- A class that implements or directly extends `Translations`, or implements `StreamChatLocalizations`, must add `messagePlayedLabel` and `messagePlayedByLabel`; extending `DefaultTranslations`, `StreamChatLocalizations` or `GlobalStreamChatLocalizations` provides them.
+- A class that implements or directly extends `Translations`, `StreamChatLocalizations` or `GlobalStreamChatLocalizations` must add `messagePlayedLabel` and `messagePlayedByLabel`; extending `DefaultTranslations` provides them.
 - `StreamMessageComposer` keeps its content when its draft is updated on another device while it is open.
 - The current user's messages show "Edited" before the delivery status and timestamp, mirroring other users' messages.
 - Text in Stream components follows the app's font family.
