@@ -226,8 +226,8 @@ class _ChewieVideoPlayer {
 
   /// Initializes the controller pair for [attachment].
   ///
-  /// Throws when there is no usable source URL. Calls [onPlaybackStarted] each time
-  /// playback starts, once the video moves.
+  /// Throws when there is no usable source URL. Calls [onPlaybackStarted]
+  /// each time playback starts, once the video moves.
   Future<void> open(
     Attachment attachment, {
     VoidCallback? onPlaybackStarted,

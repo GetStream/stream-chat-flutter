@@ -26,8 +26,10 @@ import 'stream_media_grid_delegate.dart';
 ///         child: StreamMediaGalleryPreview(
 ///           attachments: attachments,
 ///           initialIndex: index,
-///           onPlaybackStarted: (details) =>
-///               channel.markMessage(details.message, MessageMarkType.played).ignore(),
+///           onPlaybackStarted: (details) {
+///             final message = details.message;
+///             channel.markMessage(message, MessageMarkType.played).ignore();
+///           },
 ///         ),
 ///       ),
 ///     ),

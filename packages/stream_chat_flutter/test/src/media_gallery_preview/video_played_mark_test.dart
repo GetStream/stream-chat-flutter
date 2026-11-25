@@ -62,6 +62,30 @@ void main() {
     verifyNever(() => channel.markMessage(any(), any()));
   });
 
+  testWidgets('a gallery without onPlaybackStarted gives its videos none', (tester) async {
+    final message = _videoMessage();
+    StreamVideoPlayerProps? videoProps;
+    final builders = StreamComponentBuilders(
+      extensions: streamChatComponentBuilders(
+        videoPlayer: (context, props) {
+          videoProps = props;
+          return const SizedBox();
+        },
+      ),
+    );
+    final gallery = StreamComponentFactory(
+      builders: builders,
+      child: StreamMediaGalleryPreview(
+        attachments: message.toMediaGalleryAttachments(),
+      ),
+    );
+    await tester.pumpWidget(_wrap(_channel(), gallery));
+    await tester.pump();
+
+    expect(videoProps, isNotNull);
+    expect(videoProps!.onPlaybackStarted, isNull);
+  });
+
   testWidgets('a gallery reports the video that started playing', (tester) async {
     final message = _videoMessage();
     final started = <AttachmentPlaybackStartedDetails>[];
