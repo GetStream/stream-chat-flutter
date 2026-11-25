@@ -314,7 +314,11 @@ Widget _wrap(
   when(() => channel.client).thenReturn(client);
   when(() => channel.state).thenReturn(channelState);
   when(() => channel.memberCount).thenReturn(isTwoMember ? 2 : 5);
-  when(() => channel.config).thenReturn(ChannelConfig(markTypes: markTypes));
+  final channelModel = ChannelModel(
+    cid: 'messaging:test',
+    config: ChannelConfig(markTypes: markTypes),
+  );
+  when(() => channelState.channelState).thenReturn(ChannelState(channel: channelModel));
   when(() => channelState.readStream).thenAnswer((_) => Stream.value(const []));
 
   final layout = StreamMessageLayoutData(

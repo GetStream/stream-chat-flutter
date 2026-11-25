@@ -13,12 +13,13 @@ String? playedMarkLabel(BuildContext context, Message message) {
   final currentUserId = StreamChat.maybeOf(context)?.currentUser?.id;
   if (currentUserId == null || message.user?.id != currentUserId) return null;
 
-  final channel = StreamChannel.maybeOf(context)?.channel;
-  final markTypes = channel?.config?.markTypes ?? const [];
-  if (!markTypes.contains(MessageMarkType.played)) return null;
-
   final count = message.markGroups?[MessageMarkType.played]?.count ?? 0;
   if (count <= 0) return null;
+
+  final channel = StreamChannel.maybeOf(context)?.channel;
+  final config = channel?.state?.channelState.channel?.config;
+  final markTypes = config?.markTypes ?? const [];
+  if (!markTypes.contains(MessageMarkType.played)) return null;
 
   final translations = context.translations;
   if (channel?.memberCount == 2) return translations.messagePlayedLabel;
