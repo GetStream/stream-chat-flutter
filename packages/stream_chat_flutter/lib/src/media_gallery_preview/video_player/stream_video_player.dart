@@ -177,7 +177,7 @@ class _StreamVideoPlayerDefaultState extends State<DefaultStreamVideoPlayer>
     try {
       final attachment = widget.attachment;
       final details = PlaybackStartedDetails(attachment: attachment);
-      await _player.open(attachment, onPlay: () => widget.props.onPlaybackStarted?.call(details));
+      await _player.open(attachment, onPlaybackStarted: () => widget.props.onPlaybackStarted?.call(details));
       if (!mounted) return;
       setState(() {});
       updateKeepAlive();
@@ -213,7 +213,7 @@ class _ChewieVideoPlayer {
   ChewieController? _chewie;
   bool _disposed = false;
   final _playbackStart = PlaybackStartTracker();
-  VoidCallback? _onPlay;
+  VoidCallback? _onPlaybackStarted;
 
   /// The chewie controller used for playback once initialisation has
   /// completed. `null` until [open] resolves.
@@ -227,11 +227,11 @@ class _ChewieVideoPlayer {
 
   /// Initializes the controller pair for [attachment].
   ///
-  /// Throws when there is no usable source URL. Calls [onPlay] each time
+  /// Throws when there is no usable source URL. Calls [onPlaybackStarted] each time
   /// playback starts, once the video moves.
   Future<void> open(
     Attachment attachment, {
-    VoidCallback? onPlay,
+    VoidCallback? onPlaybackStarted,
   }) async {
     final localUri = attachment.localUri;
     final assetUrl = attachment.assetUrl;
@@ -253,7 +253,7 @@ class _ChewieVideoPlayer {
     }
 
     _video = video;
-    _onPlay = onPlay;
+    _onPlaybackStarted = onPlaybackStarted;
     video.addListener(_handleVideoChanged);
     _chewie = ChewieController(
       videoPlayerController: video,
@@ -270,7 +270,7 @@ class _ChewieVideoPlayer {
       isPlaying: value.isPlaying,
       position: value.position,
     );
-    if (started) _onPlay?.call();
+    if (started) _onPlaybackStarted?.call();
   }
 
   /// Starts playback. No-op if not yet ready.
