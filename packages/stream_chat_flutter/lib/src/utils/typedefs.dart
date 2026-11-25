@@ -233,8 +233,21 @@ final class MessageMarkTapDetails {
   /// The message whose mark was tapped.
   final Message message;
 
-  /// The tapped mark, such as [MessageMarkType.played].
+  /// The type of the tapped mark, such as [MessageMarkType.played].
   final MessageMarkType type;
+}
+
+/// The action to perform when a video starts playing.
+typedef OnVideoPlay = void Function(VideoPlayDetails details);
+
+/// Details of a video starting to play, passed to [OnVideoPlay].
+@immutable
+final class VideoPlayDetails {
+  /// Creates details for a video starting to play.
+  const VideoPlayDetails({required this.attachment});
+
+  /// The video attachment that started playing.
+  final Attachment attachment;
 }
 
 /// {@template onReactionLongPress}

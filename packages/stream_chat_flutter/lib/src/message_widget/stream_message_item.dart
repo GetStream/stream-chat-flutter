@@ -615,7 +615,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       StreamMessageFooter(
         message: message,
         excludeFromSemantics: announcedByRow,
-        onMarkTap: onMarkTap,
+        onMarkTap: props.onMessageMarkTap,
       ),
     );
 

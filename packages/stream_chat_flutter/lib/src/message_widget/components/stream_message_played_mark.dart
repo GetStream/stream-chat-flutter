@@ -28,6 +28,8 @@ class StreamMessagePlayedMark extends StatelessWidget {
   final Message message;
 
   /// Called when the mark is tapped.
+  ///
+  /// If null, the mark is not tappable.
   final VoidCallback? onTap;
 
   /// Whether the mark stays out of the semantics tree.
