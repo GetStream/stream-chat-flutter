@@ -70,6 +70,14 @@ void main() {
     expect(find.textContaining('Played by'), findsNothing);
   });
 
+  testWidgets('a text message reads how many members played it', (tester) async {
+    final message = _voiceMessage(playedBy: 2, text: 'Listen to this', attachments: const []);
+    await tester.pumpWidget(_wrap(_item(message)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Played by 2'), findsOneWidget);
+  });
+
   testWidgets('an audio file reads how many members played it', (tester) async {
     final audio = Attachment(type: AttachmentType.audio, assetUrl: 'https://example.com/song.mp3');
     final message = _voiceMessage(playedBy: 2).copyWith(attachments: [audio]);
@@ -231,11 +239,7 @@ void main() {
       fileName: 'stream_message_played_mark_$theme',
       constraints: const BoxConstraints.tightFor(width: 400, height: 240),
       builder: () {
-        // The voice player needs an audio plugin, so a text body stands in.
-        final message = _voiceMessage(playedBy: 3).copyWith(
-          text: 'Listen to this',
-          attachments: const [],
-        );
+        final message = _voiceMessage(playedBy: 3, text: 'Listen to this', attachments: const []);
         final stackPositions = <StreamMessageStackPosition>[.top, .single];
         final scene = Builder(
           builder: (context) => ColoredBox(
@@ -271,7 +275,7 @@ Color? _textColor(WidgetTester tester, String text) {
   return tester.widget<RichText>(richText).text.style?.color;
 }
 
-Message _voiceMessage({User? user, int playedBy = 0}) {
+Message _voiceMessage({User? user, int playedBy = 0, String? text, List<Attachment>? attachments}) {
   final markers = [
     for (var i = 0; i < playedBy; i++)
       MessageMarker(
@@ -282,9 +286,10 @@ Message _voiceMessage({User? user, int playedBy = 0}) {
   return Message(
     id: 'voice-note',
     createdAt: DateTime(2026, 11, 20, 9),
+    text: text,
     user: user ?? _currentUser,
     state: MessageState.sent,
-    attachments: [_voiceRecording],
+    attachments: attachments ?? [_voiceRecording],
     markGroups: {
       if (playedBy > 0) MessageMarkType.played: MarkGroup(count: playedBy, latestBy: markers),
     },

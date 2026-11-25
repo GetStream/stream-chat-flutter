@@ -76,7 +76,7 @@ class StreamMessageFooterProps {
 
   /// Called when the message's played mark is tapped.
   ///
-  /// The mark is not tappable when this is null or in a two-member channel.
+  /// If null, the mark is not tappable.
   final VoidCallback? onMarkTap;
 
   /// Returns a copy of this [StreamMessageFooterProps] with the given fields
