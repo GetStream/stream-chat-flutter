@@ -144,7 +144,7 @@ Widget _wrap(MockChannel channel, Widget body) {
   final builders = StreamComponentBuilders(
     extensions: streamChatComponentBuilders(
       videoPlayer: (context, props) => TextButton(
-        onPressed: () => props.onPlay?.call(VideoPlayDetails(attachment: props.attachment)),
+        onPressed: () => props.onPlaybackStarted?.call(PlaybackStartedDetails(attachment: props.attachment)),
         child: const Text('play'),
       ),
     ),

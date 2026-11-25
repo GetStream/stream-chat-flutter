@@ -264,7 +264,7 @@ class _DefaultStreamMediaGalleryPreviewState extends State<DefaultStreamMediaGal
               attachment: package.attachment,
               pageIndex: index,
               autoplay: widget.props.autoplayVideos,
-              onPlay: (_) => _markPlayed(package.message),
+              onPlaybackStarted: (_) => _markPlayed(package.message),
             );
           },
         ),

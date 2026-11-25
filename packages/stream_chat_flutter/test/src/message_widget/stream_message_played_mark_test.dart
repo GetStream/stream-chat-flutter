@@ -231,6 +231,21 @@ void main() {
     expect(tapped?.type, MessageMarkType.played);
   });
 
+  testWidgets("tapping an earlier voice message's mark reports the message", (tester) async {
+    MessageMarkTapDetails? tapped;
+    final message = _voiceMessage(playedBy: 2);
+    final item = StreamMessageItem(
+      message: message,
+      onMessageMarkTap: (_, details) => tapped = details,
+    );
+    await tester.pumpWidget(_wrap(item, stackPosition: .top));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Played by 2'));
+
+    expect(tapped?.message, message);
+  });
+
   for (final brightness in Brightness.values) {
     final theme = brightness.name;
 

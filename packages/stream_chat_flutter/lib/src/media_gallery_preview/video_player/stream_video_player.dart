@@ -42,12 +42,12 @@ class StreamVideoPlayer extends StatelessWidget {
     required Attachment attachment,
     required int pageIndex,
     bool autoplay = false,
-    OnVideoPlay? onPlay,
+    OnPlaybackStarted? onPlaybackStarted,
   }) : props = StreamVideoPlayerProps(
          attachment: attachment,
          pageIndex: pageIndex,
          autoplay: autoplay,
-         onPlay: onPlay,
+         onPlaybackStarted: onPlaybackStarted,
        );
 
   /// The properties that configure this video player.
@@ -77,7 +77,7 @@ class StreamVideoPlayerProps {
     required this.attachment,
     required this.pageIndex,
     this.autoplay = false,
-    this.onPlay,
+    this.onPlaybackStarted,
   });
 
   /// The video attachment to play.
@@ -96,10 +96,10 @@ class StreamVideoPlayerProps {
 
   /// Called each time playback starts.
   ///
-  /// Covers playback started from the controls and from [autoplay]. Videos in
-  /// a custom player built through [StreamComponentFactory] are marked played
-  /// only if that player calls it.
-  final OnVideoPlay? onPlay;
+  /// Covers playback started from the controls and from [autoplay]. A custom
+  /// player built through [StreamComponentFactory] calls it with [attachment]
+  /// for its videos to be marked played.
+  final OnPlaybackStarted? onPlaybackStarted;
 }
 
 /// Video player used on Android, iOS, macOS, and web inside a
@@ -175,8 +175,8 @@ class _StreamVideoPlayerDefaultState extends State<DefaultStreamVideoPlayer>
   Future<void> _initialize() async {
     try {
       final attachment = widget.attachment;
-      final details = VideoPlayDetails(attachment: attachment);
-      await _player.open(attachment, onPlay: () => widget.props.onPlay?.call(details));
+      final details = PlaybackStartedDetails(attachment: attachment);
+      await _player.open(attachment, onPlay: () => widget.props.onPlaybackStarted?.call(details));
       if (!mounted) return;
       setState(() {});
       updateKeepAlive();
