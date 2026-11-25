@@ -2119,45 +2119,32 @@ class Channel {
     pagination: pagination,
   );
 
-  /// Puts a mark of [type] on [message], such as [MessageMarkType.played].
-  ///
-  /// A user marks a message at most once per type, and marking a message the
-  /// user wrote changes nothing. The mark appears in the message's
-  /// [Message.ownMarks] once [EventType.messageMarkAdded] arrives for it.
-  ///
-  /// See also:
-  ///
-  ///  * [ChannelCapabilityCheck.canSendMessageMark], which tells whether the
-  ///    current user can mark messages in this channel.
-  Future<SendMessageMarkResponse> sendMessageMark(
-    Message message,
-    MessageMarkType type,
-  ) {
-    _checkInitialized();
-    return _client.sendMessageMark(message.id, type);
-  }
-
   // The ids of the messages this channel is marking or has marked played.
   final _playedMessageIds = <String>{};
 
   /// Marks [message] played by the current user, at most once.
   ///
-  /// Does nothing if [MessageRules.canMarkAsPlayed] is false for [message], or
-  /// if this channel already marked it or is marking it. Never throws: a failed
-  /// request is logged, and the next call tries again.
+  /// Returns `true` if this call sent the mark, and `false` if it was skipped:
+  /// [MessageRules.canMarkAsPlayed] is false for [message], or this channel
+  /// already marked it or is marking it. The mark appears in the message's
+  /// [Message.ownMarks] once [EventType.messageMarkAdded] arrives for it.
+  ///
+  /// Throws a [StreamChatNetworkError] if the request fails; the next call then
+  /// tries again.
   ///
   /// See also:
   ///
-  ///  * [sendMessageMark], which puts a mark of any type and throws on failure.
-  Future<void> markMessagePlayed(Message message) async {
-    if (!MessageRules.canMarkAsPlayed(message, this)) return;
-    if (!_playedMessageIds.add(message.id)) return;
+  ///  * [StreamChatClient.sendMessageMark], which puts a mark of any type.
+  Future<bool> markMessagePlayed(Message message) async {
+    if (!MessageRules.canMarkAsPlayed(message, this)) return false;
+    if (!_playedMessageIds.add(message.id)) return false;
 
     try {
-      await sendMessageMark(message, MessageMarkType.played);
-    } catch (error, stackTrace) {
+      await _client.sendMessageMark(message.id, MessageMarkType.played);
+      return true;
+    } catch (_) {
       _playedMessageIds.remove(message.id);
-      _client.logger.fine('Could not mark message ${message.id} played', error, stackTrace);
+      rethrow;
     }
   }
 

@@ -122,13 +122,13 @@ void main() {
       when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
       final message = channel.state!.messages.single;
 
-      await channel.markMessagePlayed(message);
-      await channel.markMessagePlayed(message);
+      expect(await channel.markMessagePlayed(message), isTrue);
+      expect(await channel.markMessagePlayed(message), isFalse);
 
       verify(() => client.sendMessageMark('voice-note', MessageMarkType.played)).called(1);
     });
 
-    test('sends nothing while the same mark is in flight', () async {
+    test('skips the message while the same mark is in flight', () async {
       final (client, channel) = _channel(author: _otherUser);
       addTearDown(channel.dispose);
       final response = Completer<SendMessageMarkResponse>();
@@ -136,14 +136,14 @@ void main() {
       final message = channel.state!.messages.single;
 
       final first = channel.markMessagePlayed(message);
-      await channel.markMessagePlayed(message);
+      expect(await channel.markMessagePlayed(message), isFalse);
       response.complete(SendMessageMarkResponse());
-      await first;
+      expect(await first, isTrue);
 
       verify(() => client.sendMessageMark(any(), any())).called(1);
     });
 
-    test('completes without throwing when the mark fails', () async {
+    test('throws when the mark fails', () async {
       final (client, channel) = _channel(author: _otherUser);
       addTearDown(channel.dispose);
       when(
@@ -151,7 +151,7 @@ void main() {
       ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
       final message = channel.state!.messages.single;
 
-      await expectLater(channel.markMessagePlayed(message), completes);
+      await expectLater(channel.markMessagePlayed(message), throwsA(isA<StreamChatNetworkError>()));
     });
 
     test('tries again after a failed mark', () async {
@@ -162,17 +162,17 @@ void main() {
       ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
       final message = channel.state!.messages.single;
 
-      await channel.markMessagePlayed(message);
-      await channel.markMessagePlayed(message);
+      await channel.markMessagePlayed(message).catchError((_) => false);
+      await channel.markMessagePlayed(message).catchError((_) => false);
 
       verify(() => client.sendMessageMark(any(), any())).called(2);
     });
 
-    test("sends nothing for the current user's own message", () async {
+    test("skips the current user's own message", () async {
       final (client, channel) = _channel(author: _currentUser);
       addTearDown(channel.dispose);
 
-      await channel.markMessagePlayed(channel.state!.messages.single);
+      expect(await channel.markMessagePlayed(channel.state!.messages.single), isFalse);
 
       verifyNever(() => client.sendMessageMark(any(), any()));
     });
