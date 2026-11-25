@@ -95,7 +95,7 @@ abstract class StreamAttachmentWidgetBuilder {
   static List<StreamAttachmentWidgetBuilder> defaultBuilders({
     required Message message,
     StreamAttachmentWidgetTapCallback? onAttachmentTap,
-    ValueChanged<AttachmentPlaybackStartedDetails>? onPlaybackStarted,
+    OnAttachmentPlaybackStarted? onPlaybackStarted,
     List<StreamAttachmentWidgetBuilder>? customAttachmentBuilders,
   }) {
     return [

@@ -71,6 +71,22 @@ void main() {
     verifyNever(() => channel.sendMessageMark(any(), any()));
   });
 
+  testWidgets('a gallery reports the video that started playing', (tester) async {
+    final channel = _channel();
+    final message = _videoMessage(user: _otherUser);
+    final started = <AttachmentPlaybackStartedDetails>[];
+    final gallery = StreamMediaGalleryPreview(
+      attachments: message.toMediaGalleryAttachments(),
+      onPlaybackStarted: started.add,
+    );
+    await tester.pumpWidget(_wrap(channel, gallery));
+    await tester.pump();
+
+    await _play(tester);
+
+    expect(started.single.attachment, message.attachments.single);
+  });
+
   testWidgets("playing the current user's own video marks nothing", (tester) async {
     final channel = _channel();
     await _openGallery(tester, channel, _videoMessage(user: _currentUser));

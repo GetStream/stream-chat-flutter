@@ -28,7 +28,10 @@ class VoiceRecordingAttachmentPlaylistBuilder extends StreamAttachmentWidgetBuil
   final StreamAttachmentWidgetTapCallback? onAttachmentTap;
 
   /// Called each time playback of a voice recording starts.
-  final ValueChanged<AttachmentPlaybackStartedDetails>? onPlaybackStarted;
+  ///
+  /// The message is marked played only when this builder comes from
+  /// [StreamAttachmentWidgetBuilder.defaultBuilders] inside a message.
+  final OnAttachmentPlaybackStarted? onPlaybackStarted;
 
   @override
   bool canHandle(

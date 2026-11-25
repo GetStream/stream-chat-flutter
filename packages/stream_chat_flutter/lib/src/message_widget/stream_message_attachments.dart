@@ -62,8 +62,6 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
 
   @override
   Widget? nullableBuild(BuildContext context) {
-    // The only place a played mark is sent, for voice recordings played here
-    // and videos played in the media gallery this opens.
     final channel = StreamChannel.maybeOf(context)?.channel;
     void effectiveOnPlaybackStarted(AttachmentPlaybackStartedDetails details) {
       if (channel == null) return;
@@ -107,7 +105,7 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
     BuildContext context,
     Message message,
     Attachment attachment, {
-    ValueChanged<AttachmentPlaybackStartedDetails>? onPlaybackStarted,
+    OnAttachmentPlaybackStarted? onPlaybackStarted,
   }) async {
     // If the current attachment is a url preview attachment, open the url
     // in the browser.

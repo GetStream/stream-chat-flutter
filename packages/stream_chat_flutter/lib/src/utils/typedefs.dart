@@ -252,8 +252,14 @@ final class PlaybackStartedDetails {
   final Attachment attachment;
 }
 
-/// Details of a message's attachment starting to play, such as a voice
-/// recording or a video.
+/// The action to perform when playback of a message's attachment starts.
+///
+/// Called again each time playback resumes after a pause.
+typedef OnAttachmentPlaybackStarted = void Function(AttachmentPlaybackStartedDetails details);
+
+/// Details of a message's attachment starting to play.
+///
+/// Passed to [OnAttachmentPlaybackStarted] for a voice recording or a video.
 @immutable
 final class AttachmentPlaybackStartedDetails {
   /// Creates details for a message's attachment starting to play.

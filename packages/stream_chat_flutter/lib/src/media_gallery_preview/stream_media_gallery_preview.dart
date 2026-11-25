@@ -24,8 +24,8 @@ import '../../stream_chat_flutter.dart';
 /// - Video attachments are played by [StreamVideoPlayer], which pauses
 ///   itself when its page is no longer the active one (see
 ///   [StreamMediaGalleryPreviewScope]).
-/// - Each time a video starts playing it calls
-///   [StreamMediaGalleryPreviewProps.onPlaybackStarted].
+/// - Calls [StreamMediaGalleryPreviewProps.onPlaybackStarted] each time a
+///   video starts playing.
 ///
 /// {@tool snippet}
 ///
@@ -77,7 +77,7 @@ class StreamMediaGalleryPreview extends StatelessWidget {
     required List<StreamMediaGalleryAttachment> attachments,
     int initialIndex = 0,
     bool autoplayVideos = false,
-    ValueChanged<AttachmentPlaybackStartedDetails>? onPlaybackStarted,
+    OnAttachmentPlaybackStarted? onPlaybackStarted,
   }) : assert(initialIndex >= 0, 'initialIndex cannot be negative'),
        props = .new(
          attachments: attachments,
@@ -126,7 +126,10 @@ class StreamMediaGalleryPreviewProps {
   final bool autoplayVideos;
 
   /// Called each time playback of a video starts.
-  final ValueChanged<AttachmentPlaybackStartedDetails>? onPlaybackStarted;
+  ///
+  /// A custom preview built through [StreamComponentFactory] must call it for
+  /// videos opened from a message to be marked played.
+  final OnAttachmentPlaybackStarted? onPlaybackStarted;
 }
 
 /// The default implementation of [StreamMediaGalleryPreview].
