@@ -87,7 +87,7 @@ jobs:
       || (contains(github.head_ref, 'release/') && github.event.pull_request.draft == false)
     timeout-minutes: 60
     # Pinned, so a runner image update doesn't change the iOS numbers.
-    runs-on: macos-26
+    runs-on: { group: scaleway-macos }
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7

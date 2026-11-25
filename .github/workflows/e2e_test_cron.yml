@@ -240,7 +240,7 @@ jobs:
 
   ios:
     if: ${{ (inputs.mock_server_branch || 'main') == 'main' }}
-    runs-on: macos-15
+    runs-on: { group: scaleway-macos }
     timeout-minutes: 360
     strategy:
       fail-fast: false

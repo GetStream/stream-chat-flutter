@@ -65,7 +65,7 @@ jobs:
 
   update_docs_goldens:
     if: inputs.target == 'docs' || inputs.target == 'both'
-    runs-on: macos-latest
+    runs-on: { group: scaleway-macos }
     outputs:
       changed: ${{ steps.detect.outputs.changed }}
     steps:

@@ -91,7 +91,7 @@ jobs:
   ios:
     needs: determine_platforms
     if: ${{ needs.determine_platforms.outputs.run_ios == 'true' }}
-    runs-on: xcode-27
+    runs-on: { group: scaleway-macos }
     timeout-minutes: 30
     steps:
       - name: 🔑 Mint Certificates Token
@@ -137,7 +137,7 @@ jobs:
   ios_testflight:
     needs: determine_platforms
     if: ${{ needs.determine_platforms.outputs.run_ios == 'true' }}
-    runs-on: xcode-27
+    runs-on: { group: scaleway-macos }
     timeout-minutes: 30
     steps:
       - name: 🔑 Mint Certificates Token
