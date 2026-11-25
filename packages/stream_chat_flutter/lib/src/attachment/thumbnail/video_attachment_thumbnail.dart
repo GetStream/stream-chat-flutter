@@ -65,9 +65,10 @@ class StreamVideoAttachmentThumbnail extends StatelessWidget {
       );
     }
 
+    final localPath = video.uploadState.isSuccess ? null : video.file?.path;
     final assetUrl = video.assetUrl?.let(Uri.tryParse);
 
-    final source = switch ((video.file?.path, assetUrl)) {
+    final source = switch ((localPath, assetUrl)) {
       (final path?, _) => StreamThumbnailSource.file(path),
       (_, final url?) => StreamThumbnailSource.network(url),
       _ => null,

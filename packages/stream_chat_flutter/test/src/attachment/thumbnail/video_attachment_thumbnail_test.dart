@@ -27,17 +27,30 @@ void main() {
     expect(_thumbnailSource(tester), StreamThumbnailSource.network(Uri.parse('https://cdn.example.com/a.mp4')));
   });
 
-  testWidgets('a video with a local file is thumbnailed from the file', (tester) async {
+  testWidgets('a video still uploading is thumbnailed from its local file', (tester) async {
     await _pumpThumbnail(
       tester,
       Attachment(
         type: 'video',
-        assetUrl: 'https://cdn.example.com/a.mp4',
         file: AttachmentFile(path: '/videos/a.mp4', size: 100),
+        uploadState: const UploadState.inProgress(uploaded: 10, total: 100),
       ),
     );
 
     expect(_thumbnailSource(tester), StreamThumbnailSource.file('/videos/a.mp4'));
+  });
+
+  testWidgets('an uploaded video is thumbnailed from its asset URL even when it names a file', (tester) async {
+    await _pumpThumbnail(
+      tester,
+      Attachment.fromJson(const {
+        'type': 'video',
+        'asset_url': 'https://cdn.example.com/a.mp4',
+        'file': {'path': '/videos/a.mp4', 'size': 100},
+      }),
+    );
+
+    expect(_thumbnailSource(tester), StreamThumbnailSource.network(Uri.parse('https://cdn.example.com/a.mp4')));
   });
 
   testWidgets('a video whose asset URL cannot be parsed shows the error placeholder', (tester) async {
