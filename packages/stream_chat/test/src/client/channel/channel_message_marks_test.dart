@@ -15,7 +15,10 @@ final _markedAt = DateTime.utc(2026, 11, 20, 10);
 const _viewed = MessageMarkType('acme.viewed');
 
 void main() {
-  setUpAll(() => registerFallbackValue(FakeEvent()));
+  setUpAll(() {
+    registerFallbackValue(FakeEvent());
+    registerFallbackValue(MessageMarkType.played);
+  });
 
   test("a mark on the current user's message joins its mark groups", () async {
     final (client, channel) = _channel(author: _currentUser);
@@ -114,81 +117,77 @@ void main() {
     expect(_playedGroup(storedPinned).count, 1);
   });
 
-  group('markMessage', () {
-    setUpAll(() => registerFallbackValue(MessageMarkType.played));
+  test("marks another user's message played once", () async {
+    final (client, channel) = _channel(author: _otherUser);
+    addTearDown(channel.dispose);
+    when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
+    final message = channel.state!.messages.single;
 
-    test("marks another user's message played once", () async {
-      final (client, channel) = _channel(author: _otherUser);
-      addTearDown(channel.dispose);
-      when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
-      final message = channel.state!.messages.single;
+    expect(await channel.markMessage(message, MessageMarkType.played), isNotNull);
+    expect(await channel.markMessage(message, MessageMarkType.played), isNull);
 
-      expect(await channel.markMessage(message, MessageMarkType.played), isNotNull);
-      expect(await channel.markMessage(message, MessageMarkType.played), isNull);
+    verify(() => client.sendMessageMark('voice-note', MessageMarkType.played)).called(1);
+  });
 
-      verify(() => client.sendMessageMark('voice-note', MessageMarkType.played)).called(1);
-    });
+  test('skips the message while the same mark is in flight', () async {
+    final (client, channel) = _channel(author: _otherUser);
+    addTearDown(channel.dispose);
+    final response = Completer<SendMessageMarkResponse>();
+    when(() => client.sendMessageMark(any(), any())).thenAnswer((_) => response.future);
+    final message = channel.state!.messages.single;
 
-    test('skips the message while the same mark is in flight', () async {
-      final (client, channel) = _channel(author: _otherUser);
-      addTearDown(channel.dispose);
-      final response = Completer<SendMessageMarkResponse>();
-      when(() => client.sendMessageMark(any(), any())).thenAnswer((_) => response.future);
-      final message = channel.state!.messages.single;
+    final first = channel.markMessage(message, MessageMarkType.played);
+    expect(await channel.markMessage(message, MessageMarkType.played), isNull);
+    response.complete(SendMessageMarkResponse());
+    expect(await first, isNotNull);
 
-      final first = channel.markMessage(message, MessageMarkType.played);
-      expect(await channel.markMessage(message, MessageMarkType.played), isNull);
-      response.complete(SendMessageMarkResponse());
-      expect(await first, isNotNull);
+    verify(() => client.sendMessageMark(any(), any())).called(1);
+  });
 
-      verify(() => client.sendMessageMark(any(), any())).called(1);
-    });
+  test('throws when the mark fails', () async {
+    final (client, channel) = _channel(author: _otherUser);
+    addTearDown(channel.dispose);
+    when(
+      () => client.sendMessageMark(any(), any()),
+    ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
+    final message = channel.state!.messages.single;
 
-    test('throws when the mark fails', () async {
-      final (client, channel) = _channel(author: _otherUser);
-      addTearDown(channel.dispose);
-      when(
-        () => client.sendMessageMark(any(), any()),
-      ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
-      final message = channel.state!.messages.single;
+    await expectLater(channel.markMessage(message, MessageMarkType.played), throwsA(isA<StreamChatNetworkError>()));
+  });
 
-      await expectLater(channel.markMessage(message, MessageMarkType.played), throwsA(isA<StreamChatNetworkError>()));
-    });
+  test('tries again after a failed mark', () async {
+    final (client, channel) = _channel(author: _otherUser);
+    addTearDown(channel.dispose);
+    when(
+      () => client.sendMessageMark(any(), any()),
+    ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
+    final message = channel.state!.messages.single;
+    await expectLater(channel.markMessage(message, MessageMarkType.played), throwsA(isA<StreamChatNetworkError>()));
 
-    test('tries again after a failed mark', () async {
-      final (client, channel) = _channel(author: _otherUser);
-      addTearDown(channel.dispose);
-      when(
-        () => client.sendMessageMark(any(), any()),
-      ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
-      final message = channel.state!.messages.single;
-      await expectLater(channel.markMessage(message, MessageMarkType.played), throwsA(isA<StreamChatNetworkError>()));
+    when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
 
-      when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
+    expect(await channel.markMessage(message, MessageMarkType.played), isNotNull);
+  });
 
-      expect(await channel.markMessage(message, MessageMarkType.played), isNotNull);
-    });
+  test('marks a message with another type after a played mark', () async {
+    final (client, channel) = _channel(author: _otherUser);
+    addTearDown(channel.dispose);
+    when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
+    final message = channel.state!.messages.single;
 
-    test('marks a message with another type after a played mark', () async {
-      final (client, channel) = _channel(author: _otherUser);
-      addTearDown(channel.dispose);
-      when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
-      final message = channel.state!.messages.single;
+    await channel.markMessage(message, MessageMarkType.played);
 
-      await channel.markMessage(message, MessageMarkType.played);
+    expect(await channel.markMessage(message, _viewed), isNotNull);
+    verify(() => client.sendMessageMark('voice-note', _viewed)).called(1);
+  });
 
-      expect(await channel.markMessage(message, _viewed), isNotNull);
-      verify(() => client.sendMessageMark('voice-note', _viewed)).called(1);
-    });
+  test("skips the current user's own message", () async {
+    final (client, channel) = _channel(author: _currentUser);
+    addTearDown(channel.dispose);
 
-    test("skips the current user's own message", () async {
-      final (client, channel) = _channel(author: _currentUser);
-      addTearDown(channel.dispose);
+    expect(await channel.markMessage(channel.state!.messages.single, MessageMarkType.played), isNull);
 
-      expect(await channel.markMessage(channel.state!.messages.single, MessageMarkType.played), isNull);
-
-      verifyNever(() => client.sendMessageMark(any(), any()));
-    });
+    verifyNever(() => client.sendMessageMark(any(), any()));
   });
 
   test('an updated message keeps the marks the update leaves out', () async {
