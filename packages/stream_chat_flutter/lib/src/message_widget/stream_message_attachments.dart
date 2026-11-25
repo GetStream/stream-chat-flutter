@@ -64,7 +64,7 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
   Widget? nullableBuild(BuildContext context) {
     final channel = StreamChannel.maybeOf(context)?.channel;
     void handlePlaybackStarted(AttachmentPlaybackStartedDetails details) {
-      channel?.markMessagePlayed(details.message).ignore();
+      channel?.markMessage(details.message, MessageMarkType.played).ignore();
     }
 
     Future<void> effectiveOnAttachmentTap(

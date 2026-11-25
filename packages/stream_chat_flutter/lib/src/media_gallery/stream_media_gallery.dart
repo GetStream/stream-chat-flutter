@@ -27,7 +27,7 @@ import 'stream_media_grid_delegate.dart';
 ///           attachments: attachments,
 ///           initialIndex: index,
 ///           onPlaybackStarted: (details) =>
-///               channel.markMessagePlayed(details.message).ignore(),
+///               channel.markMessage(details.message, MessageMarkType.played).ignore(),
 ///         ),
 ///       ),
 ///     ),

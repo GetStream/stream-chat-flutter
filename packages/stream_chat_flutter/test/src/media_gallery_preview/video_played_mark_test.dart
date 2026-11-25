@@ -18,13 +18,13 @@ void main() {
 
     await _play(tester);
 
-    verify(() => channel.markMessagePlayed(message)).called(1);
+    verify(() => channel.markMessage(message, MessageMarkType.played)).called(1);
   });
 
   testWidgets('a video whose mark fails raises no error', (tester) async {
     final channel = _channel();
     when(
-      () => channel.markMessagePlayed(any()),
+      () => channel.markMessage(any(), any()),
     ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
     final message = _videoMessage();
     await _openGallery(tester, channel, message);
@@ -32,7 +32,7 @@ void main() {
     await _play(tester);
     await tester.pump();
 
-    verify(() => channel.markMessagePlayed(message)).called(1);
+    verify(() => channel.markMessage(message, MessageMarkType.played)).called(1);
     expect(tester.takeException(), isNull);
   });
 
@@ -45,7 +45,7 @@ void main() {
     await tester.pumpAndSettle();
     await _play(tester);
 
-    verify(() => channel.markMessagePlayed(message)).called(1);
+    verify(() => channel.markMessage(message, MessageMarkType.played)).called(1);
   });
 
   testWidgets('a gallery shown outside a message marks nothing', (tester) async {
@@ -59,7 +59,7 @@ void main() {
 
     await _play(tester);
 
-    verifyNever(() => channel.markMessagePlayed(any()));
+    verifyNever(() => channel.markMessage(any(), any()));
   });
 
   testWidgets('a gallery reports the video that started playing', (tester) async {
@@ -124,7 +124,7 @@ MockChannel _channel() {
   when(() => channel.state).thenReturn(channelState);
   when(() => channel.memberCount).thenReturn(5);
   when(() => channelState.readStream).thenAnswer((_) => Stream.value(const []));
-  when(() => channel.markMessagePlayed(any())).thenAnswer((_) async => SendMessageMarkResponse());
+  when(() => channel.markMessage(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
   return channel;
 }
 

@@ -30,13 +30,13 @@ void main() {
 
     await _setTrackState(tester, TrackState.playing);
 
-    verify(() => channel.markMessagePlayed(message)).called(1);
+    verify(() => channel.markMessage(message, MessageMarkType.played)).called(1);
   });
 
   testWidgets('a voice recording whose mark fails raises no error', (tester) async {
     final channel = _channel();
     when(
-      () => channel.markMessagePlayed(any()),
+      () => channel.markMessage(any(), any()),
     ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
     final message = _voiceMessage();
     await tester.pumpWidget(_wrap(channel, _item(message)));
@@ -45,7 +45,7 @@ void main() {
     await _setTrackState(tester, TrackState.playing);
     await tester.pump();
 
-    verify(() => channel.markMessagePlayed(message)).called(1);
+    verify(() => channel.markMessage(message, MessageMarkType.played)).called(1);
     expect(tester.takeException(), isNull);
   });
 
@@ -56,7 +56,7 @@ void main() {
 
     await _setTrackState(tester, TrackState.loading);
 
-    verifyNever(() => channel.markMessagePlayed(any()));
+    verifyNever(() => channel.markMessage(any(), any()));
   });
 
   testWidgets('a voice recording that keeps playing is marked once', (tester) async {
@@ -68,7 +68,7 @@ void main() {
     await _setTrackState(tester, TrackState.playing);
     await _setTrackPosition(tester, const Duration(seconds: 1));
 
-    verify(() => channel.markMessagePlayed(message)).called(1);
+    verify(() => channel.markMessage(message, MessageMarkType.played)).called(1);
   });
 
   testWidgets('a playlist shown outside a message marks nothing', (tester) async {
@@ -83,7 +83,7 @@ void main() {
 
     await _setTrackState(tester, TrackState.playing);
 
-    verifyNever(() => channel.markMessagePlayed(any()));
+    verifyNever(() => channel.markMessage(any(), any()));
   });
 
   testWidgets('a playlist reports the recording that started playing', (tester) async {
@@ -214,7 +214,7 @@ MockChannel _channel() {
   when(() => channel.state).thenReturn(channelState);
   when(() => channel.memberCount).thenReturn(5);
   when(() => channelState.readStream).thenAnswer((_) => Stream.value(const []));
-  when(() => channel.markMessagePlayed(any())).thenAnswer((_) async => SendMessageMarkResponse());
+  when(() => channel.markMessage(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
   return channel;
 }
 
