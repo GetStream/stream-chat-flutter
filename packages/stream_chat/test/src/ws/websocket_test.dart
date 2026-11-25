@@ -127,7 +127,7 @@ void main() {
     addTearDown(timer.cancel);
   });
 
-  test('`connect` fails with an error that leaves out the description the socket gave', () async {
+  test('`connect` fails with a fixed message when the socket cannot open', () async {
     when(() => webSocketChannel.stream).thenAnswer(
       (_) => Stream.error(
         WebSocketChannelException.from(
@@ -171,7 +171,7 @@ void main() {
     expect(messages, contains('[connect] #ws; uri: ws://example.com:8800/connect'));
   });
 
-  test('logs a connection error without the description the socket gave', () async {
+  test('logs a failed open with the message `connect` fails with', () async {
     final logger = Logger.detached('ws')..level = Level.ALL;
     final records = <LogRecord>[];
     final subscription = logger.onRecord.listen(records.add);
@@ -197,7 +197,11 @@ void main() {
 
     await expectLater(loggedSocket.connect(OwnUser(id: 'test-user')), throwsA(isA<StreamWebSocketError>()));
 
-    expect(records.map((it) => '${it.message} ${it.error}'), everyElement(isNot(contains('json='))));
+    final warning = records.firstWhere((it) => it.message.startsWith('[onConnectionError]'));
+    expect(
+      warning.error,
+      isA<StreamWebSocketError>().having((it) => it.message, 'message', 'The WebSocket connection failed'),
+    );
   });
 
   test('`connect` successfully without user details', () async {

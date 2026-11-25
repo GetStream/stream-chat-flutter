@@ -2,6 +2,7 @@
 // coverage:ignore-file
 
 import 'dart:collection';
+import 'dart:convert';
 import 'dart:math' as math;
 
 import 'package:dio/dio.dart';
@@ -27,13 +28,15 @@ void _defaultLogPrint(InterceptStep step, Object object) => print(object);
 class LoggingInterceptor extends Interceptor {
   /// Creates an interceptor that logs requests, responses and errors.
   ///
-  /// The values of the headers in [redactedHeaders] and of the query parameters in [redactedQueryParameters] are
-  /// logged as `***`, matching names regardless of case. [redactedHeaders] replaces [defaultRedactedHeaders], so
-  /// consider spreading it in when adding a header. An empty collection logs every header as is.
+  /// The values of the headers in [redactedHeaders] and of the query
+  /// parameters in [redactedQueryParameters] are logged as `***`, matching
+  /// names regardless of case. [redactedHeaders] replaces
+  /// [defaultRedactedHeaders], so consider spreading it in when adding a
+  /// header. An empty collection logs every header as is.
   ///
-  /// Logging headers or bodies can expose sensitive data, such as the contents of requests and responses, so consider
-  /// enabling [requestHeader], [responseHeader], [requestBody] and [responseBody] only in a controlled or non-production
-  /// environment.
+  /// Headers and bodies can contain sensitive data, such as credentials and
+  /// the contents of messages, so consider logging them only in a controlled
+  /// or non-production environment.
   LoggingInterceptor({
     this.request = true,
     this.requestHeader = false,
@@ -84,8 +87,9 @@ class LoggingInterceptor extends Interceptor {
   /// you can also write log in a file.
   void Function(InterceptStep step, Object object) logPrint;
 
-  /// The headers whose values are logged as `***` when the constructor is given no others.
-  static const defaultRedactedHeaders = {'Authorization'};
+  /// The headers whose values are logged as `***` when the constructor is
+  /// given no others.
+  static const Iterable<String> defaultRedactedHeaders = {'Authorization'};
 
   static const _redacted = '***';
 
@@ -106,13 +110,16 @@ class LoggingInterceptor extends Interceptor {
   String _redactUrl(Uri uri) {
     if (_queryParametersToRedact.isEmpty || !uri.hasQuery) return '$uri';
 
-    final query = [
-      for (final MapEntry(:key, :value) in uri.queryParametersAll.entries)
-        for (final item in value)
-          '${Uri.encodeQueryComponent(key)}=${_redactQueryParameter(key, Uri.encodeQueryComponent(item))}',
-    ].join('&');
+    final query = uri.query.split('&').map(_redactQueryPair).join('&');
+    return '$uri'.replaceFirst('?${uri.query}', '?$query');
+  }
 
-    return '${uri.scheme}://${uri.authority}${uri.path}?$query';
+  String _redactQueryPair(String pair) {
+    final [name, ...] = pair.split('=');
+    final decodedName = Uri.decodeQueryComponent(name, encoding: const Utf8Codec(allowMalformed: true));
+    if (!_queryParametersToRedact.contains(decodedName)) return pair;
+
+    return '$name=$_redacted';
   }
 
   @override

@@ -41,9 +41,11 @@ void main() {
     });
 
     test('.fromWebSocketChannelError keeps a message of its own', () {
-      final error = StreamWebSocketError.fromWebSocketChannelError(WebSocketChannelException('connect failed'));
+      final error = StreamWebSocketError.fromWebSocketChannelError(
+        WebSocketChannelException('WebSocket connection failed.'),
+      );
 
-      expect(error.message, 'connect failed');
+      expect(error.message, 'WebSocket connection failed.');
     });
 
     test('.fromStreamError', () {
