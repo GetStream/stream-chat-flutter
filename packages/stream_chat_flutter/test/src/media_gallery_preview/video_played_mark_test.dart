@@ -21,6 +21,21 @@ void main() {
     verify(() => channel.markMessagePlayed(message)).called(1);
   });
 
+  testWidgets('a video keeps playing when the mark fails', (tester) async {
+    final channel = _channel();
+    when(
+      () => channel.markMessagePlayed(any()),
+    ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
+    final message = _videoMessage();
+    await _openGallery(tester, channel, message);
+
+    await _play(tester);
+    await tester.pump();
+
+    verify(() => channel.markMessagePlayed(message)).called(1);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('playing the second video of a message marks that message', (tester) async {
     final channel = _channel();
     final message = _videoMessage(videos: 2);

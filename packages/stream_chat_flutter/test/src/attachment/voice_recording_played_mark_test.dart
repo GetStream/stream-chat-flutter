@@ -33,6 +33,22 @@ void main() {
     verify(() => channel.markMessagePlayed(message)).called(1);
   });
 
+  testWidgets('a voice recording keeps playing when the mark fails', (tester) async {
+    final channel = _channel();
+    when(
+      () => channel.markMessagePlayed(any()),
+    ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
+    final message = _voiceMessage();
+    await tester.pumpWidget(_wrap(channel, _item(message)));
+    await tester.pump();
+
+    await _setTrackState(tester, TrackState.playing);
+    await tester.pump();
+
+    verify(() => channel.markMessagePlayed(message)).called(1);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('a voice recording that is still loading marks nothing', (tester) async {
     final channel = _channel();
     await tester.pumpWidget(_wrap(channel, _item(_voiceMessage())));
