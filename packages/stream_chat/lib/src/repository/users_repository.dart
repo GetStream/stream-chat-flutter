@@ -22,13 +22,19 @@ class UsersRepository {
 
   /// Blocks [userId] for the current user.
   Future<Result<BlockUserResponse>> blockUser(String userId) async {
-    final result = await _api.blockUsers(blockUsersRequest: api.BlockUsersRequest(blockedUserId: userId));
+    final result = await _api.blockUsers(
+      blockUsersRequest: api.BlockUsersRequest(blockedUserId: userId),
+    );
+
     return result.map((response) => response.toModel());
   }
 
   /// Unblocks [userId] for the current user.
   Future<Result<UnblockUserResponse>> unblockUser(String userId) async {
-    final result = await _api.unblockUsers(unblockUsersRequest: api.UnblockUsersRequest(blockedUserId: userId));
+    final result = await _api.unblockUsers(
+      unblockUsersRequest: api.UnblockUsersRequest(blockedUserId: userId),
+    );
+
     return result.map((response) => response.toModel());
   }
 
