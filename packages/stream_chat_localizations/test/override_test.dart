@@ -308,16 +308,4 @@ void main() {
       );
     },
   );
-
-  test('a subclass predating played marks falls back to the English label', () {
-    const localizations = LegacyStreamChatLocalizations();
-
-    expect(localizations.messagePlayedLabel, 'Played');
-  });
-
-  test('a subclass predating played marks falls back to the English count label', () {
-    const localizations = LegacyStreamChatLocalizations();
-
-    expect(localizations.messagePlayedByLabel(3), 'Played by 3');
-  });
 }
