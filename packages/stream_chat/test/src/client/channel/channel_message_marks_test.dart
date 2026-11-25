@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
@@ -111,6 +113,60 @@ void main() {
     expect(_playedGroup(storedPinned).count, 1);
   });
 
+  group('markMessagePlayed', () {
+    setUpAll(() => registerFallbackValue(MessageMarkType.played));
+
+    test("marks another user's message played once", () async {
+      final (client, channel) = _channel(author: _otherUser);
+      addTearDown(channel.dispose);
+      when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
+      final message = channel.state!.messages.single;
+
+      await channel.markMessagePlayed(message);
+      await channel.markMessagePlayed(message);
+
+      verify(() => client.sendMessageMark('voice-note', MessageMarkType.played)).called(1);
+    });
+
+    test('sends nothing while the same mark is in flight', () async {
+      final (client, channel) = _channel(author: _otherUser);
+      addTearDown(channel.dispose);
+      final response = Completer<SendMessageMarkResponse>();
+      when(() => client.sendMessageMark(any(), any())).thenAnswer((_) => response.future);
+      final message = channel.state!.messages.single;
+
+      final first = channel.markMessagePlayed(message);
+      await channel.markMessagePlayed(message);
+      response.complete(SendMessageMarkResponse());
+      await first;
+
+      verify(() => client.sendMessageMark(any(), any())).called(1);
+    });
+
+    test('tries again after a failed mark, without throwing', () async {
+      final (client, channel) = _channel(author: _otherUser);
+      addTearDown(channel.dispose);
+      when(
+        () => client.sendMessageMark(any(), any()),
+      ).thenThrow(StreamChatNetworkError(ChatErrorCode.internalSystemError));
+      final message = channel.state!.messages.single;
+
+      await channel.markMessagePlayed(message);
+      await channel.markMessagePlayed(message);
+
+      verify(() => client.sendMessageMark(any(), any())).called(2);
+    });
+
+    test("sends nothing for the current user's own message", () async {
+      final (client, channel) = _channel(author: _currentUser);
+      addTearDown(channel.dispose);
+
+      await channel.markMessagePlayed(channel.state!.messages.single);
+
+      verifyNever(() => client.sendMessageMark(any(), any()));
+    });
+  });
+
   test('an updated message keeps the marks the update leaves out', () async {
     final marker = MessageMarker(userId: 'listener', createdAt: _markedAt);
     final markGroups = {
@@ -165,7 +221,12 @@ void main() {
 
   final voiceNote = _voiceNote(author: author, markGroups: markGroups);
   final channelState = ChannelState(
-    channel: ChannelModel(id: 'test-channel-id', type: 'messaging'),
+    channel: ChannelModel(
+      id: 'test-channel-id',
+      type: 'messaging',
+      ownCapabilities: [ChannelCapability.sendMessageMark],
+      config: ChannelConfig(markTypes: const [MessageMarkType.played]),
+    ),
     messages: [voiceNote],
     pinnedMessages: pinnedMessages,
   );

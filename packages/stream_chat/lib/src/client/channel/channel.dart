@@ -2137,6 +2137,30 @@ class Channel {
     return _client.sendMessageMark(message.id, type);
   }
 
+  // The ids of the messages this channel is marking or has marked played.
+  final _playedMessageIds = <String>{};
+
+  /// Marks [message] played by the current user, at most once.
+  ///
+  /// Does nothing unless [MessageRules.canMarkAsPlayed] allows it, or while the
+  /// message is already marked or being marked. Never throws: a failed request
+  /// is logged, and the next call tries again.
+  ///
+  /// See also:
+  ///
+  ///  * [sendMessageMark], which puts a mark of any type and reports errors.
+  Future<void> markMessagePlayed(Message message) async {
+    if (!MessageRules.canMarkAsPlayed(message, this)) return;
+    if (!_playedMessageIds.add(message.id)) return;
+
+    try {
+      await sendMessageMark(message, MessageMarkType.played);
+    } catch (error, stackTrace) {
+      _playedMessageIds.remove(message.id);
+      _client.logger.warning('Could not mark message ${message.id} played', error, stackTrace);
+    }
+  }
+
   /// Returns the page of marks the [query] asks for, newest first.
   ///
   /// Only the author of the message can query its marks.
