@@ -202,13 +202,6 @@ class Message extends Equatable implements ComparableFieldProvider {
   @JsonKey(includeToJson: false)
   final List<Reaction>? ownReactions;
 
-  /// The users who marked this message, by mark type.
-  ///
-  /// Only set on the current user's own messages, and only for types with at
-  /// least one mark.
-  @JsonKey(includeToJson: false, fromJson: _markGroupsFromJson)
-  final Map<MessageMarkType, MarkGroup>? markGroups;
-
   static Map<MessageMarkType, MarkGroup>? _markGroupsFromJson(
     Map<String, dynamic>? json,
   ) {
@@ -219,6 +212,13 @@ class Message extends Equatable implements ComparableFieldProvider {
       ),
     );
   }
+
+  /// The users who marked this message, by mark type.
+  ///
+  /// Only set on the current user's own messages, and only for types with at
+  /// least one mark.
+  @JsonKey(includeToJson: false, fromJson: _markGroupsFromJson)
+  final Map<MessageMarkType, MarkGroup>? markGroups;
 
   /// The marks the current user put on this message.
   ///

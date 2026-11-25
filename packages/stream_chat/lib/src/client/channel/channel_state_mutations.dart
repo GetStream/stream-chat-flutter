@@ -104,7 +104,10 @@ class ChannelStateMutations {
   /// Removes the deleted [draft].
   void onDraftDeleted(Draft draft) => _state.deleteDraft(draft);
 
-  /// Adds [mark] to the marked message, or to a thread reply under [parentId].
+  /// Adds [mark] to the marked message.
+  ///
+  /// The message is found among the loaded and pinned messages, or the thread
+  /// replies under [parentId].
   ///
   /// A mark joins [Message.markGroups] on the current user's own message, or
   /// [Message.ownMarks] when the current user marked another user's message.
