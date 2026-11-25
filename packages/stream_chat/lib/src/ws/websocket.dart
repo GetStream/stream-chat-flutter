@@ -455,8 +455,7 @@ class WebSocket with TimerHelper {
       _ => StreamWebSocketError(error.toString()),
     };
 
-    final loggedError = error is WebSocketChannelException ? wsError : error;
-    _logger?.warning('[onConnectionError] #ws; error occurred', loggedError, stacktrace);
+    _logger?.warning('[onConnectionError] #ws; error occurred', wsError, stacktrace);
 
     final completer = connectionCompleter;
     // complete with error if not yet completed
