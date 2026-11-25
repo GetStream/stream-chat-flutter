@@ -65,15 +65,14 @@ class StreamVideoAttachmentThumbnail extends StatelessWidget {
       );
     }
 
-    final assetUrl = switch (video.assetUrl) {
-      final url? => Uri.tryParse(url),
-      null => null,
-    };
+    final assetUrl = video.assetUrl?.let(Uri.tryParse);
+
     final source = switch ((video.file?.path, assetUrl)) {
       (final path?, _) => StreamThumbnailSource.file(path),
       (_, final url?) => StreamThumbnailSource.network(url),
       _ => null,
     };
+
     if (source != null) {
       return Image(
         image: StreamVideoThumbnailImage(source: source),
@@ -94,4 +93,8 @@ class StreamVideoAttachmentThumbnail extends StatelessWidget {
       StackTrace.current,
     );
   }
+}
+
+extension<T extends Object> on T {
+  R let<R>(R Function(T it) f) => f(this);
 }
