@@ -44,7 +44,7 @@ void main() {
       headers: const {'Authorization': 'authorization-value'},
     );
 
-    expect(log, contains('Authorization: ██'));
+    expect(log, contains('Authorization: ***'));
   });
 
   test('redacts the Authorization header by default whatever its case', () async {
@@ -53,7 +53,7 @@ void main() {
       headers: const {'authorization': 'authorization-value'},
     );
 
-    expect(log, contains('authorization: ██'));
+    expect(log, contains('authorization: ***'));
     expect(log, isNot(contains('authorization-value')));
   });
 
@@ -86,7 +86,7 @@ void main() {
       path: '/test?api_key=key-value&page=2',
     );
 
-    expect(log, contains('api_key=██&page=2'));
+    expect(log, contains('api_key=***&page=2'));
     expect(log, isNot(contains('key-value')));
   });
 

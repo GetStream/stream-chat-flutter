@@ -28,7 +28,7 @@ class LoggingInterceptor extends Interceptor {
   /// Creates an interceptor that logs requests, responses and errors.
   ///
   /// The values of the headers in [redactedHeaders] and of the query parameters in [redactedQueryParameters] are
-  /// logged as `██`, matching names regardless of case. [redactedHeaders] replaces [defaultRedactedHeaders], so
+  /// logged as `***`, matching names regardless of case. [redactedHeaders] replaces [defaultRedactedHeaders], so
   /// consider spreading it in when adding a header. An empty collection logs every header as is.
   LoggingInterceptor({
     this.request = true,
@@ -80,10 +80,10 @@ class LoggingInterceptor extends Interceptor {
   /// you can also write log in a file.
   void Function(InterceptStep step, Object object) logPrint;
 
-  /// The headers whose values are logged as `██` when the constructor is given no others.
+  /// The headers whose values are logged as `***` when the constructor is given no others.
   static const defaultRedactedHeaders = {'Authorization'};
 
-  static const _redacted = '██';
+  static const _redacted = '***';
 
   final Set<String> _headersToRedact;
 
