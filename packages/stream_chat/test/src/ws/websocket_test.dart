@@ -7,6 +7,7 @@ import 'package:stream_chat/src/core/http/token_manager.dart';
 import 'package:stream_chat/src/ws/websocket.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
+import 'package:web_socket/web_socket.dart' as web_socket;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../fakes.dart';
@@ -127,12 +128,11 @@ void main() {
     addTearDown(timer.cancel);
   });
 
-  test('`connect` fails with an error that leaves out the query string of the URL', () async {
+  test('`connect` fails with an error that leaves out the description the socket gave', () async {
     when(() => webSocketChannel.stream).thenAnswer(
       (_) => Stream.error(
-        WebSocketChannelException(
-          "WebSocketException: Connection to 'https://example.com:443/connect?json=%7B%7D&version=1#' "
-          'was not upgraded to websocket',
+        WebSocketChannelException.from(
+          web_socket.WebSocketException("Connection to 'https://example.com:443/connect?json=%7B%7D&version=1#'"),
         ),
       ),
     );
@@ -143,8 +143,7 @@ void main() {
         isA<StreamWebSocketError>().having(
           (it) => it.message,
           'message',
-          "WebSocketException: Connection to 'https://example.com:443/connect?<redacted>#' "
-              'was not upgraded to websocket',
+          'The WebSocket connection failed',
         ),
       ),
     );
@@ -168,10 +167,10 @@ void main() {
     unawaited(loggedSocket.connect(OwnUser(id: 'test-user')).then((_) {}, onError: (_) {}));
     await pumpEventQueue();
 
-    expect(messages, contains('[connect] #ws; uri: ws://example.com:8800/connect?<redacted>'));
+    expect(messages, contains('[connect] #ws; uri: ws://example.com:8800/connect'));
   });
 
-  test('logs a connection error without the query string of the URL it quotes', () async {
+  test('logs a connection error without the description the socket gave', () async {
     final logger = Logger.detached('ws')..level = Level.ALL;
     final records = <LogRecord>[];
     final subscription = logger.onRecord.listen(records.add);
@@ -187,9 +186,8 @@ void main() {
     addTearDown(loggedSocket.disconnect);
     when(() => webSocketChannel.stream).thenAnswer(
       (_) => Stream.error(
-        WebSocketChannelException(
-          "WebSocketException: Connection to 'https://example.com:443/connect?json=%7B%7D&version=1#' "
-          'was not upgraded to websocket',
+        WebSocketChannelException.from(
+          web_socket.WebSocketException("Connection to 'https://example.com:443/connect?json=%7B%7D&version=1#'"),
         ),
       ),
     );
@@ -198,10 +196,7 @@ void main() {
 
     expect(
       records.map((it) => it.error).whereType<StreamWebSocketError>().map((it) => it.message),
-      contains(
-        "WebSocketException: Connection to 'https://example.com:443/connect?<redacted>#' "
-        'was not upgraded to websocket',
-      ),
+      contains('The WebSocket connection failed'),
     );
   });
 

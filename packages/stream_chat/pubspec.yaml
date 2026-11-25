@@ -38,6 +38,7 @@ dependencies:
   rxdart: ^0.28.0
   synchronized: ^3.4.0
   uuid: ^4.5.3
+  web_socket: '>=0.1.5 <2.0.0'
   web_socket_channel: ^3.0.3
 
 dev_dependencies:
