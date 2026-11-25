@@ -70,6 +70,14 @@ void main() {
     expect(find.textContaining('Played by'), findsNothing);
   });
 
+  testWidgets('no mark shows on a deleted message', (tester) async {
+    final message = _voiceMessage(playedBy: 2, attachments: const []).copyWith(type: MessageType.deleted);
+    await tester.pumpWidget(_wrap(_item(message)));
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('Played by'), findsNothing);
+  });
+
   testWidgets('a text message reads how many members played it', (tester) async {
     final message = _voiceMessage(playedBy: 2, text: 'Listen to this', attachments: const []);
     await tester.pumpWidget(_wrap(_item(message)));

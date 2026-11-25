@@ -13,6 +13,8 @@ String? playedMarkLabel(BuildContext context, Message message) {
   final currentUserId = StreamChat.maybeOf(context)?.currentUser?.id;
   if (currentUserId == null || message.user?.id != currentUserId) return null;
 
+  if (message.isDeleted) return null;
+
   final count = message.markGroups?[MessageMarkType.played]?.count ?? 0;
   if (count <= 0) return null;
 
