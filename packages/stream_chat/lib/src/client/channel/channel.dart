@@ -2124,10 +2124,12 @@ class Channel {
 
   /// Marks [message] with [type] for the current user, at most once.
   ///
-  /// Returns the response of the mark, or `null` if it was skipped:
-  /// [MessageRules.canMark] is false, or this channel already marked [message]
-  /// with [type] or is marking it. The mark appears in the message's
-  /// [Message.ownMarks] once [EventType.messageMarkAdded] arrives for it.
+  /// Returns `null` without sending anything if [MessageRules.canMark] is
+  /// false, or if this channel already marked [message] with [type] or is
+  /// marking it.
+  ///
+  /// The mark appears in [Message.ownMarks] once [EventType.messageMarkAdded]
+  /// arrives for it.
   ///
   /// Throws a [StreamChatNetworkError] if the request fails; the next call then
   /// tries again.
