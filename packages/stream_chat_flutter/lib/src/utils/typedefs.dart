@@ -226,7 +226,7 @@ typedef OnMessageMarkTap = void Function(BuildContext context, MessageMarkTapDet
 
 /// Details of a message mark tap, passed to [OnMessageMarkTap].
 @immutable
-class MessageMarkTapDetails {
+final class MessageMarkTapDetails {
   /// Creates details for a message mark tap.
   const MessageMarkTapDetails({required this.message, required this.type});
 

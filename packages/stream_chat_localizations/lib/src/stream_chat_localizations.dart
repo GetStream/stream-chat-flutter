@@ -145,13 +145,13 @@ abstract class GlobalStreamChatLocalizations implements StreamChatLocalizations 
     return unreadMessagesSeparatorText();
   }
 
-  /// The mark on a voice recording or video the other member has played.
+  /// The mark on a message the other member has played.
   ///
   /// Defaults to the English "Played"; the bundled locales translate it.
   @override
   String get messagePlayedLabel => 'Played';
 
-  /// The mark on a voice recording or video [count] members have played.
+  /// The mark on a message [count] members have played.
   ///
   /// Defaults to the English "Played by 3", capped at "Played by 99+". The
   /// bundled locales translate it.
