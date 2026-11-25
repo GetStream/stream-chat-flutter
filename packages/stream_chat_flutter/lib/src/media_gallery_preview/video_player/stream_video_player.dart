@@ -212,8 +212,7 @@ class _ChewieVideoPlayer {
   VideoPlayerController? _video;
   ChewieController? _chewie;
   bool _disposed = false;
-  final _playbackStart = PlaybackStartTracker();
-  VoidCallback? _onPlaybackStarted;
+  PlaybackStartTracker? _playbackStart;
 
   /// The chewie controller used for playback once initialisation has
   /// completed. `null` until [open] resolves.
@@ -253,7 +252,9 @@ class _ChewieVideoPlayer {
     }
 
     _video = video;
-    _onPlaybackStarted = onPlaybackStarted;
+    _playbackStart = PlaybackStartTracker(
+      onStarted: (_) => onPlaybackStarted?.call(),
+    );
     video.addListener(_handleVideoChanged);
     _chewie = ChewieController(
       videoPlayerController: video,
@@ -266,11 +267,10 @@ class _ChewieVideoPlayer {
     final value = _video?.value;
     if (value == null) return;
 
-    final started = _playbackStart.update(
+    _playbackStart?.handleUpdate(
       isPlaying: value.isPlaying,
       position: value.position,
     );
-    if (started) _onPlaybackStarted?.call();
   }
 
   /// Starts playback. No-op if not yet ready.

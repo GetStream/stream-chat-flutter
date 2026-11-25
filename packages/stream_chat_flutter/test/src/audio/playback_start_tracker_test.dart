@@ -6,45 +6,69 @@ import 'package:stream_chat_flutter/src/audio/playback_start_tracker.dart';
 void main() {
   const second = Duration(seconds: 1);
 
-  test('a start counts once the position moves', () {
-    final tracker = PlaybackStartTracker();
+  late List<Object?> started;
+  late PlaybackStartTracker tracker;
 
-    expect(tracker.update(isPlaying: true, position: Duration.zero), isFalse);
-    expect(tracker.update(isPlaying: true, position: second), isTrue);
+  setUp(() {
+    started = [];
+    tracker = PlaybackStartTracker(onStarted: started.add);
+  });
+
+  test('a start counts once the position moves', () {
+    tracker
+      ..handleUpdate(isPlaying: true, position: Duration.zero, key: 'a')
+      ..handleUpdate(isPlaying: true, position: second, key: 'a');
+
+    expect(started, ['a']);
   });
 
   test('a start that never moves does not count', () {
-    final tracker = PlaybackStartTracker();
+    tracker
+      ..handleUpdate(isPlaying: true, position: Duration.zero)
+      ..handleUpdate(isPlaying: true, position: Duration.zero)
+      ..handleUpdate(isPlaying: false, position: Duration.zero);
 
-    expect(tracker.update(isPlaying: true, position: Duration.zero), isFalse);
-    expect(tracker.update(isPlaying: true, position: Duration.zero), isFalse);
-    expect(tracker.update(isPlaying: false, position: Duration.zero), isFalse);
+    expect(started, isEmpty);
   });
 
   test('a start counts once while it keeps playing', () {
-    final tracker = PlaybackStartTracker()
-      ..update(isPlaying: true, position: Duration.zero)
-      ..update(isPlaying: true, position: second);
+    tracker
+      ..handleUpdate(isPlaying: true, position: Duration.zero)
+      ..handleUpdate(isPlaying: true, position: second)
+      ..handleUpdate(isPlaying: true, position: second * 2);
 
-    expect(tracker.update(isPlaying: true, position: second * 2), isFalse);
+    expect(started, hasLength(1));
   });
 
   test('a resume after a pause counts again once it moves', () {
-    final tracker = PlaybackStartTracker()
-      ..update(isPlaying: true, position: Duration.zero)
-      ..update(isPlaying: true, position: second)
-      ..update(isPlaying: false, position: second);
+    tracker
+      ..handleUpdate(isPlaying: true, position: Duration.zero)
+      ..handleUpdate(isPlaying: true, position: second)
+      ..handleUpdate(isPlaying: false, position: second)
+      ..handleUpdate(isPlaying: true, position: second)
+      ..handleUpdate(isPlaying: true, position: second * 2);
 
-    expect(tracker.update(isPlaying: true, position: second), isFalse);
-    expect(tracker.update(isPlaying: true, position: second * 2), isTrue);
+    expect(started, hasLength(2));
   });
 
   test('a switch to another key counts again once it moves', () {
-    final tracker = PlaybackStartTracker()
-      ..update(isPlaying: true, position: Duration.zero, key: 'a')
-      ..update(isPlaying: true, position: second, key: 'a');
+    tracker
+      ..handleUpdate(isPlaying: true, position: Duration.zero, key: 'a')
+      ..handleUpdate(isPlaying: true, position: second, key: 'a')
+      ..handleUpdate(isPlaying: true, position: Duration.zero, key: 'b')
+      ..handleUpdate(isPlaying: true, position: second, key: 'b');
 
-    expect(tracker.update(isPlaying: true, position: Duration.zero, key: 'b'), isFalse);
-    expect(tracker.update(isPlaying: true, position: second, key: 'b'), isTrue);
+    expect(started, ['a', 'b']);
+  });
+
+  test('a switch after a pause counts once the new key moves', () {
+    tracker
+      ..handleUpdate(isPlaying: true, position: Duration.zero, key: 'a')
+      ..handleUpdate(isPlaying: true, position: second, key: 'a')
+      ..handleUpdate(isPlaying: false, position: second, key: 'a')
+      ..handleUpdate(isPlaying: true, position: Duration.zero, key: 'b')
+      ..handleUpdate(isPlaying: true, position: second, key: 'b');
+
+    expect(started, ['a', 'b']);
   });
 }
