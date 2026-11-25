@@ -20,9 +20,22 @@ void main() {
     });
 
     final client = _client(currentUser)..handleEvent(event);
-    await Future<void>.delayed(Duration.zero);
+    await pumpEventQueue();
 
     expect(client.state.currentUser!.privacySettings?.typingIndicators?.enabled, isFalse);
+  });
+
+  test('a user.updated event for the current user keeps their blocked user ids', () async {
+    final currentUser = OwnUser(id: 'user-id', blockedUserIds: const ['blocked-user-id']);
+    final event = Event.fromJson(const {
+      'type': EventType.userUpdated,
+      'user': {'id': 'user-id', 'name': 'Jane', 'blocked_user_ids': <String>[]},
+    });
+
+    final client = _client(currentUser)..handleEvent(event);
+    await pumpEventQueue();
+
+    expect(client.state.currentUser!.blockedUserIds, ['blocked-user-id']);
   });
 }
 

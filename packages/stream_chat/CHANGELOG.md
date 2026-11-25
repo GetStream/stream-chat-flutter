@@ -159,6 +159,7 @@
 - `Channel.custom` no longer returns the data the channel was created with once the channel's custom data is empty.
 
 - `updateUser` and `updateUsers` no longer store the user's online status, ban, devices or unread counts as custom data, and no longer fail for an own user with many devices.
+- A `user.updated` event for the current user no longer empties their `blockedUserIds`.
 
 - A message deleted while its attachments upload no longer comes back.
 

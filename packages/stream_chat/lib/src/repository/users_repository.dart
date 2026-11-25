@@ -41,8 +41,7 @@ class UsersRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Creates or replaces each of [users], as [StreamChatClient.updateUser] does
-  /// for one.
+  /// Creates or replaces each of [users], as [StreamChatClient.updateUser] does.
   Future<Result<UpdateUsersResponse>> updateUsers(List<User> users) async {
     final result = await _api.updateUsers(
       updateUsersRequest: api.UpdateUsersRequest(users: {for (final user in users) user.id: user.toRequest()}),
@@ -51,8 +50,7 @@ class UsersRepository {
     return result.map((response) => response.toModel());
   }
 
-  /// Partially updates several users at once, applying each of [updates] to the
-  /// user it names.
+  /// Partially updates several users, applying each of [updates] to its user.
   Future<Result<UpdateUsersResponse>> updateUsersPartial(List<UpdateUserPartialRequest> updates) async {
     final result = await _api.updateUsersPartial(
       updateUsersPartialRequest: api.UpdateUsersPartialRequest(users: [for (final it in updates) it.toRequest()]),

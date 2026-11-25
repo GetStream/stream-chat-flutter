@@ -140,8 +140,11 @@ class OwnUser extends User {
     shadowBanned: shadowBanned ?? this.shadowBanned,
   );
 
-  /// Returns a new [OwnUser] that is a combination of this ownUser
-  /// and the given [other] ownUser.
+  /// Combines this user with [other], taking most values from [other].
+  ///
+  /// A nullable value [other] leaves out keeps this user's, except
+  /// [deactivatedAt], [deletedAt] and [shadowBanned], which are cleared.
+  /// Returns this user when [other] is null.
   OwnUser merge(OwnUser? other) {
     if (other == null) return this;
     return OwnUser(

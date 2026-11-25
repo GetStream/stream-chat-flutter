@@ -41,8 +41,7 @@ void main() {
       );
 
       expect(res.getOrNull(), UpdateUsersResponse(duration: '4.21ms', users: {'user-id': updatedUser()}));
-      // `User` equality leaves these two out.
-      expect(res.getOrNull()!.users['user-id']!.createdAt, DateTime.utc(2026, 9, 1));
+      // `User` equality leaves `updatedAt` out.
       expect(res.getOrNull()!.users['user-id']!.updatedAt, DateTime.utc(2026, 9, 2));
       verify(
         () => defaultApi.updateUsers(

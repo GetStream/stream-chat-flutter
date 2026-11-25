@@ -1922,8 +1922,9 @@ class StreamChatClient {
   /// Partially updates several users at once.
   ///
   /// Each of [updates] applies to the user it names.
-  Future<Result<UpdateUsersResponse>> updateUsersPartial(List<UpdateUserPartialRequest> updates) =>
-      _usersRepository.updateUsersPartial(updates);
+  Future<Result<UpdateUsersResponse>> updateUsersPartial(
+    List<UpdateUserPartialRequest> updates,
+  ) => _usersRepository.updateUsersPartial(updates);
 
   final _userBlockLock = Lock();
 
@@ -3000,6 +3001,7 @@ class ClientState {
             unreadChannels: currentUser?.unreadChannels,
             unreadThreads: currentUser?.unreadThreads,
             pushPreferences: currentUser?.pushPreferences,
+            blockedUserIds: currentUser?.blockedUserIds,
           );
         }
 

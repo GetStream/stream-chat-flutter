@@ -2,8 +2,7 @@ import 'package:diacritic/diacritic.dart';
 import 'package:meta/meta.dart';
 import '../../stream_chat_flutter.dart';
 
-/// Returns the subset of [users] whose name matches [query] using a
-/// word-boundary algorithm aligned with the other Stream chat SDKs.
+/// The subset of [users] whose name matches [query] word by word.
 ///
 /// Every word in the normalized [query] except the last must fully equal a
 /// word in the normalized user name. The last query word is matched as a

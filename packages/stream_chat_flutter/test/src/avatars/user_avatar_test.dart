@@ -200,11 +200,7 @@ void main() {
   });
 
   testWidgets('a user with an empty image shows the placeholder', (tester) async {
-    final user = MockUser();
-    when(() => user.id).thenReturn('ada');
-    when(() => user.name).thenReturn('Ada Lovelace');
-    when(() => user.image).thenReturn('');
-    when(() => user.online).thenReturn(false);
+    final user = User(id: 'ada', name: 'Ada Lovelace', image: '');
 
     await tester.pumpWidget(
       MaterialApp(
@@ -224,10 +220,7 @@ void main() {
   });
 
   testWidgets('a user with no name shows the placeholder icon', (tester) async {
-    final user = MockUser();
-    when(() => user.id).thenReturn('ada');
-    when(() => user.name).thenReturn(null);
-    when(() => user.online).thenReturn(false);
+    final user = User(id: 'ada');
 
     await tester.pumpWidget(
       MaterialApp(
