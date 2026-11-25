@@ -60,7 +60,7 @@ class StreamMediaGalleryPreviewItem extends StatelessWidget {
   /// Called each time video playback starts.
   ///
   /// Never called for non-video attachments.
-  final VoidCallback? onPlay;
+  final OnVideoPlay? onPlay;
 
   @override
   Widget build(BuildContext context) {

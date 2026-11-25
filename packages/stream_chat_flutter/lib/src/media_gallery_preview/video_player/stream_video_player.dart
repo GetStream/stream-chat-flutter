@@ -42,7 +42,7 @@ class StreamVideoPlayer extends StatelessWidget {
     required Attachment attachment,
     required int pageIndex,
     bool autoplay = false,
-    VoidCallback? onPlay,
+    OnVideoPlay? onPlay,
   }) : props = StreamVideoPlayerProps(
          attachment: attachment,
          pageIndex: pageIndex,
@@ -99,7 +99,7 @@ class StreamVideoPlayerProps {
   /// Covers playback started from the controls and from [autoplay]. Videos in
   /// a custom player built through [StreamComponentFactory] are marked played
   /// only if that player calls it.
-  final VoidCallback? onPlay;
+  final OnVideoPlay? onPlay;
 }
 
 /// Video player used on Android, iOS, macOS, and web inside a
@@ -174,7 +174,9 @@ class _StreamVideoPlayerDefaultState extends State<DefaultStreamVideoPlayer>
 
   Future<void> _initialize() async {
     try {
-      await _player.open(widget.attachment, onPlay: () => widget.props.onPlay?.call());
+      final attachment = widget.attachment;
+      final details = VideoPlayDetails(attachment: attachment);
+      await _player.open(attachment, onPlay: () => widget.props.onPlay?.call(details));
       if (!mounted) return;
       setState(() {});
       updateKeepAlive();
@@ -251,7 +253,7 @@ class _ChewieVideoPlayer {
 
     _video = video;
     _onPlay = onPlay;
-    video.addListener(_onVideoChanged);
+    video.addListener(_handleVideoChanged);
     _chewie = ChewieController(
       videoPlayerController: video,
       autoInitialize: true,
@@ -261,7 +263,7 @@ class _ChewieVideoPlayer {
 
   // The controller notifies on every position update, so only the switch
   // from paused to playing counts as a play.
-  void _onVideoChanged() {
+  void _handleVideoChanged() {
     if (isPlaying && !_wasPlaying) _onPlay?.call();
     _wasPlaying = isPlaying;
   }
@@ -275,7 +277,7 @@ class _ChewieVideoPlayer {
   /// Releases both controllers.
   void dispose() {
     _disposed = true;
-    _video?.removeListener(_onVideoChanged);
+    _video?.removeListener(_handleVideoChanged);
     _chewie?.dispose();
     _video?.dispose();
   }

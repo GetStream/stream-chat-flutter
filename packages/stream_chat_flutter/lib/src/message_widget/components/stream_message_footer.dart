@@ -27,7 +27,7 @@ class StreamMessageFooter extends StatelessWidget {
     super.key,
     required Message message,
     bool excludeFromSemantics = false,
-    VoidCallback? onMarkTap,
+    OnMessageMarkTap? onMarkTap,
   }) : props = .new(
          message: message,
          excludeFromSemantics: excludeFromSemantics,
@@ -74,17 +74,17 @@ class StreamMessageFooterProps {
   /// what a footer outside such a row needs.
   final bool excludeFromSemantics;
 
-  /// Called when the message's played mark is tapped.
+  /// {@macro onMessageMarkTap}
   ///
   /// If null, the mark is not tappable.
-  final VoidCallback? onMarkTap;
+  final OnMessageMarkTap? onMarkTap;
 
   /// Returns a copy of this [StreamMessageFooterProps] with the given fields
   /// replaced with new values.
   StreamMessageFooterProps copyWith({
     Message? message,
     bool? excludeFromSemantics,
-    VoidCallback? onMarkTap,
+    OnMessageMarkTap? onMarkTap,
   }) {
     return StreamMessageFooterProps(
       message: message ?? this.message,
@@ -99,12 +99,12 @@ class StreamMessageFooterProps {
 /// The footer can show up to five pieces depending on the message:
 ///
 ///  * **Username** — for messages from other users.
-///  * **Played mark** — for the current user's messages someone played, such
-///    as a voice recording.
 ///  * **Sending status** — for the current user's own messages, except
 ///    ephemeral ones.
 ///  * **Timestamp** — always shown, formatted as a short time string.
 ///  * **Edited label** — when the message text has been updated.
+///  * **Played mark** — for the current user's messages someone played, such
+///    as a voice recording.
 ///
 /// With [StreamMessageFooterProps.excludeFromSemantics] set, the pieces stay
 /// out of the semantics tree because the enclosing row already speaks them; a
@@ -148,9 +148,16 @@ class DefaultStreamMessageFooter extends StatelessWidget {
 
     Widget? markWidget;
     if (playedMarkLabel(context, message) != null) {
+      final details = MessageMarkTapDetails(
+        message: message,
+        type: MessageMarkType.played,
+      );
       markWidget = StreamMessagePlayedMark(
         message: message,
-        onTap: props.onMarkTap,
+        onTap: switch (props.onMarkTap) {
+          final onTap? => () => onTap(context, details),
+          _ => null,
+        },
         excludeFromSemantics: excluding,
       );
     }

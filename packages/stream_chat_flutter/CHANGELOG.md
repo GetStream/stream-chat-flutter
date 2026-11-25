@@ -9,8 +9,8 @@
 - Added `onScheduledMessagesBannerTap` to `StreamChannelPage` and `StreamThreadPage`.
 - Added `onSendMessage` to `StreamMessageComposer`, a `StreamMessageComposerCallback` that replaces sending a message or saving an edit.
 - Added `onSendLongPress` to `StreamMessageComposer` and `StreamChatMessageInput`, called when send is long-pressed, such as to schedule the message.
-- Added played marks, shown on the current user's messages in channel types that enable them, with `onMessageMarkTap` to handle a tap. Playing another user's voice recording or video marks it played.
-- Added `onPlay` to `StreamVideoPlayer`, `StreamVideoPlayerProps` and `StreamMediaGalleryPreviewItem`; a custom video player calls it so its videos get marked played.
+- Added played marks on the current user's messages, with `onMessageMarkTap` on `StreamMessageListView` and `StreamMessageItem`; playing another user's voice recording or video marks it played.
+- Added `onPlay` (`OnVideoPlay`, `VideoPlayDetails`) to `StreamVideoPlayer`, `StreamVideoPlayerProps` and `StreamMediaGalleryPreviewItem`; a custom video player calls it so its videos get marked played.
 
 🔄 Changed
 
