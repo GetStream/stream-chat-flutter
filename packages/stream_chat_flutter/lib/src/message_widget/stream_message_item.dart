@@ -13,6 +13,7 @@ import '../channel/stream_message_preview_text.dart';
 import '../context_menu/context_menu.dart';
 import '../context_menu/context_menu_region.dart';
 import 'message_status_labels.dart';
+import 'played_mark_label.dart';
 
 // The height of the metadata row under a message bubble when its theme sets
 // none, which the played mark keeps when it stands alone.
@@ -899,7 +900,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
     required bool excludeFromSemantics,
     VoidCallback? onTap,
   }) {
-    if (!StreamMessagePlayedMark.isShownFor(context, message)) return null;
+    if (playedMarkLabel(context, message) == null) return null;
 
     final placement = StreamMessageLayout.of(context);
     final metadataStyle = core.StreamMessageItemTheme.of(context).metadata;
@@ -1506,7 +1507,7 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
       translations.accessibility.formatRecentDateTime(message.createdAt.toLocal()),
       // Mirrors the footer, which drops the marker on a deleted message.
       if (message.messageTextUpdatedAt != null && !message.isDeleted) translations.editedMessageLabel,
-      ?StreamMessagePlayedMark.labelFor(context, message),
+      ?playedMarkLabel(context, message),
     ];
 
     return parts.where((it) => it.isNotEmpty).join(', ');

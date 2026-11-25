@@ -307,7 +307,6 @@ extension on SampleAppConfigData {
       draftMessagesEnabled: draftMessagesEnabled,
       scheduledMessagesEnabled: enableScheduledMessages,
       enforceUniqueReactions: enforceUniqueReactions,
-      showMessageMarks: showMessageMarks,
       reactionType: reactionType,
       reactionPosition: reactionPosition,
       messageTranslation: StreamMessageTranslationConfiguration(
