@@ -36,15 +36,7 @@ class Token extends Equatable {
 
   /// Creates a [Token] instance from the provided [rawValue] if it's valid.
   factory Token.fromRawValue(String rawValue) {
-    final JsonWebToken jwtBody;
-    try {
-      jwtBody = JsonWebToken.unverified(rawValue);
-      // ignore: avoid_catching_errors
-    } on ArgumentError catch (error) {
-      throw ArgumentError('Invalid JWT token: ${error.message}', 'rawValue');
-    } on FormatException catch (error) {
-      throw FormatException('Invalid JWT token: ${error.message}');
-    }
+    final jwtBody = JsonWebToken.unverified(rawValue);
     final userId = jwtBody.claims.getTyped('user_id');
     assert(
       userId != null,

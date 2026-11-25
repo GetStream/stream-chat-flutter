@@ -12,7 +12,7 @@
 - Attachment uploads go through the client's attachment file uploader, set with `attachmentFileUploaderProvider`, instead of `Channel.sendImage` and `Channel.sendFile`.
 - A WebSocket that fails to connect or errors mid-stream now reports `StreamWebSocketError.message` as `The WebSocket connection failed`, and the WebSocket connection logs show only the scheme, host and path of the connection URL.
 - The HTTP request log reports the `Authorization` header, and an `access_token` in a response body, as `<redacted>`.
-- `Token.toString()` and the error `Token.fromRawValue` throws for an invalid value no longer include the raw token.
+- `Token.toString()` no longer includes the raw token.
 
 🐞 Fixed
 
