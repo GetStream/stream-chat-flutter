@@ -214,7 +214,7 @@ MockChannel _channel() {
   when(() => channel.state).thenReturn(channelState);
   when(() => channel.memberCount).thenReturn(5);
   when(() => channelState.readStream).thenAnswer((_) => Stream.value(const []));
-  when(() => channel.markMessagePlayed(any())).thenAnswer((_) async => true);
+  when(() => channel.markMessagePlayed(any())).thenAnswer((_) async => SendMessageMarkResponse());
   return channel;
 }
 
