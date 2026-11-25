@@ -33,7 +33,7 @@ void main() {
     verify(() => channel.markMessagePlayed(message)).called(1);
   });
 
-  testWidgets('a voice recording keeps playing when the mark fails', (tester) async {
+  testWidgets('a voice recording whose mark fails raises no error', (tester) async {
     final channel = _channel();
     when(
       () => channel.markMessagePlayed(any()),

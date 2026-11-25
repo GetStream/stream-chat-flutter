@@ -21,7 +21,7 @@ void main() {
     verify(() => channel.markMessagePlayed(message)).called(1);
   });
 
-  testWidgets('a video keeps playing when the mark fails', (tester) async {
+  testWidgets('a video whose mark fails raises no error', (tester) async {
     final channel = _channel();
     when(
       () => channel.markMessagePlayed(any()),
