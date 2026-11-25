@@ -2142,13 +2142,13 @@ class Channel {
 
   /// Marks [message] played by the current user, at most once.
   ///
-  /// Does nothing unless [MessageRules.canMarkAsPlayed] allows it, or while the
-  /// message is already marked or being marked. Never throws: a failed request
-  /// is logged, and the next call tries again.
+  /// Does nothing if [MessageRules.canMarkAsPlayed] is false for [message], or
+  /// if this channel already marked it or is marking it. Never throws: a failed
+  /// request is logged, and the next call tries again.
   ///
   /// See also:
   ///
-  ///  * [sendMessageMark], which puts a mark of any type and reports errors.
+  ///  * [sendMessageMark], which puts a mark of any type and throws on failure.
   Future<void> markMessagePlayed(Message message) async {
     if (!MessageRules.canMarkAsPlayed(message, this)) return;
     if (!_playedMessageIds.add(message.id)) return;
@@ -2157,7 +2157,7 @@ class Channel {
       await sendMessageMark(message, MessageMarkType.played);
     } catch (error, stackTrace) {
       _playedMessageIds.remove(message.id);
-      _client.logger.warning('Could not mark message ${message.id} played', error, stackTrace);
+      _client.logger.fine('Could not mark message ${message.id} played', error, stackTrace);
     }
   }
 

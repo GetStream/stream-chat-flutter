@@ -143,7 +143,18 @@ void main() {
       verify(() => client.sendMessageMark(any(), any())).called(1);
     });
 
-    test('tries again after a failed mark, without throwing', () async {
+    test('completes without throwing when the mark fails', () async {
+      final (client, channel) = _channel(author: _otherUser);
+      addTearDown(channel.dispose);
+      when(
+        () => client.sendMessageMark(any(), any()),
+      ).thenThrow(StreamChatNetworkError(ChatErrorCode.internalSystemError));
+      final message = channel.state!.messages.single;
+
+      await expectLater(channel.markMessagePlayed(message), completes);
+    });
+
+    test('tries again after a failed mark', () async {
       final (client, channel) = _channel(author: _otherUser);
       addTearDown(channel.dispose);
       when(
