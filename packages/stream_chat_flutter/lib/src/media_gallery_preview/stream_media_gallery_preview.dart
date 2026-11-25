@@ -267,12 +267,15 @@ class _DefaultStreamMediaGalleryPreviewState extends State<DefaultStreamMediaGal
               attachment: package.attachment,
               pageIndex: index,
               autoplay: widget.props.autoplayVideos,
-              onPlaybackStarted: (details) {
-                final playbackDetails = AttachmentPlaybackStartedDetails(
-                  message: package.message,
-                  attachment: details.attachment,
-                );
-                widget.props.onPlaybackStarted?.call(playbackDetails);
+              onPlaybackStarted: switch (widget.props.onPlaybackStarted) {
+                final onPlaybackStarted? => (details) {
+                  final playbackDetails = AttachmentPlaybackStartedDetails(
+                    message: package.message,
+                    attachment: details.attachment,
+                  );
+                  onPlaybackStarted(playbackDetails);
+                },
+                _ => null,
               },
             );
           },
