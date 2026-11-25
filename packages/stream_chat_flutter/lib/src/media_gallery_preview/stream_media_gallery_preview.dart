@@ -5,7 +5,6 @@ import 'package:share_plus/share_plus.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../stream_chat_flutter.dart';
-import '../message_widget/played_mark_sender.dart';
 
 /// A swipeable, full-screen viewer for a list of chat media attachments.
 ///
@@ -25,8 +24,8 @@ import '../message_widget/played_mark_sender.dart';
 /// - Video attachments are played by [StreamVideoPlayer], which pauses
 ///   itself when its page is no longer the active one (see
 ///   [StreamMediaGalleryPreviewScope]).
-/// - Playing another user's video marks its message played, when the
-///   enclosing [StreamChannel] allows played marks.
+/// - Each time a video starts playing it calls
+///   [StreamMediaGalleryPreviewProps.onPlaybackStarted].
 ///
 /// {@tool snippet}
 ///
@@ -78,11 +77,13 @@ class StreamMediaGalleryPreview extends StatelessWidget {
     required List<StreamMediaGalleryAttachment> attachments,
     int initialIndex = 0,
     bool autoplayVideos = false,
+    ValueChanged<AttachmentPlaybackStartedDetails>? onPlaybackStarted,
   }) : assert(initialIndex >= 0, 'initialIndex cannot be negative'),
        props = .new(
          attachments: attachments,
          initialIndex: initialIndex,
          autoplayVideos: autoplayVideos,
+         onPlaybackStarted: onPlaybackStarted,
        );
 
   /// The properties that configure this preview.
@@ -112,6 +113,7 @@ class StreamMediaGalleryPreviewProps {
     required this.attachments,
     this.initialIndex = 0,
     this.autoplayVideos = false,
+    this.onPlaybackStarted,
   });
 
   /// The 0-based index of the attachment to show first.
@@ -122,6 +124,9 @@ class StreamMediaGalleryPreviewProps {
 
   /// Whether video attachments auto-play when their page becomes active.
   final bool autoplayVideos;
+
+  /// Called each time playback of a video starts.
+  final ValueChanged<AttachmentPlaybackStartedDetails>? onPlaybackStarted;
 }
 
 /// The default implementation of [StreamMediaGalleryPreview].
@@ -153,11 +158,6 @@ class _DefaultStreamMediaGalleryPreviewState extends State<DefaultStreamMediaGal
       duration: const Duration(milliseconds: 300),
       curve: Curves.easeInOut,
     );
-  }
-
-  void _markPlayed(Message message) {
-    final channel = StreamChannel.maybeOf(context)?.channel;
-    channel?.sendPlayedMarkOnce(message).ignore();
   }
 
   // Downloads the currently-focused attachment's bytes and hands them to
@@ -264,7 +264,13 @@ class _DefaultStreamMediaGalleryPreviewState extends State<DefaultStreamMediaGal
               attachment: package.attachment,
               pageIndex: index,
               autoplay: widget.props.autoplayVideos,
-              onPlaybackStarted: (_) => _markPlayed(package.message),
+              onPlaybackStarted: (details) {
+                final playbackDetails = AttachmentPlaybackStartedDetails(
+                  message: package.message,
+                  attachment: details.attachment,
+                );
+                widget.props.onPlaybackStarted?.call(playbackDetails);
+              },
             );
           },
         ),

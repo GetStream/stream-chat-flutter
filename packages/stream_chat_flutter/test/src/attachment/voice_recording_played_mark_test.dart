@@ -25,7 +25,7 @@ void main() {
   testWidgets("playing another user's voice recording marks it played", (tester) async {
     final channel = _channel();
     final message = _voiceMessage(user: _otherUser);
-    await tester.pumpWidget(_wrap(channel, _playlist(message)));
+    await tester.pumpWidget(_wrap(channel, _item(message)));
     await tester.pump();
 
     await _setTrackState(tester, TrackState.playing);
@@ -35,7 +35,7 @@ void main() {
 
   testWidgets('a voice recording that is still loading marks nothing', (tester) async {
     final channel = _channel();
-    await tester.pumpWidget(_wrap(channel, _playlist(_voiceMessage(user: _otherUser))));
+    await tester.pumpWidget(_wrap(channel, _item(_voiceMessage(user: _otherUser))));
     await tester.pump();
 
     await _setTrackState(tester, TrackState.loading);
@@ -46,7 +46,7 @@ void main() {
   testWidgets('playing a voice recording again marks it played once', (tester) async {
     final channel = _channel();
     final message = _voiceMessage(user: _otherUser);
-    await tester.pumpWidget(_wrap(channel, _playlist(message)));
+    await tester.pumpWidget(_wrap(channel, _item(message)));
     await tester.pump();
 
     await _setTrackState(tester, TrackState.playing);
@@ -59,7 +59,7 @@ void main() {
   testWidgets('playing a voice recording again after a failed mark retries it', (tester) async {
     final channel = _channel(markFails: true);
     final message = _voiceMessage(user: _otherUser);
-    await tester.pumpWidget(_wrap(channel, _playlist(message)));
+    await tester.pumpWidget(_wrap(channel, _item(message)));
     await tester.pump();
 
     await _setTrackState(tester, TrackState.playing);
@@ -72,7 +72,7 @@ void main() {
   testWidgets('a failed mark is not retried while the recording keeps playing', (tester) async {
     final channel = _channel(markFails: true);
     final message = _voiceMessage(user: _otherUser);
-    await tester.pumpWidget(_wrap(channel, _playlist(message)));
+    await tester.pumpWidget(_wrap(channel, _item(message)));
     await tester.pump();
 
     await _setTrackState(tester, TrackState.playing);
@@ -84,7 +84,7 @@ void main() {
   testWidgets('playing one voice recording in two players marks it played once', (tester) async {
     final channel = _channel();
     final message = _voiceMessage(user: _otherUser);
-    final body = Column(children: [_playlist(message), _playlist(message)]);
+    final body = Column(children: [_item(message), _item(message)]);
     await tester.pumpWidget(_wrap(channel, body));
     await tester.pump();
 
@@ -94,9 +94,24 @@ void main() {
     verify(() => channel.sendMessageMark(message, MessageMarkType.played)).called(1);
   });
 
+  testWidgets('a playlist shown outside a message marks nothing', (tester) async {
+    final channel = _channel();
+    final message = _voiceMessage(user: _otherUser);
+    final playlist = StreamVoiceRecordingAttachmentPlaylist(
+      message: message,
+      voiceRecordings: message.attachments,
+    );
+    await tester.pumpWidget(_wrap(channel, playlist));
+    await tester.pump();
+
+    await _setTrackState(tester, TrackState.playing);
+
+    verifyNever(() => channel.sendMessageMark(any(), any()));
+  });
+
   testWidgets("playing the current user's own voice recording marks nothing", (tester) async {
     final channel = _channel();
-    await tester.pumpWidget(_wrap(channel, _playlist(_voiceMessage(user: _currentUser))));
+    await tester.pumpWidget(_wrap(channel, _item(_voiceMessage(user: _currentUser))));
     await tester.pump();
 
     await _setTrackState(tester, TrackState.playing);
@@ -107,7 +122,7 @@ void main() {
   testWidgets('playing a draft voice recording marks nothing', (tester) async {
     final channel = _channel();
     final draft = Message(attachments: [_voiceRecording]);
-    await tester.pumpWidget(_wrap(channel, _playlist(draft)));
+    await tester.pumpWidget(_wrap(channel, _item(draft)));
     await tester.pump();
 
     await _setTrackState(tester, TrackState.playing);
@@ -119,7 +134,7 @@ void main() {
     final channel = _channel();
     final ownMark = OwnMark(type: MessageMarkType.played, createdAt: DateTime(2026));
     final message = _voiceMessage(user: _otherUser).copyWith(ownMarks: [ownMark]);
-    await tester.pumpWidget(_wrap(channel, _playlist(message)));
+    await tester.pumpWidget(_wrap(channel, _item(message)));
     await tester.pump();
 
     await _setTrackState(tester, TrackState.playing);
@@ -129,7 +144,7 @@ void main() {
 
   testWidgets('playing a voice recording without the capability marks nothing', (tester) async {
     final channel = _channel(canMark: false);
-    await tester.pumpWidget(_wrap(channel, _playlist(_voiceMessage(user: _otherUser))));
+    await tester.pumpWidget(_wrap(channel, _item(_voiceMessage(user: _otherUser))));
     await tester.pump();
 
     await _setTrackState(tester, TrackState.playing);
@@ -177,12 +192,7 @@ Future<void> _setTrackPosition(WidgetTester tester, Duration position) async {
   await tester.pump();
 }
 
-StreamVoiceRecordingAttachmentPlaylist _playlist(Message message) {
-  return StreamVoiceRecordingAttachmentPlaylist(
-    message: message,
-    voiceRecordings: message.attachments,
-  );
-}
+Widget _item(Message message) => StreamMessageItem(message: message);
 
 Message _voiceMessage({required User user}) {
   return Message(
@@ -206,10 +216,13 @@ MockChannel _channel({bool canMark = true, bool markFails = false}) {
 
   when(() => client.state).thenReturn(clientState);
   when(() => clientState.currentUser).thenReturn(_currentUser);
+  when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(_currentUser));
   when(() => client.logger).thenReturn(Logger.detached('test'));
   when(() => channel.client).thenReturn(client);
   final channelState = MockChannelState();
   when(() => channel.state).thenReturn(channelState);
+  when(() => channel.memberCount).thenReturn(5);
+  when(() => channelState.readStream).thenAnswer((_) => Stream.value(const []));
   when(() => channelState.channelState).thenReturn(
     ChannelState(
       channel: ChannelModel(
@@ -227,12 +240,17 @@ MockChannel _channel({bool canMark = true, bool markFails = false}) {
 
 Widget _wrap(MockChannel channel, Widget body) {
   return MaterialApp(
-    theme: ThemeData(extensions: [StreamTheme.light()]),
-    home: StreamChatTheme(
-      data: StreamChatThemeData(),
+    home: StreamChat(
+      client: channel.client,
+      connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
       child: StreamChannel(
         channel: channel,
-        child: Scaffold(body: body),
+        child: Scaffold(
+          body: StreamMessageLayout(
+            data: const StreamMessageLayoutData(alignment: StreamMessageAlignment.start),
+            child: SingleChildScrollView(child: body),
+          ),
+        ),
       ),
     ),
   );

@@ -62,6 +62,14 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
 
   @override
   Widget? nullableBuild(BuildContext context) {
+    // The only place a played mark is sent, for voice recordings played here
+    // and videos played in the media gallery this opens.
+    final channel = StreamChannel.maybeOf(context)?.channel;
+    void effectiveOnPlaybackStarted(AttachmentPlaybackStartedDetails details) {
+      if (channel == null) return;
+      _markPlayed(channel, details.message).ignore();
+    }
+
     Future<void> effectiveOnAttachmentTap(
       Message message,
       Attachment attachment,
@@ -72,7 +80,12 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
       if (handled ?? false) return;
 
       // Otherwise, use the default handler for standard attachment types.
-      return _defaultAttachmentTapHandler(context, message, attachment);
+      return _defaultAttachmentTapHandler(
+        context,
+        message,
+        attachment,
+        onPlaybackStarted: effectiveOnPlaybackStarted,
+      );
     }
 
     final config = StreamChatConfiguration.maybeOf(context);
@@ -82,6 +95,7 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
     final builders = StreamAttachmentWidgetBuilder.defaultBuilders(
       message: message,
       onAttachmentTap: effectiveOnAttachmentTap,
+      onPlaybackStarted: effectiveOnPlaybackStarted,
       customAttachmentBuilders: effectiveAttachmentBuilder,
     );
 
@@ -92,8 +106,9 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
   Future<void> _defaultAttachmentTapHandler(
     BuildContext context,
     Message message,
-    Attachment attachment,
-  ) async {
+    Attachment attachment, {
+    ValueChanged<AttachmentPlaybackStartedDetails>? onPlaybackStarted,
+  }) async {
     // If the current attachment is a url preview attachment, open the url
     // in the browser.
     final isFile = attachment.type == AttachmentType.file;
@@ -136,10 +151,32 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
             child: StreamMediaGalleryPreview(
               attachments: attachments,
               initialIndex: math.max(0, initialIndex),
+              onPlaybackStarted: onPlaybackStarted,
             ),
           ),
         ),
       );
     }
+  }
+}
+
+// The ids of the messages each channel is marking or has marked played, so a
+// replay or another player sends nothing.
+final _markedMessageIds = Expando<Set<String>>();
+
+// Marks [message] played, at most once per channel, when
+// [MessageRules.canMarkAsPlayed] allows it. After a failed request the next
+// play tries again.
+Future<void> _markPlayed(Channel channel, Message message) async {
+  if (!MessageRules.canMarkAsPlayed(message, channel)) return;
+
+  final markedIds = _markedMessageIds[channel] ??= {};
+  if (!markedIds.add(message.id)) return;
+
+  try {
+    await channel.sendMessageMark(message, MessageMarkType.played);
+  } catch (error, stackTrace) {
+    markedIds.remove(message.id);
+    channel.client.logger.fine('Could not mark message ${message.id} played', error, stackTrace);
   }
 }

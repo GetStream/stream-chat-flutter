@@ -14,8 +14,7 @@ void main() {
   testWidgets("playing another user's video marks it played", (tester) async {
     final channel = _channel();
     final message = _videoMessage(user: _otherUser);
-    await tester.pumpWidget(_wrap(channel, _gallery(message)));
-    await tester.pump();
+    await _openGallery(tester, channel, message);
 
     await _play(tester);
 
@@ -25,8 +24,7 @@ void main() {
   testWidgets('playing a video again marks it played once', (tester) async {
     final channel = _channel();
     final message = _videoMessage(user: _otherUser);
-    await tester.pumpWidget(_wrap(channel, _gallery(message)));
-    await tester.pump();
+    await _openGallery(tester, channel, message);
 
     await _play(tester);
     await _play(tester);
@@ -37,8 +35,7 @@ void main() {
   testWidgets('playing two videos of one message marks it played once', (tester) async {
     final channel = _channel();
     final message = _videoMessage(user: _otherUser, videos: 2);
-    await tester.pumpWidget(_wrap(channel, _gallery(message)));
-    await tester.pump();
+    await _openGallery(tester, channel, message);
 
     await _play(tester);
     await tester.drag(find.byType(PageView), const Offset(-500, 0));
@@ -52,8 +49,7 @@ void main() {
     final channel = _channel();
     final message = _videoMessage(user: _otherUser);
     when(() => channel.sendMessageMark(any(), any())).thenAnswer((_) async => throw const StreamChatError('offline'));
-    await tester.pumpWidget(_wrap(channel, _gallery(message)));
-    await tester.pump();
+    await _openGallery(tester, channel, message);
 
     await _play(tester);
     await _play(tester);
@@ -61,10 +57,23 @@ void main() {
     verify(() => channel.sendMessageMark(message, MessageMarkType.played)).called(2);
   });
 
+  testWidgets('a gallery shown outside a message marks nothing', (tester) async {
+    final channel = _channel();
+    final message = _videoMessage(user: _otherUser);
+    final gallery = StreamMediaGalleryPreview(
+      attachments: message.toMediaGalleryAttachments(),
+    );
+    await tester.pumpWidget(_wrap(channel, gallery));
+    await tester.pump();
+
+    await _play(tester);
+
+    verifyNever(() => channel.sendMessageMark(any(), any()));
+  });
+
   testWidgets("playing the current user's own video marks nothing", (tester) async {
     final channel = _channel();
-    await tester.pumpWidget(_wrap(channel, _gallery(_videoMessage(user: _currentUser))));
-    await tester.pump();
+    await _openGallery(tester, channel, _videoMessage(user: _currentUser));
 
     await _play(tester);
 
@@ -73,8 +82,7 @@ void main() {
 
   testWidgets('playing a video without the capability marks nothing', (tester) async {
     final channel = _channel(canMark: false);
-    await tester.pumpWidget(_wrap(channel, _gallery(_videoMessage(user: _otherUser))));
-    await tester.pump();
+    await _openGallery(tester, channel, _videoMessage(user: _otherUser));
 
     await _play(tester);
 
@@ -87,10 +95,14 @@ Future<void> _play(WidgetTester tester) async {
   await tester.pump();
 }
 
-StreamMediaGalleryPreview _gallery(Message message) {
-  return StreamMediaGalleryPreview(
-    attachments: message.toMediaGalleryAttachments(),
-  );
+// Shows [message] and opens its first video in the media gallery.
+Future<void> _openGallery(WidgetTester tester, MockChannel channel, Message message) async {
+  await tester.pumpWidget(_wrap(channel, StreamMessageItem(message: message)));
+  await tester.pump();
+
+  await tester.tap(find.byType(StreamVideoPlayIndicator).first);
+  await tester.pump();
+  await tester.pump(const Duration(seconds: 1));
 }
 
 Message _videoMessage({required User user, int videos = 1}) {
@@ -104,6 +116,7 @@ Message _videoMessage({required User user, int videos = 1}) {
         Attachment(
           type: AttachmentType.video,
           assetUrl: 'https://example.com/video-$i.mp4',
+          uploadState: const UploadState.success(),
         ),
     ],
   );
@@ -121,10 +134,13 @@ MockChannel _channel({bool canMark = true}) {
 
   when(() => client.state).thenReturn(clientState);
   when(() => clientState.currentUser).thenReturn(_currentUser);
+  when(() => clientState.currentUserStream).thenAnswer((_) => Stream.value(_currentUser));
   when(() => client.logger).thenReturn(Logger.detached('test'));
   when(() => channel.client).thenReturn(client);
   final channelState = MockChannelState();
   when(() => channel.state).thenReturn(channelState);
+  when(() => channel.memberCount).thenReturn(5);
+  when(() => channelState.readStream).thenAnswer((_) => Stream.value(const []));
   when(() => channelState.channelState).thenReturn(
     ChannelState(
       channel: ChannelModel(
@@ -150,14 +166,19 @@ Widget _wrap(MockChannel channel, Widget body) {
     ),
   );
 
+  // StreamChat and the factory sit above the navigator so the gallery route
+  // the message opens sees them too.
   return MaterialApp(
-    theme: ThemeData(extensions: [StreamTheme.light()]),
-    home: StreamChatTheme(
-      data: StreamChatThemeData(),
-      child: StreamComponentFactory(
-        builders: builders,
-        child: StreamChannel(
-          channel: channel,
+    builder: (context, child) => StreamChat(
+      client: channel.client,
+      connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
+      child: StreamComponentFactory(builders: builders, child: child!),
+    ),
+    home: StreamChannel(
+      channel: channel,
+      child: Scaffold(
+        body: StreamMessageLayout(
+          data: const StreamMessageLayoutData(alignment: StreamMessageAlignment.start),
           child: body,
         ),
       ),

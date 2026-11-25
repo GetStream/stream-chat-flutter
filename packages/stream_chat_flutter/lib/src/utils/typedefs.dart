@@ -252,6 +252,23 @@ final class PlaybackStartedDetails {
   final Attachment attachment;
 }
 
+/// Details of a message's attachment starting to play, such as a voice
+/// recording or a video.
+@immutable
+final class AttachmentPlaybackStartedDetails {
+  /// Creates details for a message's attachment starting to play.
+  const AttachmentPlaybackStartedDetails({
+    required this.message,
+    required this.attachment,
+  });
+
+  /// The message the attachment belongs to.
+  final Message message;
+
+  /// The attachment that started playing.
+  final Attachment attachment;
+}
+
 /// {@template onReactionLongPress}
 /// The action to perform when a message's reaction is long-pressed.
 ///

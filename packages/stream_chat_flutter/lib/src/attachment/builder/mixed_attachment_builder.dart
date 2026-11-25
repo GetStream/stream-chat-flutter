@@ -13,6 +13,7 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
   /// {@macro mixedAttachmentBuilder}
   MixedAttachmentBuilder({
     StreamAttachmentWidgetTapCallback? onAttachmentTap,
+    ValueChanged<AttachmentPlaybackStartedDetails>? onPlaybackStarted,
   }) : _imageAttachmentBuilder = ImageAttachmentBuilder(onAttachmentTap: onAttachmentTap),
        _videoAttachmentBuilder = VideoAttachmentBuilder(onAttachmentTap: onAttachmentTap),
        _giphyAttachmentBuilder = GiphyAttachmentBuilder(onAttachmentTap: onAttachmentTap),
@@ -21,6 +22,7 @@ class MixedAttachmentBuilder extends StreamAttachmentWidgetBuilder {
        _linkPreviewAttachmentBuilder = LinkPreviewAttachmentBuilder(onAttachmentTap: onAttachmentTap),
        _voiceRecordingAttachmentPlaylistBuilder = VoiceRecordingAttachmentPlaylistBuilder(
          onAttachmentTap: onAttachmentTap,
+         onPlaybackStarted: onPlaybackStarted,
        );
 
   late final StreamAttachmentWidgetBuilder _imageAttachmentBuilder;

@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../stream_chat_flutter.dart';
 import '../audio/audio_playlist_controller.dart';
-import '../message_widget/played_mark_sender.dart';
 
 /// Signature for decorating each voice recording item in a playlist.
 ///
@@ -66,6 +65,7 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
     this.separatorBuilder = _defaultVoiceRecordingPlaylistSeparatorBuilder,
     this.constraints,
     this.voiceRecordingTitle,
+    this.onPlaybackStarted,
   });
 
   /// The [Message] that the voice recordings are attached to.
@@ -88,7 +88,7 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
   ///
   /// When provided, [itemDecorator] is ignored since the builder has full
   /// control over the item widget. Playing a recording through a custom item
-  /// does not mark the message played.
+  /// does not call [onPlaybackStarted].
   final IndexedWidgetBuilder? itemBuilder;
 
   /// Optional decorator that wraps each default voice recording item.
@@ -106,6 +106,9 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
   /// The title to use for each voice recording.
   final String? voiceRecordingTitle;
 
+  /// Called each time playback of one of the [voiceRecordings] starts.
+  final ValueChanged<AttachmentPlaybackStartedDetails>? onPlaybackStarted;
+
   // Default separator builder for the voice recording playlist.
   static Widget _defaultVoiceRecordingPlaylistSeparatorBuilder(
     BuildContext context,
@@ -122,7 +125,7 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
 class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceRecordingAttachmentPlaylist>
     with WidgetsBindingObserver {
   // Whether a track was playing at the last controller update, so only the
-  // start of playback marks the message played.
+  // start of playback calls onPlaybackStarted.
   var _wasPlaying = false;
 
   late final _controller = StreamAudioPlaylistController(
@@ -161,10 +164,15 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
   void _handlePlaylistChanged() {
     if (!mounted) return;
 
-    final isPlaying = _controller.value.tracks.any((it) => it.state.isPlaying);
+    final tracks = _controller.value.tracks;
+    final playingIndex = tracks.indexWhere((it) => it.state.isPlaying);
+    final isPlaying = playingIndex != -1;
     if (isPlaying && !_wasPlaying) {
-      final channel = StreamChannel.maybeOf(context)?.channel;
-      channel?.sendPlayedMarkOnce(widget.message).ignore();
+      final details = AttachmentPlaybackStartedDetails(
+        message: widget.message,
+        attachment: widget.voiceRecordings[playingIndex],
+      );
+      widget.onPlaybackStarted?.call(details);
     }
     _wasPlaying = isPlaying;
   }

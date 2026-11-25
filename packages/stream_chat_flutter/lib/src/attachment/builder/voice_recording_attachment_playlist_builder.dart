@@ -15,6 +15,7 @@ class VoiceRecordingAttachmentPlaylistBuilder extends StreamAttachmentWidgetBuil
     this.style,
     this.constraints,
     this.onAttachmentTap,
+    this.onPlaybackStarted,
   });
 
   /// The style of the container around each voice recording.
@@ -25,6 +26,9 @@ class VoiceRecordingAttachmentPlaylistBuilder extends StreamAttachmentWidgetBuil
 
   /// The callback to call when the attachment is tapped.
   final StreamAttachmentWidgetTapCallback? onAttachmentTap;
+
+  /// Called each time playback of a voice recording starts.
+  final ValueChanged<AttachmentPlaybackStartedDetails>? onPlaybackStarted;
 
   @override
   bool canHandle(
@@ -51,6 +55,7 @@ class VoiceRecordingAttachmentPlaylistBuilder extends StreamAttachmentWidgetBuil
         message: message,
         voiceRecordings: playlist,
         constraints: constraints,
+        onPlaybackStarted: onPlaybackStarted,
         itemDecorator: (context, index, child) {
           return StreamMessageAttachment(style: style, child: child);
         },
