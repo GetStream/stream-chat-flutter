@@ -215,6 +215,43 @@ class ReactionTapDetails {
   final Reaction? reaction;
 }
 
+/// {@template onMessageMarkTap}
+/// The action to perform when a message's mark is tapped.
+///
+/// The mark is a label such as "Played by 3", the number of members who
+/// played the message. The [BuildContext] is the context at the tapped
+/// message, useful for navigation or showing overlays relative to it.
+/// {@endtemplate}
+typedef OnMessageMarkTap = void Function(BuildContext context, MessageMarkTapDetails details);
+
+/// Details of a message mark tap, passed to [OnMessageMarkTap].
+@immutable
+final class MessageMarkTapDetails {
+  /// Creates details for a message mark tap.
+  const MessageMarkTapDetails({required this.message, required this.type});
+
+  /// The message whose mark was tapped.
+  final Message message;
+
+  /// The type of the tapped mark, such as [MessageMarkType.played].
+  final MessageMarkType type;
+}
+
+/// The action to perform when playback of an attachment starts.
+///
+/// Called again each time playback resumes after a pause.
+typedef OnPlaybackStarted = void Function(PlaybackStartedDetails details);
+
+/// Details of an attachment starting to play, passed to [OnPlaybackStarted].
+@immutable
+final class PlaybackStartedDetails {
+  /// Creates details for an attachment starting to play.
+  const PlaybackStartedDetails({required this.attachment});
+
+  /// The attachment that started playing.
+  final Attachment attachment;
+}
+
 /// {@template onReactionLongPress}
 /// The action to perform when a message's reaction is long-pressed.
 ///

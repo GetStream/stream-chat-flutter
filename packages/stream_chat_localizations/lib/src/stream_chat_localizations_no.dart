@@ -97,6 +97,12 @@ class StreamChatLocalizationsNo extends GlobalStreamChatLocalizations {
   String get editedMessageLabel => 'Redigert';
 
   @override
+  String get messagePlayedLabel => 'Spilt av';
+
+  @override
+  String messagePlayedByLabel(int count) => 'Spilt av ${count > 99 ? '99+' : count}';
+
+  @override
   String get messageReactionsLabel => 'Reaksjoner på melding';
 
   @override

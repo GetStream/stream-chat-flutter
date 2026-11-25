@@ -95,6 +95,12 @@ class StreamChatLocalizationsJa extends GlobalStreamChatLocalizations {
   String get editedMessageLabel => '編集済み';
 
   @override
+  String get messagePlayedLabel => '再生済み';
+
+  @override
+  String messagePlayedByLabel(int count) => '${count > 99 ? '99+' : count}人が再生';
+
+  @override
   String get messageReactionsLabel => 'メッセージのリアクション';
 
   @override

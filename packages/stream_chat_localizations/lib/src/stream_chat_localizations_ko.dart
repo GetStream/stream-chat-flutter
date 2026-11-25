@@ -95,6 +95,12 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   String get editedMessageLabel => '편집됨';
 
   @override
+  String get messagePlayedLabel => '재생됨';
+
+  @override
+  String messagePlayedByLabel(int count) => '${count > 99 ? '99+' : count}명이 재생함';
+
+  @override
   String get messageReactionsLabel => '메시지에 대한 응답';
 
   @override

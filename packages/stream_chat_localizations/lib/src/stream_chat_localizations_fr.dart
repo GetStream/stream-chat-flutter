@@ -97,6 +97,12 @@ class StreamChatLocalizationsFr extends GlobalStreamChatLocalizations {
   String get editedMessageLabel => 'Modifié';
 
   @override
+  String get messagePlayedLabel => 'Écouté';
+
+  @override
+  String messagePlayedByLabel(int count) => 'Écouté par ${count > 99 ? '99+' : count}';
+
+  @override
   String get messageReactionsLabel => 'Réactions aux messages';
 
   @override

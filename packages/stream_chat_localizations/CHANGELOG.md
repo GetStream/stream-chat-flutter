@@ -3,6 +3,7 @@
 ✅ Added
 
 - Added the scheduled message strings, including the schedule sheets, the scheduled messages banner and a failed attachment upload, for all supported locales.
+- Added the played mark strings for all supported locales.
 
 🔄 Changed
 

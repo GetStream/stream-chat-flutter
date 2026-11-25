@@ -90,6 +90,16 @@ abstract class Translations {
   /// The label for showing the message is edited
   String get editedMessageLabel;
 
+  /// The mark on a message the other member has played.
+  ///
+  /// Shown in a channel with exactly two members. Reads "Played" in English.
+  String get messagePlayedLabel;
+
+  /// The mark on a message [count] members have played.
+  ///
+  /// A [count] above 99 reads as "99+", such as "Played by 99+".
+  String messagePlayedByLabel(int count);
+
   /// The label for message reactions
   String get messageReactionsLabel;
 
@@ -1121,6 +1131,12 @@ class DefaultTranslations implements Translations {
 
   @override
   String get editedMessageLabel => 'Edited';
+
+  @override
+  String get messagePlayedLabel => 'Played';
+
+  @override
+  String messagePlayedByLabel(int count) => 'Played by ${count > 99 ? '99+' : count}';
 
   @override
   String get messageReactionsLabel => 'Message Reactions';

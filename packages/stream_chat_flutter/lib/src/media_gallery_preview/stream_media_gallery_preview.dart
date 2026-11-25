@@ -5,6 +5,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../stream_chat_flutter.dart';
+import '../message_widget/played_mark_sender.dart';
 
 /// A swipeable, full-screen viewer for a list of chat media attachments.
 ///
@@ -24,6 +25,8 @@ import '../../stream_chat_flutter.dart';
 /// - Video attachments are played by [StreamVideoPlayer], which pauses
 ///   itself when its page is no longer the active one (see
 ///   [StreamMediaGalleryPreviewScope]).
+/// - Playing another user's video marks its message played, when the
+///   enclosing [StreamChannel] allows played marks.
 ///
 /// {@tool snippet}
 ///
@@ -152,6 +155,11 @@ class _DefaultStreamMediaGalleryPreviewState extends State<DefaultStreamMediaGal
     );
   }
 
+  void _markPlayed(Message message) {
+    final channel = StreamChannel.maybeOf(context)?.channel;
+    channel?.sendPlayedMarkOnce(message).ignore();
+  }
+
   // Downloads the currently-focused attachment's bytes and hands them to
   // the system share sheet.
   Future<void> _shareCurrentAttachment(BuildContext context) async {
@@ -256,6 +264,7 @@ class _DefaultStreamMediaGalleryPreviewState extends State<DefaultStreamMediaGal
               attachment: package.attachment,
               pageIndex: index,
               autoplay: widget.props.autoplayVideos,
+              onPlaybackStarted: (_) => _markPlayed(package.message),
             );
           },
         ),

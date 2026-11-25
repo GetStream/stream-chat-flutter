@@ -13,6 +13,11 @@ import '../channel/stream_message_preview_text.dart';
 import '../context_menu/context_menu.dart';
 import '../context_menu/context_menu_region.dart';
 import 'message_status_labels.dart';
+import 'played_mark_label.dart';
+
+// The height of the metadata row under a message bubble when its theme sets
+// none, which the played mark keeps when it stands alone.
+const _defaultMetadataRowMinHeight = 24.0;
 
 /// A chat message widget that renders a single message with its attachments,
 /// reactions, and interaction callbacks.
@@ -91,6 +96,7 @@ class StreamMessageItem extends StatelessWidget {
     void Function(Message)? onReactionsTap,
     OnReactionTap? onReactionTap,
     OnReactionLongPress? onReactionLongPress,
+    OnMessageMarkTap? onMessageMarkTap,
     void Function(Message quotedMessage)? onQuotedMessageTap,
     Comparator<ReactionGroup>? reactionSorting,
     MessageActionsBuilder? actionsBuilder,
@@ -124,6 +130,7 @@ class StreamMessageItem extends StatelessWidget {
          onReactionsTap: onReactionsTap,
          onReactionTap: onReactionTap,
          onReactionLongPress: onReactionLongPress,
+         onMessageMarkTap: onMessageMarkTap,
          onQuotedMessageTap: onQuotedMessageTap,
          reactionSorting: reactionSorting,
          actionsBuilder: actionsBuilder,
@@ -184,6 +191,7 @@ class StreamMessageItemProps extends Equatable {
     @Deprecated('Use onReactionTap instead. onReactionTap also reports the tapped reaction.') this.onReactionsTap,
     this.onReactionTap,
     this.onReactionLongPress,
+    this.onMessageMarkTap,
     this.onQuotedMessageTap,
     this.reactionSorting,
     this.actionsBuilder,
@@ -348,6 +356,11 @@ class StreamMessageItemProps extends Equatable {
   /// long-press handling.
   final OnReactionLongPress? onReactionLongPress;
 
+  /// {@macro onMessageMarkTap}
+  ///
+  /// If null, the mark is not tappable.
+  final OnMessageMarkTap? onMessageMarkTap;
+
   /// Called when an inline quoted message is tapped.
   ///
   /// Receives the [Message] that was quoted. Typically used to scroll to
@@ -434,6 +447,7 @@ class StreamMessageItemProps extends Equatable {
     void Function(Message)? onReactionsTap,
     OnReactionTap? onReactionTap,
     OnReactionLongPress? onReactionLongPress,
+    OnMessageMarkTap? onMessageMarkTap,
     void Function(Message)? onQuotedMessageTap,
     Comparator<ReactionGroup>? reactionSorting,
     MessageActionsBuilder? actionsBuilder,
@@ -463,6 +477,7 @@ class StreamMessageItemProps extends Equatable {
       onReactionsTap: onReactionsTap ?? this.onReactionsTap,
       onReactionTap: onReactionTap ?? this.onReactionTap,
       onReactionLongPress: onReactionLongPress ?? this.onReactionLongPress,
+      onMessageMarkTap: onMessageMarkTap ?? this.onMessageMarkTap,
       onQuotedMessageTap: onQuotedMessageTap ?? this.onQuotedMessageTap,
       reactionSorting: reactionSorting ?? this.reactionSorting,
       actionsBuilder: actionsBuilder ?? this.actionsBuilder,
@@ -496,6 +511,7 @@ class StreamMessageItemProps extends Equatable {
     onReactionsTap,
     onReactionTap,
     onReactionLongPress,
+    onMessageMarkTap,
     onQuotedMessageTap,
     reactionSorting,
     actionsBuilder,
@@ -587,8 +603,26 @@ class DefaultStreamMessageItem extends StatelessWidget {
     );
 
     final footerWidget = effectiveMetadataVisibility.apply(
-      StreamMessageFooter(message: message, excludeFromSemantics: announcedByRow),
+      StreamMessageFooter(
+        message: message,
+        excludeFromSemantics: announcedByRow,
+        onMarkTap: props.onMessageMarkTap,
+      ),
     );
+
+    // By default only an earlier message in a group has no metadata row, so its
+    // played mark stands alone unless the theme sets the visibility itself.
+    final usesDefaultMetadataVisibility = theme.metadataVisibility == null;
+
+    Widget? playedMarkRow;
+    if (footerWidget == null && usesDefaultMetadataVisibility) {
+      playedMarkRow = _playedMarkRow(
+        context,
+        message,
+        excludeFromSemantics: announcedByRow,
+        onTap: props.onMessageMarkTap,
+      );
+    }
 
     Widget? repliesWidget;
     if (message.replyCount case final replyCount? when replyCount > 0) {
@@ -614,7 +648,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       excludeTextFromSemantics: announcedByRow,
       header: headerWidget,
       errorBadge: errorBadgeWidget,
-      footer: footerWidget,
+      footer: footerWidget ?? playedMarkRow,
       replies: repliesWidget,
       attachmentBuilders: props.attachmentBuilders,
       reactionSorting: props.reactionSorting,
@@ -847,6 +881,45 @@ class DefaultStreamMessageItem extends StatelessWidget {
 
     if (action is! MessageAction || !context.mounted) return;
     return _onActionTap(context, channel, action).ignore();
+  }
+
+  // The played mark on its own, in place of the metadata row it would sit in,
+  // styled and sized like that row's mark.
+  Widget? _playedMarkRow(
+    BuildContext context,
+    Message message, {
+    required bool excludeFromSemantics,
+    OnMessageMarkTap? onTap,
+  }) {
+    if (playedMarkLabel(context, message) == null) return null;
+
+    final placement = StreamMessageLayout.of(context);
+    final metadataStyle = core.StreamMessageItemTheme.of(context).metadata;
+    final minHeight = metadataStyle?.minHeight?.resolve(placement) ?? _defaultMetadataRowMinHeight;
+
+    final markTextStyle = metadataStyle?.markTextStyle?.resolve(placement) ?? context.streamTextTheme.metadataDefault;
+    final defaultMarkColor = switch (placement.presentation) {
+      .standard => context.streamColorScheme.accentPrimary,
+      .preview => context.streamColorScheme.textOnAccent,
+    };
+    final markColor = metadataStyle?.markColor?.resolve(placement) ?? defaultMarkColor;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(minHeight: minHeight),
+      child: Row(
+        mainAxisSize: .min,
+        children: [
+          DefaultTextStyle.merge(
+            style: markTextStyle.copyWith(color: markColor),
+            child: StreamMessagePlayedMark(
+              message: message,
+              onTap: onTap,
+              excludeFromSemantics: excludeFromSemantics,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   // Resolves the thread parent (fetching if shown in-channel) and invokes
@@ -1425,6 +1498,7 @@ class _MessageRowSemanticsState extends State<_MessageRowSemantics> {
       translations.accessibility.formatRecentDateTime(message.createdAt.toLocal()),
       // Mirrors the footer, which drops the marker on a deleted message.
       if (message.messageTextUpdatedAt != null && !message.isDeleted) translations.editedMessageLabel,
+      ?playedMarkLabel(context, message),
     ];
 
     return parts.where((it) => it.isNotEmpty).join(', ');

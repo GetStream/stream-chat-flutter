@@ -42,10 +42,12 @@ class StreamVideoPlayer extends StatelessWidget {
     required Attachment attachment,
     required int pageIndex,
     bool autoplay = false,
+    OnPlaybackStarted? onPlaybackStarted,
   }) : props = StreamVideoPlayerProps(
          attachment: attachment,
          pageIndex: pageIndex,
          autoplay: autoplay,
+         onPlaybackStarted: onPlaybackStarted,
        );
 
   /// The properties that configure this video player.
@@ -75,6 +77,7 @@ class StreamVideoPlayerProps {
     required this.attachment,
     required this.pageIndex,
     this.autoplay = false,
+    this.onPlaybackStarted,
   });
 
   /// The video attachment to play.
@@ -90,6 +93,13 @@ class StreamVideoPlayerProps {
   /// Whether playback should auto-start the first time this page becomes
   /// active. Already-paused-by-user state is preserved on re-activation.
   final bool autoplay;
+
+  /// Called each time playback starts.
+  ///
+  /// Covers playback started from the controls and from [autoplay]. A custom
+  /// player built through [StreamComponentFactory] must call it, with
+  /// [attachment] in the [PlaybackStartedDetails], to mark its videos played.
+  final OnPlaybackStarted? onPlaybackStarted;
 }
 
 /// Video player used on Android, iOS, macOS, and web inside a
@@ -164,7 +174,9 @@ class _StreamVideoPlayerDefaultState extends State<DefaultStreamVideoPlayer>
 
   Future<void> _initialize() async {
     try {
-      await _player.open(widget.attachment);
+      final attachment = widget.attachment;
+      final details = PlaybackStartedDetails(attachment: attachment);
+      await _player.open(attachment, onPlay: () => widget.props.onPlaybackStarted?.call(details));
       if (!mounted) return;
       setState(() {});
       updateKeepAlive();
@@ -199,6 +211,8 @@ class _ChewieVideoPlayer {
   VideoPlayerController? _video;
   ChewieController? _chewie;
   bool _disposed = false;
+  bool _wasPlaying = false;
+  VoidCallback? _onPlay;
 
   /// The chewie controller used for playback once initialisation has
   /// completed. `null` until [open] resolves.
@@ -210,9 +224,14 @@ class _ChewieVideoPlayer {
   /// Whether the underlying video player is currently playing.
   bool get isPlaying => _video?.value.isPlaying ?? false;
 
-  /// Initialises the controller pair for [attachment]. Throws when there
-  /// is no usable source URL.
-  Future<void> open(Attachment attachment) async {
+  /// Initializes the controller pair for [attachment].
+  ///
+  /// Throws when there is no usable source URL. Calls [onPlay] each time
+  /// playback starts.
+  Future<void> open(
+    Attachment attachment, {
+    VoidCallback? onPlay,
+  }) async {
     final localUri = attachment.localUri;
     final assetUrl = attachment.assetUrl;
     if (localUri == null && assetUrl == null) {
@@ -233,11 +252,20 @@ class _ChewieVideoPlayer {
     }
 
     _video = video;
+    _onPlay = onPlay;
+    video.addListener(_handleVideoChanged);
     _chewie = ChewieController(
       videoPlayerController: video,
       autoInitialize: true,
       aspectRatio: video.value.aspectRatio,
     );
+  }
+
+  // The controller notifies on every position update, so only the switch
+  // from paused to playing counts as a play.
+  void _handleVideoChanged() {
+    if (isPlaying && !_wasPlaying) _onPlay?.call();
+    _wasPlaying = isPlaying;
   }
 
   /// Starts playback. No-op if not yet ready.
@@ -249,6 +277,7 @@ class _ChewieVideoPlayer {
   /// Releases both controllers.
   void dispose() {
     _disposed = true;
+    _video?.removeListener(_handleVideoChanged);
     _chewie?.dispose();
     _video?.dispose();
   }

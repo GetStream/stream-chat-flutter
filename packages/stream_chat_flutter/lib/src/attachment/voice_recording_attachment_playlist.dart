@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../stream_chat_flutter.dart';
 import '../audio/audio_playlist_controller.dart';
+import '../message_widget/played_mark_sender.dart';
 
 /// Signature for decorating each voice recording item in a playlist.
 ///
@@ -86,7 +87,8 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
   /// [StreamVoiceRecordingAttachment] will be used.
   ///
   /// When provided, [itemDecorator] is ignored since the builder has full
-  /// control over the item widget.
+  /// control over the item widget. Playing a recording through a custom item
+  /// does not mark the message played.
   final IndexedWidgetBuilder? itemBuilder;
 
   /// Optional decorator that wraps each default voice recording item.
@@ -119,6 +121,10 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
 
 class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceRecordingAttachmentPlaylist>
     with WidgetsBindingObserver {
+  // Whether a track was playing at the last controller update, so only the
+  // start of playback marks the message played.
+  var _wasPlaying = false;
+
   late final _controller = StreamAudioPlaylistController(
     widget.voiceRecordings.toPlaylist(),
   );
@@ -127,7 +133,9 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _controller.initialize();
+    _controller
+      ..addListener(_handlePlaylistChanged)
+      ..initialize();
   }
 
   @override
@@ -148,6 +156,17 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
       // If the playlist have changed, update the playlist.
       _controller.updatePlaylist(newPlaylist);
     }
+  }
+
+  void _handlePlaylistChanged() {
+    if (!mounted) return;
+
+    final isPlaying = _controller.value.tracks.any((it) => it.state.isPlaying);
+    if (isPlaying && !_wasPlaying) {
+      final channel = StreamChannel.maybeOf(context)?.channel;
+      channel?.sendPlayedMarkOnce(widget.message).ignore();
+    }
+    _wasPlaying = isPlaying;
   }
 
   @override

@@ -9,15 +9,22 @@
 - Added `onScheduledMessagesBannerTap` to `StreamChannelPage` and `StreamThreadPage`.
 - Added `onSendMessage` to `StreamMessageComposer`, a `StreamMessageComposerCallback` that replaces sending a message or saving an edit.
 - Added `onSendLongPress` to `StreamMessageComposer` and `StreamChatMessageInput`, called when send is long-pressed, such as to schedule the message.
+- Added played marks on the current user's messages in channel types that enable them, with `onMessageMarkTap` on `StreamMessageListView` and `StreamMessageItem` to handle a tap.
+- Added marking another user's voice recording or video as played once the current user plays it.
+- Added `onPlaybackStarted` to `StreamVideoPlayer`, `StreamVideoPlayerProps` and `StreamMediaGalleryPreviewItem`; a custom video player calls it to mark its videos played.
 
 🔄 Changed
 
 - `StreamChannelPage` and `StreamThreadPage` show the scheduled messages banner above their composer, and schedule the message, uploading its attachments first, on a long press of send, in channels where the user can schedule messages. Turn both off with `StreamChatConfigurationData.scheduledMessagesEnabled`.
 - A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
+- A class that implements or directly extends `Translations`, `StreamChatLocalizations` or `GlobalStreamChatLocalizations` must add `messagePlayedLabel` and `messagePlayedByLabel`; extending `DefaultTranslations` provides them.
 - `StreamMessageComposer` keeps its content when its draft is updated on another device while it is open.
+- The current user's messages show "Edited" before the delivery status and timestamp, mirroring other users' messages.
+- Text in Stream components follows the app's font family.
 
 🐞 Fixed
 
+- Fixed dark sheets turning lighter with elevation.
 - Fixed `StreamMessageComposer` refilling a cleared or edited draft when the server's copy of the earlier draft arrived late.
 
 🐞 Fixed
