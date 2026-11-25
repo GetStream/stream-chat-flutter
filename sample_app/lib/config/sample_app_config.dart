@@ -25,7 +25,6 @@ const _kEnableMessageTranslation = 'config.enableMessageTranslation';
 const _kEnableLocationSharing = 'config.enableLocationSharing';
 const _kDraftMessagesEnabled = 'config.draftMessagesEnabled';
 const _kEnforceUniqueReactions = 'config.enforceUniqueReactions';
-const _kShowMessageMarks = 'config.showMessageMarks';
 const _kReactionType = 'config.reactionType';
 const _kReactionPosition = 'config.reactionPosition';
 const _kLocale = 'config.locale';
@@ -66,7 +65,6 @@ class SampleAppConfigData {
     bool enableLocationSharing = false,
     bool draftMessagesEnabled = true,
     bool enforceUniqueReactions = false,
-    bool showMessageMarks = false,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
   }) {
@@ -90,7 +88,6 @@ class SampleAppConfigData {
       enableLocationSharing: enableLocationSharing,
       draftMessagesEnabled: draftMessagesEnabled,
       enforceUniqueReactions: enforceUniqueReactions,
-      showMessageMarks: showMessageMarks,
       reactionType: reactionType,
       reactionPosition: reactionPosition,
     );
@@ -117,7 +114,6 @@ class SampleAppConfigData {
     required this.enableLocationSharing,
     required this.draftMessagesEnabled,
     required this.enforceUniqueReactions,
-    required this.showMessageMarks,
     required this.reactionType,
     required this.reactionPosition,
   });
@@ -154,7 +150,6 @@ class SampleAppConfigData {
       enableLocationSharing: prefs.getBool(_kEnableLocationSharing, defaultValue: false).getValue(),
       draftMessagesEnabled: prefs.getBool(_kDraftMessagesEnabled, defaultValue: false).getValue(),
       enforceUniqueReactions: prefs.getBool(_kEnforceUniqueReactions, defaultValue: false).getValue(),
-      showMessageMarks: prefs.getBool(_kShowMessageMarks, defaultValue: false).getValue(),
       reactionType: _intToReactionType(prefs.getInt(_kReactionType, defaultValue: -1).getValue()),
       reactionPosition: _intToReactionPosition(prefs.getInt(_kReactionPosition, defaultValue: -1).getValue()),
     );
@@ -246,9 +241,6 @@ class SampleAppConfigData {
   /// Whether a new reaction replaces the existing one.
   final bool enforceUniqueReactions;
 
-  /// Whether the current user's voice recordings and videos show played marks.
-  final bool showMessageMarks;
-
   /// The visual type of the reactions display.
   final StreamReactionsType? reactionType;
 
@@ -281,7 +273,6 @@ class SampleAppConfigData {
     bool? enableLocationSharing,
     bool? draftMessagesEnabled,
     bool? enforceUniqueReactions,
-    bool? showMessageMarks,
     Object? reactionType = _sentinel,
     Object? reactionPosition = _sentinel,
   }) {
@@ -317,7 +308,6 @@ class SampleAppConfigData {
       enableLocationSharing: enableLocationSharing ?? this.enableLocationSharing,
       draftMessagesEnabled: draftMessagesEnabled ?? this.draftMessagesEnabled,
       enforceUniqueReactions: enforceUniqueReactions ?? this.enforceUniqueReactions,
-      showMessageMarks: showMessageMarks ?? this.showMessageMarks,
       reactionType: reactionType == _sentinel ? this.reactionType : reactionType as StreamReactionsType?,
       reactionPosition: reactionPosition == _sentinel
           ? this.reactionPosition
@@ -348,7 +338,6 @@ class SampleAppConfigData {
     prefs.setBool(_kEnableLocationSharing, enableLocationSharing);
     prefs.setBool(_kDraftMessagesEnabled, draftMessagesEnabled);
     prefs.setBool(_kEnforceUniqueReactions, enforceUniqueReactions);
-    prefs.setBool(_kShowMessageMarks, showMessageMarks);
     prefs.setInt(_kReactionType, _reactionTypeToInt(reactionType));
     prefs.setInt(_kReactionPosition, _reactionPositionToInt(reactionPosition));
   }

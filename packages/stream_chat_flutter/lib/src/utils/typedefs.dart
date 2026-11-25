@@ -219,9 +219,8 @@ class ReactionTapDetails {
 /// The action to perform when a message's mark is tapped.
 ///
 /// The mark is a label such as "Played by 3", the number of members who
-/// played a voice recording or video. The [BuildContext] is the context at
-/// the tapped message, useful for navigation or showing overlays relative to
-/// it.
+/// played the message. The [BuildContext] is the context at the tapped
+/// message, useful for navigation or showing overlays relative to it.
 /// {@endtemplate}
 typedef OnMessageMarkTap = void Function(BuildContext context, MessageMarkTapDetails details);
 

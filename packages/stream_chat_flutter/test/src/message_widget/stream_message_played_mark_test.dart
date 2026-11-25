@@ -1,3 +1,4 @@
+import 'package:alchemist/alchemist.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -16,26 +17,6 @@ final _voiceRecording = Attachment(
 );
 
 void main() {
-  testWidgets('no mark shows unless the app shows message marks', (tester) async {
-    final body = _wrap(_item(_voiceMessage(playedBy: 2)), showMessageMarks: false);
-    await tester.pumpWidget(body);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Played by 2'), findsNothing);
-  });
-
-  testWidgets('no two-member mark shows unless the app shows message marks', (tester) async {
-    final body = _wrap(
-      _item(_voiceMessage(playedBy: 1)),
-      isTwoMember: true,
-      showMessageMarks: false,
-    );
-    await tester.pumpWidget(body);
-    await tester.pumpAndSettle();
-
-    expect(find.text('Played'), findsNothing);
-  });
-
   testWidgets('a voice message played by more than 99 members reads 99+', (tester) async {
     await tester.pumpWidget(_wrap(_item(_voiceMessage(playedBy: 100))));
     await tester.pumpAndSettle();
@@ -89,21 +70,13 @@ void main() {
     expect(find.textContaining('Played by'), findsNothing);
   });
 
-  testWidgets('no mark shows on a message without audio', (tester) async {
-    final message = _voiceMessage(playedBy: 2).copyWith(attachments: const []);
-    await tester.pumpWidget(_wrap(_item(message)));
-    await tester.pumpAndSettle();
-
-    expect(find.textContaining('Played by'), findsNothing);
-  });
-
-  testWidgets('no mark shows on an audio file', (tester) async {
+  testWidgets('an audio file reads how many members played it', (tester) async {
     final audio = Attachment(type: AttachmentType.audio, assetUrl: 'https://example.com/song.mp3');
     final message = _voiceMessage(playedBy: 2).copyWith(attachments: [audio]);
     await tester.pumpWidget(_wrap(_item(message)));
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('Played by'), findsNothing);
+    expect(find.text('Played by 2'), findsOneWidget);
   });
 
   testWidgets('a group video reads how many members played it', (tester) async {
@@ -141,17 +114,19 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('a two-member played mark stays out of the semantics tree', (tester) async {
-    final semantics = tester.ensureSemantics();
+  testWidgets('tapping a two-member played mark reports the message', (tester) async {
+    MessageMarkTapDetails? tapped;
+    final message = _voiceMessage(playedBy: 1);
     final item = StreamMessageItem(
-      message: _voiceMessage(playedBy: 1),
-      onMessageMarkTap: (_, __) {},
+      message: message,
+      onMessageMarkTap: (_, details) => tapped = details,
     );
     await tester.pumpWidget(_wrap(item, isTwoMember: true));
     await tester.pumpAndSettle();
 
-    expect(find.bySemanticsLabel('Played'), findsNothing);
-    semantics.dispose();
+    await tester.tap(find.text('Played'));
+
+    expect(tapped?.message, message);
   });
 
   testWidgets('a single voice message shows no mark when the theme hides metadata', (tester) async {
@@ -247,6 +222,43 @@ void main() {
     expect(tapped?.message, message);
     expect(tapped?.type, MessageMarkType.played);
   });
+
+  for (final brightness in Brightness.values) {
+    final theme = brightness.name;
+
+    goldenTest(
+      'played marks in $theme theme',
+      fileName: 'stream_message_played_mark_$theme',
+      constraints: const BoxConstraints.tightFor(width: 400, height: 240),
+      builder: () {
+        // The voice player needs an audio plugin, so a text body stands in.
+        final message = _voiceMessage(playedBy: 3).copyWith(
+          text: 'Listen to this',
+          attachments: const [],
+        );
+        final stackPositions = <StreamMessageStackPosition>[.top, .single];
+        final scene = Builder(
+          builder: (context) => ColoredBox(
+            color: context.streamColorScheme.backgroundApp,
+            child: Column(
+              mainAxisAlignment: .center,
+              children: [
+                for (final stackPosition in stackPositions)
+                  StreamMessageLayout(
+                    data: StreamMessageLayoutData(
+                      alignment: StreamMessageAlignment.end,
+                      stackPosition: stackPosition,
+                    ),
+                    child: _item(message),
+                  ),
+              ],
+            ),
+          ),
+        );
+        return _wrap(scene, brightness: brightness);
+      },
+    );
+  }
 }
 
 StreamMessageItem _item(Message message) => StreamMessageItem(message: message);
@@ -284,7 +296,7 @@ Widget _wrap(
   bool isTwoMember = false,
   List<MessageMarkType> markTypes = const [MessageMarkType.played],
   StreamMessageStackPosition stackPosition = StreamMessageStackPosition.single,
-  bool showMessageMarks = true,
+  Brightness brightness = Brightness.light,
 }) {
   final client = MockClient();
   final clientState = MockClientState();
@@ -306,12 +318,11 @@ Widget _wrap(
   );
 
   return MaterialApp(
+    debugShowCheckedModeBanner: false,
+    theme: ThemeData(brightness: brightness),
     home: StreamChat(
       client: client,
       connectivityStream: Stream.value(const [ConnectivityResult.mobile]),
-      configData: StreamChatConfigurationData(
-        showMessageMarks: showMessageMarks,
-      ),
       child: StreamChannel(
         channel: channel,
         child: Scaffold(

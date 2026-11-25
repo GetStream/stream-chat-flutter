@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../../stream_chat_flutter.dart';
+import '../played_mark_label.dart';
 import 'stream_message_sending_status.dart';
 
 /// Displays the row below the message bubble containing the author name,
@@ -98,9 +99,8 @@ class StreamMessageFooterProps {
 /// The footer can show up to five pieces depending on the message:
 ///
 ///  * **Username** — for messages from other users.
-///  * **Played mark** — for the current user's voice recordings and videos,
-///    when [StreamChatConfigurationData.showMessageMarks] is set and the
-///    channel allows played marks.
+///  * **Played mark** — for the current user's messages someone played, such
+///    as a voice recording.
 ///  * **Sending status** — for the current user's own messages, except
 ///    ephemeral ones.
 ///  * **Timestamp** — always shown, formatted as a short time string.
@@ -147,7 +147,7 @@ class DefaultStreamMessageFooter extends StatelessWidget {
     }
 
     Widget? markWidget;
-    if (StreamMessagePlayedMark.isShownFor(context, message)) {
+    if (playedMarkLabel(context, message) != null) {
       markWidget = StreamMessagePlayedMark(
         message: message,
         onTap: props.onMarkTap,
