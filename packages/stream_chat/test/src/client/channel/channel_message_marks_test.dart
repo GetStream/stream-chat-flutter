@@ -161,11 +161,11 @@ void main() {
         () => client.sendMessageMark(any(), any()),
       ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
       final message = channel.state!.messages.single;
+      await expectLater(channel.markMessagePlayed(message), throwsA(isA<StreamChatNetworkError>()));
 
-      await channel.markMessagePlayed(message).catchError((_) => false);
-      await channel.markMessagePlayed(message).catchError((_) => false);
+      when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
 
-      verify(() => client.sendMessageMark(any(), any())).called(2);
+      expect(await channel.markMessagePlayed(message), isTrue);
     });
 
     test("skips the current user's own message", () async {
