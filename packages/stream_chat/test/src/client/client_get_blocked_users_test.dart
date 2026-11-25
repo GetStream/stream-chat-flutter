@@ -79,6 +79,31 @@ void main() {
     expect(client.state.currentUser!.blockedUserIds, ['blocked-user-1', 'blocked-user-2']);
   });
 
+  test("StreamChatClient.getBlockedUsers keeps a deleted user's id in the current user's blocked user ids", () async {
+    final defaultApi = MockDefaultApi();
+    when(defaultApi.getBlockedUsers).thenAnswer(
+      (_) async => Result.success(
+        api.GetBlockedUsersResponse(
+          duration: '4.21ms',
+          blocks: [
+            api.BlockedUserResponse(
+              user: fakeUserResponse('user-id'),
+              blockedUser: fakeUserResponse('deleted-user'),
+              userId: 'user-id',
+              blockedUserId: 'blocked-user-1',
+              createdAt: DateTime.utc(2026, 10, 1),
+            ),
+          ],
+        ),
+      ),
+    );
+    final client = _clientWithOwnUser(defaultApi, blockedUserIds: const []);
+
+    await client.getBlockedUsers();
+
+    expect(client.state.currentUser!.blockedUserIds, ['blocked-user-1']);
+  });
+
   test('StreamChatClient.getBlockedUsers returns the failure without throwing', () async {
     const error = StreamClientException(message: 'boom');
     final defaultApi = MockDefaultApi();
