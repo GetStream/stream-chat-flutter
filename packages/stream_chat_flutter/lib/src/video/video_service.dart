@@ -13,34 +13,28 @@ class _IVideoService {
 
   /// Generates a thumbnail image data in memory as UInt8List.
   ///
-  /// The video source can be a local video file or a URL, on every platform.
-  ///
-  /// If no [video] path is supplied, or if a thumbnail cannot be generated,
+  /// If no [source] is supplied, or if a thumbnail cannot be generated,
   /// returns [generatePlaceholderThumbnail]. A stock placeholder image.
   ///
   /// Use [timeMs] to pick the frame, and [maxHeight]/[maxWidth] to bound the
   /// size or `0` to keep the source resolution. A lower [quality] reduces
   /// image quality, but it gets ignored for PNG format.
   ///
-  /// [headers] are sent when fetching a remote video, except on Windows, which
-  /// cannot attach them. Windows also has no WebP encoder, so
-  /// [StreamThumbnailFormat.webp] fails there.
+  /// Windows has no WebP encoder, so [StreamThumbnailFormat.webp] fails there.
   Future<Uint8List?> generateVideoThumbnail({
-    String? video,
-    Map<String, String>? headers,
+    StreamThumbnailSource? source,
     StreamThumbnailFormat imageFormat = .png,
     int maxHeight = 0,
     int maxWidth = 0,
     int timeMs = 0,
     int quality = 10,
   }) async {
-    // If the video path is not supplied, return a placeholder image.
-    if (video == null) return generatePlaceholderThumbnail();
+    // If the video source is not supplied, return a placeholder image.
+    if (source == null) return generatePlaceholderThumbnail();
 
     try {
       return await StreamThumbnail.thumbnailData(
-        video: video,
-        headers: headers,
+        source: source,
         imageFormat: imageFormat,
         maxHeight: maxHeight,
         maxWidth: maxWidth,

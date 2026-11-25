@@ -10,9 +10,9 @@ import 'video_service.dart';
 /// A custom [ImageProvider] class for loading video thumbnails as images in
 /// Flutter.
 ///
-/// Use this class to load a video thumbnail as an image. It takes a video URL
-/// or path and generates a thumbnail image from the video. The generated
-/// thumbnail image can be used with the [Image] widget.
+/// Use this class to load a video thumbnail as an image. It takes the
+/// [StreamThumbnailSource] of a video and generates a thumbnail image from it.
+/// The generated thumbnail image can be used with the [Image] widget.
 ///
 /// {@tool snippet}
 /// Load a video thumbnail from a URL:
@@ -20,7 +20,7 @@ import 'video_service.dart';
 /// ```dart
 /// Image(
 ///   image: StreamVideoThumbnailImage(
-///     video: 'https://example.com/video.mp4',
+///     source: StreamThumbnailSource.network(Uri.parse('https://example.com/video.mp4')),
 ///     maxHeight: 200,
 ///     maxWidth: 200,
 ///   ),
@@ -34,7 +34,7 @@ import 'video_service.dart';
 /// ```dart
 /// Image(
 ///   image: StreamVideoThumbnailImage(
-///     video: '/path/to/video.mp4',
+///     source: StreamThumbnailSource.file('/path/to/video.mp4'),
 ///     maxHeight: 200,
 ///     maxWidth: 200,
 ///   ),
@@ -45,8 +45,7 @@ import 'video_service.dart';
 class StreamVideoThumbnailImage extends ImageProvider<StreamVideoThumbnailImage> {
   /// {@macro video_thumbnail_image}
   const StreamVideoThumbnailImage({
-    required this.video,
-    this.headers,
+    required this.source,
     this.imageFormat = .png,
     this.maxHeight = 0,
     this.maxWidth = 0,
@@ -55,11 +54,8 @@ class StreamVideoThumbnailImage extends ImageProvider<StreamVideoThumbnailImage>
     this.scale = 1.0,
   });
 
-  /// The URL or path of the video from which to generate the thumbnail.
-  final String video;
-
-  /// Additional headers to include in the HTTP request when fetching the video.
-  final Map<String, String>? headers;
+  /// The video from which to generate the thumbnail.
+  final StreamThumbnailSource source;
 
   /// The format of the generated thumbnail image.
   final StreamThumbnailFormat imageFormat;
@@ -94,7 +90,7 @@ class StreamVideoThumbnailImage extends ImageProvider<StreamVideoThumbnailImage>
     return MultiFrameImageStreamCompleter(
       codec: _loadAsync(key, decode),
       scale: key.scale,
-      debugLabel: key.video,
+      debugLabel: '${key.source}',
       informationCollector: () => <DiagnosticsNode>[
         DiagnosticsProperty<ImageProvider>('Image provider', this),
         DiagnosticsProperty<StreamVideoThumbnailImage>('Image key', key),
@@ -109,8 +105,7 @@ class StreamVideoThumbnailImage extends ImageProvider<StreamVideoThumbnailImage>
     assert(key == this, '$key is not $this');
 
     final bytes = await StreamVideoService.generateVideoThumbnail(
-      video: key.video,
-      headers: key.headers,
+      source: key.source,
       imageFormat: key.imageFormat,
       maxHeight: key.maxHeight,
       maxWidth: key.maxWidth,
@@ -119,7 +114,7 @@ class StreamVideoThumbnailImage extends ImageProvider<StreamVideoThumbnailImage>
     );
 
     if (bytes == null || bytes.lengthInBytes == 0) {
-      throw Exception('VideoThumbnailImage is an empty file: ${key.video}');
+      throw Exception('VideoThumbnailImage is an empty file: ${key.source}');
     }
 
     final buffer = await ui.ImmutableBuffer.fromUint8List(bytes);
@@ -131,15 +126,15 @@ class StreamVideoThumbnailImage extends ImageProvider<StreamVideoThumbnailImage>
     if (other.runtimeType != runtimeType) {
       return false;
     }
-    return other is StreamVideoThumbnailImage && other.video == video && other.scale == scale;
+    return other is StreamVideoThumbnailImage && other.source == source && other.scale == scale;
   }
 
   @override
-  int get hashCode => Object.hash(video, scale);
+  int get hashCode => Object.hash(source, scale);
 
   @override
   String toString() {
     final runtimeType = objectRuntimeType(this, 'StreamVideoThumbnailImage');
-    return '$runtimeType($video, scale: $scale)';
+    return '$runtimeType($source, scale: $scale)';
   }
 }

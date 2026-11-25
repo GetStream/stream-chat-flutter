@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'package:stream_core_flutter/chat.dart';
+import 'package:stream_thumbnail/stream_thumbnail.dart';
 
 import '../../video/video_thumbnail_image.dart';
 import 'image_attachment_thumbnail.dart';
@@ -64,11 +65,18 @@ class StreamVideoAttachmentThumbnail extends StatelessWidget {
       );
     }
 
-    final filePath = video.file?.path;
-    final videoAssetUrl = video.assetUrl;
-    if (filePath != null || videoAssetUrl != null) {
+    final assetUrl = switch (video.assetUrl) {
+      final url? => Uri.tryParse(url),
+      null => null,
+    };
+    final source = switch ((video.file?.path, assetUrl)) {
+      (final path?, _) => StreamThumbnailSource.file(path),
+      (_, final url?) => StreamThumbnailSource.network(url),
+      _ => null,
+    };
+    if (source != null) {
       return Image(
-        image: StreamVideoThumbnailImage(video: filePath ?? videoAssetUrl!),
+        image: StreamVideoThumbnailImage(source: source),
         width: width,
         height: height,
         fit: fit,
