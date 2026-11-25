@@ -58,4 +58,10 @@ void main() {
 
     expect(find.byType(StreamImageErrorPlaceholder), findsOneWidget);
   });
+
+  testWidgets('a video with neither a file nor an asset URL shows the error placeholder', (tester) async {
+    await _pumpThumbnail(tester, Attachment(type: 'video'));
+
+    expect(find.byType(StreamImageErrorPlaceholder), findsOneWidget);
+  });
 }
