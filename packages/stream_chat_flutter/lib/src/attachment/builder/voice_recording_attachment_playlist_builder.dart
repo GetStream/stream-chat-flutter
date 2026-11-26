@@ -31,7 +31,7 @@ class VoiceRecordingAttachmentPlaylistBuilder extends StreamAttachmentWidgetBuil
   ///
   /// A builder constructed directly marks nothing unless this calls
   /// [Channel.markMessage].
-  final OnMessageAttachmentPlaybackStarted? onAttachmentPlaybackStarted;
+  final OnAttachmentPlaybackStarted? onAttachmentPlaybackStarted;
 
   @override
   bool canHandle(

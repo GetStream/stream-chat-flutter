@@ -88,7 +88,7 @@ void main() {
 
   testWidgets('a gallery reports the video that started playing', (tester) async {
     final message = _videoMessage();
-    final started = <MessageAttachmentPlaybackStartedDetails>[];
+    final started = <AttachmentPlaybackStartedDetails>[];
     final gallery = StreamMediaGalleryPreview(
       attachments: message.toMediaGalleryAttachments(),
       onPlaybackStarted: started.add,

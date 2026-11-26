@@ -108,7 +108,7 @@ class StreamVoiceRecordingAttachmentPlaylist extends StatefulWidget {
   final String? voiceRecordingTitle;
 
   /// Called each time playback of one of the [voiceRecordings] starts.
-  final OnMessageAttachmentPlaybackStarted? onPlaybackStarted;
+  final OnAttachmentPlaybackStarted? onPlaybackStarted;
 
   // Default separator builder for the voice recording playlist.
   static Widget _defaultVoiceRecordingPlaylistSeparatorBuilder(
@@ -178,7 +178,7 @@ class _StreamVoiceRecordingAttachmentPlaylistState extends State<StreamVoiceReco
     final onPlaybackStarted = widget.onPlaybackStarted;
     if (onPlaybackStarted == null) return;
 
-    final details = MessageAttachmentPlaybackStartedDetails(
+    final details = AttachmentPlaybackStartedDetails(
       message: widget.message,
       attachment: attachment,
     );

@@ -258,14 +258,14 @@ final class PlaybackStartedDetails {
 /// Called once the attachment actually plays, after any loading or buffering,
 /// and again each time playback resumes after a pause or moves to another
 /// attachment.
-typedef OnMessageAttachmentPlaybackStarted = void Function(MessageAttachmentPlaybackStartedDetails details);
+typedef OnAttachmentPlaybackStarted = void Function(AttachmentPlaybackStartedDetails details);
 
 /// Details of a message's attachment starting to play, passed to
-/// [OnMessageAttachmentPlaybackStarted].
+/// [OnAttachmentPlaybackStarted].
 @immutable
-final class MessageAttachmentPlaybackStartedDetails {
+final class AttachmentPlaybackStartedDetails {
   /// Creates details for a message's attachment starting to play.
-  const MessageAttachmentPlaybackStartedDetails({
+  const AttachmentPlaybackStartedDetails({
     required this.message,
     required this.attachment,
   });
