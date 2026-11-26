@@ -62,7 +62,8 @@ class StreamLinkHandler {
 /// Shows a snack bar if [url] is not opened.
 Future<void> openLink(BuildContext context, String url) async {
   final uri = Uri.tryParse(url);
-  final linkHandler = StreamChatConfiguration.maybeOf(context)?.linkHandler ?? const StreamLinkHandler();
+  final config = StreamChatConfiguration.maybeOf(context);
+  final linkHandler = config?.linkHandler ?? const StreamLinkHandler();
   final opened = uri != null && await linkHandler.open(context, uri);
   if (opened || !context.mounted) return;
 
