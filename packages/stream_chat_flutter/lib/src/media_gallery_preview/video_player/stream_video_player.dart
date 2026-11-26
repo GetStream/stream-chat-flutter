@@ -5,7 +5,7 @@ import 'package:flutter/widgets.dart';
 import 'package:video_player/video_player.dart';
 
 import '../../../stream_chat_flutter.dart';
-import '../../audio/playback_start_tracker.dart';
+import '../../utils/playback_start_tracker.dart';
 
 /// Plays a chat video attachment inside a [StreamMediaGalleryPreview].
 ///
@@ -140,8 +140,9 @@ class _StreamVideoPlayerDefaultState extends State<DefaultStreamVideoPlayer>
     with
         StreamVideoPlayerActivityMixin<DefaultStreamVideoPlayer>,
         AutomaticKeepAliveClientMixin<DefaultStreamVideoPlayer> {
-  final _player = _ChewieVideoPlayer();
   Object? _error;
+  late final _player = _ChewieVideoPlayer(onChanged: _handlePlayerChanged);
+  late final _playbackTracker = PlaybackStartTracker<Attachment>(onStarted: _handlePlaybackStarted);
 
   @override
   int get pageIndex => widget.pageIndex;
@@ -175,12 +176,7 @@ class _StreamVideoPlayerDefaultState extends State<DefaultStreamVideoPlayer>
 
   Future<void> _initialize() async {
     try {
-      final attachment = widget.attachment;
-      final details = PlaybackStartedDetails(attachment: attachment);
-      await _player.open(
-        attachment,
-        onPlaybackStarted: () => widget.props.onPlaybackStarted?.call(details),
-      );
+      await _player.open(widget.attachment);
       if (!mounted) return;
       setState(() {});
       updateKeepAlive();
@@ -189,6 +185,22 @@ class _StreamVideoPlayerDefaultState extends State<DefaultStreamVideoPlayer>
       if (!mounted) return;
       setState(() => _error = error);
     }
+  }
+
+  void _handlePlayerChanged() {
+    final playing = _player.isPlaying ? widget.attachment : null;
+    _playbackTracker.handleUpdate(
+      playing: playing,
+      position: _player.position,
+    );
+  }
+
+  void _handlePlaybackStarted(Attachment attachment) {
+    final onPlaybackStarted = widget.props.onPlaybackStarted;
+    if (onPlaybackStarted == null) return;
+
+    final details = PlaybackStartedDetails(attachment: attachment);
+    onPlaybackStarted(details);
   }
 
   @override
@@ -212,10 +224,14 @@ class _StreamVideoPlayerDefaultState extends State<DefaultStreamVideoPlayer>
 /// [controller] is the public ready signal — non-null once [open]
 /// resolves successfully, null while loading or after [dispose].
 class _ChewieVideoPlayer {
+  _ChewieVideoPlayer({required this.onChanged});
+
+  /// Called whenever the video's position or playing state changes.
+  final VoidCallback onChanged;
+
   VideoPlayerController? _video;
   ChewieController? _chewie;
   bool _disposed = false;
-  PlaybackStartTracker? _playbackStart;
 
   /// The chewie controller used for playback once initialisation has
   /// completed. `null` until [open] resolves.
@@ -227,14 +243,12 @@ class _ChewieVideoPlayer {
   /// Whether the underlying video player is currently playing.
   bool get isPlaying => _video?.value.isPlaying ?? false;
 
-  /// Initializes the controller pair for [attachment].
-  ///
-  /// Throws when there is no usable source URL. Calls [onPlaybackStarted]
-  /// each time playback starts, once the video moves.
-  Future<void> open(
-    Attachment attachment, {
-    VoidCallback? onPlaybackStarted,
-  }) async {
+  /// The current playback position, or zero until [open] resolves.
+  Duration get position => _video?.value.position ?? Duration.zero;
+
+  /// Initialises the controller pair for [attachment]. Throws when there
+  /// is no usable source URL.
+  Future<void> open(Attachment attachment) async {
     final localUri = attachment.localUri;
     final assetUrl = attachment.assetUrl;
     if (localUri == null && assetUrl == null) {
@@ -255,24 +269,11 @@ class _ChewieVideoPlayer {
     }
 
     _video = video;
-    _playbackStart = PlaybackStartTracker(
-      onStarted: (_) => onPlaybackStarted?.call(),
-    );
-    video.addListener(_handleVideoChanged);
+    _video?.addListener(onChanged);
     _chewie = ChewieController(
       videoPlayerController: video,
       autoInitialize: true,
       aspectRatio: video.value.aspectRatio,
-    );
-  }
-
-  void _handleVideoChanged() {
-    final value = _video?.value;
-    if (value == null) return;
-
-    _playbackStart?.handleUpdate(
-      isPlaying: value.isPlaying,
-      position: value.position,
     );
   }
 
@@ -285,7 +286,7 @@ class _ChewieVideoPlayer {
   /// Releases both controllers.
   void dispose() {
     _disposed = true;
-    _video?.removeListener(_handleVideoChanged);
+    _video?.removeListener(onChanged);
     _chewie?.dispose();
     _video?.dispose();
   }

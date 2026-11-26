@@ -7,8 +7,9 @@ import '../played_mark_label.dart';
 /// Shows whether the current user's message was played.
 ///
 /// Reads "Played" in a two-member channel and "Played by 2" elsewhere, up to
-/// "Played by 99+". Shows nothing until someone plays the message, such as a
-/// voice recording.
+/// "Played by 99+". Shows nothing until someone plays the message, or when
+/// the enclosing [StreamChannel]'s [ChannelConfig.markTypes] leave out
+/// [MessageMarkType.played].
 ///
 /// Takes its text style from the surrounding [DefaultTextStyle].
 ///

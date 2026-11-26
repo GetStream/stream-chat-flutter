@@ -140,7 +140,7 @@ SendMessageMarkResponse _markResponse() {
   return SendMessageMarkResponse()
     ..mark = MessageMark(
       type: MessageMarkType.played,
-      messageId: 'message-id',
+      messageId: 'video',
       userId: _currentUser.id,
       createdAt: DateTime(2026, 11, 20),
     )
