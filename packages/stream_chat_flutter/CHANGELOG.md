@@ -15,6 +15,7 @@
 - `StreamChannelPage` and `StreamThreadPage` show the scheduled messages banner above their composer, and schedule the message, uploading its attachments first, on a long press of send, in channels where the user can schedule messages. Turn both off with `StreamChatConfigurationData.scheduledMessagesEnabled`.
 - A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
 - `StreamMessageComposer` keeps its content when its draft is updated on another device while it is open.
+- Allowed `gal` 3.x alongside 2.x (`>=2.3.2 <4.0.0`). gal 3 requires iOS 13 and Android API 24.
 
 🐞 Fixed
 
