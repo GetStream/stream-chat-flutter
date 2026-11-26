@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:meta/meta.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../stream_chat_flutter.dart';
@@ -60,6 +61,7 @@ class StreamLinkHandler {
 /// Opens [url] with the configured [StreamChatConfigurationData.linkHandler].
 ///
 /// Shows a snack bar if [url] is not opened.
+@internal
 Future<void> openLink(BuildContext context, String url) async {
   final uri = Uri.tryParse(url);
   final config = StreamChatConfiguration.maybeOf(context);
