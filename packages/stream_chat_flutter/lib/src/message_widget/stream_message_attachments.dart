@@ -98,9 +98,10 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
     final isFile = attachment.type == AttachmentType.file;
     final isUrlPreview = attachment.type == AttachmentType.urlPreview;
     if (isFile || isUrlPreview) {
-      final url = isUrlPreview
-          ? attachment.titleLink ?? attachment.ogScrapeUrl
-          : attachment.assetUrl ?? attachment.ogScrapeUrl;
+      final url = switch (isUrlPreview) {
+        true => attachment.titleLink ?? attachment.ogScrapeUrl,
+        false => attachment.assetUrl ?? attachment.ogScrapeUrl,
+      };
       if (url == null) return;
 
       if (onLinkTap case final onTap?) return onTap(url);
