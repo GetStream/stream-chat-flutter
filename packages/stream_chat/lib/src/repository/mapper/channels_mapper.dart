@@ -7,6 +7,7 @@ import '../../core/models/channel_model.dart';
 import '../../core/models/channel_state.dart';
 import '../../core/models/chat_preferences.dart';
 import '../../core/models/command.dart';
+import '../../core/models/events/message_events.dart';
 import '../../core/models/member.dart';
 import '../../core/models/predefined_filter.dart';
 import '../../core/models/push_level.dart';
@@ -30,9 +31,12 @@ import '../../core/models/response/update_channel_partial_response.dart';
 import '../../core/models/response/update_channel_response.dart';
 import '../../core/models/response/update_member_partial_response.dart';
 import 'drafts_mapper.dart';
+import 'event_users_mapper.dart';
+import 'events_mapper.dart';
 import 'locations_mapper.dart';
 import 'messages_mapper.dart';
 import 'scheduled_messages_mapper.dart';
+import 'threads_mapper.dart';
 import 'users_mapper.dart';
 
 /// Maps a generated [api.ChannelResponse] to a [ChannelModel].
@@ -227,11 +231,24 @@ extension DeleteChannelResponseMapper on api.DeleteChannelResponse {
 
 /// Maps a generated [api.MarkReadResponse] to a [MarkReadResponse].
 extension MarkReadResponseMapper on api.MarkReadResponse {
-  // TODO(openapi-migration): map `event` in group 09; its user is a
-  // `UserResponseCommonFields`.
-
   /// Converts this response into a [MarkReadResponse].
-  MarkReadResponse toModel() => MarkReadResponse(duration: duration);
+  MarkReadResponse toModel() => MarkReadResponse(duration: duration, event: event?.toModel());
+}
+
+/// Maps a generated [api.MarkReadResponseEvent] to a [MessageReadEvent].
+extension MarkReadResponseEventMapper on api.MarkReadResponseEvent {
+  /// Converts this event into a [MessageReadEvent].
+  MessageReadEvent toModel() => MessageReadEvent(
+    cid: cid,
+    channelId: channelId,
+    channelType: channelType,
+    channel: channel?.toModel(),
+    user: user?.toModel(),
+    lastReadMessageId: lastReadMessageId,
+    thread: thread?.toModel(),
+    createdAt: createdAt,
+    isLocal: false,
+  );
 }
 
 /// Maps a generated [api.MarkDeliveredResponse] to a [MarkDeliveredResponse].
@@ -248,11 +265,8 @@ extension MessageDeliveryRequestMapper on MessageDelivery {
 
 /// Maps a generated [api.EventResponse] to an [EventResponse].
 extension EventResponseMapper on api.EventResponse {
-  // TODO(openapi-migration): map `event` once `Event` and the WebSocket move to
-  // v2.
-
   /// Converts this response into an [EventResponse].
-  EventResponse toModel() => EventResponse(duration: duration);
+  EventResponse toModel() => EventResponse(duration: duration, event: event.toModel());
 }
 
 /// Maps a [CreateChannelData] to the generated [api.ChannelInput].

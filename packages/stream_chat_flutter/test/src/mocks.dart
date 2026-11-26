@@ -20,7 +20,7 @@ class MockChannel extends Mock implements Channel {
       ChannelCapability.sendMessage,
       ChannelCapability.uploadFile,
     ],
-    Stream<Event>? eventStream,
+    Stream<ChatEvent>? eventStream,
   }) : _eventStream = eventStream ?? const Stream.empty() {
     registerFallbackValue(DraftMessage());
     when(() => createDraft(any())).thenAnswer(
@@ -77,17 +77,20 @@ class MockChannel extends Mock implements Channel {
     return Future.value(const Result.success(ChannelStateResponse(duration: '0ms', channelState: ChannelState())));
   }
 
-  final Stream<Event> _eventStream;
+  final Stream<ChatEvent> _eventStream;
 
   @override
-  Stream<Event> on([
+  Stream<T> on<T extends ChatEvent>([
     String? eventType,
     String? eventType2,
     String? eventType3,
     String? eventType4,
   ]) {
-    if (eventType == null) return _eventStream;
-    return _eventStream.where((e) => e.type == eventType);
+    final events = switch (eventType) {
+      null => _eventStream,
+      _ => _eventStream.where((e) => e.type == eventType),
+    };
+    return events.where((e) => e is T).cast<T>();
   }
 }
 

@@ -8,7 +8,7 @@ void main() {
     final client = _client();
     final emitted = _usersEmittedAfterNow(client);
 
-    client.handleEvent(Event(type: 'call.session_participant_count_updated'));
+    client.handleEvent(UnknownEvent(type: 'call.session_participant_count_updated'));
     await pumpEventQueue();
 
     expect(emitted, isEmpty);

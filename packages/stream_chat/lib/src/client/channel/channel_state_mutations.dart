@@ -22,7 +22,7 @@ class ChannelStateMutations {
   final Channel _channel;
   final ChannelClientState _state;
 
-  final void Function(User user, Event event) _upsertTypingEvent;
+  final void Function(User user, TypingStartEvent event) _upsertTypingEvent;
   final void Function(User user) _removeTypingEvent;
   final void Function(User watcher, {int? watcherCount}) _removeWatcher;
   final void Function(User user) _removeMember;
@@ -37,7 +37,7 @@ class ChannelStateMutations {
   StreamChatClient get _client => _channel.client;
 
   /// Records the typing [event] for the given [user].
-  void onTypingStart(User user, Event event) => _upsertTypingEvent(user, event);
+  void onTypingStart(User user, TypingStartEvent event) => _upsertTypingEvent(user, event);
 
   /// Clears the typing state for the given [user].
   void onTypingStop(User user) => _removeTypingEvent(user);
@@ -190,9 +190,6 @@ class ChannelStateMutations {
 
     return threadMessage;
   }
-
-  /// Adds the [message] carrying a newly created poll.
-  void onPollCreated(Message message) => _state.addNewMessage(message);
 
   /// Applies the updated [eventPoll] to the message carrying it, preserving
   /// the known answers and own votes.

@@ -41,6 +41,7 @@ onto Stream's OpenAPI-generated API client.
     - [Channel Lifecycle](#channel-lifecycle)
     - [Read Receipts](#read-receipts)
     - [Sending Events](#sending-events)
+    - [Real-time Events](#real-time-events)
     - [Unread Counts](#unread-counts)
     - [User Blocking](#user-blocking)
     - [User Updates](#user-updates)
@@ -65,6 +66,8 @@ onto Stream's OpenAPI-generated API client.
 | v10.x, with a custom `AttachmentFileUploader` | [Feature Areas](#feature-areas) → File Upload |
 | v10.x, with `stream_chat_persistence` | [Offline Cache](#offline-cache) — the local database is rebuilt on first launch |
 | v10.x, using list controllers without an explicit `sort` | [Feature Areas](#feature-areas) → [Sorting](#sorting) |
+| v10.x, listening to events (`on`, `eventStream`), or with a custom `ChatPersistenceClient` | [Feature Areas](#feature-areas) → [Real-time Events](#real-time-events) |
+| v10.x, behind a proxy or allow-list that matches the WebSocket's address | [Feature Areas](#feature-areas) → [Real-time Events](#real-time-events) — the address moved to `/api/v2/connect` |
 | A v11 beta | [Symbol Map](#symbol-map) only — entries are additive across betas |
 
 ---
@@ -112,6 +115,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**Channels and Members**](#channels-and-members) | Querying, creating, watching, updating and truncating a channel, its invites and its members, and querying its members, return a `Result` instead of throwing; the invite and member calls answer an `UpdateChannelResponse`, and the channel queries a `ChannelStateResponse`; the data a channel is created or updated with and the members added to it are typed (`CreateChannelData`, `UpdateChannelData`, `ChannelMemberData`); `ChannelState`, `ChannelModel`, `Member` and `PredefinedFilter` no longer decode JSON and compare by value, and the first three's `copyWith` clears a field passed as `null` |
 | [**Channel Truncation**](#channel-truncation) | `ChannelClientState.truncate` truncates the channel instead of emptying the loaded messages, which is now `clearMessages`; `ChatPersistenceClient.truncateChannel` is required |
 | [**Message States**](#message-states) | `MessageState.sending` and `.updating` are factories carrying the request's options; a partial update has its own `partialUpdating` state |
+| [**Real-time Events**](#real-time-events) | `Event` is replaced by one class per event type extending `ChatEvent`, and a custom or unknown type arrives as an `UnknownEvent`; `on<MessageNewEvent>()` filters by class; an event's `extraData` is `custom`; `typingEvents` holds `TypingStartEvent`s; `AITypingState` is an extension type; a custom `ChatPersistenceClient`'s `updateConnectionInfo` takes a `HealthCheckEvent` and `getConnectionInfo` returns an `OwnUser`; the WebSocket connects to `/api/v2/connect` and no longer puts the user token in its address |
 | _(filled in per feature as PRs land)_ | |
 
 ---
@@ -446,7 +450,7 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Channel.startTyping` / `stopTyping` / `keyStroke` → `Future<void>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing. Same arguments. A success when typing events are disabled and nothing is sent |
 | `Channel.stopAIResponse` → `Future<EmptyResponse>` | `Future<Result<void>>` | `retyped` | Returns a `Result` instead of throwing. Calling it before the channel is initialized still throws a `StateError` |
 | `KeyStrokeHandler.onStartTyping` / `onStopTyping` → `Future<void> Function([String?])` | `Future<Result<void>> Function([String?])` | `retyped` | Return a failure rather than throwing; calling the handler returns `Future<Result<void>>` with the failure of its typing start or stop |
-| `Event.toJson`, `Read.toJson`, `Draft.toJson`, `DraftMessage.toJson`, `ChannelPushPreference.toJson` | — | `removed` | These models only decode; `fromJson` stays |
+| `Read.toJson`, `Draft.toJson`, `DraftMessage.toJson`, `ChannelPushPreference.toJson` | — | `removed` | These models only decode; `fromJson` stays. `Event` itself is removed — see [Real-time Events](#real-time-events) |
 | `StreamChatApi.channel.sendEvent` | `StreamChatClient.sendEvent` | `removed` | The endpoint moved to the generated client |
 | `StreamChatClient.queryChannel` / `watchChannel` / `createChannel` → `Future<ChannelState>` | `Future<Result<ChannelStateResponse>>` | `retyped` | Returns a `Result` instead of throwing; read the state off `.channelState` |
 | `Channel.query` / `watch` / `create` → `Future<ChannelState>` | `Future<Result<ChannelStateResponse>>` | `retyped` | Returns a `Result` instead of throwing; read the state off `.channelState`. A state read from the offline storage answers with a `0ms` duration |
@@ -490,6 +494,30 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | — | `ChatPersistenceClient.settleInterruptedRequests()` | `added` | Abstract: a custom persistence client must implement it |
 | — | `OutgoingState.partialUpdating` / `MessageState.partialUpdating(...)` | `added` | The state of a partial update, such as a pin, while it runs. An exhaustive `switch` over `OutgoingState` needs the new case |
 | `OutgoingState.when(sending: () => …, updating: () => …)` | `when(sending: (skipPush, skipEnrichUrl) => …, updating: (skipPush, skipEnrichUrl) => …, partialUpdating: (set, unset, skipEnrichUrl) => …)` | `retyped` | Also `whenOrNull` and `maybeWhen`; `map`, `mapOrNull` and `maybeMap` take a `partialUpdating` callback |
+| `Event` | `ChatEvent` and one class per event type: `MessageNewEvent`, `TypingStartEvent`, … | `removed` | [Real-time Events](#real-time-events) names the class of each type. A custom or unknown type arrives as an `UnknownEvent` |
+| `Event.fromJson`, `Event.topLevelFields` | — | `removed` | Construct the event's class directly |
+| `Event.copyWith` | `copyWith` on the event's class | `moved` | |
+| `Event.message` / `.channel` / `.user` / `.reaction` / `.member` / … (all nullable) | the same field on the event's class | `moved` | Only on the classes whose type carries it, and non-nullable where the type always does: `MessageNewEvent.message` is a `Message`, so drop the `!` |
+| `Event.extraData` | `ChatEvent.custom` | `renamed` | Holds only the custom data the event was sent with. Keys `Event` had no field for, such as `team`, `clear_history` and `thread_id`, are no longer in it |
+| `Event.userId` | `event.user?.id`; `userId` on the reminder events | `moved` | |
+| `Event.connectionId`, `Event.channelLastMessageAt` | — | `removed` | No event carries them |
+| `event.isFromUser(userId: id)` (`EventExtension`) | `event is HasUser && event.user?.id == id` | `removed` | |
+| `StreamChatClient.on([String…])` / `Channel.on([String…])` → `Stream<Event>` | `on<T extends ChatEvent>([String…])` → `Stream<T>` | `retyped` | `on(EventType.messageNew)` still compiles and emits `ChatEvent`s; `on<MessageNewEvent>()` emits `MessageNewEvent`s. Both filters combine |
+| `StreamChatClient.eventStream` (`Stream<Event>`) | `Stream<ChatEvent>` | `retyped` | |
+| `StreamChatClient.handleEvent(Event)` | `handleEvent(ChatEvent)` | `retyped` | |
+| `ChannelClientState.typingEvents` / `typingEventsStream` (`Map<User, Event>`) | `Map<User, TypingStartEvent>` | `retyped` | Reads such as `parentId` are unchanged |
+| `AITypingState` (enum) | `AITypingState` (extension type over `String`) | `retyped` | A `switch` over it needs a default; `.name` and `.values` are gone. `AI_STATE_EXTERNAL_SOURCES` is `checkingExternalSources`, no longer `checkingSources`; `isCheckingSources` matches both |
+| `ChatPersistenceClient.updateConnectionInfo(Event)` | `updateConnectionInfo(HealthCheckEvent)` | `retyped` | Store `event.me`. Called once per opened connection, no longer on every health check |
+| `ChatPersistenceClient.getConnectionInfo()` → `Future<Event?>` | `Future<OwnUser?>` | `retyped` | Return the stored current user |
+| `StreamChatPersistenceClient.updateConnectionInfo` / `getConnectionInfo` | `updateConnectionInfo(HealthCheckEvent)` / `Future<OwnUser?>` | `retyped` | `stream_chat_persistence`. Nothing to do unless you call them yourself; the stored data is unchanged |
+| `SyncResponse` | — | `removed` | Only `StreamChatApi.general.sync` returned it. `StreamChatClient.sync` is unchanged |
+| `StreamChatApi.general`, `GeneralApi` | `StreamChatClient.sync` | `removed` | `sync` was its last endpoint |
+| `EventHandler` (`void Function(Event)`) | `void Function(ChatEvent)` | `retyped` | `stream_chat_flutter_core`. The type of `StreamChatCore.onBackgroundEventReceived`, and of `StreamChat.onBackgroundEventReceived` in `stream_chat_flutter` |
+| `eventListener: bool Function(Event)` on `StreamChannelListController`, `StreamDraftListController`, `StreamMessageReminderListController`, `StreamPollVoteListController` and `StreamThreadListController` | `bool Function(ChatEvent)` | `retyped` | `stream_chat_flutter_core` |
+| `StreamChannelListEventHandler.onMessageNew(Event, …)` and every other method of the four `Stream*ListEventHandler`s | `onMessageNew(MessageNewEvent, …)`: the class of the event handled | `retyped` | `stream_chat_flutter_core`. [Real-time Events](#real-time-events) lists each method's type |
+| WebSocket address `wss://<host>/connect`, with the user token in its query | `wss://<host>/api/v2/connect`, with the token only in the connection's first message | `moved` | Add the new path to any proxy, firewall or allow-list that matches the old one |
+| — | `EventResponse.event`, `MarkReadResponse.event` | `added` | The event sending an event produced, and the read event a mark-read sent |
+| — | `EventType.notificationChannelMutesUpdated` | `added` | `NotificationChannelMutesUpdatedEvent`'s type |
 | _(more added per feature as PRs land)_ | | | |
 
 ---
@@ -1037,7 +1065,8 @@ the same name for the rest.
 
 **`sendEvent` takes the event's parts instead of an `Event`.** On `StreamChatClient` and `Channel`, pass the
 event's `type`, the `parentId` of the thread it belongs to and its `custom` data as arguments. A field you set
-on the `Event` besides those goes into `custom` under its JSON key; other users receive it as before.
+on the `Event` besides those goes into `custom` under its JSON key; other users read it from the received
+event's `custom` — see [Real-time Events](#real-time-events).
 
 ```dart
 // v10
@@ -1056,14 +1085,311 @@ typing events are disabled, the typing calls send nothing and return a success.
 `Future<Result<void>> Function([String?])`, and calling the handler returns a `Result<void>` carrying the failure
 of its typing start or stop.
 
-**`Event`, `Read`, `Draft`, `DraftMessage` and `ChannelPushPreference` no longer encode to JSON.** They still
-decode with `fromJson`. Serialize the fields you need yourself if you stored them. `ChannelState` no longer
-encodes or decodes at all — see [Channels and Members](#channels-and-members).
+**`Read`, `Draft`, `DraftMessage` and `ChannelPushPreference` no longer encode to JSON.** They still decode
+with `fromJson`. Serialize the fields you need yourself if you stored them. `ChannelState` no longer encodes or
+decodes at all — see [Channels and Members](#channels-and-members) — and `Event` is removed — see
+[Real-time Events](#real-time-events).
 
 **`StreamChatApi.channel.sendEvent` is removed.** Call `StreamChatClient.sendEvent`.
 
 > **Why:** the endpoint moved onto the generated client, which returns a `Result` for every call and takes the
 > event as its own request rather than as a received event. The `toJson` methods had no caller left in the SDK.
+
+### Real-time Events
+
+#### Key Changes:
+
+- **`Event` is replaced by one class per event type.** Each extends `ChatEvent`, which carries `type`, `createdAt`,
+  `custom` and `isLocal`, and holds only the fields its type has, non-nullable where the type always carries them:
+  `MessageNewEvent.message` is a `Message`. The table below names the class of each type. `Event.fromJson`,
+  `topLevelFields` and `EventExtension.isFromUser` go with it.
+- **A custom type, or one this version does not model, arrives as an `UnknownEvent`.** Match it by `type`; its
+  `custom` holds the data it was sent with, and `rawData` the event as it was received. It has no `cid`, `user`,
+  `parentId` or counts: read them from `rawData`, as in `rawData['cid']`. It no longer updates `ClientState.users`,
+  the unread counts or a channel's counts. `Channel.on` still delivers it to the channel its `rawData` names.
+- **`on` filters by class.** `StreamChatClient.on` and `Channel.on` take the event's class as a type argument:
+  `on<MessageNewEvent>()` emits `MessageNewEvent`s. The `EventType` filters still work, alone or combined with a
+  class, and alone they emit `ChatEvent`s. `eventStream` is a `Stream<ChatEvent>` and `handleEvent` takes a
+  `ChatEvent`.
+- **Mixins group events by what they carry:** `HasCid`, `HasUser`, `HasChannel`, `HasMessage`, `HasPollVote`,
+  `HasOwnUser`, `HasUnreadCounts`, `HasUnreadThreadCount` and `HasChannelCounts`. `on<HasMessage>()` delivers every
+  event that carries a message, and `Channel.on` delivers only `HasCid` events of its channel.
+- **The set of classes is open.** A later release can add a class for a type that arrives as an `UnknownEvent`
+  today, so a `switch` over events keeps a default case.
+- **An event's `extraData` is `custom`, and holds only the custom data the event was sent with.** The keys v10 left
+  in `extraData` because `Event` had no field for them — `team`, `clear_history`, `thread_id` and the like — are no
+  longer there. A thread marked unread is named by `NotificationMarkUnreadEvent.threadId`.
+- **`ChannelClientState.typingEvents` and `typingEventsStream` hold `TypingStartEvent`s.** Their fields read the same.
+- **`AITypingState` is an extension type over its wire value.** Its constants keep their names, a value the SDK has
+  no constant for is kept as it is, and a `switch` over it needs a default case. `AI_STATE_EXTERNAL_SOURCES` is the
+  new `checkingExternalSources` rather than `checkingSources`; `isCheckingSources` matches both.
+- **A custom `ChatPersistenceClient` stores the current user, not an event.** `updateConnectionInfo` takes the
+  `HealthCheckEvent` a connection opens with, and `getConnectionInfo` returns the stored `OwnUser`. The client calls
+  `updateConnectionInfo` once per opened connection, no longer on every health check. `StreamChatPersistenceClient`
+  does this for you, and keeps the data it stored.
+- **The `stream_chat_flutter_core` handlers take the event's class.** `EventHandler`,
+  `StreamChatCore.onBackgroundEventReceived`, `StreamChat.onBackgroundEventReceived` and the list controllers'
+  `eventListener` take a `ChatEvent`; each method of the `Stream*ListEventHandler`s takes the class it handles.
+- **`getUnreadCount` no longer emits an event.** It updates the current user's unread counts directly, so a listener
+  on every event no longer sees one after the call; read `client.state.totalUnreadCount` and the like.
+- **Users carried by events no longer include `shadowBanned` or `banExpires`, nor `invisible` outside `user.updated`.**
+  A user in `client.state.users` loses them when an event about that user arrives.
+- **A `user.updated` event about the current user keeps their `blockedUserIds` and `banExpires`,** which v10 cleared.
+- **`callLevel` on the current user's `pushPreferences` is no longer filled when connecting.**
+- **`GeneralApi`, `StreamChatApi.general` and `SyncResponse` are removed.** `StreamChatClient.sync` is unchanged.
+- **The WebSocket connects to `/api/v2/connect`**, and the user token is no longer in its address — see below.
+
+| `type` | `EventType` constant | Class |
+| --- | --- | --- |
+| `message.new` | `messageNew` | `MessageNewEvent` |
+| `message.updated` | `messageUpdated` | `MessageUpdatedEvent` |
+| `message.deleted` | `messageDeleted` | `MessageDeletedEvent` |
+| `message.read` | `messageRead` | `MessageReadEvent` |
+| `message.delivered` | `messageDelivered` | `MessageDeliveredEvent` |
+| `reaction.new` | `reactionNew` | `ReactionNewEvent` |
+| `reaction.updated` | `reactionUpdated` | `ReactionUpdatedEvent` |
+| `reaction.deleted` | `reactionDeleted` | `ReactionDeletedEvent` |
+| `typing.start` | `typingStart` | `TypingStartEvent` |
+| `typing.stop` | `typingStop` | `TypingStopEvent` |
+| `ai_indicator.update` | `aiIndicatorUpdate` | `AIIndicatorUpdateEvent` |
+| `ai_indicator.stop` | `aiIndicatorStop` | `AIIndicatorStopEvent` |
+| `ai_indicator.clear` | `aiIndicatorClear` | `AIIndicatorClearEvent` |
+| `channel.updated` | `channelUpdated` | `ChannelUpdatedEvent` |
+| `channel.deleted` | `channelDeleted` | `ChannelDeletedEvent` |
+| `channel.truncated` | `channelTruncated` | `ChannelTruncatedEvent` |
+| `channel.hidden` | `channelHidden` | `ChannelHiddenEvent` |
+| `channel.visible` | `channelVisible` | `ChannelVisibleEvent` |
+| `member.added` | `memberAdded` | `MemberAddedEvent` |
+| `member.removed` | `memberRemoved` | `MemberRemovedEvent` |
+| `member.updated` | `memberUpdated` | `MemberUpdatedEvent` |
+| `notification.added_to_channel` | `notificationAddedToChannel` | `NotificationAddedToChannelEvent` |
+| `notification.removed_from_channel` | `notificationRemovedFromChannel` | `NotificationRemovedFromChannelEvent` |
+| `notification.invited` | `notificationInvited` | `NotificationInvitedEvent` |
+| `notification.invite_accepted` | `notificationInviteAccepted` | `NotificationInviteAcceptedEvent` |
+| `notification.channel_deleted` | `notificationChannelDeleted` | `NotificationChannelDeletedEvent` |
+| `notification.channel_truncated` | `notificationChannelTruncated` | `NotificationChannelTruncatedEvent` |
+| `notification.mutes_updated` | `notificationMutesUpdated` | `NotificationMutesUpdatedEvent` |
+| `notification.channel_mutes_updated` | `notificationChannelMutesUpdated` (new) | `NotificationChannelMutesUpdatedEvent` |
+| `notification.mark_read` | `notificationMarkRead` | `NotificationMarkReadEvent` |
+| `notification.mark_unread` | `notificationMarkUnread` | `NotificationMarkUnreadEvent` |
+| `notification.message_new` | `notificationMessageNew` | `NotificationMessageNewEvent` |
+| `notification.thread_message_new` | `notificationThreadMessageNew` | `NotificationThreadMessageNewEvent` |
+| `notification.reminder_due` | `notificationReminderDue` | `NotificationReminderDueEvent` |
+| `poll.updated` | `pollUpdated` | `PollUpdatedEvent` |
+| `poll.closed` | `pollClosed` | `PollClosedEvent` |
+| `poll.deleted` | `pollDeleted` | `PollDeletedEvent` |
+| `poll.vote_casted` | `pollVoteCasted` | `PollVoteCastedEvent` |
+| `poll.vote_changed` | `pollVoteChanged` | `PollVoteChangedEvent` |
+| `poll.vote_removed` | `pollVoteRemoved` | `PollVoteRemovedEvent` |
+| `poll.answer_casted` | `pollAnswerCasted` | `PollAnswerCastedEvent` — emitted in place of a vote cast or changed that is an answer |
+| `poll.answer_removed` | `pollAnswerRemoved` | `PollAnswerRemovedEvent` — emitted in place of a vote removed that is an answer |
+| `location.shared` | `locationShared` | `LocationSharedEvent` — emitted in place of a new message that shares a location |
+| `location.updated` | `locationUpdated` | `LocationUpdatedEvent` — emitted in place of an update to a live location's message |
+| `location.expired` | `locationExpired` | `LocationExpiredEvent` — emitted in place of an update that ends a live location |
+| `draft.updated` | `draftUpdated` | `DraftUpdatedEvent` |
+| `draft.deleted` | `draftDeleted` | `DraftDeletedEvent` |
+| `reminder.created` | `reminderCreated` | `ReminderCreatedEvent` |
+| `reminder.updated` | `reminderUpdated` | `ReminderUpdatedEvent` |
+| `reminder.deleted` | `reminderDeleted` | `ReminderDeletedEvent` |
+| `scheduled_message.created` | `scheduledMessageCreated` | `ScheduledMessageCreatedEvent` |
+| `scheduled_message.updated` | `scheduledMessageUpdated` | `ScheduledMessageUpdatedEvent` |
+| `scheduled_message.deleted` | `scheduledMessageDeleted` | `ScheduledMessageDeletedEvent` |
+| `scheduled_message.sent` | `scheduledMessageSent` | `ScheduledMessageSentEvent` |
+| `scheduled_message.failed` | `scheduledMessageFailed` | `ScheduledMessageFailedEvent` |
+| `thread.updated` | `threadUpdated` | `ThreadUpdatedEvent` |
+| `user.updated` | `userUpdated` | `UserUpdatedEvent` |
+| `user.presence.changed` | `userPresenceChanged` | `UserPresenceChangedEvent` |
+| `user.watching.start` | `userWatchingStart` | `UserWatchingStartEvent` |
+| `user.watching.stop` | `userWatchingStop` | `UserWatchingStopEvent` |
+| `user.banned` | `userBanned` | `UserBannedEvent` |
+| `user.unbanned` | `userUnbanned` | `UserUnbannedEvent` |
+| `user.messages.deleted` | `userMessagesDeleted` | `UserMessagesDeletedEvent` |
+| `push_preference.updated` | `pushPreferenceUpdated` | `PushPreferenceUpdatedEvent` — emitted by `setPushPreferences` |
+| `channel.push_preference.updated` | `channelPushPreferenceUpdated` | `ChannelPushPreferenceUpdatedEvent` — emitted by `setPushPreferences` |
+| `health.check` | `healthCheck` | `HealthCheckEvent` — the message a connection opens with; not delivered by `on` or `eventStream`, passed to `ChatPersistenceClient.updateConnectionInfo` |
+| `connection.error` | `connectionError` | `ConnectionErrorEvent` |
+| `connection.changed` | `connectionChanged` | `ConnectionChangedEvent` — emitted by the client |
+| `connection.recovered` | `connectionRecovered` | `ConnectionRecoveredEvent` — emitted by the client |
+| any other type, including a custom one | — | `UnknownEvent` |
+
+The `stream_chat_flutter_core` handler methods take these classes:
+
+| Handler | Methods and the class each takes |
+| --- | --- |
+| `StreamChannelListEventHandler` | `onChannelDeleted` (`HasChannel`: `ChannelDeletedEvent` or `NotificationChannelDeletedEvent`), `onChannelHidden` (`ChannelHiddenEvent`), `onChannelTruncated` (`ChannelTruncatedEvent`), `onChannelUpdated` (`ChannelUpdatedEvent`), `onChannelVisible` (`HasChannel`: `ChannelVisibleEvent`), `onConnectionRecovered` (`ConnectionRecoveredEvent`), `onMemberUpdated` (`MemberUpdatedEvent`), `onMessageNew` (`MessageNewEvent`), `onNotificationAddedToChannel` (`NotificationAddedToChannelEvent`), `onNotificationMessageNew` (`NotificationMessageNewEvent`), `onNotificationRemovedFromChannel` (`NotificationRemovedFromChannelEvent`), `onUserPresenceChanged` (`HasUser`: `UserPresenceChangedEvent` or `UserUpdatedEvent`) |
+| `StreamDraftListEventHandler` | `onConnectionRecovered` (`ConnectionRecoveredEvent`), `onDraftUpdated` (`DraftUpdatedEvent`), `onDraftDeleted` (`DraftDeletedEvent`) |
+| `StreamMessageReminderListEventHandler` | `onConnectionRecovered` (`ConnectionRecoveredEvent`), `onMessageReminderCreated` (`ReminderCreatedEvent`), `onMessageReminderUpdated` (`ReminderUpdatedEvent`), `onMessageReminderDeleted` (`ReminderDeletedEvent`), `onMessageReminderDue` (`NotificationReminderDueEvent`) |
+| `StreamThreadListEventHandler` | `onThreadUpdated` (`ThreadUpdatedEvent`), `onConnectionRecovered` (`ConnectionRecoveredEvent`), `onReactionNew` / `onReactionUpdated` / `onReactionDeleted` (`ReactionNewEvent` / `ReactionUpdatedEvent` / `ReactionDeletedEvent`), `onNotificationThreadMessageNew` (`NotificationThreadMessageNewEvent`), `onMessageNew` / `onMessageUpdated` / `onMessageDeleted` (`MessageNewEvent` / `MessageUpdatedEvent` / `MessageDeletedEvent`), `onChannelDeleted` (`ChannelDeletedEvent`), `onChannelTruncated` (`ChannelTruncatedEvent`), `onMessageRead` (`MessageReadEvent`), `onNotificationMarkUnread` (`NotificationMarkUnreadEvent`), `onDraftUpdated` / `onDraftDeleted` (`DraftUpdatedEvent` / `DraftDeletedEvent`) |
+
+#### Migration Steps:
+
+**Listen for a type by its class.** The fields its type always carries need no `!`.
+
+**Before:**
+```dart
+client.on(EventType.messageNew).listen((event) {
+  final message = event.message!;
+  showNotification(event.user?.name, message.text);
+});
+```
+
+**After:**
+```dart
+client.on<MessageNewEvent>().listen((event) {
+  showNotification(event.user?.name, event.message.text);
+});
+```
+
+**Switch on the class instead of the type string.** Keep the default case: a later release can add a class.
+
+**Before:**
+```dart
+final description = switch (event.type) {
+  EventType.messageNew => 'New message: ${event.message!.text}',
+  EventType.reactionNew => 'New reaction: ${event.reaction!.type}',
+  EventType.channelDeleted => 'Channel ${event.cid} deleted',
+  _ => null,
+};
+```
+
+**After:**
+```dart
+final description = switch (event) {
+  MessageNewEvent(:final message) => 'New message: ${message.text}',
+  ReactionNewEvent(:final reaction?) => 'New reaction: ${reaction.type}',
+  ChannelDeletedEvent(:final channel) => 'Channel ${channel.cid} deleted',
+  _ => null,
+};
+```
+
+**Receive a custom event as an `UnknownEvent`, filtered by its type, and read its `custom`.** Sending it is
+unchanged from [Sending Events](#sending-events).
+
+**Before:**
+```dart
+await channel.sendEvent(Event(type: 'party_started', extraData: {'theme': 'disco'}));
+
+channel.on('party_started').listen((event) => startParty(event.extraData['theme']));
+```
+
+**After:**
+```dart
+await channel.sendEvent(type: 'party_started', custom: {'theme': 'disco'});
+
+channel.on<UnknownEvent>('party_started').listen((event) => startParty(event.custom['theme']));
+```
+
+**Read an event's custom data from `custom`.**
+
+**Before:**
+```dart
+channel.on(EventType.typingStart).listen((event) => showDevice(event.extraData['device']));
+```
+
+**After:**
+```dart
+channel.on<TypingStartEvent>().listen((event) => showDevice(event.custom['device']));
+```
+
+**Store the current user in a custom `ChatPersistenceClient`.** `getConnectionInfo` is what lets the client start
+offline with the user it last connected as.
+
+**Before:**
+```dart
+class MyPersistenceClient extends ChatPersistenceClient {
+  @override
+  Future<Event?> getConnectionInfo() async {
+    final json = await _store.read('connection');
+    return json == null ? null : Event.fromJson(json);
+  }
+
+  @override
+  Future<void> updateConnectionInfo(Event event) => _store.write('connection', event.toJson());
+
+  // …
+}
+```
+
+**After:**
+```dart
+class MyPersistenceClient extends ChatPersistenceClient {
+  @override
+  Future<OwnUser?> getConnectionInfo() async {
+    final json = await _store.read('current_user');
+    return json == null ? null : OwnUser.fromJson(json);
+  }
+
+  @override
+  Future<void> updateConnectionInfo(HealthCheckEvent event) => _store.write('current_user', event.me.toJson());
+
+  // …
+}
+```
+
+**Give a `switch` over `AITypingState` a default case,** and match checking sources with `isCheckingSources`.
+
+**Before:**
+```dart
+channel.on(EventType.aiIndicatorUpdate).listen((event) {
+  final label = switch (event.aiState) {
+    AITypingState.thinking => 'Thinking…',
+    AITypingState.checkingSources => 'Checking sources…',
+    AITypingState.generating => 'Generating…',
+    AITypingState.error => 'Something went wrong',
+    AITypingState.idle || null => null,
+  };
+  showIndicator(label);
+});
+```
+
+**After:**
+```dart
+channel.on<AIIndicatorUpdateEvent>().listen((event) {
+  final state = event.aiState;
+  final label = switch (state) {
+    AITypingState.thinking => 'Thinking…',
+    _ when state.isCheckingSources => 'Checking sources…',
+    AITypingState.generating => 'Generating…',
+    AITypingState.error => 'Something went wrong',
+    _ => null,
+  };
+  showIndicator(label);
+});
+```
+
+**Override a `stream_chat_flutter_core` handler method with the event's class.**
+
+**Before:**
+```dart
+class MyChannelListEventHandler extends StreamChannelListEventHandler {
+  @override
+  void onMessageNew(Event event, StreamChannelListController controller) {
+    if (event.message?.silent ?? false) return;
+    super.onMessageNew(event, controller);
+  }
+}
+```
+
+**After:**
+```dart
+class MyChannelListEventHandler extends StreamChannelListEventHandler {
+  @override
+  void onMessageNew(MessageNewEvent event, StreamChannelListController controller) {
+    if (event.message.silent) return;
+    super.onMessageNew(event, controller);
+  }
+}
+```
+
+**The WebSocket connects to `/api/v2/connect` instead of `/connect`.** The host is unchanged, and `baseWsUrl` still
+names it. If a proxy, firewall or allow-list matches the WebSocket's path, add the new one. The user token is no
+longer in the address: it travels only in the connection's first message, so it stays out of logged URLs, proxy
+logs and the error a failed connection raises.
+
+> **Why:** one `Event` carried every field of every event type, all nullable, so reading one meant knowing which
+> fields its type fills and unwrapping them; a class per type says what each event carries, and the compiler checks
+> it. The WebSocket moved to the v2 protocol, which takes the user token in the connection's first message rather
+> than in its address, keeping it out of URLs.
 
 ### Unread Counts
 
@@ -2057,6 +2383,12 @@ Work top to bottom; each item is independently verifiable.
 - [ ] Add `()` to `MessageState.sending` and `MessageState.updating`, and handle `OutgoingState.partialUpdating` in exhaustive
       `switch`es — see [Message States](#message-states)
 - [ ] If you implement `ChatPersistenceClient`, implement `settleInterruptedRequests` — see [Message States](#message-states)
+- [ ] Move event listeners onto the event classes (`on<MessageNewEvent>()`, a `switch` on the class with a default
+      case), and read an event's `custom` where you read `extraData` — see [Real-time Events](#real-time-events)
+- [ ] If you implement `ChatPersistenceClient`, retype `updateConnectionInfo` and `getConnectionInfo` — see
+      [Real-time Events](#real-time-events)
+- [ ] If a proxy, firewall or allow-list matches the WebSocket's path, add `/api/v2/connect` — see
+      [Real-time Events](#real-time-events)
 - [ ] Run `dart analyze` and your test suite; the analyzer finds most of the mechanical work for you
 
 ---

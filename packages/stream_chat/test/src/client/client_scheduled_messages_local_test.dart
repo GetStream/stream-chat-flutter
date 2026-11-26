@@ -36,8 +36,10 @@ void main() {
   // The scheduled message events while [run] runs, as type and status.
   Future<List<(String, ScheduledMessageStatus?)>> eventsDuring(Future<void> Function() run) async {
     final events = <(String, ScheduledMessageStatus?)>[];
-    final subscription = harness.client.on().where((it) => it.scheduledMessage != null).listen((it) {
-      events.add((it.type, it.scheduledMessage?.status));
+    final subscription = harness.client.on().listen((it) {
+      if (scheduledMessageOf(it) case final scheduledMessage?) {
+        events.add((it.type, scheduledMessage.status));
+      }
     });
 
     try {
@@ -291,12 +293,26 @@ void main() {
   });
 
   test('scheduleMessage reports its own events as local', () async {
-    final local = harness.client.on(EventType.scheduledMessageCreated).first;
+    final local = harness.client.on<ScheduledMessageCreatedEvent>().first;
     final message = Message(id: 'a', text: 'Good morning');
     stubSchedule(message, () => Completer<ScheduleMessageResponse>().future);
     unawaited(schedule(message));
 
     expect((await local).isLocal, isTrue);
+  });
+
+  test("scheduleMessage reports the server copy with the scheduled message's own user", () async {
+    final message = Message(id: 'a', text: 'Good morning');
+    final author = User(id: 'author-id');
+    final server = fakeScheduledMessage('a', scheduledAt: scheduledAt).copyWith(user: author);
+    stubSchedule(message, () async => scheduled(message, server));
+    final created = harness.client.on<ScheduledMessageCreatedEvent>().firstWhere(
+      (it) => it.scheduledMessage?.status == ScheduledMessageStatus.scheduled,
+    );
+
+    await schedule(message);
+
+    expect((await created).user.id, 'author-id');
   });
 
   for (final (refusal, code, type, status) in [
@@ -344,7 +360,7 @@ void main() {
   test("scheduleMessage reports the sent message's ID when it is sent right away", () async {
     final message = Message(id: 'a', text: 'Good morning');
     stubSchedule(message, () async => sentRightAway(message));
-    final sent = harness.client.on(EventType.scheduledMessageSent).first;
+    final sent = harness.client.on<ScheduledMessageSentEvent>().first;
 
     await schedule(message);
 
@@ -355,7 +371,7 @@ void main() {
     final message = Message(id: 'a', text: 'Good morning');
     final error = refusedWith(scheduledMessageAlreadySentCode);
     stubSchedule(message, () async => throw error);
-    final sent = harness.client.on(EventType.scheduledMessageSent).first;
+    final sent = harness.client.on<ScheduledMessageSentEvent>().first;
 
     await expectLater(schedule(message), throwsA(error));
 
@@ -526,3 +542,13 @@ StreamApiException refusedWith(int code) {
 ScheduleMessageResponse sentRightAway(Message message) {
   return ScheduleMessageResponse()..message = message;
 }
+
+// The scheduled message [event] carries, if it is a scheduled message event.
+ScheduledMessage? scheduledMessageOf(ChatEvent event) => switch (event) {
+  ScheduledMessageCreatedEvent(:final scheduledMessage) => scheduledMessage,
+  ScheduledMessageUpdatedEvent(:final scheduledMessage) => scheduledMessage,
+  ScheduledMessageFailedEvent(:final scheduledMessage) => scheduledMessage,
+  ScheduledMessageSentEvent(:final scheduledMessage) => scheduledMessage,
+  ScheduledMessageDeletedEvent(:final scheduledMessage) => scheduledMessage,
+  _ => null,
+};

@@ -20,7 +20,7 @@ void main() {
     final ben = User(id: 'ben', name: 'Ben');
     final emit = await _pumpOptionVotesSheet(tester, option: _pizza);
 
-    emit(Event(type: EventType.pollVoteCasted, pollVote: _voteBy(ben, _sushi)));
+    emit(PollVoteCastedEvent(poll: _lunchPoll(), pollVote: _voteBy(ben, _sushi)));
     await tester.pumpAndSettle();
 
     expect(find.text('Ben'), findsNothing);
@@ -32,8 +32,8 @@ void main() {
     expect(find.text('Ben'), findsOneWidget);
 
     emit(
-      Event(
-        type: EventType.pollVoteChanged,
+      PollVoteChangedEvent(
+        poll: _lunchPoll(),
         pollVote: pizzaVote.copyWith(optionId: _sushi.id),
       ),
     );
@@ -43,18 +43,20 @@ void main() {
   });
 }
 
+Poll _lunchPoll() => Poll(id: _pollId, name: 'Lunch: pizza or sushi?', options: const [_pizza, _sushi]);
+
 PollVote _voteBy(User user, PollOption option) {
   return PollVote(id: 'vote-${user.id}', pollId: _pollId, optionId: option.id, user: user);
 }
 
 // Pumps the votes sheet for [option] with [votes] already loaded, and returns a function that emits a channel
 // event to the sheet.
-Future<void Function(Event event)> _pumpOptionVotesSheet(
+Future<void Function(ChatEvent event)> _pumpOptionVotesSheet(
   WidgetTester tester, {
   required PollOption option,
   List<PollVote> votes = const [],
 }) async {
-  final events = StreamController<Event>.broadcast();
+  final events = StreamController<ChatEvent>.broadcast();
   addTearDown(events.close);
 
   final client = MockClient();
@@ -86,7 +88,7 @@ Future<void Function(Event event)> _pumpOptionVotesSheet(
           channel: channel,
           child: Scaffold(
             body: StreamPollOptionVotesSheet(
-              poll: Poll(id: _pollId, name: 'Lunch: pizza or sushi?', options: const [_pizza, _sushi]),
+              poll: _lunchPoll(),
               option: option,
             ),
           ),

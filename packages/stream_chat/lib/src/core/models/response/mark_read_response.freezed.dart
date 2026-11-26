@@ -14,6 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MarkReadResponse {
   String get duration;
+  MessageReadEvent? get event;
 
   /// Create a copy of MarkReadResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -29,15 +30,16 @@ mixin _$MarkReadResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is MarkReadResponse &&
-            (identical(other.duration, duration) || other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration) &&
+            (identical(other.event, event) || other.event == event));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, duration);
+  int get hashCode => Object.hash(runtimeType, duration, event);
 
   @override
   String toString() {
-    return 'MarkReadResponse(duration: $duration)';
+    return 'MarkReadResponse(duration: $duration, event: $event)';
   }
 }
 
@@ -48,7 +50,7 @@ abstract mixin class $MarkReadResponseCopyWith<$Res> {
     $Res Function(MarkReadResponse) _then,
   ) = _$MarkReadResponseCopyWithImpl;
   @useResult
-  $Res call({String duration});
+  $Res call({String duration, MessageReadEvent? event});
 }
 
 /// @nodoc
@@ -62,13 +64,17 @@ class _$MarkReadResponseCopyWithImpl<$Res> implements $MarkReadResponseCopyWith<
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? duration = null}) {
+  $Res call({Object? duration = null, Object? event = freezed}) {
     return _then(
       MarkReadResponse(
         duration: null == duration
             ? _self.duration
             : duration // ignore: cast_nullable_to_non_nullable
                   as String,
+        event: freezed == event
+            ? _self.event
+            : event // ignore: cast_nullable_to_non_nullable
+                  as MessageReadEvent?,
       ),
     );
   }

@@ -9,7 +9,6 @@ import '../channel_model.dart';
 import '../chat_preferences.dart';
 import '../command.dart';
 import '../device.dart';
-import '../draft.dart';
 import '../location.dart';
 import '../member.dart';
 import '../message.dart';
@@ -22,9 +21,6 @@ import '../push_level.dart';
 import '../push_provider.dart';
 import '../reaction.dart';
 import '../reaction_group.dart';
-import '../read.dart';
-import '../thread.dart';
-import '../thread_participant.dart';
 import '../user.dart';
 import '../user_group.dart';
 import '../user_group_member.dart';
@@ -108,7 +104,7 @@ class LocationV1JsonConverter implements JsonConverter<Location, Map<String, dyn
 /// such as `hide_messages_before`, are not custom data. [toJson] writes the
 /// id, type, frozen flag, cooldown and custom data, each custom entry at the
 /// root unless it is named like a known key.
-// TODO(openapi-migration): remove when WebSocket payloads decode as v2
+// TODO(openapi-migration): remove in group 10
 @internal
 class ChannelModelV1JsonConverter implements JsonConverter<ChannelModel, Map<String, dynamic>> {
   /// Creates a new [ChannelModelV1JsonConverter].
@@ -206,7 +202,7 @@ const _channelV1Keys = [
 
 /// Reads a [ChannelConfig] from its v1 keys, or the default configuration
 /// when there is none.
-// TODO(openapi-migration): remove when WebSocket payloads decode as v2
+// TODO(openapi-migration): remove in group 10
 @internal
 ChannelConfig channelConfigFromV1Json(Map<String, dynamic>? json) =>
     json == null ? ChannelConfig() : _channelConfigFromV1Json(json);
@@ -256,17 +252,11 @@ Duration? _secondsOrNull(Object? seconds) => switch (seconds) {
   _ => null,
 };
 
-/// Reads a [Member] from its v1 keys, or null when there is none.
+/// Reads a list of [Member]s from their v1 keys.
 ///
-/// Custom data sits at the root of the v1 map, beside the known keys. `role`
+/// Custom data sits at the root of each v1 map, beside the known keys. `role`
 /// is not custom data and is left out.
-// TODO(openapi-migration): remove when WebSocket payloads decode as v2
-@internal
-Member? memberFromV1Json(Map<String, dynamic>? json) => json == null ? null : _memberFromV1Json(json);
-
-/// Reads a list of [Member]s from their v1 keys, as [memberFromV1Json] reads
-/// each one.
-// TODO(openapi-migration): remove when WebSocket payloads decode as v2
+// TODO(openapi-migration): remove in group 10
 @internal
 List<Member>? membersFromV1Json(List<dynamic>? json) =>
     json?.map((member) => _memberFromV1Json(member as Map<String, dynamic>)).toList();
@@ -327,16 +317,10 @@ const _memberV1Keys = [
   'user_id',
 ];
 
-/// Reads a [Reaction] from its v1 keys.
+/// Reads a list of [Reaction]s from their v1 keys.
 ///
-/// Custom data sits at the root of the v1 map, beside the known keys.
-// TODO(openapi-migration): remove when WebSocket payloads decode as v2
-@internal
-Reaction? reactionFromV1Json(Map<String, dynamic>? json) => json == null ? null : _reactionFromV1Json(json);
-
-/// Reads a list of [Reaction]s from their v1 keys, as [reactionFromV1Json]
-/// reads each one.
-// TODO(openapi-migration): remove when WebSocket payloads decode as v2
+/// Custom data sits at the root of each v1 map, beside the known keys.
+// TODO(openapi-migration): remove in group 10
 @internal
 List<Reaction>? reactionsFromV1Json(List<dynamic>? json) =>
     json?.map((reaction) => _reactionFromV1Json(reaction as Map<String, dynamic>)).toList();
@@ -378,7 +362,7 @@ const _reactionV1Keys = [
 ];
 
 /// Reads a [MessageReminder] from its v1 keys.
-// TODO(openapi-migration): remove when WebSocket payloads decode as v2
+// TODO(openapi-migration): remove in group 10
 @internal
 MessageReminder? messageReminderFromV1Json(Map<String, dynamic>? json) {
   if (json == null) return null;
@@ -403,90 +387,6 @@ MessageReminder? messageReminderFromV1Json(Map<String, dynamic>? json) {
     updatedAt: _dateTimeOrNull(json['updated_at']),
   );
 }
-
-/// Reads a [Thread] from its v1 keys, with its custom data at the root.
-// TODO(openapi-migration): remove once WebSocket events decode v2 payloads
-@internal
-Thread? threadFromV1Json(Map<String, dynamic>? json) {
-  if (json == null) return null;
-  return Thread(
-    activeParticipantCount: (json['active_participant_count'] as num?)?.toInt(),
-    channel: switch (json['channel']) {
-      final Map<String, dynamic> channel => _channelModelFromV1Json(channel),
-      _ => null,
-    },
-    channelCid: json['channel_cid'] as String,
-    parentMessageId: json['parent_message_id'] as String,
-    parentMessage: switch (json['parent_message']) {
-      final Map<String, dynamic> message => Message.fromJson(message),
-      _ => null,
-    },
-    createdByUserId: json['created_by_user_id'] as String,
-    createdBy: switch (json['created_by']) {
-      final Map<String, dynamic> user => User.fromJson(user),
-      _ => null,
-    },
-    replyCount: (json['reply_count'] as num).toInt(),
-    participantCount: (json['participant_count'] as num).toInt(),
-    threadParticipants: [
-      for (final participant in json['thread_participants'] as List<dynamic>? ?? const [])
-        _threadParticipantFromV1Json(participant as Map<String, dynamic>),
-    ],
-    lastMessageAt: _dateTimeOrNull(json['last_message_at']),
-    createdAt: _dateTimeOrNull(json['created_at']),
-    updatedAt: _dateTimeOrNull(json['updated_at']),
-    deletedAt: _dateTimeOrNull(json['deleted_at']),
-    title: json['title'] as String?,
-    latestReplies: [
-      for (final reply in json['latest_replies'] as List<dynamic>? ?? const [])
-        Message.fromJson(reply as Map<String, dynamic>),
-    ],
-    read: [
-      for (final read in json['read'] as List<dynamic>? ?? const []) Read.fromJson(read as Map<String, dynamic>),
-    ],
-    draft: switch (json['draft']) {
-      final Map<String, dynamic> draft => Draft.fromJson(draft),
-      _ => null,
-    },
-    custom: _customData(json, _threadV1Keys),
-  );
-}
-
-// The keys a v1 thread carries besides its custom data.
-const _threadV1Keys = [
-  'active_participant_count',
-  'channel_cid',
-  'channel',
-  'created_at',
-  'updated_at',
-  'deleted_at',
-  'created_by_user_id',
-  'created_by',
-  'title',
-  'parent_message_id',
-  'parent_message',
-  'reply_count',
-  'participant_count',
-  'thread_participants',
-  'last_message_at',
-  'latest_replies',
-  'read',
-  'draft',
-];
-
-ThreadParticipant _threadParticipantFromV1Json(Map<String, dynamic> json) => ThreadParticipant(
-  channelCid: json['channel_cid'] as String,
-  createdAt: _dateTime.fromJson(json['created_at'] as Object),
-  lastReadAt: _dateTime.fromJson(json['last_read_at'] as Object),
-  lastThreadMessageAt: _dateTimeOrNull(json['last_thread_message_at']),
-  leftThreadAt: _dateTimeOrNull(json['left_thread_at']),
-  threadId: json['thread_id'] as String?,
-  userId: json['user_id'] as String?,
-  user: switch (json['user']) {
-    final Map<String, dynamic> user => User.fromJson(user),
-    _ => null,
-  },
-);
 
 /// Converts a [Device] to and from its v1 `id` and `push_provider` keys.
 // TODO(openapi-migration): remove in group 09
@@ -568,7 +468,7 @@ DateTime? _dateTimeOrNull(Object? json) => json == null ? null : _dateTime.fromJ
 // v1 sends for a channel without messages.
 //
 // v2 sends the Unix epoch instead, which the channels mapper reads as null
-// too, so the REST and WebSocket paths give the same channel.
+// too, so a channel reads the same whichever way it arrived.
 DateTime? _lastMessageAtOrNull(Object? json) => switch (_dateTimeOrNull(json)) {
   final date? when date.year > 1 => date,
   _ => null,
@@ -599,7 +499,7 @@ UserGroupMember _userGroupMemberFromV1Json(Map<String, dynamic> json) => UserGro
 /// Reads a [Poll] from its v1 keys.
 ///
 /// Custom data sits at the root of the v1 map, beside the known keys.
-// TODO(openapi-migration): remove once events and messages decode v2 payloads
+// TODO(openapi-migration): remove in group 10
 @internal
 Poll? pollFromV1Json(Map<String, dynamic>? json) {
   if (json == null) return null;
@@ -645,11 +545,6 @@ Poll? pollFromV1Json(Map<String, dynamic>? json) {
     custom: _customData(json, _pollV1Keys),
   );
 }
-
-/// Reads a [PollVote] from its v1 keys.
-// TODO(openapi-migration): remove once WebSocket events decode v2 payloads
-@internal
-PollVote? pollVoteFromV1Json(Map<String, dynamic>? json) => json == null ? null : _pollVoteFromV1Json(json);
 
 PollOption _pollOptionFromV1Json(Map<String, dynamic> json) => PollOption(
   id: json['id'] as String?,

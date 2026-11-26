@@ -644,8 +644,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
   StreamSubscription<DateTime?>? _lastSentAtSubscription;
   StreamSubscription<Draft?>? _draftStreamSubscription;
-  StreamSubscription<Event>? _messageUpdatedSubscription;
-  StreamSubscription<Event>? _messageDeletedSubscription;
+  StreamSubscription<MessageUpdatedEvent>? _messageUpdatedSubscription;
+  StreamSubscription<MessageDeletedEvent>? _messageDeletedSubscription;
 
   // Height of the floating pill, reported from layout and read back at paint
   // time by _FloatingComposerBackdropPainter. Layout always runs before paint,
@@ -709,13 +709,12 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     }
 
     // Keeps the composer in sync with remote message changes.
-    _messageUpdatedSubscription = channel.on(EventType.messageUpdated).listen(_onMessageUpdated);
-    _messageDeletedSubscription = channel.on(EventType.messageDeleted).listen(_onMessageDeleted);
+    _messageUpdatedSubscription = channel.on<MessageUpdatedEvent>().listen(_onMessageUpdated);
+    _messageDeletedSubscription = channel.on<MessageDeletedEvent>().listen(_onMessageDeleted);
   }
 
-  void _onMessageUpdated(Event event) {
+  void _onMessageUpdated(MessageUpdatedEvent event) {
     final updatedMessage = event.message;
-    if (updatedMessage == null) return;
 
     if (_effectiveController.message.quotedMessageId == updatedMessage.id) {
       _effectiveController.quotedMessage = updatedMessage;
@@ -726,9 +725,8 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     }
   }
 
-  void _onMessageDeleted(Event event) {
-    final deletedMessageId = event.message?.id;
-    if (deletedMessageId == null) return;
+  void _onMessageDeleted(MessageDeletedEvent event) {
+    final deletedMessageId = event.message.id;
 
     if (_effectiveController.message.quotedMessageId == deletedMessageId) {
       widget.props.onQuotedMessageCleared?.call();

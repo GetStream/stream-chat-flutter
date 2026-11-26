@@ -1,6 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../client/client.dart';
-import '../../ws/events/event.dart';
 import '../models/banned_user.dart';
 import '../models/converters/v1_json_converters.dart';
 import '../models/location.dart';
@@ -43,17 +42,6 @@ class ErrorResponse extends _BaseResponse {
       'message: $message, '
       'statusCode: $statusCode, '
       'moreInfo: $moreInfo)';
-}
-
-/// Model response for [StreamChatClient.sync] api call
-@JsonSerializable(createToJson: false)
-class SyncResponse extends _BaseResponse {
-  /// The list of events
-  @JsonKey(defaultValue: [])
-  late List<Event> events;
-
-  /// Create a new instance from a json
-  static SyncResponse fromJson(Map<String, dynamic> json) => _$SyncResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.queryUsers] api call

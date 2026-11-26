@@ -38,11 +38,12 @@ void main() {
   // Matches the default current user of [FakeClientState].
   const currentUserId = 'test-user-id';
   final otherUser = User(id: 'other-user');
+  final channelModel = ChannelModel(cid: 'messaging:test');
 
   setUpAll(() {
     registerFallbackValue(FakeMessage());
     registerFallbackValue(FakeUser());
-    registerFallbackValue(FakeEvent());
+    registerFallbackValue(TypingStartEvent());
     registerFallbackValue(FakeDraft());
     registerFallbackValue(FakeReaction());
     registerFallbackValue(DateTime(2026));
@@ -90,15 +91,15 @@ void main() {
 
   group('dispatch', () {
     test('does nothing for an unknown event without payloads', () {
-      handler.handleEvent(Event(type: 'unknown.event'));
+      handler.handleEvent(MessageDeliveredEvent());
 
       verifyZeroInteractions(mutations);
     });
 
     test('runs the unfiltered handlers around the typed blocks in order', () {
       final member = Member(userId: otherUser.id);
-      final event = Event(
-        type: EventType.memberAdded,
+      final event = MemberAddedEvent(
+        channel: channelModel,
         member: member,
         user: otherUser,
         channelMessageCount: 5,
@@ -120,7 +121,7 @@ void main() {
       final member = Member(userId: otherUser.id);
 
       handler.handleEvent(
-        Event(type: EventType.memberUpdated, member: member, user: otherUser),
+        MemberUpdatedEvent(channel: channelModel, member: member, user: otherUser),
       );
 
       verifyInOrder([
@@ -132,7 +133,7 @@ void main() {
 
   group('typing events', () {
     test('typing.start delegates the typing user and event', () {
-      final event = Event(type: EventType.typingStart, user: otherUser);
+      final event = TypingStartEvent(user: otherUser);
 
       handler.handleEvent(event);
 
@@ -140,16 +141,13 @@ void main() {
     });
 
     test('typing.start ignores events without a user', () {
-      handler.handleEvent(Event(type: EventType.typingStart));
+      handler.handleEvent(TypingStartEvent());
 
       verifyNever(() => mutations.onTypingStart(any(), any()));
     });
 
     test('typing.start ignores events from the current user', () {
-      final event = Event(
-        type: EventType.typingStart,
-        user: User(id: currentUserId),
-      );
+      final event = TypingStartEvent(user: User(id: currentUserId));
 
       handler.handleEvent(event);
 
@@ -157,7 +155,7 @@ void main() {
     });
 
     test('typing.stop delegates the typing user', () {
-      final event = Event(type: EventType.typingStop, user: otherUser);
+      final event = TypingStopEvent(user: otherUser);
 
       handler.handleEvent(event);
 
@@ -165,10 +163,7 @@ void main() {
     });
 
     test('typing.stop ignores events from the current user', () {
-      final event = Event(
-        type: EventType.typingStop,
-        user: User(id: currentUserId),
-      );
+      final event = TypingStopEvent(user: User(id: currentUserId));
 
       handler.handleEvent(event);
 
@@ -180,11 +175,7 @@ void main() {
     final message = Message(id: 'message-id', user: otherUser);
 
     test('message.new delegates the message with its watcher count', () {
-      final event = Event(
-        type: EventType.messageNew,
-        message: message,
-        watcherCount: 7,
-      );
+      final event = MessageNewEvent(message: message, watcherCount: 7);
 
       handler.handleEvent(event);
 
@@ -192,8 +183,8 @@ void main() {
     });
 
     test('notification.message_new never forwards the watcher count', () {
-      final event = Event(
-        type: EventType.notificationMessageNew,
+      final event = NotificationMessageNewEvent(
+        channel: channelModel,
         message: message,
         watcherCount: 7,
       );
@@ -203,15 +194,8 @@ void main() {
       verify(() => mutations.onMessageNew(message, watcherCount: null)).called(1);
     });
 
-    test('message.new ignores events without a message', () {
-      handler.handleEvent(Event(type: EventType.messageNew));
-
-      verifyNever(() => mutations.onMessageNew(any(), watcherCount: any(named: 'watcherCount')));
-    });
-
     test('message.deleted delegates the message enriched with deletedForMe', () {
-      final event = Event(
-        type: EventType.messageDeleted,
+      final event = MessageDeletedEvent(
         message: message,
         hardDelete: true,
         deletedForMe: true,
@@ -223,16 +207,8 @@ void main() {
       verify(() => mutations.onMessageDeleted(expected, hardDelete: true)).called(1);
     });
 
-    test('message.deleted defaults to a soft delete', () {
-      final event = Event(type: EventType.messageDeleted, message: message);
-
-      handler.handleEvent(event);
-
-      verify(() => mutations.onMessageDeleted(any(), hardDelete: false)).called(1);
-    });
-
     test('message.updated delegates the message', () {
-      final event = Event(type: EventType.messageUpdated, message: message);
+      final event = MessageUpdatedEvent(message: message);
 
       handler.handleEvent(event);
 
@@ -241,17 +217,11 @@ void main() {
 
     test('message.updated passes the user who made the edit', () {
       final editor = User(id: 'editor');
-      final event = Event(type: EventType.messageUpdated, message: message, user: editor);
+      final event = MessageUpdatedEvent(message: message, user: editor);
 
       handler.handleEvent(event);
 
       verify(() => mutations.onMessageUpdated(message, editor: editor)).called(1);
-    });
-
-    test('message.updated ignores events without a message', () {
-      handler.handleEvent(Event(type: EventType.messageUpdated));
-
-      verifyNever(() => mutations.onMessageUpdated(any()));
     });
   });
 
@@ -263,25 +233,25 @@ void main() {
     );
 
     test('draft.updated delegates the draft', () {
-      handler.handleEvent(Event(type: EventType.draftUpdated, draft: draft));
+      handler.handleEvent(DraftUpdatedEvent(draft: draft));
 
       verify(() => mutations.onDraftUpdated(draft)).called(1);
     });
 
     test('draft.deleted delegates the draft', () {
-      handler.handleEvent(Event(type: EventType.draftDeleted, draft: draft));
+      handler.handleEvent(DraftDeletedEvent(draft: draft));
 
       verify(() => mutations.onDraftDeleted(draft)).called(1);
     });
 
     test('draft.updated ignores events without a draft', () {
-      handler.handleEvent(Event(type: EventType.draftUpdated));
+      handler.handleEvent(DraftUpdatedEvent());
 
       verifyNever(() => mutations.onDraftUpdated(any()));
     });
 
     test('draft.deleted ignores events without a draft', () {
-      handler.handleEvent(Event(type: EventType.draftDeleted));
+      handler.handleEvent(DraftDeletedEvent());
 
       verifyNever(() => mutations.onDraftDeleted(any()));
     });
@@ -297,8 +267,8 @@ void main() {
     );
 
     test('reaction.new delegates the message and reaction', () {
-      final event = Event(
-        type: EventType.reactionNew,
+      final event = ReactionNewEvent(
+        channel: channelModel,
         message: message,
         reaction: reaction,
       );
@@ -309,8 +279,8 @@ void main() {
     });
 
     test('reaction.updated delegates the message and reaction', () {
-      final event = Event(
-        type: EventType.reactionUpdated,
+      final event = ReactionUpdatedEvent(
+        channel: channelModel,
         message: message,
         reaction: reaction,
       );
@@ -321,8 +291,8 @@ void main() {
     });
 
     test('reaction.deleted delegates the message and reaction', () {
-      final event = Event(
-        type: EventType.reactionDeleted,
+      final event = ReactionDeletedEvent(
+        channel: channelModel,
         message: message,
         reaction: reaction,
       );
@@ -333,8 +303,8 @@ void main() {
     });
 
     test('reaction events ignore events missing the reaction or message', () {
-      handler.handleEvent(Event(type: EventType.reactionNew, message: message));
-      handler.handleEvent(Event(type: EventType.reactionNew, reaction: reaction));
+      handler.handleEvent(ReactionNewEvent(channel: channelModel, message: message));
+      handler.handleEvent(ReactionNewEvent(channel: channelModel, reaction: reaction));
 
       verifyNever(() => mutations.onReactionNew(any(), any()));
     });
@@ -353,88 +323,52 @@ void main() {
       optionId: 'option-a',
     );
 
-    test('poll.created delegates the poll message', () {
-      final message = Message(id: 'message-id', poll: poll);
-      final event = Event(type: EventType.pollCreated, message: message);
-
-      handler.handleEvent(event);
-
-      verify(() => mutations.onPollCreated(message)).called(1);
-    });
-
-    test('poll.created ignores messages without a poll', () {
-      final message = Message(id: 'message-id');
-      handler.handleEvent(Event(type: EventType.pollCreated, message: message));
-      handler.handleEvent(Event(type: EventType.pollCreated));
-
-      verifyNever(() => mutations.onPollCreated(any()));
-    });
-
     test('poll.updated delegates the poll', () {
-      handler.handleEvent(Event(type: EventType.pollUpdated, poll: poll));
+      handler.handleEvent(PollUpdatedEvent(poll: poll));
 
       verify(() => mutations.onPollUpdated(poll)).called(1);
     });
 
     test('poll.closed delegates the poll', () {
-      handler.handleEvent(Event(type: EventType.pollClosed, poll: poll));
+      handler.handleEvent(PollClosedEvent(poll: poll));
 
       verify(() => mutations.onPollClosed(poll)).called(1);
     });
 
-    test('poll.updated ignores events without a poll', () {
-      handler.handleEvent(Event(type: EventType.pollUpdated));
-
-      verifyNever(() => mutations.onPollUpdated(any()));
-    });
-
     test('poll.answer_casted delegates the poll and vote', () {
-      handler.handleEvent(Event(type: EventType.pollAnswerCasted, poll: poll, pollVote: pollVote));
+      handler.handleEvent(PollAnswerCastedEvent(poll: poll, pollVote: pollVote));
 
       verify(() => mutations.onPollAnswerCasted(poll, pollVote)).called(1);
     });
 
     test('poll.vote_casted delegates the poll and vote', () {
-      handler.handleEvent(Event(type: EventType.pollVoteCasted, poll: poll, pollVote: pollVote));
+      handler.handleEvent(PollVoteCastedEvent(poll: poll, pollVote: pollVote));
 
       verify(() => mutations.onPollVoteCasted(poll, pollVote)).called(1);
     });
 
     test('poll.vote_changed delegates the poll and vote', () {
-      handler.handleEvent(Event(type: EventType.pollVoteChanged, poll: poll, pollVote: pollVote));
+      handler.handleEvent(PollVoteChangedEvent(poll: poll, pollVote: pollVote));
 
       verify(() => mutations.onPollVoteChanged(poll, pollVote)).called(1);
     });
 
     test('poll.answer_removed delegates the poll and vote', () {
-      handler.handleEvent(Event(type: EventType.pollAnswerRemoved, poll: poll, pollVote: pollVote));
+      handler.handleEvent(PollAnswerRemovedEvent(poll: poll, pollVote: pollVote));
 
       verify(() => mutations.onPollAnswerRemoved(poll, pollVote)).called(1);
     });
 
     test('poll.vote_removed delegates the poll and vote', () {
-      handler.handleEvent(Event(type: EventType.pollVoteRemoved, poll: poll, pollVote: pollVote));
+      handler.handleEvent(PollVoteRemovedEvent(poll: poll, pollVote: pollVote));
 
       verify(() => mutations.onPollVoteRemoved(poll, pollVote)).called(1);
-    });
-
-    test('poll vote events ignore events without a vote', () {
-      handler.handleEvent(Event(type: EventType.pollVoteCasted, poll: poll));
-
-      verifyNever(() => mutations.onPollVoteCasted(any(), any()));
-    });
-
-    test('poll vote events ignore events without a poll', () {
-      handler.handleEvent(Event(type: EventType.pollVoteCasted, pollVote: pollVote));
-
-      verifyNever(() => mutations.onPollVoteCasted(any(), any()));
     });
   });
 
   group('read events', () {
     test('message.read delegates the read with the event creation time', () {
-      final event = Event(
-        type: EventType.messageRead,
+      final event = MessageReadEvent(
         user: otherUser,
         createdAt: DateTime.now(),
         lastReadMessageId: 'last-read-id',
@@ -453,7 +387,11 @@ void main() {
     });
 
     test('notification.mark_read routes to the same read handling', () {
-      final event = Event(type: EventType.notificationMarkRead, user: otherUser);
+      final event = NotificationMarkReadEvent(
+        user: otherUser,
+        totalUnreadCount: 0,
+        unreadChannels: 0,
+      );
 
       handler.handleEvent(event);
 
@@ -467,10 +405,7 @@ void main() {
     });
 
     test('message.read from the current user reconciles channel delivery', () {
-      final event = Event(
-        type: EventType.messageRead,
-        user: User(id: currentUserId),
-      );
+      final event = MessageReadEvent(user: User(id: currentUserId));
 
       handler.handleEvent(event);
 
@@ -478,8 +413,7 @@ void main() {
     });
 
     test('message.read ignores thread reads', () {
-      final event = Event(
-        type: EventType.messageRead,
+      final event = MessageReadEvent(
         user: otherUser,
         thread: Thread(
           parentMessageId: 'parent-id',
@@ -505,8 +439,7 @@ void main() {
 
     test('notification.mark_unread delegates the unread mark', () {
       final lastReadAt = DateTime.now();
-      final event = Event(
-        type: EventType.notificationMarkUnread,
+      final event = NotificationMarkUnreadEvent(
         user: otherUser,
         lastReadAt: lastReadAt,
         unreadMessages: 3,
@@ -527,8 +460,7 @@ void main() {
 
     test('message.delivered delegates the delivery info', () {
       final deliveredAt = DateTime.now();
-      final event = Event(
-        type: EventType.messageDelivered,
+      final event = MessageDeliveredEvent(
         user: otherUser,
         lastDeliveredAt: deliveredAt,
         lastDeliveredMessageId: 'delivered-id',
@@ -547,10 +479,7 @@ void main() {
     });
 
     test('message.delivered from the current user reconciles channel delivery', () {
-      final event = Event(
-        type: EventType.messageDelivered,
-        user: User(id: currentUserId),
-      );
+      final event = MessageDeliveredEvent(user: User(id: currentUserId));
 
       handler.handleEvent(event);
 
@@ -569,8 +498,7 @@ void main() {
 
       final truncatedAt = DateTime.utc(2026, 10, 29, 12);
       final systemMessage = Message(id: 'system-id');
-      final event = Event(
-        type: EventType.channelTruncated,
+      final event = ChannelTruncatedEvent(
         channel: ChannelModel(cid: 'messaging:test', truncatedAt: truncatedAt),
         message: systemMessage,
       );
@@ -580,14 +508,14 @@ void main() {
 
       verifyInOrder([
         () => persistence.truncateChannel('messaging:test', truncatedAt: truncatedAt),
-        () => mutations.onChannelTruncated(event.channel!, cutoff: truncatedAt, message: systemMessage),
+        () => mutations.onChannelTruncated(event.channel, cutoff: truncatedAt, message: systemMessage),
       ]);
     });
 
     test("channel.truncated cuts at the channel's truncatedAt", () async {
       final truncatedAt = DateTime.utc(2026, 10, 29, 12);
       final channelModel = ChannelModel(cid: 'messaging:test', truncatedAt: truncatedAt);
-      final event = Event(type: EventType.channelTruncated, channel: channelModel);
+      final event = ChannelTruncatedEvent(channel: channelModel);
 
       handler.handleEvent(event);
       await Future<void>.value();
@@ -605,7 +533,7 @@ void main() {
 
       final eventTime = DateTime.utc(2026, 10, 29, 12);
       final channelModel = ChannelModel(cid: 'messaging:test');
-      final event = Event(type: EventType.channelTruncated, channel: channelModel, createdAt: eventTime);
+      final event = ChannelTruncatedEvent(channel: channelModel, createdAt: eventTime);
 
       await withClock(Clock.fixed(DateTime.utc(2026, 10, 29, 13)), () async {
         handler.handleEvent(event);
@@ -620,7 +548,7 @@ void main() {
 
     test('channel.updated delegates the channel model', () {
       final channelModel = ChannelModel(cid: 'messaging:test');
-      final event = Event(type: EventType.channelUpdated, channel: channelModel);
+      final event = ChannelUpdatedEvent(channel: channelModel);
 
       handler.handleEvent(event);
 
@@ -628,13 +556,7 @@ void main() {
     });
 
     test('any event carrying channel counts delegates them', () {
-      handler.handleEvent(
-        Event(
-          type: 'unknown.event',
-          channelMemberCount: 7,
-          channelMessageCount: 42,
-        ),
-      );
+      handler.handleEvent(MessageDeliveredEvent(channelMemberCount: 7, channelMessageCount: 42));
 
       verify(
         () => mutations.onChannelCounts(memberCount: 7, messageCount: 42),
@@ -642,7 +564,7 @@ void main() {
     });
 
     test('an event carrying only one of the counts still delegates it', () {
-      handler.handleEvent(Event(type: 'unknown.event', channelMemberCount: 7));
+      handler.handleEvent(MessageDeliveredEvent(channelMemberCount: 7));
 
       verify(
         () => mutations.onChannelCounts(memberCount: 7, messageCount: null),
@@ -650,7 +572,7 @@ void main() {
     });
 
     test('events without any channel count skip the count update', () {
-      handler.handleEvent(Event(type: 'unknown.event'));
+      handler.handleEvent(UnknownEvent(type: 'unknown.event'));
 
       verifyNever(
         () => mutations.onChannelCounts(
@@ -662,20 +584,11 @@ void main() {
 
     test('channel.push_preference.updated delegates the preferences', () {
       const pushPreference = ChannelPushPreference(chatLevel: ChatLevel.mentions);
-      final event = Event(
-        type: EventType.channelPushPreferenceUpdated,
-        channelPushPreference: pushPreference,
-      );
+      final event = ChannelPushPreferenceUpdatedEvent(channelPushPreference: pushPreference);
 
       handler.handleEvent(event);
 
       verify(() => mutations.onChannelPushPreferenceUpdated(pushPreference)).called(1);
-    });
-
-    test('channel.push_preference.updated ignores events without preferences', () {
-      handler.handleEvent(Event(type: EventType.channelPushPreferenceUpdated));
-
-      verifyNever(() => mutations.onChannelPushPreferenceUpdated(any()));
     });
   });
 
@@ -683,7 +596,7 @@ void main() {
     final member = Member(userId: otherUser.id);
 
     test('member.added delegates the member', () {
-      final event = Event(type: EventType.memberAdded, member: member);
+      final event = MemberAddedEvent(channel: channelModel, member: member);
 
       handler.handleEvent(event);
 
@@ -691,7 +604,7 @@ void main() {
     });
 
     test('member.removed delegates the removed user', () {
-      final event = Event(type: EventType.memberRemoved, user: otherUser);
+      final event = MemberRemovedEvent(channel: channelModel, member: member, user: otherUser);
 
       handler.handleEvent(event);
 
@@ -699,7 +612,7 @@ void main() {
     });
 
     test('member.updated delegates the member', () {
-      final event = Event(type: EventType.memberUpdated, member: member, user: otherUser);
+      final event = MemberUpdatedEvent(channel: channelModel, member: member, user: otherUser);
 
       handler.handleEvent(event);
 
@@ -707,7 +620,7 @@ void main() {
     });
 
     test('any event carrying a user delegates the member-user merge', () {
-      handler.handleEvent(Event(type: 'unknown.event', user: otherUser));
+      handler.handleEvent(TypingStopEvent(user: otherUser));
 
       verify(() => mutations.onMemberUserUpdated(otherUser)).called(1);
     });
@@ -717,8 +630,7 @@ void main() {
         () => channel.queryMembers(filter: any(named: 'filter')),
       ).thenAnswer((_) async => Result.success(QueryMembersResponse(duration: '0.01ms', members: [member])));
 
-      final event = Event(
-        type: EventType.userBanned,
+      final event = UserBannedEvent(
         cid: 'messaging:test',
         user: otherUser,
       );
@@ -743,7 +655,7 @@ void main() {
         () => channel.queryMembers(filter: any(named: 'filter')),
       ).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'boom')));
 
-      handler.handleEvent(Event(type: EventType.userBanned, cid: 'messaging:test', user: otherUser));
+      handler.handleEvent(UserBannedEvent(cid: 'messaging:test', user: otherUser));
       await Future<void>.value();
 
       verifyNever(() => mutations.onMemberBanned(any()));
@@ -754,14 +666,14 @@ void main() {
         () => channel.queryMembers(filter: any(named: 'filter')),
       ).thenAnswer((_) async => const Result.success(QueryMembersResponse(duration: '0.01ms', members: [])));
 
-      handler.handleEvent(Event(type: EventType.userBanned, cid: 'messaging:test', user: otherUser));
+      handler.handleEvent(UserBannedEvent(cid: 'messaging:test', user: otherUser));
       await Future<void>.value();
 
       verifyNever(() => mutations.onMemberBanned(any()));
     });
 
     test('user.banned ignores app-level bans without a cid', () async {
-      handler.handleEvent(Event(type: EventType.userBanned, user: otherUser));
+      handler.handleEvent(UserBannedEvent(user: otherUser));
       await Future<void>.value();
 
       verifyNever(() => channel.queryMembers(filter: any(named: 'filter')));
@@ -773,8 +685,7 @@ void main() {
         () => channel.queryMembers(filter: any(named: 'filter')),
       ).thenAnswer((_) async => Result.success(QueryMembersResponse(duration: '0.01ms', members: [member])));
 
-      final event = Event(
-        type: EventType.userUnbanned,
+      final event = UserUnbannedEvent(
         cid: 'messaging:test',
         user: otherUser,
       );
@@ -786,8 +697,7 @@ void main() {
     });
 
     test('user.messages.deleted delegates the deletion parameters', () async {
-      final event = Event(
-        type: EventType.userMessagesDeleted,
+      final event = UserMessagesDeletedEvent(
         user: otherUser,
         hardDelete: true,
       );
@@ -803,28 +713,11 @@ void main() {
         ),
       ).called(1);
     });
-
-    test('user.messages.deleted ignores events without a user', () async {
-      handler.handleEvent(Event(type: EventType.userMessagesDeleted));
-      await Future<void>.value();
-
-      verifyNever(
-        () => mutations.onUserMessagesDeleted(
-          userId: any(named: 'userId'),
-          hardDelete: any(named: 'hardDelete'),
-          deletedAt: any(named: 'deletedAt'),
-        ),
-      );
-    });
   });
 
   group('watching events', () {
     test('user.watching.start delegates the watcher and count', () {
-      final event = Event(
-        type: EventType.userWatchingStart,
-        user: otherUser,
-        watcherCount: 3,
-      );
+      final event = UserWatchingStartEvent(user: otherUser, watcherCount: 3);
 
       handler.handleEvent(event);
 
@@ -832,27 +725,11 @@ void main() {
     });
 
     test('user.watching.stop delegates the watcher and count', () {
-      final event = Event(
-        type: EventType.userWatchingStop,
-        user: otherUser,
-        watcherCount: 2,
-      );
+      final event = UserWatchingStopEvent(user: otherUser, watcherCount: 2);
 
       handler.handleEvent(event);
 
       verify(() => mutations.onUserStopWatching(otherUser, watcherCount: 2)).called(1);
-    });
-
-    test('user.watching.start ignores events without a user', () {
-      handler.handleEvent(Event(type: EventType.userWatchingStart));
-
-      verifyNever(() => mutations.onUserStartWatching(any(), watcherCount: any(named: 'watcherCount')));
-    });
-
-    test('user.watching.stop ignores events without a user', () {
-      handler.handleEvent(Event(type: EventType.userWatchingStop));
-
-      verifyNever(() => mutations.onUserStopWatching(any(), watcherCount: any(named: 'watcherCount')));
     });
   });
 
@@ -865,33 +742,42 @@ void main() {
     );
 
     test('reminder.created delegates the reminder', () {
-      handler.handleEvent(Event(type: EventType.reminderCreated, reminder: reminder));
+      handler.handleEvent(
+        ReminderCreatedEvent(
+          cid: 'messaging:test',
+          messageId: 'message-id',
+          userId: currentUserId,
+          reminder: reminder,
+        ),
+      );
 
       verify(() => mutations.onReminderCreated(reminder)).called(1);
     });
 
     test('reminder.updated delegates the reminder', () {
-      handler.handleEvent(Event(type: EventType.reminderUpdated, reminder: reminder));
+      handler.handleEvent(
+        ReminderUpdatedEvent(
+          cid: 'messaging:test',
+          messageId: 'message-id',
+          userId: currentUserId,
+          reminder: reminder,
+        ),
+      );
 
       verify(() => mutations.onReminderUpdated(reminder)).called(1);
     });
 
     test('reminder.deleted delegates the reminder', () {
-      handler.handleEvent(Event(type: EventType.reminderDeleted, reminder: reminder));
+      handler.handleEvent(
+        ReminderDeletedEvent(
+          cid: 'messaging:test',
+          messageId: 'message-id',
+          userId: currentUserId,
+          reminder: reminder,
+        ),
+      );
 
       verify(() => mutations.onReminderDeleted(reminder)).called(1);
-    });
-
-    test('reminder.created ignores events without a reminder', () {
-      handler.handleEvent(Event(type: EventType.reminderCreated));
-
-      verifyNever(() => mutations.onReminderCreated(any()));
-    });
-
-    test('reminder.deleted ignores events without a reminder', () {
-      handler.handleEvent(Event(type: EventType.reminderDeleted));
-
-      verifyNever(() => mutations.onReminderDeleted(any()));
     });
   });
 
@@ -907,7 +793,7 @@ void main() {
 
     test('location.shared delegates the location message', () {
       final message = Message(id: 'message-id', sharedLocation: location);
-      final event = Event(type: EventType.locationShared, message: message);
+      final event = LocationSharedEvent(message: message);
 
       handler.handleEvent(event);
 
@@ -916,14 +802,14 @@ void main() {
 
     test('location.shared ignores messages without a location', () {
       final message = Message(id: 'message-id');
-      handler.handleEvent(Event(type: EventType.locationShared, message: message));
+      handler.handleEvent(LocationSharedEvent(message: message));
 
       verifyNever(() => mutations.onLocationShared(any()));
     });
 
     test('location.updated delegates the location', () {
       final message = Message(id: 'message-id', sharedLocation: location);
-      final event = Event(type: EventType.locationUpdated, message: message);
+      final event = LocationUpdatedEvent(message: message);
 
       handler.handleEvent(event);
 
@@ -932,7 +818,7 @@ void main() {
 
     test('location.expired delegates the location', () {
       final message = Message(id: 'message-id', sharedLocation: location);
-      final event = Event(type: EventType.locationExpired, message: message);
+      final event = LocationExpiredEvent(message: message);
 
       handler.handleEvent(event);
 
@@ -940,13 +826,13 @@ void main() {
     });
 
     test('location.updated ignores events without a location', () {
-      handler.handleEvent(Event(type: EventType.locationUpdated));
+      handler.handleEvent(LocationUpdatedEvent(message: Message(id: 'message-id')));
 
       verifyNever(() => mutations.onLocationUpdated(any()));
     });
 
     test('location.expired ignores events without a location', () {
-      handler.handleEvent(Event(type: EventType.locationExpired));
+      handler.handleEvent(LocationExpiredEvent(message: Message(id: 'message-id')));
 
       verifyNever(() => mutations.onLocationExpired(any()));
     });
@@ -959,10 +845,10 @@ void main() {
       ).thenThrow(StateError('boom'));
 
       handler.handleEvent(
-        Event(
-          type: EventType.messageNew,
+        MessageNewEvent(
           message: Message(id: 'message-id', text: 'hi', user: otherUser),
           user: otherUser,
+          watcherCount: 1,
           channelMessageCount: 42,
         ),
       );
@@ -982,16 +868,20 @@ void main() {
       ).thenThrow(StateError('boom'));
 
       handler.handleEvent(
-        Event(
-          type: EventType.userWatchingStart,
+        UserMessagesDeletedEvent(
           user: otherUser,
+          hardDelete: true,
           channelMessageCount: 42,
         ),
       );
 
       verify(() => mutations.onMemberUserUpdated(otherUser)).called(1);
       verify(
-        () => mutations.onUserStartWatching(otherUser, watcherCount: null),
+        () => mutations.onUserMessagesDeleted(
+          userId: otherUser.id,
+          hardDelete: true,
+          deletedAt: any(named: 'deletedAt'),
+        ),
       ).called(1);
     });
 
@@ -1000,7 +890,7 @@ void main() {
       when(() => mutations.onMemberAdded(any())).thenThrow(StateError('boom'));
 
       handler.handleEvent(
-        Event(type: EventType.memberAdded, member: member, user: otherUser),
+        MemberAddedEvent(channel: channelModel, member: member, user: otherUser),
       );
 
       verify(() => mutations.onMemberUserUpdated(otherUser)).called(1);
@@ -1011,7 +901,7 @@ void main() {
       when(() => mutations.onMemberUserUpdated(any())).thenThrow(StateError('boom'));
 
       handler.handleEvent(
-        Event(type: EventType.memberUpdated, member: member, user: otherUser),
+        MemberUpdatedEvent(channel: channelModel, member: member, user: otherUser),
       );
 
       verify(() => mutations.onMemberUpdated(member)).called(1);
@@ -1023,11 +913,11 @@ void main() {
       ).thenThrow(StateError('boom'));
 
       handler.handleEvent(
-        Event(type: EventType.userWatchingStart, user: otherUser),
+        UserWatchingStartEvent(user: otherUser, watcherCount: 1),
       );
 
       verify(
-        () => mutations.onUserStartWatching(otherUser, watcherCount: null),
+        () => mutations.onUserStartWatching(otherUser, watcherCount: 1),
       ).called(1);
     });
 
@@ -1035,8 +925,8 @@ void main() {
       when(() => mutations.onMemberAdded(any())).thenThrow(StateError('boom'));
 
       handler.handleEvent(
-        Event(
-          type: EventType.memberAdded,
+        MemberAddedEvent(
+          channel: channelModel,
           member: Member(userId: otherUser.id),
         ),
       );
@@ -1051,8 +941,8 @@ void main() {
       when(() => mutations.onMemberAdded(any())).thenThrow(StateError('boom'));
 
       handler.handleEvent(
-        Event(
-          type: EventType.memberAdded,
+        MemberAddedEvent(
+          channel: channelModel,
           member: Member(userId: otherUser.id),
         ),
       );

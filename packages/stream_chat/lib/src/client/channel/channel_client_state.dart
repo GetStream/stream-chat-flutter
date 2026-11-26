@@ -869,14 +869,14 @@ class ChannelClientState {
       channelStateStream.map((cs) => _getThreadDraft(parentId, cs.messages)).distinct();
 
   /// Channel related typing users stream.
-  Stream<Map<User, Event>> get typingEventsStream => _typingEventsController.stream;
+  Stream<Map<User, TypingStartEvent>> get typingEventsStream => _typingEventsController.stream;
 
   /// Channel related typing users last value.
-  Map<User, Event> get typingEvents => _typingEventsController.value;
-  final _typingEventsController = BehaviorSubject.seeded(<User, Event>{});
+  Map<User, TypingStartEvent> get typingEvents => _typingEventsController.value;
+  final _typingEventsController = BehaviorSubject.seeded(<User, TypingStartEvent>{});
 
   // Adds or replaces the typing event for the given user.
-  void _upsertTypingEvent(User user, Event event) {
+  void _upsertTypingEvent(User user, TypingStartEvent event) {
     _typingEventsController.safeAdd({...typingEvents, user: event});
   }
 
@@ -898,8 +898,7 @@ class ChannelClientState {
         typingEvents.forEach((user, event) {
           if (now.difference(event.createdAt).inSeconds > incomingTypingStartEventTimeout) {
             _client.handleEvent(
-              Event(
-                type: EventType.typingStop,
+              TypingStopEvent(
                 user: user,
                 cid: _channel.cid,
                 parentId: event.parentId,
@@ -962,8 +961,7 @@ class ChannelClientState {
 
     final lastUpdatedAt = DateTime.timestamp();
 
-    final locationExpiredEvent = Event(
-      type: EventType.locationExpired,
+    final locationExpiredEvent = LocationExpiredEvent(
       cid: location.channelCid,
       message: Message(
         id: location.messageId,

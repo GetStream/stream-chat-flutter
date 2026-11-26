@@ -18,7 +18,7 @@ void main() {
       // Fallback values
       registerFallbackValue(FakeMessage());
       registerFallbackValue(FakeAttachmentFile());
-      registerFallbackValue(FakeEvent());
+      registerFallbackValue(UnknownEvent(type: 'fallback'));
       registerFallbackValue(DateTime(2026));
 
       final retryPolicy = RetryPolicy(
@@ -57,7 +57,7 @@ void main() {
         final otherUser = User(id: 'other-user');
 
         client.addEvent(
-          Event(cid: channel.cid, type: EventType.typingStart, user: otherUser),
+          TypingStartEvent(cid: channel.cid, user: otherUser),
         );
         await Future.delayed(Duration.zero);
 
@@ -69,12 +69,12 @@ void main() {
         final user1 = User(id: 'other-user-1');
         final user2 = User(id: 'other-user-2');
 
-        client.addEvent(Event(cid: channel.cid, type: EventType.typingStart, user: user1));
-        client.addEvent(Event(cid: channel.cid, type: EventType.typingStart, user: user2));
+        client.addEvent(TypingStartEvent(cid: channel.cid, user: user1));
+        client.addEvent(TypingStartEvent(cid: channel.cid, user: user2));
         await Future.delayed(Duration.zero);
         expect(channel.state!.typingEvents, hasLength(2));
 
-        client.addEvent(Event(cid: channel.cid, type: EventType.typingStop, user: user1));
+        client.addEvent(TypingStopEvent(cid: channel.cid, user: user1));
         await Future.delayed(Duration.zero);
 
         expect(channel.state!.typingEvents.keys.map((u) => u.id), ['other-user-2']);
@@ -83,14 +83,14 @@ void main() {
       test('${EventType.typingStart} from the current user is ignored', () async {
         final currentUser = User(id: client.state.currentUser!.id);
 
-        client.addEvent(Event(cid: channel.cid, type: EventType.typingStart, user: currentUser));
+        client.addEvent(TypingStartEvent(cid: channel.cid, user: currentUser));
         await Future.delayed(Duration.zero);
 
         expect(channel.state!.typingEvents, isEmpty);
       });
 
       test('${EventType.typingStart} without a user is ignored', () async {
-        client.addEvent(Event(cid: channel.cid, type: EventType.typingStart));
+        client.addEvent(TypingStartEvent(cid: channel.cid));
         await Future.delayed(Duration.zero);
 
         expect(channel.state!.typingEvents, isEmpty);
@@ -99,14 +99,14 @@ void main() {
       test('${EventType.typingStop} from the current user is ignored', () async {
         final currentUser = User(id: client.state.currentUser!.id);
 
-        client.addEvent(Event(cid: channel.cid, type: EventType.typingStop, user: currentUser));
+        client.addEvent(TypingStopEvent(cid: channel.cid, user: currentUser));
         await Future.delayed(Duration.zero);
 
         expect(channel.state!.typingEvents, isEmpty);
       });
 
       test('${EventType.typingStop} without a user is ignored', () async {
-        client.addEvent(Event(cid: channel.cid, type: EventType.typingStop));
+        client.addEvent(TypingStopEvent(cid: channel.cid));
         await Future.delayed(Duration.zero);
 
         expect(channel.state!.typingEvents, isEmpty);
@@ -135,11 +135,11 @@ void main() {
 
         tearDown(() => channel.dispose());
 
-        Event createNewMessageEvent(Message message) {
-          return Event(
+        MessageNewEvent createNewMessageEvent(Message message) {
+          return MessageNewEvent(
             cid: channel.cid,
-            type: EventType.messageNew,
             message: message,
+            watcherCount: 1,
           );
         }
 
@@ -630,10 +630,11 @@ void main() {
             );
 
             client.addEvent(
-              Event(
+              NotificationMessageNewEvent(
                 cid: channel.cid,
-                type: EventType.notificationMessageNew,
                 message: message,
+                channel: ChannelModel(cid: channel.cid),
+                watcherCount: 1,
               ),
             );
             await Future.delayed(Duration.zero);
@@ -681,14 +682,6 @@ void main() {
             expect(channel.state!.threads['parent-message-id']?.map((m) => m.id), ['thread-reply-id']);
           },
         );
-
-        test('an event without a message is ignored', () async {
-          client.addEvent(Event(cid: channel.cid, type: EventType.messageNew));
-          await Future.delayed(Duration.zero);
-
-          expect(channel.state!.messages, isEmpty);
-          expect(channel.lastMessageAt, initialLastMessageAt);
-        });
       },
     );
 
@@ -712,10 +705,9 @@ void main() {
 
         tearDown(() => channel.dispose());
 
-        Event createUpdateMessageEvent(Message message) {
-          return Event(
+        MessageUpdatedEvent createUpdateMessageEvent(Message message) {
+          return MessageUpdatedEvent(
             cid: channel.cid,
-            type: EventType.messageUpdated,
             message: message,
           );
         }
@@ -1107,9 +1099,8 @@ void main() {
               user: User(id: 'other-user'),
             );
             client.addEvent(
-              Event(
+              ReactionNewEvent(
                 cid: channel.cid,
-                type: EventType.reactionNew,
                 reaction: otherUserReaction,
                 message: Message(
                   id: replyId,
@@ -1119,6 +1110,7 @@ void main() {
                   createdAt: createdAt,
                   latestReactions: [otherUserReaction],
                 ),
+                channel: ChannelModel(cid: channel.cid),
               ),
             );
 
@@ -1146,9 +1138,8 @@ void main() {
             expect(channel.state!.threads, isEmpty);
 
             client.addEvent(
-              Event(
+              ReactionDeletedEvent(
                 cid: channel.cid,
-                type: EventType.reactionDeleted,
                 reaction: removed,
                 message: Message(
                   id: replyId,
@@ -1157,6 +1148,7 @@ void main() {
                   user: client.state.currentUser,
                   createdAt: createdAt,
                 ),
+                channel: ChannelModel(cid: channel.cid),
               ),
             );
 
@@ -1189,9 +1181,8 @@ void main() {
             expect(channel.state!.threads, isEmpty);
 
             client.addEvent(
-              Event(
+              MessageUpdatedEvent(
                 cid: channel.cid,
-                type: EventType.messageUpdated,
                 message: Message(
                   id: replyId,
                   parentId: parentId,
@@ -1252,9 +1243,8 @@ void main() {
           user: client.state.currentUser,
         );
         client.addEvent(
-          Event(
+          ReactionNewEvent(
             cid: channel.cid,
-            type: EventType.reactionNew,
             reaction: reaction,
             message: Message(
               id: messageId,
@@ -1262,6 +1252,7 @@ void main() {
               createdAt: createdAt,
               latestReactions: [reaction],
             ),
+            channel: ChannelModel(cid: channel.cid),
           ),
         );
         await Future.delayed(Duration.zero);
@@ -1280,9 +1271,8 @@ void main() {
           user: client.state.currentUser,
         );
         client.addEvent(
-          Event(
+          ReactionNewEvent(
             cid: channel.cid,
-            type: EventType.reactionNew,
             reaction: reaction,
             message: Message(
               id: messageId,
@@ -1290,6 +1280,7 @@ void main() {
               user: User(id: 'other-user'),
               createdAt: createdAt,
             ),
+            channel: ChannelModel(cid: channel.cid),
           ),
         );
         await Future.delayed(Duration.zero);
@@ -1307,9 +1298,8 @@ void main() {
         seedMessage(ownReactions: [existing]);
 
         client.addEvent(
-          Event(
+          ReactionUpdatedEvent(
             cid: channel.cid,
-            type: EventType.reactionUpdated,
             reaction: Reaction(
               type: 'like',
               messageId: messageId,
@@ -1320,6 +1310,7 @@ void main() {
               user: User(id: 'other-user'),
               createdAt: createdAt,
             ),
+            channel: ChannelModel(cid: channel.cid),
           ),
         );
         await Future.delayed(Duration.zero);
@@ -1338,9 +1329,8 @@ void main() {
         seedMessage(parentId: parentId, ownReactions: [removed]);
 
         client.addEvent(
-          Event(
+          ReactionDeletedEvent(
             cid: channel.cid,
-            type: EventType.reactionDeleted,
             reaction: removed,
             message: Message(
               id: messageId,
@@ -1348,6 +1338,7 @@ void main() {
               user: User(id: 'other-user'),
               createdAt: createdAt,
             ),
+            channel: ChannelModel(cid: channel.cid),
           ),
         );
         await Future.delayed(Duration.zero);
@@ -1414,41 +1405,6 @@ void main() {
         return channel.state!.messages.firstWhere((it) => it.id == pollMessageId);
       }
 
-      test('${EventType.pollCreated} adds the poll message', () async {
-        client.addEvent(
-          Event(
-            cid: channel.cid,
-            type: EventType.pollCreated,
-            message: Message(
-              id: pollMessageId,
-              user: User(id: 'other-user'),
-              createdAt: createdAt,
-              poll: createPoll(),
-            ),
-          ),
-        );
-        await Future.delayed(Duration.zero);
-
-        expect(storedPollMessage().poll?.id, pollId);
-      });
-
-      test('${EventType.pollCreated} without a poll is ignored', () async {
-        client.addEvent(
-          Event(
-            cid: channel.cid,
-            type: EventType.pollCreated,
-            message: Message(
-              id: pollMessageId,
-              user: User(id: 'other-user'),
-              createdAt: createdAt,
-            ),
-          ),
-        );
-        await Future.delayed(Duration.zero);
-
-        expect(channel.state!.messages, isEmpty);
-      });
-
       test('${EventType.pollUpdated} updates the poll but preserves own votes', () async {
         final ownVote = PollVote(
           id: 'own-vote-id',
@@ -1458,9 +1414,8 @@ void main() {
         seedPollMessage(ownVotesAndAnswers: [ownVote]);
 
         client.addEvent(
-          Event(
+          PollUpdatedEvent(
             cid: channel.cid,
-            type: EventType.pollUpdated,
             poll: createPoll(name: 'Renamed'),
           ),
         );
@@ -1475,9 +1430,8 @@ void main() {
         seedPollMessage();
 
         client.addEvent(
-          Event(
+          PollUpdatedEvent(
             cid: channel.cid,
-            type: EventType.pollUpdated,
             poll: Poll(
               id: 'unknown-poll-id',
               name: 'Renamed',
@@ -1490,23 +1444,13 @@ void main() {
         expect(storedPollMessage().poll?.name, 'Favorite color?');
       });
 
-      test('${EventType.pollUpdated} without a poll is ignored', () async {
-        seedPollMessage();
-
-        client.addEvent(Event(cid: channel.cid, type: EventType.pollUpdated));
-        await Future.delayed(Duration.zero);
-
-        expect(storedPollMessage().poll?.name, 'Favorite color?');
-      });
-
       test('${EventType.pollUpdated} updates a poll on a thread message', () async {
         const parentId = 'poll-parent-id';
         seedPollMessage(parentId: parentId);
 
         client.addEvent(
-          Event(
+          PollUpdatedEvent(
             cid: channel.cid,
-            type: EventType.pollUpdated,
             poll: createPoll(name: 'Renamed'),
           ),
         );
@@ -1520,9 +1464,8 @@ void main() {
         seedPollMessage();
 
         client.addEvent(
-          Event(
+          PollClosedEvent(
             cid: channel.cid,
-            type: EventType.pollClosed,
             poll: createPoll(name: 'Renamed'),
           ),
         );
@@ -1542,9 +1485,8 @@ void main() {
           userId: client.state.currentUser!.id,
         );
         client.addEvent(
-          Event(
+          PollAnswerCastedEvent(
             cid: channel.cid,
-            type: EventType.pollAnswerCasted,
             poll: createPoll(),
             pollVote: ownAnswer,
           ),
@@ -1561,9 +1503,8 @@ void main() {
           userId: 'other-user',
         );
         client.addEvent(
-          Event(
+          PollAnswerCastedEvent(
             cid: channel.cid,
-            type: EventType.pollAnswerCasted,
             poll: createPoll(),
             pollVote: otherAnswer,
           ),
@@ -1584,9 +1525,8 @@ void main() {
           userId: client.state.currentUser!.id,
         );
         client.addEvent(
-          Event(
+          PollVoteCastedEvent(
             cid: channel.cid,
-            type: EventType.pollVoteCasted,
             poll: createPoll(),
             pollVote: ownVote,
           ),
@@ -1602,9 +1542,8 @@ void main() {
           userId: 'other-user',
         );
         client.addEvent(
-          Event(
+          PollVoteCastedEvent(
             cid: channel.cid,
-            type: EventType.pollVoteCasted,
             poll: createPoll(),
             pollVote: otherVote,
           ),
@@ -1624,9 +1563,8 @@ void main() {
           userId: client.state.currentUser!.id,
         );
         client.addEvent(
-          Event(
+          PollVoteChangedEvent(
             cid: channel.cid,
-            type: EventType.pollVoteChanged,
             poll: createPoll(),
             pollVote: changedVote,
           ),
@@ -1648,9 +1586,8 @@ void main() {
         seedPollMessage(latestAnswers: [answer], ownVotesAndAnswers: [answer]);
 
         client.addEvent(
-          Event(
+          PollAnswerRemovedEvent(
             cid: channel.cid,
-            type: EventType.pollAnswerRemoved,
             poll: createPoll(),
             pollVote: answer,
           ),
@@ -1671,9 +1608,8 @@ void main() {
         seedPollMessage(ownVotesAndAnswers: [vote]);
 
         client.addEvent(
-          Event(
+          PollVoteRemovedEvent(
             cid: channel.cid,
-            type: EventType.pollVoteRemoved,
             poll: createPoll(),
             pollVote: vote,
           ),
@@ -1707,10 +1643,9 @@ void main() {
 
         tearDown(() => channel.dispose());
 
-        Event createDeleteMessageEvent(Message message, {bool hardDelete = false}) {
-          return Event(
+        MessageDeletedEvent createDeleteMessageEvent(Message message, {bool hardDelete = false}) {
+          return MessageDeletedEvent(
             cid: channel.cid,
-            type: EventType.messageDeleted,
             message: message.copyWith(
               type: MessageType.deleted,
               deletedAt: DateTime.timestamp(),
@@ -1888,7 +1823,7 @@ void main() {
             user: User(id: 'other-user'),
             createdAt: readAt.add(const Duration(seconds: 1)),
           );
-          client.addEvent(Event(cid: channel.cid, type: EventType.messageNew, message: message));
+          client.addEvent(MessageNewEvent(cid: channel.cid, message: message, watcherCount: 1));
           await Future.delayed(Duration.zero);
           expect(channel.state!.unreadCount, 1);
 
@@ -1921,7 +1856,7 @@ void main() {
             user: User(id: 'other-user'),
             createdAt: readAt.add(const Duration(seconds: 1)),
           );
-          client.addEvent(Event(cid: channel.cid, type: EventType.messageNew, message: message));
+          client.addEvent(MessageNewEvent(cid: channel.cid, message: message, watcherCount: 1));
           await Future.delayed(Duration.zero);
           expect(channel.state!.unreadCount, 1);
 
@@ -1940,14 +1875,14 @@ void main() {
           channel.state!.updateMessage(message);
 
           client.addEvent(
-            Event(
+            MessageDeletedEvent(
               cid: channel.cid,
-              type: EventType.messageDeleted,
               deletedForMe: true,
               message: message.copyWith(
                 type: MessageType.deleted,
                 deletedAt: DateTime.timestamp(),
               ),
+              hardDelete: false,
             ),
           );
           await Future.delayed(Duration.zero);
@@ -1975,9 +1910,8 @@ void main() {
 
       test('merges the event channel into the current channel model', () async {
         client.addEvent(
-          Event(
+          ChannelUpdatedEvent(
             cid: channel.cid,
-            type: EventType.channelUpdated,
             channel: ChannelModel(
               id: channelId,
               type: channelType,
@@ -2003,9 +1937,8 @@ void main() {
         );
 
         client.addEvent(
-          Event(
+          ChannelUpdatedEvent(
             cid: channel.cid,
-            type: EventType.channelUpdated,
             channel: ChannelModel(
               id: channelId,
               type: channelType,
@@ -2060,9 +1993,8 @@ void main() {
         expect(channel.state!.messages, hasLength(2));
 
         client.addEvent(
-          Event(
+          ChannelTruncatedEvent(
             cid: channel.cid,
-            type: EventType.channelTruncated,
             channel: ChannelModel(id: channelId, type: channelType),
           ),
         );
@@ -2074,9 +2006,8 @@ void main() {
       test('${EventType.channelTruncated} removes the stored messages created before the truncation', () async {
         final truncatedAt = DateTime.utc(2026, 10, 29, 12);
         client.addEvent(
-          Event(
+          ChannelTruncatedEvent(
             cid: channel.cid,
-            type: EventType.channelTruncated,
             channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
           ),
         );
@@ -2095,9 +2026,8 @@ void main() {
           createdAt: DateTime.now(),
         );
         client.addEvent(
-          Event(
+          NotificationChannelTruncatedEvent(
             cid: channel.cid,
-            type: EventType.notificationChannelTruncated,
             channel: ChannelModel(id: channelId, type: channelType),
             message: systemMessage,
           ),
@@ -2122,9 +2052,8 @@ void main() {
         channel.state!.updateMessage(messageAt('after', truncatedAt.add(const Duration(minutes: 1))));
 
         client.addEvent(
-          Event(
+          ChannelTruncatedEvent(
             cid: channel.cid,
-            type: EventType.channelTruncated,
             channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
           ),
         );
@@ -2145,9 +2074,8 @@ void main() {
         );
 
         client.addEvent(
-          Event(
+          ChannelTruncatedEvent(
             cid: channel.cid,
-            type: EventType.channelTruncated,
             channel: ChannelModel(id: channelId, type: channelType),
           ),
         );
@@ -2175,9 +2103,8 @@ void main() {
         );
 
         client.addEvent(
-          Event(
+          ChannelTruncatedEvent(
             cid: channel.cid,
-            type: EventType.channelTruncated,
             channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
           ),
         );
@@ -2193,9 +2120,8 @@ void main() {
         channel.state!.unreadCount = 5;
 
         client.addEvent(
-          Event(
+          ChannelTruncatedEvent(
             cid: channel.cid,
-            type: EventType.channelTruncated,
             channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
           ),
         );
@@ -2210,9 +2136,8 @@ void main() {
         channel.state!.unreadCount = 5;
 
         client.addEvent(
-          Event(
+          ChannelTruncatedEvent(
             cid: channel.cid,
-            type: EventType.channelTruncated,
             channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
           ),
         );
@@ -2231,9 +2156,8 @@ void main() {
         ]);
 
         client.addEvent(
-          Event(
+          ChannelTruncatedEvent(
             cid: channel.cid,
-            type: EventType.channelTruncated,
             channel: ChannelModel(id: channelId, type: channelType, truncatedAt: truncatedAt),
           ),
         );
@@ -2245,9 +2169,8 @@ void main() {
       test("${EventType.channelTruncated} takes the channel's last message time", () async {
         final lastMessageAt = DateTime.utc(2026, 10, 29, 11);
         client.addEvent(
-          Event(
+          ChannelTruncatedEvent(
             cid: channel.cid,
-            type: EventType.channelTruncated,
             channel: ChannelModel(id: channelId, type: channelType, lastMessageAt: lastMessageAt),
           ),
         );
@@ -2266,9 +2189,8 @@ void main() {
           createdAt: truncatedAt.add(const Duration(microseconds: 1)),
         );
         client.addEvent(
-          Event(
+          ChannelTruncatedEvent(
             cid: channel.cid,
-            type: EventType.channelTruncated,
             channel: ChannelModel(
               id: channelId,
               type: channelType,
@@ -2340,9 +2262,8 @@ void main() {
 
           await withClock(Clock.fixed(eventTime.add(const Duration(hours: 1))), () async {
             client.addEvent(
-              Event(
+              ChannelTruncatedEvent(
                 cid: channel.cid,
-                type: EventType.channelTruncated,
                 channel: ChannelModel(id: channelId, type: channelType),
                 createdAt: eventTime,
               ),
@@ -2356,9 +2277,8 @@ void main() {
 
       test('${EventType.channelTruncated} without a truncatedAt leaves the channel truncation time alone', () async {
         client.addEvent(
-          Event(
+          ChannelTruncatedEvent(
             cid: channel.cid,
-            type: EventType.channelTruncated,
             channel: ChannelModel(id: channelId, type: channelType),
             createdAt: DateTime.utc(2026, 10, 29, 12),
           ),
@@ -2460,9 +2380,8 @@ void main() {
           channel.state!.updateMessage(before);
 
           client.addEvent(
-            Event(
+            ChannelTruncatedEvent(
               cid: channel.cid,
-              type: EventType.channelTruncated,
               channel: ChannelModel(id: channelId, type: channelType),
             ),
           );
@@ -2489,9 +2408,8 @@ void main() {
           );
 
           client.addEvent(
-            Event(
+            ChannelTruncatedEvent(
               cid: channel.cid,
-              type: EventType.channelTruncated,
               channel: ChannelModel(id: channelId, type: channelType),
             ),
           );
@@ -2628,11 +2546,11 @@ void main() {
           );
 
           // Create member updated event
-          final memberUpdatedEvent = Event(
+          final memberUpdatedEvent = MemberUpdatedEvent(
             cid: channel.cid,
-            type: EventType.memberUpdated,
             user: currentUser,
             member: updatedMember,
+            channel: ChannelModel(cid: channel.cid),
           );
 
           // Dispatch event
@@ -2674,11 +2592,7 @@ void main() {
           final updatedUser = currentUser?.copyWith(role: 'moderator');
 
           // Create any event with same updated user as membership.
-          final anyEvent = Event(
-            cid: channel.cid,
-            type: EventType.any,
-            user: updatedUser,
-          );
+          final anyEvent = TypingStopEvent(cid: channel.cid, user: updatedUser);
 
           // Dispatch event
           client.addEvent(anyEvent);
@@ -2695,10 +2609,10 @@ void main() {
 
       test('${EventType.memberAdded} appends the member', () async {
         client.addEvent(
-          Event(
+          MemberAddedEvent(
             cid: channel.cid,
-            type: EventType.memberAdded,
             member: Member(userId: 'new-member'),
+            channel: ChannelModel(cid: channel.cid),
           ),
         );
         await Future.delayed(Duration.zero);
@@ -2727,10 +2641,11 @@ void main() {
         );
 
         client.addEvent(
-          Event(
+          MemberRemovedEvent(
             cid: channel.cid,
-            type: EventType.memberRemoved,
             user: User(id: 'member-1'),
+            channel: ChannelModel(cid: channel.cid),
+            member: Member(userId: 'member-1'),
           ),
         );
         await Future.delayed(Duration.zero);
@@ -2753,10 +2668,11 @@ void main() {
         );
 
         client.addEvent(
-          Event(
+          MemberRemovedEvent(
             cid: channel.cid,
-            type: EventType.memberRemoved,
             user: User(id: 'member-1'),
+            channel: ChannelModel(cid: channel.cid),
+            member: Member(userId: 'member-1'),
           ),
         );
         await Future.delayed(Duration.zero);
@@ -2773,10 +2689,10 @@ void main() {
         );
 
         client.addEvent(
-          Event(
+          MemberUpdatedEvent(
             cid: channel.cid,
-            type: EventType.memberUpdated,
             member: Member(userId: 'member-1', channelRole: 'channel_moderator'),
+            channel: ChannelModel(cid: channel.cid),
           ),
         );
         await Future.delayed(Duration.zero);
@@ -2797,9 +2713,8 @@ void main() {
         );
 
         client.addEvent(
-          Event(
+          TypingStopEvent(
             cid: channel.cid,
-            type: EventType.userUpdated,
             user: User(id: 'stranger', name: 'new-name'),
           ),
         );
@@ -2845,9 +2760,8 @@ void main() {
 
         test('${EventType.userBanned} refreshes the member from the server', () async {
           client.addEvent(
-            Event(
+            UserBannedEvent(
               cid: channel.cid,
-              type: EventType.userBanned,
               user: User(id: 'bad-user'),
             ),
           );
@@ -2859,9 +2773,8 @@ void main() {
 
         test('${EventType.userUnbanned} refreshes the member from the server', () async {
           client.addEvent(
-            Event(
+            UserUnbannedEvent(
               cid: channel.cid,
-              type: EventType.userUnbanned,
               user: User(id: 'bad-user'),
             ),
           );
@@ -2873,8 +2786,7 @@ void main() {
 
         test('an app-level ban without a cid is ignored', () async {
           client.addEvent(
-            Event(
-              type: EventType.userBanned,
+            UserBannedEvent(
               user: User(id: 'bad-user'),
             ),
           );
@@ -2919,9 +2831,8 @@ void main() {
           final watcher = User(id: 'watcher-1');
 
           client.addEvent(
-            Event(
+            UserWatchingStartEvent(
               cid: channel.cid,
-              type: EventType.userWatchingStart,
               user: watcher,
               watcherCount: 3,
             ),
@@ -2945,9 +2856,8 @@ void main() {
 
           // The watcher starts watching first (count = 2).
           client.addEvent(
-            Event(
+            UserWatchingStartEvent(
               cid: channel.cid,
-              type: EventType.userWatchingStart,
               user: watcher,
               watcherCount: 2,
             ),
@@ -2961,9 +2871,8 @@ void main() {
 
           // Then stops watching (count = 1).
           client.addEvent(
-            Event(
+            UserWatchingStopEvent(
               cid: channel.cid,
-              type: EventType.userWatchingStop,
               user: watcher,
               watcherCount: 1,
             ),
@@ -2979,53 +2888,6 @@ void main() {
       );
 
       test(
-        'watching event without watcherCount preserves the existing count',
-        () async {
-          // Seed an initial watcher count.
-          channel.state!.updateChannelState(
-            channel.state!.channelState.copyWith(watcherCount: 5),
-          );
-          expect(channel.state!.watcherCount, 5);
-
-          // A watching event that omits watcher_count must not wipe the count.
-          client.addEvent(
-            Event(
-              cid: channel.cid,
-              type: EventType.userWatchingStart,
-              user: User(id: 'watcher-2'),
-            ),
-          );
-          await Future.delayed(Duration.zero);
-
-          expect(channel.state!.watcherCount, 5);
-          expect(
-            channel.state!.channelState.watchers?.map((it) => it.id),
-            contains('watcher-2'),
-          );
-        },
-      );
-
-      test(
-        '${EventType.userWatchingStop} without watcherCount preserves the existing count',
-        () async {
-          channel.state!.updateChannelState(
-            channel.state!.channelState.copyWith(watcherCount: 5),
-          );
-
-          client.addEvent(
-            Event(
-              cid: channel.cid,
-              type: EventType.userWatchingStop,
-              user: User(id: 'watcher-3'),
-            ),
-          );
-          await Future.delayed(Duration.zero);
-
-          expect(channel.state!.watcherCount, 5);
-        },
-      );
-
-      test(
         '${EventType.messageNew} updates watcherCount from the event',
         () async {
           expect(channel.state!.watcherCount, isNull);
@@ -3037,9 +2899,8 @@ void main() {
           );
 
           client.addEvent(
-            Event(
+            MessageNewEvent(
               cid: channel.cid,
-              type: EventType.messageNew,
               message: message,
               watcherCount: 7,
             ),
@@ -3047,34 +2908,6 @@ void main() {
           await Future.delayed(Duration.zero);
 
           expect(channel.state!.watcherCount, 7);
-        },
-      );
-
-      test(
-        '${EventType.messageNew} without watcherCount preserves the existing count',
-        () async {
-          // Seed an initial watcher count.
-          channel.state!.updateChannelState(
-            channel.state!.channelState.copyWith(watcherCount: 4),
-          );
-          expect(channel.state!.watcherCount, 4);
-
-          // A local/optimistic message.new without watcher_count must not
-          // reset the count.
-          client.addEvent(
-            Event(
-              cid: channel.cid,
-              type: EventType.messageNew,
-              message: Message(
-                id: 'test-message-id-2',
-                user: client.state.currentUser,
-                createdAt: DateTime.now(),
-              ),
-            ),
-          );
-          await Future.delayed(Duration.zero);
-
-          expect(channel.state!.watcherCount, 4);
         },
       );
 
@@ -3090,15 +2923,15 @@ void main() {
           // notification.message_new is delivered to non-watchers and reports
           // watcher_count: 0; it must not clobber the real count.
           client.addEvent(
-            Event(
+            NotificationMessageNewEvent(
               cid: channel.cid,
-              type: EventType.notificationMessageNew,
               message: Message(
                 id: 'notif-message-id',
                 user: User(id: 'other-user'),
                 createdAt: DateTime.now(),
               ),
               watcherCount: 0,
+              channel: ChannelModel(cid: channel.cid),
             ),
           );
           await Future.delayed(Duration.zero);
@@ -3106,31 +2939,6 @@ void main() {
           expect(channel.state!.watcherCount, 5);
         },
       );
-
-      test('${EventType.userWatchingStop} without a watcher count preserves the count', () async {
-        client.addEvent(
-          Event(
-            cid: channel.cid,
-            type: EventType.userWatchingStart,
-            user: User(id: 'watcher-1'),
-            watcherCount: 5,
-          ),
-        );
-        await Future.delayed(Duration.zero);
-        expect(channel.state!.watcherCount, 5);
-
-        client.addEvent(
-          Event(
-            cid: channel.cid,
-            type: EventType.userWatchingStop,
-            user: User(id: 'watcher-1'),
-          ),
-        );
-        await Future.delayed(Duration.zero);
-
-        expect(channel.state!.channelState.watchers, isEmpty);
-        expect(channel.state!.watcherCount, 5);
-      });
     });
 
     group('Read Events', () {
@@ -3175,12 +2983,10 @@ void main() {
         expect(read?.lastRead.isAtSameMomentAs(DateTime(2020)), isTrue);
 
         // Create message read event
-        final messageReadEvent = Event(
+        final messageReadEvent = MessageReadEvent(
           cid: channel.cid,
-          type: EventType.messageRead,
           user: currentUser,
           createdAt: DateTime(2022),
-          unreadMessages: 0,
           lastReadMessageId: 'message-123',
         );
 
@@ -3209,12 +3015,10 @@ void main() {
           expect(read, isEmpty);
 
           // Create mark read notification event
-          final markReadEvent = Event(
+          final markReadEvent = MessageReadEvent(
             cid: channel.cid,
-            type: EventType.messageRead,
             user: currentUser,
             createdAt: DateTime(2022),
-            unreadMessages: 0,
             lastReadMessageId: 'message-123',
           );
 
@@ -3256,9 +3060,8 @@ void main() {
           expect(read?.lastRead.isAtSameMomentAs(DateTime(2020)), isTrue);
 
           // Create a thread-scoped message.read event (thread != null)
-          final threadMessageReadEvent = Event(
+          final threadMessageReadEvent = MessageReadEvent(
             cid: channel.cid,
-            type: EventType.messageRead,
             user: currentUser,
             createdAt: DateTime(2022),
             lastReadMessageId: 'thread-reply-99',
@@ -3310,9 +3113,8 @@ void main() {
         expect(read?.lastRead.isAtSameMomentAs(DateTime(2020)), isTrue);
 
         // Create mark unread notification event
-        final markUnreadEvent = Event(
+        final markUnreadEvent = NotificationMarkUnreadEvent(
           cid: channel.cid,
-          type: EventType.notificationMarkUnread,
           user: currentUser,
           lastReadAt: DateTime(2019),
           unreadMessages: 15,
@@ -3341,9 +3143,8 @@ void main() {
           expect(read, isEmpty);
 
           // Create event for non-existing user
-          final markUnreadEvent = Event(
+          final markUnreadEvent = NotificationMarkUnreadEvent(
             cid: channel.cid,
-            type: EventType.notificationMarkUnread,
             user: User(id: 'non-existing-user'),
             lastReadAt: DateTime(2019),
             unreadMessages: 15,
@@ -3392,12 +3193,10 @@ void main() {
           expect(read?.lastDeliveredMessageId, 'delivered-msg-456');
 
           // Create message read event (doesn't include delivery info)
-          final messageReadEvent = Event(
+          final messageReadEvent = MessageReadEvent(
             cid: channel.cid,
-            type: EventType.messageRead,
             user: currentUser,
             createdAt: DateTime(2022),
-            unreadMessages: 0,
             lastReadMessageId: 'message-123',
           );
 
@@ -3440,12 +3239,10 @@ void main() {
           ).thenAnswer((_) => Future.value());
 
           // Create message read event from current user
-          final messageReadEvent = Event(
+          final messageReadEvent = MessageReadEvent(
             cid: channel.cid,
-            type: EventType.messageRead,
             user: currentUser,
             createdAt: DateTime(2022),
-            unreadMessages: 0,
             lastReadMessageId: 'message-123',
           );
 
@@ -3480,9 +3277,8 @@ void main() {
           () async {
             final currentUser = client.state.currentUser!;
 
-            final markUnreadEvent = Event(
+            final markUnreadEvent = NotificationMarkUnreadEvent(
               cid: channel.cid,
-              type: EventType.notificationMarkUnread,
               user: currentUser,
               lastReadAt: DateTime(2019),
               unreadMessages: 5,
@@ -3497,9 +3293,8 @@ void main() {
         test(
           'is NOT set by a notification.mark_unread event from a different user',
           () async {
-            final markUnreadEvent = Event(
+            final markUnreadEvent = NotificationMarkUnreadEvent(
               cid: channel.cid,
-              type: EventType.notificationMarkUnread,
               user: User(id: 'someone-else'),
               lastReadAt: DateTime(2019),
               unreadMessages: 5,
@@ -3517,9 +3312,8 @@ void main() {
             final currentUser = client.state.currentUser!;
 
             client.addEvent(
-              Event(
+              NotificationMarkUnreadEvent(
                 cid: channel.cid,
-                type: EventType.notificationMarkUnread,
                 user: currentUser,
                 lastReadAt: DateTime(2019),
                 unreadMessages: 5,
@@ -3529,12 +3323,10 @@ void main() {
             expect(channel.state?.isMarkedAsUnread, isTrue);
 
             client.addEvent(
-              Event(
+              MessageReadEvent(
                 cid: channel.cid,
-                type: EventType.messageRead,
                 user: currentUser,
                 createdAt: DateTime(2022),
-                unreadMessages: 0,
               ),
             );
             await Future.delayed(Duration.zero);
@@ -3549,9 +3341,8 @@ void main() {
             final currentUser = client.state.currentUser!;
 
             client.addEvent(
-              Event(
+              NotificationMarkUnreadEvent(
                 cid: channel.cid,
-                type: EventType.notificationMarkUnread,
                 user: currentUser,
                 lastReadAt: DateTime(2019),
                 unreadMessages: 5,
@@ -3561,12 +3352,10 @@ void main() {
             expect(channel.state?.isMarkedAsUnread, isTrue);
 
             client.addEvent(
-              Event(
+              MessageReadEvent(
                 cid: channel.cid,
-                type: EventType.messageRead,
                 user: User(id: 'someone-else'),
                 createdAt: DateTime(2022),
-                unreadMessages: 0,
               ),
             );
             await Future.delayed(Duration.zero);
@@ -3603,12 +3392,13 @@ void main() {
           // notification.mark_read is delivered on the reading user's own
           // connection, so it reaches non-watched channels as well.
           client.addEvent(
-            Event(
+            NotificationMarkReadEvent(
               cid: channel.cid,
-              type: EventType.notificationMarkRead,
               user: currentUser,
               createdAt: DateTime(2022),
               lastReadMessageId: 'message-123',
+              totalUnreadCount: 0,
+              unreadChannels: 0,
             ),
           );
 
@@ -3647,12 +3437,13 @@ void main() {
           );
 
           client.addEvent(
-            Event(
+            NotificationMarkReadEvent(
               cid: channel.cid,
-              type: EventType.notificationMarkRead,
               user: currentUser,
               createdAt: DateTime(2022),
               lastReadMessageId: 'message-123',
+              totalUnreadCount: 0,
+              unreadChannels: 0,
             ),
           );
 
@@ -3690,9 +3481,8 @@ void main() {
           );
 
           client.addEvent(
-            Event(
+            NotificationMarkReadEvent(
               cid: channel.cid,
-              type: EventType.notificationMarkRead,
               user: currentUser,
               createdAt: DateTime(2022),
               lastReadMessageId: 'thread-reply-99',
@@ -3703,6 +3493,8 @@ void main() {
                 replyCount: 3,
                 participantCount: 2,
               ),
+              totalUnreadCount: 0,
+              unreadChannels: 0,
             ),
           );
 
@@ -3729,12 +3521,13 @@ void main() {
           ).thenAnswer((_) => Future.value());
 
           client.addEvent(
-            Event(
+            NotificationMarkReadEvent(
               cid: channel.cid,
-              type: EventType.notificationMarkRead,
               user: currentUser,
               createdAt: DateTime(2022),
               lastReadMessageId: 'message-123',
+              totalUnreadCount: 0,
+              unreadChannels: 0,
             ),
           );
 
@@ -3771,9 +3564,8 @@ void main() {
         expect(read?.lastDeliveredMessageId, isNull);
 
         // Create message delivered event
-        final messageDeliveredEvent = Event(
+        final messageDeliveredEvent = MessageDeliveredEvent(
           cid: channel.cid,
-          type: EventType.messageDelivered,
           user: currentUser,
           lastDeliveredAt: DateTime(2022),
           lastDeliveredMessageId: 'message-456',
@@ -3807,9 +3599,8 @@ void main() {
           expect(read, isEmpty);
 
           // Create message delivered event for new user
-          final messageDeliveredEvent = Event(
+          final messageDeliveredEvent = MessageDeliveredEvent(
             cid: channel.cid,
-            type: EventType.messageDelivered,
             user: newUser,
             lastDeliveredAt: DateTime(2022),
             lastDeliveredMessageId: 'message-789',
@@ -3865,9 +3656,8 @@ void main() {
           expect(read?.lastReadMessageId, 'read-msg-123');
 
           // Create message delivered event (doesn't include read info)
-          final messageDeliveredEvent = Event(
+          final messageDeliveredEvent = MessageDeliveredEvent(
             cid: channel.cid,
-            type: EventType.messageDelivered,
             user: currentUser,
             lastDeliveredAt: DateTime(2022),
             lastDeliveredMessageId: 'delivered-msg-456',
@@ -3911,9 +3701,8 @@ void main() {
           ).thenAnswer((_) => Future.value());
 
           // Create message delivered event from current user
-          final messageDeliveredEvent = Event(
+          final messageDeliveredEvent = MessageDeliveredEvent(
             cid: channel.cid,
-            type: EventType.messageDelivered,
             user: currentUser,
             lastDeliveredAt: DateTime(2022),
             lastDeliveredMessageId: 'message-456',
@@ -3959,9 +3748,8 @@ void main() {
         );
 
         // Create draft.updated event
-        final draftUpdatedEvent = Event(
+        final draftUpdatedEvent = DraftUpdatedEvent(
           cid: channel.cid,
-          type: EventType.draftUpdated,
           draft: draft,
         );
 
@@ -3999,9 +3787,8 @@ void main() {
         );
 
         // Create draft.updated event
-        final draftUpdatedEvent = Event(
+        final draftUpdatedEvent = DraftUpdatedEvent(
           cid: channel.cid,
-          type: EventType.draftUpdated,
           draft: draft,
         );
 
@@ -4035,9 +3822,8 @@ void main() {
         expect(draft?.message.text, 'test message');
 
         // Create draft.deleted event
-        final draftUpdatedEvent = Event(
+        final draftUpdatedEvent = DraftDeletedEvent(
           cid: channel.cid,
-          type: EventType.draftDeleted,
           draft: draft,
         );
 
@@ -4074,9 +3860,8 @@ void main() {
         expect(threadDraft?.message.text, 'thread reply');
 
         // Create draft.deleted event
-        final draftDeletedEvent = Event(
+        final draftDeletedEvent = DraftDeletedEvent(
           cid: channel.cid,
-          type: EventType.draftDeleted,
           draft: threadDraft,
         );
 
@@ -4116,9 +3901,8 @@ void main() {
           );
 
           // Create draft.updated event
-          final draftUpdatedEvent = Event(
+          final draftUpdatedEvent = DraftUpdatedEvent(
             cid: channel.cid,
-            type: EventType.draftUpdated,
             draft: updatedDraft,
           );
 
@@ -4166,9 +3950,8 @@ void main() {
           );
 
           // Create draft.updated event
-          final draftUpdatedEvent = Event(
+          final draftUpdatedEvent = DraftUpdatedEvent(
             cid: channel.cid,
-            type: EventType.draftUpdated,
             draft: updatedDraft,
           );
 
@@ -4186,7 +3969,7 @@ void main() {
       );
 
       test('an event without a draft is ignored', () async {
-        client.addEvent(Event(cid: channel.cid, type: EventType.draftUpdated));
+        client.addEvent(DraftUpdatedEvent(cid: channel.cid));
         await Future.delayed(Duration.zero);
 
         expect(channel.state?.draft, isNull);
@@ -4234,10 +4017,11 @@ void main() {
         );
 
         // Create reminder.created event
-        final reminderCreatedEvent = Event(
-          cid: channel.cid,
-          type: EventType.reminderCreated,
+        final reminderCreatedEvent = ReminderCreatedEvent(
+          cid: channel.cid!,
           reminder: reminder,
+          messageId: reminder.messageId,
+          userId: reminder.userId,
         );
 
         // Dispatch event
@@ -4291,10 +4075,11 @@ void main() {
         );
 
         // Create reminder.updated event
-        final reminderUpdatedEvent = Event(
-          cid: channel.cid,
-          type: EventType.reminderUpdated,
+        final reminderUpdatedEvent = ReminderUpdatedEvent(
+          cid: channel.cid!,
           reminder: updatedReminder,
+          messageId: updatedReminder.messageId,
+          userId: updatedReminder.userId,
         );
 
         // Dispatch event
@@ -4340,10 +4125,11 @@ void main() {
         expect(initialMessage?.reminder, isNotNull);
 
         // Create reminder.deleted event
-        final reminderDeletedEvent = Event(
-          cid: channel.cid,
-          type: EventType.reminderDeleted,
+        final reminderDeletedEvent = ReminderDeletedEvent(
+          cid: channel.cid!,
           reminder: initialReminder,
+          messageId: initialReminder.messageId,
+          userId: initialReminder.userId,
         );
 
         // Dispatch event
@@ -4392,10 +4178,11 @@ void main() {
         );
 
         // Create reminder.created event
-        final reminderCreatedEvent = Event(
-          cid: channel.cid,
-          type: EventType.reminderCreated,
+        final reminderCreatedEvent = ReminderCreatedEvent(
+          cid: channel.cid!,
           reminder: reminder,
+          messageId: reminder.messageId,
+          userId: reminder.userId,
         );
 
         // Dispatch event
@@ -4454,10 +4241,11 @@ void main() {
         );
 
         // Create reminder.updated event
-        final reminderUpdatedEvent = Event(
-          cid: channel.cid,
-          type: EventType.reminderUpdated,
+        final reminderUpdatedEvent = ReminderUpdatedEvent(
+          cid: channel.cid!,
           reminder: updatedReminder,
+          messageId: updatedReminder.messageId,
+          userId: updatedReminder.userId,
         );
 
         // Dispatch event
@@ -4509,10 +4297,11 @@ void main() {
         expect(initialMessage?.reminder, isNotNull);
 
         // Create reminder.deleted event
-        final reminderDeletedEvent = Event(
-          cid: channel.cid,
-          type: EventType.reminderDeleted,
+        final reminderDeletedEvent = ReminderDeletedEvent(
+          cid: channel.cid!,
           reminder: initialReminder,
+          messageId: initialReminder.messageId,
+          userId: initialReminder.userId,
         );
 
         // Dispatch event
@@ -4526,23 +4315,6 @@ void main() {
           (m) => m.id == messageId,
         );
         expect(updatedMessage?.reminder, isNull);
-      });
-
-      test('an event without a reminder is ignored', () async {
-        const messageId = 'test-message-id';
-
-        final message = Message(
-          id: messageId,
-          user: client.state.currentUser,
-          text: 'Test message',
-        );
-        channel.state?.updateMessage(message);
-
-        client.addEvent(Event(cid: channel.cid, type: EventType.reminderCreated));
-        await Future.delayed(Duration.zero);
-
-        final storedMessage = channel.state?.messages.firstWhere((m) => m.id == messageId);
-        expect(storedMessage?.reminder, isNull);
       });
     });
 
@@ -4582,9 +4354,8 @@ void main() {
         );
 
         // Create location.shared event
-        final locationSharedEvent = Event(
+        final locationSharedEvent = LocationSharedEvent(
           cid: channel.cid,
-          type: EventType.locationShared,
           message: locationMessage,
         );
 
@@ -4637,9 +4408,8 @@ void main() {
         );
 
         // Create location.updated event
-        final locationUpdatedEvent = Event(
+        final locationUpdatedEvent = LocationUpdatedEvent(
           cid: channel.cid,
-          type: EventType.locationUpdated,
           message: updatedMessage,
         );
 
@@ -4694,9 +4464,8 @@ void main() {
         );
 
         // Create location.expired event
-        final locationExpiredEvent = Event(
+        final locationExpiredEvent = LocationExpiredEvent(
           cid: channel.cid,
-          type: EventType.locationExpired,
           message: expiredMessage,
         );
 
@@ -4739,9 +4508,9 @@ void main() {
         await Future.delayed(const Duration(milliseconds: 900));
         final captured = verify(() => client.handleEvent(captureAny())).captured;
         expect(captured, hasLength(1));
-        final event = captured.single as Event;
+        final event = captured.single as LocationExpiredEvent;
         expect(event.type, EventType.locationExpired);
-        expect(event.message?.id, 'msg1');
+        expect(event.message.id, 'msg1');
       });
 
       test("should not auto-expire the current user's own live location", () async {
@@ -4789,9 +4558,9 @@ void main() {
         await Future.delayed(const Duration(milliseconds: 100));
         final captured = verify(() => client.handleEvent(captureAny())).captured;
         expect(captured, hasLength(1));
-        final event = captured.single as Event;
+        final event = captured.single as LocationExpiredEvent;
         expect(event.type, EventType.locationExpired);
-        expect(event.message?.id, 'msg1');
+        expect(event.message.id, 'msg1');
       });
 
       test('should not add static location to active locations', () async {
@@ -4812,9 +4581,8 @@ void main() {
         );
 
         // Create location.shared event
-        final locationSharedEvent = Event(
+        final locationSharedEvent = LocationSharedEvent(
           cid: channel.cid,
-          type: EventType.locationShared,
           message: staticMessage,
         );
 
@@ -4856,13 +4624,13 @@ void main() {
           channel.state?.addNewMessage(locationMessage);
           expect(channel.state?.activeLiveLocations, hasLength(1));
 
-          final messageDeletedEvent = Event(
-            type: EventType.messageDeleted,
+          final messageDeletedEvent = MessageDeletedEvent(
             cid: channel.cid,
             message: locationMessage.copyWith(
               type: MessageType.deleted,
               deletedAt: DateTime.timestamp(),
             ),
+            hardDelete: false,
           );
 
           // Dispatch event
@@ -4915,9 +4683,8 @@ void main() {
         );
 
         // Create location.shared event for the new message
-        final locationSharedEvent = Event(
+        final locationSharedEvent = LocationSharedEvent(
           cid: channel.cid,
-          type: EventType.locationShared,
           message: newMessage,
         );
 
@@ -4975,9 +4742,8 @@ void main() {
           );
 
           // Create location.shared event for the second message
-          final locationSharedEvent = Event(
+          final locationSharedEvent = LocationSharedEvent(
             cid: channel.cid,
-            type: EventType.locationShared,
             message: message2,
           );
 
@@ -5019,9 +4785,8 @@ void main() {
         );
 
         // Create location.shared event for the thread message
-        final locationSharedEvent = Event(
+        final locationSharedEvent = LocationSharedEvent(
           cid: channel.cid,
-          type: EventType.locationShared,
           message: threadLocationMessage,
         );
 
@@ -5079,9 +4844,8 @@ void main() {
         );
 
         // Create location.updated event for the thread message
-        final locationUpdatedEvent = Event(
+        final locationUpdatedEvent = LocationUpdatedEvent(
           cid: channel.cid,
-          type: EventType.locationUpdated,
           message: updatedThreadMessage,
         );
 
@@ -5108,10 +4872,10 @@ void main() {
         final before = channel.state!.channelState.activeLiveLocations;
 
         client.addEvent(
-          Event(
+          MessageNewEvent(
             cid: channel.cid,
-            type: EventType.messageNew,
             message: Message(id: 'msg1', text: 'Hello'),
+            watcherCount: 1,
           ),
         );
         await Future.delayed(Duration.zero);
@@ -5146,9 +4910,8 @@ void main() {
         );
 
         // Create channel.push_preference.updated event
-        final channelPushPreferenceUpdatedEvent = Event(
+        final channelPushPreferenceUpdatedEvent = ChannelPushPreferenceUpdatedEvent(
           cid: channel.cid,
-          type: EventType.channelPushPreferenceUpdated,
           channelPushPreference: channelPushPreference,
         );
 
@@ -5192,9 +4955,8 @@ void main() {
         );
 
         // Create channel.push_preference.updated event
-        final channelPushPreferenceUpdatedEvent = Event(
+        final channelPushPreferenceUpdatedEvent = ChannelPushPreferenceUpdatedEvent(
           cid: channel.cid,
-          type: EventType.channelPushPreferenceUpdated,
           channelPushPreference: updatedPushPreference,
         );
 
@@ -5211,13 +4973,6 @@ void main() {
           updatedPreferences?.disabledUntil,
           updatedPushPreference.disabledUntil,
         );
-      });
-
-      test('an event without a push preference is ignored', () async {
-        client.addEvent(Event(cid: channel.cid, type: EventType.channelPushPreferenceUpdated));
-        await Future.delayed(Duration.zero);
-
-        expect(channel.state?.channelState.pushPreferences, isNull);
       });
     });
 
@@ -5290,9 +5045,8 @@ void main() {
 
           // Create user.messages.deleted event (soft delete)
           final deletedAt = DateTime.now();
-          final userMessagesDeletedEvent = Event(
+          final userMessagesDeletedEvent = UserMessagesDeletedEvent(
             cid: channel.cid,
-            type: EventType.userMessagesDeleted,
             user: user1,
             hardDelete: false,
             createdAt: deletedAt,
@@ -5352,9 +5106,8 @@ void main() {
           expect(channel.state?.messages.length, equals(3));
 
           // Create user.messages.deleted event (hard delete)
-          final userMessagesDeletedEvent = Event(
+          final userMessagesDeletedEvent = UserMessagesDeletedEvent(
             cid: channel.cid,
-            type: EventType.userMessagesDeleted,
             user: user1,
             hardDelete: true,
           );
@@ -5413,9 +5166,8 @@ void main() {
           expect(channel.state?.threads['parent-msg']?.length, equals(2));
 
           // Create user.messages.deleted event (soft delete)
-          final userMessagesDeletedEvent = Event(
+          final userMessagesDeletedEvent = UserMessagesDeletedEvent(
             cid: channel.cid,
-            type: EventType.userMessagesDeleted,
             user: user1,
             hardDelete: false,
           );
@@ -5441,53 +5193,14 @@ void main() {
       );
 
       test(
-        'should do nothing when user is null',
-        () async {
-          // Setup: Add messages
-          final user1 = User(id: 'user-1', name: 'User 1');
-          final message1 = Message(
-            id: 'msg-1',
-            text: 'Message from user 1',
-            user: user1,
-          );
-
-          channel.state?.addNewMessage(message1);
-
-          // Verify initial state
-          expect(channel.state?.messages.length, equals(1));
-
-          // Create user.messages.deleted event without user
-          final userMessagesDeletedEvent = Event(
-            cid: channel.cid,
-            type: EventType.userMessagesDeleted,
-            hardDelete: false,
-          );
-
-          // Dispatch event
-          client.addEvent(userMessagesDeletedEvent);
-
-          // Wait for the event to be processed
-          await Future.delayed(Duration.zero);
-
-          // Verify messages are unaffected
-          expect(channel.state?.messages.length, equals(1));
-          expect(
-            channel.state?.messages.first.type,
-            isNot(MessageType.deleted),
-          );
-        },
-      );
-
-      test(
         'should handle empty message list',
         () async {
           // Setup: Empty channel
           expect(channel.state?.messages.length, equals(0));
 
           // Create user.messages.deleted event
-          final userMessagesDeletedEvent = Event(
+          final userMessagesDeletedEvent = UserMessagesDeletedEvent(
             cid: channel.cid,
-            type: EventType.userMessagesDeleted,
             user: User(id: 'user-1'),
             hardDelete: false,
           );
@@ -5534,9 +5247,8 @@ void main() {
           expect(channel.state?.messages.length, equals(3));
 
           // Create user.messages.deleted event (hard delete)
-          final userMessagesDeletedEvent = Event(
+          final userMessagesDeletedEvent = UserMessagesDeletedEvent(
             cid: channel.cid,
-            type: EventType.userMessagesDeleted,
             user: user1,
             hardDelete: true,
           );
@@ -5578,9 +5290,8 @@ void main() {
           channel.state?.addNewMessage(message1);
 
           // Create user.messages.deleted event (soft delete)
-          final userMessagesDeletedEvent = Event(
+          final userMessagesDeletedEvent = UserMessagesDeletedEvent(
             cid: channel.cid,
-            type: EventType.userMessagesDeleted,
             user: user1,
             hardDelete: false,
           );
@@ -5645,9 +5356,8 @@ void main() {
           expect(channel.state?.threads['msg-1']?.length, equals(2));
 
           // Create user.messages.deleted event (hard delete)
-          final userMessagesDeletedEvent = Event(
+          final userMessagesDeletedEvent = UserMessagesDeletedEvent(
             cid: channel.cid,
-            type: EventType.userMessagesDeleted,
             user: user1,
             hardDelete: true,
           );
@@ -5751,9 +5461,8 @@ void main() {
           );
 
           // Trigger the multi-thread batch via user.messages.deleted.
-          final userMessagesDeletedEvent = Event(
+          final userMessagesDeletedEvent = UserMessagesDeletedEvent(
             cid: channel.cid,
-            type: EventType.userMessagesDeleted,
             user: user1,
             hardDelete: false,
           );
@@ -5821,13 +5530,13 @@ void main() {
       test('a throwing handler still lets the later stages apply', () async {
         expect(channel.memberCount, equals(0));
 
-        // A message.deleted without a message throws on `event.message!` in
-        // the first dispatch stage. The unfiltered count refresh that runs
-        // after it must still apply.
+        // A notification.mark_unread without a last read time throws on
+        // `event.lastReadAt!` in the first dispatch stage. The unfiltered
+        // count refresh that runs after it must still apply.
         client.addEvent(
-          Event(
+          NotificationMarkUnreadEvent(
             cid: channel.cid,
-            type: EventType.messageDeleted,
+            user: User(id: 'other-user'),
             channelMemberCount: 9,
           ),
         );
@@ -5898,7 +5607,7 @@ void main() {
         );
 
         client.addEvent(
-          Event(cid: channel.cid, type: EventType.messageNew, message: message),
+          MessageNewEvent(cid: channel.cid, message: message, watcherCount: 1),
         );
         await Future.delayed(Duration.zero);
 
@@ -5930,7 +5639,7 @@ void main() {
         );
 
         disabledClient.addEvent(
-          Event(cid: channel.cid, type: EventType.messageNew, message: message),
+          MessageNewEvent(cid: channel.cid, message: message, watcherCount: 1),
         );
         await Future.delayed(Duration.zero);
 
@@ -5958,9 +5667,8 @@ void main() {
       expect(channel.state?.unreadCount, equals(1));
 
       client.addEvent(
-        Event(
+        MessageDeletedEvent(
           cid: channel.cid,
-          type: EventType.messageDeleted,
           message: message,
           hardDelete: true,
         ),
@@ -5989,9 +5697,8 @@ void main() {
       channel.state!.unreadCount = 1;
 
       client.addEvent(
-        Event(
+        MessageDeletedEvent(
           cid: channel.cid,
-          type: EventType.messageDeleted,
           message: message,
           hardDelete: false,
         ),
@@ -6949,9 +6656,8 @@ void main() {
         );
 
         client.addEvent(
-          Event(
+          MessageUpdatedEvent(
             cid: channel.cid,
-            type: EventType.messageUpdated,
             message: strippedParentUpdate,
           ),
         );
@@ -7007,9 +6713,8 @@ void main() {
         final updatedParent = pollMessage.copyWith(poll: updatedPoll, updatedAt: DateTime.utc(2026, 4, 29, 12));
 
         client.addEvent(
-          Event(
+          MessageUpdatedEvent(
             cid: channel.cid,
-            type: EventType.messageUpdated,
             message: updatedParent,
           ),
         );

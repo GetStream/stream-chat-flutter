@@ -6,10 +6,12 @@
 - The sort arguments on `getChannelStates`, `queryChannelStates` and `saveChannelQueries` are typed `List<ChannelSort>` rather than `SortOrder<ChannelState>`.
 - The filter arguments on `getChannelStates`, `queryChannelStates`, `updateChannelQueries` and `saveChannelQueries` are typed `ChannelFilter?` rather than an untyped `Filter`.
 - A predefined-filter query whose resolved filter is absent now stores no filter, rather than an empty one. The schema version is bumped for it, so the local cache is rebuilt once on upgrade.
+- `StreamChatPersistenceClient.getConnectionInfo` returns the stored `OwnUser?` instead of an `Event?`, and `updateConnectionInfo` takes a `HealthCheckEvent` instead of an `Event`.
 
 🔄 Changed
 
 - Every persistence call logged its own name at `info`; that call trace is `verbose` now.
+- Only the current user a connection opens with is stored; the health checks that follow no longer write to the local database.
 - A cached poll with a voting visibility the SDK does not name is read back instead of failing.
 
 🐞 Fixed

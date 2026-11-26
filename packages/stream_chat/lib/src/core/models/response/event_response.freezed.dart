@@ -14,6 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$EventResponse {
   String get duration;
+  ChatEvent get event;
 
   /// Create a copy of EventResponse
   /// with the given fields replaced by the non-null parameter values.
@@ -27,15 +28,16 @@ mixin _$EventResponse {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is EventResponse &&
-            (identical(other.duration, duration) || other.duration == duration));
+            (identical(other.duration, duration) || other.duration == duration) &&
+            (identical(other.event, event) || other.event == event));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, duration);
+  int get hashCode => Object.hash(runtimeType, duration, event);
 
   @override
   String toString() {
-    return 'EventResponse(duration: $duration)';
+    return 'EventResponse(duration: $duration, event: $event)';
   }
 }
 
@@ -43,7 +45,7 @@ mixin _$EventResponse {
 abstract mixin class $EventResponseCopyWith<$Res> {
   factory $EventResponseCopyWith(EventResponse value, $Res Function(EventResponse) _then) = _$EventResponseCopyWithImpl;
   @useResult
-  $Res call({String duration});
+  $Res call({String duration, ChatEvent event});
 }
 
 /// @nodoc
@@ -57,13 +59,17 @@ class _$EventResponseCopyWithImpl<$Res> implements $EventResponseCopyWith<$Res> 
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? duration = null}) {
+  $Res call({Object? duration = null, Object? event = null}) {
     return _then(
       EventResponse(
         duration: null == duration
             ? _self.duration
             : duration // ignore: cast_nullable_to_non_nullable
                   as String,
+        event: null == event
+            ? _self.event
+            : event // ignore: cast_nullable_to_non_nullable
+                  as ChatEvent,
       ),
     );
   }

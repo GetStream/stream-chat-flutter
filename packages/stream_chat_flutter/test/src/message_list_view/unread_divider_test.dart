@@ -35,7 +35,7 @@ void main() {
   late StreamController<bool> isUpToDateController;
   late StreamController<int> unreadCountController;
   late StreamController<List<Message>> messagesController;
-  late StreamController<Event> messageNewController;
+  late StreamController<ChatEvent> messageNewController;
   late StreamController<Read?> currentUserReadController;
 
   setUpAll(() {
@@ -56,7 +56,7 @@ void main() {
     messagesController = StreamController<List<Message>>.broadcast();
     // MockChannel.on filters this by event.type, so events pushed here
     // surface to channel.on(EventType.messageNew) subscribers.
-    messageNewController = StreamController<Event>.broadcast();
+    messageNewController = StreamController<ChatEvent>.broadcast();
     currentUserReadController = StreamController<Read?>.broadcast();
     addTearDown(isUpToDateController.close);
     addTearDown(unreadCountController.close);
@@ -141,7 +141,7 @@ void main() {
     when(() => channelClientState.messages).thenReturn(updated);
     await tester.runAsync(() async {
       messagesController.add(updated);
-      messageNewController.add(Event(type: EventType.messageNew, message: newMessage, cid: channel.cid));
+      messageNewController.add(MessageNewEvent(cid: channel.cid, message: newMessage, watcherCount: 1));
       await tester.pumpAndSettle();
     });
   }

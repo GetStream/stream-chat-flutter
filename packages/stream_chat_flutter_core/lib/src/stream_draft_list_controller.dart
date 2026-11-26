@@ -158,9 +158,9 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
   ///
   /// Return `true` if the event is handled. Return `false` to
   /// allow the event to be handled internally.
-  bool Function(Event event)? eventListener;
+  bool Function(ChatEvent event)? eventListener;
 
-  StreamSubscription<Event>? _draftEventSubscription;
+  StreamSubscription<ChatEvent>? _draftEventSubscription;
 
   // Subscribes to the draft list events.
   void _subscribeToDraftListEvents() {
@@ -175,14 +175,14 @@ class StreamDraftListController extends PagedValueNotifier<String, Draft> {
       // Returns early if the event is already handled by the listener.
       if (eventListener?.call(event) ?? false) return;
 
-      final handlerFunc = switch (event.type) {
-        EventType.draftUpdated => _eventHandler.onDraftUpdated,
-        EventType.draftDeleted => _eventHandler.onDraftDeleted,
-        EventType.connectionRecovered => _eventHandler.onConnectionRecovered,
-        _ => null,
-      };
-
-      return handlerFunc?.call(event, this);
+      switch (event) {
+        case DraftUpdatedEvent():
+          _eventHandler.onDraftUpdated(event, this);
+        case DraftDeletedEvent():
+          _eventHandler.onDraftDeleted(event, this);
+        case ConnectionRecoveredEvent():
+          _eventHandler.onConnectionRecovered(event, this);
+      }
     });
   }
 

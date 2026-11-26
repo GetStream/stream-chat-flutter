@@ -318,9 +318,9 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
   ///
   /// Return `true` if the event is handled. Return `false` to
   /// allow the event to be handled internally.
-  bool Function(Event event)? eventListener;
+  bool Function(ChatEvent event)? eventListener;
 
-  StreamSubscription<Event>? _threadEventSubscription;
+  StreamSubscription<ChatEvent>? _threadEventSubscription;
 
   // Subscribes to the thread list events.
   void _subscribeToThreadListEvents() {
@@ -335,26 +335,38 @@ class StreamThreadListController extends PagedValueNotifier<String, Thread> {
       // Returns early if the event is already handled by the listener.
       if (eventListener?.call(event) ?? false) return;
 
-      final handlerFunc = switch (event.type) {
-        EventType.threadUpdated => _eventHandler.onThreadUpdated,
-        EventType.connectionRecovered => _eventHandler.onConnectionRecovered,
-        EventType.notificationThreadMessageNew => _eventHandler.onNotificationThreadMessageNew,
-        EventType.messageRead => _eventHandler.onMessageRead,
-        EventType.notificationMarkUnread => _eventHandler.onNotificationMarkUnread,
-        EventType.channelDeleted => _eventHandler.onChannelDeleted,
-        EventType.channelTruncated => _eventHandler.onChannelTruncated,
-        EventType.messageNew => _eventHandler.onMessageNew,
-        EventType.messageUpdated => _eventHandler.onMessageUpdated,
-        EventType.messageDeleted => _eventHandler.onMessageDeleted,
-        EventType.reactionNew => _eventHandler.onReactionNew,
-        EventType.reactionUpdated => _eventHandler.onReactionUpdated,
-        EventType.reactionDeleted => _eventHandler.onReactionDeleted,
-        EventType.draftUpdated => _eventHandler.onDraftUpdated,
-        EventType.draftDeleted => _eventHandler.onDraftDeleted,
-        _ => null,
-      };
-
-      return handlerFunc?.call(event, this);
+      switch (event) {
+        case ThreadUpdatedEvent():
+          _eventHandler.onThreadUpdated(event, this);
+        case ConnectionRecoveredEvent():
+          _eventHandler.onConnectionRecovered(event, this);
+        case NotificationThreadMessageNewEvent():
+          _eventHandler.onNotificationThreadMessageNew(event, this);
+        case MessageReadEvent():
+          _eventHandler.onMessageRead(event, this);
+        case NotificationMarkUnreadEvent():
+          _eventHandler.onNotificationMarkUnread(event, this);
+        case ChannelDeletedEvent():
+          _eventHandler.onChannelDeleted(event, this);
+        case ChannelTruncatedEvent():
+          _eventHandler.onChannelTruncated(event, this);
+        case MessageNewEvent():
+          _eventHandler.onMessageNew(event, this);
+        case MessageUpdatedEvent():
+          _eventHandler.onMessageUpdated(event, this);
+        case MessageDeletedEvent():
+          _eventHandler.onMessageDeleted(event, this);
+        case ReactionNewEvent():
+          _eventHandler.onReactionNew(event, this);
+        case ReactionUpdatedEvent():
+          _eventHandler.onReactionUpdated(event, this);
+        case ReactionDeletedEvent():
+          _eventHandler.onReactionDeleted(event, this);
+        case DraftUpdatedEvent():
+          _eventHandler.onDraftUpdated(event, this);
+        case DraftDeletedEvent():
+          _eventHandler.onDraftDeleted(event, this);
+      }
     });
   }
 

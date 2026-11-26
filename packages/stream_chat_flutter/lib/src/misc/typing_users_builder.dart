@@ -49,7 +49,7 @@ class StreamTypingUsersBuilder extends StatelessWidget {
 
     if (channelState == null) return builder(context, const []);
 
-    return BetterStreamBuilder<Map<User, Event>>(
+    return BetterStreamBuilder<Map<User, TypingStartEvent>>(
       stream: channelState.typingEventsStream,
       initialData: channelState.typingEvents,
       comparator: _hasSameTypingUsers,
@@ -57,13 +57,13 @@ class StreamTypingUsersBuilder extends StatelessWidget {
     );
   }
 
-  bool _hasSameTypingUsers(Map<User, Event>? previous, Map<User, Event>? current) {
+  bool _hasSameTypingUsers(Map<User, TypingStartEvent>? previous, Map<User, TypingStartEvent>? current) {
     final previousIds = _typingUsersIn(previous).map((user) => user.id);
     final currentIds = _typingUsersIn(current).map((user) => user.id);
     return const IterableEquality<String>().equals(previousIds, currentIds);
   }
 
-  List<User> _typingUsersIn(Map<User, Event>? typingEvents) {
+  List<User> _typingUsersIn(Map<User, TypingStartEvent>? typingEvents) {
     if (typingEvents == null || typingEvents.isEmpty) return [];
 
     return [

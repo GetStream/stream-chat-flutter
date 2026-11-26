@@ -407,11 +407,11 @@ void main() {
   });
 
   group('Event handling', () {
-    late StreamController<Event> eventController;
+    late StreamController<ChatEvent> eventController;
     final initialReminders = generateMessageReminders();
 
     setUp(() {
-      eventController = StreamController<Event>.broadcast();
+      eventController = StreamController<ChatEvent>.broadcast();
       when(client.on).thenAnswer((_) => eventController.stream);
 
       when(
@@ -446,8 +446,10 @@ void main() {
         text: 'Created via event',
       );
 
-      final event = Event(
-        type: EventType.reminderCreated,
+      final event = ReminderCreatedEvent(
+        cid: newReminder.channelCid,
+        messageId: newReminder.messageId,
+        userId: newReminder.userId,
         reminder: newReminder,
       );
 
@@ -478,8 +480,10 @@ void main() {
         remindAt: DateTime.now().add(const Duration(hours: 5)),
       );
 
-      final event = Event(
-        type: EventType.reminderUpdated,
+      final event = ReminderUpdatedEvent(
+        cid: updatedReminder.channelCid,
+        messageId: updatedReminder.messageId,
+        userId: updatedReminder.userId,
         reminder: updatedReminder,
       );
 
@@ -508,8 +512,10 @@ void main() {
 
       final initialItemCount = controller.value.asSuccess.items.length;
 
-      final event = Event(
-        type: EventType.reminderDeleted,
+      final event = ReminderDeletedEvent(
+        cid: initialReminders[0].channelCid,
+        messageId: initialReminders[0].messageId,
+        userId: initialReminders[0].userId,
         reminder: initialReminders[0],
       );
 
@@ -550,8 +556,10 @@ void main() {
         remindAt: DateTime.now().add(const Duration(hours: 10)),
       );
 
-      final event = Event(
-        type: EventType.reminderUpdated,
+      final event = ReminderUpdatedEvent(
+        cid: updatedReminder.channelCid,
+        messageId: updatedReminder.messageId,
+        userId: updatedReminder.userId,
         reminder: updatedReminder,
       );
 
@@ -581,8 +589,10 @@ void main() {
       };
 
       final reminder = generateMessageReminder();
-      final event = Event(
-        type: EventType.reminderCreated,
+      final event = ReminderCreatedEvent(
+        cid: reminder.channelCid,
+        messageId: reminder.messageId,
+        userId: reminder.userId,
         reminder: reminder,
       );
 

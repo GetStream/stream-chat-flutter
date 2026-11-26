@@ -12,15 +12,15 @@ import '../mocks.dart';
 class _FakeSyncEndpoint {
   _FakeSyncEndpoint({this.events = const [], this.error});
 
-  List<Event> events;
+  List<ChatEvent> events;
   Exception? error;
 
   final calls = <({List<String> cids, DateTime lastSyncAt})>[];
 
-  Future<SyncResponse> call(List<String> cids, DateTime lastSyncAt) async {
+  Future<Result<List<ChatEvent>>> call(List<String> cids, DateTime lastSyncAt) async {
     calls.add((cids: cids, lastSyncAt: lastSyncAt));
-    if (error case final error?) throw error;
-    return SyncResponse()..events = events;
+    if (error case final error?) return Result.failure(error);
+    return Result.success(events);
   }
 }
 
@@ -73,21 +73,21 @@ class _FakeChannelClientState extends Fake implements ChannelClientState {
 typedef _Harness = ({
   SyncManager manager,
   MockStreamChatClient client,
-  List<Event> replayed,
+  List<ChatEvent> replayed,
   List<List<String>> queriedPages,
 });
 
 void main() {
-  registerFallbackValue(FakeEvent());
+  registerFallbackValue(UnknownEvent(type: 'fallback'));
   registerFallbackValue(const PaginationParams());
   registerFallbackValue(const ChannelFilter.raw({}));
 
   final t0 = DateTime.utc(2026, 3, 1, 12);
   final anHourAgo = t0.subtract(const Duration(hours: 1));
 
-  Event eventAt(DateTime createdAt) => Event(type: EventType.messageNew, createdAt: createdAt);
+  ChatEvent eventAt(DateTime createdAt) => UnknownEvent(type: 'test.event', createdAt: createdAt);
 
-  List<Event> eventsOf(int count) {
+  List<ChatEvent> eventsOf(int count) {
     return List.generate(count, (i) => eventAt(anHourAgo.add(Duration(seconds: i + 1))));
   }
 
@@ -109,7 +109,7 @@ void main() {
   }) {
     final client = MockStreamChatClient();
     final state = MockClientState();
-    final replayed = <Event>[];
+    final replayed = <ChatEvent>[];
     final queriedPages = <List<String>>[];
 
     when(() => client.chatPersistenceClient).thenReturn(persistence);
@@ -120,7 +120,7 @@ void main() {
       for (final cid in activeCids) cid: _FakeChannel(cid, lastActiveAt: lastActiveAt[cid]),
     });
     when(() => client.handleEvent(any())).thenAnswer((invocation) {
-      replayed.add(invocation.positionalArguments.first as Event);
+      replayed.add(invocation.positionalArguments.first as ChatEvent);
     });
 
     when(

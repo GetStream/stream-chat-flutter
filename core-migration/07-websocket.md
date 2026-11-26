@@ -1,5 +1,11 @@
 # 07 — WebSocket transport
 
+> **Superseded.** The client already runs on core's `StreamWebSocketClient`, recovery handler and
+> token manager, and FLU-1335 moved the connection to the v2 protocol (`/api/v2/connect`, the token
+> sent in the first message, frames decoded as the generated `WSEvent` union) and replaced `Event`
+> with typed events. What core would still need so chat can drop its own auth frame is listed in
+> that PR's description. The notes below are kept for their findings only.
+>
 > **Parked.** A full attempt was written and reverted (`git reset` off
 > `refactor/migrate-to-core`); nothing from this phase is in the tree. Everything below is kept
 > because it is what the attempt established — read [Findings from the first

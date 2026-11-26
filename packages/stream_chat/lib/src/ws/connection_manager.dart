@@ -29,6 +29,7 @@ class ConnectionManager with Disposable {
       tag: '$tag:Ws',
       messageCodec: const StreamChatWsCodec(),
       optionsProvider: _buildOptions,
+      onAuthenticate: _authenticate,
       wsProvider: wsProvider,
     );
 
@@ -53,7 +54,7 @@ class ConnectionManager with Disposable {
   final _reconnection = _PausableReconnectionPolicy();
 
   // The attempt everyone opening a connection waits on, while one is under way.
-  final _opening = InFlightCache<String, HealthCheckEvent>();
+  final _opening = InFlightCache<String, HealthCheckFrame>();
 
   // Whether the connection being opened may still be tried again with a new token.
   var _canRetryWithNewToken = false;
@@ -115,7 +116,7 @@ class ConnectionManager with Disposable {
   ///
   /// Throws a [StateError] when a connection is already open, or one is being opened for another
   /// user, and a [StreamChatException] when the connection is refused.
-  Future<HealthCheckEvent> connect(
+  Future<HealthCheckFrame> connect(
     OwnUser user, {
     bool includeUserDetails = false,
   }) async {
@@ -168,7 +169,7 @@ class ConnectionManager with Disposable {
   //
   // Everyone waiting on one attempt shares it, including whoever did not start it: a second run
   // would wait on the same frame again and report the same refusal twice.
-  Future<HealthCheckEvent> _connect(OwnUser user) => _opening.run(
+  Future<HealthCheckFrame> _connect(OwnUser user) => _opening.run(
     user.id,
     () async {
       final session = _session;
@@ -183,11 +184,11 @@ class ConnectionManager with Disposable {
   );
 
   // Opens the connection, trying once more with a new token when an expired one is refused.
-  Future<HealthCheckEvent> _attempt(OwnUser user, _Session? session) async {
+  Future<HealthCheckFrame> _attempt(OwnUser user, _Session? session) async {
     while (true) {
       // Subscribed before connecting: the frame that establishes the connection is the first
       // health check, and the only one carrying the signed-in user.
-      final established = events.waitFor<HealthCheckEvent>();
+      final established = events.waitFor<HealthCheckFrame>();
 
       // Not awaited: the state has moved on by the time this returns, so the closure waited on
       // below cannot be the one this attempt replaces.
@@ -234,8 +235,9 @@ class ConnectionManager with Disposable {
     Error.throwWithStackTrace(source.exception, source.stackTrace ?? StackTrace.current);
   }
 
-  // The request for a single attempt. Nothing is sent over the socket to authenticate one, so this
-  // is where a refused token is replaced.
+  // The request for a single attempt. The token is loaded here, before the
+  // socket opens, so the first message goes out as soon as it is open; this
+  // is also where a refused token is replaced.
   Future<WebSocketOptions> _buildOptions(
     StreamApiException? previousError,
   ) async {
@@ -256,12 +258,24 @@ class ConnectionManager with Disposable {
     }
 
     final userToken = await _tokenManager.getToken();
+    return _request.build(token: userToken);
+  }
 
-    return _request.build(
+  // Authenticates an open socket with its first message, presenting the
+  // current token, which [_buildOptions] loaded. A refused token was already
+  // replaced there, so [previousError] is not acted on again.
+  Future<void> _authenticate(WsRequestSender send, StreamApiException? previousError) async {
+    final session = _session;
+    if (session == null) throw StateError('No user is connected.');
+
+    final userToken = await _tokenManager.getToken();
+    final request = _request.authenticate(
       user: session.user,
       token: userToken,
       includeUserDetails: session.includeUserDetails,
     );
+
+    send(request).getOrThrow();
   }
 
   @override
@@ -284,18 +298,18 @@ class _Session {
   final OwnUser user;
 
   // The frame that opened this connection, and `null` until one does.
-  HealthCheckEvent? get established => _established;
-  HealthCheckEvent? _established;
+  HealthCheckFrame? get established => _established;
+  HealthCheckFrame? _established;
 
   // Whether an attempt names the user in full, which creates or updates the user.
   bool get includeUserDetails => _includeUserDetails;
   bool _includeUserDetails;
 
   // Remembers the frame the connection was opened with, and answers with it.
-  HealthCheckEvent establishedWith(HealthCheckEvent event) {
+  HealthCheckFrame establishedWith(HealthCheckFrame frame) {
     // Spent here rather than as an attempt is built, which leaves one that never landed paying.
     _includeUserDetails = false;
-    return _established = event;
+    return _established = frame;
   }
 }
 

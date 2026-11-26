@@ -21,6 +21,7 @@ import 'package:stream_core/stream_core.dart'
         InFlightCache,
         LocationCoordinate,
         LoggingInterceptor,
+        MutableEventEmitter,
         PatternMatching,
         Result,
         SortedListExtensions,
@@ -42,7 +43,7 @@ import 'package:stream_core/stream_core.dart'
         runSafely;
 import 'package:synchronized/synchronized.dart';
 
-import '../../open_api/api.dart' show DefaultApi;
+import '../../open_api/api.dart' show DefaultApi, WSEvent;
 import '../../version.dart';
 import '../core/api/attachment_file_uploader.dart';
 import '../core/api/requests.dart';
@@ -57,6 +58,14 @@ import '../core/models/banned_user.dart';
 import '../core/models/channel_state.dart';
 import '../core/models/draft.dart';
 import '../core/models/draft_message.dart';
+import '../core/models/events/channel_events.dart';
+import '../core/models/events/chat_event.dart';
+import '../core/models/events/connection_events.dart';
+import '../core/models/events/location_events.dart';
+import '../core/models/events/member_events.dart';
+import '../core/models/events/notification_events.dart';
+import '../core/models/events/push_preference_events.dart';
+import '../core/models/events/user_events.dart';
 import '../core/models/location.dart';
 import '../core/models/member.dart';
 import '../core/models/message.dart';
@@ -139,7 +148,6 @@ import '../core/models/thread.dart';
 import '../core/models/translation_language.dart';
 import '../core/models/user.dart';
 import '../core/models/user_block.dart';
-import '../core/util/event_controller.dart';
 import '../core/util/extension.dart';
 import '../core/util/immutable_collection_subjects.dart';
 import '../core/util/utils.dart';
@@ -149,6 +157,7 @@ import '../repository/app_settings_repository.dart';
 import '../repository/channels_repository.dart';
 import '../repository/devices_repository.dart';
 import '../repository/general_repository.dart';
+import '../repository/mapper/events_mapper.dart';
 import '../repository/messages_repository.dart';
 import '../repository/moderation_repository.dart';
 import '../repository/polls_repository.dart';
@@ -160,7 +169,6 @@ import '../repository/users_repository.dart';
 import '../ws/connect_request.dart';
 import '../ws/connection_manager.dart';
 import '../ws/connection_status.dart';
-import '../ws/events/event.dart';
 import '../ws/events/event_resolvers.dart' as event_resolvers;
 import '../ws/events/events.dart';
 import 'app_settings_manager.dart';
@@ -283,9 +291,12 @@ class StreamChatClient {
       wsProvider: wsProvider,
     );
 
-    // Every frame the connection delivers is an `Event`, including the two the socket acts on.
     _wsEventSubscription = _connection.events.listen((it) {
-      if (it case final Event event) handleEvent(event);
+      if (it case final HealthCheckFrame frame) return _handleHealthCheckFrame(frame);
+      if (it case final ConnectionErrorFrame frame) {
+        return handleEvent(ConnectionErrorEvent(error: frame.error, isLocal: false));
+      }
+      if (it case final WSEvent event) handleEvent(event.toModel());
     });
 
     _retryPolicy =
@@ -483,13 +494,12 @@ class StreamChatClient {
     onMarkChannelsDelivered: markChannelsDelivered,
   );
 
-  /// Every [Event] the client receives, whichever connection carried it.
+  /// Every [ChatEvent] the client receives, whichever connection carried it.
   ///
-  /// Listen to this or use the [on] method to filter specific event types.
-  Stream<Event> get eventStream => _eventController.stream;
-  late final _eventController = EventController<Event>(
+  /// To receive only some events, consider [on].
+  Stream<ChatEvent> get eventStream => _eventController;
+  late final _eventController = MutableEventEmitter<ChatEvent>(
     resolvers: [
-      event_resolvers.pollCreatedResolver,
       event_resolvers.pollAnswerCastedResolver,
       event_resolvers.pollAnswerRemovedResolver,
       event_resolvers.locationSharedResolver,
@@ -650,8 +660,8 @@ class StreamChatClient {
           return state.currentUser!;
         } catch (e, stk) {
           if (e is StreamChatException && e.isRetriable) {
-            final event = await chatPersistenceClient?.getConnectionInfo();
-            if (event != null) return ownUser.merge(event.me);
+            final storedUser = await chatPersistenceClient?.getConnectionInfo();
+            if (storedUser != null) return ownUser.merge(storedUser);
           }
           // Whoever was signed in before this, so a user who never signed in does not have the
           // next connect refused on their behalf.
@@ -759,27 +769,36 @@ class StreamChatClient {
   /// [pauseReconnect].
   void resumeReconnect() => _connection.resumeReconnect();
 
-  void _handleHealthCheckEvent(HealthCheckEvent event) {
-    if (event.me case final user?) state.currentUser = user;
-    chatPersistenceClient?.updateConnectionInfo(event);
+  // Applies the frame a connection opens with, which names the current user.
+  //
+  // A frame naming no user changes nothing.
+  void _handleHealthCheckFrame(HealthCheckFrame frame) {
+    if (_eventController.isClosed) return;
+
+    final me = frame.me;
+    if (me == null) return;
+
+    state.currentUser = me;
+    chatPersistenceClient?.updateConnectionInfo(
+      HealthCheckEvent(connectionId: frame.connectionId, me: me, createdAt: frame.createdAt, isLocal: false),
+    );
   }
 
-  /// Method called to add a new event to the [_eventController].
-  void handleEvent(Event event) {
+  /// Delivers [event] to the client's listeners, as if it had been received.
+  ///
+  /// The client applies the event to its own state first, such as the user the
+  /// event carries.
+  void handleEvent(ChatEvent event) {
     // Ignore events that arrive after the client has been disposed.
     if (_eventController.isClosed) return;
 
-    if (event case HealthCheckEvent()) {
-      return _handleHealthCheckEvent(event);
-    }
-
-    state.updateUser(event.user);
-    return _eventController.safeAdd(event);
+    if (event case HasUser(:final user?)) state.updateUser(user);
+    _eventController.tryEmit(event);
   }
 
   late final _syncManager = SyncManager(
     client: this,
-    fetchMissedEvents: _chatApi.general.sync,
+    fetchMissedEvents: _generalRepository.sync,
   );
 
   void _onConnectionStatusChanged(
@@ -793,29 +812,45 @@ class StreamChatClient {
     final isConnected = currStatus == ConnectionStatus.connected;
 
     // Notify the connection status change event
-    handleEvent(Event(type: EventType.connectionChanged, online: isConnected));
+    handleEvent(ConnectionChangedEvent(online: isConnected));
 
     final connectionRecovered = !wasConnected && isConnected;
     if (!connectionRecovered) return;
 
     await _syncManager.recoverState();
-    handleEvent(Event(type: EventType.connectionRecovered, online: true));
+    handleEvent(ConnectionRecoveredEvent());
   }
 
-  /// Every [Event] the client receives, of the types named.
+  /// Every event the client receives that is a [T] and, when types are
+  /// named, of one of those types.
   ///
-  /// Pass an eventType as parameter in order to filter just a type of event.
-  Stream<Event> on([
+  /// The type argument narrows the events to one class, so its data needs no
+  /// cast:
+  ///
+  /// ```dart
+  /// client.on<MessageNewEvent>().listen((event) => print(event.message.text));
+  /// ```
+  ///
+  /// Naming up to four types, such as [EventType.messageNew], keeps only the
+  /// events of those types; [EventType.any] or none keeps every type. Both can
+  /// be combined.
+  Stream<T> on<T extends ChatEvent>([
     String? eventType,
     String? eventType2,
     String? eventType3,
     String? eventType4,
   ]) {
-    if (eventType == null || eventType == EventType.any) return eventStream;
-    return eventStream.where(
-      (event) =>
-          event.type == eventType || event.type == eventType2 || event.type == eventType3 || event.type == eventType4,
-    );
+    if (eventType == null || eventType == EventType.any) return eventStream.whereType<T>();
+
+    return eventStream
+        .where(
+          (event) =>
+              event.type == eventType ||
+              event.type == eventType2 ||
+              event.type == eventType3 ||
+              event.type == eventType4,
+        )
+        .whereType<T>();
   }
 
   /// Replays the events missed while offline, applying them to client state and
@@ -1535,8 +1570,7 @@ class StreamChatClient {
     // Emit events for updated preferences
     final updatedPushPreference = res.userPreferences[currentUserId];
     if (updatedPushPreference != null) {
-      final pushPreferenceUpdatedEvent = Event(
-        type: EventType.pushPreferenceUpdated,
+      final pushPreferenceUpdatedEvent = PushPreferenceUpdatedEvent(
         pushPreference: updatedPushPreference,
       );
 
@@ -1547,8 +1581,7 @@ class StreamChatClient {
     final channelPushPreferences = res.userChannelPreferences[currentUserId];
     if (channelPushPreferences != null) {
       for (final MapEntry(:key, :value) in channelPushPreferences.entries) {
-        final pushPreferenceUpdatedEvent = Event(
-          type: EventType.channelPushPreferenceUpdated,
+        final pushPreferenceUpdatedEvent = ChannelPushPreferenceUpdatedEvent(
           cid: key,
           channelPushPreference: value,
         );
@@ -2073,19 +2106,16 @@ class StreamChatClient {
 
   /// Gets how many unread messages and threads the current user has.
   ///
-  /// While the client is connected, a success also updates
+  /// While a user is connected, a success also updates
   /// [ClientState.totalUnreadCount], [ClientState.unreadChannels] and
-  /// [ClientState.unreadThreads], just after the returned future completes; a
-  /// failure leaves them unchanged.
+  /// [ClientState.unreadThreads]; a failure leaves them unchanged.
   Future<Result<GetUnreadCountResponse>> getUnreadCount() async {
     final result = await _usersRepository.getUnreadCount();
     return result.onSuccess(
-      (response) => handleEvent(
-        Event(
-          totalUnreadCount: response.totalUnreadCount,
-          unreadChannels: response.channels.length,
-          unreadThreads: response.threads.length,
-        ),
+      (response) => state.currentUser = state.currentUser?.copyWith(
+        totalUnreadCount: response.totalUnreadCount,
+        unreadChannels: response.channels.length,
+        unreadThreads: response.threads.length,
       ),
     );
   }
@@ -2671,7 +2701,7 @@ class StreamChatClient {
   /// [retryScheduledMessage] or delete with [deleteScheduledMessage].
   ///
   /// Each of these changes is also reported on [on] as a scheduled message
-  /// event with [Event.isLocal] true.
+  /// event with [ChatEvent.isLocal] true.
   ///
   /// Throws a [StreamChatException] if the request fails.
   ///
@@ -3015,31 +3045,24 @@ class ClientState {
     _eventsSubscription = CompositeSubscription()
       ..add(
         _client.on().listen((event) {
-          // Update the current user only if the event is not a health check.
-          if (event.me case final user?) {
-            if (event.type != EventType.healthCheck) {
-              currentUser = currentUser?.merge(user) ?? user;
-            }
+          if (event case HasOwnUser(:final me)) {
+            currentUser = currentUser?.merge(me) ?? me;
           }
 
-          // Update the total unread count.
-          if (event.totalUnreadCount case final count?) {
-            currentUser = currentUser?.copyWith(totalUnreadCount: count);
+          if (event case HasUnreadCounts(:final totalUnreadCount?)) {
+            currentUser = currentUser?.copyWith(totalUnreadCount: totalUnreadCount);
           }
 
-          // Update the unread channels count.
-          if (event.unreadChannels case final count?) {
-            currentUser = currentUser?.copyWith(unreadChannels: count);
+          if (event case HasUnreadCounts(:final unreadChannels?)) {
+            currentUser = currentUser?.copyWith(unreadChannels: unreadChannels);
           }
 
-          // Update the unread threads count.
-          if (event.unreadThreads case final count?) {
-            currentUser = currentUser?.copyWith(unreadThreads: count);
+          if (event case HasUnreadThreadCount(:final unreadThreads?)) {
+            currentUser = currentUser?.copyWith(unreadThreads: unreadThreads);
           }
 
-          // Update the push preferences.
-          if (event.pushPreference case final preferences?) {
-            currentUser = currentUser?.copyWith(pushPreferences: preferences);
+          if (event case PushPreferenceUpdatedEvent(:final pushPreference)) {
+            currentUser = currentUser?.copyWith(pushPreferences: pushPreference);
           }
         }),
       );
@@ -3086,8 +3109,8 @@ class ClientState {
 
   void _listenChannelHidden() {
     _eventsSubscription?.add(
-      _client.on(EventType.channelHidden).listen((event) async {
-        final eventChannel = event.channel!;
+      _client.on<ChannelHiddenEvent>().listen((event) async {
+        final eventChannel = event.channel;
         await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
         channels[eventChannel.cid]?.dispose();
       }),
@@ -3096,25 +3119,11 @@ class ClientState {
 
   void _listenUserUpdated() {
     _eventsSubscription?.add(
-      _client.on(EventType.userUpdated).listen((event) {
+      _client.on<UserUpdatedEvent>().listen((event) {
         var user = event.user;
-        if (user == null) return;
 
-        if (user.id == currentUser?.id) {
-          // TODO(openapi-migration): map the v2 event's user once WebSocket
-          // events decode v2 payloads. Until then, the privacy settings the
-          // current user's copy carries sit in the user's custom data.
-          final updatedUser = OwnUser.fromJson(user.toJson());
-          currentUser = user = updatedUser.copyWith(
-            // PRESERVE these fields (we don't get them in user.updated events)
-            devices: currentUser?.devices,
-            mutes: currentUser?.mutes,
-            channelMutes: currentUser?.channelMutes,
-            totalUnreadCount: currentUser?.totalUnreadCount,
-            unreadChannels: currentUser?.unreadChannels,
-            unreadThreads: currentUser?.unreadThreads,
-            pushPreferences: currentUser?.pushPreferences,
-          );
+        if (currentUser case final current? when user.id == current.id) {
+          currentUser = user = _updatedCurrentUser(current, event);
         }
 
         updateUser(user);
@@ -3122,9 +3131,46 @@ class ClientState {
     );
   }
 
+  // The current user as [event] describes them. What only the current user
+  // has, their ban expiry, shadow ban and blocked users keep their current
+  // values.
+  OwnUser _updatedCurrentUser(OwnUser current, UserUpdatedEvent event) {
+    final user = event.user;
+    return OwnUser(
+      id: user.id,
+      role: user.role,
+      name: user.name,
+      image: user.image,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+      lastActive: user.lastActive,
+      online: user.online,
+      custom: user.custom,
+      banned: user.banned,
+      teams: user.teams,
+      language: user.language,
+      invisible: user.invisible,
+      teamsRole: user.teamsRole,
+      avgResponseTime: user.avgResponseTime,
+      deactivatedAt: user.deactivatedAt,
+      deletedAt: user.deletedAt,
+      privacySettings: event.privacySettings,
+      banExpires: current.banExpires,
+      shadowBanned: current.shadowBanned,
+      blockedUserIds: current.blockedUserIds,
+      devices: current.devices,
+      mutes: current.mutes,
+      channelMutes: current.channelMutes,
+      totalUnreadCount: current.totalUnreadCount,
+      unreadChannels: current.unreadChannels,
+      unreadThreads: current.unreadThreads,
+      pushPreferences: current.pushPreferences,
+    );
+  }
+
   void _listenAllChannelsRead() {
     _eventsSubscription?.add(
-      _client.on(EventType.notificationMarkRead).listen((event) {
+      _client.on<NotificationMarkReadEvent>().listen((event) {
         // If a cid is provided, it means it's for a specific channel.
         if (event.cid != null) return;
 
@@ -3144,11 +3190,17 @@ class ClientState {
             EventType.notificationRemovedFromChannel,
           )
           .listen((event) async {
-            final isCurrentUser = event.user!.id == currentUser!.id;
-            if (isCurrentUser && event.channel != null) {
-              final eventChannel = event.channel!;
-              await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
-              channels[eventChannel.cid]?.dispose();
+            final (user, channel) = switch (event) {
+              MemberRemovedEvent(:final user, :final channel) => (user, channel),
+              NotificationRemovedFromChannelEvent(:final user, :final channel) => (user, channel),
+              _ => (null, null),
+            };
+            if (user == null || channel == null) return;
+
+            final isCurrentUser = user.id == currentUser!.id;
+            if (isCurrentUser) {
+              await _client.chatPersistenceClient?.deleteChannels([channel.cid]);
+              channels[channel.cid]?.dispose();
             }
           }),
     );
@@ -3161,8 +3213,14 @@ class ClientState {
             EventType.channelDeleted,
             EventType.notificationChannelDeleted,
           )
-          .listen((Event event) async {
-            final eventChannel = event.channel!;
+          .listen((event) async {
+            final eventChannel = switch (event) {
+              ChannelDeletedEvent(:final channel) => channel,
+              NotificationChannelDeletedEvent(:final channel) => channel,
+              _ => null,
+            };
+            if (eventChannel == null) return;
+
             await _client.chatPersistenceClient?.deleteChannels([eventChannel.cid]);
             channels[eventChannel.cid]?.dispose();
           }),
@@ -3171,7 +3229,7 @@ class ClientState {
 
   void _listenUserMessagesDeleted() {
     _eventsSubscription?.add(
-      _client.on(EventType.userMessagesDeleted).listen((event) async {
+      _client.on<UserMessagesDeletedEvent>().listen((event) async {
         final cid = event.cid;
         // Only handle message deletions that are not channel specific
         // (i.e. user banned globally from the app)
@@ -3189,8 +3247,8 @@ class ClientState {
 
   void _listenLocationShared() {
     _eventsSubscription?.add(
-      _client.on(EventType.locationShared).listen((event) {
-        final location = event.message?.sharedLocation;
+      _client.on<LocationSharedEvent>().listen((event) {
+        final location = event.message.sharedLocation;
         if (location == null || location.isStatic) return;
 
         final currentUserId = currentUser?.id;
@@ -3212,8 +3270,8 @@ class ClientState {
 
   void _listenLocationUpdated() {
     _eventsSubscription?.add(
-      _client.on(EventType.locationUpdated).listen((event) {
-        final location = event.message?.sharedLocation;
+      _client.on<LocationUpdatedEvent>().listen((event) {
+        final location = event.message.sharedLocation;
         if (location == null || location.isStatic) return;
 
         final currentUserId = currentUser?.id;
@@ -3235,8 +3293,8 @@ class ClientState {
 
   void _listenLocationExpired() {
     _eventsSubscription?.add(
-      _client.on(EventType.locationExpired).listen((event) {
-        final location = event.message?.sharedLocation;
+      _client.on<LocationExpiredEvent>().listen((event) {
+        final location = event.message.sharedLocation;
         if (location == null || location.isStatic) return;
 
         final currentUserId = currentUser?.id;
@@ -3262,8 +3320,7 @@ class ClientState {
   void _handleLocationExpired(Location location) {
     final lastUpdatedAt = DateTime.timestamp();
 
-    final locationExpiredEvent = Event(
-      type: EventType.locationExpired,
+    final locationExpiredEvent = LocationExpiredEvent(
       cid: location.channelCid,
       message: Message(
         id: location.messageId,

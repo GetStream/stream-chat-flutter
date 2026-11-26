@@ -54,7 +54,10 @@ void main() {
       when(() => controller.currentItems).thenReturn([kept, deleted]);
 
       handler.onChannelDeleted(
-        Event(type: EventType.channelDeleted, cid: 'messaging:deleted'),
+        ChannelDeletedEvent(
+          cid: 'messaging:deleted',
+          channel: ChannelModel(cid: 'messaging:deleted'),
+        ),
         controller,
       );
 
@@ -67,10 +70,7 @@ void main() {
       when(() => controller.currentItems).thenReturn([kept, deleted]);
 
       handler.onChannelDeleted(
-        Event(
-          type: EventType.channelDeleted,
-          channel: ChannelModel(cid: 'messaging:deleted'),
-        ),
+        ChannelDeletedEvent(channel: ChannelModel(cid: 'messaging:deleted')),
         controller,
       );
 
@@ -85,7 +85,10 @@ void main() {
       when(() => controller.currentItems).thenReturn([kept, hidden]);
 
       handler.onChannelHidden(
-        Event(type: EventType.channelHidden, cid: 'messaging:hidden'),
+        ChannelHiddenEvent(
+          cid: 'messaging:hidden',
+          channel: ChannelModel(cid: 'messaging:hidden'),
+        ),
         controller,
       );
 
@@ -98,7 +101,7 @@ void main() {
       when(() => controller.refresh()).thenAnswer((_) async {});
 
       handler.onChannelTruncated(
-        Event(type: EventType.channelTruncated),
+        ChannelTruncatedEvent(channel: ChannelModel(cid: 'messaging:a')),
         controller,
       );
 
@@ -113,7 +116,10 @@ void main() {
       when(() => controller.currentItems).thenReturn([a, b]);
 
       handler.onChannelUpdated(
-        Event(type: EventType.channelUpdated, cid: 'messaging:a'),
+        ChannelUpdatedEvent(
+          cid: 'messaging:a',
+          channel: ChannelModel(cid: 'messaging:a'),
+        ),
         controller,
       );
 
@@ -125,7 +131,10 @@ void main() {
       when(() => controller.currentItems).thenReturn([a]);
 
       handler.onChannelUpdated(
-        Event(type: EventType.channelUpdated, cid: 'messaging:unknown'),
+        ChannelUpdatedEvent(
+          cid: 'messaging:unknown',
+          channel: ChannelModel(cid: 'messaging:unknown'),
+        ),
         controller,
       );
 
@@ -140,7 +149,11 @@ void main() {
       when(() => controller.currentItems).thenReturn([a, b]);
 
       handler.onMemberUpdated(
-        Event(type: EventType.memberUpdated, cid: 'messaging:a'),
+        MemberUpdatedEvent(
+          cid: 'messaging:a',
+          channel: ChannelModel(cid: 'messaging:a'),
+          member: Member(userId: 'u1'),
+        ),
         controller,
       );
 
@@ -152,7 +165,11 @@ void main() {
       when(() => controller.currentItems).thenReturn([a]);
 
       handler.onMemberUpdated(
-        Event(type: EventType.memberUpdated, cid: 'messaging:unknown'),
+        MemberUpdatedEvent(
+          cid: 'messaging:unknown',
+          channel: ChannelModel(cid: 'messaging:unknown'),
+          member: Member(userId: 'u1'),
+        ),
         controller,
       );
 
@@ -170,10 +187,8 @@ void main() {
       ).thenAnswer((_) async => Result.success(added));
 
       handler.onChannelVisible(
-        Event(
-          type: EventType.channelVisible,
-          channelId: 'new',
-          channelType: 'messaging',
+        ChannelVisibleEvent(
+          channel: ChannelModel(id: 'new', type: 'messaging'),
         ),
         controller,
       );
@@ -192,10 +207,8 @@ void main() {
       ).thenAnswer((_) async => Result.success(fetched));
 
       handler.onChannelVisible(
-        Event(
-          type: EventType.channelVisible,
-          channelId: 'new',
-          channelType: 'messaging',
+        ChannelVisibleEvent(
+          channel: ChannelModel(id: 'new', type: 'messaging'),
         ),
         controller,
       );
@@ -212,10 +225,8 @@ void main() {
       ).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'boom')));
 
       handler.onChannelVisible(
-        Event(
-          type: EventType.channelVisible,
-          channelId: 'new',
-          channelType: 'messaging',
+        ChannelVisibleEvent(
+          channel: ChannelModel(id: 'new', type: 'messaging'),
         ),
         controller,
       );
@@ -226,7 +237,7 @@ void main() {
 
     test('is a no-op when the channel identifiers are missing', () async {
       handler.onChannelVisible(
-        Event(type: EventType.channelVisible),
+        MessageReadEvent(),
         controller,
       );
       await pumpEventQueue();
@@ -246,7 +257,7 @@ void main() {
       when(() => controller.refresh()).thenAnswer((_) async {});
 
       handler.onConnectionRecovered(
-        Event(type: EventType.connectionRecovered),
+        ConnectionRecoveredEvent(),
         controller,
       );
 
@@ -262,7 +273,11 @@ void main() {
       when(() => controller.currentItems).thenReturn([a, b, c]);
 
       handler.onMessageNew(
-        Event(type: EventType.messageNew, cid: 'messaging:b'),
+        MessageNewEvent(
+          cid: 'messaging:b',
+          message: Message(id: 'message-id', text: 'Hello'),
+          watcherCount: 1,
+        ),
         controller,
       );
       await pumpEventQueue();
@@ -278,7 +293,11 @@ void main() {
       ).thenAnswer((_) async {});
 
       handler.onMessageNew(
-        Event(type: EventType.messageNew, cid: 'messaging:unknown'),
+        MessageNewEvent(
+          cid: 'messaging:unknown',
+          message: Message(id: 'message-id', text: 'Hello'),
+          watcherCount: 1,
+        ),
         controller,
       );
       await pumpEventQueue();
@@ -288,7 +307,13 @@ void main() {
     });
 
     test('is a no-op when the event has no cid', () async {
-      handler.onMessageNew(Event(type: EventType.messageNew), controller);
+      handler.onMessageNew(
+        MessageNewEvent(
+          message: Message(id: 'message-id', text: 'Hello'),
+          watcherCount: 1,
+        ),
+        controller,
+      );
       await pumpEventQueue();
 
       verifyNever(() => controller.channels = any());
@@ -308,10 +333,9 @@ void main() {
       ).thenAnswer((_) async => Result.success(added));
 
       handler.onNotificationAddedToChannel(
-        Event(
-          type: EventType.notificationAddedToChannel,
-          channelId: 'new',
-          channelType: 'messaging',
+        NotificationAddedToChannelEvent(
+          channel: ChannelModel(id: 'new', type: 'messaging'),
+          member: Member(userId: 'me'),
         ),
         controller,
       );
@@ -331,10 +355,10 @@ void main() {
       ).thenAnswer((_) async => Result.success(added));
 
       handler.onNotificationMessageNew(
-        Event(
-          type: EventType.notificationMessageNew,
-          channelId: 'new',
-          channelType: 'messaging',
+        NotificationMessageNewEvent(
+          channel: ChannelModel(id: 'new', type: 'messaging'),
+          message: Message(id: 'message-id', text: 'Hello'),
+          watcherCount: 1,
         ),
         controller,
       );
@@ -351,9 +375,9 @@ void main() {
       when(() => controller.currentItems).thenReturn([kept, removed]);
 
       handler.onNotificationRemovedFromChannel(
-        Event(
-          type: EventType.notificationRemovedFromChannel,
+        NotificationRemovedFromChannelEvent(
           channel: ChannelModel(cid: 'messaging:removed'),
+          member: Member(userId: 'me'),
         ),
         controller,
       );
@@ -366,9 +390,9 @@ void main() {
       when(() => controller.currentItems).thenReturn([kept]);
 
       handler.onNotificationRemovedFromChannel(
-        Event(
-          type: EventType.notificationRemovedFromChannel,
+        NotificationRemovedFromChannelEvent(
           channel: ChannelModel(cid: 'messaging:unknown'),
+          member: Member(userId: 'me'),
         ),
         controller,
       );
@@ -396,7 +420,7 @@ void main() {
       ).thenReturn([memberChannel, otherChannel]);
 
       handler.onUserPresenceChanged(
-        Event(type: EventType.userPresenceChanged, user: user),
+        UserPresenceChangedEvent(user: user),
         controller,
       );
 
@@ -412,7 +436,7 @@ void main() {
       when(() => controller.currentItems).thenReturn([a, b]);
 
       handler.onUserPresenceChanged(
-        Event(type: EventType.userPresenceChanged, user: user),
+        UserPresenceChangedEvent(user: user),
         controller,
       );
 
@@ -431,7 +455,7 @@ void main() {
       when(() => controller.currentItems).thenReturn([channel]);
 
       handler.onUserPresenceChanged(
-        Event(type: EventType.userUpdated, user: currentUser),
+        UserUpdatedEvent(user: currentUser),
         controller,
       );
 
@@ -445,7 +469,7 @@ void main() {
       when(() => controller.currentItems).thenReturn([channel]);
 
       handler.onUserPresenceChanged(
-        Event(type: EventType.userUpdated, user: user),
+        UserUpdatedEvent(user: user),
         controller,
       );
 
@@ -457,7 +481,7 @@ void main() {
       when(() => controller.currentItems).thenReturn([channel]);
 
       handler.onUserPresenceChanged(
-        Event(type: EventType.userPresenceChanged),
+        MessageDeliveredEvent(),
         controller,
       );
 

@@ -320,9 +320,9 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
   ///
   /// Return `true` if the event is handled. Return `false` to
   /// allow the event to be handled internally.
-  bool Function(Event event)? eventListener;
+  bool Function(ChatEvent event)? eventListener;
 
-  StreamSubscription<Event>? _channelEventSubscription;
+  StreamSubscription<ChatEvent>? _channelEventSubscription;
 
   // Subscribes to the channel list events.
   void _subscribeToChannelListEvents() {
@@ -337,31 +337,35 @@ class StreamChannelListController extends PagedValueNotifier<int, Channel> {
       // Returns early if the event is already handled by the listener.
       if (eventListener?.call(event) ?? false) return;
 
-      final eventType = event.type;
-      if (eventType == EventType.channelDeleted || eventType == EventType.notificationChannelDeleted) {
-        _eventHandler.onChannelDeleted(event, this);
-      } else if (eventType == EventType.channelHidden) {
-        _eventHandler.onChannelHidden(event, this);
-      } else if (eventType == EventType.channelTruncated) {
-        _eventHandler.onChannelTruncated(event, this);
-      } else if (eventType == EventType.channelUpdated) {
-        _eventHandler.onChannelUpdated(event, this);
-      } else if (eventType == EventType.channelVisible) {
-        _eventHandler.onChannelVisible(event, this);
-      } else if (eventType == EventType.connectionRecovered) {
-        _eventHandler.onConnectionRecovered(event, this);
-      } else if (eventType == EventType.messageNew) {
-        _eventHandler.onMessageNew(event, this);
-      } else if (eventType == EventType.notificationAddedToChannel) {
-        _eventHandler.onNotificationAddedToChannel(event, this);
-      } else if (eventType == EventType.notificationMessageNew) {
-        _eventHandler.onNotificationMessageNew(event, this);
-      } else if (eventType == EventType.notificationRemovedFromChannel) {
-        _eventHandler.onNotificationRemovedFromChannel(event, this);
-      } else if (eventType == EventType.userPresenceChanged || eventType == EventType.userUpdated) {
-        _eventHandler.onUserPresenceChanged(event, this);
-      } else if (eventType == EventType.memberUpdated) {
-        _eventHandler.onMemberUpdated(event, this);
+      switch (event) {
+        case ChannelDeletedEvent():
+          _eventHandler.onChannelDeleted(event, this);
+        case NotificationChannelDeletedEvent():
+          _eventHandler.onChannelDeleted(event, this);
+        case ChannelHiddenEvent():
+          _eventHandler.onChannelHidden(event, this);
+        case ChannelTruncatedEvent():
+          _eventHandler.onChannelTruncated(event, this);
+        case ChannelUpdatedEvent():
+          _eventHandler.onChannelUpdated(event, this);
+        case ChannelVisibleEvent():
+          _eventHandler.onChannelVisible(event, this);
+        case ConnectionRecoveredEvent():
+          _eventHandler.onConnectionRecovered(event, this);
+        case MessageNewEvent():
+          _eventHandler.onMessageNew(event, this);
+        case NotificationAddedToChannelEvent():
+          _eventHandler.onNotificationAddedToChannel(event, this);
+        case NotificationMessageNewEvent():
+          _eventHandler.onNotificationMessageNew(event, this);
+        case NotificationRemovedFromChannelEvent():
+          _eventHandler.onNotificationRemovedFromChannel(event, this);
+        case UserPresenceChangedEvent():
+          _eventHandler.onUserPresenceChanged(event, this);
+        case UserUpdatedEvent():
+          _eventHandler.onUserPresenceChanged(event, this);
+        case MemberUpdatedEvent():
+          _eventHandler.onMemberUpdated(event, this);
       }
     });
   }

@@ -4,7 +4,6 @@ import 'dart:async';
 
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/open_api/api.dart' as api;
-import 'package:stream_chat/src/ws/events/events.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
@@ -272,21 +271,16 @@ void main() {
     });
 
     test(
-      '''`.connectUser` should connect successfully if persistence contains event''',
+      '`.connectUser` connects with the stored user when the connection cannot be opened',
       () async {
         final user = User(id: 'test-user-id');
         final token = testUserToken(user.id).rawValue;
 
-        final event = Event(
-          type: EventType.healthCheck,
-          connectionId: 'test-connection-id',
-          me: OwnUser.fromUser(user),
-        );
-        when(persistence.getConnectionInfo).thenAnswer((_) async => event);
+        when(persistence.getConnectionInfo).thenAnswer((_) async => OwnUser(id: user.id, totalUnreadCount: 7));
 
         final res = await client.connectUser(user, token);
-        expect(res, isNotNull);
         expect(res, isSameUserAs(user));
+        expect(res.totalUnreadCount, 7);
 
         verify(persistence.getConnectionInfo).called(1);
         verifyNoMoreInteractions(persistence);
@@ -294,7 +288,7 @@ void main() {
     );
 
     test(
-      '''`.connectUserWithProvider` should connect successfully if persistence contains event''',
+      '`.connectUserWithProvider` connects with the stored user when the connection cannot be opened',
       () async {
         final user = User(id: 'test-user-id');
         Future<UserToken> tokenProvider(String userId) async {
@@ -302,12 +296,7 @@ void main() {
           return testUserToken(userId);
         }
 
-        final event = Event(
-          type: EventType.healthCheck,
-          connectionId: 'test-connection-id',
-          me: OwnUser.fromUser(user),
-        );
-        when(persistence.getConnectionInfo).thenAnswer((_) async => event);
+        when(persistence.getConnectionInfo).thenAnswer((_) async => OwnUser.fromUser(user));
 
         final res = await client.connectUserWithProvider(user, TokenProvider.dynamic(tokenProvider));
         expect(res, isNotNull);
@@ -319,16 +308,12 @@ void main() {
     );
 
     test(
-      '''`.connectAnonymousUser` should connect successfully if persistence contains event''',
+      '`.connectAnonymousUser` connects with the stored user when the connection cannot be opened',
       () async {
         final user = User(id: 'test-user-id');
 
         when(persistence.getConnectionInfo).thenAnswer(
-          (invocation) async => Event(
-            type: EventType.healthCheck,
-            connectionId: 'test-connection-id',
-            me: OwnUser.fromUser(user),
-          ),
+          (invocation) async => OwnUser.fromUser(user),
         );
 
         final res = await client.connectAnonymousUser();
@@ -350,10 +335,16 @@ void main() {
     final token = testUserToken(user.id).rawValue;
 
     late StreamChatClient client;
+    late FakeChatServer ws;
 
     setUpAll(() {
       // fallback values
-      registerFallbackValue(FakeEvent());
+      registerFallbackValue(
+        HealthCheckEvent(
+          connectionId: 'fallback',
+          me: OwnUser(id: 'fallback'),
+        ),
+      );
       registerFallbackValue(const PaginationParams());
       registerFallbackValue(FakeChannelState());
       registerFallbackValue(const ChannelFilter.raw({}));
@@ -367,7 +358,7 @@ void main() {
       // The hello frame reaches the client through the socket now, so connecting stores the
       // connection info before any test has had a chance to stub it.
       when(() => persistence.updateConnectionInfo(any())).thenAnswer((_) => Future.value());
-      final ws = FakeChatServer();
+      ws = FakeChatServer(user: OwnUser.fromUser(user));
       client = StreamChatClient(apiKey, defaultApi: defaultApi, chatApi: fakeChatApi, wsProvider: ws.connect)
         ..chatPersistenceClient = persistence;
       await client.connectUser(user, token);
@@ -392,6 +383,13 @@ void main() {
       );
     });
 
+    test('should not store a health check that arrives after the hello frame', () async {
+      ws.send(healthCheckFrame());
+      await pumpEventQueue();
+
+      verify(() => persistence.updateConnectionInfo(any())).called(1);
+    });
+
     group('`.sync`', () {
       test(
         'should update lastSync when sync succeeds',
@@ -402,23 +400,14 @@ void main() {
           reset(persistence);
           const cids = ['test-cid-1', 'test-cid-2', 'test-cid-3'];
           final lastSyncAt = DateTime.now();
-          when(() => fakeChatApi.general.sync(cids, lastSyncAt)).thenAnswer(
-            (_) async => SyncResponse()
-              ..events = [
-                Event(
-                  isLocal: false,
-                  type: EventType.messageDeleted,
-                  message: Message(id: 'test-message-id'),
-                ),
-              ],
-          );
+          _stubSync(defaultApi, cids, lastSyncAt);
 
           when(() => persistence.updateLastSyncAt(any())).thenAnswer((_) => Future.value());
 
           await client.sync(cids: cids, lastSyncAt: lastSyncAt);
 
           verify(() => persistence.updateLastSyncAt(any())).called(1);
-          verify(() => fakeChatApi.general.sync(cids, lastSyncAt)).called(1);
+          verify(() => defaultApi.sync(syncRequest: _syncRequest(cids, lastSyncAt))).called(1);
         },
       );
 
@@ -435,23 +424,14 @@ void main() {
           when(persistence.getChannelCids).thenAnswer((_) async => cids);
           when(persistence.getLastSyncAt).thenAnswer((_) async => lastSyncAt);
 
-          when(() => fakeChatApi.general.sync(cids, lastSyncAt)).thenAnswer(
-            (_) async => SyncResponse()
-              ..events = [
-                Event(
-                  isLocal: false,
-                  type: EventType.messageDeleted,
-                  message: Message(id: 'test-message-id', text: 'Hey!'),
-                ),
-              ],
-          );
+          _stubSync(defaultApi, cids, lastSyncAt);
 
           when(() => persistence.updateLastSyncAt(any())).thenAnswer((_) => Future.value());
 
           await client.sync();
 
           verify(() => persistence.updateLastSyncAt(any())).called(1);
-          verify(() => fakeChatApi.general.sync(cids, lastSyncAt)).called(1);
+          verify(() => defaultApi.sync(syncRequest: _syncRequest(cids, lastSyncAt))).called(1);
           verify(persistence.getChannelCids).called(1);
           verify(persistence.getLastSyncAt).called(1);
         },
@@ -1047,7 +1027,8 @@ void main() {
 
     setUpAll(() {
       // fallback values
-      registerFallbackValue(FakeEvent());
+      registerFallbackValue(UnknownEvent(type: 'fallback'));
+      registerFallbackValue(api.SyncRequest(channelCids: const [], lastSyncAt: DateTime.utc(2026)));
       registerFallbackValue(FakeMessage());
       registerFallbackValue(FakeDraftMessage());
       registerFallbackValue(FakePollVote());
@@ -1055,10 +1036,6 @@ void main() {
     });
 
     setUp(() async {
-      // Clear any accumulated interactions from a previous test so that
-      // verifyNoMoreInteractions on fakeChatApi.general stays accurate.
-      clearInteractions(fakeChatApi.general);
-
       final ws = FakeChatServer();
       client = StreamChatClient(apiKey, chatApi: fakeChatApi, defaultApi: defaultApi, wsProvider: ws.connect);
       // Stub getApp so the background fetch after connectUser succeeds.
@@ -1082,36 +1059,21 @@ void main() {
         const cids = ['test-cid-1', 'test-cid-2', 'test-cid-3'];
         final lastSyncAt = DateTime.now();
 
-        when(() => fakeChatApi.general.sync(cids, lastSyncAt)).thenAnswer(
-          (_) async => SyncResponse()
-            ..events = [
-              Event(
-                isLocal: false,
-                type: EventType.healthCheck,
-                connectionId: 'test-connection-id',
-                me: OwnUser.fromUser(user),
-              ),
-              Event(
-                isLocal: false,
-                type: EventType.messageDeleted,
-                message: Message(id: 'test-message-id'),
-              ),
-            ],
-        );
+        _stubSync(defaultApi, cids, lastSyncAt);
 
         await client.sync(cids: cids, lastSyncAt: lastSyncAt);
 
-        verify(() => fakeChatApi.general.sync(cids, lastSyncAt)).called(1);
+        verify(() => defaultApi.sync(syncRequest: _syncRequest(cids, lastSyncAt))).called(1);
       });
 
       test('should return if `cids` is not available', () async {
         expect(client.sync, returnsNormally);
-        verifyNever(() => fakeChatApi.general.sync(any(), any()));
+        verifyNever(() => defaultApi.sync(syncRequest: any(named: 'syncRequest')));
       });
 
       test('should return if `lastSyncAt` is not available', () async {
         expect(() => client.sync(cids: ['test-cid-1']), returnsNormally);
-        verifyNever(() => fakeChatApi.general.sync(any(), any()));
+        verifyNever(() => defaultApi.sync(syncRequest: any(named: 'syncRequest')));
       });
     });
 
@@ -1634,12 +1596,12 @@ void main() {
       expect(
         client.eventStream,
         emitsInOrder([
-          isA<Event>().having(
+          isA<ChatEvent>().having(
             (e) => e.type,
             'push_preference.updated event',
             EventType.pushPreferenceUpdated,
           ),
-          isA<Event>().having(
+          isA<ChatEvent>().having(
             (e) => e.type,
             'channel.push_preference.updated event',
             EventType.channelPushPreferenceUpdated,
@@ -1661,8 +1623,7 @@ void main() {
         disabledUntil: DateTime.now().add(const Duration(hours: 1)),
       );
 
-      final event = Event(
-        type: EventType.pushPreferenceUpdated,
+      final event = PushPreferenceUpdatedEvent(
         pushPreference: pushPreference,
       );
 
@@ -2532,8 +2493,7 @@ void main() {
           endAt: DateTime.now().add(const Duration(hours: 1)),
         );
 
-        final event = Event(
-          type: EventType.locationShared,
+        final event = LocationSharedEvent(
           cid: 'test-channel:123',
           message: Message(
             id: 'message-123',
@@ -2580,8 +2540,7 @@ void main() {
           endAt: DateTime.now().add(const Duration(hours: 1)),
         );
 
-        final event = Event(
-          type: EventType.locationUpdated,
+        final event = LocationUpdatedEvent(
           cid: 'test-channel:123',
           message: Message(
             id: 'message-123',
@@ -2621,8 +2580,7 @@ void main() {
           endAt: DateTime.now().subtract(const Duration(hours: 1)),
         );
 
-        final event = Event(
-          type: EventType.locationExpired,
+        final event = LocationExpiredEvent(
           cid: 'test-channel:123',
           message: Message(
             id: 'message-123',
@@ -2641,8 +2599,8 @@ void main() {
       });
 
       test('should auto-expire an active live location once at endAt', () async {
-        final expiredEvents = <Event>[];
-        final sub = client.on(EventType.locationExpired).listen(expiredEvents.add);
+        final expiredEvents = <LocationExpiredEvent>[];
+        final sub = client.on<LocationExpiredEvent>().listen(expiredEvents.add);
         addTearDown(sub.cancel);
 
         // Setting an active location schedules a one-shot expiry timer.
@@ -2685,8 +2643,7 @@ void main() {
           endAt: DateTime.now().add(const Duration(hours: 1)),
         );
 
-        final event = Event(
-          type: EventType.locationShared,
+        final event = LocationSharedEvent(
           cid: 'test-channel:123',
           message: Message(
             id: 'message-123',
@@ -2715,8 +2672,7 @@ void main() {
           // No endAt means it's static
         );
 
-        final event = Event(
-          type: EventType.locationShared,
+        final event = LocationSharedEvent(
           cid: 'test-channel:123',
           message: Message(
             id: 'message-123',
@@ -2755,8 +2711,7 @@ void main() {
           endAt: DateTime.now().add(const Duration(hours: 1)),
         );
 
-        final event1 = Event(
-          type: EventType.locationShared,
+        final event1 = LocationSharedEvent(
           cid: 'test-channel:123',
           message: Message(
             id: 'message-123',
@@ -2764,8 +2719,7 @@ void main() {
           ),
         );
 
-        final event2 = Event(
-          type: EventType.locationShared,
+        final event2 = LocationSharedEvent(
           cid: 'test-channel:123',
           message: Message(
             id: 'message-456',
@@ -3039,13 +2993,13 @@ void main() {
           );
 
           client.chatPersistenceClient = fakeClient;
-          when(() => fakeChatApi.general.sync(cids, lastSyncAt)).thenAnswer(
-            (_) async => SyncResponse()..events = [],
+          when(() => defaultApi.sync(syncRequest: _syncRequest(cids, lastSyncAt))).thenAnswer(
+            (_) async => const Result.success(api.SyncResponse(duration: '1ms', events: [])),
           );
 
           await client.sync();
 
-          verify(() => fakeChatApi.general.sync(cids, lastSyncAt)).called(1);
+          verify(() => defaultApi.sync(syncRequest: _syncRequest(cids, lastSyncAt))).called(1);
 
           final newLastSyncAt = await fakeClient.getLastSyncAt();
           expect(newLastSyncAt?.isAfter(lastSyncAt), isTrue);
@@ -3063,7 +3017,7 @@ void main() {
         await client.sync();
 
         expectLater(fakeClient.getLastSyncAt(), completion(isNotNull));
-        verifyNever(() => fakeChatApi.general.sync(any(), any()));
+        verifyNever(() => defaultApi.sync(syncRequest: any(named: 'syncRequest')));
       });
 
       test('should flush persistence client on 400 error', () async {
@@ -3077,11 +3031,13 @@ void main() {
         client.chatPersistenceClient = fakeClient;
         // What `/sync` answers when `lastSyncAt` is too old, or the channel
         // list or event count is oversized.
-        when(() => fakeChatApi.general.sync(cids, lastSyncAt)).thenThrow(
-          apiException(
-            code: StreamErrorCode.inputError,
-            statusCode: 400,
-            message: 'Too many events',
+        when(() => defaultApi.sync(syncRequest: _syncRequest(cids, lastSyncAt))).thenAnswer(
+          (_) async => Result.failure(
+            apiException(
+              code: StreamErrorCode.inputError,
+              statusCode: 400,
+              message: 'Too many events',
+            ),
           ),
         );
         when(
@@ -3092,7 +3048,7 @@ void main() {
 
         expect(await fakeClient.getChannelCids(), isEmpty); // Should be flushed
 
-        verify(() => fakeChatApi.general.sync(cids, lastSyncAt)).called(1);
+        verify(() => defaultApi.sync(syncRequest: _syncRequest(cids, lastSyncAt))).called(1);
       });
 
       test(
@@ -3108,29 +3064,27 @@ void main() {
           client.chatPersistenceClient = fakeClient;
           final events = List.generate(
             10,
-            (index) => Event(
-              type: EventType.messageNew,
+            (index) => _syncEvent(
               cid: 'channel1',
-              message: Message(id: 'message-$index'),
               createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
             ),
           );
-          when(() => fakeChatApi.general.sync(cids, lastSyncAt)).thenAnswer(
-            (_) async => SyncResponse()..events = events,
+          when(() => defaultApi.sync(syncRequest: _syncRequest(cids, lastSyncAt))).thenAnswer(
+            (_) async => Result.success(api.SyncResponse(duration: '1ms', events: events)),
           );
 
-          final replayed = <Event>[];
-          final sub = client.on(EventType.messageNew).listen(replayed.add);
+          final replayed = <ChatEvent>[];
+          final sub = client.on(_syncEventType).listen(replayed.add);
           addTearDown(sub.cancel);
 
           await client.sync();
           await pumpEventQueue();
 
-          verify(() => fakeChatApi.general.sync(cids, lastSyncAt)).called(1);
+          verify(() => defaultApi.sync(syncRequest: _syncRequest(cids, lastSyncAt))).called(1);
           // Within the limit, every event is replayed through the event handler.
           expect(replayed, hasLength(events.length));
           // lastSyncAt advances to the newest replayed event date.
-          expect(await fakeClient.getLastSyncAt(), events.last.createdAt);
+          expect(await fakeClient.getLastSyncAt(), lastSyncAt.add(Duration(seconds: events.length)).toUtc());
         },
       );
 
@@ -3148,23 +3102,21 @@ void main() {
           // 251 events exceeds the internal replay limit of 250.
           final events = List.generate(
             251,
-            (index) => Event(
-              type: EventType.messageNew,
+            (index) => _syncEvent(
               cid: 'channel1',
-              message: Message(id: 'message-$index'),
               createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
             ),
           );
-          when(() => fakeChatApi.general.sync(cids, lastSyncAt)).thenAnswer(
-            (_) async => SyncResponse()..events = events,
+          when(() => defaultApi.sync(syncRequest: _syncRequest(cids, lastSyncAt))).thenAnswer(
+            (_) async => Result.success(api.SyncResponse(duration: '1ms', events: events)),
           );
 
           when(
             () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
           ).thenAnswer((_) async => Result.success(generatedQueryChannelsResponse([])));
 
-          final replayed = <Event>[];
-          final sub = client.on(EventType.messageNew).listen(replayed.add);
+          final replayed = <ChatEvent>[];
+          final sub = client.on(_syncEventType).listen(replayed.add);
           addTearDown(sub.cancel);
 
           // The group shares one api mock, so only count this test's calls.
@@ -3173,7 +3125,7 @@ void main() {
           await client.sync();
           await pumpEventQueue();
 
-          verify(() => fakeChatApi.general.sync(cids, lastSyncAt)).called(1);
+          verify(() => defaultApi.sync(syncRequest: _syncRequest(cids, lastSyncAt))).called(1);
           // Replay is skipped; no events are dispatched through the handler.
           expect(replayed, isEmpty);
           // The channels the payload covered are refreshed in its place.
@@ -3187,7 +3139,7 @@ void main() {
           ).called(1);
           // lastSyncAt moves to the newest event in the skipped payload, so
           // that payload is not re-fetched while anything after it still is.
-          expect(await fakeClient.getLastSyncAt(), events.last.createdAt);
+          expect(await fakeClient.getLastSyncAt(), lastSyncAt.add(Duration(seconds: events.length)).toUtc());
         },
       );
     });
@@ -3313,8 +3265,8 @@ void main() {
 
       // Subscribe AFTER the initial connect so the captured event is the
       // one fired by the manual reconnect.
-      final recoveredEvents = <Event>[];
-      final sub = client.on(EventType.connectionRecovered).listen(recoveredEvents.add);
+      final recoveredEvents = <ConnectionRecoveredEvent>[];
+      final sub = client.on<ConnectionRecoveredEvent>().listen(recoveredEvents.add);
 
       await simulateReconnect();
       await sub.cancel();
@@ -3339,8 +3291,8 @@ void main() {
 
       // Subscribe AFTER the initial connect so the captured event is the
       // one fired by the manual reconnect.
-      final recoveredEvents = <Event>[];
-      final sub = client.on(EventType.connectionRecovered).listen(recoveredEvents.add);
+      final recoveredEvents = <ConnectionRecoveredEvent>[];
+      final sub = client.on<ConnectionRecoveredEvent>().listen(recoveredEvents.add);
 
       await simulateReconnect();
       await sub.cancel();
@@ -3389,15 +3341,13 @@ void main() {
       // 251 events exceeds the internal replay limit of 250.
       final events = List.generate(
         251,
-        (index) => Event(
-          type: EventType.messageNew,
+        (index) => _syncEvent(
           cid: cid,
-          message: Message(id: 'message-$index'),
           createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
         ),
       );
-      when(() => fakeChatApi.general.sync(const [cid], lastSyncAt)).thenAnswer(
-        (_) async => SyncResponse()..events = events,
+      when(() => defaultApi.sync(syncRequest: _syncRequest(const [cid], lastSyncAt))).thenAnswer(
+        (_) async => Result.success(api.SyncResponse(duration: '1ms', events: events)),
       );
 
       clearInteractions(defaultApi);
@@ -3415,7 +3365,7 @@ void main() {
 
       // The pointer lands on the newest event in the skipped payload, not on
       // the wall clock, so anything after it is still fetched next time.
-      expect(await persistenceClient.getLastSyncAt(), events.last.createdAt);
+      expect(await persistenceClient.getLastSyncAt(), lastSyncAt.add(Duration(seconds: events.length)).toUtc());
     });
 
     // A failed sync applied nothing and moved nothing, so the configured
@@ -3435,11 +3385,13 @@ void main() {
       await client.openPersistenceConnection(user);
       addTearDown(() => client.chatPersistenceClient = null);
 
-      when(() => fakeChatApi.general.sync(const [cid], lastSyncAt)).thenThrow(
-        const StreamApiException(
-          code: StreamErrorCode.internalError,
-          message: 'Something goes wrong in the system',
-          statusCode: 500,
+      when(() => defaultApi.sync(syncRequest: _syncRequest(const [cid], lastSyncAt))).thenAnswer(
+        (_) async => const Result.failure(
+          StreamApiException(
+            code: StreamErrorCode.internalError,
+            message: 'Something goes wrong in the system',
+            statusCode: 500,
+          ),
         ),
       );
 
@@ -3489,15 +3441,13 @@ void main() {
       // 251 events exceeds the internal replay limit of 250.
       final events = List.generate(
         251,
-        (index) => Event(
-          type: EventType.messageNew,
+        (index) => _syncEvent(
           cid: cid,
-          message: Message(id: 'message-$index'),
           createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
         ),
       );
-      when(() => fakeChatApi.general.sync(const [cid], lastSyncAt)).thenAnswer(
-        (_) async => SyncResponse()..events = events,
+      when(() => defaultApi.sync(syncRequest: _syncRequest(const [cid], lastSyncAt))).thenAnswer(
+        (_) async => Result.success(api.SyncResponse(duration: '1ms', events: events)),
       );
 
       await simulateReconnect();
@@ -3531,15 +3481,13 @@ void main() {
 
       final events = List.generate(
         251,
-        (index) => Event(
-          type: EventType.messageNew,
+        (index) => _syncEvent(
           cid: cids.first,
-          message: Message(id: 'message-$index'),
           createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
         ),
       );
-      when(() => fakeChatApi.general.sync(cids, lastSyncAt)).thenAnswer(
-        (_) async => SyncResponse()..events = events,
+      when(() => defaultApi.sync(syncRequest: _syncRequest(cids, lastSyncAt))).thenAnswer(
+        (_) async => Result.success(api.SyncResponse(duration: '1ms', events: events)),
       );
 
       clearInteractions(defaultApi);
@@ -3584,9 +3532,9 @@ void main() {
       addTearDown(() => client.chatPersistenceClient = null);
 
       final calls = <String>[];
-      when(() => fakeChatApi.general.sync(const [cid], lastSyncAt)).thenAnswer((_) async {
+      when(() => defaultApi.sync(syncRequest: _syncRequest(const [cid], lastSyncAt))).thenAnswer((_) async {
         calls.add('sync');
-        return SyncResponse()..events = [];
+        return const Result.success(api.SyncResponse(duration: '1ms', events: []));
       });
       when(
         () => defaultApi.queryChannels(queryChannelsRequest: any(named: 'queryChannelsRequest')),
@@ -3633,15 +3581,13 @@ void main() {
 
       final events = List.generate(
         251,
-        (index) => Event(
-          type: EventType.messageNew,
+        (index) => _syncEvent(
           cid: cids.first,
-          message: Message(id: 'message-$index'),
           createdAt: lastSyncAt.add(Duration(seconds: index + 1)),
         ),
       );
-      when(() => fakeChatApi.general.sync(cids, lastSyncAt)).thenAnswer(
-        (_) async => SyncResponse()..events = events,
+      when(() => defaultApi.sync(syncRequest: _syncRequest(cids, lastSyncAt))).thenAnswer(
+        (_) async => Result.success(api.SyncResponse(duration: '1ms', events: events)),
       );
 
       // The first page fails, the second one succeeds.
@@ -3829,8 +3775,7 @@ void main() {
 
           // Simulate global user.messages.deleted event being broadcast to channels
           // (In production, ClientState._listenUserMessagesDeleted does this)
-          final event = Event(
-            type: EventType.userMessagesDeleted,
+          final event = UserMessagesDeletedEvent(
             user: bannedUser,
             hardDelete: false,
           );
@@ -3899,8 +3844,7 @@ void main() {
 
           // Simulate global user.messages.deleted event being broadcast to channels
           // (In production, ClientState._listenUserMessagesDeleted does this)
-          final event = Event(
-            type: EventType.userMessagesDeleted,
+          final event = UserMessagesDeletedEvent(
             user: bannedUser,
             hardDelete: true,
           );
@@ -4041,33 +3985,6 @@ void main() {
       }
 
       await sub.cancel();
-    });
-  });
-
-  group('event resolvers', () {
-    // Recovering after an outage replays the events missed over `/sync`, not over the socket, so
-    // one carrying a poll has to be reported the same way as one that arrived live.
-    test('should report a poll message recovered after an outage as a poll created event', () async {
-      final client = StreamChatClient(
-        'test-api-key',
-        defaultApi: FakeDefaultApi(),
-        chatApi: FakeChatApi(),
-        wsProvider: FakeChatServer().connect,
-      );
-      addTearDown(client.dispose);
-
-      final poll = Poll(
-        name: 'What is your favorite color?',
-        options: const [
-          PollOption(text: 'Red'),
-          PollOption(text: 'Blue'),
-        ],
-      );
-
-      final reported = client.on(EventType.pollCreated).first;
-      client.handleEvent(Event(type: EventType.messageNew, poll: poll));
-
-      expect((await reported).poll, poll);
     });
   });
 
@@ -4552,4 +4469,29 @@ final _skipsActiveMemberCount = predicate<api.QueryChannelsRequest>(
 class _FailingSettlePersistenceClient extends MockPersistenceClient {
   @override
   Future<void> settleInterruptedRequests() => Future.error(StateError('Database is locked'));
+}
+
+api.SyncRequest _syncRequest(List<String> cids, DateTime lastSyncAt) =>
+    api.SyncRequest(channelCids: cids, lastSyncAt: lastSyncAt);
+
+const _syncEventType = 'test.event';
+
+// An event `sync` replays for [cid], created at [createdAt].
+api.WSEvent _syncEvent({required String cid, required DateTime createdAt}) => api.UnknownWSEvent(_syncEventType, {
+  'type': _syncEventType,
+  'cid': cid,
+  'created_at': createdAt.toUtc().toIso8601String(),
+  'custom': <String, Object?>{},
+});
+
+// Answers a `sync` of [cids] since [lastSyncAt] with one event.
+void _stubSync(MockDefaultApi defaultApi, List<String> cids, DateTime lastSyncAt) {
+  when(() => defaultApi.sync(syncRequest: _syncRequest(cids, lastSyncAt))).thenAnswer(
+    (_) async => Result.success(
+      api.SyncResponse(
+        duration: '1ms',
+        events: [_syncEvent(cid: cids.first, createdAt: DateTime.utc(2026, 3, 1, 12))],
+      ),
+    ),
+  );
 }

@@ -4,6 +4,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:mocktail/mocktail.dart';
+import 'package:stream_chat/open_api/models.dart' as api;
 import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_core/stream_core.dart' show WebSocketOptions;
 import 'package:web_socket_channel/web_socket_channel.dart';
@@ -14,8 +15,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 /// and decodes real frames, and reaches `connected` because this server greeted it — not because a
 /// fake reported that it had.
 ///
-/// The default behaviour is a healthy server: it greets every connection with a health check
-/// signing in [user], and answers every ping.
+/// The default behaviour is a healthy server: it answers the message that authenticates a
+/// connection with a greeting signing in [user], and answers every ping.
 class FakeChatServer {
   /// Creates a [FakeChatServer] that signs in [user].
   FakeChatServer({this.user});
@@ -23,7 +24,8 @@ class FakeChatServer {
   /// The user the hello frame signs in, and `null` for a server that names nobody.
   OwnUser? user;
 
-  /// The refusal sent instead of a greeting, and `null` for a server that accepts the connection.
+  /// The refusal sent in answer to the authenticating message instead of a greeting, and `null` for
+  /// a server that accepts the connection.
   ///
   /// Set to a [connectionErrorFrame] for a server that will not serve the credentials it was given.
   Map<String, Object?>? refusal;
@@ -40,19 +42,20 @@ class FakeChatServer {
   /// The socket of the connection in flight, which is the one frames are sent over.
   FakeWebSocketChannel get socket => sockets.last;
 
+  /// The options each socket was opened with, in the order they were opened.
+  final options = <WebSocketOptions>[];
+
+  /// Every message that authenticated a connection, in the order they arrived.
+  final authFrames = <Map<String, Object?>>[];
+
   /// Hands out a socket wired to this server, for a client's `wsProvider`.
   FakeWebSocketChannel connect(WebSocketOptions options) {
     final socket = FakeWebSocketChannel(
       onSent: _onSent,
-      readyError: handshakeFails ? const StreamNetworkException(message: 'Error Connecting') : null,
+      readyError: handshakeFails ? _handshakeError(options) : null,
     );
     sockets.add(socket);
-
-    // A server either greets a connection it accepts, which is what establishes it, or refuses it.
-    if (!handshakeFails) {
-      scheduleMicrotask(() => socket.receive(refusal ?? healthCheckFrame(me: user)));
-    }
-
+    this.options.add(options);
     return socket;
   }
 
@@ -64,23 +67,73 @@ class FakeChatServer {
     return socket.closeFromServer(closeCode, closeReason);
   }
 
-  // Answers a ping with a pong, which is what keeps a connection alive.
+  // The error a real socket fails its handshake with, which names the full address it was opened
+  // at, query string included.
+  WebSocketChannelException _handshakeError(WebSocketOptions options) {
+    final address = Uri.parse(options.url).replace(queryParameters: options.queryParameters);
+    return WebSocketChannelException('Failed to connect to $address');
+  }
+
+  // Answers the authenticating message with a greeting, which is what establishes a connection, or
+  // with a refusal; and answers a ping with a pong, which is what keeps it alive.
   void _onSent(Object? frame) {
     final json = jsonDecode(frame! as String) as Map<String, Object?>;
+    if (json.containsKey('token')) {
+      authFrames.add(json);
+      return send(refusal ?? connectionOkFrame(me: user));
+    }
+
     if (json['type'] == EventType.healthCheck) send(healthCheckFrame());
   }
 }
 
-/// The frame that establishes a connection, and the pong that keeps it alive.
-///
-/// [me] rides the first one only, which is how a connection learns who the server signed in.
-Map<String, Object?> healthCheckFrame({OwnUser? me}) {
+/// The frame that establishes a connection, signing in [me].
+Map<String, Object?> connectionOkFrame({OwnUser? me}) {
+  return {
+    'type': 'connection.ok',
+    'connection_id': 'fake-connection-id',
+    'created_at': DateTime.now().toIso8601String(),
+    if (me != null) 'me': ownUserResponseJson(me),
+  };
+}
+
+/// The pong that keeps a connection alive.
+Map<String, Object?> healthCheckFrame() {
   return {
     'type': EventType.healthCheck,
     'connection_id': 'fake-connection-id',
     'created_at': DateTime.now().toIso8601String(),
-    if (me != null) 'me': me.toJson(),
+    'custom': <String, Object?>{},
   };
+}
+
+/// [user] as the server describes the signed-in user, without devices or mutes.
+Map<String, Object?> ownUserResponseJson(OwnUser user) {
+  final now = DateTime.now();
+  return api.OwnUserResponse(
+    id: user.id,
+    name: user.name,
+    image: user.image,
+    role: user.role ?? 'user',
+    custom: user.custom,
+    teams: user.teams,
+    teamsRole: user.teamsRole,
+    language: user.language ?? 'en',
+    invisible: user.invisible ?? false,
+    banned: user.banned,
+    online: user.online,
+    blockedUserIds: user.blockedUserIds,
+    createdAt: user.createdAt ?? now,
+    updatedAt: user.updatedAt ?? now,
+    lastActive: user.lastActive,
+    devices: const [],
+    mutes: const [],
+    channelMutes: const [],
+    totalUnreadCount: user.totalUnreadCount,
+    unreadChannels: user.unreadChannels,
+    unreadCount: user.totalUnreadCount,
+    unreadThreads: user.unreadThreads,
+  ).toJson();
 }
 
 /// The refusal a server sends before closing a connection it will not serve.

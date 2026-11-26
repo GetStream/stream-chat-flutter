@@ -3,12 +3,9 @@ import '../db/drift_chat_database.dart';
 
 /// Useful mapping functions for [ConnectionEventEntity]
 extension ConnectionEventX on ConnectionEventEntity {
-  /// Maps a [ConnectionEventEntity] into [Event]
-  Event toEvent() => Event(
-    type: type,
-    createdAt: lastEventAt,
-    me: ownUser != null ? OwnUser.fromJson(ownUser!) : null,
-    totalUnreadCount: totalUnreadCount,
-    unreadChannels: unreadChannels,
-  );
+  /// The current user the row stores, or null when it stores none.
+  OwnUser? toOwnUser() => switch (ownUser) {
+    final json? => OwnUser.fromJson(json),
+    null => null,
+  };
 }

@@ -23,7 +23,16 @@ MockChannel unsortedMockChannel() {
 void main() {
   setUpAll(() {
     registerFallbackValue(const PaginationParams());
-    registerFallbackValue(Event(type: 'fallback'));
+    registerFallbackValue(ChannelHiddenEvent(channel: _channel()));
+    registerFallbackValue(ChannelTruncatedEvent(channel: _channel()));
+    registerFallbackValue(ChannelUpdatedEvent(channel: _channel()));
+    registerFallbackValue(MemberUpdatedEvent(channel: _channel(), member: _member()));
+    registerFallbackValue(ConnectionRecoveredEvent());
+    registerFallbackValue(MessageNewEvent(message: _message(), watcherCount: 1));
+    registerFallbackValue(NotificationAddedToChannelEvent(channel: _channel(), member: _member()));
+    registerFallbackValue(NotificationMessageNewEvent(channel: _channel(), message: _message(), watcherCount: 1));
+    registerFallbackValue(NotificationRemovedFromChannelEvent(channel: _channel(), member: _member()));
+    registerFallbackValue(UserPresenceChangedEvent(user: _user()));
   });
 
   final client = MockClient();
@@ -490,11 +499,11 @@ void main() {
   // in stream_channel_list_event_handler_test.dart, so here we inject a mock
   // handler and assert only that dispatch reaches the right method.
   group('Event handling routes each event to its handler', () {
-    late StreamController<Event> eventController;
+    late StreamController<ChatEvent> eventController;
     late MockStreamChannelListEventHandler handler;
 
     setUp(() {
-      eventController = StreamController<Event>.broadcast();
+      eventController = StreamController<ChatEvent>.broadcast();
       when(client.on).thenAnswer((_) => eventController.stream);
       handler = MockStreamChannelListEventHandler();
     });
@@ -507,70 +516,70 @@ void main() {
 
     test('channel.deleted -> onChannelDeleted', () async {
       final controller = await subscribe();
-      eventController.add(Event(type: EventType.channelDeleted));
+      eventController.add(ChannelDeletedEvent(channel: _channel()));
       await pumpEventQueue();
       verify(() => handler.onChannelDeleted(any(), controller)).called(1);
     });
 
     test('notification.channel_deleted -> onChannelDeleted', () async {
       final controller = await subscribe();
-      eventController.add(Event(type: EventType.notificationChannelDeleted));
+      eventController.add(NotificationChannelDeletedEvent(channel: _channel()));
       await pumpEventQueue();
       verify(() => handler.onChannelDeleted(any(), controller)).called(1);
     });
 
     test('channel.hidden -> onChannelHidden', () async {
       final controller = await subscribe();
-      eventController.add(Event(type: EventType.channelHidden));
+      eventController.add(ChannelHiddenEvent(channel: _channel()));
       await pumpEventQueue();
       verify(() => handler.onChannelHidden(any(), controller)).called(1);
     });
 
     test('channel.truncated -> onChannelTruncated', () async {
       final controller = await subscribe();
-      eventController.add(Event(type: EventType.channelTruncated));
+      eventController.add(ChannelTruncatedEvent(channel: _channel()));
       await pumpEventQueue();
       verify(() => handler.onChannelTruncated(any(), controller)).called(1);
     });
 
     test('channel.updated -> onChannelUpdated', () async {
       final controller = await subscribe();
-      eventController.add(Event(type: EventType.channelUpdated));
+      eventController.add(ChannelUpdatedEvent(channel: _channel()));
       await pumpEventQueue();
       verify(() => handler.onChannelUpdated(any(), controller)).called(1);
     });
 
     test('member.updated -> onMemberUpdated', () async {
       final controller = await subscribe();
-      eventController.add(Event(type: EventType.memberUpdated));
+      eventController.add(MemberUpdatedEvent(channel: _channel(), member: _member()));
       await pumpEventQueue();
       verify(() => handler.onMemberUpdated(any(), controller)).called(1);
     });
 
     test('channel.visible -> onChannelVisible', () async {
       final controller = await subscribe();
-      eventController.add(Event(type: EventType.channelVisible));
+      eventController.add(ChannelVisibleEvent(channel: _channel()));
       await pumpEventQueue();
       verify(() => handler.onChannelVisible(any(), controller)).called(1);
     });
 
     test('connection.recovered -> onConnectionRecovered', () async {
       final controller = await subscribe();
-      eventController.add(Event(type: EventType.connectionRecovered));
+      eventController.add(ConnectionRecoveredEvent());
       await pumpEventQueue();
       verify(() => handler.onConnectionRecovered(any(), controller)).called(1);
     });
 
     test('message.new -> onMessageNew', () async {
       final controller = await subscribe();
-      eventController.add(Event(type: EventType.messageNew));
+      eventController.add(MessageNewEvent(message: _message(), watcherCount: 1));
       await pumpEventQueue();
       verify(() => handler.onMessageNew(any(), controller)).called(1);
     });
 
     test('notification.added_to_channel -> onNotificationAddedToChannel', () async {
       final controller = await subscribe();
-      eventController.add(Event(type: EventType.notificationAddedToChannel));
+      eventController.add(NotificationAddedToChannelEvent(channel: _channel(), member: _member()));
       await pumpEventQueue();
       verify(
         () => handler.onNotificationAddedToChannel(any(), controller),
@@ -579,7 +588,7 @@ void main() {
 
     test('notification.message_new -> onNotificationMessageNew', () async {
       final controller = await subscribe();
-      eventController.add(Event(type: EventType.notificationMessageNew));
+      eventController.add(NotificationMessageNewEvent(channel: _channel(), message: _message(), watcherCount: 1));
       await pumpEventQueue();
       verify(
         () => handler.onNotificationMessageNew(any(), controller),
@@ -588,7 +597,7 @@ void main() {
 
     test('notification.removed_from_channel -> onNotificationRemovedFromChannel', () async {
       final controller = await subscribe();
-      eventController.add(Event(type: EventType.notificationRemovedFromChannel));
+      eventController.add(NotificationRemovedFromChannelEvent(channel: _channel(), member: _member()));
       await pumpEventQueue();
       verify(
         () => handler.onNotificationRemovedFromChannel(any(), controller),
@@ -597,14 +606,14 @@ void main() {
 
     test('user.presence.changed -> onUserPresenceChanged', () async {
       final controller = await subscribe();
-      eventController.add(Event(type: EventType.userPresenceChanged));
+      eventController.add(UserPresenceChangedEvent(user: _user()));
       await pumpEventQueue();
       verify(() => handler.onUserPresenceChanged(any(), controller)).called(1);
     });
 
     test('user.updated -> onUserPresenceChanged', () async {
       final controller = await subscribe();
-      eventController.add(Event(type: EventType.userUpdated));
+      eventController.add(UserUpdatedEvent(user: _user()));
       await pumpEventQueue();
       verify(() => handler.onUserPresenceChanged(any(), controller)).called(1);
     });
@@ -704,3 +713,11 @@ void main() {
     expect(res.exceptionOrNull(), error);
   });
 }
+
+ChannelModel _channel() => ChannelModel(cid: 'messaging:general');
+
+Member _member() => Member(userId: 'user-id');
+
+Message _message() => Message(id: 'message-id', text: 'Hello');
+
+User _user() => User(id: 'user-id');

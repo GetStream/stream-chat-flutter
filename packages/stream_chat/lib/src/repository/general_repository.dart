@@ -1,9 +1,11 @@
 import 'package:stream_core/stream_core.dart' show PatternMatching, Result;
 
 import '../../open_api/api.dart' as api;
+import '../core/models/events/chat_event.dart';
 import '../core/models/response/create_guest_user_response.dart';
 import '../core/models/response/og_attachment_response.dart';
 import '../core/models/user.dart';
+import 'mapper/events_mapper.dart';
 import 'mapper/general_mapper.dart';
 import 'mapper/users_mapper.dart';
 
@@ -30,6 +32,16 @@ class GeneralRepository {
   Future<Result<CreateGuestUserResponse>> createGuest(User user) async {
     final result = await _api.createGuest(
       createGuestRequest: api.CreateGuestRequest(user: user.toRequest()),
+    );
+
+    return result.map((response) => response.toModel());
+  }
+
+  /// Fetches the events missed on the channels with the ids [cids] since
+  /// [lastSyncAt].
+  Future<Result<List<ChatEvent>>> sync(List<String> cids, DateTime lastSyncAt) async {
+    final result = await _api.sync(
+      syncRequest: api.SyncRequest(channelCids: cids, lastSyncAt: lastSyncAt),
     );
 
     return result.map((response) => response.toModel());

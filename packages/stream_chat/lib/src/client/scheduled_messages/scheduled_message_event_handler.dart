@@ -1,5 +1,5 @@
-import '../../event_type.dart';
-import '../../ws/events/event.dart';
+import '../../core/models/events/chat_event.dart';
+import '../../core/models/events/scheduled_message_events.dart';
 import 'scheduled_message_list_state.dart';
 
 /// A handler that applies scheduled message events to a
@@ -12,28 +12,15 @@ class ScheduledMessageEventHandler {
   final ScheduledMessageListStateNotifier state;
 
   /// Applies [event] to [state].
-  void handleEvent(Event event) {
-    final scheduledMessage = event.scheduledMessage;
-    if (scheduledMessage == null) return;
-
-    if (event.type == EventType.scheduledMessageCreated) {
-      return state.onScheduledMessageUpserted(scheduledMessage);
-    }
-
-    if (event.type == EventType.scheduledMessageUpdated) {
-      return state.onScheduledMessageUpserted(scheduledMessage);
-    }
-
-    if (event.type == EventType.scheduledMessageFailed) {
-      return state.onScheduledMessageUpserted(scheduledMessage);
-    }
-
-    if (event.type == EventType.scheduledMessageSent) {
-      return state.onScheduledMessageRemoved(scheduledMessage.id);
-    }
-
-    if (event.type == EventType.scheduledMessageDeleted) {
-      return state.onScheduledMessageRemoved(scheduledMessage.id);
+  void handleEvent(ChatEvent event) {
+    switch (event) {
+      case ScheduledMessageCreatedEvent(:final scheduledMessage?):
+      case ScheduledMessageUpdatedEvent(:final scheduledMessage?):
+      case ScheduledMessageFailedEvent(:final scheduledMessage?):
+        return state.onScheduledMessageUpserted(scheduledMessage);
+      case ScheduledMessageSentEvent(:final scheduledMessage?):
+      case ScheduledMessageDeletedEvent(:final scheduledMessage?):
+        return state.onScheduledMessageRemoved(scheduledMessage.id);
     }
   }
 }

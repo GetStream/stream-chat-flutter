@@ -229,9 +229,9 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   ///
   /// Return `true` if the event is handled. Return `false` to
   /// allow the event to be handled internally.
-  bool Function(Event event)? eventListener;
+  bool Function(ChatEvent event)? eventListener;
 
-  StreamSubscription<Event>? _pollVoteListEventSubscription;
+  StreamSubscription<ChatEvent>? _pollVoteListEventSubscription;
 
   // Subscribes to the poll vote list events.
   void _subscribeToPollVoteEvents() {
@@ -246,15 +246,19 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
       // Returns early if the event is already handled by the listener.
       if (eventListener?.call(event) ?? false) return;
 
-      if (!_belongsToPoll(event)) return;
+      if (event is! HasPollVote || !_belongsToPoll(event)) return;
 
-      final eventType = event.type;
-      if (eventType == EventType.pollVoteCasted || eventType == EventType.pollAnswerCasted) {
-        _eventHandler.onPollVoteCasted(event, this);
-      } else if (eventType == EventType.pollVoteChanged) {
-        _eventHandler.onPollVoteChanged(event, this);
-      } else if (eventType == EventType.pollVoteRemoved || eventType == EventType.pollAnswerRemoved) {
-        _eventHandler.onPollVoteRemoved(event, this);
+      switch (event) {
+        case PollVoteCastedEvent():
+          _eventHandler.onPollVoteCasted(event, this);
+        case PollAnswerCastedEvent():
+          _eventHandler.onPollVoteCasted(event, this);
+        case PollVoteChangedEvent():
+          _eventHandler.onPollVoteChanged(event, this);
+        case PollVoteRemovedEvent():
+          _eventHandler.onPollVoteRemoved(event, this);
+        case PollAnswerRemovedEvent():
+          _eventHandler.onPollVoteRemoved(event, this);
       }
     });
   }
@@ -262,10 +266,7 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
   // Whether the vote or answer carried by [event] belongs to [pollId].
   //
   // The subscription receives the events of every poll in [channel], not only the one this controller lists.
-  bool _belongsToPoll(Event event) {
-    final eventPollId = event.pollVote?.pollId ?? event.poll?.id;
-    return eventPollId == pollId;
-  }
+  bool _belongsToPoll(HasPollVote event) => (event.pollVote.pollId ?? event.poll.id) == pollId;
 
   // Unsubscribes from all poll vote list events.
   void _unsubscribeFromPolVoteListEvents() {
@@ -293,7 +294,7 @@ class StreamPollVoteListController extends PagedValueNotifier<String, PollVote> 
 }
 
 /// Contains handlers that are called from [StreamPollVoteListController] for
-/// certain [Event]s.
+/// certain events.
 ///
 /// This class can be mixed in or extended to create custom overrides.
 mixin class StreamPollVoteEventHandler {
@@ -307,11 +308,10 @@ mixin class StreamPollVoteEventHandler {
   /// [StreamPollVoteListController.forAnswers] ignores votes for other options or
   /// votes that aren't answers, respectively.
   void onPollVoteCasted(
-    Event event,
+    HasPollVote event,
     StreamPollVoteListController controller,
   ) {
     final pollVote = event.pollVote;
-    if (pollVote == null) return;
     if (!controller._scope.includes(pollVote)) return;
 
     final updatedPollVotes = <String, PollVote>{
@@ -331,11 +331,10 @@ mixin class StreamPollVoteEventHandler {
   /// [StreamPollVoteListController.forAnswers] instead removes a vote that is no
   /// longer for that option or isn't an answer, respectively.
   void onPollVoteChanged(
-    Event event,
+    HasPollVote event,
     StreamPollVoteListController controller,
   ) {
     final pollVote = event.pollVote;
-    if (pollVote == null) return;
 
     if (!controller._scope.includes(pollVote)) {
       _removePollVote(pollVote, controller);
@@ -358,11 +357,10 @@ mixin class StreamPollVoteEventHandler {
   ///
   /// By default, this removes the poll vote from the list.
   void onPollVoteRemoved(
-    Event event,
+    HasPollVote event,
     StreamPollVoteListController controller,
   ) {
     final pollVote = event.pollVote;
-    if (pollVote == null) return;
 
     _removePollVote(pollVote, controller);
   }

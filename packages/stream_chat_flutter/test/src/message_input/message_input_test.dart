@@ -862,12 +862,12 @@ void main() {
     late MockClientState clientState;
     late MockChannel channel;
     late MockChannelState channelState;
-    late StreamController<Event> eventController;
+    late StreamController<ChatEvent> eventController;
 
     setUp(() {
       registerFallbackValue(Message());
 
-      eventController = StreamController<Event>.broadcast();
+      eventController = StreamController<ChatEvent>.broadcast();
 
       client = MockClient();
       clientState = MockClientState();
@@ -934,9 +934,9 @@ void main() {
           expect(controller.message.quotedMessageId, 'quoted-msg-id');
 
           eventController.add(
-            Event(
-              type: EventType.messageDeleted,
+            MessageDeletedEvent(
               message: Message(id: 'quoted-msg-id'),
+              hardDelete: false,
             ),
           );
           await tester.pump();
@@ -984,9 +984,9 @@ void main() {
           await tester.pumpAndSettle();
 
           eventController.add(
-            Event(
-              type: EventType.messageDeleted,
+            MessageDeletedEvent(
               message: Message(id: 'some-other-msg-id'),
+              hardDelete: false,
             ),
           );
           await tester.pump();
@@ -1033,8 +1033,7 @@ void main() {
           expect(controller.message.quotedMessage?.text, 'Original text');
 
           eventController.add(
-            Event(
-              type: EventType.messageUpdated,
+            MessageUpdatedEvent(
               message: Message(
                 id: 'quoted-msg-id',
                 text: 'Edited text',
@@ -1083,8 +1082,7 @@ void main() {
           await tester.pumpAndSettle();
 
           eventController.add(
-            Event(
-              type: EventType.messageUpdated,
+            MessageUpdatedEvent(
               message: Message(
                 id: 'some-other-msg-id',
                 text: 'Edited text',
@@ -1132,8 +1130,7 @@ void main() {
           expect(controller.message.text, 'Original text');
 
           eventController.add(
-            Event(
-              type: EventType.messageUpdated,
+            MessageUpdatedEvent(
               message: Message(
                 id: 'editing-msg-id',
                 text: 'Updated by another device',
@@ -1177,8 +1174,7 @@ void main() {
           await tester.pumpAndSettle();
 
           eventController.add(
-            Event(
-              type: EventType.messageUpdated,
+            MessageUpdatedEvent(
               message: Message(
                 id: 'some-other-msg-id',
                 text: 'Edited text',
@@ -1224,9 +1220,9 @@ void main() {
           expect(controller.message.state.isUpdating, isTrue);
 
           eventController.add(
-            Event(
-              type: EventType.messageDeleted,
+            MessageDeletedEvent(
               message: Message(id: 'editing-msg-id'),
+              hardDelete: false,
             ),
           );
           await tester.pump();
@@ -1265,9 +1261,9 @@ void main() {
           await tester.pumpAndSettle();
 
           eventController.add(
-            Event(
-              type: EventType.messageDeleted,
+            MessageDeletedEvent(
               message: Message(id: 'some-other-msg-id'),
+              hardDelete: false,
             ),
           );
           await tester.pump();

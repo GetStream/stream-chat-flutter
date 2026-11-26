@@ -29,7 +29,7 @@ void main() {
   });
 
   testWidgets('StreamTypingIndicator shows alternativeWidget when nobody is typing', (tester) async {
-    final typingEvents = BehaviorSubject.seeded(<User, Event>{});
+    final typingEvents = BehaviorSubject.seeded(<User, TypingStartEvent>{});
     addTearDown(typingEvents.close);
 
     await _pumpIndicator(tester, typingEvents: typingEvents, alternativeWidget: const Text('Last message'));
@@ -93,11 +93,11 @@ void main() {
   });
 }
 
-Event _typingEvent(User user, {String? parentId}) {
-  return Event(type: EventType.typingStart, user: user, parentId: parentId);
+TypingStartEvent _typingEvent(User user, {String? parentId}) {
+  return TypingStartEvent(user: user, parentId: parentId);
 }
 
-MockChannel _channelWith(BehaviorSubject<Map<User, Event>> typingEvents) {
+MockChannel _channelWith(BehaviorSubject<Map<User, TypingStartEvent>> typingEvents) {
   final client = MockClient();
   final clientState = MockClientState();
   when(() => client.state).thenReturn(clientState);
@@ -124,7 +124,7 @@ Widget _app(Widget child) {
 
 Future<void> _pumpIndicator(
   WidgetTester tester, {
-  required BehaviorSubject<Map<User, Event>> typingEvents,
+  required BehaviorSubject<Map<User, TypingStartEvent>> typingEvents,
   String? parentId,
   Widget? alternativeWidget,
 }) async {

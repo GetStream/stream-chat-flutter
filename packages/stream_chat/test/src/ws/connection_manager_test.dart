@@ -1,3 +1,6 @@
+import 'dart:async';
+import 'dart:convert';
+
 import 'package:stream_chat/src/ws/connect_request.dart';
 import 'package:stream_chat/src/ws/connection_manager.dart';
 import 'package:stream_chat/stream_chat.dart';
@@ -199,11 +202,185 @@ void main() {
     expect(() => manager.connect(OwnUser(id: 'someone-else')), throwsStateError);
     await expectLater(first, throwsA(isA<StreamChatException>()));
   });
+
+  test('ConnectionManager authenticates a first connection with the token and the full user details', () async {
+    final server = FakeChatServer(user: _user());
+    final manager = _manager(server: server);
+    addTearDown(manager.dispose);
+    final user = OwnUser(id: 'test-user-id', name: 'Test User', language: 'nl', custom: const {'color': 'red'});
+
+    await manager.connect(user, includeUserDetails: true);
+
+    expect(server.authFrames.single, {
+      'token': _token.rawValue,
+      'products': ['chat'],
+      'user_details': {
+        'id': 'test-user-id',
+        'name': 'Test User',
+        'language': 'nl',
+        'custom': {'color': 'red'},
+      },
+    });
+  });
+
+  test('ConnectionManager names the user by id alone when their details are not to be sent', () async {
+    final server = FakeChatServer(user: _user());
+    final manager = _manager(server: server);
+    addTearDown(manager.dispose);
+
+    await manager.connect(OwnUser(id: 'test-user-id', name: 'Test User'));
+
+    expect(server.authFrames.single['user_details'], {'id': 'test-user-id'});
+  });
+
+  test('ConnectionManager names the user by id alone when it reopens a connection it established', () async {
+    final server = FakeChatServer(user: _user());
+    final manager = _manager(server: server);
+    addTearDown(manager.dispose);
+
+    await manager.connect(OwnUser(id: 'test-user-id', name: 'Test User'), includeUserDetails: true);
+    final reconnected = manager.statusStream.skip(1).firstWhere((it) => it == ConnectionStatus.connected);
+    server.drop(closeCode: 1006);
+    await reconnected;
+
+    expect(server.authFrames.map((it) => it['user_details']), [
+      {'id': 'test-user-id', 'name': 'Test User', 'custom': <String, Object?>{}},
+      {'id': 'test-user-id'},
+    ]);
+  });
+
+  test('ConnectionManager sends the full user details again when it retries a refused first connection', () async {
+    var loads = 0;
+    final server = FakeChatServer(user: _user())..refusal = connectionErrorFrame();
+    final manager = _manager(
+      server: server,
+      tokenProvider: TokenProvider.dynamic((userId) async {
+        loads += 1;
+        if (loads == 2) server.refusal = null;
+        return testUserToken(userId);
+      }),
+    );
+    addTearDown(manager.dispose);
+
+    await manager.connect(OwnUser(id: 'test-user-id', name: 'Test User'), includeUserDetails: true);
+
+    final details = {'id': 'test-user-id', 'name': 'Test User', 'custom': <String, Object?>{}};
+    expect(server.authFrames.map((it) => it['user_details']), [details, details]);
+  });
+
+  test('ConnectionManager authenticates a retry with the token that replaced the refused one', () async {
+    var loads = 0;
+    final server = FakeChatServer(user: _user())..refusal = connectionErrorFrame();
+    final manager = _manager(
+      server: server,
+      tokenProvider: TokenProvider.dynamic((userId) async {
+        loads += 1;
+        if (loads == 2) server.refusal = null;
+        return _numberedToken(loads);
+      }),
+    );
+    addTearDown(manager.dispose);
+
+    await manager.connect(_user());
+
+    expect(server.authFrames.map((it) => it['token']), [_numberedToken(1).rawValue, _numberedToken(2).rawValue]);
+  });
+
+  test('ConnectionManager authenticates with the token the socket was opened for', () async {
+    var loads = 0;
+    final server = FakeChatServer(user: _user());
+    final manager = _manager(
+      server: server,
+      tokenProvider: TokenProvider.dynamic((_) async => _numberedToken(loads += 1)),
+    );
+    addTearDown(manager.dispose);
+
+    await manager.connect(_user());
+
+    expect(server.authFrames.single['token'], _numberedToken(1).rawValue);
+  });
+
+  test('ConnectionManager authenticates an anonymous connection with no token and the anonymous id', () async {
+    final server = FakeChatServer(user: OwnUser(id: '!anon'));
+    final manager = _manager(
+      server: server,
+      userId: '!anon',
+      tokenProvider: TokenProvider.static(UserToken.anonymous()),
+    );
+    addTearDown(manager.dispose);
+
+    await manager.connect(OwnUser(id: '!anon'), includeUserDetails: true);
+
+    expect(server.authFrames.single, {
+      'token': '',
+      'products': ['chat'],
+      'user_details': {'id': 'anon'},
+    });
+  });
+
+  test('ConnectionManager opens no socket before the token is loaded', () async {
+    final token = Completer<UserToken>();
+    final server = FakeChatServer(user: _user());
+    final manager = _manager(server: server, tokenProvider: TokenProvider.dynamic((_) => token.future));
+    addTearDown(manager.dispose);
+
+    final connecting = manager.connect(_user());
+    await pumpEventQueue();
+
+    expect(server.sockets, isEmpty);
+
+    token.complete(_token);
+    await connecting;
+
+    expect(server.authFrames.single['token'], _token.rawValue);
+  });
+
+  test('ConnectionManager keeps the token out of the address it opens', () async {
+    final server = FakeChatServer(user: _user());
+    final manager = _manager(server: server);
+    addTearDown(manager.dispose);
+
+    await manager.connect(_user());
+
+    final options = server.options.single;
+    expect(options.url, isNot(contains(_token.rawValue)));
+    expect(options.queryParameters!.values, isNot(contains(_token.rawValue)));
+  });
+
+  test('ConnectionManager reports a socket that could not open without the token', () async {
+    final manager = _manager(server: FakeChatServer()..handshakeFails = true);
+    addTearDown(manager.dispose);
+
+    await expectLater(manager.connect(_user()), throwsA(_exceptionWithout(_token.rawValue)));
+  });
+
+  test('ConnectionManager reports a refused connection without the token', () async {
+    final refusal = connectionErrorFrame(code: StreamErrorCode.tokenSignatureInvalid);
+    final manager = _manager(server: FakeChatServer()..refusal = refusal);
+    addTearDown(manager.dispose);
+
+    await expectLater(manager.connect(_user()), throwsA(_exceptionWithout(_token.rawValue)));
+  });
 }
 
 OwnUser _user() => OwnUser(id: 'test-user-id');
 
-ConnectionManager _manager({FakeChatServer? server, TokenProvider? tokenProvider}) {
+final _token = testUserToken('test-user-id');
+
+// A token for `test-user-id` that differs from every other [number].
+UserToken _numberedToken(int number) {
+  const header = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9';
+  final payload = base64.encode(utf8.encode(json.encode({'user_id': 'test-user-id', 'number': number})));
+  return UserToken('$header.$payload.devtoken');
+}
+
+// A [StreamException] whose description and cause both leave out [secret].
+Matcher _exceptionWithout(String secret) => isA<StreamException>()
+    .having((it) => '$it', 'description', isNot(contains(secret)))
+    .having((it) => it.message, 'message', isNot(contains(secret)))
+    .having((it) => '${it.cause}', 'cause', isNot(contains(secret)));
+
+ConnectionManager _manager({FakeChatServer? server, TokenProvider? tokenProvider, String userId = 'test-user-id'}) {
   return ConnectionManager(
     request: ConnectRequest.forApi(
       'https://chat.stream-io-api.com',
@@ -213,8 +390,8 @@ ConnectionManager _manager({FakeChatServer? server, TokenProvider? tokenProvider
       ),
     ),
     tokenManager: TokenManager(
-      userId: 'test-user-id',
-      tokenProvider: tokenProvider ?? TokenProvider.static(testUserToken('test-user-id')),
+      userId: userId,
+      tokenProvider: tokenProvider ?? TokenProvider.static(_token),
     ),
     wsProvider:
         server?.connect ??

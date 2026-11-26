@@ -426,12 +426,13 @@ class _BenchmarkPageState extends State<BenchmarkPage> {
       updatedAt: now,
     );
     channel.client.handleEvent(
-      Event(
-        type: EventType.messageNew,
+      MessageNewEvent(
         cid: cid,
         channelType: channel.type,
         channelId: channel.id,
         message: message,
+        // Keeps the channel's watcher count as it is.
+        watcherCount: channel.state?.watcherCount ?? 0,
         createdAt: now,
       ),
     );

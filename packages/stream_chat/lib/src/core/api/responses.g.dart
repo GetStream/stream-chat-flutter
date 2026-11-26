@@ -21,10 +21,6 @@ Map<String, dynamic> _$ErrorResponseToJson(ErrorResponse instance) => <String, d
   'more_info': instance.moreInfo,
 };
 
-SyncResponse _$SyncResponseFromJson(Map<String, dynamic> json) => SyncResponse()
-  ..duration = json['duration'] as String?
-  ..events = (json['events'] as List<dynamic>?)?.map((e) => Event.fromJson(e as Map<String, dynamic>)).toList() ?? [];
-
 QueryUsersResponse _$QueryUsersResponseFromJson(Map<String, dynamic> json) => QueryUsersResponse()
   ..duration = json['duration'] as String?
   ..users = (json['users'] as List<dynamic>?)?.map((e) => User.fromJson(e as Map<String, dynamic>)).toList() ?? [];

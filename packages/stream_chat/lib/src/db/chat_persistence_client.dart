@@ -5,9 +5,11 @@ import '../core/models/attachment_file.dart';
 import '../core/models/channel_model.dart';
 import '../core/models/channel_state.dart';
 import '../core/models/draft.dart';
+import '../core/models/events/connection_events.dart';
 import '../core/models/location.dart';
 import '../core/models/member.dart';
 import '../core/models/message.dart';
+import '../core/models/own_user.dart';
 import '../core/models/poll.dart';
 import '../core/models/poll_vote.dart';
 import '../core/models/reaction.dart';
@@ -15,7 +17,6 @@ import '../core/models/read.dart';
 import '../core/models/response/query_channels_response.dart';
 import '../core/models/user.dart';
 import '../core/util/extension.dart';
-import '../ws/events/event.dart';
 
 /// A simple client used for persisting chat data locally.
 abstract class ChatPersistenceClient {
@@ -47,14 +48,17 @@ abstract class ChatPersistenceClient {
     PaginationParams? options,
   });
 
-  /// Get stored connection event
-  Future<Event?> getConnectionInfo();
+  /// The current user as the last opened connection named them, or null when
+  /// none was stored.
+  ///
+  /// Lets the client start offline with the user it last connected as.
+  Future<OwnUser?> getConnectionInfo();
 
   /// Get stored lastSyncAt
   Future<DateTime?> getLastSyncAt();
 
-  /// Update stored connection event
-  Future<void> updateConnectionInfo(Event event);
+  /// Stores the current user named by [event], which a connection opens with.
+  Future<void> updateConnectionInfo(HealthCheckEvent event);
 
   /// Update stored lastSyncAt
   Future<void> updateLastSyncAt(DateTime lastSyncAt);

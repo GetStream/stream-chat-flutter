@@ -20,8 +20,8 @@ void main() {
     final emit = await _pumpCommentsSheet(tester);
 
     emit(
-      Event(
-        type: EventType.pollVoteCasted,
+      PollVoteCastedEvent(
+        poll: _lunchPoll(),
         pollVote: PollVote(id: 'vote-ben', pollId: _pollId, optionId: _pizza.id, user: ben),
       ),
     );
@@ -35,8 +35,8 @@ void main() {
     final emit = await _pumpCommentsSheet(tester);
 
     emit(
-      Event(
-        type: EventType.pollAnswerCasted,
+      PollAnswerCastedEvent(
+        poll: _lunchPoll(),
         pollVote: PollVote(id: 'answer-ben', pollId: _pollId, answerText: 'Pasta!', user: ben),
       ),
     );
@@ -46,9 +46,11 @@ void main() {
   });
 }
 
+Poll _lunchPoll() => Poll(id: _pollId, name: 'Lunch: pizza or sushi?', options: const [_pizza]);
+
 // Pumps the comments sheet with no comments loaded, and returns a function that emits a channel event to the sheet.
-Future<void Function(Event event)> _pumpCommentsSheet(WidgetTester tester) async {
-  final events = StreamController<Event>.broadcast();
+Future<void Function(ChatEvent event)> _pumpCommentsSheet(WidgetTester tester) async {
+  final events = StreamController<ChatEvent>.broadcast();
   addTearDown(events.close);
 
   final client = MockClient();
@@ -80,7 +82,7 @@ Future<void Function(Event event)> _pumpCommentsSheet(WidgetTester tester) async
           channel: channel,
           child: Scaffold(
             body: StreamPollCommentsSheet(
-              poll: Poll(id: _pollId, name: 'Lunch: pizza or sushi?', options: const [_pizza]),
+              poll: _lunchPoll(),
             ),
           ),
         ),

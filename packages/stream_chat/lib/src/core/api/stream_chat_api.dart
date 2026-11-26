@@ -3,7 +3,6 @@ import 'package:stream_core/stream_core.dart' show ConnectionIdGetter, SystemEnv
 
 import '../http/stream_http_client.dart';
 import 'channel_api.dart';
-import 'general_api.dart';
 import 'moderation_api.dart';
 import 'push_preferences_api.dart';
 import 'scheduled_messages_api.dart';
@@ -54,8 +53,4 @@ class StreamChatApi {
   /// API dedicated to scheduled message operations.
   ScheduledMessagesApi get scheduledMessages => _scheduledMessages ??= ScheduledMessagesApi(_client);
   ScheduledMessagesApi? _scheduledMessages;
-
-  /// Api dedicated to general operations
-  GeneralApi get general => _general ??= GeneralApi(_client);
-  GeneralApi? _general;
 }

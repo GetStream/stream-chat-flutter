@@ -13,18 +13,18 @@ class ConnectionEventDao extends DatabaseAccessor<DriftChatDatabase> with _$Conn
   /// Creates a new connection event dao instance
   ConnectionEventDao(super.db);
 
-  /// Get the latest stored connection event
-  Future<Event?> get connectionEvent => select(connectionEvents)
-      .map((eventEntity) => eventEntity.toEvent())
-      .getSingleOrNull()
-      // A row carrying only a checkpoint is not a connection event.
-      .then((event) => event?.type == EventType.any ? null : event);
+  /// The current user stored from the last opened connection, or null when
+  /// none was stored.
+  Future<OwnUser?> get connectedUser =>
+      select(connectionEvents).getSingleOrNull()
+      // A row carrying only a checkpoint names no user.
+      .then((entity) => entity?.type == EventType.any ? null : entity?.toOwnUser());
 
   /// Get the latest stored lastSyncAt
   Future<DateTime?> get lastSyncAt => select(connectionEvents).getSingleOrNull().then((r) => r?.lastSyncAt);
 
-  /// Update stored connection event with latest data
-  Future<int> updateConnectionEvent(Event event) => transaction(() async {
+  /// Stores the current user named by [event], which a connection opens with.
+  Future<int> updateConnectionEvent(HealthCheckEvent event) => transaction(() async {
     final connectionInfo = await select(connectionEvents).getSingleOrNull();
     return into(connectionEvents).insertOnConflictUpdate(
       ConnectionEventEntity(
@@ -32,9 +32,9 @@ class ConnectionEventDao extends DatabaseAccessor<DriftChatDatabase> with _$Conn
         type: event.type,
         lastSyncAt: connectionInfo?.lastSyncAt,
         lastEventAt: event.createdAt,
-        totalUnreadCount: event.totalUnreadCount ?? connectionInfo?.totalUnreadCount,
-        ownUser: event.me?.toJson() ?? connectionInfo?.ownUser,
-        unreadChannels: event.unreadChannels ?? connectionInfo?.unreadChannels,
+        totalUnreadCount: event.me.totalUnreadCount,
+        ownUser: event.me.toJson(),
+        unreadChannels: event.me.unreadChannels,
       ),
     );
   });

@@ -7,10 +7,12 @@ import '../../core/api/responses.dart';
 import '../../core/api/scheduled_messages_api.dart';
 import '../../core/error/stream_chat_exception.dart';
 import '../../core/models/channel_state.dart';
+import '../../core/models/events/chat_event.dart';
+import '../../core/models/events/connection_events.dart';
+import '../../core/models/events/scheduled_message_events.dart';
 import '../../core/models/message.dart';
 import '../../core/models/scheduled_message.dart';
 import '../../event_type.dart';
-import '../../ws/events/event.dart';
 import '../client.dart';
 import 'scheduled_message_event_handler.dart';
 import 'scheduled_message_list_state.dart';
@@ -35,7 +37,7 @@ class ScheduledMessageManager {
 
   final _stateNotifier = ScheduledMessageListStateNotifier();
   late final _eventHandler = ScheduledMessageEventHandler(state: _stateNotifier);
-  late final StreamSubscription<Event> _eventsSubscription;
+  late final StreamSubscription<ChatEvent> _eventsSubscription;
 
   // The load of the complete list, shared while it runs.
   var _loadCache = InFlightCache<String, ScheduledMessageListState>();
@@ -396,14 +398,14 @@ class ScheduledMessageManager {
     _stateNotifier.onChannelsQueried(channels);
   }
 
-  void _onEvent(Event event) {
+  void _onEvent(ChatEvent event) {
     _eventHandler.handleEvent(event);
 
-    if (event.type == EventType.connectionChanged && event.online == false) {
+    if (event case ConnectionChangedEvent(online: false)) {
       _onConnectionLost();
     }
 
-    if (event.type == EventType.connectionRecovered) {
+    if (event case ConnectionRecoveredEvent()) {
       _onConnectionRecovered().ignore();
     }
   }
@@ -465,12 +467,32 @@ class ScheduledMessageManager {
   }) {
     if (generation != _generation) return;
 
-    final event = Event(
-      type: type,
-      cid: scheduledMessage.cid,
-      messageId: messageId,
-      scheduledMessage: scheduledMessage,
-    );
+    final user = scheduledMessage.user;
+    final cid = scheduledMessage.cid;
+    final event = switch (type) {
+      EventType.scheduledMessageCreated => ScheduledMessageCreatedEvent(
+        cid: cid,
+        scheduledMessage: scheduledMessage,
+        user: user,
+      ),
+      EventType.scheduledMessageUpdated => ScheduledMessageUpdatedEvent(
+        cid: cid,
+        scheduledMessage: scheduledMessage,
+        user: user,
+      ),
+      EventType.scheduledMessageSent => ScheduledMessageSentEvent(
+        cid: cid,
+        scheduledMessage: scheduledMessage,
+        user: user,
+        messageId: messageId,
+      ),
+      EventType.scheduledMessageDeleted => ScheduledMessageDeletedEvent(
+        cid: cid,
+        scheduledMessage: scheduledMessage,
+        user: user,
+      ),
+      _ => throw ArgumentError.value(type, 'type', 'Not a scheduled message event type'),
+    };
 
     _client.handleEvent(event);
   }

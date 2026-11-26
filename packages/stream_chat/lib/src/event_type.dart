@@ -1,6 +1,6 @@
 /// @docImport 'client/client.dart';
+/// @docImport 'core/models/events/chat_event.dart';
 /// @docImport 'core/models/scheduled_message.dart';
-/// @docImport 'ws/events/event.dart';
 library;
 
 /// This class defines some basic event types
@@ -119,6 +119,9 @@ class EventType {
   /// Event sent when the user's mutes list is updated
   static const String notificationMutesUpdated = 'notification.mutes_updated';
 
+  /// Event sent when the current user's muted channels list is updated.
+  static const String notificationChannelMutesUpdated = 'notification.channel_mutes_updated';
+
   /// Event sent when the AI indicator is updated
   static const String aiIndicatorUpdate = 'ai_indicator.update';
 
@@ -181,14 +184,14 @@ class EventType {
 
   /// Event sent when the current user schedules a message.
   ///
-  /// The client also sends one with [Event.isLocal] true while the message is
-  /// being scheduled, as [ScheduledMessageStatus.preparingToSchedule], and one
-  /// with the scheduled copy once the request succeeds.
+  /// The client also sends one with [ChatEvent.isLocal] true while the message
+  /// is being scheduled, as [ScheduledMessageStatus.preparingToSchedule], and
+  /// one with the scheduled copy once the request succeeds.
   static const String scheduledMessageCreated = 'scheduled_message.created';
 
   /// Event sent when the current user edits or reschedules a scheduled message.
   ///
-  /// The client also sends one with [Event.isLocal] true after
+  /// The client also sends one with [ChatEvent.isLocal] true after
   /// [StreamChatClient.updateScheduledMessage],
   /// [StreamChatClient.rescheduleMessage] and
   /// [StreamChatClient.sendScheduledMessageNow], and when the request to
@@ -198,14 +201,14 @@ class EventType {
 
   /// Event sent when the current user deletes a scheduled message.
   ///
-  /// The client also sends one with [Event.isLocal] true when it finds a
+  /// The client also sends one with [ChatEvent.isLocal] true when it finds a
   /// scheduled message deleted or gone, or scheduling it fails in a way that
   /// cannot be retried.
   static const String scheduledMessageDeleted = 'scheduled_message.deleted';
 
   /// Event sent when a scheduled message of the current user is sent.
   ///
-  /// The client also sends one with [Event.isLocal] true when it finds a
+  /// The client also sends one with [ChatEvent.isLocal] true when it finds a
   /// scheduled message already sent, such as one sent right away.
   static const String scheduledMessageSent = 'scheduled_message.sent';
 

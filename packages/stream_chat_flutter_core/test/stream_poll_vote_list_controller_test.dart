@@ -146,8 +146,8 @@ void main() {
     final (:controller, :events) = await _loadedController(votes: [existingVote]);
 
     events.add(
-      Event(
-        type: EventType.pollVoteCasted,
+      PollVoteCastedEvent(
+        poll: _poll(id: _otherPollId),
         pollVote: PollVote(id: 'vote-2', pollId: _otherPollId, optionId: 'option-2'),
       ),
     );
@@ -160,7 +160,7 @@ void main() {
     final (:controller, :events) = await _loadedController();
     final vote = PollVote(id: 'vote-1', pollId: _pollId, optionId: 'option-1');
 
-    events.add(Event(type: EventType.pollVoteCasted, pollVote: vote));
+    events.add(PollVoteCastedEvent(poll: _poll(), pollVote: vote));
     await pumpEventQueue();
 
     expect(controller.currentItems, [vote]);
@@ -170,8 +170,8 @@ void main() {
     final (:controller, :events) = await _loadedController();
 
     events.add(
-      Event(
-        type: EventType.pollAnswerCasted,
+      PollAnswerCastedEvent(
+        poll: _poll(id: _otherPollId),
         pollVote: PollVote(id: 'answer-1', pollId: _otherPollId, answerText: 'Beach!'),
       ),
     );
@@ -184,8 +184,8 @@ void main() {
     final (:controller, :events) = await _loadedController();
 
     events.add(
-      Event(
-        type: EventType.pollVoteChanged,
+      PollVoteChangedEvent(
+        poll: _poll(id: _otherPollId),
         pollVote: PollVote(id: 'vote-2', pollId: _otherPollId, optionId: 'option-2'),
       ),
     );
@@ -199,11 +199,7 @@ void main() {
     final vote = PollVote(id: 'vote-1', optionId: 'option-1');
 
     events.add(
-      Event(
-        type: EventType.pollVoteCasted,
-        poll: Poll(id: _pollId, name: 'Lunch', options: const []),
-        pollVote: vote,
-      ),
+      PollVoteCastedEvent(poll: _poll(), pollVote: vote),
     );
     await pumpEventQueue();
 
@@ -214,8 +210,8 @@ void main() {
     final (:controller, :events) = await _loadedController();
 
     events.add(
-      Event(
-        type: EventType.pollVoteCasted,
+      PollVoteCastedEvent(
+        poll: Poll(name: 'Lunch', options: const []),
         pollVote: PollVote(id: 'vote-2', optionId: 'option-2'),
       ),
     );
@@ -238,8 +234,8 @@ void main() {
       final (:controller, :events) = await _loadedOptionController(_pizza, votes: [pizzaVote]);
 
       events.add(
-        Event(
-          type: EventType.pollVoteCasted,
+        PollVoteCastedEvent(
+          poll: _poll(),
           pollVote: PollVote(id: 'vote-2', pollId: _pollId, optionId: _sushi),
         ),
       );
@@ -252,7 +248,7 @@ void main() {
       final (:controller, :events) = await _loadedOptionController(_pizza);
       final pizzaVote = PollVote(id: 'vote-1', pollId: _pollId, optionId: _pizza);
 
-      events.add(Event(type: EventType.pollVoteCasted, pollVote: pizzaVote));
+      events.add(PollVoteCastedEvent(poll: _poll(), pollVote: pizzaVote));
       await pumpEventQueue();
 
       expect(controller.currentItems, [pizzaVote]);
@@ -262,8 +258,8 @@ void main() {
       final (:controller, :events) = await _loadedOptionController(_pizza);
 
       events.add(
-        Event(
-          type: EventType.pollAnswerCasted,
+        PollAnswerCastedEvent(
+          poll: _poll(),
           pollVote: PollVote(id: 'answer-1', pollId: _pollId, answerText: 'Pasta!'),
         ),
       );
@@ -277,8 +273,8 @@ void main() {
       final (:controller, :events) = await _loadedOptionController(_pizza, votes: [pizzaVote]);
 
       events.add(
-        Event(
-          type: EventType.pollVoteChanged,
+        PollVoteChangedEvent(
+          poll: _poll(),
           pollVote: pizzaVote.copyWith(optionId: _sushi),
         ),
       );
@@ -291,7 +287,7 @@ void main() {
       final (:controller, :events) = await _loadedOptionController(_pizza);
       final pizzaVote = PollVote(id: 'vote-1', pollId: _pollId, optionId: _pizza);
 
-      events.add(Event(type: EventType.pollVoteChanged, pollVote: pizzaVote));
+      events.add(PollVoteChangedEvent(poll: _poll(), pollVote: pizzaVote));
       await pumpEventQueue();
 
       expect(controller.currentItems, [pizzaVote]);
@@ -311,8 +307,8 @@ void main() {
       final (:controller, :events) = await _loadedAnswersController();
 
       events.add(
-        Event(
-          type: EventType.pollVoteCasted,
+        PollVoteCastedEvent(
+          poll: _poll(),
           pollVote: PollVote(id: 'vote-1', pollId: _pollId, optionId: _pizza),
         ),
       );
@@ -325,7 +321,7 @@ void main() {
       final (:controller, :events) = await _loadedAnswersController();
       final answer = PollVote(id: 'answer-1', pollId: _pollId, answerText: 'Pasta!');
 
-      events.add(Event(type: EventType.pollAnswerCasted, pollVote: answer));
+      events.add(PollAnswerCastedEvent(poll: _poll(), pollVote: answer));
       await pumpEventQueue();
 
       expect(controller.currentItems, [answer]);
@@ -335,8 +331,8 @@ void main() {
       final (:controller, :events) = await _loadedAnswersController();
 
       events.add(
-        Event(
-          type: EventType.pollVoteChanged,
+        PollVoteChangedEvent(
+          poll: _poll(),
           pollVote: PollVote(id: 'vote-1', pollId: _pollId, optionId: _pizza),
         ),
       );
@@ -350,7 +346,7 @@ void main() {
     final pizzaVote = PollVote(id: 'vote-1', pollId: _pollId, optionId: _pizza);
     final (:controller, :events) = await _loadedController(votes: [pizzaVote]);
 
-    events.add(Event(type: EventType.pollVoteRemoved, pollVote: pizzaVote));
+    events.add(PollVoteRemovedEvent(poll: _poll(), pollVote: pizzaVote));
     await pumpEventQueue();
 
     expect(controller.currentItems, isEmpty);
@@ -361,12 +357,14 @@ void main() {
     final (:controller, :events) = await _loadedController(votes: [pizzaVote]);
     final sushiVote = pizzaVote.copyWith(optionId: _sushi);
 
-    events.add(Event(type: EventType.pollVoteChanged, pollVote: sushiVote));
+    events.add(PollVoteChangedEvent(poll: _poll(), pollVote: sushiVote));
     await pumpEventQueue();
 
     expect(controller.currentItems, [sushiVote]);
   });
 }
+
+Poll _poll({String id = _pollId}) => Poll(id: id, name: 'Lunch', options: const []);
 
 PollVote _vote(String id) => PollVote(
   id: id,
@@ -406,12 +404,12 @@ StreamPollVoteListController _controller(Channel channel) {
 // Returns a controller for [_pollId] that has loaded [votes] and listens to the returned channel events.
 //
 // The controller is built by [create], or with the default constructor when [create] is omitted.
-Future<({StreamPollVoteListController controller, StreamController<Event> events})> _loadedController({
+Future<({StreamPollVoteListController controller, StreamController<ChatEvent> events})> _loadedController({
   List<PollVote> votes = const [],
   StreamPollVoteListController Function(Channel channel)? create,
 }) async {
   final channel = _channelAnswering([Result.success(_page(votes))]);
-  final events = StreamController<Event>.broadcast();
+  final events = StreamController<ChatEvent>.broadcast();
   addTearDown(events.close);
   when(channel.on).thenAnswer((_) => events.stream);
 
@@ -423,7 +421,7 @@ Future<({StreamPollVoteListController controller, StreamController<Event> events
 }
 
 // Returns a controller scoped to [optionId] that has loaded [votes].
-Future<({StreamPollVoteListController controller, StreamController<Event> events})> _loadedOptionController(
+Future<({StreamPollVoteListController controller, StreamController<ChatEvent> events})> _loadedOptionController(
   String optionId, {
   List<PollVote> votes = const [],
 }) {
@@ -438,7 +436,7 @@ Future<({StreamPollVoteListController controller, StreamController<Event> events
 }
 
 // Returns a controller scoped to the poll's answers that has loaded nothing.
-Future<({StreamPollVoteListController controller, StreamController<Event> events})> _loadedAnswersController() {
+Future<({StreamPollVoteListController controller, StreamController<ChatEvent> events})> _loadedAnswersController() {
   return _loadedController(
     create: (channel) => StreamPollVoteListController.forAnswers(
       channel: channel,

@@ -126,7 +126,35 @@ class ScheduledMessageHarness {
 
   // Delivers [type] for [message] the way a web-socket event arrives.
   Future<void> receive(String type, ScheduledMessage message) async {
-    client.handleEvent(Event(type: type, cid: message.cid, scheduledMessage: message, isLocal: false));
+    final user = message.user;
+    client.handleEvent(switch (type) {
+      EventType.scheduledMessageCreated => ScheduledMessageCreatedEvent(
+        cid: message.cid,
+        scheduledMessage: message,
+        user: user,
+        isLocal: false,
+      ),
+      EventType.scheduledMessageUpdated => ScheduledMessageUpdatedEvent(
+        cid: message.cid,
+        scheduledMessage: message,
+        user: user,
+        isLocal: false,
+      ),
+      EventType.scheduledMessageFailed => ScheduledMessageFailedEvent(
+        cid: message.cid,
+        scheduledMessage: message,
+        user: user,
+        isLocal: false,
+      ),
+      EventType.scheduledMessageSent => ScheduledMessageSentEvent(
+        cid: message.cid,
+        scheduledMessage: message,
+        user: user,
+        messageId: message.id,
+        isLocal: false,
+      ),
+      _ => ScheduledMessageDeletedEvent(cid: message.cid, scheduledMessage: message, user: user, isLocal: false),
+    });
     await settle();
   }
 

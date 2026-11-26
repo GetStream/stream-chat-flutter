@@ -3,16 +3,17 @@ import 'package:stream_chat/src/core/models/channel_model.dart';
 import 'package:stream_chat/src/core/models/channel_state.dart';
 import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/draft_message.dart';
+import 'package:stream_chat/src/core/models/events/connection_events.dart';
 import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/member.dart';
 import 'package:stream_chat/src/core/models/message.dart';
+import 'package:stream_chat/src/core/models/own_user.dart';
 import 'package:stream_chat/src/core/models/poll.dart';
 import 'package:stream_chat/src/core/models/poll_vote.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/read.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
-import 'package:stream_chat/src/ws/events/event.dart';
 import 'package:test/test.dart';
 
 class TestPersistenceClient extends ChatPersistenceClient {
@@ -96,7 +97,7 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<Map<String, List<Message>>> getChannelThreads(String cid) => throw UnimplementedError();
 
   @override
-  Future<Event?> getConnectionInfo() => throw UnimplementedError();
+  Future<OwnUser?> getConnectionInfo() => throw UnimplementedError();
 
   @override
   Future<DateTime?> getLastSyncAt() => throw UnimplementedError();
@@ -135,7 +136,7 @@ class TestPersistenceClient extends ChatPersistenceClient {
   Future<void> updateChannels(List<ChannelModel> channels) => Future.value();
 
   @override
-  Future<void> updateConnectionInfo(Event event) => throw UnimplementedError();
+  Future<void> updateConnectionInfo(HealthCheckEvent event) => throw UnimplementedError();
 
   @override
   Future<void> updateLastSyncAt(DateTime lastSyncAt) => throw UnimplementedError();

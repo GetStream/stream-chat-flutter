@@ -79,14 +79,14 @@ class StreamChatPersistenceClient extends ChatPersistenceClient {
   }
 
   @override
-  Future<Event?> getConnectionInfo() {
+  Future<OwnUser?> getConnectionInfo() {
     assert(_debugIsConnected, '');
     _logger.v(() => 'getConnectionInfo');
-    return db!.connectionEventDao.connectionEvent;
+    return db!.connectionEventDao.connectedUser;
   }
 
   @override
-  Future<void> updateConnectionInfo(Event event) {
+  Future<void> updateConnectionInfo(HealthCheckEvent event) {
     assert(_debugIsConnected, '');
     _logger.v(() => 'updateConnectionInfo');
     return db!.connectionEventDao.updateConnectionEvent(event);

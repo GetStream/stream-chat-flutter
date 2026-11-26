@@ -30,8 +30,4 @@ void main() {
   test('`.moderation`', () {
     expect(streamChatApi.moderation, isNotNull);
   });
-
-  test('`.general`', () {
-    expect(streamChatApi.general, isNotNull);
-  });
 }

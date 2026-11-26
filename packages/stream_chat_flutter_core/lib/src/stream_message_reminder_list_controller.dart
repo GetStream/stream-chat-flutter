@@ -157,9 +157,9 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
   ///
   /// Return `true` if the event is handled. Return `false` to
   /// allow the event to be handled internally.
-  bool Function(Event event)? eventListener;
+  bool Function(ChatEvent event)? eventListener;
 
-  StreamSubscription<Event>? _reminderEventSubscription;
+  StreamSubscription<ChatEvent>? _reminderEventSubscription;
 
   // Subscribes to the message reminder list events.
   void _subscribeToReminderListEvents() {
@@ -174,16 +174,18 @@ class StreamMessageReminderListController extends PagedValueNotifier<String, Mes
       // Returns early if the event is already handled by the listener.
       if (eventListener?.call(event) ?? false) return;
 
-      final handlerFunc = switch (event.type) {
-        EventType.reminderCreated => _eventHandler.onMessageReminderCreated,
-        EventType.reminderUpdated => _eventHandler.onMessageReminderUpdated,
-        EventType.reminderDeleted => _eventHandler.onMessageReminderDeleted,
-        EventType.notificationReminderDue => _eventHandler.onMessageReminderDue,
-        EventType.connectionRecovered => _eventHandler.onConnectionRecovered,
-        _ => null,
-      };
-
-      return handlerFunc?.call(event, this);
+      switch (event) {
+        case ReminderCreatedEvent():
+          _eventHandler.onMessageReminderCreated(event, this);
+        case ReminderUpdatedEvent():
+          _eventHandler.onMessageReminderUpdated(event, this);
+        case ReminderDeletedEvent():
+          _eventHandler.onMessageReminderDeleted(event, this);
+        case NotificationReminderDueEvent():
+          _eventHandler.onMessageReminderDue(event, this);
+        case ConnectionRecoveredEvent():
+          _eventHandler.onConnectionRecovered(event, this);
+      }
     });
   }
 

@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:stream_chat/open_api/api.dart';
 import 'package:stream_chat/src/client/channel/channel.dart';
 import 'package:stream_chat/src/client/channel_delivery_reporter.dart';
@@ -8,18 +9,17 @@ import 'package:stream_chat/src/client/moderation_client.dart';
 import 'package:stream_chat/src/client/scheduled_messages/scheduled_message_manager.dart';
 import 'package:stream_chat/src/core/api/attachment_file_uploader.dart';
 import 'package:stream_chat/src/core/api/channel_api.dart';
-import 'package:stream_chat/src/core/api/general_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/push_preferences_api.dart';
 import 'package:stream_chat/src/core/api/scheduled_messages_api.dart';
 import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
-import 'package:stream_chat/src/core/util/event_controller.dart';
+import 'package:stream_chat/src/core/models/events/chat_event.dart';
 import 'package:stream_chat/src/db/chat_persistence_client.dart';
 import 'package:stream_chat/src/event_type.dart';
-import 'package:stream_chat/src/ws/events/event.dart';
-import 'package:stream_core/stream_core.dart' show StreamLogger, StreamWebSocketClient, TokenManager;
+import 'package:stream_core/stream_core.dart'
+    show MutableEventEmitter, StreamLogger, StreamWebSocketClient, TokenManager;
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 class MockWebSocketChannel extends Mock implements WebSocketChannel {}
@@ -53,8 +53,6 @@ class MockModerationApi extends Mock implements ModerationApi {}
 class MockDefaultApi extends Mock implements DefaultApi {}
 
 class MockModerationClient extends Mock implements ModerationClient {}
-
-class MockGeneralApi extends Mock implements GeneralApi {}
 
 class MockScheduledMessagesApi extends Mock implements ScheduledMessagesApi {}
 
@@ -116,25 +114,28 @@ class MockStreamChatClient extends Mock implements StreamChatClient {
   }
 
   @override
-  Stream<Event> get eventStream => _eventController.stream;
-  final _eventController = EventController<Event>();
-  void addEvent(Event event) => _eventController.add(event);
+  Stream<ChatEvent> get eventStream => _eventController;
+  final _eventController = MutableEventEmitter<ChatEvent>();
+  void addEvent(ChatEvent event) => _eventController.emit(event);
 
   @override
   late final scheduledMessageManager = ScheduledMessageManager(this);
 
   @override
-  Stream<Event> on([
+  Stream<T> on<T extends ChatEvent>([
     String? eventType,
     String? eventType2,
     String? eventType3,
     String? eventType4,
   ]) {
-    if (eventType == null || eventType == EventType.any) return eventStream;
-    return eventStream.where(
-      (event) =>
-          event.type == eventType || event.type == eventType2 || event.type == eventType3 || event.type == eventType4,
-    );
+    final events = switch (eventType) {
+      null || EventType.any => eventStream,
+      _ => eventStream.where(
+        (event) =>
+            event.type == eventType || event.type == eventType2 || event.type == eventType3 || event.type == eventType4,
+      ),
+    };
+    return events.whereType<T>();
   }
 
   @override
@@ -177,13 +178,21 @@ class MockRetryQueueChannel extends Mock implements Channel {
   StreamChatClient get client => _client ??= MockStreamChatClient();
 
   @override
-  Stream<Event> on([
+  Stream<T> on<T extends ChatEvent>([
     String? eventType,
     String? eventType2,
     String? eventType3,
     String? eventType4,
   ]) {
-    return client.on(eventType, eventType2, eventType3, eventType4).where((e) => e.cid == cid);
+    return client
+        .on<T>(eventType, eventType2, eventType3, eventType4)
+        .where(
+          (e) => switch (e) {
+            HasCid(cid: final eventCid) => eventCid == cid,
+            UnknownEvent(:final rawData) => rawData['cid'] == cid,
+            _ => false,
+          },
+        );
   }
 }
 

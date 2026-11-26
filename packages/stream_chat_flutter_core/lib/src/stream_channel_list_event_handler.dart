@@ -1,8 +1,8 @@
-import 'package:stream_chat/stream_chat.dart' show Event, Member, PatternMatching;
+import 'package:stream_chat/stream_chat.dart';
 import 'stream_channel_list_controller.dart';
 
 /// Contains handlers that are called from [StreamChannelListController] for
-/// certain [Event]s.
+/// certain events.
 ///
 /// This class can be mixed in or extended to create custom overrides.
 mixin class StreamChannelListEventHandler {
@@ -12,12 +12,12 @@ mixin class StreamChannelListEventHandler {
   /// This event is fired when a channel is deleted.
   ///
   /// By default, this removes the channel from the list of channels.
-  void onChannelDeleted(Event event, StreamChannelListController controller) {
+  void onChannelDeleted(HasChannel event, StreamChannelListController controller) {
     final channels = [...controller.currentItems];
 
     final updatedChannels = channels
       ..removeWhere(
-        (it) => it.cid == (event.cid ?? event.channel?.cid),
+        (it) => it.cid == event.channel?.cid,
       );
 
     controller.channels = updatedChannels;
@@ -29,7 +29,7 @@ mixin class StreamChannelListEventHandler {
   /// This event is fired when a channel is hidden.
   ///
   /// By default, this removes the channel from the list of channels.
-  void onChannelHidden(Event event, StreamChannelListController controller) {
+  void onChannelHidden(ChannelHiddenEvent event, StreamChannelListController controller) {
     onChannelDeleted(event, controller);
   }
 
@@ -39,7 +39,7 @@ mixin class StreamChannelListEventHandler {
   /// This event is fired when a channel is truncated.
   ///
   /// By default, this refreshes the whole channel list.
-  void onChannelTruncated(Event event, StreamChannelListController controller) {
+  void onChannelTruncated(ChannelTruncatedEvent event, StreamChannelListController controller) {
     controller.refresh();
   }
 
@@ -50,8 +50,8 @@ mixin class StreamChannelListEventHandler {
   ///
   /// By default, this re-sorts the list when the updated channel is present in
   /// it, and does nothing otherwise.
-  void onChannelUpdated(Event event, StreamChannelListController controller) {
-    final cid = event.cid ?? event.channel?.cid;
+  void onChannelUpdated(ChannelUpdatedEvent event, StreamChannelListController controller) {
+    final cid = event.channel.cid;
     final channels = controller.currentItems;
     if (!channels.any((it) => it.cid == cid)) return;
     controller.channels = [...channels];
@@ -64,8 +64,8 @@ mixin class StreamChannelListEventHandler {
   ///
   /// By default, this re-sorts the list when the member's channel is present in
   /// it, and does nothing otherwise.
-  void onMemberUpdated(Event event, StreamChannelListController controller) {
-    final cid = event.cid ?? event.channel?.cid;
+  void onMemberUpdated(MemberUpdatedEvent event, StreamChannelListController controller) {
+    final cid = event.channel.cid;
     final channels = controller.currentItems;
     if (!channels.any((it) => it.cid == cid)) return;
     controller.channels = [...channels];
@@ -78,11 +78,11 @@ mixin class StreamChannelListEventHandler {
   ///
   /// By default, this adds the channel to the list of channels.
   void onChannelVisible(
-    Event event,
+    HasChannel event,
     StreamChannelListController controller,
   ) async {
-    final channelId = event.channelId;
-    final channelType = event.channelType;
+    final channelId = event.channel?.id;
+    final channelType = event.channel?.type;
 
     if (channelId == null || channelType == null) return;
 
@@ -110,7 +110,7 @@ mixin class StreamChannelListEventHandler {
   ///
   /// By default, this refreshes the whole channel list.
   void onConnectionRecovered(
-    Event event,
+    ConnectionRecoveredEvent event,
     StreamChannelListController controller,
   ) {
     controller.refresh();
@@ -122,7 +122,7 @@ mixin class StreamChannelListEventHandler {
   /// we are currently watching.
   ///
   /// By default, this moves the channel to the top of the list.
-  void onMessageNew(Event event, StreamChannelListController controller) async {
+  void onMessageNew(MessageNewEvent event, StreamChannelListController controller) async {
     final channelCid = event.cid;
     if (channelCid == null) return;
 
@@ -149,7 +149,7 @@ mixin class StreamChannelListEventHandler {
   ///
   /// By default, this adds the channel and moves it to the top of list.
   void onNotificationAddedToChannel(
-    Event event,
+    NotificationAddedToChannelEvent event,
     StreamChannelListController controller,
   ) {
     onChannelVisible(event, controller);
@@ -163,7 +163,7 @@ mixin class StreamChannelListEventHandler {
   ///
   /// By default, this adds the channel and moves it to the top of list.
   void onNotificationMessageNew(
-    Event event,
+    NotificationMessageNewEvent event,
     StreamChannelListController controller,
   ) {
     onChannelVisible(event, controller);
@@ -177,11 +177,11 @@ mixin class StreamChannelListEventHandler {
   ///
   /// By default, this removes the event channel from the list.
   void onNotificationRemovedFromChannel(
-    Event event,
+    NotificationRemovedFromChannelEvent event,
     StreamChannelListController controller,
   ) {
     final channels = [...controller.currentItems];
-    final updatedChannels = channels.where((it) => it.cid != event.channel?.cid);
+    final updatedChannels = channels.where((it) => it.cid != event.channel.cid);
     final listChanged = channels.length != updatedChannels.length;
 
     if (!listChanged) return;
@@ -199,7 +199,7 @@ mixin class StreamChannelListEventHandler {
   /// current user, as the channel membership — then re-sorts the list.
   /// Does nothing when no listed channel references the user.
   void onUserPresenceChanged(
-    Event event,
+    HasUser event,
     StreamChannelListController controller,
   ) {
     final user = event.user;

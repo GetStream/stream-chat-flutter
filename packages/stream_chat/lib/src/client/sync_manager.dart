@@ -1,18 +1,17 @@
 import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
-import 'package:stream_core/stream_core.dart' show Failure, StreamApiException, StreamLogger, Success;
+import 'package:stream_core/stream_core.dart' show Failure, Result, StreamApiException, StreamLogger, Success;
 import 'package:synchronized/synchronized.dart';
 
 import '../core/api/requests.dart';
-import '../core/api/responses.dart';
 import '../core/models/channel_state.dart';
+import '../core/models/events/chat_event.dart';
 import '../db/chat_persistence_client.dart';
-import '../ws/events/event.dart';
 import 'client.dart';
 
 /// Fetches the events missed on [cids] since [lastSyncAt].
-typedef FetchMissedEvents = Future<SyncResponse> Function(List<String> cids, DateTime lastSyncAt);
+typedef FetchMissedEvents = Future<Result<List<ChatEvent>>> Function(List<String> cids, DateTime lastSyncAt);
 
 /// Catches a client up on the state it missed while it was disconnected.
 ///
@@ -229,28 +228,27 @@ class SyncManager {
       ..i(() => 'Syncing events since $lastSyncAt for ${cappedCids.length} channels')
       ..d(() => 'Syncing channels: $cappedCids');
 
-    final List<Event> events;
-    try {
-      final res = await fetchMissedEvents(cappedCids, lastSyncAt);
-      // lastSyncAt becomes the newest event's date, so the order has to be ours.
-      events = res.events.sortedBy((it) => it.createdAt);
-    } catch (error, stk) {
-      // A 400 means the window is too old, or held too many events to return.
+    final List<ChatEvent> events;
+    switch (await fetchMissedEvents(cappedCids, lastSyncAt)) {
+      // lastSyncAt becomes the newest event's date, so we sort the events here.
+      case Success(:final data):
+        events = data.sortedBy((it) => it.createdAt);
+      // A refused request means the window is too old, or held too many events
+      // to return.
       // The two are indistinguishable, and either way the refusal is the
       // signal that local state is too far behind to reconcile — so the
       // store is dropped and repopulated rather than reconciled.
-      if (error is StreamApiException && error.statusCode == 400) {
+      case Failure(:final StreamApiException error, :final stackTrace) when error.statusCode == 400:
         _logger.w(
           () => 'Resetting local state: the server would not serve the missed events',
           error: error,
-          stackTrace: stk,
+          stackTrace: stackTrace,
         );
         return _discardRefusedWindow(cappedCids, to: clock.now());
-      }
-
       // Anything else could succeed next time, so lastSyncAt stays put.
-      _logger.w(() => 'Error syncing events', error: error, stackTrace: stk);
-      return const <String>{};
+      case Failure(:final error, :final stackTrace):
+        _logger.w(() => 'Error syncing events', error: error, stackTrace: stackTrace);
+        return const <String>{};
     }
 
     final nextSyncAt = events.lastOrNull?.createdAt ?? clock.now();

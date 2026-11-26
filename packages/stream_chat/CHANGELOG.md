@@ -106,7 +106,7 @@
 - `MemberUpdatePayload` and `MemberUpdateType` are removed; pass `set: {'pinned': true}` or `unset: ['pinned']` (and `archived`) to `updateMemberPartial`, or call `pinChannel`, `archiveChannel` and their counterparts.
 - The calls that hide, show and delete a channel, on `StreamChatClient` and `Channel`, return a `Result` with a `HideChannelResponse`, `ShowChannelResponse` or `DeleteChannelResponse` instead of throwing.
 - `StreamChatApi.channel`'s hide, show and delete methods are removed; use the `StreamChatClient` methods instead.
-- The calls that mark channels and threads read or unread, on `StreamChatClient` and `Channel`, return a `Result` instead of throwing, with a `MarkReadResponse` when marking read.
+- The calls that mark channels and threads read or unread, on `StreamChatClient` and `Channel`, return a `Result` instead of throwing, with a `MarkReadResponse` carrying the read event when marking read.
 - `StreamChatClient.markChannelsDelivered` returns a `Result<MarkDeliveredResponse>` instead of throwing, and `MarkChannelsDelivered`, the callback `ChannelDeliveryReporter` takes, returns a `Future<Result<void>>`.
 - `MessageDelivery` no longer encodes to JSON, compares by value and gains `copyWith`.
 - `StreamChatApi.channel`'s read, unread and delivery methods are removed; use the `StreamChatClient` methods instead.
@@ -186,10 +186,10 @@
 - `deleteMessage` and `deleteMessageForMe` return a `DeleteMessageResponse` instead of an `EmptyResponse`, also when `Channel` deletes a message that was never sent.
 - `SendMessageResponse` and `UpdateMessageResponse` are immutable, compare by value, and their `duration` is non-nullable; `MessageResponse` is removed.
 - `MessageApi` and `StreamChatApi.message` are removed.
-- `sendEvent` takes the event's `type`, `parentId` and `custom` data instead of an `Event`, on `StreamChatClient` and `Channel`, and returns a `Result<EventResponse>` instead of throwing.
+- `sendEvent` takes the event's `type`, `parentId` and `custom` data instead of an `Event`, on `StreamChatClient` and `Channel`, and returns a `Result<EventResponse>` carrying the sent event instead of throwing.
 - `Channel.startTyping`, `stopTyping`, `keyStroke` and `stopAIResponse` return a `Result<void>` instead of throwing.
 - `KeyStrokeHandler`'s `onStartTyping` and `onStopTyping` callbacks return a `Result<void>`, and calling the handler returns one instead of throwing.
-- `toJson` is removed from `Event`, `ChannelState`, `Read`, `Draft`, `DraftMessage` and `ChannelPushPreference`.
+- `toJson` is removed from `ChannelState`, `Read`, `Draft`, `DraftMessage` and `ChannelPushPreference`.
 - `StreamChatApi.channel.sendEvent` is removed.
 - `queryChannel`, `watchChannel` and `createChannel` on `StreamChatClient`, and `Channel.query`, `watch` and `create`, return a `Result<ChannelStateResponse>` instead of a `ChannelState`, and no longer throw.
 - `ChannelStateResponse` holds the `ChannelState` and the call's `duration`, and reports `0ms` for a state read from the offline storage.
@@ -219,6 +219,17 @@
 - A partial update, such as pinning a message, is in the new `OutgoingState.partialUpdating` state while it runs; `isUpdating` still covers it.
 - `OutgoingState`'s `when`, `whenOrNull` and `maybeWhen` pass the request's options to `sending` and `updating` and take a `partialUpdating` callback, and its `map`, `mapOrNull` and `maybeMap` take one too.
 - A custom `ChatPersistenceClient` must implement `settleInterruptedRequests`, which marks the stored messages left sending, updating or deleting as failed.
+
+- `Event` and `EventExtension.isFromUser` are removed: each event type is its own class extending `ChatEvent`, such as `MessageNewEvent`, and an event of a custom or unknown type is an `UnknownEvent`.
+- `StreamChatClient.on` and `Channel.on` take the event class as a type argument, as in `on<MessageNewEvent>()`, and emit `ChatEvent`s instead of `Event`s when given only type names.
+- `StreamChatClient.eventStream` is a `Stream<ChatEvent>` instead of a `Stream<Event>`, and `handleEvent` takes a `ChatEvent`.
+- `ChannelClientState.typingEvents` and `typingEventsStream` map each typing user to a `TypingStartEvent` instead of an `Event`.
+- An event's `extraData` is replaced by `custom`, which holds only the custom data the event was sent with, so keys such as `team`, `clear_history` and `thread_id` no longer appear in it.
+- `AITypingState` is an extension type over `String` instead of an enum, and keeps a state it has no constant for instead of reading it as `idle`.
+- `AITypingState.checkingSources` no longer covers `AI_STATE_EXTERNAL_SOURCES`, which is the new `checkingExternalSources`; `isCheckingSources` matches both.
+- A custom `ChatPersistenceClient`'s `updateConnectionInfo` takes a `HealthCheckEvent` instead of an `Event`, and `getConnectionInfo` returns an `OwnUser?` instead of an `Event?`.
+- `GeneralApi`, `StreamChatApi.general` and `SyncResponse` are removed; `StreamChatClient.sync` is unchanged.
+- The WebSocket connects to `/api/v2/connect` instead of `/connect`.
 
 🐞 Fixed
 
@@ -250,6 +261,8 @@
 - `queryMembers` with a `createdAt` bound in local time, or with a filter on a date, no longer fails.
 - A typing start that fails after a later key stroke no longer keeps that key stroke's typing stop from being sent.
 
+- A `user.updated` event about the current user no longer clears their `blockedUserIds`, `shadowBanned` and `banExpires`.
+
 🔄 Changed
 
 - A channel in an event reports a null `lastMessageAt` where it had no last message, instead of a date in year 1.
@@ -257,6 +270,11 @@
 - `SystemEnvironment` is a different type with the same constructor and fields, so existing usage keeps working.
 - Most SDK logging moved off `info`. It now carries only client and connection lifecycle — client created and disposed, user set and disconnected, connection opening, established and closing — and per-operation, per-event and per-timer records are `debug` or `verbose`. Raising the priority to `info` to debug a problem no longer buries it under a health check every 20 seconds and a line per WebSocket frame.
 - Deleting a bounced or unsent message now emits a local `message.deleted` with `hardDelete: true`. The server never stored these messages.
+- The client calls `ChatPersistenceClient.updateConnectionInfo` only when a connection opens, no longer on every health check.
+- `getUnreadCount` updates the current user's unread counts without emitting an event.
+- Users carried by events no longer include `shadowBanned` or `banExpires`, nor `invisible` outside `user.updated`, so a user in `ClientState.users` loses them when an event about that user arrives.
+- `callLevel` on the current user's `pushPreferences` is no longer filled when connecting.
+- `UnknownEvent` carries only its `type`, `createdAt`, `custom` and `rawData`, and no longer updates `ClientState.users`, the unread counts or a channel's counts; its channel, user and counts are in `rawData`.
 
 ✅ Added
 
@@ -281,16 +299,17 @@
 - Added a `prev` cursor to `QueryThreadsResponse` and `QueryDraftsResponse`.
 - Added a `prev` argument to `queryPolls` and `queryPollVotes`, and a `prev` cursor on their responses, for paging backwards.
 - Added a `prev` cursor to `QueryReactionsResponse`.
+- Added the `HasCid`, `HasUser`, `HasChannel`, `HasMessage`, `HasPollVote`, `HasOwnUser`, `HasUnreadCounts`, `HasUnreadThreadCount` and `HasChannelCounts` event mixins, so `on<HasMessage>()` delivers every event that carries a message.
+- Added `EventType.notificationChannelMutesUpdated`.
 
 🔒 Security
 
-- The WebSocket connect and reconnect URIs are logged with the user token redacted. They carried it in full, so an app that raised the log priority wrote a usable token to the console and to any handler it had installed. The token now travels in query parameters the socket never logs, so nothing has to redact it.
+- The user token is no longer in the WebSocket's connect URL, so it no longer appears in logged connect URLs, in proxy logs or in the error a failed connection raises.
 
 🔄 Internal / Non-breaking
 
 - Added the OpenAPI-generated v2 client under `lib/open_api/`, along with the `melos run gen:openapi` tooling that produces it. No API uses it yet.
-- The WebSocket is now `stream_core`'s `StreamWebSocketClient`. `Event` extends `WsEvent`, the two frames the socket acts on rather than publishes — the health check and the connection error — are their own types under `lib/src/ws/events/`, and `EventType.connectionError` is added. The hand-rolled socket, its reconnection monitor and its timer helper are removed, along with the `web_socket_channel` dependency.
-- The connect URL no longer repeats the user token inside its `json` payload. The server reads the token from the `authorization` query parameter and never looked at `user_token`.
+- The WebSocket is now `stream_core`'s `StreamWebSocketClient`, and `EventType.connectionError` is added. The hand-rolled socket, its reconnection monitor and its timer helper are removed, along with the `web_socket_channel` dependency.
 - Replaced the internal `InFlightCache` and `SystemEnvironmentManager` with shared implementations.
 
 ## Upcoming

@@ -1,63 +1,61 @@
-import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:stream_core/stream_core.dart';
 
+import '../../../open_api/models.dart' as api;
 import '../../core/models/own_user.dart';
-import '../../event_type.dart';
-import 'event.dart';
+import '../../repository/mapper/event_users_mapper.dart';
 
-part 'events.freezed.dart';
-part 'events.g.dart';
-
-/// A WebSocket health check event for monitoring connection status.
+/// A frame that keeps a connection alive, and the one that opens it.
 ///
-/// Represents periodic health check messages sent by the Stream Chat WebSocket service to verify
-/// connection stability and provide real-time connection monitoring. Contains connection metadata
-/// and, on the message that opens the session, the signed-in user.
-///
-/// **Note:** This event is not specified in the OpenAPI spec, so we define it manually.
-@Freezed(copyWith: false)
-@JsonSerializable(createToJson: false)
-class HealthCheckEvent extends Event with _$HealthCheckEvent {
-  /// Creates a new [HealthCheckEvent] instance.
-  HealthCheckEvent({
-    required this.connectionId,
-    super.createdAt,
-    super.me,
-    super.type = EventType.healthCheck,
-  }) : super(connectionId: connectionId, isLocal: false);
+/// The frame that opens a connection names the signed-in user in [me]; the
+/// periodic ones that keep it alive name nobody.
+class HealthCheckFrame extends WsEvent {
+  /// Creates a [HealthCheckFrame] for the connection [connectionId].
+  const HealthCheckFrame({required this.connectionId, this.createdAt, this.me});
 
-  /// Creates a [HealthCheckEvent] from JSON data.
-  factory HealthCheckEvent.fromJson(Map<String, dynamic> json) => _$HealthCheckEventFromJson(json);
+  /// Creates a [HealthCheckFrame] from a frame received on the connection.
+  ///
+  /// Reads only what it needs, so a frame that lacks a value nothing reads
+  /// still keeps the connection alive.
+  factory HealthCheckFrame.fromJson(Map<String, Object?> json) {
+    return HealthCheckFrame(
+      connectionId: json['connection_id']! as String,
+      createdAt: switch (json['created_at']) {
+        final Object createdAt => const StreamDateTimeConverter().fromJson(createdAt),
+        null => null,
+      },
+      me: switch (json['me']) {
+        final Map<String, Object?> me => api.OwnUserResponse.fromJson(me).toModel(),
+        _ => null,
+      },
+    );
+  }
 
-  /// The unique identifier for this WebSocket connection.
-  @override
+  /// The id the connection is identified by while it stays open.
   final String connectionId;
 
-  /// Health check information for this connection.
+  /// When the frame was sent.
+  final DateTime? createdAt;
+
+  /// The signed-in user, on the frame that opens the connection.
+  final OwnUser? me;
+
   @override
   HealthCheckInfo get healthCheckInfo => HealthCheckInfo(connectionId: connectionId);
 }
 
-/// A WebSocket event sent when there is an error in the connection.
-///
-/// Represents connection errors and failures that occur during WebSocket communication with the
-/// Stream Chat service. Contains the error describing why the connection could not be served.
-///
-/// **Note:** This event is not specified in the OpenAPI spec, so we define it manually.
-@Freezed(copyWith: false)
-@JsonSerializable(createToJson: false)
-class ConnectionErrorEvent extends Event with _$ConnectionErrorEvent {
-  /// Creates a new [ConnectionErrorEvent] instance.
-  ConnectionErrorEvent({
-    required this.error,
-    super.createdAt,
-    super.type = EventType.connectionError,
-  }) : super(isLocal: false);
+/// A frame refusing or closing a connection with an error.
+class ConnectionErrorFrame extends WsEvent {
+  /// Creates a [ConnectionErrorFrame] reporting [error].
+  const ConnectionErrorFrame({required this.error});
 
-  /// Creates a [ConnectionErrorEvent] from JSON data.
-  factory ConnectionErrorEvent.fromJson(Map<String, dynamic> json) => _$ConnectionErrorEventFromJson(json);
+  /// Creates a [ConnectionErrorFrame] from a frame received on the connection.
+  factory ConnectionErrorFrame.fromJson(Map<String, Object?> json) {
+    return ConnectionErrorFrame(
+      error: StreamApiError.fromJson(json['error']! as Map<String, Object?>),
+    );
+  }
 
-  /// The error information describing what went wrong.
+  /// Why the connection was refused or closed.
   @override
   final StreamApiError error;
 }

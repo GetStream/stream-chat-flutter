@@ -1,6 +1,5 @@
 /// @docImport '../../client/client.dart';
-/// @docImport '../../event_type.dart';
-/// @docImport '../../ws/events/event.dart';
+/// @docImport 'events/scheduled_message_events.dart';
 library;
 
 import 'package:clock/clock.dart';
@@ -61,8 +60,8 @@ final class ScheduledMessage extends Equatable {
 
   /// The ID of this scheduled message.
   ///
-  /// The sent message gets an ID of its own, given by [Event.messageId] on
-  /// [EventType.scheduledMessageSent] when it is known.
+  /// The sent message gets an ID of its own, given by
+  /// [ScheduledMessageSentEvent.messageId] when it is known.
   final String id;
 
   /// The ID of the channel this message is sent to, in the form `type:id`.

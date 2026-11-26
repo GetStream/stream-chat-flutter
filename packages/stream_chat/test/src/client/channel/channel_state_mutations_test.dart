@@ -16,7 +16,7 @@ void main() {
   late MockChannelClientState state;
   late ChannelStateMutations mutations;
 
-  late List<(User, Event)> upsertTypingEventCalls;
+  late List<(User, TypingStartEvent)> upsertTypingEventCalls;
   late List<User> removeTypingEventCalls;
   late List<(User, int?)> removeWatcherCalls;
   late List<User> removeMemberCalls;
@@ -76,7 +76,7 @@ void main() {
 
   group('typing', () {
     test('onTypingStart records the typing event for the user', () {
-      final event = Event(type: EventType.typingStart, user: otherUser);
+      final event = TypingStartEvent(user: otherUser);
 
       mutations.onTypingStart(otherUser, event);
 
@@ -102,8 +102,7 @@ void main() {
 
     test("onMessageNew clears its author's typing in the same channel", () {
       final sentAt = DateTime.utc(2026, 10, 13, 12);
-      final typing = Event(
-        type: EventType.typingStart,
+      final typing = TypingStartEvent(
         user: otherUser,
         createdAt: sentAt.subtract(const Duration(seconds: 2)),
       );
@@ -115,7 +114,7 @@ void main() {
     });
 
     test("onMessageNew keeps its author's typing in a thread", () {
-      final threadTyping = Event(type: EventType.typingStart, user: otherUser, parentId: 'parent-id');
+      final threadTyping = TypingStartEvent(user: otherUser, parentId: 'parent-id');
       when(() => state.typingEvents).thenReturn({otherUser: threadTyping});
 
       mutations.onMessageNew(message);
@@ -126,8 +125,7 @@ void main() {
     test("onMessageNew keeps its author's typing that started after the message", () {
       final sentAt = DateTime.utc(2026, 10, 13, 12);
       final sentMessage = message.copyWith(createdAt: sentAt);
-      final nextTyping = Event(
-        type: EventType.typingStart,
+      final nextTyping = TypingStartEvent(
         user: otherUser,
         createdAt: sentAt.add(const Duration(milliseconds: 200)),
       );
@@ -140,7 +138,7 @@ void main() {
 
     test('onMessageNew keeps other users typing', () {
       final someoneElse = User(id: 'someone-else');
-      when(() => state.typingEvents).thenReturn({someoneElse: Event(type: EventType.typingStart, user: someoneElse)});
+      when(() => state.typingEvents).thenReturn({someoneElse: TypingStartEvent(user: someoneElse)});
 
       mutations.onMessageNew(message);
 
@@ -193,8 +191,7 @@ void main() {
 
     test("onMessageUpdated clears the editor's typing in the same channel", () {
       final editedAt = DateTime.utc(2026, 10, 13, 12);
-      final typing = Event(
-        type: EventType.typingStart,
+      final typing = TypingStartEvent(
         user: otherUser,
         createdAt: editedAt.subtract(const Duration(seconds: 2)),
       );
@@ -207,8 +204,7 @@ void main() {
 
     test("onMessageUpdated keeps the editor's typing when the text was not edited", () {
       final updatedAt = DateTime.utc(2026, 10, 13, 12);
-      final typing = Event(
-        type: EventType.typingStart,
+      final typing = TypingStartEvent(
         user: otherUser,
         createdAt: updatedAt.subtract(const Duration(seconds: 2)),
       );
@@ -221,8 +217,7 @@ void main() {
 
     test("onMessageUpdated keeps the editor's typing that started after the edit", () {
       final editedAt = DateTime.utc(2026, 10, 13, 12);
-      final nextTyping = Event(
-        type: EventType.typingStart,
+      final nextTyping = TypingStartEvent(
         user: otherUser,
         createdAt: editedAt.add(const Duration(milliseconds: 200)),
       );
@@ -393,14 +388,6 @@ void main() {
       when(() => state.messages).thenReturn([message]);
       when(() => state.threads).thenReturn(const {});
     }
-
-    test('onPollCreated adds the poll message', () {
-      final message = Message(id: 'poll-message-id', poll: createPoll());
-
-      mutations.onPollCreated(message);
-
-      verify(() => state.addNewMessage(message)).called(1);
-    });
 
     test('onPollUpdated applies the poll preserving known answers and votes', () {
       final answer = createVote('answer-1');

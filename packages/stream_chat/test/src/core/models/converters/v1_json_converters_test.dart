@@ -7,7 +7,6 @@ import 'package:stream_chat/src/core/models/chat_preferences.dart';
 import 'package:stream_chat/src/core/models/command.dart';
 import 'package:stream_chat/src/core/models/converters/v1_json_converters.dart';
 import 'package:stream_chat/src/core/models/device.dart';
-import 'package:stream_chat/src/core/models/draft.dart';
 import 'package:stream_chat/src/core/models/location.dart';
 import 'package:stream_chat/src/core/models/message.dart';
 import 'package:stream_chat/src/core/models/message_reminder.dart';
@@ -16,59 +15,52 @@ import 'package:stream_chat/src/core/models/push_level.dart';
 import 'package:stream_chat/src/core/models/push_provider.dart';
 import 'package:stream_chat/src/core/models/reaction.dart';
 import 'package:stream_chat/src/core/models/reaction_group.dart';
-import 'package:stream_chat/src/core/models/read.dart';
-import 'package:stream_chat/src/core/models/thread.dart';
-import 'package:stream_chat/src/core/models/thread_participant.dart';
 import 'package:stream_chat/src/core/models/user.dart';
 import 'package:stream_chat/src/core/models/user_group.dart';
 import 'package:stream_chat/src/core/models/user_group_member.dart';
-import 'package:stream_chat/src/ws/events/event.dart';
 import 'package:test/test.dart';
 
 import '../../../utils.dart';
 
 void main() {
-  test('Event.fromJson reads every channel config field from its v1 keys', () {
-    final channel = Event.fromJson(const {
-      'type': 'channel.updated',
-      'channel': {
-        'id': 'general',
-        'type': 'messaging',
-        'cid': 'messaging:general',
-        'config': {
-          'automod': 'simple',
-          'commands': [
-            {'name': 'giphy', 'description': 'Post a random gif', 'args': '[text]', 'set': 'fun_set'},
-          ],
-          'connect_events': true,
-          'created_at': '2026-01-01T00:00:00Z',
-          'updated_at': '2026-02-01T00:00:00Z',
-          'max_message_length': 5000,
-          'message_retention': 'infinite',
-          'mutes': true,
-          'reactions': true,
-          'read_events': true,
-          'replies': true,
-          'search': true,
-          'polls': true,
-          'push_level': 'direct_mentions',
-          'push_notifications': false,
-          'chat_preferences': {'direct_mentions': 'all'},
-          'typing_events': true,
-          'uploads': true,
-          'url_enrichment': true,
-          'skip_last_msg_update_for_system_msgs': true,
-          'user_message_reminders': true,
-          'mark_messages_pending': true,
-          'delivery_events': true,
-          'shared_locations': true,
-          'scheduled_messages_max_per_channel': 10,
-          'scheduled_messages_max_per_user': 100,
-          'scheduled_messages_min_lead_time_seconds': 60,
-          'scheduled_messages_max_lead_time_seconds': 10368000,
-        },
+  test('ChannelMute.fromJson reads every channel config field from its v1 keys', () {
+    final channel = _mutedChannelFromJson(const {
+      'id': 'general',
+      'type': 'messaging',
+      'cid': 'messaging:general',
+      'config': {
+        'automod': 'simple',
+        'commands': [
+          {'name': 'giphy', 'description': 'Post a random gif', 'args': '[text]', 'set': 'fun_set'},
+        ],
+        'connect_events': true,
+        'created_at': '2026-01-01T00:00:00Z',
+        'updated_at': '2026-02-01T00:00:00Z',
+        'max_message_length': 5000,
+        'message_retention': 'infinite',
+        'mutes': true,
+        'reactions': true,
+        'read_events': true,
+        'replies': true,
+        'search': true,
+        'polls': true,
+        'push_level': 'direct_mentions',
+        'push_notifications': false,
+        'chat_preferences': {'direct_mentions': 'all'},
+        'typing_events': true,
+        'uploads': true,
+        'url_enrichment': true,
+        'skip_last_msg_update_for_system_msgs': true,
+        'user_message_reminders': true,
+        'mark_messages_pending': true,
+        'delivery_events': true,
+        'shared_locations': true,
+        'scheduled_messages_max_per_channel': 10,
+        'scheduled_messages_max_per_user': 100,
+        'scheduled_messages_min_lead_time_seconds': 60,
+        'scheduled_messages_max_lead_time_seconds': 10368000,
       },
-    }).channel!;
+    });
 
     final config = channel.config;
     expect(config.automod, 'simple');
@@ -102,16 +94,13 @@ void main() {
     expect(config.scheduledMessagesMaxLeadTime, const Duration(days: 120));
   });
 
-  test('Event.fromJson reads a channel config without its optional keys with the defaults', () {
-    final config = Event.fromJson(const {
-      'type': 'channel.updated',
-      'channel': {
-        'id': 'general',
-        'type': 'messaging',
-        'cid': 'messaging:general',
-        'config': <String, Object?>{},
-      },
-    }).channel!.config;
+  test('ChannelMute.fromJson reads a channel config without its optional keys with the defaults', () {
+    final config = _mutedChannelFromJson(const {
+      'id': 'general',
+      'type': 'messaging',
+      'cid': 'messaging:general',
+      'config': <String, Object?>{},
+    }).config;
 
     expect(config.automod, 'flag');
     expect(config.commands, isEmpty);
@@ -125,11 +114,8 @@ void main() {
     expect(config.scheduledMessagesMaxLeadTime, isNull);
   });
 
-  test('Event.fromJson reads a channel without a config with the default config', () {
-    final channel = Event.fromJson(const {
-      'type': 'channel.updated',
-      'channel': {'id': 'general', 'type': 'messaging', 'cid': 'messaging:general'},
-    }).channel!;
+  test('ChannelMute.fromJson reads a channel without a config with the default config', () {
+    final channel = _mutedChannelFromJson(const {'id': 'general', 'type': 'messaging', 'cid': 'messaging:general'});
 
     // A default config is stamped with the time it is created.
     final createdAt = DateTime.utc(2026);
@@ -139,36 +125,40 @@ void main() {
     );
   });
 
-  test('Event.fromJson reads every member field from its v1 keys, with custom data in custom and without role', () {
-    final event = Event.fromJson(const {
-      'type': 'member.updated',
-      'member': {
-        'user': {'id': 'mo', 'role': 'user', 'name': 'Mo'},
-        'user_id': 'mo',
-        'role': 'user',
-        'channel_role': 'channel_member',
-        'invited': true,
-        'invite_accepted_at': '2020-01-02T00:00:00Z',
-        'invite_rejected_at': '2020-01-03T00:00:00Z',
-        'is_moderator': true,
-        'banned': true,
-        'ban_expires': '2020-01-04T00:00:00Z',
-        'shadow_banned': true,
-        'pinned_at': '2020-01-05T00:00:00Z',
-        'archived_at': '2020-01-06T00:00:00Z',
-        'created_at': '2020-01-07T00:00:00Z',
-        'updated_at': '2020-01-08T00:00:00Z',
-        'deleted_messages': ['msg-1', 'msg-2'],
-        'notifications_muted': true,
-        'status': 'member',
-        'ban_from_future_channels': true,
-        'future_channel_ban_expires': '2020-01-09T00:00:00Z',
-        'deleted_at': '2020-01-10T00:00:00Z',
-        'nickname': 'Momo',
-      },
+  test('ChannelMute.fromJson reads every member field from its v1 keys, with custom data in custom, without role', () {
+    final channel = _mutedChannelFromJson(const {
+      'id': 'general',
+      'type': 'messaging',
+      'cid': 'messaging:general',
+      'members': [
+        {
+          'user': {'id': 'mo', 'role': 'user', 'name': 'Mo'},
+          'user_id': 'mo',
+          'role': 'user',
+          'channel_role': 'channel_member',
+          'invited': true,
+          'invite_accepted_at': '2020-01-02T00:00:00Z',
+          'invite_rejected_at': '2020-01-03T00:00:00Z',
+          'is_moderator': true,
+          'banned': true,
+          'ban_expires': '2020-01-04T00:00:00Z',
+          'shadow_banned': true,
+          'pinned_at': '2020-01-05T00:00:00Z',
+          'archived_at': '2020-01-06T00:00:00Z',
+          'created_at': '2020-01-07T00:00:00Z',
+          'updated_at': '2020-01-08T00:00:00Z',
+          'deleted_messages': ['msg-1', 'msg-2'],
+          'notifications_muted': true,
+          'status': 'member',
+          'ban_from_future_channels': true,
+          'future_channel_ban_expires': '2020-01-09T00:00:00Z',
+          'deleted_at': '2020-01-10T00:00:00Z',
+          'nickname': 'Momo',
+        },
+      ],
     });
 
-    final member = event.member!;
+    final member = channel.members!.single;
     expect(member.user?.id, 'mo');
     expect(member.userId, 'mo');
     expect(member.channelRole, 'channel_member');
@@ -192,19 +182,16 @@ void main() {
     expect(member.custom, {'nickname': 'Momo'});
   });
 
-  test('Event.fromJson reads the channel members from their v1 keys', () {
-    final channel = Event.fromJson(const {
-      'type': 'channel.updated',
-      'channel': {
-        'id': 'general',
-        'type': 'messaging',
-        'cid': 'messaging:general',
-        'members': [
-          {'user_id': 'mo', 'channel_role': 'channel_moderator'},
-          {'user_id': 'jo', 'channel_role': 'channel_member'},
-        ],
-      },
-    }).channel!;
+  test('ChannelMute.fromJson reads the channel members from their v1 keys', () {
+    final channel = _mutedChannelFromJson(const {
+      'id': 'general',
+      'type': 'messaging',
+      'cid': 'messaging:general',
+      'members': [
+        {'user_id': 'mo', 'channel_role': 'channel_moderator'},
+        {'user_id': 'jo', 'channel_role': 'channel_member'},
+      ],
+    });
 
     expect(channel.members?.map((it) => (it.userId, it.channelRole)), [
       ('mo', 'channel_moderator'),
@@ -212,8 +199,8 @@ void main() {
     ]);
   });
 
-  test('Event.fromJson reads a v1 channel with its custom data at the root', () {
-    final channel = Event.fromJson({'type': 'channel.updated', 'channel': jsonFixture('channel.json')}).channel!;
+  test('ChannelMute.fromJson reads a v1 channel with its custom data at the root', () {
+    final channel = _mutedChannelFromJson(jsonFixture('channel.json'));
 
     expect(channel.activeMemberCount, 3);
     expect(channel.custom, {
@@ -222,49 +209,43 @@ void main() {
     });
   });
 
-  test('Event.fromJson reads a zero last_message_at as no date', () {
-    final channel = Event.fromJson(const {
-      'type': 'channel.truncated',
-      'channel': {
-        'id': 'general',
-        'type': 'messaging',
-        'cid': 'messaging:general',
-        'last_message_at': '0001-01-01T00:00:00Z',
-      },
-    }).channel!;
+  test('ChannelMute.fromJson reads a zero last_message_at as no date', () {
+    final channel = _mutedChannelFromJson(const {
+      'id': 'general',
+      'type': 'messaging',
+      'cid': 'messaging:general',
+      'last_message_at': '0001-01-01T00:00:00Z',
+    });
 
     expect(channel.lastMessageAt, isNull);
   });
 
-  test('Event.fromJson reads every channel field from its v1 keys', () {
-    final channel = Event.fromJson(const {
-      'type': 'channel.updated',
-      'channel': {
-        'id': 'general',
-        'type': 'messaging',
-        'cid': 'messaging:general',
-        'own_capabilities': ['send-message', 'read-events'],
-        'created_by': {'id': 'creator'},
-        'frozen': true,
-        'last_message_at': '2026-03-04T00:00:00Z',
-        'created_at': '2026-01-01T00:00:00Z',
-        'updated_at': '2026-02-01T00:00:00Z',
-        'deleted_at': '2026-03-01T00:00:00Z',
-        'member_count': 2,
-        'message_count': 42,
-        'team': 'blue',
-        'cooldown': 30,
-        'filter_tags': ['support'],
-        'disabled': true,
-        'hidden': true,
-        'muted': true,
-        'blocked': true,
-        'truncated_at': '2026-02-02T00:00:00Z',
-        'truncated_by': {'id': 'truncator', 'name': 'Truncator'},
-        'auto_translation_enabled': true,
-        'auto_translation_language': 'fr',
-      },
-    }).channel!;
+  test('ChannelMute.fromJson reads every channel field from its v1 keys', () {
+    final channel = _mutedChannelFromJson(const {
+      'id': 'general',
+      'type': 'messaging',
+      'cid': 'messaging:general',
+      'own_capabilities': ['send-message', 'read-events'],
+      'created_by': {'id': 'creator'},
+      'frozen': true,
+      'last_message_at': '2026-03-04T00:00:00Z',
+      'created_at': '2026-01-01T00:00:00Z',
+      'updated_at': '2026-02-01T00:00:00Z',
+      'deleted_at': '2026-03-01T00:00:00Z',
+      'member_count': 2,
+      'message_count': 42,
+      'team': 'blue',
+      'cooldown': 30,
+      'filter_tags': ['support'],
+      'disabled': true,
+      'hidden': true,
+      'muted': true,
+      'blocked': true,
+      'truncated_at': '2026-02-02T00:00:00Z',
+      'truncated_by': {'id': 'truncator', 'name': 'Truncator'},
+      'auto_translation_enabled': true,
+      'auto_translation_language': 'fr',
+    });
 
     expect(channel.ownCapabilities, [ChannelCapability.sendMessage, ChannelCapability.readEvents]);
     expect(channel.createdBy?.id, 'creator');
@@ -290,18 +271,15 @@ void main() {
     expect(channel.custom, isEmpty);
   });
 
-  test('Event.fromJson leaves the channel fields the model does not carry out of its custom data', () {
-    final channel = Event.fromJson(const {
-      'type': 'channel.updated',
-      'channel': {
-        'id': 'general',
-        'type': 'messaging',
-        'cid': 'messaging:general',
-        'hide_messages_before': '0001-01-01T00:00:00Z',
-        'mute_expires_at': '2026-01-01T00:00:00Z',
-        'color': 'red',
-      },
-    }).channel!;
+  test('ChannelMute.fromJson leaves the channel fields the model does not carry out of its custom data', () {
+    final channel = _mutedChannelFromJson(const {
+      'id': 'general',
+      'type': 'messaging',
+      'cid': 'messaging:general',
+      'hide_messages_before': '0001-01-01T00:00:00Z',
+      'mute_expires_at': '2026-01-01T00:00:00Z',
+      'color': 'red',
+    });
 
     expect(channel.custom, {'color': 'red'});
   });
@@ -607,16 +585,18 @@ void main() {
     expect(Attachment.fromJson(attachment.toJson()).actions, attachment.actions);
   });
 
-  test('Event.fromJson reads every reaction field from its v1 keys, with the rest in custom data', () {
+  test('Message.fromJson reads every reaction field from its v1 keys, with the rest in custom data', () {
     final json = jsonFixture('reaction.json');
 
-    final event = Event.fromJson({
-      'type': 'reaction.new',
-      'reaction': {...json, 'bananas': 'yes'},
+    final message = Message.fromJson({
+      'id': 'message-id',
+      'latest_reactions': [
+        {...json, 'bananas': 'yes'},
+      ],
     });
 
     expect(
-      event.reaction,
+      message.latestReactions?.single,
       Reaction(
         messageId: '76cd8c82-b557-4e48-9d12-87995d3a0e04',
         type: 'wow',
@@ -630,17 +610,19 @@ void main() {
     );
   });
 
-  test('Event.fromJson reads a reaction without a score as scoring one', () {
-    final event = Event.fromJson(const {
-      'type': 'reaction.new',
-      'reaction': {
-        'type': 'like',
-        'created_at': '2020-01-28T22:17:31.108742Z',
-        'updated_at': '2020-01-28T22:17:31.108742Z',
-      },
+  test('Message.fromJson reads a reaction without a score as scoring one', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
+      'latest_reactions': [
+        {
+          'type': 'like',
+          'created_at': '2020-01-28T22:17:31.108742Z',
+          'updated_at': '2020-01-28T22:17:31.108742Z',
+        },
+      ],
     });
 
-    expect(event.reaction!.score, 1);
+    expect(message.latestReactions!.single.score, 1);
   });
 
   test('Message.fromJson reads the latest and own reactions', () {
@@ -783,9 +765,9 @@ void main() {
     );
   });
 
-  test('Event.fromJson reads reminder dates sent as epoch nanoseconds', () {
-    final event = Event.fromJson(const {
-      'type': 'reminder.created',
+  test('Message.fromJson reads reminder dates sent as epoch nanoseconds', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
       'reminder': {
         'channel_cid': 'messaging:general',
         'message_id': 'message-id',
@@ -796,14 +778,14 @@ void main() {
       },
     });
 
-    expect(event.reminder?.remindAt, DateTime.utc(2024, 6, 15, 14, 30));
-    expect(event.reminder?.createdAt, DateTime.utc(2024, 6, 1, 10));
-    expect(event.reminder?.updatedAt, DateTime.utc(2024, 6, 2, 10));
+    expect(message.reminder?.remindAt, DateTime.utc(2024, 6, 15, 14, 30));
+    expect(message.reminder?.createdAt, DateTime.utc(2024, 6, 1, 10));
+    expect(message.reminder?.updatedAt, DateTime.utc(2024, 6, 2, 10));
   });
 
-  test('Event.fromJson reads a reminder sent without a due date', () {
-    final event = Event.fromJson(const {
-      'type': 'reminder.updated',
+  test('Message.fromJson reads a reminder sent without a due date', () {
+    final message = Message.fromJson(const {
+      'id': 'message-id',
       'reminder': {
         'channel_cid': 'messaging:general',
         'message_id': 'message-id',
@@ -813,146 +795,13 @@ void main() {
       },
     });
 
-    expect(event.reminder?.remindAt, isNull);
-  });
-
-  test('Event.fromJson reads every thread field from its v1 keys, with custom data in custom', () {
-    const channelJson = {'id': 'general', 'type': 'messaging', 'cid': 'messaging:general'};
-    const parentJson = {'id': 'parent-id', 'text': 'Where do we meet?'};
-    const replyJson = {'id': 'reply-id', 'text': 'At the station', 'parent_id': 'parent-id'};
-    const creatorJson = {'id': 'creator-id'};
-    const participantJson = {'id': 'participant-id'};
-    const readerJson = {'id': 'reader-id'};
-    const draftJson = {
-      'channel_cid': 'messaging:general',
-      'created_at': '2024-06-05T10:00:00.000Z',
-      'parent_id': 'parent-id',
-      'message': {'id': 'draft-id', 'text': 'Maybe at noon'},
-    };
-
-    final event = Event.fromJson(const {
-      'type': 'thread.updated',
-      'thread': {
-        'active_participant_count': 2,
-        'channel_cid': 'messaging:general',
-        'channel': channelJson,
-        'created_at': '2024-06-01T10:00:00.000Z',
-        'updated_at': '2024-06-02T10:00:00.000Z',
-        'deleted_at': '2024-06-03T10:00:00.000Z',
-        'created_by_user_id': 'creator-id',
-        'created_by': creatorJson,
-        'title': 'Meeting point',
-        'parent_message_id': 'parent-id',
-        'parent_message': parentJson,
-        'reply_count': 4,
-        'participant_count': 3,
-        'thread_participants': [
-          {
-            'channel_cid': 'messaging:general',
-            'created_at': '2024-06-01T11:00:00.000Z',
-            'last_read_at': '2024-06-02T11:00:00.000Z',
-            'last_thread_message_at': '2024-06-02T12:00:00.000Z',
-            'left_thread_at': '2024-06-03T12:00:00.000Z',
-            'thread_id': 'parent-id',
-            'user_id': 'participant-id',
-            'user': participantJson,
-          },
-        ],
-        'last_message_at': '2024-06-02T09:00:00.000Z',
-        'latest_replies': [replyJson],
-        'read': [
-          {
-            'user': readerJson,
-            'last_read': '2024-06-02T13:00:00.000Z',
-            'unread_messages': 1,
-            'last_read_message_id': 'reply-id',
-          },
-        ],
-        'draft': draftJson,
-        'priority': 'high',
-      },
-    });
-
-    final thread = event.thread!;
-    // A channel compares by identity, so it is checked on its own.
-    expect(thread.channel?.cid, 'messaging:general');
-    expect(
-      thread,
-      Thread(
-        activeParticipantCount: 2,
-        channelCid: 'messaging:general',
-        channel: thread.channel,
-        createdAt: DateTime.utc(2024, 6, 1, 10),
-        updatedAt: DateTime.utc(2024, 6, 2, 10),
-        deletedAt: DateTime.utc(2024, 6, 3, 10),
-        createdByUserId: 'creator-id',
-        createdBy: User.fromJson(const {...creatorJson}),
-        title: 'Meeting point',
-        parentMessageId: 'parent-id',
-        parentMessage: Message.fromJson(const {...parentJson}),
-        replyCount: 4,
-        participantCount: 3,
-        threadParticipants: [
-          ThreadParticipant(
-            channelCid: 'messaging:general',
-            createdAt: DateTime.utc(2024, 6, 1, 11),
-            lastReadAt: DateTime.utc(2024, 6, 2, 11),
-            lastThreadMessageAt: DateTime.utc(2024, 6, 2, 12),
-            leftThreadAt: DateTime.utc(2024, 6, 3, 12),
-            threadId: 'parent-id',
-            userId: 'participant-id',
-            user: User.fromJson(const {...participantJson}),
-          ),
-        ],
-        lastMessageAt: DateTime.utc(2024, 6, 2, 9),
-        latestReplies: [
-          Message.fromJson(const {...replyJson}),
-        ],
-        read: [
-          Read(
-            user: User.fromJson(const {...readerJson}),
-            lastRead: DateTime.utc(2024, 6, 2, 13),
-            unreadMessages: 1,
-            lastReadMessageId: 'reply-id',
-          ),
-        ],
-        draft: Draft.fromJson(const {...draftJson}),
-        custom: const {'priority': 'high'},
-      ),
-    );
-  });
-
-  test('Event.fromJson reads a thread sent without participants, replies, reads or a draft', () {
-    final event = Event.fromJson(const {
-      'type': 'message.read',
-      'thread': {
-        'active_participant_count': 0,
-        'channel_cid': 'messaging:general',
-        'created_at': '2024-06-01T10:00:00.000Z',
-        'updated_at': '2024-06-02T10:00:00.000Z',
-        'created_by_user_id': 'creator-id',
-        'title': '',
-        'parent_message_id': 'parent-id',
-        'reply_count': 0,
-        'participant_count': 1,
-        'last_message_at': '2024-06-02T09:00:00.000Z',
-      },
-    });
-
-    expect(
-      event.thread,
-      Thread(
-        activeParticipantCount: 0,
-        channelCid: 'messaging:general',
-        createdAt: DateTime.utc(2024, 6, 1, 10),
-        updatedAt: DateTime.utc(2024, 6, 2, 10),
-        createdByUserId: 'creator-id',
-        title: '',
-        parentMessageId: 'parent-id',
-        replyCount: 0,
-        participantCount: 1,
-        lastMessageAt: DateTime.utc(2024, 6, 2, 9),
-      ),
-    );
+    expect(message.reminder?.remindAt, isNull);
   });
 }
+
+ChannelModel _mutedChannelFromJson(Map<String, Object?> channel) => ChannelMute.fromJson({
+  'user': {'id': 'mo'},
+  'channel': channel,
+  'created_at': '2026-01-01T00:00:00Z',
+  'updated_at': '2026-01-01T00:00:00Z',
+}).channel;

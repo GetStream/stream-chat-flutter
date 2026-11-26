@@ -1,129 +1,144 @@
-import '../../event_type.dart';
-import 'event.dart';
+import '../../core/models/events/chat_event.dart';
+import '../../core/models/events/location_events.dart';
+import '../../core/models/events/message_events.dart';
+import '../../core/models/events/notification_events.dart';
+import '../../core/models/events/poll_events.dart';
+import '../../core/models/location.dart';
 
-/// Resolves message new events into more specific `pollCreated` events
-/// for easier downstream state handling.
+/// Resolves casted or changed poll votes that are answers into
+/// [PollAnswerCastedEvent]s for easier downstream state handling.
 ///
-/// Applies when:
-/// - `event.type` is `messageNew` or `notification.message_new, and
-/// - `event.poll` is not null
+/// Returns `null` when [event] is not a casted or changed answer.
+ChatEvent? pollAnswerCastedResolver(ChatEvent event) => switch (event) {
+  PollVoteCastedEvent(:final cid, :final messageId, :final poll, :final pollVote, :final createdAt, :final custom)
+      when pollVote.isAnswer == true =>
+    PollAnswerCastedEvent(
+      cid: cid,
+      messageId: messageId,
+      poll: poll,
+      pollVote: pollVote,
+      createdAt: createdAt,
+      custom: custom,
+      isLocal: event.isLocal,
+    ),
+  PollVoteChangedEvent(:final cid, :final messageId, :final poll, :final pollVote, :final createdAt, :final custom)
+      when pollVote.isAnswer == true =>
+    PollAnswerCastedEvent(
+      cid: cid,
+      messageId: messageId,
+      poll: poll,
+      pollVote: pollVote,
+      createdAt: createdAt,
+      custom: custom,
+      isLocal: event.isLocal,
+    ),
+  _ => null,
+};
+
+/// Resolves removed poll votes that are answers into
+/// [PollAnswerRemovedEvent]s for easier downstream state handling.
 ///
-/// Returns a modified event with type `pollCreated`,
-/// or `null` if not applicable.
-Event? pollCreatedResolver(Event event) {
-  final validTypes = {EventType.messageNew, EventType.notificationMessageNew};
-  if (!validTypes.contains(event.type)) return null;
+/// Returns `null` when [event] is not a removed answer.
+ChatEvent? pollAnswerRemovedResolver(ChatEvent event) => switch (event) {
+  PollVoteRemovedEvent(:final cid, :final messageId, :final poll, :final pollVote, :final createdAt, :final custom)
+      when pollVote.isAnswer == true =>
+    PollAnswerRemovedEvent(
+      cid: cid,
+      messageId: messageId,
+      poll: poll,
+      pollVote: pollVote,
+      createdAt: createdAt,
+      custom: custom,
+      isLocal: event.isLocal,
+    ),
+  _ => null,
+};
 
-  final poll = event.poll;
-  if (poll == null) return null;
+/// Resolves new messages sharing a location into [LocationSharedEvent]s for
+/// easier downstream state handling.
+///
+/// Returns `null` when [event] is not a new message sharing a location.
+ChatEvent? locationSharedResolver(ChatEvent event) => switch (event) {
+  MessageNewEvent(:final message) when message.sharedLocation != null => LocationSharedEvent(
+    cid: event.cid,
+    channelId: event.channelId,
+    channelType: event.channelType,
+    channelMemberCount: event.channelMemberCount,
+    channelMessageCount: event.channelMessageCount,
+    channel: event.channel,
+    message: message,
+    user: event.user,
+    totalUnreadCount: event.totalUnreadCount,
+    unreadChannels: event.unreadChannels,
+    createdAt: event.createdAt,
+    custom: event.custom,
+    isLocal: event.isLocal,
+  ),
+  NotificationMessageNewEvent(:final message) when message.sharedLocation != null => LocationSharedEvent(
+    cid: event.cid,
+    channelId: event.channelId,
+    channelType: event.channelType,
+    channelMemberCount: event.channelMemberCount,
+    channelMessageCount: event.channelMessageCount,
+    channel: event.channel,
+    message: message,
+    totalUnreadCount: event.totalUnreadCount,
+    unreadChannels: event.unreadChannels,
+    createdAt: event.createdAt,
+    custom: event.custom,
+    isLocal: event.isLocal,
+  ),
+  _ => null,
+};
 
-  // If the event is a message new or notification message new and
-  // it contains a poll, we can resolve it to a poll created event.
-  return event.copyWith(type: EventType.pollCreated);
+/// Resolves edits of a message sharing a static or still-active location into
+/// [LocationUpdatedEvent]s for easier downstream state handling.
+///
+/// Returns `null` when [event] is not such an edit.
+ChatEvent? locationUpdatedResolver(ChatEvent event) => switch (event) {
+  MessageUpdatedEvent(:final message) when _isActive(message.sharedLocation) => LocationUpdatedEvent(
+    cid: event.cid,
+    channelId: event.channelId,
+    channelType: event.channelType,
+    channelMemberCount: event.channelMemberCount,
+    channelMessageCount: event.channelMessageCount,
+    message: message,
+    user: event.user,
+    createdAt: event.createdAt,
+    custom: event.custom,
+    isLocal: event.isLocal,
+  ),
+  _ => null,
+};
+
+/// Resolves edits of a message sharing an expired live location into
+/// [LocationExpiredEvent]s for easier downstream state handling.
+///
+/// Returns `null` when [event] is not such an edit.
+ChatEvent? locationExpiredResolver(ChatEvent event) => switch (event) {
+  MessageUpdatedEvent(:final message) when _isExpired(message.sharedLocation) => LocationExpiredEvent(
+    cid: event.cid,
+    channelId: event.channelId,
+    channelType: event.channelType,
+    channelMemberCount: event.channelMemberCount,
+    channelMessageCount: event.channelMessageCount,
+    message: message,
+    user: event.user,
+    createdAt: event.createdAt,
+    custom: event.custom,
+    isLocal: event.isLocal,
+  ),
+  _ => null,
+};
+
+// Whether [location] is static, or live and not expired yet.
+bool _isActive(Location? location) {
+  if (location == null) return false;
+  return !(location.isLive && location.isExpired);
 }
 
-/// Resolves casted or changed poll vote events into more specific
-/// `pollAnswerCasted` events for easier downstream state handling.
-///
-/// Applies when:
-/// - `event.type` is `pollVoteCasted` or `pollVoteChanged`, and
-/// - `event.pollVote?.isAnswer == true`
-///
-/// Returns a modified event with type `pollAnswerCasted`,
-/// or `null` if not applicable.
-Event? pollAnswerCastedResolver(Event event) {
-  final validTypes = {EventType.pollVoteCasted, EventType.pollVoteChanged};
-  if (!validTypes.contains(event.type)) return null;
-
-  final pollVote = event.pollVote;
-  if (pollVote?.isAnswer != true) return null;
-
-  // If the event is a poll vote casted or changed and it's an answer
-  // we can resolve it to a poll answer casted event.
-  return event.copyWith(type: EventType.pollAnswerCasted);
-}
-
-/// Resolves removed poll vote events into more specific
-/// `pollAnswerRemoved` events for easier downstream state handling.
-///
-/// Applies when:
-/// - `event.type` is `pollVoteRemoved`, and
-/// - `event.pollVote?.isAnswer == true`
-///
-/// Returns a modified event with type `pollAnswerRemoved`,
-/// or `null` if not applicable.
-Event? pollAnswerRemovedResolver(Event event) {
-  if (event.type != EventType.pollVoteRemoved) return null;
-
-  final pollVote = event.pollVote;
-  if (pollVote?.isAnswer != true) return null;
-
-  // If the event is a poll vote removed and it's an answer
-  // we can resolve it to a poll answer removed event.
-  return event.copyWith(type: EventType.pollAnswerRemoved);
-}
-
-/// Resolves message new events into more specific `locationShared` events
-/// for easier downstream state handling.
-///
-/// Applies when:
-/// - `event.type` is `messageNew` or `notification.message_new, and
-/// - `event.message.sharedLocation` is not null
-///
-/// Returns a modified event with type `locationShared`,
-/// or `null` if not applicable.
-Event? locationSharedResolver(Event event) {
-  final validTypes = {EventType.messageNew, EventType.notificationMessageNew};
-  if (!validTypes.contains(event.type)) return null;
-
-  final sharedLocation = event.message?.sharedLocation;
-  if (sharedLocation == null) return null;
-
-  // If the event is a message new or notification message new and it
-  // contains a shared location, we can resolve it to a location shared event.
-  return event.copyWith(type: EventType.locationShared);
-}
-
-/// Resolves message updated events into more specific `locationUpdated`
-/// events for easier downstream state handling.
-///
-/// Applies when:
-/// - `event.type` is `messageUpdated`, and
-/// - `event.message.sharedLocation` is not null and not expired
-///
-/// Returns a modified event with type `locationUpdated`,
-/// or `null` if not applicable.
-Event? locationUpdatedResolver(Event event) {
-  if (event.type != EventType.messageUpdated) return null;
-
-  final sharedLocation = event.message?.sharedLocation;
-  if (sharedLocation == null) return null;
-
-  if (sharedLocation.isLive && sharedLocation.isExpired) return null;
-
-  // If the location is static or still active, we can resolve it
-  // to a location updated event.
-  return event.copyWith(type: EventType.locationUpdated);
-}
-
-/// Resolves message updated events into more specific `locationExpired`
-/// events for easier downstream state handling.
-///
-/// Applies when:
-/// - `event.type` is `messageUpdated`, and
-/// - `event.message.sharedLocation` is not null and expired
-///
-/// Returns a modified event with type `locationExpired`,
-/// or `null` if not applicable.
-Event? locationExpiredResolver(Event event) {
-  if (event.type != EventType.messageUpdated) return null;
-
-  final sharedLocation = event.message?.sharedLocation;
-  if (sharedLocation == null) return null;
-
-  if (sharedLocation.isStatic || sharedLocation.isActive) return null;
-
-  // If the location is live and expired, we can resolve it to a
-  // location expired event.
-  return event.copyWith(type: EventType.locationExpired);
+// Whether [location] is live and has expired.
+bool _isExpired(Location? location) {
+  if (location == null) return false;
+  return !(location.isStatic || location.isActive);
 }

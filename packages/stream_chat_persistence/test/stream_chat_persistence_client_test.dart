@@ -63,8 +63,8 @@ void main() {
     await client.connect(userId, databaseProvider: testDatabaseProvider);
     addTearDown(() async => client.disconnect());
 
-    final connectionEvent = Event(
-      type: EventType.healthCheck,
+    final connectionEvent = HealthCheckEvent(
+      connectionId: 'test-connection-id',
       createdAt: DateTime.timestamp(),
       me: OwnUser(id: userId, name: 'Test User'),
     );
@@ -129,13 +129,13 @@ void main() {
     });
 
     test('getConnectionInfo', () async {
-      final event = Event();
-      when(() => mockDatabase.connectionEventDao.connectionEvent).thenAnswer((_) async => event);
+      final user = OwnUser(id: userId);
+      when(() => mockDatabase.connectionEventDao.connectedUser).thenAnswer((_) async => user);
 
-      final fetchedEvent = await client.getConnectionInfo();
-      expect(fetchedEvent, isNotNull);
-      expect(fetchedEvent!.type, event.type);
-      verify(() => mockDatabase.connectionEventDao.connectionEvent).called(1);
+      final fetchedUser = await client.getConnectionInfo();
+      expect(fetchedUser, isNotNull);
+      expect(fetchedUser!.id, user.id);
+      verify(() => mockDatabase.connectionEventDao.connectedUser).called(1);
     });
 
     test('getLastSyncAt', () async {
@@ -148,7 +148,10 @@ void main() {
     });
 
     test('updateConnectionInfo', () async {
-      final event = Event();
+      final event = HealthCheckEvent(
+        connectionId: 'test-connection-id',
+        me: OwnUser(id: userId),
+      );
       when(() => mockDatabase.connectionEventDao.updateConnectionEvent(event)).thenAnswer((_) async => 1);
 
       await client.updateConnectionInfo(event);

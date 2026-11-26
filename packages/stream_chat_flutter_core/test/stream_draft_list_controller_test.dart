@@ -439,10 +439,10 @@ void main() {
   });
 
   group('Event handling', () {
-    late StreamController<Event> eventController;
+    late StreamController<ChatEvent> eventController;
 
     setUp(() {
-      eventController = StreamController<Event>.broadcast();
+      eventController = StreamController<ChatEvent>.broadcast();
       when(client.on).thenAnswer((_) => eventController.stream);
     });
 
@@ -475,8 +475,7 @@ void main() {
         message: DraftMessage(text: 'Updated via event'),
       );
 
-      final event = Event(
-        type: EventType.draftUpdated,
+      final event = DraftUpdatedEvent(
         draft: updatedDraft,
       );
 
@@ -513,8 +512,7 @@ void main() {
 
       final initialItemCount = controller.value.asSuccess.items.length;
 
-      final event = Event(
-        type: EventType.draftDeleted,
+      final event = DraftDeletedEvent(
         draft: drafts[0],
       );
 
@@ -562,7 +560,7 @@ void main() {
       queryCallCount = 0;
 
       // When connection recovered is triggered, verify another query is made
-      final event = Event(type: EventType.connectionRecovered);
+      final event = ConnectionRecoveredEvent();
       eventController.add(event);
 
       // Give it enough time for the async operations to complete
@@ -607,8 +605,7 @@ void main() {
         ),
       );
 
-      final event = Event(
-        type: EventType.draftUpdated,
+      final event = DraftUpdatedEvent(
         draft: updatedDraft,
       );
 
@@ -629,7 +626,7 @@ void main() {
   group('Subscription lifecycle', () {
     test('pause and resume correctly affect event subscription', () async {
       final drafts = generateDrafts();
-      final eventController = StreamController<Event>.broadcast();
+      final eventController = StreamController<ChatEvent>.broadcast();
       when(client.on).thenAnswer((_) => eventController.stream);
 
       final response = Result.success(QueryDraftsResponse(duration: '0.01ms', drafts: drafts, next: ''));

@@ -8,7 +8,7 @@ part 'own_user.g.dart';
 
 /// The class that defines the own user model.
 ///
-/// This object can be found in [Event].
+/// This object can be found in [StreamChatClient.state] as the current user.
 @JsonSerializable(includeIfNull: false)
 class OwnUser extends User {
   /// Constructor used for json serialization.

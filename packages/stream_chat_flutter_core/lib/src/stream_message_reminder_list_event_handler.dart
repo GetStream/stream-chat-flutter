@@ -2,7 +2,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'stream_message_reminder_list_controller.dart';
 
 /// Contains handlers that are called from [StreamMessageReminderListController]
-/// for certain [Event]s.
+/// for certain events.
 ///
 /// This class can be mixed in or extended to create custom overrides.
 mixin class StreamMessageReminderListEventHandler {
@@ -13,7 +13,7 @@ mixin class StreamMessageReminderListEventHandler {
   /// By default, this does nothing and can be overridden to perform
   /// custom actions, such as refreshing the list of reminders.
   void onConnectionRecovered(
-    Event event,
+    ConnectionRecoveredEvent event,
     StreamMessageReminderListController controller,
   ) {
     // no-op
@@ -26,11 +26,10 @@ mixin class StreamMessageReminderListEventHandler {
   ///
   /// By default, this updates the reminder in the list.
   void onMessageReminderCreated(
-    Event event,
+    ReminderCreatedEvent event,
     StreamMessageReminderListController controller,
   ) {
     final reminder = event.reminder;
-    if (reminder == null) return;
 
     controller.updateReminder(reminder);
   }
@@ -42,11 +41,10 @@ mixin class StreamMessageReminderListEventHandler {
   ///
   /// By default, this updates the reminder in the list.
   void onMessageReminderUpdated(
-    Event event,
+    ReminderUpdatedEvent event,
     StreamMessageReminderListController controller,
   ) {
     final reminder = event.reminder;
-    if (reminder == null) return;
 
     controller.updateReminder(reminder);
   }
@@ -58,11 +56,10 @@ mixin class StreamMessageReminderListEventHandler {
   ///
   /// By default, this removes the reminder from the list.
   void onMessageReminderDeleted(
-    Event event,
+    ReminderDeletedEvent event,
     StreamMessageReminderListController controller,
   ) {
     final reminder = event.reminder;
-    if (reminder == null) return;
 
     controller.deleteReminder(reminder);
   }
@@ -74,9 +71,19 @@ mixin class StreamMessageReminderListEventHandler {
   ///
   /// By default, this updates the reminder in the list.
   void onMessageReminderDue(
-    Event event,
+    NotificationReminderDueEvent event,
     StreamMessageReminderListController controller,
   ) {
-    return onMessageReminderUpdated(event, controller);
+    final updated = ReminderUpdatedEvent(
+      cid: event.cid,
+      messageId: event.messageId,
+      parentId: event.parentId,
+      reminder: event.reminder,
+      userId: event.userId,
+      createdAt: event.createdAt,
+      custom: event.custom,
+    );
+
+    return onMessageReminderUpdated(updated, controller);
   }
 }

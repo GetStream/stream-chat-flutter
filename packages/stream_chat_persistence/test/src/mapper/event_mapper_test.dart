@@ -3,13 +3,11 @@ import 'package:stream_chat/stream_chat.dart';
 import 'package:stream_chat_persistence/src/db/drift_chat_database.dart';
 import 'package:stream_chat_persistence/src/mapper/event_mapper.dart';
 
-import '../utils/date_matcher.dart';
-
 void main() {
-  test('toEvent should map entity into Event', () {
+  test('toOwnUser should map entity into OwnUser', () {
     const type = 'dummy.type';
     final now = DateTime.now();
-    final ownUser = OwnUser(id: 'testUserId');
+    final ownUser = OwnUser(id: 'testUserId', totalUnreadCount: 33, unreadChannels: 33);
     final entity = ConnectionEventEntity(
       id: 3,
       type: type,
@@ -19,12 +17,16 @@ void main() {
       lastSyncAt: now,
       lastEventAt: now,
     );
-    final event = entity.toEvent();
-    expect(event, isA<Event>());
-    expect(event.type, type);
-    expect(event.createdAt.toUtc(), isSameDateAs(now.toUtc()));
-    expect(event.me!.id, ownUser.id);
-    expect(event.totalUnreadCount, entity.totalUnreadCount);
-    expect(event.unreadChannels, entity.unreadChannels);
+    final user = entity.toOwnUser();
+    expect(user, isA<OwnUser>());
+    expect(user!.id, ownUser.id);
+    expect(user.totalUnreadCount, ownUser.totalUnreadCount);
+    expect(user.unreadChannels, ownUser.unreadChannels);
+  });
+
+  test('toOwnUser should return null when the entity stores no user', () {
+    const entity = ConnectionEventEntity(id: 3, type: 'dummy.type');
+
+    expect(entity.toOwnUser(), isNull);
   });
 }

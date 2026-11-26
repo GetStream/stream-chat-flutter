@@ -10,7 +10,7 @@ void main() {
   final harness = useScheduledMessageClient();
 
   test('hasLoadedAll becomes false once the connection is lost', () async {
-    harness.client.handleEvent(Event(type: EventType.connectionChanged, online: false));
+    harness.client.handleEvent(ConnectionChangedEvent(online: false));
     await settle();
 
     expect(harness.client.state.scheduledMessageListState.hasLoadedAll, isFalse);
@@ -23,8 +23,8 @@ void main() {
       ..stubPage('page-2', () async => fakePage([last]));
 
     harness.client
-      ..handleEvent(Event(type: EventType.connectionChanged, online: false))
-      ..handleEvent(Event(type: EventType.connectionRecovered, online: true));
+      ..handleEvent(ConnectionChangedEvent(online: false))
+      ..handleEvent(ConnectionRecoveredEvent());
     await settle();
 
     expect(harness.client.state.scheduledMessageListState.hasLoadedAll, isTrue);
@@ -34,14 +34,14 @@ void main() {
   test('a reload that failed is tried again on the next recovery', () async {
     harness.stubPage(null, () async => throw offline);
     harness.client
-      ..handleEvent(Event(type: EventType.connectionChanged, online: false))
-      ..handleEvent(Event(type: EventType.connectionRecovered, online: true));
+      ..handleEvent(ConnectionChangedEvent(online: false))
+      ..handleEvent(ConnectionRecoveredEvent());
     await settle();
     harness.stubPage(null, () async => fakePage([fakeScheduledMessage('missed')]));
 
     harness.client
-      ..handleEvent(Event(type: EventType.connectionChanged, online: false))
-      ..handleEvent(Event(type: EventType.connectionRecovered, online: true));
+      ..handleEvent(ConnectionChangedEvent(online: false))
+      ..handleEvent(ConnectionRecoveredEvent());
     await settle();
 
     expect(harness.client.state.scheduledMessageListState.hasLoadedAll, isTrue);
@@ -49,7 +49,7 @@ void main() {
   });
 
   test('a recovery without a lost connection loads nothing', () async {
-    harness.client.handleEvent(Event(type: EventType.connectionRecovered, online: true));
+    harness.client.handleEvent(ConnectionRecoveredEvent());
     await settle();
 
     verifyNever(

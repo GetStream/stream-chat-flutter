@@ -19,15 +19,15 @@ void main() {
       moderation: const Moderation(action: ModerationAction.bounce, originalText: 'bad word'),
     );
     channel.state!.addNewMessage(bounced);
-    final deleted = channel.on(EventType.messageDeleted).first;
+    final deleted = channel.on<MessageDeletedEvent>(EventType.messageDeleted).first;
 
     await channel.deleteMessage(bounced);
 
     expect(
       await deleted,
-      isA<Event>()
+      isA<MessageDeletedEvent>()
           .having((it) => it.hardDelete, 'hardDelete', isTrue)
-          .having((it) => it.message?.id, 'message id', 'bounced'),
+          .having((it) => it.message.id, 'message id', 'bounced'),
     );
   });
 
@@ -35,11 +35,11 @@ void main() {
     final channel = _channel();
     final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending());
     channel.state!.addNewMessage(unsent);
-    final deleted = channel.on(EventType.messageDeleted).first;
+    final deleted = channel.on<MessageDeletedEvent>(EventType.messageDeleted).first;
 
     await channel.deleteMessage(unsent);
 
-    expect(await deleted, isA<Event>().having((it) => it.message?.id, 'message id', 'unsent'));
+    expect(await deleted, isA<MessageDeletedEvent>().having((it) => it.message.id, 'message id', 'unsent'));
   });
 
   test('deleting a bounced message removes it from the state', () async {
@@ -86,15 +86,15 @@ void main() {
     final channel = _channel();
     final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending());
     channel.state!.addNewMessage(unsent);
-    final deleted = channel.on(EventType.messageDeleted).first;
+    final deleted = channel.on<MessageDeletedEvent>(EventType.messageDeleted).first;
 
     await channel.deleteMessageForMe(unsent);
 
     expect(
       await deleted,
-      isA<Event>()
+      isA<MessageDeletedEvent>()
           .having((it) => it.hardDelete, 'hardDelete', isTrue)
-          .having((it) => it.message?.id, 'message id', 'unsent'),
+          .having((it) => it.message.id, 'message id', 'unsent'),
     );
   });
 
@@ -152,7 +152,7 @@ Message _withUploadingImage(String id) {
 // A client that delivers the events the SDK raises, as the real one does.
 class _DeliveringClient extends MockStreamChatClient {
   @override
-  void handleEvent(Event event) => addEvent(event);
+  void handleEvent(ChatEvent event) => addEvent(event);
 }
 
 // A channel created from a state, on a [_DeliveringClient] whose image

@@ -33,13 +33,10 @@ class RetryQueue {
 
   void _listenConnectionRecovered() {
     client
-        .on(EventType.connectionRecovered)
-        .distinct()
+        .on<ConnectionRecoveredEvent>()
         .listen((event) {
-          if (event.online == true) {
-            logger.d(() => 'Connection recovered, retrying failed messages');
-            channel.state?.retryFailedMessages();
-          }
+          logger.d(() => 'Connection recovered, retrying failed messages');
+          channel.state?.retryFailedMessages();
         })
         .addTo(_compositeSubscription);
   }

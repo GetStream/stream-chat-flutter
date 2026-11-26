@@ -24,7 +24,7 @@ void main() {
   late StreamController<bool> isUpToDateController;
   late StreamController<int> unreadCountController;
   late StreamController<List<Message>> messagesController;
-  late StreamController<Event> messageNewController;
+  late StreamController<ChatEvent> messageNewController;
 
   setUpAll(() {
     registerFallbackValue(EventType.messageNew);
@@ -43,7 +43,7 @@ void main() {
     messagesController = StreamController<List<Message>>.broadcast();
     // MockChannel.on filters this by event.type, so events pushed here
     // surface to channel.on(EventType.messageNew) subscribers.
-    messageNewController = StreamController<Event>.broadcast();
+    messageNewController = StreamController<ChatEvent>.broadcast();
     addTearDown(isUpToDateController.close);
     addTearDown(unreadCountController.close);
     addTearDown(messagesController.close);
@@ -113,7 +113,7 @@ void main() {
     when(() => channelClientState.messages).thenReturn(updated);
     await tester.runAsync(() async {
       messagesController.add(updated);
-      messageNewController.add(Event(type: EventType.messageNew, message: newMessage, cid: channel.cid));
+      messageNewController.add(MessageNewEvent(cid: channel.cid, message: newMessage, watcherCount: 1));
       await tester.pumpAndSettle();
     });
   }
@@ -347,7 +347,7 @@ void main() {
 
         await tester.runAsync(() async {
           messagesController.add(updated);
-          messageNewController.add(Event(type: EventType.messageNew, message: newMessage, cid: channel.cid));
+          messageNewController.add(MessageNewEvent(cid: channel.cid, message: newMessage, watcherCount: 1));
           await tester.pump();
         });
 
@@ -381,7 +381,7 @@ void main() {
         var maxExcursion = 0.0;
         await tester.runAsync(() async {
           messagesController.add(updated);
-          messageNewController.add(Event(type: EventType.messageNew, message: newMessage, cid: channel.cid));
+          messageNewController.add(MessageNewEvent(cid: channel.cid, message: newMessage, watcherCount: 1));
           for (var i = 0; i < 20; i++) {
             await tester.pump(const Duration(milliseconds: 25));
             final delta = (scrollable.position.pixels - pixelsBefore).abs();

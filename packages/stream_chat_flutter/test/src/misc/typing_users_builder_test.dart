@@ -20,7 +20,7 @@ void main() {
   });
 
   testWidgets('StreamTypingUsersBuilder passes an empty list when nobody is typing', (tester) async {
-    final typingEvents = BehaviorSubject.seeded(<User, Event>{});
+    final typingEvents = BehaviorSubject.seeded(<User, TypingStartEvent>{});
     addTearDown(typingEvents.close);
 
     final builds = await _pumpBuilder(tester, typingEvents: typingEvents);
@@ -97,11 +97,11 @@ void main() {
   });
 }
 
-Event _typingEvent(User user, {String? parentId}) {
-  return Event(type: EventType.typingStart, user: user, parentId: parentId);
+TypingStartEvent _typingEvent(User user, {String? parentId}) {
+  return TypingStartEvent(user: user, parentId: parentId);
 }
 
-MockChannel _channelWith(BehaviorSubject<Map<User, Event>> typingEvents) {
+MockChannel _channelWith(BehaviorSubject<Map<User, TypingStartEvent>> typingEvents) {
   final client = MockClient();
   final clientState = MockClientState();
   when(() => client.state).thenReturn(clientState);
@@ -120,7 +120,7 @@ MockChannel _channelWith(BehaviorSubject<Map<User, Event>> typingEvents) {
 // built with.
 Future<List<List<User>>> _pumpBuilder(
   WidgetTester tester, {
-  required BehaviorSubject<Map<User, Event>> typingEvents,
+  required BehaviorSubject<Map<User, TypingStartEvent>> typingEvents,
   String? parentId,
 }) async {
   final channel = _channelWith(typingEvents);

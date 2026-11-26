@@ -2,7 +2,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'stream_thread_list_controller.dart';
 
 /// Contains handlers that are called from [StreamThreadListController] for
-/// certain [Event]s.
+/// certain events.
 ///
 /// This class can be mixed in or extended to create custom overrides.
 mixin class StreamThreadListEventHandler {
@@ -11,7 +11,7 @@ mixin class StreamThreadListEventHandler {
   /// This event is fired when a thread is updated.
   ///
   /// By default, this does nothing. Override this method to handle this event.
-  void onThreadUpdated(Event event, StreamThreadListController controller) {
+  void onThreadUpdated(ThreadUpdatedEvent event, StreamThreadListController controller) {
     // no-op
   }
 
@@ -21,7 +21,7 @@ mixin class StreamThreadListEventHandler {
   ///
   /// By default, this refreshes the whole thread list.
   void onConnectionRecovered(
-    Event event,
+    ConnectionRecoveredEvent event,
     StreamThreadListController controller,
   ) {
     controller.refresh();
@@ -34,7 +34,7 @@ mixin class StreamThreadListEventHandler {
   ///
   /// By default, this updates the parent or reply message in the thread list.
   void onReactionNew(
-    Event event,
+    ReactionNewEvent event,
     StreamThreadListController controller,
   ) {
     final message = event.message;
@@ -49,11 +49,10 @@ mixin class StreamThreadListEventHandler {
   ///
   /// By default, this updates the parent or reply message in the thread list.
   void onReactionUpdated(
-    Event event,
+    ReactionUpdatedEvent event,
     StreamThreadListController controller,
   ) {
     final message = event.message;
-    if (message == null) return;
 
     _updateParentOrReply(message, controller);
   }
@@ -64,7 +63,7 @@ mixin class StreamThreadListEventHandler {
   ///
   /// By default, this updates the parent or reply message in the thread list.
   void onReactionDeleted(
-    Event event,
+    ReactionDeletedEvent event,
     StreamThreadListController controller,
   ) {
     final message = event.message;
@@ -80,11 +79,10 @@ mixin class StreamThreadListEventHandler {
   ///
   /// By default, this updates the unread count of the channel.
   void onNotificationThreadMessageNew(
-    Event event,
+    NotificationThreadMessageNewEvent event,
     StreamThreadListController controller,
   ) {
     final message = event.message;
-    if (message == null) return;
 
     final parentMessageId = message.parentId;
     final thread = controller.getThread(parentMessageId: parentMessageId);
@@ -103,11 +101,10 @@ mixin class StreamThreadListEventHandler {
   ///
   /// By default, this updates the parent or reply message in the thread list.
   void onMessageNew(
-    Event event,
+    MessageNewEvent event,
     StreamThreadListController controller,
   ) {
     final message = event.message;
-    if (message == null) return;
 
     _updateParentOrReply(message, controller);
   }
@@ -118,11 +115,10 @@ mixin class StreamThreadListEventHandler {
   ///
   /// By default, this updates the parent or reply message in the thread list.
   void onMessageUpdated(
-    Event event,
+    MessageUpdatedEvent event,
     StreamThreadListController controller,
   ) {
     final message = event.message;
-    if (message == null) return;
 
     _updateParentOrReply(message, controller);
   }
@@ -132,18 +128,17 @@ mixin class StreamThreadListEventHandler {
   /// This event is fired when a message is deleted.
   ///
   /// By default, this updates or deletes the parent/reply message in the
-  /// thread list based on the [Event.hardDelete] value.
+  /// thread list based on the [MessageDeletedEvent.hardDelete] value.
   void onMessageDeleted(
-    Event event,
+    MessageDeletedEvent event,
     StreamThreadListController controller,
   ) {
     final message = event.message;
-    if (message == null) return;
 
     _deleteParentOrReply(
       message,
       controller,
-      isHardDelete: event.hardDelete ?? false,
+      isHardDelete: event.hardDelete,
     );
   }
 
@@ -153,11 +148,10 @@ mixin class StreamThreadListEventHandler {
   ///
   /// By default, this deletes all threads associated with the channel.
   void onChannelDeleted(
-    Event event,
+    ChannelDeletedEvent event,
     StreamThreadListController controller,
   ) {
-    final channelCid = event.cid ?? event.channel?.cid;
-    if (channelCid == null) return;
+    final channelCid = event.cid ?? event.channel.cid;
 
     return controller.deleteThreadByChannelCid(channelCid: channelCid);
   }
@@ -168,11 +162,10 @@ mixin class StreamThreadListEventHandler {
   ///
   /// By default, this deletes all threads associated with the channel.
   void onChannelTruncated(
-    Event event,
+    ChannelTruncatedEvent event,
     StreamThreadListController controller,
   ) {
-    final channelCid = event.cid ?? event.channel?.cid;
-    if (channelCid == null) return;
+    final channelCid = event.cid ?? event.channel.cid;
 
     return controller.deleteThreadByChannelCid(channelCid: channelCid);
   }
@@ -183,7 +176,7 @@ mixin class StreamThreadListEventHandler {
   ///
   /// By default, this updates the read state of the thread.
   void onMessageRead(
-    Event event,
+    MessageReadEvent event,
     StreamThreadListController controller,
   ) {
     final thread = event.thread;
@@ -204,18 +197,18 @@ mixin class StreamThreadListEventHandler {
   ///
   /// By default, this updates the read state of the thread.
   void onNotificationMarkUnread(
-    Event event,
+    NotificationMarkUnreadEvent event,
     StreamThreadListController controller,
   ) {
-    final thread = event.thread;
-    if (thread == null) return;
+    final threadId = event.threadId;
+    if (threadId == null) return;
 
     final user = event.user;
     if (user == null) return;
 
     final createdAt = event.createdAt;
 
-    return _markThreadAsUnread(thread, user, createdAt, controller);
+    return _markThreadAsUnread(threadId, user, createdAt, controller);
   }
 
   /// Function which gets called for the event [EventType.draftUpdated].
@@ -224,7 +217,7 @@ mixin class StreamThreadListEventHandler {
   ///
   /// By default, this updates the draft in the thread.
   void onDraftUpdated(
-    Event event,
+    DraftUpdatedEvent event,
     StreamThreadListController controller,
   ) {
     final draft = event.draft;
@@ -245,7 +238,7 @@ mixin class StreamThreadListEventHandler {
   ///
   /// By default, this deletes the draft in the thread.
   void onDraftDeleted(
-    Event event,
+    DraftDeletedEvent event,
     StreamThreadListController controller,
   ) {
     final draft = event.draft;
@@ -276,12 +269,11 @@ mixin class StreamThreadListEventHandler {
   }
 
   void _markThreadAsUnread(
-    Thread threadInfo,
+    String parentMessageId,
     User user,
     DateTime createdAt,
     StreamThreadListController controller,
   ) {
-    final parentMessageId = threadInfo.parentMessageId;
     final thread = controller.getThread(parentMessageId: parentMessageId);
     if (thread == null) return;
 

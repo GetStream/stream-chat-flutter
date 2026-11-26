@@ -39,7 +39,18 @@ void main() {
       },
     );
 
-    expect(res.getOrNull(), const EventResponse(duration: '4.21ms'));
+    expect(
+      res.getOrNull(),
+      EventResponse(
+        duration: '4.21ms',
+        event: UnknownEvent(
+          type: 'party_started',
+          rawData: _eventJson('party_started'),
+          createdAt: DateTime.utc(2024, 6, 1, 10),
+          isLocal: false,
+        ),
+      ),
+    );
     verify(() => defaultApi.sendEvent(type: 'messaging', id: 'general', sendEventRequest: request)).called(1);
     verifyNoMoreInteractions(defaultApi);
   });
@@ -55,7 +66,13 @@ void main() {
 
     final res = await client.sendEvent('general', 'messaging', type: EventType.typingStart);
 
-    expect(res.getOrNull(), const EventResponse(duration: '0.53ms'));
+    expect(
+      res.getOrNull(),
+      EventResponse(
+        duration: '0.53ms',
+        event: TypingStartEvent(createdAt: DateTime.utc(2024, 6, 1, 10), isLocal: false),
+      ),
+    );
     verify(() => defaultApi.sendEvent(type: 'messaging', id: 'general', sendEventRequest: request)).called(1);
   });
 
@@ -79,12 +96,14 @@ void main() {
 
 api.EventResponse _response(String type, {required String duration}) => api.EventResponse(
   duration: duration,
-  event: api.WSEvent.fromJson({
-    'type': type,
-    'created_at': '2024-06-01T10:00:00Z',
-    'custom': <String, Object?>{},
-  }),
+  event: api.WSEvent.fromJson(_eventJson(type)),
 );
+
+Map<String, Object?> _eventJson(String type) => {
+  'type': type,
+  'created_at': '2024-06-01T10:00:00Z',
+  'custom': <String, Object?>{},
+};
 
 StreamChatClient _client(api.DefaultApi defaultApi) {
   final client = StreamChatClient('test-api-key', defaultApi: defaultApi);

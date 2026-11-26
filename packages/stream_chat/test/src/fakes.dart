@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/open_api/api.dart' as api;
 import 'package:stream_chat/src/core/api/channel_api.dart';
-import 'package:stream_chat/src/core/api/general_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/push_preferences_api.dart';
 import 'package:stream_chat/src/core/api/scheduled_messages_api.dart';
@@ -59,7 +58,7 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
   int flushCallCount = 0;
 
   /// The health check last persisted, and `null` until one is.
-  Event? connectionInfo;
+  HealthCheckEvent? connectionInfo;
 
   @override
   bool get isConnected => _isConnected;
@@ -121,7 +120,7 @@ class FakePersistenceClient extends Fake implements ChatPersistenceClient {
   Future<void> updateChannelStates(List<ChannelState> channelStates) async {}
 
   @override
-  Future<void> updateConnectionInfo(Event event) async {
+  Future<void> updateConnectionInfo(HealthCheckEvent event) async {
     connectionInfo = event;
   }
 }
@@ -146,11 +145,6 @@ class FakeChatApi extends Fake implements StreamChatApi {
 
   @override
   ModerationApi get moderation => _moderation ??= MockModerationApi();
-
-  GeneralApi? _general;
-
-  @override
-  GeneralApi get general => _general ??= MockGeneralApi();
 
   ScheduledMessagesApi? _scheduledMessages;
 
@@ -251,8 +245,6 @@ class FakeMessage extends Fake implements Message {}
 class FakeDraftMessage extends Fake implements DraftMessage {}
 
 class FakeAttachmentFile extends Fake implements AttachmentFile {}
-
-class FakeEvent extends Fake implements Event {}
 
 class FakeUser extends Fake implements User {}
 

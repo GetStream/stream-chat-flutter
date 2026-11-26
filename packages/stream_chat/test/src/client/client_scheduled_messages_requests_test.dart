@@ -105,8 +105,8 @@ void main() {
     when(
       () => harness.api.scheduledMessages.updateScheduledMessage('a', message: edited),
     ).thenAnswer((_) => answer.future);
-    final updates = <Event>[];
-    final subscription = harness.client.on(EventType.scheduledMessageUpdated).listen(updates.add);
+    final updates = <ScheduledMessageUpdatedEvent>[];
+    final subscription = harness.client.on<ScheduledMessageUpdatedEvent>().listen(updates.add);
     addTearDown(subscription.cancel);
     final request = harness.client.updateScheduledMessage(a, edited);
 
@@ -205,7 +205,7 @@ void main() {
   for (final (name, stub, request) in requests) {
     test('$name reports one that no longer exists as deleted', () async {
       await harness.hold([a]);
-      final deleted = harness.client.on(EventType.scheduledMessageDeleted).first;
+      final deleted = harness.client.on<ScheduledMessageDeletedEvent>().first;
       stub(harness.api, missingError);
 
       await expectLater(request(harness.client), throwsA(missingError));

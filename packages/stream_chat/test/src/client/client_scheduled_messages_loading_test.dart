@@ -117,8 +117,8 @@ void main() {
     harness.stubQuery(fakePage([fakeScheduledMessage('a')]));
 
     harness.client
-      ..handleEvent(Event(type: EventType.connectionChanged, online: false))
-      ..handleEvent(Event(type: EventType.connectionRecovered, online: true));
+      ..handleEvent(ConnectionChangedEvent(online: false))
+      ..handleEvent(ConnectionRecoveredEvent());
     await settle();
 
     verifyNever(
@@ -134,7 +134,7 @@ void main() {
 
   test('connecting a user again after they were all loaded and the connection was lost loads none of them', () async {
     await harness.loadAllScheduledMessages();
-    harness.client.handleEvent(Event(type: EventType.connectionChanged, online: false));
+    harness.client.handleEvent(ConnectionChangedEvent(online: false));
     await settle();
 
     await harness.client.disconnectUser();

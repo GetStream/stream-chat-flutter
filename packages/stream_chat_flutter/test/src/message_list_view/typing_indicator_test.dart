@@ -24,7 +24,7 @@ void main() {
 
   testWidgets('StreamMessageListView hides the typing row once typing stops', (tester) async {
     final ada = User(id: 'ada', name: 'Ada');
-    final typingEvents = BehaviorSubject<Map<User, Event>>.seeded({ada: _typingEvent(ada)});
+    final typingEvents = BehaviorSubject<Map<User, TypingStartEvent>>.seeded({ada: _typingEvent(ada)});
     addTearDown(typingEvents.close);
 
     await _pumpMessageListView(tester, typingEventsSubject: typingEvents);
@@ -95,14 +95,14 @@ void main() {
   });
 }
 
-Event _typingEvent(User user, {String? parentId}) {
-  return Event(type: EventType.typingStart, user: user, parentId: parentId);
+TypingStartEvent _typingEvent(User user, {String? parentId}) {
+  return TypingStartEvent(user: user, parentId: parentId);
 }
 
 Future<void> _pumpMessageListView(
   WidgetTester tester, {
-  Map<User, Event> typingEvents = const {},
-  BehaviorSubject<Map<User, Event>>? typingEventsSubject,
+  Map<User, TypingStartEvent> typingEvents = const {},
+  BehaviorSubject<Map<User, TypingStartEvent>>? typingEventsSubject,
   bool isUpToDate = true,
   StreamMessageListViewConfiguration config = const StreamMessageListViewConfiguration(),
   StreamMessageListViewBuilders builders = const StreamMessageListViewBuilders(),

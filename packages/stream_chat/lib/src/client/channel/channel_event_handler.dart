@@ -25,15 +25,14 @@ class ChannelEventHandler {
 
   /// Handles the given channel [event].
   ///
-  /// Routes the event by its type, preserving the effect order the per-event
-  /// subscriptions used to produce.
+  /// Routes the event by its class, applying its effects in a fixed order.
   ///
   /// Only synchronous failures are contained: a stage that throws is logged
   /// and the remaining stages still run for the same event. A failure after
   /// an `await` is not — the `async` handlers have their futures discarded
   /// here, and some state writes are themselves `async void`, so both surface
   /// as unhandled async errors rather than logged warnings.
-  void handleEvent(Event event) {
+  void handleEvent(ChatEvent event) {
     _guard(event, 'message and channel dispatch', () => _dispatchMessageAndChannelEvents(event));
     _guard(event, 'channel counts', () => _onChannelCounts(event));
     _guard(event, 'member list dispatch', () => _dispatchMemberListEvents(event));
@@ -43,7 +42,7 @@ class ChannelEventHandler {
 
   // Runs the given [stage] of [event] handling, containing a synchronous
   // failure so the remaining stages still run for the same event.
-  void _guard(Event event, String stage, void Function() region) {
+  void _guard(ChatEvent event, String stage, void Function() region) {
     try {
       region();
     } catch (error, stackTrace) {
@@ -56,283 +55,173 @@ class ChannelEventHandler {
   }
 
   // Routes typing, message, draft, reaction, poll, read, and channel events.
-  void _dispatchMessageAndChannelEvents(Event event) {
-    switch (event.type) {
+  void _dispatchMessageAndChannelEvents(ChatEvent event) {
+    switch (event) {
       // typing events
-      case EventType.typingStart:
+      case TypingStartEvent():
         _onTypingStart(event);
-      case EventType.typingStop:
+      case TypingStopEvent():
         _onTypingStop(event);
       // message events
-      case EventType.messageNew:
-      case EventType.notificationMessageNew:
-        _onMessageNew(event);
-      case EventType.messageDeleted:
+      case MessageNewEvent():
+        _mutations.onMessageNew(event.message, watcherCount: event.watcherCount);
+      // Only a new message in a watched channel carries a reliable watcher
+      // count; one for a non-watched channel reports 0.
+      case NotificationMessageNewEvent():
+        _mutations.onMessageNew(event.message);
+      case MessageDeletedEvent():
         _onMessageDeleted(event);
-      case EventType.messageUpdated:
-        _onMessageUpdated(event);
+      case MessageUpdatedEvent():
+        _mutations.onMessageUpdated(event.message, editor: event.user);
       // draft events
-      case EventType.draftUpdated:
-        _onDraftUpdated(event);
-      case EventType.draftDeleted:
-        _onDraftDeleted(event);
+      case DraftUpdatedEvent(:final draft?):
+        _mutations.onDraftUpdated(draft);
+      case DraftDeletedEvent(:final draft?):
+        _mutations.onDraftDeleted(draft);
       // reaction events
-      case EventType.reactionNew:
-        _onReactionNew(event);
-      case EventType.reactionUpdated:
-        _onReactionUpdated(event);
-      case EventType.reactionDeleted:
-        _onReactionDeleted(event);
+      case ReactionNewEvent(:final message?, :final reaction?):
+        _mutations.onReactionNew(message, reaction);
+      case ReactionUpdatedEvent(:final message, :final reaction?):
+        _mutations.onReactionUpdated(message, reaction);
+      case ReactionDeletedEvent(:final message?, :final reaction?):
+        _mutations.onReactionDeleted(message, reaction);
       // poll events
-      case EventType.pollCreated:
-        _onPollCreated(event);
-      case EventType.pollUpdated:
-        _onPollUpdated(event);
-      case EventType.pollClosed:
-        _onPollClosed(event);
-      case EventType.pollAnswerCasted:
-        _onPollAnswerCasted(event);
-      case EventType.pollVoteCasted:
-        _onPollVoteCasted(event);
-      case EventType.pollVoteChanged:
-        _onPollVoteChanged(event);
-      case EventType.pollAnswerRemoved:
-        _onPollAnswerRemoved(event);
-      case EventType.pollVoteRemoved:
-        _onPollVoteRemoved(event);
+      case PollUpdatedEvent():
+        _mutations.onPollUpdated(event.poll);
+      case PollClosedEvent():
+        _mutations.onPollClosed(event.poll);
+      case PollAnswerCastedEvent():
+        _mutations.onPollAnswerCasted(event.poll, event.pollVote);
+      case PollVoteCastedEvent():
+        _mutations.onPollVoteCasted(event.poll, event.pollVote);
+      case PollVoteChangedEvent():
+        _mutations.onPollVoteChanged(event.poll, event.pollVote);
+      case PollAnswerRemovedEvent():
+        _mutations.onPollAnswerRemoved(event.poll, event.pollVote);
+      case PollVoteRemovedEvent():
+        _mutations.onPollVoteRemoved(event.poll, event.pollVote);
       // read events
-      case EventType.messageRead:
-      case EventType.notificationMarkRead:
-        _onMessageRead(event);
-      case EventType.notificationMarkUnread:
+      case MessageReadEvent():
+        _onMessageRead(event, event.user, event.thread, event.lastReadMessageId);
+      case NotificationMarkReadEvent():
+        _onMessageRead(event, event.user, event.thread, event.lastReadMessageId);
+      case NotificationMarkUnreadEvent():
         _onNotificationMarkUnread(event);
-      case EventType.messageDelivered:
+      case MessageDeliveredEvent():
         _onMessageDelivered(event);
       // channel events
-      case EventType.channelTruncated:
-      case EventType.notificationChannelTruncated:
-        _onChannelTruncated(event);
-      case EventType.channelUpdated:
-        _onChannelUpdated(event);
+      case ChannelTruncatedEvent():
+        _onChannelTruncated(event, event.channel, event.message);
+      case NotificationChannelTruncatedEvent():
+        _onChannelTruncated(event, event.channel, event.message);
+      case ChannelUpdatedEvent():
+        _mutations.onChannelUpdated(event.channel);
     }
   }
 
   // Routes the member added and removed events.
-  void _dispatchMemberListEvents(Event event) {
-    switch (event.type) {
-      // member events
-      case EventType.memberAdded:
-        _onMemberAdded(event);
-      case EventType.memberRemoved:
+  void _dispatchMemberListEvents(ChatEvent event) {
+    switch (event) {
+      case MemberAddedEvent():
+        _mutations.onMemberAdded(event.member);
+      case MemberRemovedEvent():
         _onMemberRemoved(event);
     }
   }
 
   // Routes the remaining member, watching, reminder, location, and channel
   // push preference events.
-  void _dispatchRemainingEvents(Event event) {
-    switch (event.type) {
+  void _dispatchRemainingEvents(ChatEvent event) {
+    switch (event) {
       // member events
-      case EventType.memberUpdated:
-        _onMemberUpdated(event);
-      case EventType.userBanned:
-        _onMemberBanned(event);
-      case EventType.userUnbanned:
-        _onMemberUnbanned(event);
-      case EventType.userMessagesDeleted:
-        _onUserMessagesDeleted(event);
+      case MemberUpdatedEvent():
+        _mutations.onMemberUpdated(event.member);
+      case UserBannedEvent():
+        _onMemberBanned(event.cid, event.user);
+      case UserUnbannedEvent():
+        _onMemberUnbanned(event.cid, event.user);
+      case UserMessagesDeletedEvent():
+        _mutations.onUserMessagesDeleted(
+          userId: event.user.id,
+          hardDelete: event.hardDelete ?? false,
+          deletedAt: event.createdAt,
+        );
       // user watching events
-      case EventType.userWatchingStart:
-        _onUserStartWatching(event);
-      case EventType.userWatchingStop:
-        _onUserStopWatching(event);
+      case UserWatchingStartEvent():
+        _mutations.onUserStartWatching(event.user, watcherCount: event.watcherCount);
+      case UserWatchingStopEvent():
+        _mutations.onUserStopWatching(event.user, watcherCount: event.watcherCount);
       // reminder events
-      case EventType.reminderCreated:
-        _onReminderCreated(event);
-      case EventType.reminderUpdated:
-        _onReminderUpdated(event);
-      case EventType.reminderDeleted:
-        _onReminderDeleted(event);
+      case ReminderCreatedEvent():
+        _mutations.onReminderCreated(event.reminder);
+      case ReminderUpdatedEvent():
+        _mutations.onReminderUpdated(event.reminder);
+      case ReminderDeletedEvent():
+        _mutations.onReminderDeleted(event.reminder);
       // location events
-      case EventType.locationShared:
-        _onLocationShared(event);
-      case EventType.locationUpdated:
-        _onLocationUpdated(event);
-      case EventType.locationExpired:
-        _onLocationExpired(event);
+      case LocationSharedEvent(:final message) when message.sharedLocation != null:
+        _mutations.onLocationShared(message);
+      case LocationUpdatedEvent(message: Message(:final sharedLocation?)):
+        _mutations.onLocationUpdated(sharedLocation);
+      case LocationExpiredEvent(message: Message(:final sharedLocation?)):
+        _mutations.onLocationExpired(sharedLocation);
       // channel push preference events
-      case EventType.channelPushPreferenceUpdated:
-        _onChannelPushPreferenceUpdated(event);
+      case ChannelPushPreferenceUpdatedEvent():
+        _mutations.onChannelPushPreferenceUpdated(event.channelPushPreference);
     }
   }
 
-  void _onTypingStart(Event event) {
+  void _onTypingStart(TypingStartEvent event) {
     final user = event.user;
     if (user == null) return;
 
     final currentUser = _client.state.currentUser;
-    if (event.isFromUser(userId: currentUser?.id)) return;
+    if (user.id == currentUser?.id) return;
 
     _mutations.onTypingStart(user, event);
   }
 
-  void _onTypingStop(Event event) {
+  void _onTypingStop(TypingStopEvent event) {
     final user = event.user;
     if (user == null) return;
 
     final currentUser = _client.state.currentUser;
-    if (event.isFromUser(userId: currentUser?.id)) return;
+    if (user.id == currentUser?.id) return;
 
     _mutations.onTypingStop(user);
   }
 
-  void _onMessageNew(Event event) {
-    final message = event.message;
-    if (message == null) return;
-
-    // Only message.new carries a reliable watcher count;
-    // notification.message_new targets non-watchers and reports 0.
-    final watcherCount = switch (event.type) {
-      EventType.messageNew => event.watcherCount,
-      _ => null,
-    };
-
-    _mutations.onMessageNew(message, watcherCount: watcherCount);
-  }
-
-  void _onMessageDeleted(Event event) {
-    final hardDelete = event.hardDelete ?? false;
-
-    final message = event.message!.copyWith(
+  void _onMessageDeleted(MessageDeletedEvent event) {
+    final message = event.message.copyWith(
       // TODO: Remove once deletedForMe is properly enriched on the backend.
       deletedForMe: event.deletedForMe,
     );
 
-    return _mutations.onMessageDeleted(message, hardDelete: hardDelete);
+    return _mutations.onMessageDeleted(message, hardDelete: event.hardDelete);
   }
 
-  void _onMessageUpdated(Event event) {
-    final message = event.message;
-    if (message == null) return;
-
-    return _mutations.onMessageUpdated(message, editor: event.user);
-  }
-
-  void _onDraftUpdated(Event event) {
-    final draft = event.draft;
-    if (draft == null) return;
-
-    return _mutations.onDraftUpdated(draft);
-  }
-
-  void _onDraftDeleted(Event event) {
-    final draft = event.draft;
-    if (draft == null) return;
-
-    return _mutations.onDraftDeleted(draft);
-  }
-
-  void _onReactionNew(Event event) {
-    final (eventReaction, eventMessage) = (event.reaction, event.message);
-    if (eventReaction == null || eventMessage == null) return;
-
-    return _mutations.onReactionNew(eventMessage, eventReaction);
-  }
-
-  void _onReactionUpdated(Event event) {
-    final (eventReaction, eventMessage) = (event.reaction, event.message);
-    if (eventReaction == null || eventMessage == null) return;
-
-    return _mutations.onReactionUpdated(eventMessage, eventReaction);
-  }
-
-  void _onReactionDeleted(Event event) {
-    final (eventReaction, eventMessage) = (event.reaction, event.message);
-    if (eventReaction == null || eventMessage == null) return;
-
-    return _mutations.onReactionDeleted(eventMessage, eventReaction);
-  }
-
-  void _onPollCreated(Event event) {
-    final message = event.message;
-    if (message == null || message.poll == null) return;
-
-    return _mutations.onPollCreated(message);
-  }
-
-  void _onPollUpdated(Event event) {
-    final eventPoll = event.poll;
-    if (eventPoll == null) return;
-
-    return _mutations.onPollUpdated(eventPoll);
-  }
-
-  void _onPollClosed(Event event) {
-    final eventPoll = event.poll;
-    if (eventPoll == null) return;
-
-    return _mutations.onPollClosed(eventPoll);
-  }
-
-  void _onPollAnswerCasted(Event event) {
-    final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-    if (eventPoll == null || eventPollVote == null) return;
-
-    return _mutations.onPollAnswerCasted(eventPoll, eventPollVote);
-  }
-
-  void _onPollVoteCasted(Event event) {
-    final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-    if (eventPoll == null || eventPollVote == null) return;
-
-    return _mutations.onPollVoteCasted(eventPoll, eventPollVote);
-  }
-
-  void _onPollVoteChanged(Event event) {
-    final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-    if (eventPoll == null || eventPollVote == null) return;
-
-    return _mutations.onPollVoteChanged(eventPoll, eventPollVote);
-  }
-
-  void _onPollAnswerRemoved(Event event) {
-    final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-    if (eventPoll == null || eventPollVote == null) return;
-
-    return _mutations.onPollAnswerRemoved(eventPoll, eventPollVote);
-  }
-
-  void _onPollVoteRemoved(Event event) {
-    final (eventPoll, eventPollVote) = (event.poll, event.pollVote);
-    if (eventPoll == null || eventPollVote == null) return;
-
-    return _mutations.onPollVoteRemoved(eventPoll, eventPollVote);
-  }
-
-  void _onMessageRead(Event event) {
+  void _onMessageRead(ChatEvent event, User? user, Thread? thread, String? lastReadMessageId) {
     // Skip handling the event if delivered for a thread
-    if (event.thread != null) return;
-
-    final user = event.user;
+    if (thread != null) return;
     if (user == null) return;
 
     _mutations.onMessageRead(
       user,
       lastRead: event.createdAt,
-      lastReadMessageId: event.lastReadMessageId,
+      lastReadMessageId: lastReadMessageId,
     );
 
     // If the read event is from the current user, reconcile the channel
     // delivery status with the updated read state, and clear any pending
     // manual mark-unread — the user has read past it.
     final currentUser = _client.state.currentUser;
-    if (event.isFromUser(userId: currentUser?.id)) {
+    if (user.id == currentUser?.id) {
       _client.channelDeliveryReporter.reconcileDelivery([_channel]);
       _channel.state?.isMarkedAsUnread = false;
     }
   }
 
-  void _onNotificationMarkUnread(Event event) {
+  void _onNotificationMarkUnread(NotificationMarkUnreadEvent event) {
     final user = event.user;
     if (user == null) return;
 
@@ -346,12 +235,12 @@ class ChannelEventHandler {
     // Only a mark-unread for the current user's own read state should gate
     // this device's auto mark-read.
     final currentUser = _client.state.currentUser;
-    if (event.isFromUser(userId: currentUser?.id)) {
+    if (user.id == currentUser?.id) {
       _channel.state?.isMarkedAsUnread = true;
     }
   }
 
-  void _onMessageDelivered(Event event) {
+  void _onMessageDelivered(MessageDeliveredEvent event) {
     final user = event.user;
     if (user == null) return;
 
@@ -364,13 +253,12 @@ class ChannelEventHandler {
     // If the delivered event is from the current user, reconcile
     // the channel delivery with the updated read state.
     final currentUser = _client.state.currentUser;
-    if (event.isFromUser(userId: currentUser?.id)) {
+    if (user.id == currentUser?.id) {
       _client.channelDeliveryReporter.reconcileDelivery([_channel]);
     }
   }
 
-  Future<void> _onChannelTruncated(Event event) async {
-    final channel = event.channel!;
+  Future<void> _onChannelTruncated(ChatEvent event, ChannelModel channel, Message? message) async {
     // A truncation of only some members leaves the channel's truncation time
     // unchanged; a channel without one is cut at the event's own time.
     final cutoff = channel.truncatedAt ?? event.createdAt;
@@ -382,17 +270,13 @@ class ChannelEventHandler {
     _mutations.onChannelTruncated(
       channel,
       cutoff: cutoff,
-      message: event.message,
+      message: message,
     );
   }
 
-  void _onChannelUpdated(Event event) {
-    final channel = event.channel!;
+  void _onChannelCounts(ChatEvent event) {
+    if (event is! HasChannelCounts) return;
 
-    return _mutations.onChannelUpdated(channel);
-  }
-
-  void _onChannelCounts(Event event) {
     final memberCount = event.channelMemberCount;
     final messageCount = event.channelMessageCount;
     if (memberCount == null && messageCount == null) return;
@@ -403,46 +287,32 @@ class ChannelEventHandler {
     );
   }
 
-  void _onMemberAdded(Event event) {
-    final member = event.member!;
-
-    return _mutations.onMemberAdded(member);
-  }
-
-  void _onMemberRemoved(Event event) {
-    final user = event.user!;
+  void _onMemberRemoved(MemberRemovedEvent event) {
+    final user = event.user;
+    if (user == null) return;
 
     return _mutations.onMemberRemoved(user);
   }
 
-  void _onMemberUserUpdated(Event event) {
-    final user = event.user;
-    if (user == null) return;
-
-    return _mutations.onMemberUserUpdated(user);
+  void _onMemberUserUpdated(ChatEvent event) {
+    if (event case HasUser(:final user?)) return _mutations.onMemberUserUpdated(user);
   }
 
-  void _onMemberUpdated(Event event) {
-    final member = event.member!;
-
-    return _mutations.onMemberUpdated(member);
-  }
-
-  Future<void> _onMemberBanned(Event event) async {
+  Future<void> _onMemberBanned(String? cid, User user) async {
     // Filters channel ban from app ban.
-    if (event.cid == null) return;
+    if (cid == null) return;
 
-    final member = await _queryMember(event.user!.id);
+    final member = await _queryMember(user.id);
     if (member == null) return;
 
     _mutations.onMemberBanned(member);
   }
 
-  Future<void> _onMemberUnbanned(Event event) async {
+  Future<void> _onMemberUnbanned(String? cid, User user) async {
     // Filters channel ban from app ban.
-    if (event.cid == null) return;
+    if (cid == null) return;
 
-    final member = await _queryMember(event.user!.id);
+    final member = await _queryMember(user.id);
     if (member == null) return;
 
     _mutations.onMemberUnbanned(member);
@@ -453,79 +323,5 @@ class ChannelEventHandler {
   Future<Member?> _queryMember(String userId) async {
     final result = await _channel.queryMembers(filter: .equal(MemberFilterField.userId, userId));
     return result.getOrNull()?.members.firstOrNull;
-  }
-
-  Future<void> _onUserMessagesDeleted(Event event) async {
-    final user = event.user;
-    if (user == null) return;
-
-    return _mutations.onUserMessagesDeleted(
-      userId: user.id,
-      hardDelete: event.hardDelete ?? false,
-      deletedAt: event.createdAt,
-    );
-  }
-
-  void _onUserStartWatching(Event event) {
-    final watcher = event.user;
-    if (watcher == null) return;
-
-    return _mutations.onUserStartWatching(watcher, watcherCount: event.watcherCount);
-  }
-
-  void _onUserStopWatching(Event event) {
-    final watcher = event.user;
-    if (watcher == null) return;
-
-    return _mutations.onUserStopWatching(watcher, watcherCount: event.watcherCount);
-  }
-
-  void _onReminderCreated(Event event) {
-    final reminder = event.reminder;
-    if (reminder == null) return;
-
-    return _mutations.onReminderCreated(reminder);
-  }
-
-  void _onReminderUpdated(Event event) {
-    final reminder = event.reminder;
-    if (reminder == null) return;
-
-    return _mutations.onReminderUpdated(reminder);
-  }
-
-  void _onReminderDeleted(Event event) {
-    final reminder = event.reminder;
-    if (reminder == null) return;
-
-    return _mutations.onReminderDeleted(reminder);
-  }
-
-  void _onLocationShared(Event event) {
-    final message = event.message;
-    if (message == null || message.sharedLocation == null) return;
-
-    return _mutations.onLocationShared(message);
-  }
-
-  void _onLocationUpdated(Event event) {
-    final location = event.message?.sharedLocation;
-    if (location == null) return;
-
-    return _mutations.onLocationUpdated(location);
-  }
-
-  void _onLocationExpired(Event event) {
-    final location = event.message?.sharedLocation;
-    if (location == null) return;
-
-    return _mutations.onLocationExpired(location);
-  }
-
-  void _onChannelPushPreferenceUpdated(Event event) {
-    final pushPreferences = event.channelPushPreference;
-    if (pushPreferences == null) return;
-
-    return _mutations.onChannelPushPreferenceUpdated(pushPreferences);
   }
 }

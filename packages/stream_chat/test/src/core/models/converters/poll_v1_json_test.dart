@@ -135,18 +135,6 @@ void main() {
     expect(answer.optionId, '');
     expect(answer.isAnswer, isTrue);
   });
-
-  test('Event.fromJson reads the poll and the vote of a vote event', () {
-    final event = Event.fromJson({
-      'type': EventType.pollVoteCasted,
-      'poll': _fullPollJson(),
-      'poll_vote': _voteJson,
-    });
-
-    expect(event.poll!.id, 'poll-id');
-    expect(event.poll!.ownVotesAndAnswers, [_vote, _answer]);
-    expect(event.pollVote, _vote);
-  });
 }
 
 final _vote = PollVote(

@@ -11,7 +11,7 @@ import 'package:stream_chat_flutter_core/stream_chat_flutter_core.dart';
 import 'mocks.dart';
 
 class MockOnBackgroundEventReceived extends Mock {
-  void call(Event event);
+  void call(ChatEvent event);
 }
 
 void main() {
@@ -200,7 +200,7 @@ void main() {
 
     Future<void> pumpStreamChatCore(
       WidgetTester tester, {
-      void Function(Event)? onBackgroundEventReceived,
+      void Function(ChatEvent)? onBackgroundEventReceived,
       Duration backgroundKeepAlive = const Duration(seconds: 15),
     }) async {
       await tester.pumpWidget(
@@ -292,7 +292,7 @@ void main() {
       'should listen for events when app goes to background with handler',
       (tester) async {
         // Arrange
-        final event = Event(type: EventType.any);
+        final event = UnknownEvent(type: EventType.any);
         when(mockClient.on).thenAnswer((_) => Stream.value(event));
 
         await pumpStreamChatCore(
@@ -318,7 +318,7 @@ void main() {
       (tester) async {
         await tester.runAsync(() async {
           // Arrange
-          final event = Event(type: EventType.any);
+          final event = UnknownEvent(type: EventType.any);
           when(mockClient.on).thenAnswer((_) => Stream.value(event));
 
           await pumpStreamChatCore(

@@ -15,26 +15,23 @@ void main() {
     eventDao = database.connectionEventDao;
   });
 
-  test('connectionEvent', () async {
-    // Should be null initially
-    final event = await eventDao.connectionEvent;
-    expect(event, isNull);
+  test('connectedUser is null before any connection is stored', () async {
+    expect(await eventDao.connectedUser, isNull);
+  });
 
-    // Adding a new event
-    final newEvent = Event(
+  test('connectedUser returns the user of the stored hello', () async {
+    final newEvent = HealthCheckEvent(
+      connectionId: 'test-connection-id',
       createdAt: DateTime.now(),
-      totalUnreadCount: 33,
-      unreadChannels: 3,
-      me: OwnUser(id: 'testUserId'),
+      me: OwnUser(id: 'testUserId', totalUnreadCount: 33, unreadChannels: 3),
     );
     await eventDao.updateConnectionEvent(newEvent);
 
-    // Should match the added event
-    final updatedEvent = await eventDao.connectionEvent;
-    expect(updatedEvent, isNotNull);
-    expect(updatedEvent!.me!.id, newEvent.me!.id);
-    expect(updatedEvent.totalUnreadCount, newEvent.totalUnreadCount);
-    expect(updatedEvent.unreadChannels, newEvent.unreadChannels);
+    final updatedUser = await eventDao.connectedUser;
+    expect(updatedUser, isNotNull);
+    expect(updatedUser!.id, newEvent.me.id);
+    expect(updatedUser.totalUnreadCount, newEvent.me.totalUnreadCount);
+    expect(updatedUser.unreadChannels, newEvent.me.unreadChannels);
   });
 
   test('lastSyncAt', () async {
@@ -43,11 +40,10 @@ void main() {
     expect(lastSyncAt, isNull);
 
     // Adding an event for testing
-    final event = Event(
+    final event = HealthCheckEvent(
+      connectionId: 'test-connection-id',
       createdAt: DateTime.now(),
-      totalUnreadCount: 33,
-      unreadChannels: 3,
-      me: OwnUser(id: 'testUserId'),
+      me: OwnUser(id: 'testUserId', totalUnreadCount: 33, unreadChannels: 3),
     );
     await eventDao.updateConnectionEvent(event);
 
@@ -62,31 +58,34 @@ void main() {
 
   test('updateConnectionEvent', () async {
     // Adding and event for testing
-    final event = Event(
+    final event = HealthCheckEvent(
+      connectionId: 'test-connection-id',
       createdAt: DateTime.now(),
-      totalUnreadCount: 33,
-      unreadChannels: 3,
-      me: OwnUser(id: 'testUserId'),
+      me: OwnUser(id: 'testUserId', totalUnreadCount: 33, unreadChannels: 3),
     );
     await eventDao.updateConnectionEvent(event);
 
-    // Should match the previously added event
-    final fetchedEvent = await eventDao.connectionEvent;
-    expect(fetchedEvent, isNotNull);
-    expect(fetchedEvent!.me!.id, event.me!.id);
-    expect(fetchedEvent.totalUnreadCount, event.totalUnreadCount);
-    expect(fetchedEvent.unreadChannels, event.unreadChannels);
+    // Should match the user of the previously added event
+    final fetchedUser = await eventDao.connectedUser;
+    expect(fetchedUser, isNotNull);
+    expect(fetchedUser!.id, event.me.id);
+    expect(fetchedUser.totalUnreadCount, event.me.totalUnreadCount);
+    expect(fetchedUser.unreadChannels, event.me.unreadChannels);
 
     // Updating the added event
-    final newEvent = event.copyWith(unreadChannels: 4);
+    final newEvent = HealthCheckEvent(
+      connectionId: 'test-connection-id',
+      createdAt: DateTime.now(),
+      me: event.me.copyWith(unreadChannels: 4),
+    );
     await eventDao.updateConnectionEvent(newEvent);
 
-    // Should match the updated event
-    final fetchedNewEvent = await eventDao.connectionEvent;
-    expect(fetchedNewEvent, isNotNull);
-    expect(fetchedNewEvent!.me!.id, event.me!.id);
-    expect(fetchedNewEvent.totalUnreadCount, event.totalUnreadCount);
-    expect(fetchedNewEvent.unreadChannels, newEvent.unreadChannels);
+    // Should match the user of the updated event
+    final fetchedNewUser = await eventDao.connectedUser;
+    expect(fetchedNewUser, isNotNull);
+    expect(fetchedNewUser!.id, event.me.id);
+    expect(fetchedNewUser.totalUnreadCount, event.me.totalUnreadCount);
+    expect(fetchedNewUser.unreadChannels, newEvent.me.unreadChannels);
   });
 
   test('updateLastSyncAt', () async {
@@ -95,11 +94,10 @@ void main() {
     expect(lastSyncAt, isNull);
 
     // Adding an event just for testing
-    final event = Event(
+    final event = HealthCheckEvent(
+      connectionId: 'test-connection-id',
       createdAt: DateTime.now(),
-      totalUnreadCount: 33,
-      unreadChannels: 3,
-      me: OwnUser(id: 'testUserId'),
+      me: OwnUser(id: 'testUserId', totalUnreadCount: 33, unreadChannels: 3),
     );
     await eventDao.updateConnectionEvent(event);
 
@@ -122,7 +120,12 @@ void main() {
   });
 
   test('updateLastSyncAt stores the checkpoint after the database was reset', () async {
-    await eventDao.updateConnectionEvent(Event(createdAt: DateTime.now()));
+    await eventDao.updateConnectionEvent(
+      HealthCheckEvent(
+        connectionId: 'test-connection-id',
+        me: OwnUser(id: 'testUserId'),
+      ),
+    );
 
     await database.flush();
 
@@ -132,28 +135,27 @@ void main() {
     expect(await eventDao.lastSyncAt, equals(afterReset));
   });
 
-  test('updateLastSyncAt keeps the stored connection event', () async {
-    final event = Event(
+  test('updateLastSyncAt keeps the stored connected user', () async {
+    final event = HealthCheckEvent(
+      connectionId: 'test-connection-id',
       createdAt: DateTime.now(),
-      totalUnreadCount: 33,
-      unreadChannels: 3,
-      me: OwnUser(id: 'testUserId'),
+      me: OwnUser(id: 'testUserId', totalUnreadCount: 33, unreadChannels: 3),
     );
     await eventDao.updateConnectionEvent(event);
 
     await eventDao.updateLastSyncAt(DateTime.now());
 
-    final storedEvent = await eventDao.connectionEvent;
-    expect(storedEvent, isNotNull);
-    expect(storedEvent!.me!.id, event.me!.id);
-    expect(storedEvent.totalUnreadCount, event.totalUnreadCount);
-    expect(storedEvent.unreadChannels, event.unreadChannels);
+    final storedUser = await eventDao.connectedUser;
+    expect(storedUser, isNotNull);
+    expect(storedUser!.id, event.me.id);
+    expect(storedUser.totalUnreadCount, event.me.totalUnreadCount);
+    expect(storedUser.unreadChannels, event.me.unreadChannels);
   });
 
-  test('a checkpoint written on its own is not read back as a connection event', () async {
+  test('a checkpoint written on its own is not read back as a connected user', () async {
     await eventDao.updateLastSyncAt(DateTime.now());
 
-    expect(await eventDao.connectionEvent, isNull);
+    expect(await eventDao.connectedUser, isNull);
   });
 
   tearDown(() async {

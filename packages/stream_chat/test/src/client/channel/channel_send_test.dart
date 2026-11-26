@@ -9,7 +9,6 @@ import '../../mocks.dart';
 void main() {
   setUpAll(() {
     registerFallbackValue(FakeMessage());
-    registerFallbackValue(FakeEvent());
   });
 
   group('when the message id already exists', () {
@@ -90,10 +89,10 @@ void main() {
       _whenSendingMessage(client, channel, message).thenAnswer((_) async {
         // The server's copy arrives over the WebSocket before the send fails.
         client.addEvent(
-          Event(
+          MessageNewEvent(
             cid: channel.cid,
-            type: EventType.messageNew,
             message: message.copyWith(createdAt: serverCreatedAt),
+            watcherCount: 1,
           ),
         );
         await pumpEventQueue();

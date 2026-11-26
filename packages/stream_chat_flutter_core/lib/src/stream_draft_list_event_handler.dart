@@ -2,7 +2,7 @@ import 'package:stream_chat/stream_chat.dart';
 import 'stream_draft_list_controller.dart';
 
 /// Contains handlers that are called from [StreamDraftListController] for
-/// certain [Event]s.
+/// certain events.
 ///
 /// This class can be mixed in or extended to create custom overrides.
 mixin class StreamDraftListEventHandler {
@@ -12,7 +12,7 @@ mixin class StreamDraftListEventHandler {
   ///
   /// By default, this refreshes the whole draft list.
   void onConnectionRecovered(
-    Event event,
+    ConnectionRecoveredEvent event,
     StreamDraftListController controller,
   ) {
     controller.refresh();
@@ -24,7 +24,7 @@ mixin class StreamDraftListEventHandler {
   ///
   /// By default, this does nothing. Override this method to handle this event.
   void onDraftUpdated(
-    Event event,
+    DraftUpdatedEvent event,
     StreamDraftListController controller,
   ) {
     final draft = event.draft;
@@ -39,7 +39,7 @@ mixin class StreamDraftListEventHandler {
   ///
   /// By default, this does nothing. Override this method to handle this event.
   void onDraftDeleted(
-    Event event,
+    DraftDeletedEvent event,
     StreamDraftListController controller,
   ) {
     final draft = event.draft;

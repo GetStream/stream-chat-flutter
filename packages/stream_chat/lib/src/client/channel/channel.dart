@@ -1225,8 +1225,7 @@ class Channel {
 
     // Nothing else reports the deletion of a message that only exists locally.
     _client.handleEvent(
-      Event(
-        type: EventType.messageDeleted,
+      MessageDeletedEvent(
         cid: cid,
         channelId: id,
         channelType: type,
@@ -2660,22 +2659,32 @@ class Channel {
     return _client.unarchiveChannel(channelId: id!, channelType: type);
   }
 
-  /// Stream of [Event] coming from websocket connection specific for the
-  /// channel. Pass an eventType as parameter in order to filter just a type
-  /// of event.
-  Stream<Event> on([
+  /// Every event of this channel that is a [T] and, when types are named, of
+  /// one of those types.
+  ///
+  /// Works like [StreamChatClient.on], keeping only the events that belong to
+  /// this channel.
+  Stream<T> on<T extends ChatEvent>([
     String? eventType,
     String? eventType2,
     String? eventType3,
     String? eventType4,
   ]) => _client
-      .on(
+      .on<T>(
         eventType,
         eventType2,
         eventType3,
         eventType4,
       )
-      .where((e) => e.cid == cid);
+      .where(_belongsToChannel);
+
+  // Whether [event] names this channel. An event the SDK has no class for
+  // names it only in its raw data.
+  bool _belongsToChannel(ChatEvent event) => switch (event) {
+    HasCid(cid: final eventCid) => eventCid == cid,
+    UnknownEvent(:final rawData) => rawData['cid'] == cid,
+    _ => false,
+  };
 
   late final _keyStrokeHandler = KeyStrokeHandler(
     onStartTyping: startTyping,

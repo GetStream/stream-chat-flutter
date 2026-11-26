@@ -1,26 +1,12 @@
-import 'package:json_annotation/json_annotation.dart';
 import '../core/models/own_user.dart';
 import '../core/models/privacy_settings.dart';
-import '../core/util/serializer.dart';
 
-part 'connect_user_details.g.dart';
-
-/// Class that defines the user details required for connecting to Stream Chat
-/// via WebSocket.
+/// The details of the user a connection is opened for.
 ///
-/// This class is used when establishing a WebSocket connection to provide
-/// necessary user information.
-///
-/// Example:
-/// ```dart
-/// final userDetails = ConnectUserDetails.fromOwnUser(ownUser);
-/// ```
-///
-/// See also:
-/// - [OwnUser]: The model representing the authenticated user.
-@JsonSerializable(createFactory: false, includeIfNull: false)
+/// Sent when the connection opens, which creates the user or updates them to
+/// match.
 class ConnectUserDetails {
-  /// Creates a new instance of [ConnectUserDetails].
+  /// Creates [ConnectUserDetails] for the user [id].
   const ConnectUserDetails({
     required this.id,
     this.name,
@@ -28,10 +14,10 @@ class ConnectUserDetails {
     this.language,
     this.invisible,
     this.privacySettings,
-    this.extraData,
+    this.custom = const {},
   });
 
-  /// Create a new instance from [OwnUser] object.
+  /// Creates [ConnectUserDetails] from [user].
   factory ConnectUserDetails.fromOwnUser(OwnUser user) {
     return ConnectUserDetails(
       id: user.id,
@@ -40,39 +26,47 @@ class ConnectUserDetails {
       language: user.language,
       invisible: user.invisible,
       privacySettings: user.privacySettings,
-      extraData: user.custom,
+      custom: user.custom,
     );
   }
 
-  /// The user identifier.
+  /// The user's id.
   final String id;
 
   /// The user's display name.
   final String? name;
 
-  /// The user's profile image URL.
+  /// The address of the user's profile image.
   final String? image;
 
-  /// The user's preferred language (e.g., "en", "es").
+  /// The user's preferred language, such as `en`.
   final String? language;
 
-  /// Whether the user wants to appear offline.
+  /// Whether the user appears offline to others.
   final bool? invisible;
 
   /// The user's privacy preferences.
   final PrivacySettings? privacySettings;
 
-  /// Map of custom user extraData.
-  final Map<String, Object?>? extraData;
+  /// The user's custom data.
+  final Map<String, Object?> custom;
 
-  /// Serialize to json.
+  /// Serializes these details for the request that opens a connection.
   ///
-  /// Writes the entries of [extraData] at the root, leaving out any named like
-  /// one of [OwnUser.topLevelFields].
-  Map<String, dynamic> toJson() {
-    return Serializer.moveFromExtraDataToRoot(
-      _$ConnectUserDetailsToJson(this),
-      topLevelFields: OwnUser.topLevelFields,
-    );
+  /// Leaves out unset values, and custom entries named like one of
+  /// [OwnUser.topLevelFields].
+  Map<String, Object?> toJson() {
+    return {
+      'id': id,
+      'name': ?name,
+      'image': ?image,
+      'language': ?language,
+      'invisible': ?invisible,
+      'privacy_settings': ?privacySettings?.toJson(),
+      'custom': {
+        for (final MapEntry(:key, :value) in custom.entries)
+          if (!OwnUser.topLevelFields.contains(key)) key: value,
+      },
+    };
   }
 }

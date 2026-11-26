@@ -7,5 +7,5 @@ import 'package:stream_chat/stream_chat.dart';
 // TODO: Add stacktrace as a parameter in v7.0.0
 typedef ErrorBuilder = Widget Function(BuildContext context, Object error);
 
-/// A Signature for a handler function which will expose a [event].
-typedef EventHandler = void Function(Event event);
+/// Signature for a function that handles a chat [event].
+typedef EventHandler = void Function(ChatEvent event);

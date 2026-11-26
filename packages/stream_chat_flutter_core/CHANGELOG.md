@@ -15,6 +15,8 @@
 - `StreamChannel.queryBeforeMessage` and `queryAfterMessage` return a `Result<ChannelState>`, and `loadChannelAtMessage`, `loadChannelAtTimestamp`, `reloadChannel` and `queryMembersAndWatchers` a `Result<void>`, instead of throwing.
 - `StreamChannel.queryMembers` returns a `Result<List<Member>>` instead of throwing.
 - `StreamChannelListController.getChannel` returns a `Result<Channel>` and `leaveChannel` a `Result<UpdateChannelResponse>` instead of throwing.
+- `EventHandler`, `StreamChatCore.onBackgroundEventReceived` and the `eventListener` of `StreamChannelListController`, `StreamDraftListController`, `StreamMessageReminderListController`, `StreamPollVoteListController` and `StreamThreadListController` take a `ChatEvent` instead of an `Event`.
+- The methods of `StreamChannelListEventHandler`, `StreamDraftListEventHandler`, `StreamMessageReminderListEventHandler` and `StreamThreadListEventHandler` take the class of the event they handle, such as `onMessageNew(MessageNewEvent, …)`, instead of an `Event`.
 
 🐞 Fixed
 
@@ -22,6 +24,7 @@
 - A list controller sorted each loaded page with an unstable sort, so rows it called equal — members sharing a `created_at`, say — were reordered on every page append. They keep the order they arrived in now.
 
 - `StreamThreadListController` no longer reorders a thread when a reply it does not hold is deleted.
+- `StreamThreadListController` now marks a thread unread when the current user marks it unread.
 
 ## Upcoming
 

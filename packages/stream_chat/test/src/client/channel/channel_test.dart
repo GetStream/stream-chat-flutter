@@ -491,7 +491,6 @@ void main() {
       // Fallback values
       registerFallbackValue(FakeMessage());
       registerFallbackValue(FakeAttachmentFile());
-      registerFallbackValue(FakeEvent());
 
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
@@ -617,7 +616,7 @@ void main() {
         ).thenAnswer((_) async => ScheduleMessageResponse()..message = message);
         await channel.scheduleMessage(message, scheduledAt: scheduledAt);
 
-        client.addEvent(Event(type: EventType.messageNew, cid: channel.cid, message: message));
+        client.addEvent(MessageNewEvent(cid: channel.cid, message: message, watcherCount: 1));
         await pumpEventQueue();
 
         expect(channel.state!.messages.single.id, 'sent-id');
@@ -3612,7 +3611,14 @@ void main() {
     test('Channel.stopAIResponse sends the AI indicator stop event and returns a success', () async {
       when(
         () => client.sendEvent(channelId, channelType, type: EventType.aiIndicatorStop),
-      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0.01ms')));
+      ).thenAnswer(
+        (_) async => Result.success(
+          EventResponse(
+            duration: '0.01ms',
+            event: UnknownEvent(type: 'test.event'),
+          ),
+        ),
+      );
 
       final res = await channel.stopAIResponse();
 
@@ -3633,13 +3639,17 @@ void main() {
 
     test('Channel.sendEvent sends the event to this channel and returns the response', () async {
       const custom = {'theme': 'disco'};
+      final response = EventResponse(
+        duration: '0.01ms',
+        event: UnknownEvent(type: 'party_started'),
+      );
       when(
         () => client.sendEvent(channelId, channelType, type: 'party_started', parentId: 'parent-id', custom: custom),
-      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0.01ms')));
+      ).thenAnswer((_) async => Result.success(response));
 
       final res = await channel.sendEvent(type: 'party_started', parentId: 'parent-id', custom: custom);
 
-      expect(res.getOrNull(), const EventResponse(duration: '0.01ms'));
+      expect(res.getOrNull(), response);
       verify(
         () => client.sendEvent(channelId, channelType, type: 'party_started', parentId: 'parent-id', custom: custom),
       ).called(1);
@@ -5571,13 +5581,33 @@ void main() {
       verify(() => client.unpinChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test('`.on`', () async {
+    test('Channel.on delivers only the events of its own channel', () async {
       const eventType = 'test.event';
-      final event = Event(type: eventType, cid: channelCid);
+      final event = UnknownEvent(type: eventType, rawData: const {'cid': channelCid});
 
-      Future.microtask(() => client.addEvent(event));
+      Future.microtask(() {
+        client
+          ..addEvent(UnknownEvent(type: eventType, rawData: const {'cid': 'messaging:other'}))
+          ..addEvent(event);
+      });
 
-      return expectLater(channel.on(eventType), emitsInOrder([event]));
+      return expectLater(channel.on(eventType), emits(event));
+    });
+
+    test('Channel.on with a type argument delivers only events of that class', () async {
+      final event = MessageNewEvent(
+        cid: channelCid,
+        message: Message(id: 'message-id'),
+        watcherCount: 1,
+      );
+
+      Future.microtask(() {
+        client
+          ..addEvent(UnknownEvent(type: EventType.messageNew, rawData: const {'cid': channelCid}))
+          ..addEvent(event);
+      });
+
+      return expectLater(channel.on<MessageNewEvent>(), emits(event));
     });
 
     group('stale error message cleanup', () {
@@ -6109,17 +6139,13 @@ void main() {
       });
 
       test(
-        'should update channel messageCount when event contains channelMessageCount',
+        'should update channel messageCount from any event carrying channelMessageCount',
         () async {
           // Verify initial state - no messageCount
           expect(channel.messageCount, isNull);
 
-          // Create event with channelMessageCount
-          final messageCountEvent = Event(
-            cid: channel.cid,
-            type: EventType.messageNew,
-            channelMessageCount: 42,
-          );
+          // Any event carrying the channel's counts updates them
+          final messageCountEvent = MessageDeliveredEvent(cid: channel.cid, channelMessageCount: 42);
 
           // Dispatch event
           client.addEvent(messageCountEvent);
@@ -6136,14 +6162,14 @@ void main() {
         'should update channel messageCount from message.new and message.deleted events',
         () async {
           // Test with message.new event - count increases
-          final messageNewEvent = Event(
+          final messageNewEvent = MessageNewEvent(
             cid: channel.cid,
-            type: EventType.messageNew,
             message: Message(
               id: 'new-message-1',
               text: 'Hello world!',
               user: User(id: 'user-1'),
             ),
+            watcherCount: 1,
             channelMessageCount: 1,
           );
 
@@ -6152,14 +6178,14 @@ void main() {
           expect(channel.messageCount, equals(1));
 
           // Test with another message.new event - count increases
-          final messageNewEvent2 = Event(
+          final messageNewEvent2 = MessageNewEvent(
             cid: channel.cid,
-            type: EventType.messageNew,
             message: Message(
               id: 'new-message-2',
               text: 'Second message',
               user: User(id: 'user-2'),
             ),
+            watcherCount: 1,
             channelMessageCount: 2,
           );
 
@@ -6168,14 +6194,14 @@ void main() {
           expect(channel.messageCount, equals(2));
 
           // Test with message.deleted event - count decreases
-          final messageDeletedEvent = Event(
+          final messageDeletedEvent = MessageDeletedEvent(
             cid: channel.cid,
-            type: EventType.messageDeleted,
             message: Message(
               id: 'new-message-1',
               text: 'Hello world!',
               user: User(id: 'user-1'),
             ),
+            hardDelete: false,
             channelMessageCount: 1,
           );
 
@@ -6208,11 +6234,7 @@ void main() {
           expect(channel.messageCount, isNull);
 
           // Update messageCount via event
-          final messageCountEvent = Event(
-            cid: channel.cid,
-            type: EventType.messageNew,
-            channelMessageCount: 100,
-          );
+          final messageCountEvent = MessageDeliveredEvent(cid: channel.cid, channelMessageCount: 100);
 
           client.addEvent(messageCountEvent);
           await Future.delayed(Duration.zero);
@@ -6236,14 +6258,14 @@ void main() {
           // Update messageCount multiple times, repeating one of the counts.
           final counts = [1, 5, 5, 10];
           for (final (index, count) in counts.indexed) {
-            final event = Event(
+            final event = MessageNewEvent(
               cid: channel.cid,
-              type: EventType.messageNew,
               message: Message(
                 id: 'msg-$index',
                 text: 'Message $count',
                 user: User(id: 'user-1'),
               ),
+              watcherCount: 1,
               channelMessageCount: count,
             );
 
@@ -6275,9 +6297,8 @@ void main() {
       await Future.delayed(Duration.zero);
 
       client.addEvent(
-        Event(
+        ChannelUpdatedEvent(
           cid: channel.cid,
-          type: EventType.channelUpdated,
           channel: ChannelModel(id: channelId, type: channelType),
         ),
       );
@@ -6340,21 +6361,13 @@ void main() {
       });
 
       test(
-        'should update channel memberCount when event contains channelMemberCount',
+        'should update channel memberCount from any event carrying channelMemberCount',
         () async {
           // Verify initial state - default memberCount
           expect(channel.memberCount, equals(0));
 
-          // Create event with channelMemberCount
-          final memberCountEvent = Event(
-            cid: channel.cid,
-            type: EventType.memberAdded,
-            member: Member(
-              userId: 'user-1',
-              user: User(id: 'user-1'),
-            ),
-            channelMemberCount: 42,
-          );
+          // Any event carrying the channel's counts updates them
+          final memberCountEvent = MessageDeliveredEvent(cid: channel.cid, channelMemberCount: 42);
 
           // Dispatch event
           client.addEvent(memberCountEvent);
@@ -6371,9 +6384,9 @@ void main() {
         'should update channel memberCount from member.added and member.removed events',
         () async {
           // Test with member.added event - count increases
-          final memberAddedEvent = Event(
+          final memberAddedEvent = MemberAddedEvent(
             cid: channel.cid,
-            type: EventType.memberAdded,
+            channel: ChannelModel(cid: channel.cid),
             member: Member(
               userId: 'user-1',
               user: User(id: 'user-1'),
@@ -6387,9 +6400,9 @@ void main() {
           expect(channel.state?.channelState.members?.map((it) => it.userId), equals(['user-1']));
 
           // Test with another member.added event - count increases
-          final memberAddedEvent2 = Event(
+          final memberAddedEvent2 = MemberAddedEvent(
             cid: channel.cid,
-            type: EventType.memberAdded,
+            channel: ChannelModel(cid: channel.cid),
             member: Member(
               userId: 'user-2',
               user: User(id: 'user-2'),
@@ -6406,9 +6419,13 @@ void main() {
           );
 
           // Test with member.removed event - count decreases
-          final memberRemovedEvent = Event(
+          final memberRemovedEvent = MemberRemovedEvent(
             cid: channel.cid,
-            type: EventType.memberRemoved,
+            channel: ChannelModel(cid: channel.cid),
+            member: Member(
+              userId: 'user-1',
+              user: User(id: 'user-1'),
+            ),
             user: User(id: 'user-1'),
             channelMemberCount: 1,
           );
@@ -6443,15 +6460,7 @@ void main() {
           expect(channel.memberCount, equals(0));
 
           // Update memberCount via event
-          final memberCountEvent = Event(
-            cid: channel.cid,
-            type: EventType.memberAdded,
-            member: Member(
-              userId: 'user-1',
-              user: User(id: 'user-1'),
-            ),
-            channelMemberCount: 100,
-          );
+          final memberCountEvent = MessageDeliveredEvent(cid: channel.cid, channelMemberCount: 100);
 
           client.addEvent(memberCountEvent);
           await Future.delayed(Duration.zero);
@@ -6469,9 +6478,9 @@ void main() {
         () async {
           // Seed a known member count.
           client.addEvent(
-            Event(
+            MemberAddedEvent(
               cid: channel.cid,
-              type: EventType.memberAdded,
+              channel: ChannelModel(cid: channel.cid),
               member: Member(
                 userId: 'user-1',
                 user: User(id: 'user-1'),
@@ -6485,9 +6494,9 @@ void main() {
 
           // An event without the field should leave the count untouched.
           client.addEvent(
-            Event(
+            MemberAddedEvent(
               cid: channel.cid,
-              type: EventType.memberAdded,
+              channel: ChannelModel(cid: channel.cid),
               member: Member(
                 userId: 'user-2',
                 user: User(id: 'user-2'),
@@ -6511,9 +6520,9 @@ void main() {
           // Update memberCount multiple times, repeating one of the counts.
           final counts = [1, 5, 5, 10];
           for (final (index, count) in counts.indexed) {
-            final event = Event(
+            final event = MemberAddedEvent(
               cid: channel.cid,
-              type: EventType.memberAdded,
+              channel: ChannelModel(cid: channel.cid),
               member: Member(
                 userId: 'user-$index',
                 user: User(id: 'user-$index'),
@@ -6597,7 +6606,6 @@ void main() {
       // Fallback values
       registerFallbackValue(FakeMessage());
       registerFallbackValue(FakeAttachmentFile());
-      registerFallbackValue(FakeEvent());
 
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
@@ -6674,11 +6682,25 @@ void main() {
 
         when(
           () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
-        ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0.01ms')));
+        ).thenAnswer(
+          (_) async => Result.success(
+            EventResponse(
+              duration: '0.01ms',
+              event: UnknownEvent(type: 'test.event'),
+            ),
+          ),
+        );
 
         when(
           () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
-        ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0.01ms')));
+        ).thenAnswer(
+          (_) async => Result.success(
+            EventResponse(
+              duration: '0.01ms',
+              event: UnknownEvent(type: 'test.event'),
+            ),
+          ),
+        );
 
         await expectLater(channel.keyStroke(), completion(isA<Success<void>>()));
 
@@ -6709,10 +6731,24 @@ void main() {
 
       when(
         () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
-      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0ms')));
+      ).thenAnswer(
+        (_) async => Result.success(
+          EventResponse(
+            duration: '0ms',
+            event: UnknownEvent(type: 'test.event'),
+          ),
+        ),
+      );
       when(
         () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
-      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0ms')));
+      ).thenAnswer(
+        (_) async => Result.success(
+          EventResponse(
+            duration: '0ms',
+            event: UnknownEvent(type: 'test.event'),
+          ),
+        ),
+      );
       when(
         () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
       ).thenAnswer((_) async => Result.success(SendMessageResponse(duration: '0ms', message: message)));
@@ -6742,10 +6778,24 @@ void main() {
 
       when(
         () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
-      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0ms')));
+      ).thenAnswer(
+        (_) async => Result.success(
+          EventResponse(
+            duration: '0ms',
+            event: UnknownEvent(type: 'test.event'),
+          ),
+        ),
+      );
       when(
         () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
-      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0ms')));
+      ).thenAnswer(
+        (_) async => Result.success(
+          EventResponse(
+            duration: '0ms',
+            event: UnknownEvent(type: 'test.event'),
+          ),
+        ),
+      );
       when(
         () => client.updateMessage(any(that: isSameMessageAs(message))),
       ).thenAnswer((_) async => Result.success(UpdateMessageResponse(duration: '0ms', message: message)));
@@ -6776,10 +6826,24 @@ void main() {
 
       when(
         () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
-      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0ms')));
+      ).thenAnswer(
+        (_) async => Result.success(
+          EventResponse(
+            duration: '0ms',
+            event: UnknownEvent(type: 'test.event'),
+          ),
+        ),
+      );
       when(
         () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
-      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0ms')));
+      ).thenAnswer(
+        (_) async => Result.success(
+          EventResponse(
+            duration: '0ms',
+            event: UnknownEvent(type: 'test.event'),
+          ),
+        ),
+      );
       when(
         () => client.scheduleMessage(
           any(that: isSameMessageAs(message)),
@@ -6885,7 +6949,14 @@ void main() {
 
       when(
         () => client.sendEvent(channelId, channelType, type: EventType.typingStart),
-      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0.01ms')));
+      ).thenAnswer(
+        (_) async => Result.success(
+          EventResponse(
+            duration: '0.01ms',
+            event: UnknownEvent(type: 'test.event'),
+          ),
+        ),
+      );
 
       await expectLater(channel.startTyping(), completion(isA<Success<void>>()));
 
@@ -6953,7 +7024,14 @@ void main() {
 
       when(
         () => client.sendEvent(channelId, channelType, type: EventType.typingStop),
-      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0.01ms')));
+      ).thenAnswer(
+        (_) async => Result.success(
+          EventResponse(
+            duration: '0.01ms',
+            event: UnknownEvent(type: 'test.event'),
+          ),
+        ),
+      );
 
       await expectLater(channel.stopTyping(), completion(isA<Success<void>>()));
 
@@ -7004,7 +7082,14 @@ void main() {
       final channel = Channel.fromState(client, channelState);
       when(
         () => client.sendEvent(channelId, channelType, type: any(named: 'type')),
-      ).thenAnswer((_) async => const Result.success(EventResponse(duration: '0.01ms')));
+      ).thenAnswer(
+        (_) async => Result.success(
+          EventResponse(
+            duration: '0.01ms',
+            event: UnknownEvent(type: 'test.event'),
+          ),
+        ),
+      );
 
       unawaited(channel.keyStroke());
       channel.dispose();
