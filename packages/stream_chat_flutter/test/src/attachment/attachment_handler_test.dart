@@ -10,7 +10,7 @@ void main() {
       final attachment = Attachment(
         title: 'test image attachment',
         type: 'image',
-        extraData: const {
+        custom: const {
           'mime_type': 'png',
         },
       );
@@ -29,7 +29,7 @@ void main() {
       final attachment = Attachment(
         title: 'test giphy attachment',
         type: 'giphy',
-        extraData: const {
+        custom: const {
           'original': 'https://giphy.com/gifs/nrkp3-dance-happy-3o7TKnCdBx5cMg0qti',
         },
       );

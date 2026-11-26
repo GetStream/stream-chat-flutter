@@ -716,7 +716,7 @@ class Channel {
           it.file!,
           onSendProgress: onSendProgress,
           cancelToken: cancelToken,
-          extraData: it.extraData,
+          extraData: it.custom,
         );
 
         throttledUpdateAttachment.cancel();
@@ -1410,19 +1410,19 @@ class Channel {
 
   /// Sends a static location to this channel.
   ///
-  /// Optionally, provide a [messageText] and [extraData] to send along with
-  /// the location.
+  /// A [messageText] and [custom] data, when given, are sent in the message
+  /// with the location.
   Future<SendMessageResponse> sendStaticLocation({
     String? id,
     String? messageText,
     String? createdByDeviceId,
     required LocationCoordinate location,
-    Map<String, Object?> extraData = const {},
+    Map<String, Object?> custom = const {},
   }) {
     final message = Message(
       id: id,
       text: messageText,
-      extraData: extraData,
+      custom: custom,
     );
 
     final currentUserId = _client.state.currentUser?.id;
@@ -1442,20 +1442,20 @@ class Channel {
 
   /// Sends a live location sharing message to this channel.
   ///
-  /// Optionally, provide a [messageText] and [extraData] to send along with
-  /// the location.
+  /// A [messageText] and [custom] data, when given, are sent in the message
+  /// with the location.
   Future<SendMessageResponse> startLiveLocationSharing({
     String? id,
     String? messageText,
     String? createdByDeviceId,
     required DateTime endSharingAt,
     required LocationCoordinate location,
-    Map<String, Object?> extraData = const {},
+    Map<String, Object?> custom = const {},
   }) {
     final message = Message(
       id: id,
       text: messageText,
-      extraData: extraData,
+      custom: custom,
     );
 
     final currentUserId = _client.state.currentUser?.id;
@@ -1732,12 +1732,13 @@ class Channel {
     );
   }
 
-  /// Create a reminder for the given [messageId].
+  /// Creates a reminder on the message with the id [messageId].
   ///
-  /// Optionally, provide a [remindAt] date to set when the reminder should
-  /// be triggered. If not provided, the reminder will be created as a
-  /// bookmark type instead.
-  Future<CreateReminderResponse> createReminder(
+  /// The reminder is due at [remindAt]. Without it, the reminder is a bookmark,
+  /// which is never due.
+  ///
+  /// Throws a [StateError] if this channel is not initialized.
+  Future<Result<CreateReminderResponse>> createReminder(
     String messageId, {
     DateTime? remindAt,
   }) {
@@ -1748,12 +1749,13 @@ class Channel {
     );
   }
 
-  /// Update an existing reminder with the given [reminderId].
+  /// Updates the reminder on the message with the id [messageId].
   ///
-  /// Optionally, provide a [remindAt] date to set when the reminder should
-  /// be triggered. If not provided, the reminder will be updated as a
-  /// bookmark type instead.
-  Future<UpdateReminderResponse> updateReminder(
+  /// The reminder becomes due at [remindAt]. Without it, the reminder becomes a
+  /// bookmark, which is never due.
+  ///
+  /// Throws a [StateError] if this channel is not initialized.
+  Future<Result<UpdateReminderResponse>> updateReminder(
     String messageId, {
     DateTime? remindAt,
   }) {
@@ -1764,8 +1766,10 @@ class Channel {
     );
   }
 
-  /// Remove the reminder for the given [messageId].
-  Future<EmptyResponse> deleteReminder(String messageId) {
+  /// Deletes the reminder on the message with the id [messageId].
+  ///
+  /// Throws a [StateError] if this channel is not initialized.
+  Future<Result<DeleteReminderResponse>> deleteReminder(String messageId) {
     _checkInitialized();
     return _client.deleteReminder(messageId);
   }
@@ -1785,7 +1789,7 @@ class Channel {
     // ignore: parameter_assignments
     reaction = reaction.copyWith(
       messageId: messageId,
-      user: _client.state.currentUser,
+      user: _client.state.currentUser ?? reaction.user,
     );
 
     final updatedMessage = message.addMyReaction(

@@ -13,7 +13,7 @@ extension PinnedMessageReactionEntityX on PinnedMessageReactionEntity {
     emojiCode: emojiCode,
     createdAt: createdAt,
     updatedAt: updatedAt,
-    extraData: extraData ?? <String, Object>{},
+    custom: custom ?? <String, Object>{},
   );
 }
 
@@ -28,6 +28,6 @@ extension PReactionX on Reaction {
     emojiCode: emojiCode,
     createdAt: createdAt,
     updatedAt: updatedAt,
-    extraData: extraData,
+    custom: custom,
   );
 }

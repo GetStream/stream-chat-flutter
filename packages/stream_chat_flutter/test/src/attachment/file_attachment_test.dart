@@ -32,7 +32,7 @@ void main() {
                   file: Attachment(
                     type: 'file',
                     title: 'example.pdf',
-                    extraData: const {
+                    custom: const {
                       'mime_type': 'pdf',
                     },
                   ),

@@ -47,8 +47,8 @@ class DraftMessages extends Table {
   /// The channel cid of which this message is part of
   TextColumn get channelCid => text().references(Channels, #cid, onDelete: KeyAction.cascade)();
 
-  /// Message custom extraData
-  TextColumn get extraData => text().nullable().map(MapConverter())();
+  /// Custom data attached to the draft message.
+  TextColumn get custom => text().nullable().map(MapConverter())();
 
   @override
   Set<Column> get primaryKey => {id};

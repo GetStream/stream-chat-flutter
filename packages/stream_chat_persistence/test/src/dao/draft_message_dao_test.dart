@@ -78,7 +78,7 @@ void main() {
           quotedMessageId: withQuotedMessage ? messages[index].id : null,
           parentId: withParentMessage ? messages[index].id : null,
           pollId: withPoll && polls != null ? polls[index].id : null,
-          extraData: {'extra_test_field': 'extraTestData$index'},
+          custom: {'extra_test_field': 'extraTestData$index'},
         );
 
         return Draft(

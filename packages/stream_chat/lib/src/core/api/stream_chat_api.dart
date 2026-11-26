@@ -7,7 +7,6 @@ import 'general_api.dart';
 import 'message_api.dart';
 import 'moderation_api.dart';
 import 'push_preferences_api.dart';
-import 'reminders_api.dart';
 import 'scheduled_messages_api.dart';
 import 'threads_api.dart';
 import 'user_api.dart';
@@ -61,10 +60,6 @@ class StreamChatApi {
   /// Api dedicated to moderation operations
   ModerationApi get moderation => _moderation ??= ModerationApi(_client);
   ModerationApi? _moderation;
-
-  /// Api dedicated to message reminders operations
-  RemindersApi get reminders => _reminders ??= RemindersApi(_client);
-  RemindersApi? _reminders;
 
   /// API dedicated to scheduled message operations.
   ScheduledMessagesApi get scheduledMessages => _scheduledMessages ??= ScheduledMessagesApi(_client);

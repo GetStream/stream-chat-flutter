@@ -68,10 +68,10 @@ void main() {
     expect(message.mentionedUsers.map((user) => user.id), ['bob']);
   });
 
-  test('ScheduledMessage.fromJson reads custom data as extra data', () {
+  test('ScheduledMessage.fromJson reads custom data as custom', () {
     final message = ScheduledMessage.fromJson(scheduledMessageJson()).message;
 
-    expect(message.extraData, {'mood': 'happy'});
+    expect(message.custom, {'mood': 'happy'});
   });
 
   test('ScheduledMessage.fromJson keeps a custom field named custom as it is', () {
@@ -84,7 +84,7 @@ void main() {
 
     final message = ScheduledMessage.fromJson(json).message;
 
-    expect(message.extraData, {
+    expect(message.custom, {
       'custom': {'mood': 'happy'},
     });
   });

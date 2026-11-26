@@ -26,14 +26,18 @@ Attachment _$AttachmentFromJson(Map<String, dynamic> json) => Attachment(
   authorIcon: json['author_icon'] as String?,
   assetUrl: json['asset_url'] as String?,
   actions:
-      (json['actions'] as List<dynamic>?)?.map((e) => Action.fromJson(e as Map<String, dynamic>)).toList() ?? const [],
+      (json['actions'] as List<dynamic>?)
+          ?.map((e) => const ActionV1JsonConverter().fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
   originalWidth: (json['original_width'] as num?)?.toInt(),
   originalHeight: (json['original_height'] as num?)?.toInt(),
-  extraData: json['extra_data'] as Map<String, dynamic>? ?? const {},
+  custom: json['extra_data'] as Map<String, dynamic>? ?? const {},
   file: json['file'] == null ? null : AttachmentFile.fromJson(json['file'] as Map<String, dynamic>),
   uploadState: json['upload_state'] == null
       ? const UploadState.success()
       : UploadState.fromJson(json['upload_state'] as Map<String, dynamic>),
+  giphy: json['giphy'] as Map<String, dynamic>?,
 );
 
 Map<String, dynamic> _$AttachmentToJson(Attachment instance) => <String, dynamic>{
@@ -54,11 +58,12 @@ Map<String, dynamic> _$AttachmentToJson(Attachment instance) => <String, dynamic
   'author_link': ?instance.authorLink,
   'author_icon': ?instance.authorIcon,
   'asset_url': ?instance.assetUrl,
-  'actions': ?instance.actions?.map((e) => e.toJson()).toList(),
+  'actions': ?instance.actions?.map(const ActionV1JsonConverter().toJson).toList(),
   'original_width': ?instance.originalWidth,
   'original_height': ?instance.originalHeight,
   'file': ?instance.file?.toJson(),
   'upload_state': instance.uploadState.toJson(),
-  'extra_data': instance.extraData,
+  'extra_data': instance.custom,
   'id': instance.id,
+  'giphy': ?instance.giphy,
 };

@@ -54,7 +54,7 @@ class GiphyInfo {
 extension GiphyInfoX on Attachment {
   /// Returns the [GiphyInfo] for the given [type].
   GiphyInfo? giphyInfo(GiphyInfoType type) {
-    final giphy = extraData['giphy'] as Map<String, Object?>?;
+    final giphy = this.giphy;
     if (giphy == null) return null;
 
     final info = giphy[type.value] as Map<String, Object?>?;

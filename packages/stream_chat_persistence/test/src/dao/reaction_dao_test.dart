@@ -34,7 +34,7 @@ void main() {
       showInChannel: math.Random().nextBool(),
       replyCount: 3,
       updatedAt: DateTime.now(),
-      extraData: const {'extra_test_field': 'extraTestData'},
+      custom: const {'extra_test_field': 'extraTestData'},
       text: 'Dummy text',
       pinned: math.Random().nextBool(),
       pinnedAt: DateTime.now(),
@@ -54,7 +54,7 @@ void main() {
           messageId: message.id,
           score: count + 3,
           emojiCode: '😂$index',
-          extraData: const {'extra_test_field': 'extraTestData'},
+          custom: const {'extra_test_field': 'extraTestData'},
         );
       },
     );
@@ -90,7 +90,7 @@ void main() {
       messageId: messageId,
       score: 30,
       emojiCode: '🎈',
-      extraData: const {'extra_test_field': 'extraTestData'},
+      custom: const {'extra_test_field': 'extraTestData'},
     );
 
     await reactionDao.updateReactions([copyReaction, newReaction]);

@@ -299,7 +299,7 @@ extension on RecordStateRecording {
     final attachment = Attachment(
       file: attachmentFile,
       type: AttachmentType.voiceRecording,
-      extraData: {
+      custom: {
         'duration': duration.inMilliseconds / 1000,
         'waveform_data': sampling.resampleWaveformData(waveform, 100),
       },

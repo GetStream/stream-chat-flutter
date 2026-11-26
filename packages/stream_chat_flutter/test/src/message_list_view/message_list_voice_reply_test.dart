@@ -83,7 +83,7 @@ Attachment _voiceRecording() => Attachment(
   type: AttachmentType.voiceRecording,
   title: 'voice_note.m4a',
   file: AttachmentFile(size: 10000, path: 'voice_recordings/voice_note.m4a'),
-  extraData: {'duration': 12, 'waveform_data': List.filled(50, 0.5)},
+  custom: {'duration': 12, 'waveform_data': List.filled(50, 0.5)},
 );
 
 Attachment _file() => Attachment(

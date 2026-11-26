@@ -76,7 +76,7 @@ void main() {
       localUpdatedAt: DateTime.now(),
       remoteUpdatedAt: DateTime.now().add(const Duration(seconds: 1)),
       messageTextUpdatedAt: DateTime.now().add(const Duration(minutes: 5)),
-      extraData: {'extra_test_data': 'extraData'},
+      custom: {'extra_test_data': 'custom'},
       userId: user.id,
       channelRole: 'channel_member',
       localDeletedAt: DateTime.now(),
@@ -93,6 +93,9 @@ void main() {
         'language': 'en',
       },
       restrictedVisibility: const ['user-id-2'],
+      html: '<p>Hello</p>',
+      mml: '<mml>Hello</mml>',
+      deletedReplyCount: 2,
     );
     final message = entity.toMessage(
       user: user,
@@ -127,7 +130,7 @@ void main() {
       message.messageTextUpdatedAt,
       isSameDateAs(entity.messageTextUpdatedAt),
     );
-    expect(message.extraData, entity.extraData);
+    expect(message.custom, entity.custom);
     expect(message.user!.id, entity.userId);
     expect(message.localDeletedAt, isSameDateAs(entity.localDeletedAt));
     expect(message.remoteDeletedAt, isSameDateAs(entity.remoteDeletedAt));
@@ -149,6 +152,10 @@ void main() {
       expect(messageAttachment.assetUrl, entityAttachment.assetUrl);
     }
     expect(message.restrictedVisibility, entity.restrictedVisibility);
+    expect(message.cid, entity.channelCid);
+    expect(message.html, entity.html);
+    expect(message.mml, entity.mml);
+    expect(message.deletedReplyCount, entity.deletedReplyCount);
   });
 
   test('toEntity should map message into MessageEntity', () {
@@ -217,7 +224,7 @@ void main() {
       localUpdatedAt: DateTime.now(),
       updatedAt: DateTime.now().add(const Duration(seconds: 1)),
       messageTextUpdatedAt: DateTime.now().add(const Duration(minutes: 5)),
-      extraData: const {'extra_test_data': 'extraData'},
+      custom: const {'extra_test_data': 'custom'},
       user: user,
       channelRole: 'channel_member',
       localDeletedAt: DateTime.now(),
@@ -234,6 +241,9 @@ void main() {
         'language': 'en',
       },
       restrictedVisibility: const ['user-id-2'],
+      html: '<p>Hello</p>',
+      mml: '<mml>Hello</mml>',
+      deletedReplyCount: 2,
     );
     final entity = message.toPinnedEntity(cid: cid);
     expect(entity, isA<PinnedMessageEntity>());
@@ -256,7 +266,7 @@ void main() {
       message.messageTextUpdatedAt,
       isSameDateAs(entity.messageTextUpdatedAt),
     );
-    expect(entity.extraData, message.extraData);
+    expect(entity.custom, message.custom);
     expect(entity.userId, message.user!.id);
     expect(entity.localDeletedAt, isSameDateAs(message.localDeletedAt));
     expect(entity.remoteDeletedAt, isSameDateAs(message.remoteDeletedAt));
@@ -274,5 +284,8 @@ void main() {
     );
     expect(entity.i18n, message.i18n);
     expect(entity.restrictedVisibility, message.restrictedVisibility);
+    expect(entity.html, message.html);
+    expect(entity.mml, message.mml);
+    expect(entity.deletedReplyCount, message.deletedReplyCount);
   });
 }

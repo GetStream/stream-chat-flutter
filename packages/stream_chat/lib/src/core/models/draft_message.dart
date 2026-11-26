@@ -29,7 +29,7 @@ class DraftMessage extends Equatable {
     this.command,
     this.poll,
     this._pollId,
-    this.extraData = const {},
+    this.custom = const {},
   }) : id = id ?? const Uuid().v4(),
        type = MessageType(type);
 
@@ -92,12 +92,14 @@ class DraftMessage extends Equatable {
   String? get pollId => _pollId ?? poll?.id;
   final String? _pollId;
 
-  /// Message custom extraData.
-  final Map<String, Object?> extraData;
+  /// This draft message's custom data.
+  @JsonKey(name: 'extra_data')
+  final Map<String, Object?> custom;
 
-  /// Known top level fields.
+  /// The JSON keys [DraftMessage.fromJson] reads into named fields, or leaves
+  /// out.
   ///
-  /// Useful for [Serializer] methods.
+  /// Every other key is kept in [custom].
   static const topLevelFields = [
     'id',
     'text',
@@ -114,11 +116,15 @@ class DraftMessage extends Equatable {
     'extra_data',
   ];
 
-  /// Serialize to json.
+  /// Serializes this draft message to JSON.
+  ///
+  /// Writes the entries of [custom] at the root, leaving out any named like one
+  /// of [topLevelFields].
   Map<String, dynamic> toJson() {
     final message = removeMentionsIfNotIncluded();
     final json = Serializer.moveFromExtraDataToRoot(
       _$DraftMessageToJson(message),
+      topLevelFields: topLevelFields,
     );
 
     // If the message contains command we should append it to the text
@@ -145,7 +151,7 @@ class DraftMessage extends Equatable {
     String? command,
     Poll? poll,
     String? pollId,
-    Map<String, Object?>? extraData,
+    Map<String, Object?>? custom,
   }) {
     return DraftMessage(
       id: id ?? this.id,
@@ -161,7 +167,7 @@ class DraftMessage extends Equatable {
       command: command ?? this.command,
       poll: poll ?? this.poll,
       pollId: pollId ?? this.pollId,
-      extraData: extraData ?? this.extraData,
+      custom: custom ?? this.custom,
     );
   }
 
@@ -178,7 +184,7 @@ class DraftMessage extends Equatable {
     silent,
     command,
     pollId,
-    extraData,
+    custom,
   ];
 }
 
@@ -205,7 +211,7 @@ extension MessageToDraftMessage on Message {
       command: command,
       poll: poll,
       pollId: pollId,
-      extraData: extraData,
+      custom: custom,
     );
   }
 }
@@ -234,7 +240,7 @@ extension DraftMessageToMessage on DraftMessage {
       command: command,
       poll: poll,
       pollId: pollId,
-      extraData: extraData,
+      custom: custom,
     );
   }
 }

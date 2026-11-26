@@ -285,7 +285,7 @@ Future<bool> _scheduleAgain(
     quotedMessageId: quotedMessageId,
     parentId: content.parentId,
     showInChannel: content.showInChannel,
-    extraData: content.extraData,
+    custom: content.custom,
   );
 
   final ChannelModel(:id, :type) = ChannelModel(cid: scheduledMessage.cid);

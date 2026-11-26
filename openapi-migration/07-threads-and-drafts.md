@@ -39,7 +39,7 @@
 
 ## Risks
 
-- `DraftMessage.poll` is never decoded from JSON: `poll` is not in `DraftMessage.topLevelFields`, so the key would land in `extraData`, and the draft payload carries `poll_id` only. Its `PollV1JsonConverter` exists so the generated code compiles. Decide here whether the field stays constructor-only or goes.
+- `DraftMessage.poll` is never decoded from JSON: `poll` is not in `DraftMessage.topLevelFields`, so the key would land in `custom`, and the draft payload carries `poll_id` only. Its `PollV1JsonConverter` exists so the generated code compiles. Decide here whether the field stays constructor-only or goes.
 - The four draft methods live in `message_api.dart`, not `threads_api.dart` — this group reaches into that file, and group 10 must leave those four alone.
 - `Draft` and `DraftMessage` are public, persisted, and read by `StreamDraftListController` in `stream_chat_flutter_core`.
 

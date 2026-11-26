@@ -119,6 +119,7 @@ class Event extends WsEvent {
   final Member? member;
 
   /// The reaction sent with the event
+  @ReactionV1JsonConverter()
   final Reaction? reaction;
 
   /// The number of unread messages for current user
@@ -182,6 +183,7 @@ class Event extends WsEvent {
   final Draft? draft;
 
   /// The message reminder sent with the event.
+  @MessageReminderV1JsonConverter()
   final MessageReminder? reminder;
 
   /// The scheduled message this event is about.

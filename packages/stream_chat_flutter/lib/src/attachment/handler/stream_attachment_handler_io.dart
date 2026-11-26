@@ -111,7 +111,7 @@ class StreamAttachmentHandler extends StreamAttachmentHandlerBase {
       final duration = videoController.value.duration;
       if (duration.inSeconds > 0) {
         return attachment.copyWith(
-          extraData: {...attachment.extraData, 'duration': duration.inSeconds},
+          custom: {...attachment.custom, 'duration': duration.inSeconds},
         );
       }
     } catch (_) {

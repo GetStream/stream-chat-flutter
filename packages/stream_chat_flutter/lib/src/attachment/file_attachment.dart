@@ -177,7 +177,7 @@ class _FileAttachmentSubtitle extends StatelessWidget {
 
     final colorScheme = context.streamColorScheme;
 
-    final attachmentSize = attachment.file?.size ?? attachment.extraData['file_size'];
+    final attachmentSize = attachment.file?.size ?? attachment.custom['file_size'];
 
     return attachment.uploadState.when(
       success: () => Text(fileSize(attachmentSize)),

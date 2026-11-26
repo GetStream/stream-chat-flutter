@@ -167,8 +167,8 @@ void main() {
       await controller.stopRecord();
 
       final stoppedState = controller.value as RecordStateStopped;
-      expect(stoppedState.audioRecording.extraData['duration'], isNotNull);
-      expect(stoppedState.audioRecording.extraData['waveform_data'], isNotNull);
+      expect(stoppedState.audioRecording.custom['duration'], isNotNull);
+      expect(stoppedState.audioRecording.custom['waveform_data'], isNotNull);
     });
   });
 

@@ -15,7 +15,7 @@ void main() {
         size: 10000,
         path: 'voice_recordings/test1.m4a',
       ),
-      extraData: {
+      custom: {
         'duration': 300,
         'waveform_data': List.filled(50, 0.5),
       },
@@ -28,7 +28,7 @@ void main() {
         size: 30000,
         path: 'voice_recordings/test2.m4a',
       ),
-      extraData: {
+      custom: {
         'duration': 900,
         'waveform_data': List.filled(50, 0.5),
       },

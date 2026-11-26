@@ -13,7 +13,7 @@ extension ReactionEntityX on ReactionEntity {
     emojiCode: emojiCode,
     createdAt: createdAt,
     updatedAt: updatedAt,
-    extraData: extraData ?? <String, Object>{},
+    custom: custom ?? <String, Object>{},
   );
 }
 
@@ -28,6 +28,6 @@ extension ReactionX on Reaction {
     emojiCode: emojiCode,
     createdAt: createdAt,
     updatedAt: updatedAt,
-    extraData: extraData,
+    custom: custom,
   );
 }

@@ -10,7 +10,7 @@ import '../../stream_chat_flutter.dart';
 ///   white outside-aligned border so it reads against any thumbnail.
 /// - A "video" [StreamMediaBadge] pinned to the bottom-leading corner when
 ///   [attachment] is a video; the badge surfaces the video's duration in
-///   `M:SS` format when present on `extraData['duration']`.
+///   `M:SS` format when present on `custom['duration']`.
 ///
 /// The tile is tappable when [onTap] / [onLongPress] is set; the ripple is
 /// drawn over the media via a transparent [Material].
@@ -67,7 +67,7 @@ class StreamMediaGalleryItem extends StatelessWidget {
 
     Duration? videoDuration;
     if (isVideo) {
-      final secs = attachment.extraData['duration'] as num?;
+      final secs = attachment.custom['duration'] as num?;
       if (secs != null) videoDuration = Duration(seconds: secs.round());
     }
 

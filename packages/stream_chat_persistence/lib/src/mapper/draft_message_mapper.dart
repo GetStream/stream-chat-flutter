@@ -34,7 +34,7 @@ extension DraftMessageEntityX on DraftMessageEntity {
         command: command,
         poll: poll,
         pollId: pollId,
-        extraData: extraData ?? <String, Object>{},
+        custom: custom ?? <String, Object>{},
       ),
       parentId: parentId,
       parentMessage: parentMessage,
@@ -64,6 +64,6 @@ extension DraftMessageX on Draft {
     silent: message.silent,
     command: message.command,
     pollId: message.pollId,
-    extraData: message.extraData,
+    custom: message.custom,
   );
 }

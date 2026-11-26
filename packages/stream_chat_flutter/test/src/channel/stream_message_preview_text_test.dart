@@ -436,7 +436,7 @@ void main() {
         attachments: [
           Attachment(
             type: AttachmentType.voiceRecording,
-            extraData: const {'duration': 125},
+            custom: const {'duration': 125},
           ),
         ],
       );
@@ -1246,7 +1246,7 @@ void main() {
         attachments: [
           Attachment(
             type: 'product',
-            extraData: const {'title': 'iPhone'},
+            custom: const {'title': 'iPhone'},
           ),
         ],
       );
@@ -1567,7 +1567,7 @@ void main() {
         attachments: [
           Attachment(
             type: 'voiceRecording',
-            extraData: const {'duration': 83.0},
+            custom: const {'duration': 83.0},
           ),
         ],
       );
@@ -1797,7 +1797,7 @@ void main() {
         attachments: [
           Attachment(
             type: AttachmentType.voiceRecording,
-            extraData: const {'duration': 83.0},
+            custom: const {'duration': 83.0},
           ),
         ],
       );
@@ -1893,7 +1893,7 @@ void main() {
         attachments: [
           Attachment(
             type: AttachmentType.voiceRecording,
-            extraData: const {'duration': 83.0},
+            custom: const {'duration': 83.0},
           ),
         ],
       );
@@ -2107,7 +2107,7 @@ class _CustomMessagePreviewFormatter extends StreamMessagePreviewFormatter {
     final attachment = attachments.firstOrNull;
 
     if (attachment?.type == 'product') {
-      final title = attachment?.extraData['title'] as String?;
+      final title = attachment?.custom['title'] as String?;
       return TextSpan(text: '🛍️ ${title ?? "Product"}');
     }
 

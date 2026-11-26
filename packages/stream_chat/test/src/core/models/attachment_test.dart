@@ -24,6 +24,10 @@ void main() {
       expect(attachment.actions, isNotEmpty);
       expect(attachment.actions, hasLength(3));
       expect(attachment.actions![0], isA<Action>());
+      expect(attachment.giphy, {
+        'original': {'url': 'https://media0.giphy.com/media/3o7TKnCdBx5cMg0qti/giphy.gif'},
+      });
+      expect(attachment.custom, isEmpty);
     });
 
     test('should serialize to json correctly', () {
@@ -44,7 +48,7 @@ void main() {
       );
     });
 
-    test('fileName, mimeType property and extraData manipulation', () {
+    test('fileName, mimeType property and custom data manipulation', () {
       final file = AttachmentFile(size: 3, path: 'myfolder/myfile.txt');
       final attachment = Attachment(file: file);
 
@@ -58,16 +62,16 @@ void main() {
         'mime_type': 'text/plain',
       });
 
-      // Setting the size and mimeType using extraData should work fine
+      // Setting the size and mimeType using custom data should work fine
       var newAttachment = Attachment(
-        extraData: const {
+        custom: const {
           'file_size': 6,
           'mime_type': 'application/pdf',
         },
       );
 
-      expect(newAttachment.extraData['file_size'], 6);
-      expect(newAttachment.extraData['mime_type'], 'application/pdf');
+      expect(newAttachment.custom['file_size'], 6);
+      expect(newAttachment.custom['mime_type'], 'application/pdf');
       expect(newAttachment.fileSize, 6);
       expect(newAttachment.mimeType, 'application/pdf');
 
@@ -75,8 +79,8 @@ void main() {
       final fileTwo = AttachmentFile(size: 12, path: 'myfolder/fileTwo.pdf');
       newAttachment = attachment.copyWith(file: fileTwo);
 
-      expect(newAttachment.extraData['file_size'], 12);
-      expect(newAttachment.extraData['mime_type'], 'application/pdf');
+      expect(newAttachment.custom['file_size'], 12);
+      expect(newAttachment.custom['mime_type'], 'application/pdf');
       expect(newAttachment.fileSize, 12);
       expect(newAttachment.mimeType, 'application/pdf');
 
@@ -84,14 +88,14 @@ void main() {
       final fileThree = AttachmentFile(size: 9, path: 'myfolder/fileThree.png');
       newAttachment = attachment.copyWith(
         file: fileThree,
-        extraData: {
+        custom: {
           'file_size': 88,
           'mime_type': 'application/pdf',
         },
       );
 
-      expect(newAttachment.extraData['file_size'], 9);
-      expect(newAttachment.extraData['mime_type'], 'image/png');
+      expect(newAttachment.custom['file_size'], 9);
+      expect(newAttachment.custom['mime_type'], 'image/png');
       expect(newAttachment.fileSize, 9);
       expect(newAttachment.mimeType, 'image/png');
     });
@@ -211,5 +215,70 @@ void main() {
         expect(attachment.toJson(), isNot(contains('type')));
       });
     });
+  });
+
+  test('Attachment.toJson writes the Giphy renditions, so an edited message keeps them', () {
+    final attachment = Attachment(
+      type: 'giphy',
+      giphy: const {
+        'original': {'url': 'https://example.com/original.gif'},
+      },
+    );
+
+    expect(attachment.toJson()['giphy'], {
+      'original': {'url': 'https://example.com/original.gif'},
+    });
+  });
+
+  test('Attachment.toJson leaves out custom data named like a field', () {
+    final attachment = Attachment(
+      title: 'Cat',
+      giphy: const {
+        'original': {'url': 'https://example.com/original.gif'},
+      },
+      custom: const {'title': 'custom', 'giphy': 'custom', 'caption': 'A cat'},
+    );
+
+    final json = attachment.toJson();
+
+    expect(json['title'], 'Cat');
+    expect(json['giphy'], {
+      'original': {'url': 'https://example.com/original.gif'},
+    });
+    expect(json['caption'], 'A cat');
+  });
+
+  test('Attachment.fromData reads back the upload state written by toData, whatever the custom data holds', () {
+    final attachment = Attachment(
+      type: 'file',
+      uploadState: const UploadState.success(),
+      custom: const {'upload_state': 'custom', 'caption': 'A file'},
+    );
+
+    final stored = Attachment.fromData(attachment.toData());
+
+    expect(stored.uploadState, const UploadState.success());
+    expect(stored.custom['caption'], 'A file');
+  });
+
+  test('Attachment.copyWith keeps the Giphy renditions', () {
+    final attachment = Attachment(
+      giphy: const {
+        'original': {'url': 'https://example.com/original.gif'},
+      },
+    );
+
+    expect(attachment.copyWith(title: 'Cat').giphy, attachment.giphy);
+  });
+
+  test('Attachment.fromData reads back the Giphy renditions written by toData', () {
+    final attachment = Attachment(
+      type: 'giphy',
+      giphy: const {
+        'original': {'url': 'https://example.com/original.gif'},
+      },
+    );
+
+    expect(Attachment.fromData(attachment.toData()), attachment);
   });
 }
