@@ -12,6 +12,7 @@ import '../pages/group_chat_details_screen.dart';
 import '../pages/group_info_screen.dart';
 import '../pages/new_chat_screen.dart';
 import '../pages/new_group_chat_screen.dart';
+import '../scheduled_messages/screens/scheduled_messages_screen.dart';
 import '../state/new_group_chat_state.dart';
 import '../widgets/split_view.dart';
 import 'routes.dart';
@@ -43,7 +44,7 @@ final appRoutes = [
             pageBuilder: (context, state) {
               final channel = _resolveChannel(context, state);
               final messageId = state.uri.queryParameters['mid'];
-              final parentId = state.uri.queryParameters['pid'];
+              final parentId = state.uri.queryParameters['parentId'];
 
               // Thread deep-links require the parent message to already be in
               // channel state, unless the caller passes it as `extra`. On cold
@@ -78,6 +79,7 @@ final appRoutes = [
                         builder: (context, parent) => StreamThreadPage(
                           parent: parent,
                           automaticallyImplyLeading: showBackButton,
+                          onScheduledMessagesBannerTap: _openScheduledMessages,
                           onViewInChannelTap: (message) {
                             GoRouter.of(context).goNamed(
                               Routes.CHANNEL_PAGE.name,
@@ -91,6 +93,7 @@ final appRoutes = [
 
                     return StreamChannelPage(
                       automaticallyImplyLeading: showBackButton,
+                      onScheduledMessagesBannerTap: _openScheduledMessages,
                       onChannelAvatarPressed: (context, channel) {
                         final isOneToOne = channel.isOneToOne;
                         final currentUserId = StreamChat.of(context).currentUser?.id;
@@ -153,6 +156,18 @@ final appRoutes = [
                   );
                 },
               ),
+              GoRoute(
+                name: Routes.SCHEDULED_MESSAGES.name,
+                path: Routes.SCHEDULED_MESSAGES.path,
+                builder: (BuildContext context, GoRouterState state) {
+                  // A thread's replies are listed by its parent alone.
+                  if (state.uri.queryParameters['parentId'] case final parentId?) {
+                    return ScheduledMessagesScreen(parentId: parentId);
+                  }
+
+                  return ScheduledMessagesScreen(cid: _resolveChannel(context, state).cid);
+                },
+              ),
             ],
           ),
         ],
@@ -200,4 +215,13 @@ final appRoutes = [
 Channel _resolveChannel(BuildContext context, GoRouterState state) {
   final [type, id] = state.pathParameters['cid']!.split(':');
   return StreamChat.of(context).client.channel(type, id: id);
+}
+
+// Opens the scheduled messages of [channel], or of the thread of [parent].
+void _openScheduledMessages(BuildContext context, Channel channel, Message? parent) {
+  GoRouter.of(context).pushNamed(
+    Routes.SCHEDULED_MESSAGES.name,
+    pathParameters: Routes.SCHEDULED_MESSAGES.params(channel),
+    queryParameters: {if (parent != null) 'parentId': parent.id},
+  );
 }

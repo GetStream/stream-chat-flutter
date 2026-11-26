@@ -7,11 +7,18 @@ import 'package:clock/clock.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
+import '../error/stream_chat_exception.dart';
 import 'channel_model.dart';
 import 'message.dart';
 import 'user.dart';
 
 part 'scheduled_message.g.dart';
+
+class _NullConst {
+  const _NullConst();
+}
+
+const _nullConst = _NullConst();
 
 /// A message that is sent to its channel at [scheduledAt].
 ///
@@ -36,7 +43,7 @@ final class ScheduledMessage extends Equatable {
     required this.message,
     required this.scheduledAt,
     required this.status,
-    this.failureReason,
+    this.failure,
     DateTime? createdAt,
     this.localCreatedAt,
     DateTime? updatedAt,
@@ -56,7 +63,18 @@ final class ScheduledMessage extends Equatable {
       updatedAt: scheduled.updatedAt,
     );
 
+    // A failed one without a reason failed to send.
+    if (scheduled.status == .failed && scheduled.failure == null) {
+      const failure = ScheduledMessageFailure.sendingFailed();
+      return scheduled.copyWith(message: message, failure: failure);
+    }
+
     return scheduled.copyWith(message: message);
+  }
+
+  static ScheduledMessageFailure? _failureFromJson(String? reason) {
+    if (reason == null) return null;
+    return .sendingFailed(reason: ScheduledMessageSendingFailureReason(reason));
   }
 
   /// The ID of this scheduled message.
@@ -93,10 +111,11 @@ final class ScheduledMessage extends Equatable {
   /// The stage of this scheduled message's lifecycle.
   final ScheduledMessageStatus status;
 
-  /// The reason this message could not be sent.
+  /// What stopped this message from being scheduled, changed or sent.
   ///
-  /// Only set when [status] is [ScheduledMessageStatus.failed].
-  final ScheduledMessageFailureReason? failureReason;
+  /// Set when, and only when, [status] is [ScheduledMessageStatus.failed].
+  @JsonKey(name: 'failure_reason', fromJson: _failureFromJson)
+  final ScheduledMessageFailure? failure;
 
   /// The time this message was scheduled.
   ///
@@ -135,7 +154,7 @@ final class ScheduledMessage extends Equatable {
     Message? message,
     DateTime? scheduledAt,
     ScheduledMessageStatus? status,
-    ScheduledMessageFailureReason? failureReason,
+    Object? failure = _nullConst,
     DateTime? createdAt,
     DateTime? localCreatedAt,
     DateTime? updatedAt,
@@ -149,7 +168,10 @@ final class ScheduledMessage extends Equatable {
       message: message ?? this.message,
       scheduledAt: scheduledAt ?? this.scheduledAt,
       status: status ?? this.status,
-      failureReason: failureReason ?? this.failureReason,
+      failure: switch (failure) {
+        _NullConst() => this.failure,
+        _ => failure as ScheduledMessageFailure?,
+      },
       createdAt: createdAt ?? remoteCreatedAt,
       localCreatedAt: localCreatedAt ?? this.localCreatedAt,
       updatedAt: updatedAt ?? remoteUpdatedAt,
@@ -168,7 +190,7 @@ final class ScheduledMessage extends Equatable {
     message,
     scheduledAt,
     status,
-    failureReason,
+    failure,
     localCreatedAt,
     remoteCreatedAt,
     localUpdatedAt,
@@ -181,9 +203,9 @@ final class ScheduledMessage extends Equatable {
 /// A status without a constant here can still be named by wrapping its value:
 /// `ScheduledMessageStatus('paused')`.
 extension type const ScheduledMessageStatus(String _) implements String {
-  /// Being scheduled from this device.
+  /// Being scheduled, changed or sent now from this device.
   ///
-  /// Only set until the request to schedule it completes.
+  /// Only set until the request completes.
   static const preparingToSchedule = ScheduledMessageStatus('preparing_to_schedule');
 
   /// Waiting for its time.
@@ -196,11 +218,11 @@ extension type const ScheduledMessageStatus(String _) implements String {
   /// It cannot be edited, sent now or deleted until it is sent or fails.
   static const sending = ScheduledMessageStatus('sending');
 
-  /// Could not be sent.
+  /// Could not be scheduled or sent, or a change to it could not be saved.
   ///
-  /// The reason is [ScheduledMessage.failureReason]. One whose reason
-  /// [ScheduledMessageFailureReason.isRetriable] can be scheduled again;
-  /// any other can only be deleted.
+  /// The failure is [ScheduledMessage.failure]. One with a
+  /// [ScheduledMessageUpdatingFailed] is still scheduled as it was. One whose
+  /// failure [ScheduledMessageFailure.isRetriable] can be retried.
   static const failed = ScheduledMessageStatus('failed');
 
   /// Deleted before it was sent.
@@ -208,49 +230,133 @@ extension type const ScheduledMessageStatus(String _) implements String {
 
   /// Sent to its channel.
   static const sent = ScheduledMessageStatus('sent');
+
+  /// Whether the message is still to be sent.
+  ///
+  /// It is while being scheduled or changed, waiting for its time, or being
+  /// sent. A failed message is not, though one whose failure is a
+  /// [ScheduledMessageUpdatingFailed] is still scheduled as it was.
+  bool get isPending => this == preparingToSchedule || this == scheduled || this == sending;
 }
 
-/// The reason a [ScheduledMessage] could not be sent.
+/// What stopped a [ScheduledMessage] from being scheduled, changed or sent.
+///
+/// New kinds can be added, so a `switch` over it needs a default case.
+///
+/// See also:
+///
+///  * [ScheduledMessageSchedulingFailed], which can always be retried.
+///  * [ScheduledMessageUpdatingFailed], which leaves the message scheduled as
+///    it was.
+///  * [ScheduledMessageSendingFailed], which can't be retried or changed.
+abstract final class ScheduledMessageFailure extends Equatable {
+  const ScheduledMessageFailure._();
+
+  /// Scheduling the message failed.
+  const factory ScheduledMessageFailure.schedulingFailed() = ScheduledMessageSchedulingFailed;
+
+  /// Saving a change to the message failed.
+  ///
+  /// The message is still scheduled as it was.
+  const factory ScheduledMessageFailure.updatingFailed({
+    ScheduledMessageErrorReason? reason,
+    required bool isRetriable,
+  }) = ScheduledMessageUpdatingFailed;
+
+  /// The message could not be sent at its time.
+  const factory ScheduledMessageFailure.sendingFailed({
+    ScheduledMessageSendingFailureReason? reason,
+  }) = ScheduledMessageSendingFailed;
+
+  /// Whether making the same request again, unchanged, can succeed.
+  bool get isRetriable;
+}
+
+/// A failure to schedule a [ScheduledMessage].
+///
+/// Only a temporary error, or an attachment that didn't upload, leaves one
+/// listed, to be retried.
+final class ScheduledMessageSchedulingFailed extends ScheduledMessageFailure {
+  /// Creates a failure to schedule.
+  const ScheduledMessageSchedulingFailed() : super._();
+
+  @override
+  bool get isRetriable => true;
+
+  @override
+  List<Object?> get props => [];
+}
+
+/// A failure to save a change to a [ScheduledMessage].
+///
+/// The message is still scheduled as it was.
+final class ScheduledMessageUpdatingFailed extends ScheduledMessageFailure {
+  /// Creates a failure to save a change, refused for [reason] if one is known.
+  const ScheduledMessageUpdatingFailed({
+    this.reason,
+    required this.isRetriable,
+  }) : super._();
+
+  /// Why the change was refused, if known.
+  final ScheduledMessageErrorReason? reason;
+
+  @override
+  final bool isRetriable;
+
+  @override
+  List<Object?> get props => [reason, isRetriable];
+}
+
+/// A failure to send a [ScheduledMessage] at its time.
+final class ScheduledMessageSendingFailed extends ScheduledMessageFailure {
+  /// Creates a failure to send, for [reason] if one is known.
+  const ScheduledMessageSendingFailed({this.reason}) : super._();
+
+  /// Why it couldn't be sent, if known.
+  final ScheduledMessageSendingFailureReason? reason;
+
+  @override
+  bool get isRetriable => false;
+
+  @override
+  List<Object?> get props => [reason];
+}
+
+/// The reason a [ScheduledMessage] could not be sent at its time.
 ///
 /// A reason without a constant here can still be named by wrapping its value:
-/// `ScheduledMessageFailureReason('rate_limited')`.
-extension type const ScheduledMessageFailureReason(String _) implements String {
-  /// The request to schedule it failed in a way that can be retried.
-  static const requestFailed = ScheduledMessageFailureReason('request_failed');
-
+/// `ScheduledMessageSendingFailureReason('rate_limited')`.
+extension type const ScheduledMessageSendingFailureReason(String _) implements String {
   /// The user is banned from the channel.
-  static const banned = ScheduledMessageFailureReason('banned');
+  static const banned = ScheduledMessageSendingFailureReason('banned');
 
   /// The user is no longer allowed to send messages in the channel.
-  static const noPermission = ScheduledMessageFailureReason('no_permission');
+  static const noPermission = ScheduledMessageSendingFailureReason('no_permission');
 
   /// The channel is frozen.
-  static const channelFrozen = ScheduledMessageFailureReason('channel_frozen');
+  static const channelFrozen = ScheduledMessageSendingFailureReason('channel_frozen');
 
   /// The channel was deleted.
-  static const channelDeleted = ScheduledMessageFailureReason('channel_deleted');
+  static const channelDeleted = ScheduledMessageSendingFailureReason('channel_deleted');
 
   /// The user was deleted.
-  static const userDeleted = ScheduledMessageFailureReason('user_deleted');
+  static const userDeleted = ScheduledMessageSendingFailureReason('user_deleted');
 
   /// The message was blocked by moderation.
-  static const moderationBlocked = ScheduledMessageFailureReason('moderation_blocked');
+  static const moderationBlocked = ScheduledMessageSendingFailureReason('moderation_blocked');
 
   /// The message was rejected by the app.
-  static const hookRejected = ScheduledMessageFailureReason('hook_rejected');
+  static const hookRejected = ScheduledMessageSendingFailureReason('hook_rejected');
 
   /// The message could not be sent in time.
-  static const expired = ScheduledMessageFailureReason('expired');
+  static const expired = ScheduledMessageSendingFailureReason('expired');
 
   /// The message no longer meets the app's limits, such as its length.
-  static const invalidMessage = ScheduledMessageFailureReason('invalid_message');
+  static const invalidMessage = ScheduledMessageSendingFailureReason('invalid_message');
 
   /// The channel now holds new messages for approval.
-  static const pendingNotSupported = ScheduledMessageFailureReason('pending_not_supported');
+  static const pendingNotSupported = ScheduledMessageSendingFailureReason('pending_not_supported');
 
   /// Something went wrong while sending.
-  static const internalError = ScheduledMessageFailureReason('internal_error');
-
-  /// Whether the message can be scheduled again.
-  bool get isRetriable => this == requestFailed;
+  static const internalError = ScheduledMessageSendingFailureReason('internal_error');
 }

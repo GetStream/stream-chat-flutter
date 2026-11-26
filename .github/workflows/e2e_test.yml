@@ -28,7 +28,8 @@ env:
 jobs:
   select:
     # Pull requests run the tests their changes can reach, per the nightly coverage map.
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     timeout-minutes: 10
     permissions:
       contents: read
@@ -57,7 +58,8 @@ jobs:
   allure_launch_android:
     needs: select
     if: (github.event_name != 'workflow_dispatch' || inputs.android) && needs.select.outputs.e2e_batches != '[]'
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     timeout-minutes: 10
     outputs:
       launch_id: ${{ steps.launch.outputs.launch_id }}
@@ -72,7 +74,8 @@ jobs:
   allure_launch_ios:
     needs: select
     if: github.event_name == 'workflow_dispatch' && inputs.ios && needs.select.outputs.e2e_batches != '[]'
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     timeout-minutes: 10
     outputs:
       launch_id: ${{ steps.launch.outputs.launch_id }}
@@ -88,7 +91,8 @@ jobs:
     # Always on pull_request; opt-out via the checkbox on workflow_dispatch.
     if: (github.event_name != 'workflow_dispatch' || inputs.android) && needs.select.outputs.e2e_batches != '[]'
     needs: [select, allure_launch_android]
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     timeout-minutes: 60
     strategy:
       fail-fast: false
@@ -130,7 +134,7 @@ jobs:
 
       - name: Restore the AVD
         id: avd
-        uses: actions/cache/restore@v5
+        uses: actions/cache/restore@v6
         with:
           path: |
             ~/.android/avd/*
@@ -247,7 +251,8 @@ jobs:
   # the per-batch job names come and go.
   result:
     name: E2E result
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     if: ${{ always() }}
     needs: [select, allure_launch_android, allure_launch_ios, android, ios]
     permissions: {}

@@ -20,6 +20,12 @@
 - Truncating a channel no longer removes the stored messages sent after its truncation time.
 - A message left sending, updating or deleting when the app was closed no longer comes back from the local cache still in progress; it comes back failed, so it is retried.
 
+## Upcoming
+
+✅ Added
+
+- Added a `databaseNamePrefix` parameter to `StreamChatPersistenceClient` to keep the offline data of apps that share storage apart, such as two web apps on one origin.
+
 ## 10.7.0
 
 ✅ Added

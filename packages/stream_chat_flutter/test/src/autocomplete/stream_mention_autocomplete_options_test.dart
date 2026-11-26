@@ -36,7 +36,7 @@ _MentionTestMocks _setupMocks({
 }
 
 Widget _buildMentionOptionsBody({
-  required MockClient client,
+  required MockClient? client,
   required MockChannel channel,
   String query = '',
   bool mentionAllAppUsers = false,
@@ -59,7 +59,7 @@ Widget _buildMentionOptionsBody({
 
 Future<void> _pumpMentionOptions(
   WidgetTester tester, {
-  required MockClient client,
+  required MockClient? client,
   required MockChannel channel,
   String query = '',
   bool mentionAllAppUsers = false,
@@ -738,6 +738,33 @@ void main() {
             pagination: any(named: 'pagination'),
           ),
         );
+      },
+    );
+
+    testWidgets(
+      'mentionAllAppUsers searches through the channel client when no client is given',
+      (tester) async {
+        final mocks = _setupMocks(ownCapabilities: const []);
+        when(
+          () => mocks.client.queryUsers(
+            presence: any(named: 'presence'),
+            filter: any(named: 'filter'),
+            sort: any(named: 'sort'),
+            pagination: any(named: 'pagination'),
+          ),
+        ).thenAnswer(
+          (_) async => QueryUsersResponse()..users = [User(id: 'alice-id', name: 'Alice')],
+        );
+
+        await _pumpMentionOptions(
+          tester,
+          client: null,
+          channel: mocks.channel,
+          query: 'alice',
+          mentionAllAppUsers: true,
+        );
+
+        expect(find.text('Alice'), findsOneWidget);
       },
     );
 

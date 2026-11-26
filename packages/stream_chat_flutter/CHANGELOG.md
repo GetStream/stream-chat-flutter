@@ -15,10 +15,26 @@
 
 - Added `StreamScheduledMessageListView` to list the current user's scheduled messages.
 - Added `showStreamScheduledMessageActionsSheet` to act on a scheduled message.
+- Added `showStreamScheduleMessageSheet` and `showStreamScheduleTimeSheet`, to pick when a message is sent.
+- Added `StreamScheduledMessagesBanner`, which counts a channel's or thread's scheduled messages, themed with `StreamScheduledMessagesBannerTheme` and `StreamScheduledMessagesBannerThemeData`, and replaceable through the `scheduledMessagesBanner` component builder.
+- Added `onScheduledMessagesBannerTap` to `StreamChannelPage` and `StreamThreadPage`.
+- Added `onSendMessage` to `StreamMessageComposer`, a `StreamMessageComposerCallback` that replaces sending a message or saving an edit.
+- Added `onSendLongPress` to `StreamMessageComposer` and `StreamChatMessageInput`, called when send is long-pressed, such as to schedule the message.
 
 🔄 Changed
 
+- `StreamChannelPage` and `StreamThreadPage` show the scheduled messages banner above their composer, and schedule the message, uploading its attachments first, on a long press of send, in channels where the user can schedule messages. Turn both off with `StreamChatConfigurationData.scheduledMessagesEnabled`.
 - A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
+- `StreamMessageComposer` keeps its content when its draft is updated on another device while it is open.
+- Allowed `gal` 3.x alongside 2.x (`>=2.3.2 <4.0.0`). gal 3 requires iOS 13 and Android API 24.
+
+🐞 Fixed
+
+- Fixed `StreamMessageComposer` refilling a cleared or edited draft when the server's copy of the earlier draft arrived late.
+
+🐞 Fixed
+
+- Fixed `StreamMessageComposer` and `StreamMentionAutocompleteOptions` showing no user suggestions when `mentionAllAppUsers` is enabled without a `client`.
 
 ## 10.7.0
 

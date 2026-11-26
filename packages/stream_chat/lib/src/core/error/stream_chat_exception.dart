@@ -1,4 +1,6 @@
 /// @docImport '../models/channel_config.dart';
+/// @docImport '../models/scheduled_message.dart';
+/// @docImport '../util/scheduled_message_rules.dart';
 library;
 
 import 'package:meta/meta.dart';
@@ -93,7 +95,10 @@ extension StreamChatExceptionMessageRejections on StreamChatException {
 /// The reason a request to schedule or change a scheduled message was refused.
 ///
 /// Read from
-/// [StreamChatExceptionScheduledMessages.scheduledMessageErrorReason].
+/// [StreamChatExceptionScheduledMessages.scheduledMessageErrorReason] for
+/// a refusal by the server, or [ScheduledMessageRefusedError.reason] for one
+/// on this device. A change that failed keeps it in
+/// [ScheduledMessageUpdatingFailed.reason].
 extension type const ScheduledMessageErrorReason(String _) implements String {
   /// Scheduled messages are turned off for the app.
   static const scheduledMessagesDisabled = ScheduledMessageErrorReason('scheduled_messages_disabled');
@@ -133,6 +138,41 @@ extension type const ScheduledMessageErrorReason(String _) implements String {
 
   /// The scheduled message was deleted.
   static const scheduledMessageCanceled = ScheduledMessageErrorReason('scheduled_message_canceled');
+
+  /// The message is a command, such as `/giphy`.
+  ///
+  /// A command runs when the message is sent, so it can't be scheduled.
+  static const scheduledMessageIsCommand = ScheduledMessageErrorReason('scheduled_message_is_command');
+
+  /// The message quotes a message that was deleted.
+  static const scheduledMessageQuoteDeleted = ScheduledMessageErrorReason('scheduled_message_quote_deleted');
+
+  /// Sending the message right away, as its time had passed, was refused.
+  ///
+  /// This happens in a frozen channel, for example.
+  static const scheduledMessageSendRefused = ScheduledMessageErrorReason('scheduled_message_send_refused');
+}
+
+/// A refused request about a scheduled message.
+///
+/// The message isn't scheduled or changed, and its [reason] says why.
+///
+/// See also:
+///
+///  * [ScheduledMessageRules], which tells up front whether some of these
+///    requests would be refused.
+final class ScheduledMessageRefusedError extends StreamClientException {
+  /// Creates an error refusing a request for [reason].
+  const ScheduledMessageRefusedError(this.reason, String message) : super(message: message);
+
+  /// Why the request was refused.
+  final ScheduledMessageErrorReason reason;
+
+  @override
+  List<Object?> get props => [...super.props, reason];
+
+  @override
+  String toString() => 'ScheduledMessageRefusedError(reason: $reason, message: $message)';
 }
 
 const _scheduledMessageErrorReasons = {
@@ -158,4 +198,15 @@ extension StreamChatExceptionScheduledMessages on StreamChatException {
     StreamApiException(:final code) => _scheduledMessageErrorReasons[code],
     _ => null,
   };
+
+  /// Whether the scheduled message the request was for no longer exists.
+  ///
+  /// Other failures that something was not found, such as a quoted message
+  /// that was deleted, are false.
+  bool get isScheduledMessageNotFound => switch (this) {
+    StreamApiException(statusCode: 404, :final message) => _scheduledMessageNotFound.hasMatch(message),
+    _ => false,
+  };
 }
+
+final _scheduledMessageNotFound = RegExp('scheduled message .* not found');

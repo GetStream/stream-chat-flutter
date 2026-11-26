@@ -169,6 +169,7 @@ export 'src/core/models/user_group_member.dart';
 export 'src/core/models/voting_visibility.dart';
 export 'src/core/util/extension.dart';
 export 'src/core/util/message_rules.dart';
+export 'src/core/util/scheduled_message_rules.dart';
 export 'src/db/chat_persistence_client.dart';
 export 'src/event_type.dart';
 export 'src/ws/connection_status.dart' show ConnectionStatus;

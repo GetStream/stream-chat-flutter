@@ -60,6 +60,10 @@ abstract class AccessibilityTranslations {
   /// [StreamMessageComposer].
   String get recordVoiceRecordingLabel;
 
+  /// The hint for long-pressing the send button of a [StreamMessageComposer]
+  /// to schedule the message, such as "Schedule message".
+  String get scheduleMessageHint;
+
   /// The tooltip for the cancel button while a voice recording is in
   /// progress.
   String get cancelRecordingTooltip;
@@ -452,6 +456,9 @@ class DefaultAccessibilityTranslations extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'Record voice message';
+
+  @override
+  String get scheduleMessageHint => 'Schedule message';
 
   @override
   String get cancelRecordingTooltip => 'Cancel recording';
