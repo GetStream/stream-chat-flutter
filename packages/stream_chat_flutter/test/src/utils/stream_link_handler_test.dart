@@ -102,7 +102,7 @@ void main() {
     await tester.pump();
 
     expect(launched, isEmpty);
-    expect(find.byType(SnackBar), findsOneWidget);
+    expect(find.byType(StreamSnackbar), findsOneWidget);
   });
 }
 
@@ -122,10 +122,13 @@ Future<BuildContext> _pumpContext(
 
   await tester.pumpWidget(
     MaterialApp(
-      home: switch (configuration) {
-        final data? => StreamChatConfiguration(data: data, child: home),
-        _ => home,
-      },
+      theme: ThemeData(extensions: [StreamTheme()]),
+      home: StreamSnackbarScope(
+        child: switch (configuration) {
+          final data? => StreamChatConfiguration(data: data, child: home),
+          _ => home,
+        },
+      ),
     ),
   );
   return context;

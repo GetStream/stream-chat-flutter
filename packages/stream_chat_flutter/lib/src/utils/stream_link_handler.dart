@@ -69,7 +69,7 @@ Future<void> openLink(BuildContext context, String url) async {
   final opened = uri != null && await linkHandler.open(context, uri);
   if (opened || !context.mounted) return;
 
-  ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-    SnackBar(content: Text(context.translations.launchUrlError)),
+  StreamSnackbarMessenger.maybeOf(context)?.show(
+    StreamSnackbar(message: Text(context.translations.launchUrlError), variant: .error),
   );
 }
