@@ -11,7 +11,7 @@
 - Added `onSendLongPress` to `StreamMessageComposer` and `StreamChatMessageInput`, called when send is long-pressed, such as to schedule the message.
 - Added played marks on the current user's messages in channel types that enable them, shown with `StreamMessagePlayedMark`, and `onMessageMarkTap` on `StreamMessageListView` and `StreamMessageItem` to handle a tap.
 - Added marking another user's voice recording or video as played once the current user plays it from a message.
-- Added `onPlaybackStarted` to `StreamVoiceRecordingAttachmentPlaylist`, `VoiceRecordingAttachmentPlaylistBuilder`, `StreamMediaGalleryPreview`, `StreamMediaGalleryPreviewItem` and `StreamVideoPlayer`, called when an attachment starts playing. A custom video player or gallery preview calls it for its videos to be marked played.
+- Added `onPlaybackStarted` to `StreamVoiceRecordingAttachmentPlaylist`, `StreamMediaGalleryPreview`, `StreamMediaGalleryPreviewItem` and `StreamVideoPlayer`, and `onAttachmentPlaybackStarted` to `VoiceRecordingAttachmentPlaylistBuilder`, called when an attachment starts playing. A custom video player or gallery preview calls it for its videos to be marked played.
 
 🔄 Changed
 

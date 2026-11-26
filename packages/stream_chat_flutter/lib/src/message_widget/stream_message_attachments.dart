@@ -81,7 +81,7 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
         context,
         message,
         attachment,
-        onPlaybackStarted: handlePlaybackStarted,
+        onAttachmentPlaybackStarted: handlePlaybackStarted,
       );
     }
 
@@ -92,7 +92,7 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
     final builders = StreamAttachmentWidgetBuilder.defaultBuilders(
       message: message,
       onAttachmentTap: effectiveOnAttachmentTap,
-      onPlaybackStarted: handlePlaybackStarted,
+      onAttachmentPlaybackStarted: handlePlaybackStarted,
       customAttachmentBuilders: effectiveAttachmentBuilder,
     );
 
@@ -104,7 +104,7 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
     BuildContext context,
     Message message,
     Attachment attachment, {
-    OnAttachmentPlaybackStarted? onPlaybackStarted,
+    OnAttachmentPlaybackStarted? onAttachmentPlaybackStarted,
   }) async {
     // If the current attachment is a url preview attachment, open the url
     // in the browser.
@@ -148,7 +148,7 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
             child: StreamMediaGalleryPreview(
               attachments: attachments,
               initialIndex: math.max(0, initialIndex),
-              onPlaybackStarted: onPlaybackStarted,
+              onPlaybackStarted: onAttachmentPlaybackStarted,
             ),
           ),
         ),

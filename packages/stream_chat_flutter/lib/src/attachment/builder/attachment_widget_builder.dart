@@ -95,7 +95,7 @@ abstract class StreamAttachmentWidgetBuilder {
   static List<StreamAttachmentWidgetBuilder> defaultBuilders({
     required Message message,
     StreamAttachmentWidgetTapCallback? onAttachmentTap,
-    OnAttachmentPlaybackStarted? onPlaybackStarted,
+    OnAttachmentPlaybackStarted? onAttachmentPlaybackStarted,
     List<StreamAttachmentWidgetBuilder>? customAttachmentBuilders,
   }) {
     return [
@@ -108,7 +108,7 @@ abstract class StreamAttachmentWidgetBuilder {
       // attachments.
       MixedAttachmentBuilder(
         onAttachmentTap: onAttachmentTap,
-        onPlaybackStarted: onPlaybackStarted,
+        onAttachmentPlaybackStarted: onAttachmentPlaybackStarted,
       ),
 
       // Handles a mix of image, gif, and video attachments.
@@ -139,7 +139,7 @@ abstract class StreamAttachmentWidgetBuilder {
       // Handles voice recording attachments.
       VoiceRecordingAttachmentPlaylistBuilder(
         onAttachmentTap: onAttachmentTap,
-        onPlaybackStarted: onPlaybackStarted,
+        onAttachmentPlaybackStarted: onAttachmentPlaybackStarted,
       ),
 
       // We don't handle URL attachments if the message is a reply.
