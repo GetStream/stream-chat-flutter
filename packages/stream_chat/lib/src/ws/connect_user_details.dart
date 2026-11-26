@@ -3,8 +3,8 @@ import '../core/models/privacy_settings.dart';
 
 /// The details of the user a connection is opened for.
 ///
-/// Sent when the connection opens, which creates the user or updates them to
-/// match.
+/// A connection presents them in full only when it is asked to include them;
+/// otherwise it names the user by [id] alone.
 class ConnectUserDetails {
   /// Creates [ConnectUserDetails] for the user [id].
   const ConnectUserDetails({

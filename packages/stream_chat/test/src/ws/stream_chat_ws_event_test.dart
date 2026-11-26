@@ -67,6 +67,22 @@ void main() {
     expect(event, isA<HealthCheckFrame>().having((it) => it.me, 'me', isNull));
   });
 
+  test('StreamChatWsCodec still opens the connection when the user it names cannot be read', () {
+    final event = _codec().decode(
+      _frame({
+        'type': 'connection.ok',
+        'me': {..._user}..remove('role'),
+      }),
+    );
+
+    expect(
+      event,
+      isA<HealthCheckFrame>()
+          .having((it) => it.connectionId, 'connectionId', 'test-connection-id')
+          .having((it) => it.me, 'me', isNull),
+    );
+  });
+
   test('StreamChatWsCodec tolerates the health check fields it does not model', () {
     // `cid` is always the literal `*` on a chat health check, and `custom` and `received_at` ride
     // along from the server's base event.

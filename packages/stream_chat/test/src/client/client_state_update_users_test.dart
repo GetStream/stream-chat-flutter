@@ -14,6 +14,15 @@ void main() {
     expect(emitted, isEmpty);
   });
 
+  test('StreamChatClient stores the user an event carries', () {
+    final client = _client();
+    final user = User(id: 'u1', name: 'Alice');
+
+    client.handleEvent(TypingStartEvent(cid: 'messaging:general', user: user));
+
+    expect(client.state.users['u1'], user);
+  });
+
   test('ClientState.updateUser does not emit users for a user stored with the same data', () async {
     final client = _client();
     final user = User(id: 'u1', name: 'Alice', updatedAt: DateTime.utc(2026));

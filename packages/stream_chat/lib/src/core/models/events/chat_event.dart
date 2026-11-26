@@ -45,7 +45,7 @@ abstract base class ChatEvent implements StreamEvent {
 
   /// Whether this client made the event rather than receiving it.
   ///
-  /// False for the events received from the server. True for the events the
+  /// False for the events received over the connection. True for the events the
   /// client emits itself, such as a [ConnectionChangedEvent] or a
   /// scheduled-message event for a change it has not heard back about yet, and
   /// by default for an event created in app code.
@@ -54,8 +54,7 @@ abstract base class ChatEvent implements StreamEvent {
 
 /// An event that belongs to a channel.
 ///
-/// [Channel.on] delivers only the events of its own channel, matching them by
-/// [cid].
+/// [Channel.on] delivers the ones whose [cid] names its channel.
 base mixin HasCid on ChatEvent {
   /// The cid (`type:id`) of the channel the event belongs to.
   ///

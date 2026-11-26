@@ -65,9 +65,9 @@ class ChannelEventHandler {
       // message events
       case MessageNewEvent():
         _mutations.onMessageNew(event.message, watcherCount: event.watcherCount);
-      // Only a new message in a watched channel carries a reliable watcher
-      // count; one for a non-watched channel reports 0.
       case NotificationMessageNewEvent():
+        // The watcher count of a channel the current user is not watching is
+        // not applied.
         _mutations.onMessageNew(event.message);
       case MessageDeletedEvent():
         _onMessageDeleted(event);

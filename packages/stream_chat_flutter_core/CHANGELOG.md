@@ -24,7 +24,7 @@
 - A list controller sorted each loaded page with an unstable sort, so rows it called equal — members sharing a `created_at`, say — were reordered on every page append. They keep the order they arrived in now.
 
 - `StreamThreadListController` no longer reorders a thread when a reply it does not hold is deleted.
-- `StreamThreadListController` now marks a thread unread when the current user marks it unread.
+- `StreamThreadListController` now marks a thread unread when it receives a mark-unread event for that thread.
 
 ## Upcoming
 

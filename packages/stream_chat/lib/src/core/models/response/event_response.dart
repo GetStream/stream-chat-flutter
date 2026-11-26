@@ -21,7 +21,7 @@ class EventResponse with _$EventResponse {
   @override
   final String duration;
 
-  /// The event as the channel's watchers receive it.
+  /// The event that was sent.
   ///
   /// An event with a custom type comes back as an [UnknownEvent].
   @override

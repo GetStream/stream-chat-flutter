@@ -75,7 +75,7 @@ stream_chat                        # Pure Dart, no Flutter dependency
 Low-level Dart client. Key types:
 - `StreamChatClient` — central API client, manages WebSocket, REST, and state
 - `Channel` — represents a chat channel, has its own state and streaming APIs
-- Models in `lib/src/core/models/`: `Message`, `User`, `Member`, `Reaction`, `Poll`, `Event`, `Attachment`, `Draft`, etc.
+- Models in `lib/src/core/models/`: `Message`, `User`, `Member`, `Reaction`, `Poll`, `ChatEvent` (one class per event type), `Attachment`, `Draft`, etc.
 - Generated code (`.g.dart`, `.freezed.dart`) for JSON serialization/immutable models — do not edit manually
 
 ### `stream_chat_flutter_core`

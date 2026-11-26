@@ -219,7 +219,6 @@
 - A partial update, such as pinning a message, is in the new `OutgoingState.partialUpdating` state while it runs; `isUpdating` still covers it.
 - `OutgoingState`'s `when`, `whenOrNull` and `maybeWhen` pass the request's options to `sending` and `updating` and take a `partialUpdating` callback, and its `map`, `mapOrNull` and `maybeMap` take one too.
 - A custom `ChatPersistenceClient` must implement `settleInterruptedRequests`, which marks the stored messages left sending, updating or deleting as failed.
-
 - `Event` and `EventExtension.isFromUser` are removed: each event type is its own class extending `ChatEvent`, such as `MessageNewEvent`, and an event of a custom or unknown type is an `UnknownEvent`.
 - `StreamChatClient.on` and `Channel.on` take the event class as a type argument, as in `on<MessageNewEvent>()`, and emit `ChatEvent`s instead of `Event`s when given only type names.
 - `StreamChatClient.eventStream` is a `Stream<ChatEvent>` instead of a `Stream<Event>`, and `handleEvent` takes a `ChatEvent`.
@@ -260,7 +259,6 @@
 - `truncateChannel` and `Channel.truncate` with a `truncatedAt` now reach the server, where they failed before sending.
 - `queryMembers` with a `createdAt` bound in local time, or with a filter on a date, no longer fails.
 - A typing start that fails after a later key stroke no longer keeps that key stroke's typing stop from being sent.
-
 - A `user.updated` event about the current user no longer clears their `blockedUserIds`, `shadowBanned` and `banExpires`.
 
 🔄 Changed
@@ -274,7 +272,8 @@
 - `getUnreadCount` updates the current user's unread counts without emitting an event.
 - Users carried by events no longer include `shadowBanned` or `banExpires`, nor `invisible` outside `user.updated`, so a user in `ClientState.users` loses them when an event about that user arrives.
 - `callLevel` on the current user's `pushPreferences` is no longer filled when connecting.
-- `UnknownEvent` carries only its `type`, `createdAt`, `custom` and `rawData`, and no longer updates `ClientState.users`, the unread counts or a channel's counts; its channel, user and counts are in `rawData`.
+- `EventType.pollCreated` is removed; a new poll arrives as a `MessageNewEvent` whose message carries it.
+- `UnknownEvent` carries only its `type`, `createdAt`, `custom`, `rawData` and `isLocal`, and no longer updates `ClientState.users`, the unread counts or a channel's counts; its channel, user and counts are in `rawData`.
 
 ✅ Added
 

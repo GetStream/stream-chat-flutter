@@ -661,8 +661,10 @@ final class NotificationMessageNewEvent extends ChatEvent
   @override
   final Message message;
 
-  /// The number of users watching the channel, which is not reliable for this
-  /// event and usually 0.
+  /// The number of users watching the channel, as reported with the event.
+  ///
+  /// The client does not apply it, because the current user is not watching
+  /// the channel.
   @override
   final int watcherCount;
 

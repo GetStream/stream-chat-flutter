@@ -500,7 +500,8 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `Event.message` / `.channel` / `.user` / `.reaction` / `.member` / … (all nullable) | the same field on the event's class | `moved` | Only on the classes whose type carries it, and non-nullable where the type always does: `MessageNewEvent.message` is a `Message`, so drop the `!` |
 | `Event.extraData` | `ChatEvent.custom` | `renamed` | Holds only the custom data the event was sent with. Keys `Event` had no field for, such as `team`, `clear_history` and `thread_id`, are no longer in it |
 | `Event.userId` | `event.user?.id`; `userId` on the reminder events | `moved` | |
-| `Event.connectionId`, `Event.channelLastMessageAt` | — | `removed` | No event carries them |
+| `Event.connectionId`, `Event.channelLastMessageAt` | — | `removed` | Only `HealthCheckEvent` carries `connectionId`; no event carries `channelLastMessageAt` |
+| `EventType.pollCreated`, and listening for it (`on(EventType.pollCreated)`) | `MessageNewEvent` whose `message.poll` is set | `removed` | No event of type `poll.created` is delivered; a new poll arrives with its message |
 | `event.isFromUser(userId: id)` (`EventExtension`) | `event is HasUser && event.user?.id == id` | `removed` | |
 | `StreamChatClient.on([String…])` / `Channel.on([String…])` → `Stream<Event>` | `on<T extends ChatEvent>([String…])` → `Stream<T>` | `retyped` | `on(EventType.messageNew)` still compiles and emits `ChatEvent`s; `on<MessageNewEvent>()` emits `MessageNewEvent`s. Both filters combine |
 | `StreamChatClient.eventStream` (`Stream<Event>`) | `Stream<ChatEvent>` | `retyped` | |
@@ -1113,7 +1114,8 @@ decodes at all — see [Channels and Members](#channels-and-members) — and `Ev
   `ChatEvent`.
 - **Mixins group events by what they carry:** `HasCid`, `HasUser`, `HasChannel`, `HasMessage`, `HasPollVote`,
   `HasOwnUser`, `HasUnreadCounts`, `HasUnreadThreadCount` and `HasChannelCounts`. `on<HasMessage>()` delivers every
-  event that carries a message, and `Channel.on` delivers only `HasCid` events of its channel.
+  event that carries a message, and `Channel.on` delivers the `HasCid` events of its channel and the `UnknownEvent`s
+  whose `rawData` names it.
 - **The set of classes is open.** A later release can add a class for a type that arrives as an `UnknownEvent`
   today, so a `switch` over events keeps a default case.
 - **An event's `extraData` is `custom`, and holds only the custom data the event was sent with.** The keys v10 left
@@ -1134,7 +1136,7 @@ decodes at all — see [Channels and Members](#channels-and-members) — and `Ev
   on every event no longer sees one after the call; read `client.state.totalUnreadCount` and the like.
 - **Users carried by events no longer include `shadowBanned` or `banExpires`, nor `invisible` outside `user.updated`.**
   A user in `client.state.users` loses them when an event about that user arrives.
-- **A `user.updated` event about the current user keeps their `blockedUserIds` and `banExpires`,** which v10 cleared.
+- **A `user.updated` event about the current user keeps their `blockedUserIds`, `shadowBanned` and `banExpires`,** which v10 cleared.
 - **`callLevel` on the current user's `pushPreferences` is no longer filled when connecting.**
 - **`GeneralApi`, `StreamChatApi.general` and `SyncResponse` are removed.** `StreamChatClient.sync` is unchanged.
 - **The WebSocket connects to `/api/v2/connect`**, and the user token is no longer in its address — see below.
@@ -1216,7 +1218,7 @@ The `stream_chat_flutter_core` handler methods take these classes:
 
 | Handler | Methods and the class each takes |
 | --- | --- |
-| `StreamChannelListEventHandler` | `onChannelDeleted` (`HasChannel`: `ChannelDeletedEvent` or `NotificationChannelDeletedEvent`), `onChannelHidden` (`ChannelHiddenEvent`), `onChannelTruncated` (`ChannelTruncatedEvent`), `onChannelUpdated` (`ChannelUpdatedEvent`), `onChannelVisible` (`HasChannel`: `ChannelVisibleEvent`), `onConnectionRecovered` (`ConnectionRecoveredEvent`), `onMemberUpdated` (`MemberUpdatedEvent`), `onMessageNew` (`MessageNewEvent`), `onNotificationAddedToChannel` (`NotificationAddedToChannelEvent`), `onNotificationMessageNew` (`NotificationMessageNewEvent`), `onNotificationRemovedFromChannel` (`NotificationRemovedFromChannelEvent`), `onUserPresenceChanged` (`HasUser`: `UserPresenceChangedEvent` or `UserUpdatedEvent`) |
+| `StreamChannelListEventHandler` | `onChannelDeleted` (`HasChannel`: `ChannelDeletedEvent` or `NotificationChannelDeletedEvent`, and `ChannelHiddenEvent` through the default `onChannelHidden`), `onChannelHidden` (`ChannelHiddenEvent`), `onChannelTruncated` (`ChannelTruncatedEvent`), `onChannelUpdated` (`ChannelUpdatedEvent`), `onChannelVisible` (`HasChannel`: `ChannelVisibleEvent`, and `NotificationAddedToChannelEvent` or `NotificationMessageNewEvent` through the defaults of their handlers), `onConnectionRecovered` (`ConnectionRecoveredEvent`), `onMemberUpdated` (`MemberUpdatedEvent`), `onMessageNew` (`MessageNewEvent`), `onNotificationAddedToChannel` (`NotificationAddedToChannelEvent`), `onNotificationMessageNew` (`NotificationMessageNewEvent`), `onNotificationRemovedFromChannel` (`NotificationRemovedFromChannelEvent`), `onUserPresenceChanged` (`HasUser`: `UserPresenceChangedEvent` or `UserUpdatedEvent`) |
 | `StreamDraftListEventHandler` | `onConnectionRecovered` (`ConnectionRecoveredEvent`), `onDraftUpdated` (`DraftUpdatedEvent`), `onDraftDeleted` (`DraftDeletedEvent`) |
 | `StreamMessageReminderListEventHandler` | `onConnectionRecovered` (`ConnectionRecoveredEvent`), `onMessageReminderCreated` (`ReminderCreatedEvent`), `onMessageReminderUpdated` (`ReminderUpdatedEvent`), `onMessageReminderDeleted` (`ReminderDeletedEvent`), `onMessageReminderDue` (`NotificationReminderDueEvent`) |
 | `StreamThreadListEventHandler` | `onThreadUpdated` (`ThreadUpdatedEvent`), `onConnectionRecovered` (`ConnectionRecoveredEvent`), `onReactionNew` / `onReactionUpdated` / `onReactionDeleted` (`ReactionNewEvent` / `ReactionUpdatedEvent` / `ReactionDeletedEvent`), `onNotificationThreadMessageNew` (`NotificationThreadMessageNewEvent`), `onMessageNew` / `onMessageUpdated` / `onMessageDeleted` (`MessageNewEvent` / `MessageUpdatedEvent` / `MessageDeletedEvent`), `onChannelDeleted` (`ChannelDeletedEvent`), `onChannelTruncated` (`ChannelTruncatedEvent`), `onMessageRead` (`MessageReadEvent`), `onNotificationMarkUnread` (`NotificationMarkUnreadEvent`), `onDraftUpdated` / `onDraftDeleted` (`DraftUpdatedEvent` / `DraftDeletedEvent`) |

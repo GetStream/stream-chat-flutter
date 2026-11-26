@@ -99,9 +99,9 @@ class StreamChat extends StatefulWidget {
   /// in the background
   final Duration backgroundKeepAlive;
 
-  /// Handler called whenever the [client] receives a new [Event] while the app
-  /// is in background. Can be used to display various notifications depending
-  /// upon the [Event.type]
+  /// Handler called whenever the [client] receives a new [ChatEvent] while the
+  /// app is in background. Can be used to display various notifications
+  /// depending upon the [ChatEvent.type]
   final EventHandler? onBackgroundEventReceived;
 
   /// Stream of connectivity result

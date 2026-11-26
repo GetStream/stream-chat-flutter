@@ -131,9 +131,6 @@ class EventType {
   /// Event sent when the AI indicator is cleared
   static const String aiIndicatorClear = 'ai_indicator.clear';
 
-  /// Event sent when a new poll is created.
-  static const String pollCreated = 'poll.created';
-
   /// Event sent when a poll is updated.
   static const String pollUpdated = 'poll.updated';
 

@@ -23,11 +23,19 @@ class HealthCheckFrame extends WsEvent {
         final Object createdAt => const StreamDateTimeConverter().fromJson(createdAt),
         null => null,
       },
-      me: switch (json['me']) {
-        final Map<String, Object?> me => api.OwnUserResponse.fromJson(me).toModel(),
-        _ => null,
-      },
+      me: _meFromJson(json['me']),
     );
+  }
+
+  // The signed-in user the frame names, or null when it names none that can
+  // be read, so the connection still opens.
+  static OwnUser? _meFromJson(Object? json) {
+    if (json is! Map<String, Object?>) return null;
+    try {
+      return api.OwnUserResponse.fromJson(json).toModel();
+    } on Object {
+      return null;
+    }
   }
 
   /// The id the connection is identified by while it stays open.

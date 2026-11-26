@@ -12,8 +12,8 @@ import '../../../stream_chat.dart';
 import '../../core/error/stream_chat_exception.dart';
 import '../../repository/mapper/result_mapper.dart';
 
-/// The maximum time the incoming [Event.typingStart] event is valid before a
-/// [Event.typingStop] event is emitted automatically.
+/// The maximum time the incoming [EventType.typingStart] event is valid before
+/// a [EventType.typingStop] event is emitted automatically.
 const incomingTypingStartEventTimeout = 7;
 
 // Ends a send or an update waiting on its attachments: one for the same
