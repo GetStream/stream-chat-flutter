@@ -99,7 +99,6 @@ import '../core/models/role_type.dart';
 import '../core/models/scheduled_message.dart';
 import '../core/models/thread.dart';
 import '../core/models/user.dart';
-import '../core/models/user_block.dart';
 import '../core/util/event_controller.dart';
 import '../core/util/extension.dart';
 import '../core/util/immutable_collection_subjects.dart';
@@ -1934,13 +1933,7 @@ class StreamChatClient {
   /// [ClientState.currentUser]. A failure leaves it unchanged.
   Future<Result<BlockUserResponse>> blockUser(String userId) async {
     final result = await _userBlockLock.synchronized(() => _usersRepository.blockUser(userId));
-    return result.onSuccess((response) => _addBlockedUserId(response.blockedUserId));
-  }
-
-  void _addBlockedUserId(String userId) {
-    final blockedUserIds = [...?state.currentUser?.blockedUserIds];
-    if (blockedUserIds.contains(userId)) return;
-    state.blockedUserIds = [...blockedUserIds, userId];
+    return result.onSuccess((response) => state.addBlockedUserId(response.blockedUserId));
   }
 
   /// Unblocks [userId] for the current user.
@@ -1949,13 +1942,7 @@ class StreamChatClient {
   /// [ClientState.currentUser]. A failure leaves it unchanged.
   Future<Result<UnblockUserResponse>> unblockUser(String userId) async {
     final result = await _userBlockLock.synchronized(() => _usersRepository.unblockUser(userId));
-    return result.onSuccess((_) => _removeBlockedUserId(userId));
-  }
-
-  void _removeBlockedUserId(String userId) {
-    final blockedUserIds = [...?state.currentUser?.blockedUserIds];
-    if (!blockedUserIds.remove(userId)) return;
-    state.blockedUserIds = blockedUserIds;
+    return result.onSuccess((_) => state.removeBlockedUserId(userId));
   }
 
   /// Gets the users the current user has blocked.
@@ -1965,11 +1952,9 @@ class StreamChatClient {
   /// unchanged.
   Future<Result<GetBlockedUsersResponse>> getBlockedUsers() async {
     final result = await _userBlockLock.synchronized(_usersRepository.getBlockedUsers);
-    return result.onSuccess((response) => _replaceBlockedUserIds(response.blocks));
-  }
-
-  void _replaceBlockedUserIds(List<UserBlock> blocks) {
-    state.blockedUserIds = [for (final block in blocks) block.blockedUserId];
+    return result.onSuccess((response) {
+      state.blockedUserIds = [for (final block in response.blocks) block.blockedUserId];
+    });
   }
 
   /// Gets how many unread messages and threads the current user has.
@@ -3289,6 +3274,22 @@ class ClientState {
   @internal
   set blockedUserIds(List<String> blockedUserIds) {
     currentUser = currentUser?.copyWith(blockedUserIds: blockedUserIds);
+  }
+
+  /// Adds [userId] to the current user's blocked user ids.
+  @internal
+  void addBlockedUserId(String userId) {
+    final ids = currentUser?.blockedUserIds ?? const [];
+    if (ids.contains(userId)) return;
+    blockedUserIds = [...ids, userId];
+  }
+
+  /// Removes [userId] from the current user's blocked user ids.
+  @internal
+  void removeBlockedUserId(String userId) {
+    final ids = [...?currentUser?.blockedUserIds];
+    if (!ids.remove(userId)) return;
+    blockedUserIds = ids;
   }
 
   /// Used internally for optimistic update of unread count
