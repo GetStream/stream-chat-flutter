@@ -98,7 +98,7 @@ void main() {
 
   testWidgets('a playlist reports the recording that started playing', (tester) async {
     final message = _voiceMessage();
-    final started = <AttachmentPlaybackStartedDetails>[];
+    final started = <MessageAttachmentPlaybackStartedDetails>[];
     final playlist = StreamVoiceRecordingAttachmentPlaylist(
       message: message,
       voiceRecordings: message.attachments,
@@ -118,7 +118,7 @@ void main() {
     final message = _voiceMessage().copyWith(
       attachments: [unplayable, _voiceRecording],
     );
-    final started = <AttachmentPlaybackStartedDetails>[];
+    final started = <MessageAttachmentPlaybackStartedDetails>[];
     final playlist = StreamVoiceRecordingAttachmentPlaylist(
       message: message,
       voiceRecordings: message.attachments,
@@ -137,7 +137,7 @@ void main() {
     final message = _voiceMessage().copyWith(
       attachments: [_voiceRecording, second],
     );
-    final started = <AttachmentPlaybackStartedDetails>[];
+    final started = <MessageAttachmentPlaybackStartedDetails>[];
     final playlist = StreamVoiceRecordingAttachmentPlaylist(
       message: message,
       voiceRecordings: message.attachments,

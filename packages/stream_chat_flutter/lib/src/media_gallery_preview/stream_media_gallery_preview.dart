@@ -77,7 +77,7 @@ class StreamMediaGalleryPreview extends StatelessWidget {
     required List<StreamMediaGalleryAttachment> attachments,
     int initialIndex = 0,
     bool autoplayVideos = false,
-    OnAttachmentPlaybackStarted? onPlaybackStarted,
+    OnMessageAttachmentPlaybackStarted? onPlaybackStarted,
   }) : assert(initialIndex >= 0, 'initialIndex cannot be negative'),
        props = .new(
          attachments: attachments,
@@ -129,7 +129,7 @@ class StreamMediaGalleryPreviewProps {
   ///
   /// A custom preview built through [StreamComponentFactory] must call it for
   /// videos opened from a message to be marked played.
-  final OnAttachmentPlaybackStarted? onPlaybackStarted;
+  final OnMessageAttachmentPlaybackStarted? onPlaybackStarted;
 }
 
 /// The default implementation of [StreamMediaGalleryPreview].
@@ -269,7 +269,7 @@ class _DefaultStreamMediaGalleryPreviewState extends State<DefaultStreamMediaGal
               autoplay: widget.props.autoplayVideos,
               onPlaybackStarted: switch (widget.props.onPlaybackStarted) {
                 final onPlaybackStarted? => (details) {
-                  final playbackDetails = AttachmentPlaybackStartedDetails(
+                  final playbackDetails = MessageAttachmentPlaybackStartedDetails(
                     message: package.message,
                     attachment: details.attachment,
                   );
