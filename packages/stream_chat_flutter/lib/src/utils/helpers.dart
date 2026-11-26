@@ -6,7 +6,7 @@ import 'package:flutter_portal/flutter_portal.dart';
 import 'package:synchronized/synchronized.dart';
 
 import '../../stream_chat_flutter.dart';
-import 'open_link.dart';
+import 'stream_link_handler.dart';
 
 final _permissionRequestLock = Lock();
 

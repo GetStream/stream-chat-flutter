@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:stream_chat_flutter/src/utils/open_link.dart';
+import 'package:stream_chat_flutter/src/utils/stream_link_handler.dart';
 import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 void main() {

@@ -3,7 +3,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../utils/device_segmentation.dart';
-import '../utils/open_link.dart';
+import '../utils/stream_link_handler.dart';
 import 'stream_typewriter_builder.dart';
 
 /// {@template streamingMessageView}

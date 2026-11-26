@@ -6,7 +6,7 @@ import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../stream_chat_flutter.dart';
 import '../attachment/attachment_widget_catalog.dart';
-import '../utils/open_link.dart';
+import '../utils/stream_link_handler.dart';
 
 /// {@template onAttachmentWidgetTap}
 /// A callback that is called when an attachment widget is tapped.

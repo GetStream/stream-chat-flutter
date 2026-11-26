@@ -12,7 +12,7 @@ import '../../stream_chat_flutter.dart';
 import '../channel/stream_message_preview_text.dart';
 import '../context_menu/context_menu.dart';
 import '../context_menu/context_menu_region.dart';
-import '../utils/open_link.dart';
+import '../utils/stream_link_handler.dart';
 import 'message_status_labels.dart';
 
 /// A chat message widget that renders a single message with its attachments,
