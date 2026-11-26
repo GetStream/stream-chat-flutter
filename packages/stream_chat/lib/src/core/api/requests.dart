@@ -1,8 +1,10 @@
+/// @docImport 'responses.dart';
+library;
+
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 import '../models/message_mark.dart';
-import 'responses.dart';
 
 part 'requests.g.dart';
 

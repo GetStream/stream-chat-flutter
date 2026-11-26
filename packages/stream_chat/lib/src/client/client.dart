@@ -2078,7 +2078,8 @@ class StreamChatClient {
 
   /// Returns the page of marks the [query] asks for, newest first.
   ///
-  /// Only the author of the message can query its marks.
+  /// Only the author of the message can query its marks; for anyone else the
+  /// returned future completes with a [StreamChatNetworkError].
   Future<QueryMessageMarksResponse> queryMessageMarks(
     MessageMarksQuery query,
   ) => _chatApi.message.queryMessageMarks(query);

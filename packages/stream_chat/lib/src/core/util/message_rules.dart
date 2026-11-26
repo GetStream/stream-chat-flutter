@@ -7,7 +7,8 @@ import '../models/own_user.dart';
 /// Provides validation rules for message operations.
 ///
 /// Determines whether messages can be sent, counted as unread, marked as
-/// delivered or played, or update channel timestamps based on business rules.
+/// delivered, marked by the current user, or update channel timestamps based
+/// on business rules.
 class MessageRules {
   const MessageRules._();
 

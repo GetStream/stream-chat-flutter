@@ -120,7 +120,7 @@ void main() {
   test("marks another user's message played once", () async {
     final (client, channel) = _channel(author: _otherUser);
     addTearDown(channel.dispose);
-    when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
+    when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => _markResponse());
     final message = channel.state!.messages.single;
 
     expect(await channel.markMessage(message, MessageMarkType.played), isNotNull);
@@ -138,7 +138,7 @@ void main() {
 
     final first = channel.markMessage(message, MessageMarkType.played);
     expect(await channel.markMessage(message, MessageMarkType.played), isNull);
-    response.complete(SendMessageMarkResponse());
+    response.complete(_markResponse());
     expect(await first, isNotNull);
 
     verify(() => client.sendMessageMark(any(), any())).called(1);
@@ -164,7 +164,7 @@ void main() {
     final message = channel.state!.messages.single;
     await expectLater(channel.markMessage(message, MessageMarkType.played), throwsA(isA<StreamChatNetworkError>()));
 
-    when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
+    when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => _markResponse());
 
     expect(await channel.markMessage(message, MessageMarkType.played), isNotNull);
   });
@@ -172,7 +172,7 @@ void main() {
   test('marks a message with another type after a played mark', () async {
     final (client, channel) = _channel(author: _otherUser);
     addTearDown(channel.dispose);
-    when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
+    when(() => client.sendMessageMark(any(), any())).thenAnswer((_) async => _markResponse());
     final message = channel.state!.messages.single;
 
     await channel.markMessage(message, MessageMarkType.played);
@@ -296,4 +296,16 @@ Event _markAdded(
       createdAt: _markedAt,
     ),
   );
+}
+
+// A response for a played mark the server created.
+SendMessageMarkResponse _markResponse() {
+  return SendMessageMarkResponse()
+    ..mark = MessageMark(
+      type: MessageMarkType.played,
+      messageId: 'voice-note',
+      userId: _currentUserId,
+      createdAt: _markedAt,
+    )
+    ..created = true;
 }
