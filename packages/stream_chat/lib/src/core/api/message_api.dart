@@ -280,7 +280,7 @@ class MessageApi {
     return QueryReactionsResponse.fromJson(response.data);
   }
 
-  /// Puts a mark of [type] on the message with [messageId].
+  /// Marks the message [messageId] with [type].
   Future<SendMessageMarkResponse> sendMessageMark(
     String messageId,
     MessageMarkType type,

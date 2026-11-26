@@ -2062,7 +2062,7 @@ class StreamChatClient {
     pagination: pagination,
   );
 
-  /// Puts a mark of [type] on the message with [messageId].
+  /// Marks the message [messageId] with [type].
   ///
   /// A user marks a message at most once per type. Marking it again, or
   /// marking a message the user wrote, changes nothing and returns
