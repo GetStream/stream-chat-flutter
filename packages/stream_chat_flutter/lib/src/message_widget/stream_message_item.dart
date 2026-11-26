@@ -12,6 +12,7 @@ import '../../stream_chat_flutter.dart';
 import '../channel/stream_message_preview_text.dart';
 import '../context_menu/context_menu.dart';
 import '../context_menu/context_menu_region.dart';
+import '../utils/open_link.dart';
 import 'message_status_labels.dart';
 
 /// A chat message widget that renders a single message with its attachments,
@@ -623,7 +624,7 @@ class DefaultStreamMessageItem extends StatelessWidget {
       onLinkTap: (_, href, __) {
         if (href == null) return;
         if (props.onMessageLinkTap case final onTap?) return onTap(message, href);
-        return launchURL(context, href).ignore();
+        return openLink(context, href).ignore();
       },
       onMentionTap: switch (props.onUserMentionTap) {
         final onTap? => (_, id) {

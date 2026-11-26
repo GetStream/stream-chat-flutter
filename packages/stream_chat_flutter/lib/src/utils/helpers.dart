@@ -4,9 +4,9 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_portal/flutter_portal.dart';
 import 'package:synchronized/synchronized.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../stream_chat_flutter.dart';
+import 'open_link.dart';
 
 final _permissionRequestLock = Lock();
 
@@ -24,19 +24,11 @@ Future<T> runInPermissionRequestLock<T>(
   );
 }
 
-/// Launch URL
-Future<void> launchURL(BuildContext context, String url) async {
-  try {
-    await launchUrl(
-      Uri.parse(url).withScheme,
-      mode: LaunchMode.externalApplication,
-    );
-  } catch (e) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(context.translations.launchUrlError)),
-    );
-  }
-}
+/// Opens [url] with the configured [StreamChatConfigurationData.linkHandler].
+///
+/// Shows a snack bar if [url] is not opened.
+@Deprecated('Use StreamChatConfigurationData.linkHandler instead.')
+Future<void> launchURL(BuildContext context, String url) => openLink(context, url);
 
 /// Get centerTitle considering a default and platform specific behaviour
 bool getEffectiveCenterTitle(

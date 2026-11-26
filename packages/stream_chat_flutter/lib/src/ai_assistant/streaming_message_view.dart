@@ -3,7 +3,7 @@ import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../utils/device_segmentation.dart';
-import '../utils/helpers.dart';
+import '../utils/open_link.dart';
 import 'stream_typewriter_builder.dart';
 
 /// {@template streamingMessageView}
@@ -87,7 +87,7 @@ class _StreamingMessageViewState extends State<StreamingMessageView> {
       onTapLink: switch (widget.onTapLink) {
         final onTapLink? => onTapLink,
         _ => (String link, String? href, String title) {
-          if (href != null) launchURL(context, href);
+          if (href != null) openLink(context, href);
         },
       },
     );

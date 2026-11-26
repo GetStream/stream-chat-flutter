@@ -163,6 +163,7 @@ class StreamChatConfigurationData {
     bool scheduledMessagesEnabled = true,
     MessagePreviewFormatter? messagePreviewFormatter,
     StreamImageCDN imageCDN = const StreamImageCDN(),
+    StreamLinkHandler linkHandler = const StreamLinkHandler(),
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
@@ -176,6 +177,7 @@ class StreamChatConfigurationData {
       scheduledMessagesEnabled: scheduledMessagesEnabled,
       messagePreviewFormatter: messagePreviewFormatter ?? MessagePreviewFormatter(),
       imageCDN: imageCDN,
+      linkHandler: linkHandler,
       attachmentBuilders: attachmentBuilders,
       reactionType: reactionType,
       reactionPosition: reactionPosition,
@@ -191,6 +193,7 @@ class StreamChatConfigurationData {
     required this.scheduledMessagesEnabled,
     required this.messagePreviewFormatter,
     required this.imageCDN,
+    required this.linkHandler,
     required this.attachmentBuilders,
     required this.messageListViewConfiguration,
     required this.messageTranslation,
@@ -207,6 +210,7 @@ class StreamChatConfigurationData {
     bool? scheduledMessagesEnabled,
     MessagePreviewFormatter? messagePreviewFormatter,
     StreamImageCDN? imageCDN,
+    StreamLinkHandler? linkHandler,
     List<StreamAttachmentWidgetBuilder>? attachmentBuilders,
     StreamReactionsType? reactionType,
     StreamReactionsPosition? reactionPosition,
@@ -220,6 +224,7 @@ class StreamChatConfigurationData {
       scheduledMessagesEnabled: scheduledMessagesEnabled ?? this.scheduledMessagesEnabled,
       messagePreviewFormatter: messagePreviewFormatter ?? this.messagePreviewFormatter,
       imageCDN: imageCDN ?? this.imageCDN,
+      linkHandler: linkHandler ?? this.linkHandler,
       attachmentBuilders: attachmentBuilders ?? this.attachmentBuilders,
       reactionType: reactionType ?? this.reactionType,
       reactionPosition: reactionPosition ?? this.reactionPosition,
@@ -260,6 +265,14 @@ class StreamChatConfigurationData {
   /// Defaults to [StreamImageCDN], which supports Stream's own CDN.
   /// Extend [StreamImageCDN] to customize behavior for a custom CDN.
   final StreamImageCDN imageCDN;
+
+  /// The [StreamLinkHandler] that opens the links users tap.
+  ///
+  /// Covers links in message text, link previews, file attachments and AI
+  /// replies. A link-tap callback set on a widget, such as
+  /// [StreamMessageListView.onMessageLinkTap], is used instead. Defaults to a
+  /// [StreamLinkHandler] that opens [StreamLinkHandler.defaultSchemes].
+  final StreamLinkHandler linkHandler;
 
   /// Custom attachment builders for rendering attachment widgets in messages.
   ///
