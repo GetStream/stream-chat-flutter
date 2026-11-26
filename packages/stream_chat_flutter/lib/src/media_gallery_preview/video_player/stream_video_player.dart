@@ -177,7 +177,10 @@ class _StreamVideoPlayerDefaultState extends State<DefaultStreamVideoPlayer>
     try {
       final attachment = widget.attachment;
       final details = PlaybackStartedDetails(attachment: attachment);
-      await _player.open(attachment, onPlaybackStarted: () => widget.props.onPlaybackStarted?.call(details));
+      await _player.open(
+        attachment,
+        onPlaybackStarted: () => widget.props.onPlaybackStarted?.call(details),
+      );
       if (!mounted) return;
       setState(() {});
       updateKeepAlive();

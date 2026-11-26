@@ -7,7 +7,7 @@
 
 🔄 Changed
 
-- A language added by subclassing `GlobalStreamChatLocalizations` must add the scheduled message strings.
+- A language added by subclassing `GlobalStreamChatLocalizations` must add the scheduled message and played mark strings.
 
 ## 10.7.0
 

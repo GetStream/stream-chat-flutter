@@ -9,9 +9,9 @@
 - Added `onScheduledMessagesBannerTap` to `StreamChannelPage` and `StreamThreadPage`.
 - Added `onSendMessage` to `StreamMessageComposer`, a `StreamMessageComposerCallback` that replaces sending a message or saving an edit.
 - Added `onSendLongPress` to `StreamMessageComposer` and `StreamChatMessageInput`, called when send is long-pressed, such as to schedule the message.
-- Added played marks on the current user's messages in channel types that enable them, with `onMessageMarkTap` on `StreamMessageListView` and `StreamMessageItem` to handle a tap.
-- Added marking another user's voice recording or video as played once the current user plays it from a message; a custom video player or gallery preview must call its props' `onPlaybackStarted` for this.
-- Added `onPlaybackStarted` to `StreamVoiceRecordingAttachmentPlaylist`, `StreamMediaGalleryPreview`, `StreamMediaGalleryPreviewItem` and `StreamVideoPlayer`, called when an attachment starts playing.
+- Added played marks on the current user's messages in channel types that enable them, shown with `StreamMessagePlayedMark`, and `onMessageMarkTap` on `StreamMessageListView` and `StreamMessageItem` to handle a tap.
+- Added marking another user's voice recording or video as played once the current user plays it from a message.
+- Added `onPlaybackStarted` to `StreamVoiceRecordingAttachmentPlaylist`, `VoiceRecordingAttachmentPlaylistBuilder`, `StreamMediaGalleryPreview`, `StreamMediaGalleryPreviewItem` and `StreamVideoPlayer`, called when an attachment starts playing. A custom video player or gallery preview calls it for its videos to be marked played.
 
 🔄 Changed
 
@@ -26,9 +26,6 @@
 
 - Fixed dark sheets turning lighter with elevation.
 - Fixed `StreamMessageComposer` refilling a cleared or edited draft when the server's copy of the earlier draft arrived late.
-
-🐞 Fixed
-
 - Fixed `StreamMessageComposer` and `StreamMentionAutocompleteOptions` showing no user suggestions when `mentionAllAppUsers` is enabled without a `client`.
 
 ## 10.7.0

@@ -135,6 +135,18 @@ Message _videoMessage({int videos = 1}) {
   );
 }
 
+// A response for a played mark the server created.
+SendMessageMarkResponse _markResponse() {
+  return SendMessageMarkResponse()
+    ..mark = MessageMark(
+      type: MessageMarkType.played,
+      messageId: 'message-id',
+      userId: _currentUser.id,
+      createdAt: DateTime(2026, 11, 20),
+    )
+    ..created = true;
+}
+
 MockChannel _channel() {
   final client = MockClient();
   final clientState = MockClientState();
@@ -148,7 +160,7 @@ MockChannel _channel() {
   when(() => channel.state).thenReturn(channelState);
   when(() => channel.memberCount).thenReturn(5);
   when(() => channelState.readStream).thenAnswer((_) => Stream.value(const []));
-  when(() => channel.markMessage(any(), any())).thenAnswer((_) async => SendMessageMarkResponse());
+  when(() => channel.markMessage(any(), any())).thenAnswer((_) async => _markResponse());
   return channel;
 }
 
