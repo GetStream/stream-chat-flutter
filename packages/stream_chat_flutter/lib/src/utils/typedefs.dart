@@ -260,9 +260,8 @@ final class PlaybackStartedDetails {
 /// attachment.
 typedef OnAttachmentPlaybackStarted = void Function(AttachmentPlaybackStartedDetails details);
 
-/// Details of a message's attachment starting to play.
-///
-/// Passed to [OnAttachmentPlaybackStarted] for a voice recording or a video.
+/// Details of a message's attachment starting to play, passed to
+/// [OnAttachmentPlaybackStarted].
 @immutable
 final class AttachmentPlaybackStartedDetails {
   /// Creates details for a message's attachment starting to play.

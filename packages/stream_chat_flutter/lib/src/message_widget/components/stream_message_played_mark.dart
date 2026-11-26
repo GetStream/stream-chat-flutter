@@ -48,7 +48,7 @@ class StreamMessagePlayedMark extends StatelessWidget {
     if (onTap == null) {
       return ExcludeSemantics(
         excluding: excludeFromSemantics,
-        child: Text(label),
+        child: Text(label, maxLines: 1, overflow: .ellipsis),
       );
     }
 
@@ -59,7 +59,7 @@ class StreamMessagePlayedMark extends StatelessWidget {
     return GestureDetector(
       behavior: .opaque,
       onTap: () => onTap(context, details),
-      child: Text(label),
+      child: Text(label, maxLines: 1, overflow: .ellipsis),
     );
   }
 }
