@@ -2,6 +2,7 @@
 import 'package:drift/drift.dart';
 import '../converter/list_converter.dart';
 import '../converter/map_converter.dart';
+import '../converter/mark_groups_converter.dart';
 import '../converter/reaction_groups_converter.dart';
 import 'channels.dart';
 
@@ -46,6 +47,12 @@ class Messages extends Table {
 
   /// A map describing the reaction group for every reaction
   TextColumn get reactionGroups => text().map(ReactionGroupsConverter()).nullable()();
+
+  /// The users who marked the message, by mark type.
+  TextColumn get markGroups => text().map(MarkGroupsConverter()).nullable()();
+
+  /// The marks the current user put on the message.
+  TextColumn get ownMarks => text().nullable().map(ListConverter<String>())();
 
   /// The ID of the parent message, if the message is a thread reply.
   TextColumn get parentId => text().nullable()();

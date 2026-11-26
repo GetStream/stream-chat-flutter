@@ -683,6 +683,116 @@ void main() {
         },
       );
     });
+
+    group('canMark', () {
+      late Channel channel;
+
+      setUp(() {
+        channel = _createChannel(
+          client,
+          capabilities: [ChannelCapability.sendMessageMark],
+          markTypes: [MessageMarkType.played],
+        );
+      });
+
+      test("should return true for another user's unplayed message", () {
+        final message = _createMessage();
+
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isTrue);
+      });
+
+      test('should return false when channel lacks the mark capability', () {
+        final message = _createMessage();
+        final channel = _createChannel(
+          client,
+          markTypes: [MessageMarkType.played],
+        );
+
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isFalse);
+      });
+
+      test('should return false when the channel type has no played marks', () {
+        final message = _createMessage();
+        final channel = _createChannel(
+          client,
+          capabilities: [ChannelCapability.sendMessageMark],
+        );
+
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isFalse);
+      });
+
+      test('should return false when the channel is not initialized', () {
+        final message = _createMessage();
+        final channel = Channel(client, 'messaging', 'not-initialized');
+
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isFalse);
+      });
+
+      test('should return false for a deleted message', () {
+        final message = _createMessage(
+          (m) => m.copyWith(type: MessageType.deleted),
+        );
+
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isFalse);
+      });
+
+      test('should return false for a message without a sender', () {
+        final message = Message(id: 'message-id', text: 'Draft');
+
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isFalse);
+      });
+
+      test("should return false for the current user's own message", () {
+        final currentUserId = client.state.currentUser!.id;
+        final message = _createMessage(
+          (m) => m.copyWith(user: User(id: currentUserId)),
+        );
+
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isFalse);
+      });
+
+      test('should return false for a message already marked as played', () {
+        final ownMark = OwnMark(
+          type: MessageMarkType.played,
+          createdAt: DateTime(2023, 1, 2),
+        );
+        final message = _createMessage(
+          (m) => m.copyWith(ownMarks: [ownMark]),
+        );
+
+        expect(MessageRules.canMark(message, channel, MessageMarkType.played), isFalse);
+      });
+
+      test('should return true for a custom type the channel type supports', () {
+        const viewed = MessageMarkType('acme.viewed');
+        final message = _createMessage();
+        final channel = _createChannel(
+          client,
+          capabilities: [ChannelCapability.sendMessageMark],
+          markTypes: [viewed],
+        );
+
+        expect(MessageRules.canMark(message, channel, viewed), isTrue);
+      });
+
+      test('should return true for a type the current user has not marked yet', () {
+        const viewed = MessageMarkType('acme.viewed');
+        final ownMark = OwnMark(
+          type: MessageMarkType.played,
+          createdAt: DateTime(2023, 1, 2),
+        );
+        final message = _createMessage(
+          (m) => m.copyWith(ownMarks: [ownMark]),
+        );
+        final channel = _createChannel(
+          client,
+          capabilities: [ChannelCapability.sendMessageMark],
+          markTypes: [MessageMarkType.played, viewed],
+        );
+
+        expect(MessageRules.canMark(message, channel, viewed), isTrue);
+      });
+    });
   });
 }
 
@@ -733,6 +843,7 @@ Channel _createChannel(
   bool hasDeliveryEvents = false,
   bool skipLastMsgUpdateForSystemMsgs = false,
   List<ChannelCapability>? capabilities,
+  List<MessageMarkType> markTypes = const [],
   List<Read>? reads,
 }) {
   final channelState = ChannelState(
@@ -742,6 +853,7 @@ Channel _createChannel(
         readEvents: hasReadEvents,
         deliveryEvents: hasDeliveryEvents,
         skipLastMsgUpdateForSystemMsgs: skipLastMsgUpdateForSystemMsgs,
+        markTypes: markTypes,
       ),
       ownCapabilities: [
         ...?capabilities,

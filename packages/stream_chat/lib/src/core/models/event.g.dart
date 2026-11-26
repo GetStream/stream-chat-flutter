@@ -46,6 +46,7 @@ Event _$EventFromJson(Map<String, dynamic> json) => Event(
   lastReadMessageId: json['last_read_message_id'] as String?,
   draft: json['draft'] == null ? null : Draft.fromJson(json['draft'] as Map<String, dynamic>),
   reminder: json['reminder'] == null ? null : MessageReminder.fromJson(json['reminder'] as Map<String, dynamic>),
+  mark: json['mark'] == null ? null : MessageMark.fromJson(json['mark'] as Map<String, dynamic>),
   scheduledMessage: json['scheduled_message'] == null
       ? null
       : ScheduledMessage.fromJson(
@@ -105,6 +106,7 @@ Map<String, dynamic> _$EventToJson(Event instance) => <String, dynamic>{
   'last_read_message_id': ?instance.lastReadMessageId,
   'draft': ?instance.draft?.toJson(),
   'reminder': ?instance.reminder?.toJson(),
+  'mark': ?instance.mark?.toJson(),
   'push_preference': ?instance.pushPreference?.toJson(),
   'channel_push_preference': ?instance.channelPushPreference?.toJson(),
   'channel_member_count': ?instance.channelMemberCount,

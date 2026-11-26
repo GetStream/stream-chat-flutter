@@ -1,12 +1,14 @@
 import '../../client/channel/channel.dart';
 import '../../client/channel/channel_capability_check.dart';
 import '../models/message.dart';
+import '../models/message_mark.dart';
 import '../models/own_user.dart';
 
 /// Provides validation rules for message operations.
 ///
 /// Determines whether messages can be sent, counted as unread, marked as
-/// delivered, or update channel timestamps based on business rules.
+/// delivered, marked by the current user, or update channel timestamps based
+/// on business rules.
 class MessageRules {
   const MessageRules._();
 
@@ -205,5 +207,51 @@ class MessageRules {
     }
 
     return true;
+  }
+
+  /// Whether the current user can mark [message] with [type] in [channel].
+  ///
+  /// Returns `false` if any of the following is true:
+  ///
+  /// * There is no current user
+  /// * [ChannelCapabilityCheck.canSendMessageMark] is false for [channel]
+  /// * [ChannelConfig.markTypes] doesn't include [type]
+  /// * The message is deleted
+  /// * The message has no sender
+  /// * The message was sent by the current user
+  /// * The current user already marked the message with [type]
+  ///
+  /// It doesn't check that [message] has an attachment the type applies to,
+  /// such as one that can be played for [MessageMarkType.played].
+  static bool canMark(
+    Message message,
+    Channel channel,
+    MessageMarkType type,
+  ) {
+    // Don't mark if the current user is not set.
+    final currentUser = channel.client.state.currentUser;
+    if (currentUser == null) return false;
+
+    // Don't mark if the current user can't send message marks here.
+    if (!channel.canSendMessageMark) return false;
+
+    // Don't mark if the channel type doesn't support this mark type.
+    final config = channel.state?.channelState.channel?.config;
+    final markTypes = config?.markTypes ?? const [];
+    if (!markTypes.contains(type)) return false;
+
+    // Don't mark a deleted message.
+    if (message.isDeleted) return false;
+
+    // Don't mark a message without a sender.
+    final messageUser = message.user;
+    if (messageUser == null) return false;
+
+    // Don't mark the current user's own messages.
+    if (messageUser.id == currentUser.id) return false;
+
+    // Don't mark a message the current user already marked with this type.
+    final ownMarks = message.ownMarks ?? const [];
+    return !ownMarks.any((it) => it.type == type);
   }
 }

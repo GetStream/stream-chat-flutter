@@ -104,6 +104,36 @@ class ChannelStateMutations {
   /// Removes the deleted [draft].
   void onDraftDeleted(Draft draft) => _state.deleteDraft(draft);
 
+  /// Adds [mark] to the marked message.
+  ///
+  /// The message is found among the loaded and pinned messages, or the thread
+  /// replies under [parentId].
+  ///
+  /// A mark joins [Message.markGroups] on the current user's own message, or
+  /// [Message.ownMarks] when the current user marked another user's message.
+  /// A marker already listed for that type is not counted again.
+  void onMessageMarkAdded(MessageMark mark, {String? parentId}) {
+    final currentUserId = _client.state.currentUser?.id;
+    if (currentUserId == null) return;
+
+    final messages = [
+      ..._state.messages,
+      ...?_state.threads[parentId],
+      ..._state.pinnedMessages,
+    ];
+    final message = messages.firstWhereOrNull((it) => it.id == mark.messageId);
+    if (message == null) return;
+
+    final updated = switch (currentUserId) {
+      final userId when message.user?.id == userId => message.addMark(mark),
+      final userId when mark.userId == userId => message.addMyMark(mark),
+      _ => null,
+    };
+    if (updated == null || identical(updated, message)) return;
+
+    return _state.updateMessage(updated, upsert: false);
+  }
+
   /// Applies the [eventMessage] carrying the new [eventReaction], preserving
   /// the current user's own reactions.
   void onReactionNew(Message eventMessage, Reaction eventReaction) {

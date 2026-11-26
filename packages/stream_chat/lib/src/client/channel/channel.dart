@@ -2119,6 +2119,57 @@ class Channel {
     pagination: pagination,
   );
 
+  // The marks this channel is sending or has sent, by message id and type.
+  final _sentMarks = <(String, MessageMarkType)>{};
+
+  /// Marks [message] with [type] for the current user, at most once.
+  ///
+  /// Returns `null` without sending anything if [MessageRules.canMark] is
+  /// false, or if this channel already marked [message] with [type] or is
+  /// marking it.
+  ///
+  /// The mark appears in [Message.ownMarks] once [EventType.messageMarkAdded]
+  /// arrives for it.
+  ///
+  /// Throws a [StreamChatNetworkError] if the request fails; the next call then
+  /// tries again.
+  ///
+  /// ```dart
+  /// await channel.markMessage(message, MessageMarkType.played);
+  /// ```
+  ///
+  /// See also:
+  ///
+  ///  * [StreamChatClient.sendMessageMark], which sends a mark without these
+  ///    checks.
+  Future<SendMessageMarkResponse?> markMessage(
+    Message message,
+    MessageMarkType type,
+  ) async {
+    if (!MessageRules.canMark(message, this, type)) return null;
+
+    final mark = (message.id, type);
+    if (!_sentMarks.add(mark)) return null;
+
+    try {
+      return await _client.sendMessageMark(message.id, type);
+    } catch (_) {
+      _sentMarks.remove(mark);
+      rethrow;
+    }
+  }
+
+  /// Returns the page of marks the [query] asks for, newest first.
+  ///
+  /// Only the author of the message can query its marks; for anyone else the
+  /// returned future completes with a [StreamChatNetworkError].
+  Future<QueryMessageMarksResponse> queryMessageMarks(
+    MessageMarksQuery query,
+  ) {
+    _checkInitialized();
+    return _client.queryMessageMarks(query);
+  }
+
   /// Retrieves a list of messages by given [messageIDs].
   Future<GetMessagesByIdResponse> getMessagesById(
     List<String> messageIDs,
