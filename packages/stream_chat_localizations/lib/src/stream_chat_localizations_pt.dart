@@ -891,11 +891,19 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   String notifyRoleText(String role) => 'Notificar todos os membros $role';
 
   @override
-  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+  String scheduledMessageSendAtText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
-    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return 'Enviar em $date às $time';
+  }
+
+  @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
+    return 'Agendado para $date às $time';
   }
 
   @override
@@ -903,6 +911,9 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get scheduledMessageUploadingLabel => 'Enviando arquivos…';
+
+  @override
+  String get scheduledMessageAttachmentUploadFailedText => 'Não foi possível enviar o anexo.';
 
   @override
   String get scheduledThreadReplyPrefixText => 'Resposta na conversa:';
@@ -914,24 +925,28 @@ Não é possível adicionar mais de $limit arquivos de uma vez
   }
 
   @override
-  String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+  String scheduledMessageFailureText({
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {
-    return switch (reason) {
-      .requestFailed => 'Não foi possível enviar. Tente novamente',
-      .internalError => 'Algo deu errado. Tente novamente',
-      .channelDeleted => 'Este canal foi excluído',
-      .userDeleted => 'Sua conta foi excluída',
-      .channelFrozen => 'Este canal está congelado',
-      .banned => 'Você não pode enviar mensagens neste canal',
-      .noPermission => 'Você não tem mais permissão para publicar aqui',
-      .moderationBlocked => 'Bloqueada pela moderação',
-      .hookRejected => 'Rejeitada pelo aplicativo',
-      .expired => 'Não enviada: o serviço atrasou',
-      .pendingNotSupported => 'Este canal agora exige aprovação. Agende novamente.',
-      .invalidMessage when isQuoteDeleted => 'A mensagem citada foi excluída. Edite para remover a citação.',
-      .invalidMessage => 'A mensagem não atende mais aos limites do aplicativo. Edite-a.',
+    return switch (failure) {
+      ScheduledMessageUpdatingFailed() => 'A edição não foi salva. A versão anterior continua agendada.',
+      ScheduledMessageSchedulingFailed() => 'Não foi possível agendar.',
+      ScheduledMessageSendingFailed(reason: .internalError) => 'Algo deu errado. Tente novamente',
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => 'Este canal foi excluído',
+      ScheduledMessageSendingFailed(reason: .userDeleted) => 'Sua conta foi excluída',
+      ScheduledMessageSendingFailed(reason: .channelFrozen) => 'Este canal está congelado',
+      ScheduledMessageSendingFailed(reason: .banned) => 'Você não pode enviar mensagens neste canal',
+      ScheduledMessageSendingFailed(reason: .noPermission) => 'Você não tem mais permissão para publicar aqui',
+      ScheduledMessageSendingFailed(reason: .moderationBlocked) => 'Bloqueada pela moderação',
+      ScheduledMessageSendingFailed(reason: .hookRejected) => 'Rejeitada pelo aplicativo',
+      ScheduledMessageSendingFailed(reason: .expired) => 'Não enviada: o serviço atrasou',
+      ScheduledMessageSendingFailed(reason: .pendingNotSupported) =>
+        'Este canal agora exige aprovação. Agende novamente.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) when isQuoteDeleted =>
+        'A mensagem citada foi excluída. Edite para remover a citação.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) =>
+        'A mensagem não atende mais aos limites do aplicativo. Edite-a.',
       _ => 'Algo deu errado. Tente novamente',
     };
   }
@@ -950,6 +965,115 @@ Não é possível adicionar mais de $limit arquivos de uma vez
 
   @override
   String get sendNowLabel => 'Enviar agora';
+
+  @override
+  String get scheduleMessageLabel => 'Agendar mensagem';
+
+  @override
+  String get rescheduleMessageLabel => 'Reagendar mensagem';
+
+  @override
+  String get customTimeLabel => 'Horário personalizado';
+
+  @override
+  String scheduleTomorrowText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final time = _formatTime(scheduledAt.toLocal(), use24HourFormat: use24HourFormat);
+    return 'Amanhã às $time';
+  }
+
+  @override
+  String scheduleWeekdayText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final local = scheduledAt.toLocal();
+    final weekday = toBeginningOfSentenceCase(DateFormat.EEEE(localeName).format(local), localeName);
+    final time = _formatTime(local, use24HourFormat: use24HourFormat);
+    return '$weekday às $time';
+  }
+
+  @override
+  String messageToLabel({required String channelName}) => 'Mensagem para $channelName';
+
+  @override
+  String get dateLabel => 'Data';
+
+  @override
+  String get timeLabel => 'Hora';
+
+  @override
+  String get scheduleLabel => 'Agendar';
+
+  @override
+  String sentInYourTimeZoneText({required String timeZone}) => 'Enviada no seu fuso horário ($timeZone)';
+
+  @override
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: 'Escolha um horário daqui a pelo menos $minutes minuto',
+      other: 'Escolha um horário daqui a pelo menos $minutes minutos',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError =>
+      'Escolha um horário mais tarde. Ao editar, não é possível enviar uma mensagem imediatamente.';
+
+  @override
+  String get scheduleTooFarError => 'Esse horário está além do que o aplicativo permite';
+
+  @override
+  String scheduleLimitReachedLabel({required int limit}) => 'Limite atingido (máx. $limit)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) => 'Você atingiu o limite de $limit mensagens agendadas.';
+
+  @override
+  String get scheduleMessageError => 'Não foi possível agendar a mensagem. Tente novamente';
+
+  @override
+  String get scheduleCommandRefusedError => 'Comandos não podem ser agendados. Remova o comando / para continuar.';
+
+  @override
+  String get scheduleQuotedMessageDeletedError => 'A mensagem citada foi excluída';
+
+  @override
+  String get scheduleMessageRefusedError => 'Esta mensagem não pode ser agendada';
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count mensagem agendada',
+      other: '$count mensagens agendadas',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count resposta agendada',
+      other: '$count respostas agendadas',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count falhou ao enviar',
+      other: '$count falharam ao enviar',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count de $limit mensagens agendadas';
+  }
 }
 
 class _AccessibilityTranslationsPt extends AccessibilityTranslations {
@@ -972,6 +1096,9 @@ class _AccessibilityTranslationsPt extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'Gravar mensagem de voz';
+
+  @override
+  String get scheduleMessageHint => 'Agendar mensagem';
 
   @override
   String get cancelRecordingTooltip => 'Cancelar gravação';

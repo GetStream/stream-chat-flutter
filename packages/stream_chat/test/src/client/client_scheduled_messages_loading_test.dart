@@ -208,7 +208,6 @@ void main() {
 
     harness.stubQuery(fakePage([fakeScheduledMessage('loaded')]));
     await harness.client.loadScheduledMessages();
-    await settle();
 
     expect(idsOf(channel.state!.scheduledMessages), ['loaded']);
   });

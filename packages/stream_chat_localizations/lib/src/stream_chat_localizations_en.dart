@@ -888,11 +888,19 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   String notifyRoleText(String role) => 'Notify all $role members';
 
   @override
-  String scheduledMessageSendAtText({required DateTime scheduledAt}) {
+  String scheduledMessageSendAtText({required DateTime scheduledAt, bool use24HourFormat = false}) {
     final localScheduledAt = scheduledAt.toLocal();
     final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
-    final time = DateFormat.jm(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
     return 'Send $date at $time';
+  }
+
+  @override
+  String scheduledMessageScheduledForText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final localScheduledAt = scheduledAt.toLocal();
+    final date = DateFormat.MMMEd(localeName).format(localScheduledAt);
+    final time = _formatTime(localScheduledAt, use24HourFormat: use24HourFormat);
+    return 'Scheduled for $date at $time';
   }
 
   @override
@@ -900,6 +908,9 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get scheduledMessageUploadingLabel => 'Uploading…';
+
+  @override
+  String get scheduledMessageAttachmentUploadFailedText => "Couldn't upload attachment.";
 
   @override
   String get scheduledThreadReplyPrefixText => 'Thread reply:';
@@ -911,24 +922,28 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
   }
 
   @override
-  String scheduledMessageFailureReasonText({
-    ScheduledMessageFailureReason? reason,
+  String scheduledMessageFailureText({
+    ScheduledMessageFailure? failure,
     bool isQuoteDeleted = false,
   }) {
-    return switch (reason) {
-      .requestFailed => "Couldn't send. Try again",
-      .internalError => 'Something went wrong. Try again',
-      .channelDeleted => 'This channel was deleted',
-      .userDeleted => 'Your account was deleted',
-      .channelFrozen => 'This channel is frozen',
-      .banned => "You can't send messages in this channel",
-      .noPermission => "You're no longer allowed to post here",
-      .moderationBlocked => 'Blocked by moderation',
-      .hookRejected => 'Rejected by the app',
-      .expired => 'Not sent: the service was delayed',
-      .pendingNotSupported => 'This channel now needs approval. Schedule it again.',
-      .invalidMessage when isQuoteDeleted => 'The quoted message was deleted. Edit it to remove the quote.',
-      .invalidMessage => "The message no longer meets the app's limits. Edit it.",
+    return switch (failure) {
+      ScheduledMessageUpdatingFailed() => "The edit wasn't saved. The earlier version is still scheduled.",
+      ScheduledMessageSchedulingFailed() => "Couldn't schedule.",
+      ScheduledMessageSendingFailed(reason: .internalError) => 'Something went wrong. Try again',
+      ScheduledMessageSendingFailed(reason: .channelDeleted) => 'This channel was deleted',
+      ScheduledMessageSendingFailed(reason: .userDeleted) => 'Your account was deleted',
+      ScheduledMessageSendingFailed(reason: .channelFrozen) => 'This channel is frozen',
+      ScheduledMessageSendingFailed(reason: .banned) => "You can't send messages in this channel",
+      ScheduledMessageSendingFailed(reason: .noPermission) => "You're no longer allowed to post here",
+      ScheduledMessageSendingFailed(reason: .moderationBlocked) => 'Blocked by moderation',
+      ScheduledMessageSendingFailed(reason: .hookRejected) => 'Rejected by the app',
+      ScheduledMessageSendingFailed(reason: .expired) => 'Not sent: the service was delayed',
+      ScheduledMessageSendingFailed(reason: .pendingNotSupported) =>
+        'This channel now needs approval. Schedule it again.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) when isQuoteDeleted =>
+        'The quoted message was deleted. Edit it to remove the quote.',
+      ScheduledMessageSendingFailed(reason: .invalidMessage) =>
+        "The message no longer meets the app's limits. Edit it.",
       _ => 'Something went wrong. Try again',
     };
   }
@@ -947,6 +962,108 @@ class StreamChatLocalizationsEn extends GlobalStreamChatLocalizations {
 
   @override
   String get sendNowLabel => 'Send Now';
+
+  @override
+  String get scheduleMessageLabel => 'Schedule message';
+
+  @override
+  String get rescheduleMessageLabel => 'Reschedule message';
+
+  @override
+  String get customTimeLabel => 'Custom time';
+
+  @override
+  String scheduleTomorrowText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final time = _formatTime(scheduledAt.toLocal(), use24HourFormat: use24HourFormat);
+    return 'Tomorrow at $time';
+  }
+
+  @override
+  String scheduleWeekdayText({required DateTime scheduledAt, bool use24HourFormat = false}) {
+    final local = scheduledAt.toLocal();
+    final weekday = DateFormat.EEEE(localeName).format(local);
+    final time = _formatTime(local, use24HourFormat: use24HourFormat);
+    return '$weekday at $time';
+  }
+
+  @override
+  String messageToLabel({required String channelName}) => 'Message to $channelName';
+
+  @override
+  String get dateLabel => 'Date';
+
+  @override
+  String get timeLabel => 'Time';
+
+  @override
+  String get scheduleLabel => 'Schedule';
+
+  @override
+  String sentInYourTimeZoneText({required String timeZone}) => 'Sent in your time zone ($timeZone)';
+
+  @override
+  String scheduleTooSoonError({required Duration minLeadTime}) {
+    final minutes = minLeadTime.inMinutes;
+    return Intl.plural(
+      minutes,
+      one: 'Pick a time at least $minutes minute from now',
+      other: 'Pick a time at least $minutes minutes from now',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String get rescheduleTooSoonError => "Pick a later time. Editing can't send a message right away.";
+
+  @override
+  String get scheduleTooFarError => "That's further ahead than your app allows";
+
+  @override
+  String scheduleLimitReachedLabel({required int limit}) => 'Limit reached ($limit max)';
+
+  @override
+  String scheduleUserLimitReachedError({required int limit}) =>
+      "You've reached your limit of $limit scheduled messages.";
+
+  @override
+  String get scheduleMessageError => "Couldn't schedule message. Try again";
+
+  @override
+  String get scheduleCommandRefusedError => "Commands can't be scheduled. Remove the / command to continue.";
+
+  @override
+  String get scheduleQuotedMessageDeletedError => 'The quoted message was deleted';
+
+  @override
+  String get scheduleMessageRefusedError => "This message can't be scheduled";
+
+  @override
+  String scheduledMessagesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count scheduled message',
+      other: '$count scheduled messages',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledRepliesCountText({required int count}) {
+    return Intl.plural(
+      count,
+      one: '$count scheduled reply',
+      other: '$count scheduled replies',
+      locale: localeName,
+    );
+  }
+
+  @override
+  String scheduledMessagesFailedCountText({required int count}) => '$count failed to send';
+
+  @override
+  String scheduledMessagesLimitText({required int count, required int limit}) {
+    return '$count of $limit scheduled messages';
+  }
 }
 
 class _AccessibilityTranslationsEn extends AccessibilityTranslations {
@@ -969,6 +1086,9 @@ class _AccessibilityTranslationsEn extends AccessibilityTranslations {
 
   @override
   String get recordVoiceRecordingLabel => 'Record voice message';
+
+  @override
+  String get scheduleMessageHint => 'Schedule message';
 
   @override
   String get cancelRecordingTooltip => 'Cancel recording';

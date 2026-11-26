@@ -1,5 +1,7 @@
 // ignore_for_file: avoid_redundant_argument_values, deprecated_member_use
 
+import 'dart:io';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
@@ -45,6 +47,45 @@ void main() {
         await client.disconnect();
       });
     });
+  });
+
+  test('StreamChatPersistenceClient keeps the data of two prefixes apart', () async {
+    final syncedAt = DateTime.utc(2026, 11, 20);
+    final beta = await _connectedClient(databaseNamePrefix: 'beta');
+    await beta.updateLastSyncAt(syncedAt);
+
+    final prod = await _connectedClient(databaseNamePrefix: 'prod');
+
+    expect(await prod.getLastSyncAt(), isNull);
+    expect(await beta.getLastSyncAt(), syncedAt);
+  });
+
+  test('StreamChatPersistenceClient accepts a databaseNamePrefix with inner _ and -', () {
+    expect(
+      () => StreamChatPersistenceClient(databaseNamePrefix: 'chat_beta-2'),
+      returnsNormally,
+    );
+  });
+
+  test('StreamChatPersistenceClient rejects a databaseNamePrefix starting with _', () {
+    expect(
+      () => StreamChatPersistenceClient(databaseNamePrefix: '_beta'),
+      throwsAssertionError,
+    );
+  });
+
+  test('StreamChatPersistenceClient rejects a databaseNamePrefix ending in _', () {
+    expect(
+      () => StreamChatPersistenceClient(databaseNamePrefix: 'beta_'),
+      throwsAssertionError,
+    );
+  });
+
+  test('StreamChatPersistenceClient rejects a databaseNamePrefix with a path separator', () {
+    expect(
+      () => StreamChatPersistenceClient(databaseNamePrefix: '../chat'),
+      throwsAssertionError,
+    );
   });
 
   test('disconnect', () async {
@@ -1409,4 +1450,19 @@ void main() {
       await client.disconnect(flush: true);
     });
   });
+}
+
+Future<StreamChatPersistenceClient> _connectedClient({
+  required String databaseNamePrefix,
+}) async {
+  const userId = 'prefixTestUser';
+  final client = StreamChatPersistenceClient(databaseNamePrefix: databaseNamePrefix);
+  await client.connect(userId);
+  addTearDown(() async {
+    await client.disconnect();
+    // On macOS and Linux the database is a file in the working directory.
+    final file = File('${databaseNamePrefix}_db_$userId.sqlite');
+    if (file.existsSync()) file.deleteSync();
+  });
+  return client;
 }

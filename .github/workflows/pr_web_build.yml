@@ -1,0 +1,120 @@
+name: pr_web_build
+
+# Deploys the sample app of a pull request labeled `build` to
+# https://flutter.getstream.io/chat/pr/<number>/ and comments the link,
+# through the shared actions in stream-core-flutter. Every push deploys again;
+# removing the label or closing the pull request removes the build. Builds left
+# behind are removed after 30 days by distribute_web. Fork pull requests are
+# skipped: their runs get no identity token.
+
+on:
+  pull_request:
+    types: [labeled, unlabeled, synchronize, reopened, closed]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Build and Deploy
+    # Any label change starts this workflow, so a `labeled` run only builds
+    # when the label added is `build`. A closed pull request gets no build:
+    # no `closed` event would come to remove it.
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      github.event.pull_request.state == 'open' &&
+      github.event.action != 'closed' &&
+      github.event.action != 'unlabeled' &&
+      contains(github.event.pull_request.labels.*.name, 'build') &&
+      (github.event.action != 'labeled' || github.event.label.name == 'build')
+    runs-on:
+      group: github-public-amd64
+    timeout-minutes: 30
+    # On the jobs rather than the workflow, so a run that skips both (another
+    # label added) leaves a running deploy alone.
+    concurrency:
+      group: pr-web-build-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    environment:
+      name: flutter-web-pr
+      url: ${{ steps.target.outputs.url }}
+    permissions:
+      contents: read
+      id-token: write
+      pull-requests: write
+    steps:
+      - name: "Git Checkout"
+        uses: actions/checkout@v7
+
+      - uses: ./.github/actions/setup-flutter
+
+      - name: "Install Tools"
+        uses: ./.github/actions/install-tools
+
+      - name: "Bootstrap Workspace"
+        run: melos bootstrap
+
+      - name: Target
+        id: target
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-target@932fb06e4555b3556f211147f8915ce8a6bd0a6c
+        with:
+          app: chat
+          flavor: pr
+
+      - name: Build
+        working-directory: sample_app
+        env:
+          BUILD_ARGS: ${{ steps.target.outputs.build-args }}
+        run: |
+          read -ra args <<< "$BUILD_ARGS"
+          flutter build web --release "${args[@]}"
+
+      - name: Deploy
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-deploy@932fb06e4555b3556f211147f8915ce8a6bd0a6c
+        with:
+          path: ${{ steps.target.outputs.path }}
+          service-account: ${{ steps.target.outputs.service-account }}
+          build-dir: sample_app/build/web
+
+      - name: Comment the link
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-pr-comment@932fb06e4555b3556f211147f8915ce8a6bd0a6c
+        with:
+          app: chat
+          url: ${{ steps.target.outputs.url }}
+
+  remove:
+    name: Remove Build
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      ((github.event.action == 'closed' && contains(github.event.pull_request.labels.*.name, 'build')) ||
+      (github.event.action == 'unlabeled' && github.event.label.name == 'build'))
+    runs-on:
+      group: github-public-amd64
+    timeout-minutes: 5
+    # Shares the deploy's group, so it stops a deploy that is still running.
+    concurrency:
+      group: pr-web-build-${{ github.event.pull_request.number }}
+      cancel-in-progress: true
+    environment:
+      name: flutter-web-pr
+    permissions:
+      id-token: write
+      pull-requests: write
+    steps:
+      - name: Target
+        id: target
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-target@932fb06e4555b3556f211147f8915ce8a6bd0a6c
+        with:
+          app: chat
+          flavor: pr
+
+      - name: Remove
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-remove@932fb06e4555b3556f211147f8915ce8a6bd0a6c
+        with:
+          path: ${{ steps.target.outputs.path }}
+          service-account: ${{ steps.target.outputs.service-account }}
+
+      - name: Update the comment
+        uses: GetStream/stream-core-flutter/.github/actions/flutter-web-pr-comment@932fb06e4555b3556f211147f8915ce8a6bd0a6c
+        with:
+          app: chat

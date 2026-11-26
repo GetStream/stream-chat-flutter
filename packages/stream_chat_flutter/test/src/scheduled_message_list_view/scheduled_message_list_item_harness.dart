@@ -4,15 +4,17 @@ import 'package:stream_chat_flutter/stream_chat_flutter.dart';
 
 import '../mocks.dart';
 
+// A scheduled message; with [createdAt], one already on the server.
 ScheduledMessage fakeScheduledMessage({
   String text = 'Can you review the venue shortlist?',
   ScheduledMessageStatus status = ScheduledMessageStatus.scheduled,
-  ScheduledMessageFailureReason? failureReason,
+  ScheduledMessageFailure? failure,
   List<Attachment> attachments = const [],
   String? parentId,
   Message? quotedMessage,
   String? quotedMessageId,
   ChannelModel? channel,
+  DateTime? createdAt,
 }) {
   return ScheduledMessage(
     cid: 'messaging:general',
@@ -28,7 +30,8 @@ ScheduledMessage fakeScheduledMessage({
     ),
     scheduledAt: DateTime(2026, 10, 21, 8),
     status: status,
-    failureReason: failureReason,
+    failure: failure,
+    createdAt: createdAt,
   );
 }
 
@@ -49,7 +52,8 @@ ScheduledMessage uploading() {
 ScheduledMessage failed() {
   return fakeScheduledMessage(
     status: ScheduledMessageStatus.failed,
-    failureReason: ScheduledMessageFailureReason.pendingNotSupported,
+    failure: const ScheduledMessageSendingFailed(reason: ScheduledMessageSendingFailureReason.pendingNotSupported),
+    createdAt: DateTime(2026, 10, 20),
   );
 }
 

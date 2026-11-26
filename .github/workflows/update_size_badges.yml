@@ -18,7 +18,8 @@ permissions:
 
 jobs:
   update_size_badges:
-    runs-on: ubuntu-latest
+    runs-on:
+      group: github-public-amd64
     timeout-minutes: 15
     steps:
       # Reads stream-internal-metrics, and pushes the badge commit, which
@@ -50,7 +51,7 @@ jobs:
         run: bundle exec fastlane update_readme_badges
 
       - name: 📤 Commit Changes
-        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@c322b778cb789f4c45d8830dd1b5324584da378f
+        uses: GetStream/stream-core-flutter/.github/actions/bot-commit@932fb06e4555b3556f211147f8915ce8a6bd0a6c
         with:
           files: README.md
           message: "chore(repo): update the SDK size badges"

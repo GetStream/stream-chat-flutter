@@ -23,6 +23,18 @@ const _kMentionTrigger = '@';
 /// previewed as an OG Attachment.
 typedef OgPreviewFilter = bool Function(Uri matchedUri, String messageText);
 
+/// Signature for the composer's send callbacks.
+///
+/// Used by [MessageComposerProps.onSendMessage] and
+/// [MessageComposerProps.onSendLongPress]. The [BuildContext] is the
+/// composer's, and [controller] holds the message to send, or the edit to
+/// save.
+typedef StreamMessageComposerCallback =
+    FutureOr<void> Function(
+      BuildContext context,
+      StreamMessageComposerController controller,
+    );
+
 /// Inactive state:
 ///
 /// ![screenshot](https://raw.githubusercontent.com/GetStream/stream-chat-flutter/master/packages/stream_chat_flutter/screenshots/message_input.png)
@@ -71,6 +83,8 @@ class StreamMessageComposer extends StatelessWidget {
     super.key,
     void Function(Message)? onMessageSent,
     FutureOr<Message> Function(Message)? preMessageSending,
+    StreamMessageComposerCallback? onSendMessage,
+    StreamMessageComposerCallback? onSendLongPress,
     StreamMessageComposerController? messageComposerController,
     FocusNode? focusNode,
     bool disableAttachments = false,
@@ -109,6 +123,8 @@ class StreamMessageComposer extends StatelessWidget {
   }) : props = .new(
          onMessageSent: onMessageSent,
          preMessageSending: preMessageSending,
+         onSendMessage: onSendMessage,
+         onSendLongPress: onSendLongPress,
          messageComposerController: messageComposerController,
          focusNode: focusNode,
          disableAttachments: disableAttachments,
@@ -185,6 +201,8 @@ class MessageComposerProps {
   const MessageComposerProps({
     this.onMessageSent,
     this.preMessageSending,
+    this.onSendMessage,
+    this.onSendLongPress,
     this.messageComposerController,
     this.focusNode,
     this.disableAttachments = false,
@@ -232,6 +250,25 @@ class MessageComposerProps {
   ///
   /// Use this to transform the message.
   final FutureOr<Message> Function(Message)? preMessageSending;
+
+  /// Called in place of sending a new message or saving an edit.
+  ///
+  /// When set, the composer neither sends nor clears anything, so the callback
+  /// is responsible for the message and for resetting the controller.
+  /// [preMessageSending], [onMessageSent] and [onQuotedMessageCleared] aren't
+  /// called, and the draft isn't deleted. An error it throws goes to
+  /// [onError]. The send button is still enabled only while the message can
+  /// be sent.
+  final StreamMessageComposerCallback? onSendMessage;
+
+  /// Called when the send button is long-pressed for a new message.
+  ///
+  /// The composer is left as it is, so the callback decides what to do with
+  /// the message, such as scheduling it through
+  /// [showStreamScheduleMessageSheet] and then resetting the controller. An
+  /// error it throws goes to [onError]. When null, the send button has no
+  /// long press.
+  final StreamMessageComposerCallback? onSendLongPress;
 
   /// The controller for the message composer.
   final StreamMessageComposerController? messageComposerController;
@@ -461,6 +498,8 @@ class MessageComposerProps {
   MessageComposerProps copyWith({
     void Function(Message)? onMessageSent,
     FutureOr<Message> Function(Message)? preMessageSending,
+    StreamMessageComposerCallback? onSendMessage,
+    StreamMessageComposerCallback? onSendLongPress,
     StreamMessageComposerController? messageComposerController,
     FocusNode? focusNode,
     bool? disableAttachments,
@@ -499,6 +538,8 @@ class MessageComposerProps {
     return MessageComposerProps(
       onMessageSent: onMessageSent ?? this.onMessageSent,
       preMessageSending: preMessageSending ?? this.preMessageSending,
+      onSendMessage: onSendMessage ?? this.onSendMessage,
+      onSendLongPress: onSendLongPress ?? this.onSendLongPress,
       messageComposerController: messageComposerController ?? this.messageComposerController,
       focusNode: focusNode ?? this.focusNode,
       disableAttachments: disableAttachments ?? this.disableAttachments,
@@ -739,25 +780,29 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
     }
   }
 
-  // Tracks the last draft seen on the stream so we can tell the
-  // "no draft on server" initial state apart from a real removal.
+  // The last draft seen on the stream. Tells the "no draft yet" initial state
+  // apart from a removal, and a newly appearing draft from an update.
   Draft? _lastDraft;
 
   void _onDraftUpdate(Draft? draft) {
     // Don't let draft changes clobber an in-progress edit.
     if (_isEditing) return;
 
-    final hadDraft = _lastDraft != null;
+    final previousDraft = _lastDraft;
     _lastDraft = draft;
 
     // Initial subscription with no draft on server — leave the controller
     // alone so any pre-populated composer state (quoted message, attachments,
     // drafted text) is preserved.
-    if (draft == null && !hadDraft) return;
+    if (draft == null && previousDraft == null) return;
 
     // Draft transitioned from non-null to null — removed locally or on
     // another device; reset the composer to match.
     if (draft == null) return _effectiveController.reset();
+
+    // Only a newly appearing draft fills the composer; later updates would
+    // overwrite what the user typed or deleted since.
+    if (previousDraft != null) return;
 
     // Otherwise, update the controller with the draft message.
     if (draft.message case final draftMessage) {
@@ -1082,6 +1127,10 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
               placeholder: _buildPlaceholder(context),
               focusNode: focusNode,
               onSendPressed: sendMessage,
+              onSendLongPress: switch (widget.props.onSendLongPress) {
+                final onSendLongPress? => () => _sendLongPress(onSendLongPress),
+                null => null,
+              },
               canAlsoSendToChannel: _shouldShowSendToChannelCheckbox(),
               audioRecorderController: canRecordVoice ? _audioRecorderController : null,
               sendVoiceRecordingAutomatically: widget.props.sendVoiceRecordingAutomatically,
@@ -1619,6 +1668,15 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
     _hidePicker();
 
+    if (widget.props.onSendMessage case final onSendMessage?) {
+      try {
+        await onSendMessage(context, _effectiveController);
+      } catch (error, stackTrace) {
+        _reportSendError(error, stackTrace);
+      }
+      return;
+    }
+
     final streamChannel = StreamChannel.maybeOf(context);
     if (streamChannel == null) return;
 
@@ -1688,27 +1746,40 @@ class DefaultStreamMessageComposerState extends State<DefaultStreamMessageCompos
 
       widget.props.onMessageSent?.call(resp.message);
     } catch (error, stackTrace) {
-      if (widget.props.onError case final onError?) {
-        return onError(error, stackTrace);
-      }
-
-      // The send button drops this future, so rethrowing would escape as an
-      // unhandled async error. Forward it through Flutter's error plumbing
-      // instead, so host apps (Crashlytics / Sentry / console) still see it.
-      // A refusal from the server or a failed connection is marked silent: the
-      // message is left in a failed state and retried on reconnect, so both are
-      // expected in release. A `StreamClientException` is not — that one means
-      // the SDK itself failed, and it has to stay loud.
-      FlutterError.reportError(
-        FlutterErrorDetails(
-          exception: error,
-          stack: stackTrace,
-          library: 'stream_chat_flutter',
-          context: ErrorDescription('while sending a message'),
-          silent: error is StreamApiException || error is StreamNetworkException,
-        ),
-      );
+      _reportSendError(error, stackTrace);
     }
+  }
+
+  // Runs [onSendLongPress], reporting an error it throws as a send error.
+  Future<void> _sendLongPress(StreamMessageComposerCallback onSendLongPress) async {
+    try {
+      await onSendLongPress(context, _effectiveController);
+    } catch (error, stackTrace) {
+      _reportSendError(error, stackTrace);
+    }
+  }
+
+  void _reportSendError(Object error, StackTrace stackTrace) {
+    if (widget.props.onError case final onError?) {
+      return onError(error, stackTrace);
+    }
+
+    // The send button drops the send's future, so rethrowing would escape as
+    // an unhandled async error. Forward it through Flutter's error plumbing
+    // instead, so host apps (Crashlytics / Sentry / console) still see it.
+    // A refusal from the server or a failed connection is marked silent: the
+    // message is left in a failed state and retried on reconnect, so both are
+    // expected in release. A `StreamClientException` is not — that one means
+    // the SDK itself failed, and it has to stay loud.
+    FlutterError.reportError(
+      FlutterErrorDetails(
+        exception: error,
+        stack: stackTrace,
+        library: 'stream_chat_flutter',
+        context: ErrorDescription('while sending a message'),
+        silent: error is StreamApiException || error is StreamNetworkException,
+      ),
+    );
   }
 
   void _showErrorAlert(String description) {

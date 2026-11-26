@@ -74,7 +74,7 @@ command:
       flutter_svg: ^2.3.0
       flutter_timezone: ^5.1.1
       freezed_annotation: ^3.0.0
-      gal: ^2.3.2
+      gal: '>=2.3.2 <4.0.0'
       geolocator: ^13.0.0
       go_router: ^14.6.2
       http_parser: ^4.1.2

@@ -26,7 +26,21 @@ const _kAndroidPushProvider = PushProvider.firebase(name: 'firebase');
 
 /// Shared across every client so reconnecting doesn't need a second
 /// SQLite connection.
-final _chatPersistenceClient = StreamChatPersistenceClient();
+final _chatPersistenceClient = _createPersistenceClient();
+
+/// Pull request web builds keep no offline cache: nothing removes a build's
+/// browser storage, and every demo on flutter.getstream.io shares it.
+///
+/// On web the cache lives in IndexedDB rather than `localStorage`, whose
+/// quota of about 5 MB is shared by every demo on that origin.
+StreamChatPersistenceClient? _createPersistenceClient() {
+  if (kWebPrNumber.isNotEmpty) return null;
+  return StreamChatPersistenceClient(
+    // The client adds its own `_`: `chat_beta_` becomes `chat_beta`.
+    databaseNamePrefix: kWebStoragePrefix.replaceFirst(RegExp(r'_$'), ''),
+    webUseExperimentalIndexedDb: true,
+  );
+}
 
 /// Prints records in debug builds and reports the ones carrying an error to
 /// Crashlytics.

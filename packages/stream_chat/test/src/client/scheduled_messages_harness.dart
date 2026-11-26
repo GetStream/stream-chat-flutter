@@ -1,8 +1,10 @@
+import 'package:clock/clock.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../fakes.dart';
+import '../mocks.dart';
 import '../utils.dart';
 import '../ws/fake_chat_server.dart';
 
@@ -12,18 +14,60 @@ const testCid = 'messaging:general';
 
 final testUser = User(id: 'test-user-id');
 final testToken = testUserToken(testUser.id).rawValue;
-final missingError = apiException(code: StreamErrorCode.notFound, statusCode: 404);
+// The error a request on a scheduled message that no longer exists gets.
+final missingError = apiException(
+  code: StreamErrorCode.notFound,
+  message: 'UpdateScheduledMessage failed with error: "scheduled message a not found"',
+  statusCode: 404,
+);
+
+// The error a request on a scheduled message quoting a deleted message gets.
+final quoteDeletedError = apiException(
+  code: StreamErrorCode.notFound,
+  message: 'UpdateScheduledMessage failed with error: "Can\'t quote this message. The message has been deleted"',
+  statusCode: 404,
+);
 const offline = StreamNetworkException(message: 'No connection');
 
 // The codes of the errors that refuse a scheduled message request because the
-// message is being sent, was already sent, or was deleted.
+// time is too far ahead, the message can no longer be changed, is being sent,
+// was changed at the same time, was already sent, or was deleted.
+const scheduledAtTooFarCode = 116;
+const scheduledMessageNotEditableCode = 120;
 const scheduledMessageSendingCode = 121;
+const scheduledMessageConflictCode = 122;
 const scheduledMessageAlreadySentCode = 123;
 const scheduledMessageCanceledCode = 124;
+
+// The error that refuses a scheduled message request with [code].
+StreamApiException refusedWith(int code) {
+  return apiException(code: StreamErrorCode(code), message: 'Refused');
+}
+
+// The time the scheduling tests run at, and the time they schedule for.
+final now = DateTime.utc(2026, 10, 30, 12);
+final scheduledAt = now.add(const Duration(days: 1));
+
+// An error that refuses to schedule a message.
+final rejected = apiException(message: 'Too many scheduled messages');
+
+// The response for [message] scheduled as [scheduledMessage].
+ScheduleMessageResponse scheduled(Message message, ScheduledMessage scheduledMessage) {
+  return ScheduleMessageResponse()
+    ..message = message
+    ..scheduledMessage = scheduledMessage;
+}
+
+// The response for [message] when its time had passed and it was sent.
+ScheduleMessageResponse sentRightAway(Message message) {
+  return ScheduleMessageResponse()..message = message;
+}
 
 // A scheduled message in a channel other than [testCid].
 final elsewhere = fakeScheduledMessage('there', cid: 'messaging:other', scheduledAt: DateTime.utc(2026, 11, 3));
 
+// A scheduled message as the server returns it, or, unless [isOnServer], one
+// never on the server, which has no server dates.
 ScheduledMessage fakeScheduledMessage(
   String id, {
   String cid = testCid,
@@ -32,7 +76,8 @@ ScheduledMessage fakeScheduledMessage(
   String text = 'Good morning',
   String? parentId,
   ScheduledMessageStatus status = ScheduledMessageStatus.scheduled,
-  ScheduledMessageFailureReason? failureReason,
+  ScheduledMessageFailure? failure,
+  bool isOnServer = true,
 }) => ScheduledMessage(
   id: id,
   cid: cid,
@@ -40,9 +85,9 @@ ScheduledMessage fakeScheduledMessage(
   message: Message(id: id, text: text, parentId: parentId),
   scheduledAt: scheduledAt ?? DateTime.utc(2026, 11, 2, 9),
   status: status,
-  failureReason: failureReason,
-  createdAt: DateTime.utc(2026, 10, 29),
-  updatedAt: updatedAt ?? DateTime.utc(2026, 10, 29),
+  failure: failure,
+  createdAt: isOnServer ? DateTime.utc(2026, 10, 29) : null,
+  updatedAt: isOnServer ? updatedAt ?? DateTime.utc(2026, 10, 29) : null,
 );
 
 QueryScheduledMessagesResponse fakePage(List<ScheduledMessage> messages, {String? next}) {
@@ -69,6 +114,16 @@ List<String> idsOf(List<ScheduledMessage>? messages) => [for (final it in messag
 Matcher pageAfter(String? next) => isA<ScheduledMessagesQuery>().having((q) => q.next, 'next', next);
 
 // Pumps the events the client emits for its own changes.
+// Awaits [request], expecting it to throw [throws] when given.
+Future<void> expectRequest(Future<Object?> request, Object? throws) async {
+  if (throws == null) {
+    await request;
+    return;
+  }
+
+  await expectLater(request, throwsA(throws));
+}
+
 Future<void> settle() => pumpEventQueue();
 
 // Gives each test a client connected as [testUser] on a fake API, with the
@@ -87,11 +142,15 @@ ScheduledMessageHarness useScheduledMessageClient({bool loaded = true}) {
 
   setUp(() async {
     final api = harness.api = FakeChatApi();
+    final fileUploader = harness.fileUploader = MockAttachmentFileUploader();
+    harness.logs.clear();
     final client = harness.client = StreamChatClient(
       'test-api-key',
       defaultApi: FakeDefaultApi(),
       chatApi: api,
       wsProvider: FakeChatServer().connect,
+      attachmentFileUploaderProvider: (_) => fileUploader,
+      logConfig: StreamLogConfig(handler: _CapturingHandler(harness.logs.add)),
     );
     addTearDown(client.dispose);
     await client.connectUser(testUser, testToken);
@@ -107,7 +166,11 @@ ScheduledMessageHarness useScheduledMessageClient({bool loaded = true}) {
 // it. Each test gets a new client.
 class ScheduledMessageHarness {
   late FakeChatApi api;
+  late MockAttachmentFileUploader fileUploader;
   late StreamChatClient client;
+
+  // The messages the client logged.
+  final logs = <String>[];
 
   // Loads an empty list, so the scheduled messages count as all loaded.
   Future<void> loadAllScheduledMessages() async {
@@ -122,11 +185,69 @@ class ScheduledMessageHarness {
     await settle();
   }
 
+  // The statuses the scheduled message [id] is listed with while [run] runs,
+  // one for each copy of it listed, and null when it stops being listed. What
+  // [run] throws is thrown, so a test of a failing request asserts it.
+  Future<List<ScheduledMessageStatus?>> statusesDuring(
+    Future<void> Function() run, {
+    String id = 'a',
+  }) async {
+    ScheduledMessage? listed(List<ScheduledMessage> scheduledMessages) {
+      return scheduledMessages.where((it) => it.id == id).firstOrNull;
+    }
+
+    final statuses = <ScheduledMessageStatus?>[];
+    var last = listed(client.state.scheduledMessages);
+    final subscription = client.state.scheduledMessagesStream.listen((scheduledMessages) {
+      final copy = listed(scheduledMessages);
+      if (copy == last) return;
+
+      last = copy;
+      statuses.add(copy?.status);
+    });
+
+    try {
+      await run();
+      await settle();
+    } finally {
+      await subscription.cancel();
+    }
+
+    return statuses;
+  }
+
   // Makes the client hold [messages], as if each had just been scheduled.
   Future<void> hold(List<ScheduledMessage> messages) async {
     for (final message in messages) {
       await receive(EventType.scheduledMessageCreated, message);
     }
+  }
+
+  // Schedules [message] at [scheduledAt], then lets the events it emits
+  // through.
+  Future<ScheduleMessageResponse> schedule(Message message) async {
+    try {
+      return await withClock(
+        Clock.fixed(now),
+        () => client.scheduleMessage(message, 'general', 'messaging', scheduledAt: scheduledAt),
+      );
+    } finally {
+      await settle();
+    }
+  }
+
+  // Answers scheduling [message] at [scheduledAt] with [answer].
+  void stubSchedule(Message message, Future<ScheduleMessageResponse> Function() answer) {
+    when(
+      () => api.scheduledMessages.scheduleMessage('general', 'messaging', message, scheduledAt),
+    ).thenAnswer((_) => answer());
+  }
+
+  // Schedules [message] while the server can't be reached.
+  Future<ScheduledMessage> scheduleUnreachable(Message message) async {
+    stubSchedule(message, () async => throw offline);
+    await expectLater(schedule(message), throwsA(offline));
+    return client.state.scheduledMessages.single;
   }
 
   // Answers every query with [response].
@@ -174,4 +295,14 @@ class ScheduledMessageHarness {
       ),
     ).thenAnswer((_) async => QueryChannelsResponse()..channels = channelStates);
   }
+}
+
+// Hands the message of each record the client logs to [_onMessage].
+class _CapturingHandler extends StreamLogHandler {
+  const _CapturingHandler(this._onMessage);
+
+  final void Function(String message) _onMessage;
+
+  @override
+  void handle(StreamLogRecord record) => _onMessage(record.message);
 }

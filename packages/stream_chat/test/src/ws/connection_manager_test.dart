@@ -1,7 +1,8 @@
 import 'package:stream_chat/src/ws/connect_request.dart';
 import 'package:stream_chat/src/ws/connection_manager.dart';
 import 'package:stream_chat/stream_chat.dart';
-import 'package:stream_core/stream_core.dart' show Disconnected, Initialized, SystemEnvironmentManager;
+import 'package:stream_core/stream_core.dart'
+    show AuthenticationFailed, Connected, Disconnected, Initialized, SystemEnvironmentManager;
 import 'package:test/test.dart';
 
 import '../utils.dart';
@@ -134,17 +135,24 @@ void main() {
     expect(server.sockets, isEmpty);
   });
 
-  test('ConnectionManager stays closed when the provider has no other token to give', () async {
-    final server = FakeChatServer()..refusal = connectionErrorFrame();
+  test('ConnectionManager stops reopening a connection whose static token expired', () async {
+    final server = FakeChatServer(user: _user());
     final manager = _manager(server: server);
     addTearDown(manager.dispose);
+    await manager.connect(_user());
 
-    await expectLater(manager.connect(_user()), throwsA(isA<StreamApiException>()));
+    // Skips the open connection the state is reported with on listen.
+    final outcome = manager.connectionState
+        .skip(1)
+        .firstWhere(
+          (state) => state is Connected || (state is Disconnected && state.source is AuthenticationFailed),
+        );
+    server.send(connectionErrorFrame());
 
-    // A static provider answers with the token that was refused, so another attempt could only be
-    // turned down again. The session ends rather than asking forever.
-    server.refusal = null;
-    await expectLater(manager.connect(_user()), throwsA(isA<StreamAuthenticationException>()));
+    // A static provider answers with the token that was refused, so
+    // reopening could only be turned down again, forever.
+    expect(await outcome, isA<Disconnected>());
+    expect(server.sockets, hasLength(1));
   });
 
   test('ConnectionManager waits on the connection being opened for the same user', () async {

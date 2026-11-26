@@ -238,4 +238,27 @@ void main() {
       expect(error.scheduledMessageErrorReason, isNull);
     });
   });
+
+  group('isScheduledMessageNotFound', () {
+    test('is true when the scheduled message is not found', () {
+      const error = StreamApiException(
+        message: 'UpdateScheduledMessage failed with error: "scheduled message a not found"',
+        statusCode: 404,
+        code: StreamErrorCode.notFound,
+      );
+
+      expect(error.isScheduledMessageNotFound, isTrue);
+    });
+
+    test('is false when the quoted message is not found', () {
+      const error = StreamApiException(
+        message:
+            'UpdateScheduledMessage failed with error: "Can\'t quote this message. Message with id a could not be found"',
+        statusCode: 404,
+        code: StreamErrorCode.notFound,
+      );
+
+      expect(error.isScheduledMessageNotFound, isFalse);
+    });
+  });
 }
