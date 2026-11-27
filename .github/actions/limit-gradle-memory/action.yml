@@ -1,0 +1,24 @@
+name: 'Limit Gradle memory'
+description: >
+  Caps the Gradle heap, compiles Kotlin inside Gradle and stops Gradle after
+  each build, so Android builds fit on a 2-core runner with 8 GB.
+inputs:
+  heap:
+    description: 'The Gradle heap, as -Xmx takes it.'
+    required: false
+    default: '3g'
+runs:
+  using: "composite"
+  steps:
+    # ~/.gradle/gradle.properties overrides each project's own, also the
+    # Flutter Gradle plugin's included build, which ignores the app's.
+    - name: Limit Gradle memory
+      shell: bash
+      run: |
+        mkdir -p ~/.gradle
+        cat >> ~/.gradle/gradle.properties <<PROPERTIES
+        org.gradle.jvmargs=-Xmx${{ inputs.heap }} -XX:MaxMetaspaceSize=1g -XX:ReservedCodeCacheSize=256m -XX:+HeapDumpOnOutOfMemoryError
+        org.gradle.daemon=false
+        kotlin.compiler.execution.strategy=in-process
+        PROPERTIES
+        cat ~/.gradle/gradle.properties

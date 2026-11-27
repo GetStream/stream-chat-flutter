@@ -63,7 +63,8 @@ jobs:
     if: needs.gate.outputs.should_run == 'true'
     runs-on:
       group: github-public-amd64
-    timeout-minutes: 15
+    # One package at a time per core: more get the runner shut down.
+    timeout-minutes: 30
     steps:
       - name: 📚 Git Checkout
         uses: actions/checkout@v7
@@ -291,6 +292,10 @@ jobs:
       - name: 🤖 Install Android NDK
         if: matrix.platform == 'android'
         uses: ./.github/actions/install-android-ndk
+
+      - name: 🐘 Limit Gradle memory
+        if: matrix.platform == 'android'
+        uses: ./.github/actions/limit-gradle-memory
 
       - name: 📦 Install Tools
         uses: ./.github/actions/install-tools
