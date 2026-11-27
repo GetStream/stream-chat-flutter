@@ -18,7 +18,7 @@ abstract class Translations {
   /// [AccessibilityTranslations].
   AccessibilityTranslations get accessibility;
 
-  /// The error shown when [launchURL] fails
+  /// The error shown when a tapped link can't be opened
   String get launchUrlError;
 
   /// The error shown when loading users fails

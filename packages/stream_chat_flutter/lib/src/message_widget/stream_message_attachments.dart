@@ -6,6 +6,7 @@ import 'package:stream_core_flutter/chat.dart' as core;
 
 import '../../stream_chat_flutter.dart';
 import '../attachment/attachment_widget_catalog.dart';
+import '../utils/stream_link_handler.dart';
 
 /// {@template onAttachmentWidgetTap}
 /// A callback that is called when an attachment widget is tapped.
@@ -94,16 +95,17 @@ class StreamMessageAttachments extends core.NullableStatelessWidget {
     Message message,
     Attachment attachment,
   ) async {
-    // If the current attachment is a url preview attachment, open the url
-    // in the browser.
     final isFile = attachment.type == AttachmentType.file;
     final isUrlPreview = attachment.type == AttachmentType.urlPreview;
     if (isFile || isUrlPreview) {
-      final url = attachment.assetUrl ?? attachment.ogScrapeUrl;
+      final url = switch (isUrlPreview) {
+        true => attachment.titleLink ?? attachment.ogScrapeUrl,
+        false => attachment.assetUrl ?? attachment.ogScrapeUrl,
+      };
       if (url == null) return;
 
       if (onLinkTap case final onTap?) return onTap(url);
-      return launchURL(context, url);
+      return openLink(context, url);
     }
 
     final isImage = attachment.type == AttachmentType.image;

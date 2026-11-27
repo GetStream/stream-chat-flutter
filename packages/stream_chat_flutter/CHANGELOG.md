@@ -9,6 +9,7 @@
 - Added `onScheduledMessagesBannerTap` to `StreamChannelPage` and `StreamThreadPage`.
 - Added `onSendMessage` to `StreamMessageComposer`, a `StreamMessageComposerCallback` that replaces sending a message or saving an edit.
 - Added `onSendLongPress` to `StreamMessageComposer` and `StreamChatMessageInput`, called when send is long-pressed, such as to schedule the message.
+- Added `StreamLinkHandler` and `StreamChatConfigurationData.linkHandler`, which open the links tapped in messages, link previews, file attachments and AI replies.
 
 🔄 Changed
 
@@ -16,9 +17,15 @@
 - A class that implements or directly extends `Translations` or `AccessibilityTranslations` must add the scheduled message strings; extending `DefaultTranslations` or `DefaultAccessibilityTranslations` provides them.
 - `StreamMessageComposer` keeps its content when its draft is updated on another device while it is open.
 - Allowed `gal` 3.x alongside 2.x (`>=2.3.2 <4.0.0`). gal 3 requires iOS 13 and Android API 24.
+- Tapping a link opens only `http`, `https` and `mailto` links by default, and shows the "can't open" snack bar for others. To open more, pass `StreamLinkHandler(schemes: {...StreamLinkHandler.defaultSchemes, 'tel'})` as `linkHandler`.
+
+⚠️ Deprecated
+
+- Deprecated `launchURL`; open links through `StreamChatConfigurationData.linkHandler` instead.
 
 🐞 Fixed
 
+- Fixed link previews opening a different link than the one they show.
 - Fixed `StreamMessageComposer` refilling a cleared or edited draft when the server's copy of the earlier draft arrived late.
 
 🐞 Fixed

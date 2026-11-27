@@ -176,4 +176,5 @@ export 'src/utils/extensions.dart';
 export 'src/utils/helpers.dart';
 export 'src/utils/message_preview_formatter.dart';
 export 'src/utils/stream_image_cdn.dart';
+export 'src/utils/stream_link_handler.dart' hide openLink;
 export 'src/utils/typedefs.dart';
