@@ -20,7 +20,7 @@ void _ensureGoldenMocktailFallbacks() {
 
 /// Subscriptions after a successful paged load call [StreamChatClient.on]. Mocks must return a stream.
 void stubStreamClientEventStream(MockClient client) {
-  when(() => client.on()).thenAnswer((_) => const Stream<Event>.empty());
+  when(client.on).thenAnswer((_) => const Stream.empty());
 }
 
 /// Stubs channel queries for [StreamChannelListController] goldens using [StreamChannelListController.fromValue].

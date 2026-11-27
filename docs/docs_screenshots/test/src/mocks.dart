@@ -79,7 +79,7 @@ class MockChannel extends Mock implements Channel {
   Future<Result<void>> keyStroke([String? parentId]) async => const Result.success(null);
 
   @override
-  Stream<Event> on([
+  Stream<T> on<T extends ChatEvent>([
     String? eventType,
     String? eventType2,
     String? eventType3,
