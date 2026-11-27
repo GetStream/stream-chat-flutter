@@ -72,7 +72,7 @@ class _NameGenerator extends StatelessWidget {
           if (otherMembers.length == 1) {
             final user = otherMembers.first.user;
             if (user != null) {
-              channelName = user.name;
+              channelName = user.nameOrId;
             }
           } else {
             final maxWidth = constraints.maxWidth;
@@ -80,7 +80,7 @@ class _NameGenerator extends StatelessWidget {
             var currentChars = 0;
             final currentMembers = <Member>[];
             otherMembers.forEach((element) {
-              final newLength = currentChars + (element.user?.name.length ?? 0);
+              final newLength = currentChars + (element.user?.nameOrId.length ?? 0);
               if (newLength < maxChars) {
                 currentChars = newLength;
                 currentMembers.add(element);
@@ -89,7 +89,7 @@ class _NameGenerator extends StatelessWidget {
 
             final exceedingMembers = otherMembers.length - currentMembers.length;
             channelName =
-                '${currentMembers.map((e) => e.user?.name).join(', ')} '
+                '${currentMembers.map((e) => e.user?.nameOrId).join(', ')} '
                 '${exceedingMembers > 0 ? '+ $exceedingMembers' : ''}';
           }
         }

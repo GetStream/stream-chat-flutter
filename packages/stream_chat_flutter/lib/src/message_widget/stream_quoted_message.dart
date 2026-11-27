@@ -161,7 +161,7 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
     if (isCurrentUser(replier)) {
       if (repliedToOwnMessage) return a11y.outgoingReplyToOwnMessageLabel;
 
-      final authorName = quotedAuthor.name.trim();
+      final authorName = quotedAuthor.nameOrId.trim();
       if (authorName.isEmpty) return null;
 
       return a11y.outgoingReplyToMessageLabel(authorName: authorName);
@@ -169,14 +169,14 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
 
     // With no name there is nothing to attribute the reply to, so the preview
     // falls back to announcing the author's name as shown.
-    final replierName = replier.name.trim();
+    final replierName = replier.nameOrId.trim();
     if (replierName.isEmpty) return null;
 
     if (repliedToOwnMessage) {
       return a11y.incomingReplyToOwnMessageLabel(replierName: replierName);
     }
 
-    final authorName = quotedAuthor.name.trim();
+    final authorName = quotedAuthor.nameOrId.trim();
     if (authorName.isEmpty) return null;
 
     return a11y.incomingReplyToMessageLabel(replierName: replierName, authorName: authorName);
@@ -301,7 +301,7 @@ class DefaultStreamQuotedMessage extends StatelessWidget {
     final currentUser = StreamChat.maybeOf(context)?.currentUser;
     if (quotedAuthor.id == currentUser?.id) return context.translations.youText;
 
-    return quotedAuthor.name;
+    return quotedAuthor.nameOrId;
   }
 
   Widget? _buildThumbnail(BuildContext context, Message message) {

@@ -1121,7 +1121,7 @@ extension on Message {
     final updatedMentionedUsers = [...mentionedUsers];
     for (final user in mentionedUsers.toSet()) {
       if (mentionsToken(user.id)) continue;
-      if (mentionsToken(user.name)) continue;
+      if (mentionsToken(user.nameOrId)) continue;
 
       updatedMentionedUsers.remove(user);
     }

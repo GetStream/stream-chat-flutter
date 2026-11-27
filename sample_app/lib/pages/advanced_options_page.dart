@@ -84,9 +84,7 @@ class _AdvancedOptionsPageState extends State<AdvancedOptionsPage> {
           apiKey: apiKey,
           user: User(
             id: userId,
-            extraData: {
-              'name': username,
-            },
+            name: username,
           ),
           token: userToken,
           baseUrl: baseUrl.isEmpty ? null : baseUrl,

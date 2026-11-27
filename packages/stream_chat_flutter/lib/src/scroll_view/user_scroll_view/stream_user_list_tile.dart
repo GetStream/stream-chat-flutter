@@ -129,7 +129,7 @@ class StreamUserListTile extends StatelessWidget {
     final title =
         this.title ??
         Text(
-          user.name,
+          user.nameOrId,
           style: context.streamTextTheme.bodyEmphasis,
         );
 

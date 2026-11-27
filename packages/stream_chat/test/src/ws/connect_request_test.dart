@@ -57,6 +57,18 @@ void main() {
     );
   });
 
+  test('ConnectRequest leaves out custom data named like one of the user details', () {
+    final user = OwnUser(
+      id: 'test-user-id',
+      name: 'Test User',
+      custom: const {'name': 'custom', 'privacy_settings': 'custom', 'color': 'red'},
+    );
+
+    final options = _request().build(user: user, token: _token(), includeUserDetails: true);
+
+    expect(_payload(options)['user_details'], {'id': 'test-user-id', 'name': 'Test User', 'color': 'red'});
+  });
+
   test('ConnectRequest describes the app as it describes itself now', () {
     final environment = _environment();
     final request = ConnectRequest.forApi(

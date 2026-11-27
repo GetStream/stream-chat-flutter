@@ -254,7 +254,7 @@ class _PollCommentCard extends StatelessWidget {
                       ),
                       Flexible(
                         child: Text(
-                          user.name,
+                          user.nameOrId,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: textTheme.captionEmphasis.copyWith(color: colorScheme.textPrimary),

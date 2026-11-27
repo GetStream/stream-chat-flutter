@@ -62,7 +62,7 @@ class _HomeDrawer extends StatelessWidget {
           children: [
             ListTile(
               leading: StreamUserAvatar(size: .md, user: user!, showOnlineIndicator: false),
-              title: Text(user.name),
+              title: Text(user.nameOrId),
             ),
             const Spacer(),
             ListTile(

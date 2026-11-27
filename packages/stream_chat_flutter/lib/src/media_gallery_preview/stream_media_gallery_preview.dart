@@ -223,7 +223,7 @@ class _DefaultStreamMediaGalleryPreviewState extends State<DefaultStreamMediaGal
             final translations = context.translations;
             final message = attachments[currentPage].message;
 
-            final senderName = message.user?.name ?? '';
+            final senderName = message.user?.nameOrId ?? '';
             final sentAt = translations.sentAtText(date: message.createdAt, time: message.createdAt);
             final pageCounter = translations.galleryPaginationText(currentPage: currentPage, totalPages: itemCount);
 

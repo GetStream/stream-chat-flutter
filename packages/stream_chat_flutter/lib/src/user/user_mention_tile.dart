@@ -54,7 +54,7 @@ class StreamUserMentionTile extends StatelessWidget {
                 children: [
                   title ??
                       Text(
-                        user.name,
+                        user.nameOrId,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: context.streamTextTheme.bodyEmphasis,

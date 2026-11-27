@@ -36,9 +36,9 @@ class DebugMutes extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text('By: ${mute.user.name} (${mute.user.id})'),
+                        Text('By: ${mute.user.nameOrId} (${mute.user.id})'),
                         Text(
-                          'Who: ${mute.target.name} (${mute.target.id})',
+                          'Who: ${mute.target.nameOrId} (${mute.target.id})',
                         ),
                         Text('Exp: ${mute.expires}'),
                       ],

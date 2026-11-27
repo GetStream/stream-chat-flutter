@@ -1,6 +1,6 @@
 # 19 — User Blocking
 
-**Goal:** Move blocking and unblocking a user, and listing the blocked users, ahead of [09](09-users.md): they embed `User` only through the existing `user_mapper.dart`, and nothing persists them.
+**Goal:** Move blocking and unblocking a user, and listing the blocked users, ahead of [09](09-users.md): they embed `User` only through the existing `users_mapper.dart`, and nothing persists them.
 
 **Size:** 0 hand-written method(s) across 0 file(s) → 3 generated operation(s).
 

@@ -99,7 +99,7 @@ class StreamPollVoteListTile extends StatelessWidget {
                   ),
                   Expanded(
                     child: Text(
-                      user.name,
+                      user.nameOrId,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: textTheme.bodyDefault.copyWith(color: colorScheme.textPrimary),

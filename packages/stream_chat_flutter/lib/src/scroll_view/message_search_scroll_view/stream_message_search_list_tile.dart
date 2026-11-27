@@ -185,7 +185,7 @@ class MessageSearchListTileTitle extends StatelessWidget {
       TextSpan(
         children: [
           TextSpan(
-            text: user.id == StreamChat.of(context).currentUser?.id ? context.translations.youText : user.name,
+            text: user.id == StreamChat.of(context).currentUser?.id ? context.translations.youText : user.nameOrId,
           ),
           if (channelName != null) ...[
             TextSpan(

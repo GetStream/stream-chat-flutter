@@ -39,7 +39,7 @@ class DebugMembers extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(member.user?.name ?? '?'),
+                        Text(member.user?.nameOrId ?? '?'),
                         Text('ID: ${member.user?.id ?? '?'}'),
                         Text('Ban: ${member.banned ? 'T' : 'F'}'),
                         Text('ShBan: ${member.shadowBanned ? 'T' : 'F'}'),

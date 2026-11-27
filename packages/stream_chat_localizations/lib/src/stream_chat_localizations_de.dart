@@ -36,9 +36,9 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
     if (users.isEmpty) return '';
     final first = users.first;
     if (users.length == 1) {
-      return '${first.name} tippt';
+      return '${first.nameOrId} tippt';
     }
-    return '${first.name} und ${users.length - 1} weitere tippen';
+    return '${first.nameOrId} und ${users.length - 1} weitere tippen';
   }
 
   @override
@@ -66,7 +66,7 @@ class StreamChatLocalizationsDe extends GlobalStreamChatLocalizations {
   }) {
     final pinnedByCurrentUser = currentUser.id == pinnedBy.id;
     if (pinnedByCurrentUser) return 'Angeheftet von Dir';
-    return 'Angeheftet von ${pinnedBy.name}';
+    return 'Angeheftet von ${pinnedBy.nameOrId}';
   }
 
   @override

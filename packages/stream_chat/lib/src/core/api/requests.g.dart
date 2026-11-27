@@ -42,17 +42,6 @@ Map<String, dynamic> _$PaginationParamsToJson(PaginationParams instance) => <Str
   'created_at_around': ?instance.createdAtAround?.toIso8601String(),
 };
 
-Map<String, dynamic> _$PartialUpdateUserRequestToJson(
-  PartialUpdateUserRequest instance,
-) => <String, dynamic>{
-  'stringify': instance.stringify,
-  'hash_code': instance.hashCode,
-  'id': instance.id,
-  'set': instance.set,
-  'unset': instance.unset,
-  'props': instance.props,
-};
-
 Map<String, dynamic> _$ThreadOptionsToJson(ThreadOptions instance) => <String, dynamic>{
   'stringify': instance.stringify,
   'hash_code': instance.hashCode,

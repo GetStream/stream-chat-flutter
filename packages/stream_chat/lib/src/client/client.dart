@@ -66,6 +66,7 @@ import '../core/models/push_preference.dart';
 import '../core/models/push_provider.dart';
 import '../core/models/reaction.dart';
 import '../core/models/request/message_delivery.dart';
+import '../core/models/request/update_user_partial_request.dart';
 import '../core/models/response/add_user_group_members_response.dart';
 import '../core/models/response/app_settings_response.dart';
 import '../core/models/response/block_user_response.dart';
@@ -93,6 +94,7 @@ import '../core/models/response/unblock_user_response.dart';
 import '../core/models/response/update_channel_partial_response.dart';
 import '../core/models/response/update_member_partial_response.dart';
 import '../core/models/response/update_user_group_response.dart';
+import '../core/models/response/update_users_response.dart';
 import '../core/models/role_type.dart';
 import '../core/models/scheduled_message.dart';
 import '../core/models/thread.dart';
@@ -1897,32 +1899,31 @@ class StreamChatClient {
     String? prev,
   }) => _pollsRepository.queryPollVotes(pollId, filter: filter, sort: sort, limit: limit, next: next, prev: prev);
 
-  /// Update or Create the given user object.
-  Future<UpdateUsersResponse> updateUser(User user) => updateUsers([user]);
+  /// Creates [user], or replaces the existing user with the same id.
+  ///
+  /// This cannot change the user's role, teams or team roles. To change only
+  /// some fields, consider [updateUserPartial].
+  Future<Result<UpdateUsersResponse>> updateUser(User user) => updateUsers([user]);
 
-  /// Batch update a list of users
-  Future<UpdateUsersResponse> updateUsers(List<User> users) => _chatApi.user.updateUsers(users);
+  /// Creates or replaces each of [users], as [updateUser] does for one.
+  Future<Result<UpdateUsersResponse>> updateUsers(List<User> users) => _usersRepository.updateUsers(users);
 
-  /// Partially update the given user with [id].
-  /// Use [set] to define values to be set.
-  /// Use [unset] to define values to be unset.
-  Future<UpdateUsersResponse> partialUpdateUser(
+  /// Partially updates the user with [id].
+  ///
+  /// Sets the fields in [set] and removes the fields named in [unset], leaving
+  /// every other field as it is.
+  Future<Result<UpdateUsersResponse>> updateUserPartial(
     String id, {
     Map<String, Object?>? set,
     List<String>? unset,
-  }) {
-    final user = PartialUpdateUserRequest(
-      id: id,
-      set: set,
-      unset: unset,
-    );
-    return partialUpdateUsers([user]);
-  }
+  }) => updateUsersPartial([UpdateUserPartialRequest(id: id, set: set, unset: unset)]);
 
-  /// Batch partial updates the [users].
-  Future<UpdateUsersResponse> partialUpdateUsers(
-    List<PartialUpdateUserRequest> users,
-  ) => _chatApi.user.partialUpdateUsers(users);
+  /// Partially updates several users at once.
+  ///
+  /// Each of [updates] applies to the user it names.
+  Future<Result<UpdateUsersResponse>> updateUsersPartial(
+    List<UpdateUserPartialRequest> updates,
+  ) => _usersRepository.updateUsersPartial(updates);
 
   final _userBlockLock = Lock();
 
@@ -2856,7 +2857,10 @@ class ClientState {
         if (user == null) return;
 
         if (user.id == currentUser?.id) {
-          final updatedUser = OwnUser.fromUser(user);
+          // TODO(openapi-migration): map the v2 event's user once WebSocket
+          // events decode v2 payloads. Until then, the privacy settings the
+          // current user's copy carries sit in the user's custom data.
+          final updatedUser = OwnUser.fromJson(user.toJson());
           currentUser = user = updatedUser.copyWith(
             // PRESERVE these fields (we don't get them in user.updated events)
             devices: currentUser?.devices,
@@ -2866,6 +2870,7 @@ class ClientState {
             unreadChannels: currentUser?.unreadChannels,
             unreadThreads: currentUser?.unreadThreads,
             pushPreferences: currentUser?.pushPreferences,
+            blockedUserIds: currentUser?.blockedUserIds,
           );
         }
 

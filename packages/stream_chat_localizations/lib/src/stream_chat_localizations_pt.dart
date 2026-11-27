@@ -36,9 +36,9 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
     if (users.isEmpty) return '';
     final first = users.first;
     if (users.length == 1) {
-      return '${first.name} está digitando';
+      return '${first.nameOrId} está digitando';
     }
-    return '${first.name} e ${users.length - 1} estão digitando';
+    return '${first.nameOrId} e ${users.length - 1} estão digitando';
   }
 
   @override
@@ -66,7 +66,7 @@ class StreamChatLocalizationsPt extends GlobalStreamChatLocalizations {
   }) {
     final pinnedByCurrentUser = currentUser.id == pinnedBy.id;
     if (pinnedByCurrentUser) return 'Definido por você';
-    return 'Definido por ${pinnedBy.name}';
+    return 'Definido por ${pinnedBy.nameOrId}';
   }
 
   @override

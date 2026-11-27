@@ -405,7 +405,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
     User? messageAuthor,
     TextSpan messageBody,
   ) {
-    final authorName = messageAuthor?.name.trim().nullIfEmpty;
+    final authorName = messageAuthor?.nameOrId.trim().nullIfEmpty;
     if (authorName == null) return formatDirectMessage(context, messageBody);
 
     // Use only the first name to keep the prefix compact in narrow
@@ -576,7 +576,7 @@ class StreamMessagePreviewFormatter implements AccessibleMessagePreviewFormatter
     // members share a first name. When the sender has no derivable name,
     // skip the prefix entirely — a bare "Message, ..." token carries no
     // information.
-    final authorName = message.user?.name.trim().nullIfEmpty;
+    final authorName = message.user?.nameOrId.trim().nullIfEmpty;
     if (authorName == null) return body;
 
     return '${a11y.incomingMessagePreviewLabel(senderName: authorName)}\n$body';

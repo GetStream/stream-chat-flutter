@@ -8,7 +8,7 @@ import '../../core/models/response/poll_vote_response.dart';
 import '../../core/models/response/query_poll_votes_response.dart';
 import '../../core/models/response/query_polls_response.dart';
 import '../../core/models/voting_visibility.dart';
-import 'user_mapper.dart';
+import 'users_mapper.dart';
 
 /// Maps a generated [api.PollResponseData] to a [Poll].
 extension PollResponseDataMapper on api.PollResponseData {

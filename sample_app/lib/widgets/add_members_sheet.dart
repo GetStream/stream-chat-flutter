@@ -198,7 +198,7 @@ class _UserRow extends StatelessWidget {
         ),
         child: StreamListTile(
           leading: StreamUserAvatar(user: user, size: .md),
-          title: Text(user.name),
+          title: Text(user.nameOrId),
           trailing: StreamCheckbox.circular(
             value: selected,
             onChanged: onTap == null ? null : (_) => onTap!(),

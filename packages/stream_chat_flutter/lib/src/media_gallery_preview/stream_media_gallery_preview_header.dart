@@ -16,7 +16,7 @@ import '../../stream_chat_flutter.dart';
 ///
 /// ```dart
 /// StreamMediaGalleryPreviewHeader(
-///   title: Text(message.user?.name ?? ''),
+///   title: Text(message.user?.nameOrId ?? ''),
 ///   subtitle: Text(
 ///     context.translations.sentAtText(
 ///       date: message.createdAt,

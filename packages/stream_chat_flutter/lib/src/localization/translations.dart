@@ -1062,9 +1062,9 @@ class DefaultTranslations implements Translations {
     if (users.isEmpty) return '';
     final first = users.first;
     if (users.length == 1) {
-      return '${first.name} is typing';
+      return '${first.nameOrId} is typing';
     }
-    return '${first.name} and ${users.length - 1} more are typing';
+    return '${first.nameOrId} and ${users.length - 1} more are typing';
   }
 
   @override
@@ -1092,7 +1092,7 @@ class DefaultTranslations implements Translations {
   }) {
     final pinnedByCurrentUser = currentUser.id == pinnedBy.id;
     if (pinnedByCurrentUser) return 'Pinned by You';
-    return 'Pinned by ${pinnedBy.name}';
+    return 'Pinned by ${pinnedBy.nameOrId}';
   }
 
   @override

@@ -222,7 +222,7 @@ class _MessageScreenState extends State<MessageScreen> {
           stream: channel.state?.typingEventsStream.map((it) => it.keys),
           builder: (context, snapshot) {
             if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-              return Text('${snapshot.data!.first.name} is typing...');
+              return Text('${snapshot.data!.first.nameOrId} is typing...');
             }
             return const SizedBox();
           },

@@ -36,9 +36,9 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
     if (users.isEmpty) return '';
     final first = users.first;
     if (users.length == 1) {
-      return '${first.name} està escrivint';
+      return '${first.nameOrId} està escrivint';
     }
-    return '${first.name} y ${users.length - 1} estan escrivint';
+    return '${first.nameOrId} y ${users.length - 1} estan escrivint';
   }
 
   @override
@@ -66,7 +66,7 @@ class StreamChatLocalizationsCa extends GlobalStreamChatLocalizations {
   }) {
     final pinnedByCurrentUser = currentUser.id == pinnedBy.id;
     if (pinnedByCurrentUser) return 'Fixat per tu';
-    return 'Fixat per ${pinnedBy.name}';
+    return 'Fixat per ${pinnedBy.nameOrId}';
   }
 
   @override

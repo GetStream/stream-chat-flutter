@@ -20,7 +20,13 @@ void main() {
       banned: math.Random().nextBool(),
       teamsRole: const {'teamId': 'role', 'teamId2': 'role2'},
       avgResponseTime: 120,
-      extraData: {'test_extra_data': 'extraData'},
+      custom: {'test_extra_data': 'extraData'},
+      name: 'Test User',
+      image: 'https://example.com/test.png',
+      deactivatedAt: DateTime.now(),
+      deletedAt: DateTime.now(),
+      shadowBanned: math.Random().nextBool(),
+      blockedUserIds: const ['blocked-user'],
     );
     final user = entity.toUser();
     expect(user, isA<User>());
@@ -34,7 +40,13 @@ void main() {
     expect(user.banned, entity.banned);
     expect(user.teamsRole, entity.teamsRole);
     expect(user.avgResponseTime, entity.avgResponseTime);
-    expect(user.extraData, entity.extraData);
+    expect(user.custom, entity.custom);
+    expect(user.name, entity.name);
+    expect(user.image, entity.image);
+    expect(user.deactivatedAt, isSameDateAs(entity.deactivatedAt));
+    expect(user.deletedAt, isSameDateAs(entity.deletedAt));
+    expect(user.shadowBanned, entity.shadowBanned);
+    expect(user.blockedUserIds, entity.blockedUserIds);
   });
 
   test('toEntity should map user into UserEntity', () {
@@ -49,7 +61,13 @@ void main() {
       banned: math.Random().nextBool(),
       teamsRole: const {'teamId': 'role', 'teamId2': 'role2'},
       avgResponseTime: 120,
-      extraData: const {'test_extra_data': 'extraData'},
+      custom: const {'test_extra_data': 'extraData'},
+      name: 'Test User',
+      image: 'https://example.com/test.png',
+      deactivatedAt: DateTime.now(),
+      deletedAt: DateTime.now(),
+      shadowBanned: math.Random().nextBool(),
+      blockedUserIds: const ['blocked-user'],
     );
     final entity = user.toEntity();
     expect(entity, isA<UserEntity>());
@@ -63,6 +81,12 @@ void main() {
     expect(entity.banned, user.banned);
     expect(entity.teamsRole, user.teamsRole);
     expect(entity.avgResponseTime, user.avgResponseTime);
-    expect(entity.extraData, user.extraData);
+    expect(entity.custom, user.custom);
+    expect(entity.name, user.name);
+    expect(entity.image, user.image);
+    expect(entity.deactivatedAt, isSameDateAs(user.deactivatedAt));
+    expect(entity.deletedAt, isSameDateAs(user.deletedAt));
+    expect(entity.shadowBanned, user.shadowBanned);
+    expect(entity.blockedUserIds, user.blockedUserIds);
   });
 }

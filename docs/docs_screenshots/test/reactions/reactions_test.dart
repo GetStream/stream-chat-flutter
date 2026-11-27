@@ -242,7 +242,7 @@ void main() {
                 if (user == null) return const SizedBox.shrink();
                 return StreamListTile(
                   leading: StreamUserAvatar(size: StreamAvatarSize.md, user: user),
-                  title: Text(user.name),
+                  title: Text(user.nameOrId),
                   trailing: StreamEmoji(
                     size: StreamEmojiSize.md,
                     emoji: StreamChatConfiguration.of(context).reactionIconResolver.resolve(reaction.type),

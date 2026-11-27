@@ -34,9 +34,9 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
     if (users.isEmpty) return '';
     final first = users.first;
     if (users.length == 1) {
-      return '${first.name} 타이핑중';
+      return '${first.nameOrId} 타이핑중';
     }
-    return '${first.name}하고 ${users.length - 1}명 타이핑중';
+    return '${first.nameOrId}하고 ${users.length - 1}명 타이핑중';
   }
 
   @override
@@ -64,7 +64,7 @@ class StreamChatLocalizationsKo extends GlobalStreamChatLocalizations {
   }) {
     final pinnedByCurrentUser = currentUser.id == pinnedBy.id;
     if (pinnedByCurrentUser) return '당신의 핀';
-    return '${pinnedBy.name}의 핀';
+    return '${pinnedBy.nameOrId}의 핀';
   }
 
   @override

@@ -36,9 +36,9 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
     if (users.isEmpty) return '';
     final first = users.first;
     if (users.length == 1) {
-      return '${first.name} टाइप कर रहा है';
+      return '${first.nameOrId} टाइप कर रहा है';
     }
-    return '${first.name} और ${users.length - 1} और टाइप कर रहे हैं';
+    return '${first.nameOrId} और ${users.length - 1} और टाइप कर रहे हैं';
   }
 
   @override
@@ -66,7 +66,7 @@ class StreamChatLocalizationsHi extends GlobalStreamChatLocalizations {
   }) {
     final pinnedByCurrentUser = currentUser.id == pinnedBy.id;
     if (pinnedByCurrentUser) return 'आपके द्वारा पिन किया गया';
-    return '${pinnedBy.name} द्वारा पिन किया गया';
+    return '${pinnedBy.nameOrId} द्वारा पिन किया गया';
   }
 
   @override

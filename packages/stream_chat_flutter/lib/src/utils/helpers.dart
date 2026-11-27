@@ -211,7 +211,7 @@ Future<bool?> showInfoBottomSheet(
 }
 
 /// Get random png with initials
-String getRandomPicUrl(User user) => 'https://getstream.io/random_png/?id=${user.id}&name=${user.name}';
+String getRandomPicUrl(User user) => 'https://getstream.io/random_png/?id=${user.id}&name=${user.nameOrId}';
 
 /// Get websiteName from [hostName]
 String? getWebsiteName(String hostName) {

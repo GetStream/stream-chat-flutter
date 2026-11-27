@@ -314,7 +314,7 @@ class _ScheduledMessagePreview extends StatelessWidget {
     final prefix = switch (message) {
       Message(parentId: _?) => translations.scheduledThreadReplyPrefixText,
       Message(quotedMessageId: _?) => translations.scheduledQuoteReplyPrefixText(
-        name: message.quotedMessage?.user?.name,
+        name: message.quotedMessage?.user?.nameOrId,
       ),
       _ => null,
     };

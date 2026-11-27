@@ -14,8 +14,8 @@ abstract class StreamMention {
 
   /// The display name of the mention, derived from the payload.
   ///
-  /// For user mentions this is `user.name`, which itself falls back to
-  /// `user.id` when the user has no name set (see [User.name]).
+  /// For user mentions this is [User.nameOrId]: the user's name, or their id
+  /// when they have none.
   String get display;
 }
 
@@ -31,7 +31,7 @@ class StreamUserMention extends StreamMention {
   StreamMentionType get type => .user;
 
   @override
-  String get display => user.name;
+  String get display => user.nameOrId;
 }
 
 /// A `@channel` broadcast mention.

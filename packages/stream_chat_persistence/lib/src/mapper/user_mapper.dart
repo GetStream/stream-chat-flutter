@@ -11,11 +11,17 @@ extension UserEntityX on UserEntity {
     role: role,
     online: online,
     lastActive: lastActive,
-    extraData: extraData,
+    custom: custom,
     banned: banned,
     createdAt: createdAt,
     teamsRole: teamsRole,
     avgResponseTime: avgResponseTime,
+    name: name,
+    image: image,
+    deactivatedAt: deactivatedAt,
+    deletedAt: deletedAt,
+    shadowBanned: shadowBanned,
+    blockedUserIds: blockedUserIds,
   );
 }
 
@@ -33,6 +39,12 @@ extension UserX on User {
     banned: banned,
     teamsRole: teamsRole,
     avgResponseTime: avgResponseTime,
-    extraData: extraData,
+    custom: custom,
+    name: name,
+    image: image,
+    deactivatedAt: deactivatedAt,
+    deletedAt: deletedAt,
+    shadowBanned: shadowBanned,
+    blockedUserIds: blockedUserIds,
   );
 }

@@ -121,7 +121,10 @@ class StreamUserAvatar extends StatelessWidget {
 
     final userAvatar = StreamAvatar(
       size: effectiveSize,
-      imageUrl: user.image,
+      imageUrl: switch (user.image) {
+        final image? when image.isNotEmpty => image,
+        _ => null,
+      },
       showBorder: showBorder,
       isFloating: isFloating,
       backgroundColor: effectiveBackgroundColor,
@@ -183,7 +186,7 @@ class _StreamUserAvatarPlaceholder extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userInitials = user.name.initials;
+    final userInitials = user.name?.initials;
     final Widget content;
     if (userInitials != null && userInitials.isNotEmpty) {
       content = switch (size) {
