@@ -7,12 +7,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-# Fork pull requests get a read-only token: they skip the comment and read
-# the suggested change in the job summary instead.
 permissions:
   contents: read
-  issues: write
-  pull-requests: write
 
 jobs:
   # Centralizes every gating decision for this workflow — currently just a
@@ -39,13 +35,18 @@ jobs:
               - 'packages/stream_chat_persistence/**'
               - '.github/workflows/check_db_entities.yml'
 
+  # Decides whether the check passes: it fails when entity files changed and
+  # `schemaVersion` was not bumped. The comment is left to `comment`, so a
+  # comment that cannot be posted never fails the check.
   check_entity_modifications:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
     runs-on: ubuntu-latest
+    outputs:
+      has_changes: ${{ steps.check_entities.outputs.has_changes }}
     steps:
       # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
-      # makes no other GitHub call, so it runs on a free standard runner.
+      # makes no signed-in GitHub call, so it runs on a free standard runner.
       - name: 📥 Checkout
         run: |
           git init -q .
@@ -67,8 +68,46 @@ jobs:
         if: steps.check_entities.outputs.has_changes == 'true'
         run: cat comment_body.md >> "$GITHUB_STEP_SUMMARY"
 
+      - name: 📤 Upload Comment Body
+        if: steps.check_entities.outputs.has_changes == 'true'
+        uses: actions/upload-artifact@v7
+        with:
+          name: db-entities-comment
+          path: comment_body.md
+          if-no-files-found: error
+          retention-days: 1
+
+      - name: 🚨 Enforce schema version bump
+        if: steps.check_entities.outputs.has_changes == 'true' && steps.check_entities.outputs.version_bumped == 'false'
+        run: |
+          echo "::error file=packages/stream_chat_persistence/lib/src/db/drift_chat_database.dart::Database entity files were modified but \`schemaVersion\` was not bumped. See the job summary for the suggested change."
+          exit 1
+
+  # Posts the comment `check_entity_modifications` wrote, also when that job
+  # failed on a missing version bump. Commenting is a signed-in GitHub call,
+  # which the org IP allow list refuses from a standard runner, so this job
+  # runs in the org runner group. Fork pull requests get a read-only token:
+  # they skip the comment and read the suggested change in the job summary
+  # instead.
+  comment:
+    needs: check_entity_modifications
+    if: >-
+      !cancelled()
+      && needs.check_entity_modifications.outputs.has_changes == 'true'
+      && github.event.pull_request.head.repo.full_name == github.repository
+    timeout-minutes: 5
+    runs-on:
+      group: github-public-amd64
+    permissions:
+      issues: write
+      pull-requests: write
+    steps:
+      - name: 📥 Download Comment Body
+        uses: actions/download-artifact@v8
+        with:
+          name: db-entities-comment
+
       - name: 🔍 Find Comment
-        if: steps.check_entities.outputs.has_changes == 'true' && github.event.pull_request.head.repo.full_name == github.repository
         uses: peter-evans/find-comment@v4
         id: find_comment
         with:
@@ -77,16 +116,9 @@ jobs:
           body-includes: Database Entity Files Modified
 
       - name: 💬 Create or Update Comment
-        if: steps.check_entities.outputs.has_changes == 'true' && github.event.pull_request.head.repo.full_name == github.repository
         uses: peter-evans/create-or-update-comment@v5
         with:
           comment-id: ${{ steps.find_comment.outputs.comment-id }}
           issue-number: ${{ github.event.pull_request.number }}
           body-path: comment_body.md
           edit-mode: replace
-
-      - name: 🚨 Enforce schema version bump
-        if: steps.check_entities.outputs.has_changes == 'true' && steps.check_entities.outputs.version_bumped == 'false'
-        run: |
-          echo "::error file=packages/stream_chat_persistence/lib/src/db/drift_chat_database.dart::Database entity files were modified but \`schemaVersion\` was not bumped. See the job summary for the suggested change."
-          exit 1
