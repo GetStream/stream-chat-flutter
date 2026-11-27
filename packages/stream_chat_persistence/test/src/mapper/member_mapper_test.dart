@@ -25,7 +25,13 @@ void main() {
       archivedAt: DateTime.now(),
       isModerator: math.Random().nextBool(),
       deletedMessages: ['msg1', 'msg2', 'msg3'],
-      extraData: {'test_extra_data': 'testData'},
+      custom: {'test_extra_data': 'testData'},
+      banExpires: DateTime.now(),
+      notificationsMuted: true,
+      status: 'member',
+      banFromFutureChannels: true,
+      futureChannelBanExpires: DateTime.now(),
+      deletedAt: DateTime.now(),
     );
     final member = entity.toMember(user: user);
     expect(member, isA<Member>());
@@ -42,7 +48,13 @@ void main() {
     expect(member.archivedAt, isSameDateAs(entity.archivedAt));
     expect(member.isModerator, entity.isModerator);
     expect(member.deletedMessages, entity.deletedMessages);
-    expect(member.extraData, entity.extraData);
+    expect(member.custom, entity.custom);
+    expect(member.banExpires, isSameDateAs(entity.banExpires));
+    expect(member.notificationsMuted, entity.notificationsMuted);
+    expect(member.status, entity.status);
+    expect(member.banFromFutureChannels, entity.banFromFutureChannels);
+    expect(member.futureChannelBanExpires, isSameDateAs(entity.futureChannelBanExpires));
+    expect(member.deletedAt, isSameDateAs(entity.deletedAt));
   });
 
   test('toEntity show map member into MemberEntity', () {
@@ -62,7 +74,13 @@ void main() {
       archivedAt: DateTime.now(),
       isModerator: math.Random().nextBool(),
       deletedMessages: const ['msg1', 'msg2', 'msg3'],
-      extraData: const {'test_extra_data': 'testData'},
+      custom: const {'test_extra_data': 'testData'},
+      banExpires: DateTime.now(),
+      notificationsMuted: true,
+      status: 'member',
+      banFromFutureChannels: true,
+      futureChannelBanExpires: DateTime.now(),
+      deletedAt: DateTime.now(),
     );
     final entity = member.toEntity(cid: cid);
     expect(entity, isA<MemberEntity>());
@@ -80,6 +98,12 @@ void main() {
     expect(entity.archivedAt, isSameDateAs(member.archivedAt));
     expect(entity.isModerator, member.isModerator);
     expect(entity.deletedMessages, member.deletedMessages);
-    expect(entity.extraData, member.extraData);
+    expect(entity.custom, member.custom);
+    expect(entity.banExpires, isSameDateAs(member.banExpires));
+    expect(entity.notificationsMuted, member.notificationsMuted);
+    expect(entity.status, member.status);
+    expect(entity.banFromFutureChannels, member.banFromFutureChannels);
+    expect(entity.futureChannelBanExpires, isSameDateAs(member.futureChannelBanExpires));
+    expect(entity.deletedAt, isSameDateAs(member.deletedAt));
   });
 }

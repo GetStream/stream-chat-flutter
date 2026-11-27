@@ -23,7 +23,7 @@ void main() {
   });
 
   testWidgets('StreamThreadListView centers its default error state between the side insets', (tester) async {
-    final controller = _FakeThreadListController(const PagedValue.error(StreamChatError('error')));
+    final controller = _FakeThreadListController(const PagedValue.error(StreamClientException(message: 'error')));
 
     await _pumpWithInsets(tester, StreamThreadListView(controller: controller));
 
@@ -67,7 +67,7 @@ void main() {
       tester,
       const StreamScheduledMessageListView(),
       scheduledMessageListState: const ScheduledMessageListState(),
-      loadScheduledMessages: () async => throw const StreamChatError('error'),
+      loadScheduledMessages: () async => throw const StreamClientException(message: 'error'),
     );
 
     final content = find.descendant(of: find.byType(StreamScrollViewErrorWidget), matching: find.byType(Column));

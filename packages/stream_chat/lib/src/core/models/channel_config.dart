@@ -1,4 +1,4 @@
-/// @docImport '../error/stream_chat_error.dart';
+/// @docImport '../error/stream_chat_exception.dart';
 library;
 
 import 'package:json_annotation/json_annotation.dart';
@@ -89,8 +89,8 @@ class ChannelConfig {
 
   /// The push level for this channel.
   ///
-  /// Mutually exclusive with [chatPreferences] — when [chatPreferences] is set
-  /// on the backend, the coarse level is cleared and vice versa.
+  /// Mutually exclusive with [chatPreferences] — when [chatPreferences] is set,
+  /// the coarse level is cleared and vice versa.
   final PushLevel? pushLevel;
 
   /// True if this channel type supports push notifications.

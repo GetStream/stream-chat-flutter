@@ -1,3 +1,25 @@
+## Upcoming Beta
+
+🛑️ Breaking
+
+- `StreamChatPersistenceClient` no longer takes `logLevel` or `logHandlerFunction`. Logging is configured once, on `StreamChatClient`, with `logConfig`.
+- The sort arguments on `getChannelStates`, `queryChannelStates` and `saveChannelQueries` are typed `List<ChannelSort>` rather than `SortOrder<ChannelState>`.
+- The filter arguments on `getChannelStates`, `queryChannelStates`, `updateChannelQueries` and `saveChannelQueries` are typed `ChannelFilter?` rather than an untyped `Filter`.
+- A predefined-filter query whose resolved filter is absent now stores no filter, rather than an empty one. The schema version is bumped for it, so the local cache is rebuilt once on upgrade.
+
+🔄 Changed
+
+- Every persistence call logged its own name at `info`; that call trace is `verbose` now.
+- A cached poll with a voting visibility the SDK does not name is read back instead of failing.
+
+🐞 Fixed
+
+- A cached channel query given no sort came back in whatever order the lookup returned; it now applies `ChannelSort.defaultSort`, the ordering the API would have.
+- A member's `banExpires` is now kept in the local cache.
+- Messages sent before a channel was truncated no longer come back from the local cache, including after a truncation the client missed.
+- Truncating a channel no longer removes the stored messages sent after its truncation time.
+- A message left sending, updating or deleting when the app was closed no longer comes back from the local cache still in progress; it comes back failed, so it is retried.
+
 ## Upcoming
 
 ✅ Added

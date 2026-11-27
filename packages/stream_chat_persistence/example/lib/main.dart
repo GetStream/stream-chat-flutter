@@ -11,7 +11,6 @@ Future<void> main() async {
 
   /// Set the chatPersistenceClient for offline support
   client.chatPersistenceClient = StreamChatPersistenceClient(
-    logLevel: Level.INFO,
     connectionMode: ConnectionMode.background,
   );
 

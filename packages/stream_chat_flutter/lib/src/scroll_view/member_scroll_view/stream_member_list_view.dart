@@ -84,7 +84,7 @@ class StreamMemberListView extends StatelessWidget {
   final WidgetBuilder? loadingBuilder;
 
   /// A builder that is called to build the error state of the list.
-  final Widget Function(BuildContext, StreamChatError)? errorBuilder;
+  final Widget Function(BuildContext, StreamChatException)? errorBuilder;
 
   /// Called when the member taps this list tile.
   final void Function(Member)? onMemberTap;

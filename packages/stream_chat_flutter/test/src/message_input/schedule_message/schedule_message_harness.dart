@@ -74,7 +74,7 @@ MockChannel scheduleChannel({
   final model = ChannelModel(
     cid: scheduleCid,
     config: config,
-    extraData: {'name': ?name},
+    custom: {'name': ?name},
   );
 
   when(() => client.state).thenReturn(clientState);

@@ -24,8 +24,8 @@ void main() {
 
   test('queryUsers', () async {
     const presence = true;
-    final filter = Filter.in_('cid', const ['test-cid-1', 'test-cid-2']);
-    const sort = [SortOption<User>.desc('test-field')];
+    final filter = UserFilter.in_(UserFilterField.id, const ['test-id-1', 'test-id-2']);
+    final sort = [UserSort.desc(UserSortField.custom('test-field'))];
     const pagination = PaginationParams();
 
     const path = '/users';
@@ -137,160 +137,6 @@ void main() {
     verifyNoMoreInteractions(client);
   });
 
-  test('blockUser', () async {
-    const targetUserId = 'test-target-user-id';
-
-    const path = '/users/block';
-
-    when(
-      () => client.post(
-        path,
-        data: {
-          'blocked_user_id': targetUserId,
-        },
-      ),
-    ).thenAnswer(
-      (_) async => successResponse(
-        path,
-        data: {
-          'blocked_by_user_id': 'deven',
-          'blocked_user_id': 'jaap',
-          'created_at': '2024-10-01 12:45:23.456',
-        },
-      ),
-    );
-
-    final res = await userApi.blockUser(targetUserId);
-
-    expect(res, isNotNull);
-
-    verify(
-      () => client.post(
-        path,
-        data: {
-          'blocked_user_id': targetUserId,
-        },
-      ),
-    ).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
-  test('unblockUser', () async {
-    const targetUserId = 'test-target-user-id';
-
-    const path = '/users/unblock';
-
-    when(
-      () => client.post(
-        path,
-        data: {
-          'blocked_user_id': targetUserId,
-        },
-      ),
-    ).thenAnswer(
-      (_) async => successResponse(
-        path,
-        data: <String, dynamic>{},
-      ),
-    );
-
-    final res = await userApi.unblockUser(targetUserId);
-
-    expect(res, isNotNull);
-
-    verify(
-      () => client.post(
-        path,
-        data: {
-          'blocked_user_id': targetUserId,
-        },
-      ),
-    ).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
-  test('queryBlockedUsers', () async {
-    const path = '/users/block';
-
-    when(() => client.get(path)).thenAnswer(
-      (_) async => successResponse(path, data: <String, dynamic>{}),
-    );
-
-    final res = await userApi.queryBlockedUsers();
-
-    expect(res, isNotNull);
-
-    verify(() => client.get(path)).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
-  test('getUnreadCount', () async {
-    const path = '/unread';
-
-    when(() => client.get(path)).thenAnswer(
-      (_) async => successResponse(
-        path,
-        data: {
-          'duration': '5.23ms',
-          'total_unread_count': 42,
-          'total_unread_threads_count': 8,
-          'total_unread_count_by_team': {'team-1': 15, 'team-2': 27},
-          'channels': [
-            {
-              'channel_id': 'messaging:test-channel-1',
-              'unread_count': 5,
-              'last_read': '2024-01-15T10:30:00.000Z',
-            },
-            {
-              'channel_id': 'messaging:test-channel-2',
-              'unread_count': 10,
-              'last_read': '2024-01-15T09:15:00.000Z',
-            },
-          ],
-          'channel_type': [
-            {
-              'channel_type': 'messaging',
-              'channel_count': 3,
-              'unread_count': 25,
-            },
-            {
-              'channel_type': 'livestream',
-              'channel_count': 1,
-              'unread_count': 17,
-            },
-          ],
-          'threads': [
-            {
-              'unread_count': 3,
-              'last_read': '2024-01-15T10:30:00.000Z',
-              'last_read_message_id': 'message-1',
-              'parent_message_id': 'parent-message-1',
-            },
-            {
-              'unread_count': 5,
-              'last_read': '2024-01-15T09:45:00.000Z',
-              'last_read_message_id': 'message-2',
-              'parent_message_id': 'parent-message-2',
-            },
-          ],
-        },
-      ),
-    );
-
-    final res = await userApi.getUnreadCount();
-
-    expect(res, isNotNull);
-    expect(res.totalUnreadCount, 42);
-    expect(res.totalUnreadThreadsCount, 8);
-    expect(res.totalUnreadCountByTeam, {'team-1': 15, 'team-2': 27});
-    expect(res.channels.length, 2);
-    expect(res.channelType.length, 2);
-    expect(res.threads.length, 2);
-
-    verify(() => client.get(path)).called(1);
-    verifyNoMoreInteractions(client);
-  });
-
   test('getActiveLiveLocations', () async {
     const path = '/users/live_locations';
 
@@ -314,7 +160,7 @@ void main() {
     const messageId = 'test-message-id';
     const createdByDeviceId = 'test-device-id';
     final endAt = DateTime.timestamp().add(const Duration(hours: 1));
-    const coordinates = LocationCoordinates(
+    const coordinates = LocationCoordinate(
       latitude: 40.7128,
       longitude: -74.0060,
     );

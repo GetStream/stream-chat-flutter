@@ -38,7 +38,7 @@ String describeScheduleError(Object error, ScheduleErrorTexts texts) {
     };
   }
 
-  if (error is! StreamChatNetworkError) return texts.generic;
+  if (error is! StreamApiException) return texts.generic;
 
   return switch (error.scheduledMessageErrorReason) {
     .scheduledMessagesDisabled => ScheduledMessagesStrings.scheduledMessagesDisabled,
@@ -70,7 +70,7 @@ void showScheduleError(StreamSnackbarMessenger messenger, Object error, Schedule
 
 // Whether [error] says the scheduled message was already sent or deleted.
 bool _isScheduledMessageGone(Object error) {
-  if (error is! StreamChatNetworkError) return false;
+  if (error is! StreamApiException) return false;
   if (error.scheduledMessageErrorReason == .scheduledMessageAlreadySent) return true;
   return error.isScheduledMessageNotFound;
 }

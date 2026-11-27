@@ -1,19 +1,19 @@
 import 'dart:async';
 
 import 'package:clock/clock.dart';
-import 'package:logging/logging.dart';
+import 'package:stream_core/stream_core.dart'
+    show InFlightCache, StreamClientException, StreamLogger, StreamNetworkException;
 
 import '../../core/api/responses.dart';
 import '../../core/api/scheduled_messages_api.dart';
-import '../../core/error/stream_chat_error.dart';
+import '../../core/error/stream_chat_exception.dart';
 import '../../core/models/attachment_file.dart';
 import '../../core/models/channel_state.dart';
-import '../../core/models/event.dart';
 import '../../core/models/message.dart';
 import '../../core/models/scheduled_message.dart';
-import '../../core/util/in_flight_cache.dart';
 import '../../core/util/scheduled_message_rules.dart';
 import '../../event_type.dart';
+import '../../ws/events/event.dart';
 import '../attachment/attachment_uploader.dart';
 import '../attachment/message_attachment_uploader.dart';
 import '../attachment/scheduled_message_attachment_uploader.dart';
@@ -28,16 +28,14 @@ import 'scheduled_messages_query.dart';
 /// events the server sends update it too.
 class ScheduledMessageManager {
   /// Creates a manager for the scheduled messages of `client`.
-  ///
-  /// The `logger` logs its warnings.
-  ScheduledMessageManager(this._client, {this._logger}) {
+  ScheduledMessageManager(this._client) {
     _eventsSubscription = _client.eventStream.listen(_onEvent);
   }
 
   static const _pageSize = 100;
 
   final StreamChatClient _client;
-  final Logger? _logger;
+  static const _logger = StreamLogger('SCh:ScheduledMessages');
   ScheduledMessagesApi get _api => _client.chatApi.scheduledMessages;
 
   final _stateNotifier = ScheduledMessageListStateNotifier();
@@ -129,7 +127,7 @@ class ScheduledMessageManager {
       await loadMessages();
       _wasLoadedBeforeConnectionLost = false;
     } catch (error, stackTrace) {
-      _logger?.warning('Failed to reload the scheduled messages', error, stackTrace);
+      _logger.w(() => 'Failed to reload the scheduled messages', error: error, stackTrace: stackTrace);
     }
   }
 
@@ -138,7 +136,7 @@ class ScheduledMessageManager {
   ///
   /// Adds the page [query] picks to the list, without removing any.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails.
+  /// Throws a [StreamChatException] if the request fails.
   /// {@endtemplate}
   Future<QueryScheduledMessagesResponse> queryMessages(
     ScheduledMessagesQuery query,
@@ -160,7 +158,7 @@ class ScheduledMessageManager {
   /// [ScheduledMessageListState.hasLoadedAll] is true. Resolves to the list's
   /// state. Calling this again while it runs returns the same result.
   ///
-  /// Throws a [StreamChatNetworkError] if a request fails; the ones loaded
+  /// Throws a [StreamChatException] if a request fails; the ones loaded
   /// before it stay listed.
   /// {@endtemplate}
   Future<ScheduledMessageListState> loadMessages() {
@@ -196,9 +194,9 @@ class ScheduledMessageManager {
   /// message carries their progress. If one fails, the message stays listed as
   /// failed, with that attachment's [Attachment.uploadState] failed.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, and a
-  /// [StreamChatError] if an attachment fails to upload or its upload is
-  /// stopped, such as by deleting the message.
+  /// Throws a [StreamChatException] if the request fails, if an attachment
+  /// fails to upload, or if its upload is stopped, such as by deleting the
+  /// message.
   ///
   /// Throws a [ScheduledMessageRefusedError] if it can't be scheduled in that
   /// channel or sending it right away is refused, an [ArgumentError] if
@@ -243,16 +241,16 @@ class ScheduledMessageManager {
   ///
   /// If an upload or the save fails, the edit stays listed as failed.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, such as with
+  /// Throws a [StreamChatException] if the request fails, such as with
   /// [ScheduledMessageErrorReason.scheduledAtTooSoon] for a time that isn't in
   /// the future.
   ///
   /// Throws a [ScheduledMessageRefusedError] if the edit can't be scheduled, or
   /// once sending the message failed.
   ///
-  /// Throws a [StreamChatError] if an attachment fails to upload or its upload
-  /// is stopped, and an [ArgumentError] if [id] isn't listed and an attachment
-  /// of [message] isn't uploaded.
+  /// Throws a [StreamChatException] if an attachment fails to upload or its
+  /// upload is stopped, and an [ArgumentError] if [id] isn't listed and an
+  /// attachment of [message] isn't uploaded.
   ///
   /// Throws a [StateError] while it is still being scheduled or its
   /// attachments upload.
@@ -304,7 +302,7 @@ class ScheduledMessageManager {
   /// [ScheduledMessageUpdatingFailed] if saving the move fails. An edit that
   /// failed to save is saved with it.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, such as with
+  /// Throws a [StreamChatException] if the request fails, such as with
   /// [ScheduledMessageErrorReason.scheduledAtTooSoon] for a time that isn't in
   /// the future.
   ///
@@ -357,7 +355,7 @@ class ScheduledMessageManager {
   /// scheduled first. An [EventType.scheduledMessageSent] event follows once
   /// it has been sent.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, a
+  /// Throws a [StreamChatException] if the request fails, a
   /// [ScheduledMessageRefusedError] if it quotes a deleted message or sending
   /// it already failed, and a [StateError] while it is still being scheduled or
   /// its attachments upload.
@@ -389,7 +387,7 @@ class ScheduledMessageManager {
   ///
   /// Its attachment uploads are canceled.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, including when it
+  /// Throws a [StreamChatException] if the request fails, including when it
   /// no longer exists or was already sent.
   /// {@endtemplate}
   Future<DeleteScheduledMessageResponse> deleteMessage(String id) async {
@@ -438,10 +436,10 @@ class ScheduledMessageManager {
   ///
   /// Its attachments that failed to upload are uploaded again.
   ///
-  /// Throws a [StreamChatNetworkError] if the request fails, a
-  /// [ScheduledMessageRefusedError] if it is refused, a [StreamChatError] if an
-  /// attachment fails to upload again, and a [StateError] if [id] isn't listed
-  /// with a failure that can be resent, or no user is connected.
+  /// Throws a [StreamChatException] if the request fails or an attachment
+  /// fails to upload again, a [ScheduledMessageRefusedError] if it is refused,
+  /// and a [StateError] if [id] isn't listed with a failure that can be
+  /// resent, or no user is connected.
   /// {@endtemplate}
   Future<ScheduledMessage?> resendMessage(String id) async {
     final scheduledMessage = _listed(id);
@@ -519,7 +517,7 @@ class ScheduledMessageManager {
         );
 
         _upsert(failed, generation);
-        throw const StreamChatError('Failed to upload one or more attachments');
+        throw const StreamClientException(message: 'Failed to upload one or more attachments');
       }
     }
 
@@ -551,7 +549,7 @@ class ScheduledMessageManager {
 
       await _upsertUnlessDeleted(created, generation, wasDeletedMeanwhile: wasDeletedMeanwhile());
       return (response: response, sent: local.message);
-    } on StreamChatNetworkError catch (error) {
+    } on StreamChatException catch (error) {
       // Sent or deleted: on a retry, the first attempt went through, scheduled
       // or sent right away.
       if (error.isGone || error.isMessageAlreadyExistsError) {
@@ -612,11 +610,13 @@ class ScheduledMessageManager {
     try {
       await _api.deleteScheduledMessage(id);
       return true;
-    } on StreamChatNetworkError catch (error, stackTrace) {
-      if (!error.isGone) _logger?.warning('Failed to delete the scheduled message $id', error, stackTrace);
+    } on StreamChatException catch (error, stackTrace) {
+      if (!error.isGone) {
+        _logger.w(() => 'Failed to delete the scheduled message $id', error: error, stackTrace: stackTrace);
+      }
       return error.isGone;
     } catch (error, stackTrace) {
-      _logger?.warning('Failed to delete the scheduled message $id', error, stackTrace);
+      _logger.w(() => 'Failed to delete the scheduled message $id', error: error, stackTrace: stackTrace);
       return false;
     }
   }
@@ -670,7 +670,7 @@ class ScheduledMessageManager {
         );
 
         if (_listed(failed.id) != null) _upsert(failed, generation);
-        throw const StreamChatError('Failed to upload one or more attachments');
+        throw const StreamClientException(message: 'Failed to upload one or more attachments');
       }
     }
 
@@ -710,7 +710,7 @@ class ScheduledMessageManager {
   // Uploads the attachments of [scheduledMessage] not uploaded yet, with
   // their progress on it, and resolves to how the upload ended.
   //
-  // Throws a [StreamChatError] if [_cancelUploads] stops them, even once they
+  // Throws a [StreamChatException] if [_cancelUploads] stops them, even once they
   // have finished.
   Future<MessageAttachmentsUploadResult> _uploadAttachments(
     ScheduledMessage scheduledMessage,
@@ -734,7 +734,7 @@ class ScheduledMessageManager {
 
     // Deleted, replaced or cleared while it waited.
     if (!identical(_uploads[id], upload)) {
-      throw const StreamChatError('The attachment uploads were canceled');
+      throw const StreamNetworkException(message: 'The attachment uploads were canceled', isCancelled: true);
     }
     _uploads.remove(id);
 
@@ -786,7 +786,7 @@ class ScheduledMessageManager {
     try {
       return await request();
     } catch (error) {
-      final networkError = error is StreamChatNetworkError ? error : null;
+      final networkError = error is StreamChatException ? error : null;
       if (networkError != null && networkError.isGone) {
         _remove(scheduledMessage.id, generation);
         rethrow;
@@ -867,10 +867,10 @@ class ScheduledMessageManager {
   // by a temporary error, or by a change made at the same time, can be
   // retried.
   static ScheduledMessageFailure _updatingFailureOf(Object error) {
-    final reason = error is StreamChatNetworkError ? error.scheduledMessageErrorReason : null;
+    final reason = error is StreamChatException ? error.scheduledMessageErrorReason : null;
     final isRetriable = switch (error) {
-      StreamChatNetworkError(isRetriable: true) => true,
-      StreamChatNetworkError() => reason == .scheduledMessageConflict,
+      StreamChatException(isRetriable: true) => true,
+      StreamChatException() => reason == .scheduledMessageConflict,
       _ => true,
     };
 
@@ -915,7 +915,7 @@ class ScheduledMessageManager {
 }
 
 // Why a request on a scheduled message was refused.
-extension on StreamChatNetworkError {
+extension on StreamChatException {
   /// Whether the scheduled message was already sent.
   bool get isAlreadySent => scheduledMessageErrorReason == .scheduledMessageAlreadySent;
 

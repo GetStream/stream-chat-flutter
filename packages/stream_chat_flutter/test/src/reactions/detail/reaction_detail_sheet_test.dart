@@ -12,7 +12,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(const PaginationParams());
-    registerFallbackValue(Filter.equal('type', 'like'));
+    registerFallbackValue(ReactionFilter.equal(ReactionFilterField.type, 'like'));
   });
 
   setUp(() {

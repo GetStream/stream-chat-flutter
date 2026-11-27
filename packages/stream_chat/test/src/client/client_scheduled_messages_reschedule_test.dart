@@ -2,6 +2,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
+import '../utils.dart';
 import 'scheduled_messages_harness.dart';
 
 void main() {
@@ -10,17 +11,9 @@ void main() {
   final original = fakeScheduledMessage('a');
   final later = DateTime.utc(2026, 11, 3, 9);
   final moved = fakeScheduledMessage('a', scheduledAt: later, updatedAt: DateTime.utc(2026, 10, 30));
-  final tooFar = StreamChatNetworkError.raw(
-    code: 4,
-    message: 'Too far ahead',
-    statusCode: 400,
-    data: ErrorResponse()
-      ..code = 4
-      ..statusCode = 400
-      ..message = 'Too far ahead',
-  );
-  final sendingError = StreamChatNetworkError.raw(
-    code: scheduledMessageSendingCode,
+  final tooFar = apiException(code: StreamErrorCode.inputError, message: 'Too far ahead', statusCode: 400);
+  final sendingError = apiException(
+    code: const StreamErrorCode(scheduledMessageSendingCode),
     message: 'Sending',
     statusCode: 409,
   );

@@ -1,46 +1,55 @@
-import 'package:logging/logging.dart';
 import 'package:rate_limiter/rate_limiter.dart';
+import 'package:stream_core/stream_core.dart' show Failure, Result, StreamLogger;
 import 'package:synchronized/synchronized.dart';
 
 import '../core/models/message.dart';
-import '../core/models/message_delivery.dart';
+import '../core/models/request/message_delivery.dart';
 import '../core/util/message_rules.dart';
 import 'channel/channel.dart';
 
-/// A callback that sends delivery receipts for multiple channels.
+/// Signature for a callback that sends delivery receipts for multiple channels.
 ///
-/// Each [MessageDeliveryInfo] represents an acknowledgment that the current
-/// user has received a message.
+/// Each [MessageDelivery] represents an acknowledgment that the current user
+/// has received a message.
+///
+/// The returned [Result] reports whether the receipts were sent.
+///
+/// See also:
+///
+///  * [StreamChatClient.markChannelsDelivered], which matches this signature.
 typedef MarkChannelsDelivered =
-    Future<void> Function(
+    Future<Result<void>> Function(
       Iterable<MessageDelivery> deliveries,
     );
 
 /// Manages the delivery reporting for channel messages.
 ///
-/// Collects channels that need delivery acknowledgments and efficiently
-/// reports them to the server.
+/// Collects channels that need delivery acknowledgments and reports them in
+/// batches.
 class ChannelDeliveryReporter {
   /// Creates a new channel delivery reporter.
   ///
   /// The [onMarkChannelsDelivered] callback is invoked when delivery receipts
-  /// are ready to be sent to the server.
+  /// are ready to be sent.
   ///
   /// The [throttleDuration] controls how frequently delivery receipts are sent.
   ///
-  /// The optional [logger] logs warnings and errors during operation.
+  /// The [tag] names this reporter in the log records it writes.
   ChannelDeliveryReporter({
-    this._logger,
     required this.onMarkChannelsDelivered,
     this._throttleDuration = const Duration(seconds: 1),
-  });
+    String tag = 'SCh:Delivery',
+  }) : _logger = StreamLogger(tag);
 
-  final Logger? _logger;
+  final StreamLogger _logger;
   final Duration _throttleDuration;
 
   /// The callback invoked to send delivery receipts.
   ///
   /// Receives delivery receipts acknowledging that messages were received.
+  ///
+  /// When it returns a failure, or throws, the receipts are kept for a later
+  /// batch.
   final MarkChannelsDelivered onMarkChannelsDelivered;
 
   final _deliveryCandidatesLock = Lock();
@@ -67,9 +76,10 @@ class ChannelDeliveryReporter {
         // Only submit for delivery if the message can be marked as delivered.
         if (!MessageRules.canMarkAsDelivered(lastMessage, channel)) continue;
 
-        _logger?.fine(
-          'Submitted channel $channelCid for delivery '
-          '(message: ${lastMessage.id})',
+        _logger.d(
+          () =>
+              'Submitted channel $channelCid for delivery '
+              '(message: ${lastMessage.id})',
         );
 
         // Update the latest message for the channel
@@ -112,9 +122,10 @@ class ChannelDeliveryReporter {
         // If the message can still be marked as delivered, keep it
         if (MessageRules.canMarkAsDelivered(message, channel)) continue;
 
-        _logger?.fine(
-          'Reconciled delivery for channel $channelCid '
-          '(message: ${message.id}), removing from candidates',
+        _logger.d(
+          () =>
+              'Reconciled delivery for channel $channelCid '
+              '(message: ${message.id}), removing from candidates',
         );
 
         // Otherwise, remove it from the candidates
@@ -137,9 +148,10 @@ class ChannelDeliveryReporter {
 
         final message = _deliveryCandidates.remove(channelCid);
 
-        _logger?.fine(
-          'Canceled delivery for channel $channelCid '
-          '(message: ${message?.id})',
+        _logger.d(
+          () =>
+              'Canceled delivery for channel $channelCid '
+              '(message: ${message?.id})',
         );
       }
     });
@@ -161,10 +173,14 @@ class ChannelDeliveryReporter {
 
     if (messageDeliveries.isEmpty) return;
 
-    _logger?.info('Marking ${messageDeliveries.length} channels as delivered');
+    _logger.d(() => 'Marking ${messageDeliveries.length} channels as delivered');
 
     try {
-      await onMarkChannelsDelivered(messageDeliveries);
+      final result = await onMarkChannelsDelivered(messageDeliveries);
+      if (result case Failure(:final error, :final stackTrace)) {
+        _logger.w(() => 'Failed to mark channels as delivered', error: error, stackTrace: stackTrace);
+        return;
+      }
 
       // Clear the successfully delivered candidates. If a channel's message ID
       // has changed since we started delivery, keep it for the next batch.
@@ -186,7 +202,7 @@ class ChannelDeliveryReporter {
         }
       });
     } catch (e, stk) {
-      _logger?.warning('Failed to mark channels as delivered', e, stk);
+      _logger.w(() => 'Failed to mark channels as delivered', error: e, stackTrace: stk);
     }
   }
 

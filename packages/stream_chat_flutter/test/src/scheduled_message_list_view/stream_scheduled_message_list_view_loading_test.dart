@@ -70,7 +70,7 @@ void main() {
 
   testWidgets('StreamScheduledMessageListView says the scheduled messages could not be loaded', (tester) async {
     final client = mockClient(hasLoadedAll: false);
-    when(client.loadScheduledMessages).thenAnswer((_) async => throw const StreamChatError('Boom'));
+    when(client.loadScheduledMessages).thenAnswer((_) async => throw const StreamClientException(message: 'Boom'));
 
     await tester.pumpWidget(wrapWithMaterialApp(client: client, child: const StreamScheduledMessageListView()));
     await tester.pump();
@@ -78,7 +78,9 @@ void main() {
     expect(find.text("Couldn't load scheduled messages"), findsOneWidget);
   });
 
-  testWidgets('StreamScheduledMessageListView hands errorBuilder a StreamChatError for any failure', (tester) async {
+  testWidgets('StreamScheduledMessageListView hands errorBuilder a StreamChatException for any failure', (
+    tester,
+  ) async {
     final client = mockClient(hasLoadedAll: false);
     when(client.loadScheduledMessages).thenAnswer((_) async => throw StateError('Boom'));
 
@@ -86,7 +88,7 @@ void main() {
       wrapWithMaterialApp(
         client: client,
         child: StreamScheduledMessageListView(
-          errorBuilder: (_, error) => Text('error: ${error.message}'),
+          errorBuilder: (_, error) => Text('error: ${error.cause}'),
         ),
       ),
     );
@@ -97,7 +99,7 @@ void main() {
 
   testWidgets('StreamScheduledMessageListView loads the scheduled messages again when retry is tapped', (tester) async {
     final client = mockClient(hasLoadedAll: false);
-    when(client.loadScheduledMessages).thenAnswer((_) async => throw const StreamChatError('Boom'));
+    when(client.loadScheduledMessages).thenAnswer((_) async => throw const StreamClientException(message: 'Boom'));
     await tester.pumpWidget(wrapWithMaterialApp(client: client, child: const StreamScheduledMessageListView()));
     await tester.pump();
 
@@ -111,7 +113,7 @@ void main() {
     final updates = CountingStream();
     addTearDown(updates.close);
     final client = mockClient(hasLoadedAll: false, updates: updates.stream);
-    when(client.loadScheduledMessages).thenAnswer((_) async => throw const StreamChatError('Boom'));
+    when(client.loadScheduledMessages).thenAnswer((_) async => throw const StreamClientException(message: 'Boom'));
     await tester.pumpWidget(wrapWithMaterialApp(client: client, child: const StreamScheduledMessageListView()));
     await tester.pump();
 

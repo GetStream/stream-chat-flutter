@@ -1,5 +1,6 @@
 // ignore_for_file: cascade_invocations
 
+import 'package:clock/clock.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/src/client/channel/channel_event_handler.dart';
 import 'package:stream_chat/src/client/channel/channel_state_mutations.dart';
@@ -39,7 +40,7 @@ void main() {
   late MockStreamChatClient client;
   late MockChannelStateMutations mutations;
   late ChannelEventHandler handler;
-  late List<LogRecord> logRecords;
+  late List<StreamLogRecord> logRecords;
 
   // Matches the default current user of [FakeClientState].
   const currentUserId = 'test-user-id';
@@ -51,13 +52,14 @@ void main() {
     registerFallbackValue(FakeEvent());
     registerFallbackValue(FakeDraft());
     registerFallbackValue(FakeReaction());
+    registerFallbackValue(DateTime(2026));
     registerFallbackValue(FakePoll());
     registerFallbackValue(FakePollVote());
     registerFallbackValue(FakeMember());
     registerFallbackValue(FakeMessageReminder());
     registerFallbackValue(FakeLocation());
     registerFallbackValue(FakeChannelPushPreference());
-    registerFallbackValue(Filter.equal('id', ''));
+    registerFallbackValue(MemberFilter.equal(MemberFilterField.userId, ''));
     registerFallbackValue('');
     registerFallbackValue(0);
     registerFallbackValue(false);
@@ -70,12 +72,13 @@ void main() {
     client = MockStreamChatClient();
     mutations = MockChannelStateMutations();
 
+    // A `StreamLogger` writes to the global handler rather than to a stream of
+    // its own, so what the handler reports is observed through that handler.
     logRecords = [];
-    final logger = Logger.detached('mock-client-logger')..level = Level.ALL;
-    logger.onRecord.listen(logRecords.add);
+    StreamLogger.handler = _CapturingHandler(logRecords.add);
+    StreamLogger.priority = StreamLogPriority.verbose;
 
     when(() => channel.client).thenReturn(client);
-    when(() => client.logger).thenReturn(logger);
     when(() => client.state).thenReturn(FakeClientState());
     when(() => client.channelDeliveryReporter.reconcileDelivery(any())).thenAnswer((_) async {});
 
@@ -89,6 +92,8 @@ void main() {
 
     handler = ChannelEventHandler(channel: channel, mutations: mutations);
   });
+
+  tearDown(StreamLogger.reset);
 
   group('dispatch', () {
     test('does nothing for an unknown event without payloads', () {
@@ -561,18 +566,19 @@ void main() {
   });
 
   group('channel events', () {
-    test('channel.truncated wipes persisted messages before mutating', () async {
+    test('channel.truncated removes the stored messages before mutating', () async {
       final persistentClient = MockStreamChatClientWithPersistence();
       when(() => channel.client).thenReturn(persistentClient);
       when(() => persistentClient.state).thenReturn(FakeClientState());
 
       final persistence = persistentClient.chatPersistenceClient;
-      when(() => persistence.deleteMessageByCid(any())).thenAnswer((_) async {});
+      when(() => persistence.truncateChannel(any(), truncatedAt: any(named: 'truncatedAt'))).thenAnswer((_) async {});
 
+      final truncatedAt = DateTime.utc(2026, 10, 29, 12);
       final systemMessage = Message(id: 'system-id');
       final event = Event(
         type: EventType.channelTruncated,
-        channel: ChannelModel(cid: 'messaging:test'),
+        channel: ChannelModel(cid: 'messaging:test', truncatedAt: truncatedAt),
         message: systemMessage,
       );
 
@@ -580,8 +586,42 @@ void main() {
       await Future<void>.value();
 
       verifyInOrder([
-        () => persistence.deleteMessageByCid('messaging:test'),
-        () => mutations.onChannelTruncated(message: systemMessage),
+        () => persistence.truncateChannel('messaging:test', truncatedAt: truncatedAt),
+        () => mutations.onChannelTruncated(event.channel!, cutoff: truncatedAt, message: systemMessage),
+      ]);
+    });
+
+    test("channel.truncated cuts at the channel's truncatedAt", () async {
+      final truncatedAt = DateTime.utc(2026, 10, 29, 12);
+      final channelModel = ChannelModel(cid: 'messaging:test', truncatedAt: truncatedAt);
+      final event = Event(type: EventType.channelTruncated, channel: channelModel);
+
+      handler.handleEvent(event);
+      await Future<void>.value();
+
+      verify(() => mutations.onChannelTruncated(channelModel, cutoff: truncatedAt)).called(1);
+    });
+
+    test('channel.truncated without a truncatedAt cuts at the event time, not the device clock', () async {
+      final persistentClient = MockStreamChatClientWithPersistence();
+      when(() => channel.client).thenReturn(persistentClient);
+      when(() => persistentClient.state).thenReturn(FakeClientState());
+
+      final persistence = persistentClient.chatPersistenceClient;
+      when(() => persistence.truncateChannel(any(), truncatedAt: any(named: 'truncatedAt'))).thenAnswer((_) async {});
+
+      final eventTime = DateTime.utc(2026, 10, 29, 12);
+      final channelModel = ChannelModel(cid: 'messaging:test');
+      final event = Event(type: EventType.channelTruncated, channel: channelModel, createdAt: eventTime);
+
+      await withClock(Clock.fixed(DateTime.utc(2026, 10, 29, 13)), () async {
+        handler.handleEvent(event);
+        await Future<void>.value();
+      });
+
+      verifyInOrder([
+        () => persistence.truncateChannel('messaging:test', truncatedAt: eventTime),
+        () => mutations.onChannelTruncated(channelModel, cutoff: eventTime),
       ]);
     });
 
@@ -693,7 +733,15 @@ void main() {
       handler.handleEvent(event);
       await Future<void>.value();
 
-      verify(() => channel.queryMembers(filter: Filter.equal('id', otherUser.id))).called(1);
+      // A `Filter` compares by identity, so the query is checked against the
+      // filter it serializes to rather than against an equal instance.
+      final filter =
+          verify(
+                () => channel.queryMembers(filter: captureAny(named: 'filter')),
+              ).captured.single
+              as MemberFilter;
+
+      expect(filter.toJson(), MemberFilter.equal(MemberFilterField.userId, otherUser.id).toJson());
       verify(() => mutations.onMemberBanned(member)).called(1);
     });
 
@@ -979,7 +1027,7 @@ void main() {
       );
 
       expect(logRecords, hasLength(1));
-      expect(logRecords.single.level, Level.WARNING);
+      expect(logRecords.single.priority, StreamLogPriority.warning);
       expect(logRecords.single.message, contains(EventType.memberAdded));
       expect(logRecords.single.error, isA<StateError>());
     });
@@ -997,4 +1045,13 @@ void main() {
       expect(logRecords.single.message, contains('member list dispatch'));
     });
   });
+}
+
+class _CapturingHandler extends StreamLogHandler {
+  const _CapturingHandler(this._onRecord);
+
+  final void Function(StreamLogRecord) _onRecord;
+
+  @override
+  void handle(StreamLogRecord record) => _onRecord(record);
 }

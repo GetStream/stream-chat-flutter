@@ -12,9 +12,9 @@ class PinnedMessagesPage extends StatefulWidget {
 class _PinnedMessagesPageState extends State<PinnedMessagesPage> {
   late final _controller = StreamMessageSearchListController(
     client: StreamChat.of(context).client,
-    filter: Filter.in_('cid', [StreamChannel.of(context).channel.cid!]),
-    messageFilter: Filter.equal('pinned', true),
-    sort: const [SortOption.asc('created_at')],
+    filter: ChannelFilter.in_(ChannelFilterField.cid, [StreamChannel.of(context).channel.cid]),
+    messageFilter: MessageSearchFilter.equal(MessageSearchFilterField.pinned, true),
+    sort: [MessageSearchSort.asc(MessageSearchSortField.createdAt)],
     limit: 20,
   );
 

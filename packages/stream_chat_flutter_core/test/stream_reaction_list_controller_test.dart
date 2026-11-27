@@ -52,7 +52,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(const PaginationParams());
-    registerFallbackValue(Filter.equal('type', 'like'));
+    registerFallbackValue(ReactionFilter.equal(ReactionFilterField.type, 'like'));
   });
 
   setUp(() {
@@ -176,8 +176,8 @@ void main() {
       expect(controller.value.asSuccess.nextPageKey, isNull);
     });
 
-    test('handles StreamChatError by transitioning to error state', () async {
-      const chatError = StreamChatError('Network error');
+    test('handles a Stream failure by transitioning to error state', () async {
+      const chatError = StreamNetworkException(message: 'Network error');
 
       when(
         () => client.queryReactions(
@@ -200,7 +200,7 @@ void main() {
       expect((controller.value as Error).error, equals(chatError));
     });
 
-    test('wraps generic exceptions in StreamChatError', () async {
+    test('wraps generic exceptions in a StreamClientException', () async {
       final exception = Exception('API unavailable');
 
       when(
@@ -221,10 +221,13 @@ void main() {
       await pumpEventQueue();
 
       expect(controller.value, isA<Error>());
-      expect(
-        (controller.value as Error).error.message,
-        contains('API unavailable'),
-      );
+
+      final error = (controller.value as Error).error;
+      expect(error, isA<StreamClientException>());
+      // The message names the load; the throwable itself survives as `cause`
+      // rather than being flattened into the message.
+      expect(error.message, 'Failed to load reactions');
+      expect(error.cause, same(exception));
     });
   });
 
@@ -308,10 +311,10 @@ void main() {
       expect(capturedPagination?.next, equals(nextKey));
     });
 
-    test('loadMore preserves existing items on StreamChatError', () async {
+    test('loadMore preserves existing items on a Stream failure', () async {
       const nextKey = 'next_page_token';
       final existingReactions = generateReactions();
-      const chatError = StreamChatError('Network error');
+      const chatError = StreamNetworkException(message: 'Network error');
 
       when(
         () => client.queryReactions(
@@ -367,11 +370,10 @@ void main() {
 
       expect(controller.value.isSuccess, isTrue);
       expect(controller.value.asSuccess.items, equals(existingReactions));
-      expect(controller.value.asSuccess.error, isNotNull);
-      expect(
-        controller.value.asSuccess.error!.message,
-        contains('Network error'),
-      );
+      final error = controller.value.asSuccess.error;
+      // The message names the load; the throwable survives as `cause`.
+      expect(error?.message, 'Failed to load more reactions');
+      expect(error?.cause, same(exception));
     });
   });
 
@@ -434,10 +436,40 @@ void main() {
   });
 
   group('Filtering and sorting', () {
+    test('an empty sort leaves a page in the order it arrived in', () async {
+      // Reactions arrive newest-first, so an oldest-first page comes back
+      // reordered unless the empty sort is left alone.
+      final oldestFirst = generateReactions(count: 50).reversed.toList();
+
+      when(
+        () => client.queryReactions(
+          any(),
+          filter: any(named: 'filter'),
+          sort: any(named: 'sort'),
+          pagination: any(named: 'pagination'),
+        ),
+      ).thenAnswer(
+        (_) async => QueryReactionsResponse()
+          ..reactions = oldestFirst
+          ..next = null,
+      );
+
+      final controller = StreamReactionListController(
+        client: client,
+        messageId: 'message_123',
+        sort: ReactionSort.empty,
+      );
+
+      await controller.doInitialLoad();
+      await pumpEventQueue();
+
+      expect(controller.value.asSuccess.items, equals(oldestFirst));
+    });
+
     test('refresh resets filter and sort to initial values', () async {
       final reactions = generateReactions();
-      final initialFilter = Filter.equal('type', 'like');
-      final sort = [const SortOption<Reaction>.desc(ReactionSortKey.createdAt)];
+      final initialFilter = ReactionFilter.equal(ReactionFilterField.type, 'like');
+      final sort = [ReactionSort.desc(ReactionSortField.createdAt)];
 
       final apiCalls = <Map<String, dynamic>>[];
 
@@ -470,8 +502,8 @@ void main() {
 
       // Change filter and sort at runtime
       controller
-        ..filter = Filter.equal('type', 'love')
-        ..sort = [const SortOption<Reaction>.asc(ReactionSortKey.createdAt)];
+        ..filter = ReactionFilter.equal(ReactionFilterField.type, 'love')
+        ..sort = [ReactionSort.asc(ReactionSortField.createdAt)];
 
       await controller.refresh();
       await pumpEventQueue();
@@ -485,10 +517,10 @@ void main() {
 
     test('refresh with resetValue=false preserves current filter and sort', () async {
       final reactions = generateReactions();
-      final initialFilter = Filter.equal('type', 'like');
-      final initialSort = [const SortOption<Reaction>.desc(ReactionSortKey.createdAt)];
-      final newFilter = Filter.equal('type', 'love');
-      final newSort = [const SortOption<Reaction>.asc(ReactionSortKey.createdAt)];
+      final initialFilter = ReactionFilter.equal(ReactionFilterField.type, 'like');
+      final initialSort = [ReactionSort.desc(ReactionSortField.createdAt)];
+      final newFilter = ReactionFilter.equal(ReactionFilterField.type, 'love');
+      final newSort = [ReactionSort.asc(ReactionSortField.createdAt)];
 
       final apiCalls = <Map<String, dynamic>>[];
 
@@ -535,7 +567,10 @@ void main() {
 
     test('value setter sorts items when sort is provided', () async {
       final now = DateTime.now();
-      final older = generateReaction(userId: 'user_1', createdAt: now.subtract(const Duration(hours: 1)));
+      final older = generateReaction(
+        userId: 'user_1',
+        createdAt: now.subtract(const Duration(hours: 1)),
+      );
       final newer = generateReaction(userId: 'user_2', createdAt: now);
 
       final response = QueryReactionsResponse()
@@ -554,7 +589,7 @@ void main() {
       final controller = StreamReactionListController(
         client: client,
         messageId: messageId,
-        sort: [const SortOption<Reaction>.desc(ReactionSortKey.createdAt)],
+        sort: [ReactionSort.desc(ReactionSortField.createdAt)],
       );
 
       await controller.doInitialLoad();

@@ -1,4 +1,4 @@
-/// @docImport '../error/stream_chat_error.dart';
+/// @docImport '../error/stream_chat_exception.dart';
 library;
 
 import '../../client/channel/channel.dart';

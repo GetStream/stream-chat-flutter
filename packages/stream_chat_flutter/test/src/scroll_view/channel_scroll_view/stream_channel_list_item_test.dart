@@ -643,7 +643,7 @@ void main() {
     testWidgets('keeps the clock of a message still sending in a channel without read events', (tester) async {
       final channel = ownMessageChannel(
         ownCapabilities: const [ChannelCapability.sendMessage],
-        messageState: MessageState.sending,
+        messageState: MessageState.sending(),
       );
 
       await pumpSubtitle(tester, channel);

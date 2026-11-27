@@ -96,17 +96,11 @@ void main() {
   });
 }
 
-Logger _createLogger(String name) => Logger.detached(name);
-
 StreamChatClient _createMockClient() {
   final client = MockStreamChatClient();
   final clientState = FakeClientState(currentUser: OwnUser(id: 'current-user-id'));
 
   when(() => client.state).thenReturn(clientState);
-  when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-    return _createLogger(invocation.positionalArguments.first as String);
-  });
-  when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
   when(() => client.retryPolicy).thenReturn(
     RetryPolicy(shouldRetry: (_, __, ___) => false),
   );

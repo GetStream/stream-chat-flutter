@@ -5,6 +5,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
+import '../utils.dart';
 import 'scheduled_messages_harness.dart';
 
 void main() {
@@ -350,11 +351,7 @@ void main() {
   });
 
   test('scheduleMessage leaves one that fails with a retriable server error as failed', () async {
-    final unavailable = StreamChatNetworkError(
-      ChatErrorCode.internalSystemError,
-      statusCode: 503,
-      data: ErrorResponse()..statusCode = 503,
-    );
+    final unavailable = apiException(code: StreamErrorCode.internalError, statusCode: 503);
     final message = Message(id: 'a', text: 'Good morning');
     harness.stubSchedule(message, () async => throw unavailable);
 
@@ -409,15 +406,7 @@ void main() {
 
 // The error that refuses a message whose ID [id] is already taken by a sent
 // message.
-StreamChatNetworkError _messageAlreadyExists(String id) {
+StreamApiException _messageAlreadyExists(String id) {
   final message = 'SendMessage failed with error: "a message with ID $id already exists"';
-  return StreamChatNetworkError.raw(
-    code: ChatErrorCode.inputError.code,
-    message: message,
-    statusCode: 400,
-    data: ErrorResponse()
-      ..code = ChatErrorCode.inputError.code
-      ..statusCode = 400
-      ..message = message,
-  );
+  return apiException(code: StreamErrorCode.inputError, message: message, statusCode: 400);
 }

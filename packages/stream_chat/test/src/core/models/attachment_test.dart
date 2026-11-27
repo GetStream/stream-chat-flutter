@@ -1,7 +1,7 @@
-import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/models/action.dart';
 import 'package:stream_chat/src/core/models/attachment.dart';
 import 'package:stream_chat/src/core/models/attachment_file.dart';
+import 'package:stream_chat/src/core/models/response/og_attachment_response.dart';
 import 'package:test/test.dart';
 
 import '../../utils.dart';
@@ -203,7 +203,7 @@ void main() {
       });
 
       test('sends no type for a scraped link the server gave no type', () {
-        final ogAttachment = OGAttachmentResponse()..ogScrapeUrl = 'https://getstream.io/blog';
+        const ogAttachment = OGAttachmentResponse(duration: '1ms', ogScrapeUrl: 'https://getstream.io/blog');
 
         final attachment = Attachment.fromOGAttachment(ogAttachment);
 

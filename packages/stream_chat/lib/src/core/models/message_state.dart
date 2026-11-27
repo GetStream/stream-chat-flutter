@@ -8,6 +8,31 @@ part 'message_state.g.dart';
 
 /// Helper extension for [MessageState].
 extension MessageStateX on MessageState {
+  /// The state a message is left in when its request never finished.
+  ///
+  /// A send, update or delete, such as one cut off by the app being closed,
+  /// becomes failed with the options it was made with, so it can be retried.
+  /// Any other state is returned as is.
+  MessageState get settled {
+    return switch (this) {
+      MessageOutgoing(state: final Sending state) => .sendingFailed(
+        skipPush: state.skipPush,
+        skipEnrichUrl: state.skipEnrichUrl,
+      ),
+      MessageOutgoing(state: final Updating state) => .updatingFailed(
+        skipPush: state.skipPush,
+        skipEnrichUrl: state.skipEnrichUrl,
+      ),
+      MessageOutgoing(state: final PartialUpdating state) => .partialUpdatingFailed(
+        set: state.set,
+        unset: state.unset,
+        skipEnrichUrl: state.skipEnrichUrl,
+      ),
+      MessageOutgoing(state: final Deleting state) => .deletingFailed(scope: state.scope),
+      MessageInitial() || MessageCompleted() || MessageFailed() => this,
+    };
+  }
+
   /// Returns true if the message is in initial state.
   bool get isInitial => this is MessageInitial;
 
@@ -28,8 +53,11 @@ extension MessageStateX on MessageState {
 
   /// Returns true if the message is in outgoing updating state.
   bool get isUpdating {
-    final messageState = this;
-    return messageState is MessageOutgoing && messageState.state is Updating;
+    return switch (this) {
+      MessageOutgoing(state: Updating()) => true,
+      MessageOutgoing(state: PartialUpdating()) => true,
+      _ => false,
+    };
   }
 
   /// Returns true if the message is in outgoing deleting state.
@@ -218,6 +246,56 @@ sealed class MessageState with _$MessageState {
 
   // region Factory Constructors for Common States
 
+  /// Sending state when the message is being sent.
+  ///
+  /// The `skipPush` and `skipEnrichUrl` options of the send are kept, so the
+  /// send can be made again with them.
+  factory MessageState.sending({
+    bool skipPush = false,
+    bool skipEnrichUrl = false,
+  }) {
+    return MessageState.outgoing(
+      state: OutgoingState.sending(
+        skipPush: skipPush,
+        skipEnrichUrl: skipEnrichUrl,
+      ),
+    );
+  }
+
+  /// Updating state when the message is being updated.
+  ///
+  /// The `skipPush` and `skipEnrichUrl` options of the update are kept, so the
+  /// update can be made again with them.
+  factory MessageState.updating({
+    bool skipPush = false,
+    bool skipEnrichUrl = false,
+  }) {
+    return MessageState.outgoing(
+      state: OutgoingState.updating(
+        skipPush: skipPush,
+        skipEnrichUrl: skipEnrichUrl,
+      ),
+    );
+  }
+
+  /// Partial updating state when the message is being partially updated.
+  ///
+  /// The `set`, `unset` and `skipEnrichUrl` arguments of the update are kept,
+  /// so the update can be made again with them.
+  factory MessageState.partialUpdating({
+    Map<String, Object?>? set,
+    List<String>? unset,
+    bool skipEnrichUrl = false,
+  }) {
+    return MessageState.outgoing(
+      state: OutgoingState.partialUpdating(
+        set: set,
+        unset: unset,
+        skipEnrichUrl: skipEnrichUrl,
+      ),
+    );
+  }
+
   /// Deleting state when the message is being deleted.
   factory MessageState.deleting({
     required MessageDeleteScope scope,
@@ -271,6 +349,8 @@ sealed class MessageState with _$MessageState {
     );
   }
 
+  /// Partial updating failed state when the message fails to be partially
+  /// updated.
   factory MessageState.partialUpdatingFailed({
     Map<String, Object?>? set,
     List<String>? unset,
@@ -288,16 +368,6 @@ sealed class MessageState with _$MessageState {
   // endregion
 
   // region Common Static Instances
-
-  /// Sending state when the message is being sent.
-  static const sending = MessageState.outgoing(
-    state: OutgoingState.sending(),
-  );
-
-  /// Updating state when the message is being updated.
-  static const updating = MessageState.outgoing(
-    state: OutgoingState.updating(),
-  );
 
   /// Deleting state when the message is being soft deleted.
   static const softDeleting = MessageState.outgoing(
@@ -374,10 +444,23 @@ sealed class MessageState with _$MessageState {
 @freezed
 sealed class OutgoingState with _$OutgoingState {
   /// Sending state when the message is being sent.
-  const factory OutgoingState.sending() = Sending;
+  const factory OutgoingState.sending({
+    @Default(false) bool skipPush,
+    @Default(false) bool skipEnrichUrl,
+  }) = Sending;
 
   /// Updating state when the message is being updated.
-  const factory OutgoingState.updating() = Updating;
+  const factory OutgoingState.updating({
+    @Default(false) bool skipPush,
+    @Default(false) bool skipEnrichUrl,
+  }) = Updating;
+
+  /// Partial updating state when the message is being partially updated.
+  const factory OutgoingState.partialUpdating({
+    Map<String, Object?>? set,
+    List<String>? unset,
+    @Default(false) bool skipEnrichUrl,
+  }) = PartialUpdating;
 
   /// Deleting state when the message is being deleted.
   const factory OutgoingState.deleting({
@@ -554,14 +637,16 @@ extension OutgoingStatePatternMatching on OutgoingState {
   /// @nodoc
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
-    required TResult Function() sending,
-    required TResult Function() updating,
+    required TResult Function(bool skipPush, bool skipEnrichUrl) sending,
+    required TResult Function(bool skipPush, bool skipEnrichUrl) updating,
+    required TResult Function(Map<String, Object?>? set, List<String>? unset, bool skipEnrichUrl) partialUpdating,
     required TResult Function(MessageDeleteScope scope) deleting,
   }) {
     final outgoingState = this;
     return switch (outgoingState) {
-      Sending() => sending(),
-      Updating() => updating(),
+      Sending() => sending(outgoingState.skipPush, outgoingState.skipEnrichUrl),
+      Updating() => updating(outgoingState.skipPush, outgoingState.skipEnrichUrl),
+      PartialUpdating() => partialUpdating(outgoingState.set, outgoingState.unset, outgoingState.skipEnrichUrl),
       Deleting() => deleting(outgoingState.scope),
     };
   }
@@ -569,14 +654,16 @@ extension OutgoingStatePatternMatching on OutgoingState {
   /// @nodoc
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
-    TResult? Function()? sending,
-    TResult? Function()? updating,
+    TResult? Function(bool skipPush, bool skipEnrichUrl)? sending,
+    TResult? Function(bool skipPush, bool skipEnrichUrl)? updating,
+    TResult? Function(Map<String, Object?>? set, List<String>? unset, bool skipEnrichUrl)? partialUpdating,
     TResult? Function(MessageDeleteScope scope)? deleting,
   }) {
     final outgoingState = this;
     return switch (outgoingState) {
-      Sending() => sending?.call(),
-      Updating() => updating?.call(),
+      Sending() => sending?.call(outgoingState.skipPush, outgoingState.skipEnrichUrl),
+      Updating() => updating?.call(outgoingState.skipPush, outgoingState.skipEnrichUrl),
+      PartialUpdating() => partialUpdating?.call(outgoingState.set, outgoingState.unset, outgoingState.skipEnrichUrl),
       Deleting() => deleting?.call(outgoingState.scope),
     };
   }
@@ -584,15 +671,17 @@ extension OutgoingStatePatternMatching on OutgoingState {
   /// @nodoc
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
-    TResult Function()? sending,
-    TResult Function()? updating,
+    TResult Function(bool skipPush, bool skipEnrichUrl)? sending,
+    TResult Function(bool skipPush, bool skipEnrichUrl)? updating,
+    TResult Function(Map<String, Object?>? set, List<String>? unset, bool skipEnrichUrl)? partialUpdating,
     TResult Function(MessageDeleteScope scope)? deleting,
     required TResult orElse(),
   }) {
     final outgoingState = this;
     final result = switch (outgoingState) {
-      Sending() => sending?.call(),
-      Updating() => updating?.call(),
+      Sending() => sending?.call(outgoingState.skipPush, outgoingState.skipEnrichUrl),
+      Updating() => updating?.call(outgoingState.skipPush, outgoingState.skipEnrichUrl),
+      PartialUpdating() => partialUpdating?.call(outgoingState.set, outgoingState.unset, outgoingState.skipEnrichUrl),
       Deleting() => deleting?.call(outgoingState.scope),
     };
 
@@ -604,12 +693,14 @@ extension OutgoingStatePatternMatching on OutgoingState {
   TResult map<TResult extends Object?>({
     required TResult Function(Sending value) sending,
     required TResult Function(Updating value) updating,
+    required TResult Function(PartialUpdating value) partialUpdating,
     required TResult Function(Deleting value) deleting,
   }) {
     final outgoingState = this;
     return switch (outgoingState) {
       Sending() => sending(outgoingState),
       Updating() => updating(outgoingState),
+      PartialUpdating() => partialUpdating(outgoingState),
       Deleting() => deleting(outgoingState),
     };
   }
@@ -619,12 +710,14 @@ extension OutgoingStatePatternMatching on OutgoingState {
   TResult? mapOrNull<TResult extends Object?>({
     TResult? Function(Sending value)? sending,
     TResult? Function(Updating value)? updating,
+    TResult? Function(PartialUpdating value)? partialUpdating,
     TResult? Function(Deleting value)? deleting,
   }) {
     final outgoingState = this;
     return switch (outgoingState) {
       Sending() => sending?.call(outgoingState),
       Updating() => updating?.call(outgoingState),
+      PartialUpdating() => partialUpdating?.call(outgoingState),
       Deleting() => deleting?.call(outgoingState),
     };
   }
@@ -634,6 +727,7 @@ extension OutgoingStatePatternMatching on OutgoingState {
   TResult maybeMap<TResult extends Object?>({
     TResult Function(Sending value)? sending,
     TResult Function(Updating value)? updating,
+    TResult Function(PartialUpdating value)? partialUpdating,
     TResult Function(Deleting value)? deleting,
     required TResult orElse(),
   }) {
@@ -641,6 +735,7 @@ extension OutgoingStatePatternMatching on OutgoingState {
     final result = switch (outgoingState) {
       Sending() => sending?.call(outgoingState),
       Updating() => updating?.call(outgoingState),
+      PartialUpdating() => partialUpdating?.call(outgoingState),
       Deleting() => deleting?.call(outgoingState),
     };
 

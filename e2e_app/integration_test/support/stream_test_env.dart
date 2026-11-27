@@ -120,7 +120,7 @@ class StreamTestEnv {
   /// connection drops. Mirrors the native JWT screen's connection status.
   Future<void> assertConnected({Duration timeout = const Duration(seconds: 30)}) async {
     await _waitForConnection(ConnectionStatus.connected, timeout: timeout);
-    _connectionStatusSubscription ??= authController.client!.wsConnectionStatusStream.listen((status) {
+    _connectionStatusSubscription ??= authController.client!.connectionStatusStream.listen((status) {
       if (status != ConnectionStatus.connected) _disconnections++;
     });
   }
@@ -277,7 +277,7 @@ class StreamTestEnv {
     final end = DateTime.now().add(timeout);
     while (DateTime.now().isBefore(end)) {
       await _tester.pump(const Duration(milliseconds: 200));
-      if (authController.client?.wsConnectionStatus == status) return;
+      if (authController.client?.connectionStatus == status) return;
     }
     throw TestFailure('Timed out waiting for connection status: $status');
   }

@@ -148,8 +148,8 @@ Future<void> _scheduleOnSendLongPress(
 bool _isRefused(Object error) {
   return switch (error) {
     ScheduledMessageRefusedError() || ArgumentError() || StateError() => true,
-    StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) => false,
-    StreamChatNetworkError() => !error.isRetriable,
+    StreamApiException(scheduledMessageErrorReason: .scheduledMessageAlreadySent) => false,
+    StreamApiException() => !error.isRetriable,
     _ => false,
   };
 }
@@ -158,7 +158,7 @@ bool _isRefused(Object error) {
 String _scheduleErrorText(Translations translations, Channel channel, Object error) {
   final (reason, isRefused) = switch (error) {
     ScheduledMessageRefusedError() => (error.reason, true),
-    StreamChatNetworkError() => (error.scheduledMessageErrorReason, !error.isRetriable),
+    StreamApiException() => (error.scheduledMessageErrorReason, !error.isRetriable),
     _ => (null, false),
   };
 

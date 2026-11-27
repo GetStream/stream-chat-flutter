@@ -206,7 +206,7 @@ Future<ScheduledMessage> _withMentionedUsers(StreamChatClient client, ScheduledM
   final content = scheduledMessage.message;
   final ids = [for (final user in content.mentionedUsers) user.id];
   final missing = [...ids.where((id) => client.state.users[id] == null)];
-  if (missing.isNotEmpty) await client.queryUsers(filter: Filter.in_('id', missing));
+  if (missing.isNotEmpty) await client.queryUsers(filter: UserFilter.in_(UserFilterField.id, missing));
 
   final mentionedUsers = [for (final id in ids) client.state.users[id] ?? User(id: id)];
   return scheduledMessage.copyWith(message: content.copyWith(mentionedUsers: mentionedUsers));
@@ -303,9 +303,9 @@ Future<void> _maybeDelete(BuildContext context, ScheduledMessage scheduledMessag
   } catch (error) {
     // Not found also covers one deleted on another device.
     final notice = switch (error) {
-      StreamChatNetworkError(scheduledMessageErrorReason: .scheduledMessageAlreadySent) =>
+      StreamApiException(scheduledMessageErrorReason: .scheduledMessageAlreadySent) =>
         ScheduledMessagesStrings.alreadySent,
-      StreamChatNetworkError(isScheduledMessageNotFound: true) => ScheduledMessagesStrings.sentOrDeleted,
+      StreamApiException(isScheduledMessageNotFound: true) => ScheduledMessagesStrings.sentOrDeleted,
       _ => null,
     };
 

@@ -8,6 +8,7 @@ extension MemberEntityX on MemberEntity {
     user: user,
     userId: userId,
     banned: banned,
+    banExpires: banExpires,
     shadowBanned: shadowBanned,
     updatedAt: updatedAt,
     createdAt: createdAt,
@@ -19,7 +20,12 @@ extension MemberEntityX on MemberEntity {
     archivedAt: archivedAt,
     isModerator: isModerator,
     deletedMessages: deletedMessages,
-    extraData: extraData ?? {},
+    custom: custom ?? {},
+    notificationsMuted: notificationsMuted,
+    status: status,
+    banFromFutureChannels: banFromFutureChannels,
+    futureChannelBanExpires: futureChannelBanExpires,
+    deletedAt: deletedAt,
   );
 }
 
@@ -29,6 +35,7 @@ extension MemberX on Member {
   MemberEntity toEntity({required String cid}) => MemberEntity(
     userId: user!.id,
     banned: banned,
+    banExpires: banExpires,
     shadowBanned: shadowBanned,
     channelCid: cid,
     createdAt: createdAt,
@@ -41,6 +48,11 @@ extension MemberX on Member {
     channelRole: channelRole,
     updatedAt: updatedAt,
     deletedMessages: deletedMessages,
-    extraData: extraData,
+    custom: custom,
+    notificationsMuted: notificationsMuted,
+    status: status,
+    banFromFutureChannels: banFromFutureChannels,
+    futureChannelBanExpires: futureChannelBanExpires,
+    deletedAt: deletedAt,
   );
 }

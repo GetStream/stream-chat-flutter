@@ -1,31 +1,33 @@
 import 'package:clock/clock.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/core/http/token.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
 import '../fakes.dart';
+import '../mocks.dart';
+import '../utils.dart';
+import '../ws/fake_chat_server.dart';
 
 // Fixtures and a connected client shared by the scheduled message tests.
 
 const testCid = 'messaging:general';
 
 final testUser = User(id: 'test-user-id');
-final testToken = Token.development(testUser.id).rawValue;
+final testToken = testUserToken(testUser.id).rawValue;
 // The error a request on a scheduled message that no longer exists gets.
-final missingError = StreamChatNetworkError.raw(
-  code: ChatErrorCode.doesNotExist.code,
+final missingError = apiException(
+  code: StreamErrorCode.notFound,
   message: 'UpdateScheduledMessage failed with error: "scheduled message a not found"',
   statusCode: 404,
 );
 
 // The error a request on a scheduled message quoting a deleted message gets.
-final quoteDeletedError = StreamChatNetworkError.raw(
-  code: ChatErrorCode.doesNotExist.code,
+final quoteDeletedError = apiException(
+  code: StreamErrorCode.notFound,
   message: 'UpdateScheduledMessage failed with error: "Can\'t quote this message. The message has been deleted"',
   statusCode: 404,
 );
-final offline = StreamChatNetworkError.raw(code: -1, message: 'No connection');
+const offline = StreamNetworkException(message: 'No connection');
 
 // The codes of the errors that refuse a scheduled message request because the
 // time is too far ahead, the message can no longer be changed, is being sent,
@@ -38,16 +40,8 @@ const scheduledMessageAlreadySentCode = 123;
 const scheduledMessageCanceledCode = 124;
 
 // The error that refuses a scheduled message request with [code].
-StreamChatNetworkError refusedWith(int code) {
-  return StreamChatNetworkError.raw(
-    code: code,
-    message: 'Refused',
-    statusCode: 400,
-    data: ErrorResponse()
-      ..code = code
-      ..statusCode = 400
-      ..message = 'Refused',
-  );
+StreamApiException refusedWith(int code) {
+  return apiException(code: StreamErrorCode(code), message: 'Refused');
 }
 
 // The time the scheduling tests run at, and the time they schedule for.
@@ -55,13 +49,7 @@ final now = DateTime.utc(2026, 10, 30, 12);
 final scheduledAt = now.add(const Duration(days: 1));
 
 // An error that refuses to schedule a message.
-final rejected = StreamChatNetworkError(
-  ChatErrorCode.inputError,
-  data: ErrorResponse()
-    ..code = 4
-    ..statusCode = 400
-    ..message = 'Too many scheduled messages',
-);
+final rejected = apiException(message: 'Too many scheduled messages');
 
 // The response for [message] scheduled as [scheduledMessage].
 ScheduleMessageResponse scheduled(Message message, ScheduledMessage scheduledMessage) {
@@ -154,15 +142,15 @@ ScheduledMessageHarness useScheduledMessageClient({bool loaded = true}) {
 
   setUp(() async {
     final api = harness.api = FakeChatApi();
+    final fileUploader = harness.fileUploader = MockAttachmentFileUploader();
     harness.logs.clear();
     final client = harness.client = StreamChatClient(
       'test-api-key',
+      defaultApi: FakeDefaultApi(),
       chatApi: api,
-      ws: FakeWebSocket(),
-      logHandlerFunction: (record) => harness.logs.add(record.message),
-    );
-    when(() => api.general.getAppSettings()).thenAnswer(
-      (_) async => GetAppSettingsResponse()..app = const AppSettings(name: 'test'),
+      wsProvider: FakeChatServer().connect,
+      attachmentFileUploaderProvider: (_) => fileUploader,
+      logConfig: StreamLogConfig(handler: _CapturingHandler(harness.logs.add)),
     );
     addTearDown(client.dispose);
     await client.connectUser(testUser, testToken);
@@ -178,6 +166,7 @@ ScheduledMessageHarness useScheduledMessageClient({bool loaded = true}) {
 // it. Each test gets a new client.
 class ScheduledMessageHarness {
   late FakeChatApi api;
+  late MockAttachmentFileUploader fileUploader;
   late StreamChatClient client;
 
   // The messages the client logged.
@@ -306,4 +295,14 @@ class ScheduledMessageHarness {
       ),
     ).thenAnswer((_) async => QueryChannelsResponse()..channels = channelStates);
   }
+}
+
+// Hands the message of each record the client logs to [_onMessage].
+class _CapturingHandler extends StreamLogHandler {
+  const _CapturingHandler(this._onMessage);
+
+  final void Function(String message) _onMessage;
+
+  @override
+  void handle(StreamLogRecord record) => _onMessage(record.message);
 }

@@ -1,0 +1,313 @@
+import 'dart:async';
+
+import 'package:stream_core/stream_core.dart';
+
+import '../core/models/own_user.dart';
+import 'connect_request.dart';
+import 'connection_status.dart';
+import 'events/events.dart';
+import 'stream_chat_ws_event.dart';
+
+/// The connection a `StreamChatClient` works over.
+///
+/// Opens and closes the connection, answers for the connection id it is issued, and reopens one that
+/// drops. Obtained via `StreamChatClient`; not constructed directly.
+class ConnectionManager with Disposable {
+  /// Creates a [ConnectionManager] that connects with [request].
+  ///
+  /// [wsProvider] stands in for the socket, for tests that drive one without a real connection.
+  ///
+  /// Reports under [tag], and the socket and recovery handler it owns under `<tag>:Ws` and
+  /// `<tag>:Recovery`, so one prefix selects the whole family.
+  ConnectionManager({
+    required this._request,
+    required this._tokenManager,
+    WebSocketProvider? wsProvider,
+    String tag = 'SCh:Connection',
+  }) : _logger = StreamLogger(tag) {
+    _ws = StreamWebSocketClient(
+      tag: '$tag:Ws',
+      messageCodec: const StreamChatWsCodec(),
+      optionsProvider: _buildOptions,
+      wsProvider: wsProvider,
+    );
+
+    _recovery = ConnectionRecoveryHandler(
+      client: _ws,
+      tag: '$tag:Recovery',
+      policies: [_reconnection],
+    );
+  }
+
+  final ConnectRequest _request;
+  final TokenManager _tokenManager;
+
+  late final StreamWebSocketClient _ws;
+  late final ConnectionRecoveryHandler _recovery;
+
+  final StreamLogger _logger;
+
+  // The user the open connection belongs to, and `null` while there is none.
+  _Session? _session;
+
+  final _reconnection = _PausableReconnectionPolicy();
+
+  // The attempt everyone opening a connection waits on, while one is under way.
+  final _opening = InFlightCache<String, HealthCheckEvent>();
+
+  // Whether the connection being opened may still be tried again with a new token.
+  var _canRetryWithNewToken = false;
+
+  /// Every frame received on the connection, as it arrives.
+  EventEmitter<WsEvent> get events => _ws.events;
+
+  /// The state of the connection, reported on listen and again on every change.
+  ConnectionStateEmitter get connectionState => _ws.connectionState;
+
+  /// The status the connection presents as.
+  ConnectionStatus get status => _statusOf(connectionState.value);
+
+  /// [status] on listen, and again on each change.
+  ///
+  /// Reports once per change in status, so the steps a connection passes through on its way to
+  /// being open do not each report one.
+  Stream<ConnectionStatus> get statusStream => connectionState.map(_statusOf).distinct();
+
+  ConnectionStatus _statusOf(WebSocketConnectionState state) {
+    // A refusal the next attempt answers with a new token is still part of connecting.
+    if (state case Disconnecting(:final source) || Disconnected(:final source)) {
+      if (_willRetryWithNewToken(source)) return .connecting;
+    }
+
+    return .fromState(state, isRecovering: _recovery.isRecovering);
+  }
+
+  /// The state a connection attempt settles in, either [Connected] or [Disconnected].
+  ///
+  /// Completes immediately when none is being opened, so a caller that cannot go on without a
+  /// connection can await it unconditionally — and has to handle [Disconnected] either way.
+  Future<WebSocketConnectionState> get settled => connectionState.settled;
+
+  /// The unique identifier for the open WebSocket connection.
+  ///
+  /// Null while no connection is open. Requests made over an open connection are sent with it.
+  String? get connectionId => switch (connectionState.value) {
+    Connected(:final healthCheck) => healthCheck.connectionId,
+    _ => null,
+  };
+
+  /// Stops a dropped connection from being reopened, until [resumeReconnect].
+  ///
+  /// Leaves an open connection alone. Use while the app is in the background, where a reopened
+  /// connection cannot be used.
+  void pauseReconnect() => _reconnection.pause();
+
+  /// Reopens dropped connections again, after [pauseReconnect].
+  void resumeReconnect() => _reconnection.resume();
+
+  /// Opens a connection for [user], completing with the health check that established it.
+  ///
+  /// If [includeUserDetails] is true, the user's full details are sent, which creates or updates
+  /// the user. Completes with the attempt already under way when there is one for [user].
+  ///
+  /// A connection refused because its token expired is tried once more with a new token, unless
+  /// the token provider is static.
+  ///
+  /// Throws a [StateError] when a connection is already open, or one is being opened for another
+  /// user, and a [StreamChatException] when the connection is refused.
+  Future<HealthCheckEvent> connect(
+    OwnUser user, {
+    bool includeUserDetails = false,
+  }) async {
+    if (isDisposed) throw StateError('Cannot connect a disposed ConnectionManager');
+
+    // Reopening is asked for on events that can land mid-attempt, whose attempt is the connection
+    // the caller was after.
+    if (connectionState.value case Connecting() || Authenticating()) {
+      if (_session case final open? when open.user.id == user.id) return _connect(user);
+
+      throw StateError(
+        'Cannot connect ${user.id}: a connection is already being opened for '
+        '${_session?.user.id ?? 'another user'}. Disconnect before connecting again.',
+      );
+    }
+
+    // Answered with the frame that opened the connection, the only one naming the signed-in user.
+    if (connectionState.value case Connected()) {
+      if (_session case final open? when open.user.id == user.id) {
+        if (open.established case final established?) return established;
+      }
+
+      throw StateError(
+        'Cannot connect ${user.id}: a connection is already open for '
+        '${_session?.user.id ?? 'another user'}. Disconnect before connecting again.',
+      );
+    }
+
+    // The socket refuses to open one while another is still closing.
+    if (connectionState.value case Disconnecting()) {
+      await connectionState.waitFor<Disconnected>();
+
+      // Asked for again rather than opened on what was true before the wait.
+      return connect(user, includeUserDetails: includeUserDetails);
+    }
+
+    _session = _Session(user, includeUserDetails: includeUserDetails);
+    resumeReconnect();
+
+    return _connect(user);
+  }
+
+  /// Closes the connection, which stays closed until [connect] is called again.
+  Future<void> disconnect() {
+    _session = null;
+    return _ws.disconnect();
+  }
+
+  // Waits for the attempt to land or to close, and answers with the frame that landed it.
+  //
+  // Everyone waiting on one attempt shares it, including whoever did not start it: a second run
+  // would wait on the same frame again and report the same refusal twice.
+  Future<HealthCheckEvent> _connect(OwnUser user) => _opening.run(
+    user.id,
+    () async {
+      final session = _session;
+      _canRetryWithNewToken = true;
+
+      try {
+        return await _attempt(user, session);
+      } finally {
+        _canRetryWithNewToken = false;
+      }
+    },
+  );
+
+  // Opens the connection, trying once more with a new token when an expired one is refused.
+  Future<HealthCheckEvent> _attempt(OwnUser user, _Session? session) async {
+    while (true) {
+      // Subscribed before connecting: the frame that establishes the connection is the first
+      // health check, and the only one carrying the signed-in user.
+      final established = events.waitFor<HealthCheckEvent>();
+
+      // Not awaited: the state has moved on by the time this returns, so the closure waited on
+      // below cannot be the one this attempt replaces.
+      unawaited(_ws.connect());
+
+      final settledState = await settled;
+      if (settledState case Disconnected(:final source)) {
+        // Otherwise it fails unobserved when the socket closes without a frame.
+        established.ignore();
+
+        // The next attempt loads a new token in place of the refused one.
+        if (_willRetryWithNewToken(source)) {
+          _canRetryWithNewToken = false;
+          continue;
+        }
+
+        _refuse(user, source);
+      }
+
+      // Already on its way by the time the attempt settles. Kept for whoever asks for the
+      // connection it opened.
+      final event = await established;
+      session?.establishedWith(event);
+
+      return event;
+    }
+  }
+
+  // Whether the attempt refused with [source] is tried again with a new token.
+  bool _willRetryWithNewToken(DisconnectionSource source) {
+    if (!_canRetryWithNewToken) return false;
+    if (_tokenManager.usesStaticProvider) return false;
+
+    return switch (source) {
+      ServerInitiated(error: StreamApiException(isTokenExpired: true)) => true,
+      _ => false,
+    };
+  }
+
+  // Raises why a connection was refused, the way a rejected request is raised.
+  Never _refuse(OwnUser user, DisconnectionSource source) {
+    _logger.w(() => 'connect ${user.id} failed: ${source.closeReason}', error: source.cause);
+
+    Error.throwWithStackTrace(source.exception, source.stackTrace ?? StackTrace.current);
+  }
+
+  // The request for a single attempt. Nothing is sent over the socket to authenticate one, so this
+  // is where a refused token is replaced.
+  Future<WebSocketOptions> _buildOptions(
+    StreamApiException? previousError,
+  ) async {
+    final session = _session;
+    if (session == null) throw StateError('No user is connected.');
+
+    // Drop the refused token, so the load below asks for another.
+    if (previousError case final refused? when refused.isTokenExpired) {
+      _tokenManager.expireToken();
+
+      // A static provider can only present the refused token again, so a
+      // dropped connection stays closed until connect is called again.
+      final isReopening = session.established != null;
+      if (isReopening && _tokenManager.usesStaticProvider) {
+        throw StreamAuthenticationException(
+          message: 'The token was refused and the provider has no other to give',
+          cause: refused,
+        );
+      }
+    }
+
+    final userToken = await _tokenManager.getToken();
+
+    return _request.build(
+      user: session.user,
+      token: userToken,
+      includeUserDetails: session.includeUserDetails,
+    );
+  }
+
+  @override
+  Future<void> dispose() async {
+    _session = null;
+    await _recovery.dispose();
+    await _ws.dispose();
+    return super.dispose();
+  }
+}
+
+// A connection opened for one user: who each request names, and whether their details still have
+// to be sent.
+class _Session {
+  _Session(
+    this.user, {
+    required this._includeUserDetails,
+  });
+
+  final OwnUser user;
+
+  // The frame that opened this connection, and `null` until one does.
+  HealthCheckEvent? get established => _established;
+  HealthCheckEvent? _established;
+
+  // Whether an attempt names the user in full, which creates or updates the user.
+  bool get includeUserDetails => _includeUserDetails;
+  bool _includeUserDetails;
+
+  // Remembers the frame the connection was opened with, and answers with it.
+  HealthCheckEvent establishedWith(HealthCheckEvent event) {
+    // Spent here rather than as an attempt is built, which leaves one that never landed paying.
+    _includeUserDetails = false;
+    return _established = event;
+  }
+}
+
+// A policy that can be switched off, for while a reopened connection would go unused.
+class _PausableReconnectionPolicy implements AutomaticReconnectionPolicy {
+  var _paused = false;
+
+  void pause() => _paused = true;
+  void resume() => _paused = false;
+
+  @override
+  bool canBeReconnected() => !_paused;
+}

@@ -37,7 +37,7 @@ void main() {
 
   testWidgets('keeps the composer clear when scheduling fails in a way that can be retried', (tester) async {
     final channel = await pumpChannelPage(tester);
-    stubSchedule(channel, () async => throw StreamChatNetworkError.raw(code: -1, message: 'Offline'));
+    stubSchedule(channel, () async => throw const StreamNetworkException(message: 'Offline'));
     await _type(tester, 'Hello');
 
     await _scheduleWithPreset(tester);
@@ -64,7 +64,7 @@ void main() {
         failure: const ScheduledMessageFailure.schedulingFailed(),
       );
       when(() => clientState.scheduledMessages).thenReturn([failed]);
-      throw const StreamChatError('Failed to upload one or more attachments');
+      throw const StreamClientException(message: 'Failed to upload one or more attachments');
     });
     await _type(tester, 'Hello');
 
@@ -76,7 +76,11 @@ void main() {
 
   testWidgets('says nothing when the message is deleted while its attachments upload', (tester) async {
     final channel = await pumpChannelPage(tester);
-    stubSchedule(channel, () async => throw const StreamChatError('The attachment uploads were canceled'));
+    stubSchedule(
+      channel,
+      () async =>
+          throw const StreamNetworkException(message: 'The attachment uploads were canceled', isCancelled: true),
+    );
     await _type(tester, 'Hello');
 
     await _scheduleWithPreset(tester);
@@ -149,15 +153,7 @@ void main() {
 
   testWidgets("says the message can't be scheduled when the server refuses it without a reason", (tester) async {
     final channel = await pumpChannelPage(tester);
-    final refused = StreamChatNetworkError.raw(
-      code: 4,
-      message: 'Refused',
-      statusCode: 400,
-      data: ErrorResponse()
-        ..code = 4
-        ..statusCode = 400
-        ..message = 'Refused',
-    );
+    const refused = StreamApiException(message: 'Refused', statusCode: 400, code: StreamErrorCode.inputError);
     stubSchedule(channel, () async => throw refused);
     await _type(tester, 'Hello');
 
@@ -169,14 +165,10 @@ void main() {
   testWidgets('says why the server refused to schedule the message', (tester) async {
     final channel = await pumpChannelPage(tester);
     when(() => channel.config).thenReturn(ChannelConfig(scheduledMessagesMaxPerUser: 100));
-    final limitReached = StreamChatNetworkError.raw(
-      code: 118,
+    const limitReached = StreamApiException(
       message: 'Too many scheduled messages',
       statusCode: 400,
-      data: ErrorResponse()
-        ..code = 118
-        ..statusCode = 400
-        ..message = 'Too many scheduled messages',
+      code: StreamErrorCode(118),
     );
     stubSchedule(channel, () async => throw limitReached);
     await _type(tester, 'Hello');
@@ -273,18 +265,10 @@ void main() {
   });
 
   for (final (name, error) in [
-    ('the server is unreachable', StreamChatNetworkError.raw(code: -1, message: 'No connection')),
+    ('the server is unreachable', const StreamNetworkException(message: 'No connection')),
     (
       'it was already sent',
-      StreamChatNetworkError.raw(
-        code: 123,
-        message: 'Already sent',
-        statusCode: 400,
-        data: ErrorResponse()
-          ..code = 123
-          ..statusCode = 400
-          ..message = 'Already sent',
-      ),
+      const StreamApiException(message: 'Already sent', statusCode: 400, code: StreamErrorCode(123)),
     ),
   ]) {
     testWidgets('keeps the composer cleared when $name', (tester) async {

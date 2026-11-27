@@ -94,11 +94,7 @@ void main() {
       final message = Message(id: 'stored-message-id', text: 'Hello world!');
 
       // The first attempt times out, so the retry queue re-sends the message.
-      final receiveTimeout = StreamChatNetworkError.raw(
-        code: -1,
-        message: 'The request took longer than the receive timeout',
-        type: StreamChatNetworkErrorType.receiveTimeout,
-      );
+      const receiveTimeout = StreamNetworkException(message: 'The request took longer than the receive timeout');
       final errors = [receiveTimeout, _messageAlreadyExistsError(message.id)];
       var attempt = 0;
       _whenSendingMessage(client, channel, message).thenAnswer((_) async {
@@ -106,7 +102,7 @@ void main() {
         attempt += 1;
         throw error;
       });
-      await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatNetworkError>()));
+      await expectLater(channel.sendMessage(message), throwsA(isA<StreamNetworkException>()));
       await pumpEventQueue();
 
       expect(channel.state!.messages.single.state, MessageState.sent);
@@ -115,8 +111,6 @@ void main() {
 }
 
 Channel _initializedChannel(MockStreamChatClient client) {
-  when(() => client.detachedLogger(any())).thenAnswer((it) => Logger.detached(it.positionalArguments.first as String));
-  when(() => client.logger).thenReturn(Logger.detached('test-client'));
   when(() => client.state).thenReturn(FakeClientState());
   when(() => client.retryPolicy).thenReturn(
     RetryPolicy(shouldRetry: (_, __, ___) => false, delayFactor: Duration.zero),
@@ -143,19 +137,10 @@ When<Future<SendMessageResponse>> _whenSendingMessage(
   return when(() => client.sendMessage(any(that: isSameMessageAs(message)), channel.id!, channel.type));
 }
 
-StreamChatNetworkError _messageAlreadyExistsError(String messageId) {
+StreamApiException _messageAlreadyExistsError(String messageId) {
   return _inputError('SendMessage failed with error: "a message with ID $messageId already exists"');
 }
 
-StreamChatNetworkError _inputError(String message) {
-  return StreamChatNetworkError.raw(
-    code: ChatErrorCode.inputError.code,
-    message: message,
-    statusCode: 400,
-    data: ErrorResponse()
-      ..code = ChatErrorCode.inputError.code
-      ..message = message
-      ..statusCode = 400,
-    type: StreamChatNetworkErrorType.badResponse,
-  );
+StreamApiException _inputError(String message) {
+  return StreamApiException(message: message, statusCode: 400, code: StreamErrorCode.inputError);
 }

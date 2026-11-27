@@ -3,9 +3,11 @@ import 'dart:async';
 import 'package:clock/clock.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_core/stream_core.dart' show runSafely;
 import 'package:test/test.dart';
 
 import '../fakes.dart';
+import '../utils.dart';
 import 'scheduled_messages_harness.dart';
 
 void main() {
@@ -15,14 +17,14 @@ void main() {
   final now = DateTime.utc(2026, 10, 30, 12);
   final scheduledAt = now.add(const Duration(days: 1));
   const imageUrl = 'https://example.com/image.png';
-  final uploadError = StreamChatNetworkError(ChatErrorCode.internalSystemError);
+  final uploadError = apiException(code: StreamErrorCode.internalError, statusCode: 500);
 
   Future<ScheduleMessageResponse> schedule(Message message) {
     return _schedule(harness, message, now: now, scheduledAt: scheduledAt);
   }
 
   test('scheduleMessage lists its attachment as preparing while it uploads', () async {
-    _stubImageUpload(harness, (_) => Completer<SendImageResponse>().future);
+    _stubImageUpload(harness, (_) => Completer<UploadedFile>().future);
 
     schedule(_withImage()).ignore();
     await settle();
@@ -36,7 +38,7 @@ void main() {
       // The request is larger than the file.
       final onSendProgress = invocation.namedArguments[#onSendProgress] as ProgressCallback;
       onSendProgress(60, 120);
-      return Completer<SendImageResponse>().future;
+      return Completer<UploadedFile>().future;
     });
     final message = Message(
       id: 'message',
@@ -57,7 +59,7 @@ void main() {
   });
 
   test('scheduleMessage schedules the message with its attachment uploaded', () async {
-    _stubImageUpload(harness, (_) async => SendImageResponse()..file = imageUrl);
+    _stubImageUpload(harness, (_) async => const UploadedFile(fileUrl: imageUrl));
     _stubSchedule(harness);
 
     await schedule(_withImage());
@@ -69,7 +71,7 @@ void main() {
   test('scheduleMessage throws when an attachment fails to upload', () async {
     _stubImageUpload(harness, (_) async => throw uploadError);
 
-    await expectLater(schedule(_withImage()), throwsA(isA<StreamChatError>()));
+    await expectLater(schedule(_withImage()), throwsA(isA<StreamChatException>()));
   });
 
   test('scheduleMessage leaves one whose attachment failed to upload listed as failed', () async {
@@ -99,14 +101,14 @@ void main() {
   });
 
   test('scheduleMessage does not schedule one whose user disconnected while it uploaded', () async {
-    final upload = Completer<SendImageResponse>();
+    final upload = Completer<UploadedFile>();
     _stubImageUpload(harness, (_) => upload.future);
     _stubSchedule(harness);
     final scheduling = _ignoringFailure(schedule(_withImage()));
     await settle();
 
     await harness.client.disconnectUser();
-    upload.complete(SendImageResponse()..file = imageUrl);
+    upload.complete(const UploadedFile(fileUrl: imageUrl));
     await scheduling;
 
     _verifyNeverScheduled(harness);
@@ -117,7 +119,7 @@ void main() {
     _stubImageUpload(harness, (_) async {
       attempt += 1;
       if (attempt == 1) throw uploadError;
-      return SendImageResponse()..file = imageUrl;
+      return const UploadedFile(fileUrl: imageUrl);
     });
     _stubSchedule(harness);
     await _ignoringFailure(schedule(_withImage()));
@@ -135,7 +137,7 @@ void main() {
       final file = invocation.positionalArguments.first as AttachmentFile;
       uploads.add(file.path);
       if (file.path == 'second.png' && failSecond) throw uploadError;
-      return SendImageResponse()..file = imageUrl;
+      return const UploadedFile(fileUrl: imageUrl);
     });
     _stubSchedule(harness);
     await _ignoringFailure(schedule(_withImages(['first', 'second'])));
@@ -164,7 +166,7 @@ void main() {
 
   test('deleteScheduledMessage makes the scheduleMessage of one still uploading throw', () async {
     _stubImageUpload(harness, _uploadUntilCanceled);
-    final scheduling = expectLater(schedule(_withImage()), throwsA(isA<StreamChatError>()));
+    final scheduling = expectLater(schedule(_withImage()), throwsA(isA<StreamChatException>()));
     await settle();
 
     await harness.client.deleteScheduledMessage(harness.client.state.scheduledMessages.single.id);
@@ -233,7 +235,7 @@ void main() {
   test('updateScheduledMessage uploads the new attachment first', () async {
     final scheduledMessage = fakeScheduledMessage('a');
     await harness.hold([scheduledMessage]);
-    _stubImageUpload(harness, (_) async => SendImageResponse()..file = imageUrl);
+    _stubImageUpload(harness, (_) async => const UploadedFile(fileUrl: imageUrl));
     _stubUpdate(harness, scheduledMessage);
 
     await harness.client.updateScheduledMessage(scheduledMessage.id, _withImage(id: 'a'));
@@ -249,7 +251,7 @@ void main() {
     _stubDelete(harness, scheduledMessage);
     final editing = expectLater(
       harness.client.updateScheduledMessage(scheduledMessage.id, _withImage(id: 'a')),
-      throwsA(isA<StreamChatError>()),
+      throwsA(isA<StreamChatException>()),
     );
     await settle();
 
@@ -335,7 +337,7 @@ void main() {
     final scheduledMessage = fakeScheduledMessage('a');
     await harness.hold([scheduledMessage]);
     _stubUploadUntilCanceled(harness);
-    final error = StreamChatNetworkError(ChatErrorCode.internalSystemError);
+    final error = apiException(code: StreamErrorCode.internalError, statusCode: 500);
     when(
       () => harness.api.scheduledMessages.deleteScheduledMessage(any()),
     ).thenAnswer((_) async => throw error);
@@ -384,14 +386,14 @@ void main() {
   });
 
   test('deleteScheduledMessage of one whose attachment finished uploading does not schedule it', () async {
-    final upload = Completer<SendImageResponse>();
+    final upload = Completer<UploadedFile>();
     _stubImageUpload(harness, (_) => upload.future);
     _stubSchedule(harness);
     final scheduling = _ignoringFailure(schedule(_withImage()));
     await settle();
     final listed = harness.client.state.scheduledMessages.single;
 
-    upload.complete(SendImageResponse()..file = imageUrl);
+    upload.complete(const UploadedFile(fileUrl: imageUrl));
     harness.client.deleteScheduledMessage(listed.id).ignore();
     await scheduling;
 
@@ -412,7 +414,7 @@ void main() {
     _stubImageUpload(harness, (_) async {
       uploads += 1;
       if (uploads == 1) throw uploadError;
-      return SendImageResponse()..file = imageUrl;
+      return const UploadedFile(fileUrl: imageUrl);
     });
     _stubSchedule(harness);
     _stubUpdate(harness, fakeScheduledMessage('message'));
@@ -427,7 +429,7 @@ void main() {
   test('updateScheduledMessage does not list again one sent while its attachment uploads', () async {
     final scheduledMessage = fakeScheduledMessage('a');
     await harness.hold([scheduledMessage]);
-    final upload = Completer<SendImageResponse>();
+    final upload = Completer<UploadedFile>();
     _stubImageUpload(harness, (_) => upload.future);
     final editing = _ignoringFailure(harness.client.updateScheduledMessage(scheduledMessage.id, _withImage(id: 'a')));
     await settle();
@@ -476,7 +478,7 @@ void main() {
     final scheduledMessage = fakeScheduledMessage('a');
     await harness.hold([scheduledMessage]);
     _stubUploadUntilCanceled(harness);
-    final error = StreamChatNetworkError(ChatErrorCode.internalSystemError);
+    final error = apiException(code: StreamErrorCode.internalError, statusCode: 500);
     when(
       () => harness.api.scheduledMessages.deleteScheduledMessage(any()),
     ).thenAnswer((_) async => throw error);
@@ -495,7 +497,7 @@ void main() {
     _stubImageUpload(harness, (_) async {
       uploads += 1;
       if (uploads == 1) throw uploadError;
-      return SendImageResponse()..file = imageUrl;
+      return const UploadedFile(fileUrl: imageUrl);
     });
     _stubSchedule(harness);
     _stubUpdate(harness, fakeScheduledMessage('message'));
@@ -563,19 +565,19 @@ Future<void> _ignoringFailure(Future<Object?> future) {
 
 // An upload that answers only once it is canceled, the way a canceled
 // request does.
-Future<SendImageResponse> _uploadUntilCanceled(Invocation invocation) async {
+Future<UploadedFile> _uploadUntilCanceled(Invocation invocation) async {
   final cancelToken = invocation.namedArguments[#cancelToken] as CancelToken;
   await cancelToken.whenCancel;
-  throw StreamChatNetworkError.raw(code: 0, message: 'Request canceled', type: .cancel);
+  throw const StreamNetworkException(message: 'Request canceled', isCancelled: true);
 }
 
 // Answers every image upload with [answer].
 void _stubImageUpload(
   ScheduledMessageHarness harness,
-  Future<SendImageResponse> Function(Invocation) answer,
+  Future<UploadedFile> Function(Invocation) answer,
 ) {
   when(
-    () => harness.api.fileUploader.sendImage(
+    () => harness.fileUploader.sendImage(
       any(),
       any(),
       any(),
@@ -583,7 +585,7 @@ void _stubImageUpload(
       cancelToken: any(named: 'cancelToken'),
       extraData: any(named: 'extraData'),
     ),
-  ).thenAnswer(answer);
+  ).thenAnswer((invocation) => runSafely(() => answer(invocation)));
 }
 
 // Answers every schedule request with the message as scheduled.

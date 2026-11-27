@@ -2,7 +2,7 @@ import 'dart:math';
 
 import 'package:rate_limiter/rate_limiter.dart';
 
-import '../../core/error/stream_chat_error.dart';
+import '../../core/error/stream_chat_exception.dart';
 import '../../core/models/attachment.dart';
 import '../../core/models/attachment_file.dart';
 import '../../core/models/message.dart';
@@ -62,7 +62,7 @@ final class MessageAttachmentsUpload {
   final _settled = <String>{};
 
   // Set once the upload is canceled, with the reason it was given.
-  ({StreamChatError? reason})? _canceled;
+  ({StreamChatException? reason})? _canceled;
   bool get _isCanceled => _canceled != null;
 
   late final _notifyProgress = _notify.throttled(const Duration(milliseconds: 500));
@@ -75,7 +75,7 @@ final class MessageAttachmentsUpload {
   late final Future<MessageAttachmentsUploadResult> _result;
 
   /// The reason given to [cancel], or null if it wasn't canceled with one.
-  StreamChatError? get cancelReason => _canceled?.reason;
+  StreamChatException? get cancelReason => _canceled?.reason;
 
   /// Cancels the upload of [attachmentId], for [reason] if given.
   ///
@@ -101,7 +101,7 @@ final class MessageAttachmentsUpload {
   /// attachments are left as they were. The upload ends as
   /// [MessageAttachmentsUploadCanceled] unless it had already completed;
   /// either way, [reason] becomes the [cancelReason].
-  void cancel({StreamChatError? reason}) {
+  void cancel({StreamChatException? reason}) {
     if (_isCanceled) return;
     _canceled = (reason: reason);
 

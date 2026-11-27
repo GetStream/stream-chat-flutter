@@ -1,9 +1,8 @@
 import 'dart:async';
 
 import 'package:dio/dio.dart';
+import 'package:stream_core/stream_core.dart' show Failure, StreamLogger, StreamNetworkException, Success;
 
-import '../../core/api/responses.dart';
-import '../../core/error/error.dart';
 import '../../core/models/attachment.dart';
 import '../../core/models/attachment_file.dart';
 import '../client.dart';
@@ -18,6 +17,8 @@ final class ChannelAttachmentUploader {
     required this._channelId,
     required this._channelType,
   });
+
+  static const _logger = StreamLogger('SCh:AttachmentUploader');
 
   final StreamChatClient _client;
   final String _channelId;
@@ -52,53 +53,44 @@ final class ChannelAttachmentUploader {
       return attachment.copyWith(uploadState: failed);
     }
 
-    try {
-      final send = switch (attachment.type) {
-        AttachmentType.image => _client.sendImage,
-        _ => _client.sendFile,
-      };
+    final isImage = attachment.type == AttachmentType.image;
+    final send = isImage ? _client.sendImage : _client.sendFile;
 
-      // Counted against the file's own size, as the bytes sent exceed it.
-      void onSendProgress(int sent, int total) {
-        final fileSize = file.size;
-        if (fileSize == null || total <= 0) {
-          onProgress?.call(sent, total);
-          return;
-        }
-
-        final fileSent = (sent / total * fileSize).round().clamp(0, fileSize);
-        onProgress?.call(fileSent, fileSize);
+    // Counted against the file's own size, as the bytes sent exceed it.
+    void onSendProgress(int sent, int total) {
+      final fileSize = file.size;
+      if (fileSize == null || total <= 0) {
+        onProgress?.call(sent, total);
+        return;
       }
 
-      final response = await send(
-        file,
-        _channelId,
-        _channelType,
-        onSendProgress: onSendProgress,
-        cancelToken: cancelToken,
-        extraData: attachment.extraData,
-      );
+      final fileSent = (sent / total * fileSize).round().clamp(0, fileSize);
+      onProgress?.call(fileSent, fileSize);
+    }
 
-      final uploaded = switch (response) {
-        SendFileResponse() => attachment.copyWith(
-          assetUrl: response.file,
-          thumbUrl: response.thumbUrl,
-        ),
-        _ => attachment.copyWith(imageUrl: response.file),
-      };
+    final result = await send(
+      file,
+      _channelId,
+      _channelType,
+      onSendProgress: onSendProgress,
+      cancelToken: cancelToken,
+      extraData: attachment.extraData,
+    );
 
-      return uploaded.copyWith(uploadState: const UploadState.success());
-    } catch (error, stackTrace) {
-      if (error is StreamChatNetworkError && error.type == .cancel) {
-        _client.logger.info('Attachment ${attachment.id} upload canceled');
+    switch (result) {
+      case Success(data: final uploaded):
+        return attachment.copyWith(
+          imageUrl: isImage ? uploaded.fileUrl : null,
+          assetUrl: isImage ? null : uploaded.fileUrl,
+          thumbUrl: uploaded.thumbUrl,
+          uploadState: const UploadState.success(),
+        );
+      case Failure(error: StreamNetworkException(isCancelled: true)):
+        _logger.d(() => 'Attachment ${attachment.id} upload canceled');
         return null;
-      }
-
-      final message = 'Failed to upload attachment ${attachment.id}';
-      _client.logger.severe(message, error, stackTrace);
-
-      final failed = UploadState.failed(error: error.toString());
-      return attachment.copyWith(uploadState: failed);
+      case Failure(:final error, :final stackTrace):
+        _logger.e(() => 'Failed to upload attachment ${attachment.id}', error: error, stackTrace: stackTrace);
+        return attachment.copyWith(uploadState: UploadState.failed(error: error.toString()));
     }
   }
 }

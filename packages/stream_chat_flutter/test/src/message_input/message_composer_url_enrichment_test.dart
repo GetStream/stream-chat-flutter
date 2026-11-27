@@ -45,11 +45,15 @@ void main() {
       when(channel.getRemainingCooldown).thenReturn(0);
 
       when(() => client.enrichUrl(any())).thenAnswer(
-        (invocation) async => OGAttachmentResponse()..ogScrapeUrl = invocation.positionalArguments.first as String,
+        (invocation) async => Result.success(_ogResponse(invocation.positionalArguments.first as String)),
       );
     });
 
-    Future<Object?> enrichUrlFrom(WidgetTester tester, String text) async {
+    Future<void> pumpComposer(
+      WidgetTester tester, {
+      StreamMessageComposerController? controller,
+      ErrorListener? onError,
+    }) async {
       await tester.pumpWidget(
         MaterialApp(
           home: StreamChat(
@@ -57,17 +61,26 @@ void main() {
             connectivityStream: Stream.value([ConnectivityResult.mobile]),
             child: StreamChannel(
               channel: channel,
-              child: Scaffold(body: StreamMessageComposer()),
+              child: Scaffold(
+                body: StreamMessageComposer(messageComposerController: controller, onError: onError),
+              ),
             ),
           ),
         ),
       );
       await tester.pumpAndSettle();
+    }
 
+    Future<void> typeAndWaitForEnrichment(WidgetTester tester, String text) async {
       await tester.enterText(find.byType(TextField), text);
       // Enrichment runs behind a 350ms debounce; advance past it.
       await tester.pump(const Duration(milliseconds: 500));
       await tester.pumpAndSettle();
+    }
+
+    Future<Object?> enrichUrlFrom(WidgetTester tester, String text) async {
+      await pumpComposer(tester);
+      await typeAndWaitForEnrichment(tester, text);
 
       return verify(() => client.enrichUrl(captureAny())).captured.single;
     }
@@ -105,6 +118,53 @@ void main() {
       });
     }
 
+    testWidgets('a scraped url becomes the link preview', (tester) async {
+      final controller = StreamMessageComposerController();
+      addTearDown(controller.dispose);
+      await pumpComposer(tester, controller: controller);
+
+      await typeAndWaitForEnrichment(tester, 'https://example.com');
+
+      expect(controller.ogAttachment?.ogScrapeUrl, 'https://example.com');
+    });
+
+    testWidgets('a failed scrape clears the existing link preview', (tester) async {
+      const error = StreamApiException(code: StreamErrorCode.inputError, message: 'unreachable', statusCode: 400);
+      when(() => client.enrichUrl('https://unreachable.example')).thenAnswer((_) async => const Result.failure(error));
+      final controller = StreamMessageComposerController();
+      addTearDown(controller.dispose);
+      await pumpComposer(tester, controller: controller);
+      await typeAndWaitForEnrichment(tester, 'https://example.com');
+
+      await typeAndWaitForEnrichment(tester, 'https://unreachable.example');
+
+      expect(controller.ogAttachment, isNull);
+    });
+
+    testWidgets('a failed scrape reports the error to onError', (tester) async {
+      const error = StreamApiException(code: StreamErrorCode.inputError, message: 'unreachable', statusCode: 400);
+      when(() => client.enrichUrl('https://unreachable.example')).thenAnswer((_) async => const Result.failure(error));
+      final errors = <Object>[];
+      await pumpComposer(tester, onError: (error, _) => errors.add(error));
+
+      await typeAndWaitForEnrichment(tester, 'https://unreachable.example');
+
+      expect(errors, [error]);
+    });
+
+    testWidgets('a url scraped earlier is previewed again without a second request', (tester) async {
+      final controller = StreamMessageComposerController();
+      addTearDown(controller.dispose);
+      await pumpComposer(tester, controller: controller);
+
+      await typeAndWaitForEnrichment(tester, 'https://example.com');
+      await typeAndWaitForEnrichment(tester, 'no link here');
+      await typeAndWaitForEnrichment(tester, 'https://example.com');
+
+      expect(controller.ogAttachment?.ogScrapeUrl, 'https://example.com');
+      verify(() => client.enrichUrl('https://example.com')).called(1);
+    });
+
     testWidgets('keeps the input focused when the link preview is removed', (tester) async {
       await enrichUrlFrom(tester, 'look https://example.com');
       final preview = find.byType(core.StreamMessageComposerLinkPreviewAttachment);
@@ -119,10 +179,9 @@ void main() {
     testWidgets('shows a scraped image as a single link preview', (tester) async {
       const url = 'https://example.com/photo.jpg';
       when(() => client.enrichUrl(any())).thenAnswer(
-        (_) async => OGAttachmentResponse()
-          ..type = 'image'
-          ..imageUrl = url
-          ..ogScrapeUrl = url,
+        (_) async => const Result.success(
+          OGAttachmentResponse(duration: '1ms', type: 'image', imageUrl: url, ogScrapeUrl: url),
+        ),
       );
 
       await enrichUrlFrom(tester, 'look $url');
@@ -131,4 +190,8 @@ void main() {
       expect(find.text(url), findsOneWidget);
     });
   });
+}
+
+OGAttachmentResponse _ogResponse(String url) {
+  return OGAttachmentResponse(duration: '0.01ms', ogScrapeUrl: url, titleLink: url);
 }

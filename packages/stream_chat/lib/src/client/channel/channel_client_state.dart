@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:clock/clock.dart';
 import 'package:collection/collection.dart';
 import 'package:meta/meta.dart';
 import 'package:rxdart/rxdart.dart';
@@ -7,7 +8,6 @@ import 'package:rxdart/rxdart.dart';
 import '../../../stream_chat.dart';
 import '../../core/util/message_merging.dart';
 import '../../core/util/message_predicates.dart';
-import '../../core/util/utils.dart';
 import '../live_location_expiration_scheduler.dart';
 import '../retry_queue.dart';
 import 'channel_event_handler.dart';
@@ -20,12 +20,9 @@ class ChannelClientState {
     this._channel,
     ChannelState channelState,
   ) {
-    _retryQueue = RetryQueue(
-      channel: _channel,
-      logger: _client.detachedLogger(
-        '🔄 (${generateHash([_channel.cid])})',
-      ),
-    );
+    // Tagged with the channel, so a record says which queue reported it while
+    // staying under the `SCh:RetryQueue` prefix for filtering.
+    _retryQueue = RetryQueue(channel: _channel, tag: 'SCh:RetryQueue:${_channel.cid}');
 
     final seededState = channelState.copyWith(
       pinnedMessages: MessageMerging.sortPinnedMessages(channelState.pinnedMessages),
@@ -59,9 +56,31 @@ class ChannelClientState {
         ?.getChannelThreads(_channel.cid!)
         .then((threads) {
           // Load all the threads for the channel from the offline storage.
-          if (threads.isNotEmpty) _threads = threads;
+          if (threads.isEmpty) return;
+          // A truncation can land while they load.
+          final truncatedAt = _channelState.channel?.truncatedAt;
+          _threads = threads.map(
+            (parentId, replies) => MapEntry(parentId, _truncateMessages(replies, truncatedAt)!),
+          );
         })
         .then((_) => retryFailedMessages());
+  }
+
+  // Returns the [messages] created at or after [truncatedAt], and the ones not
+  // sent yet; [messages] itself when none is older.
+  static List<Message>? _truncateMessages(
+    List<Message>? messages,
+    DateTime? truncatedAt,
+  ) {
+    if (messages == null || truncatedAt == null) return messages;
+
+    bool survives(Message message) {
+      final createdAt = message.remoteCreatedAt;
+      return createdAt == null || !createdAt.isBefore(truncatedAt);
+    }
+
+    if (messages.every(survives)) return messages;
+    return messages.where(survives).toList();
   }
 
   final Channel _channel;
@@ -193,7 +212,7 @@ class ChannelClientState {
 
     updateChannelState(
       channelState.copyWith(
-        read: updatedReads.toList(),
+        read: updatedReads,
       ),
     );
   }
@@ -430,8 +449,8 @@ class ChannelClientState {
 
   /// Records whether the current user has an outstanding manual mark-unread.
   ///
-  /// Only meant for [ChannelEventHandler], which applies the read events the
-  /// server sends for the current user.
+  /// Only meant for [ChannelEventHandler], which applies the current user's
+  /// read events.
   @internal
   set isMarkedAsUnread(bool markedAsUnread) => _isMarkedAsUnread = markedAsUnread;
 
@@ -440,14 +459,15 @@ class ChannelClientState {
   /// Marks the channel as read locally, without making a network request.
   ///
   /// Used for channels that track unread counts locally (see
-  /// [Channel.usesLocalUnreadCount]), since the server rejects the mark-read
-  /// endpoint for channels that have read events disabled.
+  /// [Channel.usesLocalUnreadCount]), since marking read fails for channels
+  /// that have read events disabled.
   ///
   /// [messageId] only sets the resulting [Read.lastReadMessageId]; it does not
   /// narrow which messages stay unread. The count always drops to zero and
   /// [Read.lastRead] is always `now`, so messages newer than [messageId] are
-  /// marked read as well. This differs from the server, which recomputes the
-  /// count as the number of messages after [messageId], and from
+  /// marked read as well. This differs from [Channel.markRead] on a channel
+  /// with read events enabled, which recomputes the count as the number of
+  /// messages after [messageId], and from
   /// [markUnreadLocally], which does recompute from the locally-known
   /// messages. Callers that need a partial boundary should use
   /// [markUnreadLocally] instead.
@@ -473,7 +493,7 @@ class ChannelClientState {
     // new read boundary just made ineligible. `delivery_events` is configured
     // independently of `read_events`, so a channel tracking unread counts
     // locally can still have delivery receipts enabled. Mirrors what the
-    // `message.read` event listener does for server-driven channels.
+    // `message.read` event listener does for channels with read events enabled.
     _client.channelDeliveryReporter.reconcileDelivery([_channel]);
 
     _isMarkedAsUnread = false;
@@ -487,8 +507,8 @@ class ChannelClientState {
   /// as unread.
   ///
   /// Used for channels that track unread counts locally (see
-  /// [Channel.usesLocalUnreadCount]), since the server rejects the
-  /// mark-unread endpoint for channels that have read events disabled.
+  /// [Channel.usesLocalUnreadCount]), since marking unread fails for channels
+  /// that have read events disabled.
   void markUnreadLocally({
     required DateTime lastRead,
     String? lastReadMessageId,
@@ -537,11 +557,86 @@ class ChannelClientState {
     return count;
   }
 
-  /// Delete all channel messages.
-  void truncate() {
-    _channelState = _channelState.copyWith(
-      messages: [],
+  /// Removes the messages, pinned messages and thread replies created before
+  /// [truncatedAt], or before now when omitted.
+  ///
+  /// Messages not sent yet are kept, and a provided [truncatedAt] becomes the
+  /// channel's truncation time unless it has a later one. When the loaded
+  /// messages are the latest ones and some of them are removed, the unread
+  /// count is lowered to the messages left. To only empty the loaded messages,
+  /// consider [clearMessages].
+  void truncate({DateTime? truncatedAt}) {
+    truncateBefore(truncatedAt ?? clock.now(), truncatedAt: truncatedAt);
+  }
+
+  /// Removes the messages, pinned messages and thread replies created before
+  /// [cutoff], as [truncate] does.
+  ///
+  /// A provided [truncatedAt] becomes the channel's truncation time unless it
+  /// has a later one; the [cutoff] itself is not recorded.
+  @internal
+  void truncateBefore(DateTime cutoff, {DateTime? truncatedAt}) {
+    final channelState = _channelState;
+    final loaded = channelState.messages ?? const <Message>[];
+    final remaining = _truncateMessages(loaded, cutoff)!;
+
+    final channel = channelState.channel;
+    final latestTruncatedAt = [channel?.truncatedAt, truncatedAt].nonNulls.maxOrNull;
+
+    // Removing messages from the start of an up-to-date list leaves every
+    // message sent after the cutoff, which bounds the unread count.
+    final knowsMessagesLeft = isUpToDate && remaining.length < loaded.length;
+    final sentLeft = remaining.where((it) => it.remoteCreatedAt != null);
+    final unreadCap = knowsMessagesLeft ? sentLeft.length : null;
+
+    // Writes the state directly: the message merge in [updateChannelState]
+    // would undo the removal. One write also updates the state streams once.
+    _channelState = channelState.copyWith(
+      channel: channel?.copyWith(truncatedAt: latestTruncatedAt),
+      messages: remaining,
+      pinnedMessages: _truncateMessages(channelState.pinnedMessages, cutoff),
+      read: _capUnreadCount(channelState.read, at: unreadCap),
     );
+
+    _truncateThreads(cutoff);
+  }
+
+  // Returns [reads] with the current user's unread count lowered to [at], or
+  // unchanged when [at] is null.
+  List<Read>? _capUnreadCount(List<Read>? reads, {required int? at}) {
+    if (at == null) return reads;
+
+    final currentUserId = _client.state.currentUser?.id;
+    return reads?.map((read) {
+      if (read.user.id != currentUserId) return read;
+      if (read.unreadMessages <= at) return read;
+      return read.copyWith(unreadMessages: at);
+    }).toList();
+  }
+
+  // Removes the thread replies created before [truncatedAt].
+  void _truncateThreads(DateTime truncatedAt) {
+    final threads = this.threads;
+    final truncated = threads.map(
+      (parentId, replies) {
+        final kept = _truncateMessages(replies, truncatedAt)!;
+        return MapEntry(parentId, kept);
+      },
+    );
+
+    bool isChanged(String parentId) {
+      return !identical(threads[parentId], truncated[parentId]);
+    }
+
+    if (threads.keys.any(isChanged)) _threads = truncated;
+  }
+
+  /// Removes the loaded messages, so a different range of them can be loaded.
+  ///
+  /// Pinned messages, thread replies and the unread count are left as they
+  /// are.
+  void clearMessages() {
+    _channelState = _channelState.copyWith(messages: []);
   }
 
   /// Drops the oldest messages, keeping at most [maxMessages].
@@ -565,7 +660,7 @@ class ChannelClientState {
 
   /// Update channelState with updated information.
   void updateChannelState(ChannelState updatedState) {
-    final newMessages = messages.mergeSorted(
+    final newMessages = messages.sortedMerge(
       updatedState.messages,
       key: (message) => message.id,
       update: MessageMerging.mergeUpdate,
@@ -590,14 +685,19 @@ class ChannelClientState {
       final pinned => MessageMerging.sortPinnedMessages(pinned),
     };
 
+    final channel = _channelState.channel;
+    final newChannel = channel?.merge(updatedState.channel);
+    // An older truncation time can't bring back messages a later one removed.
+    final truncatedAt = [channel?.truncatedAt, newChannel?.truncatedAt].nonNulls.maxOrNull;
+
     _channelState = _channelState.copyWith(
       messages: newMessages,
-      channel: _channelState.channel?.merge(updatedState.channel),
-      watchers: newWatchers.toList(),
+      channel: newChannel?.copyWith(truncatedAt: truncatedAt),
+      watchers: newWatchers,
       watcherCount: updatedState.watcherCount,
       members: updatedState.members,
       membership: updatedState.membership,
-      read: newReads.toList(),
+      read: newReads,
       draft: updatedState.draft,
       pinnedMessages: newPinnedMessages,
       pendingMessages: updatedState.pendingMessages,
@@ -607,8 +707,8 @@ class ChannelClientState {
     );
   }
 
-  /// Applies a [remoteState] received from the server or offline storage
-  /// (e.g. a `query`/`watch` response), merging it into local state.
+  /// Applies a [remoteState] from a `query`/`watch` response or offline
+  /// storage, merging it into local state.
   ///
   /// Unlike [updateChannelState], this preserves the current user's
   /// locally-tracked read state for channels that track unread counts
@@ -617,10 +717,29 @@ class ChannelClientState {
   /// being overwritten by the remote payload; only delivery fields are
   /// still applied from it.
   ///
+  /// Also applies the channel's truncation time: a newer one truncates the
+  /// channel, and messages from before it are left out.
+  ///
   /// Call this instead of [updateChannelState] whenever [remoteState]
   /// genuinely comes from the network or offline storage.
   void updateChannelStateFromServer(ChannelState remoteState) {
-    updateChannelState(_preserveLocalUnreadState(remoteState));
+    final current = _channelState.channel?.truncatedAt;
+    final remote = remoteState.channel?.truncatedAt;
+
+    // A newer truncation removes the stored messages before it first, so the
+    // merge below can't keep them.
+    if (remote != null && (current == null || remote.isAfter(current))) {
+      truncate(truncatedAt: remote);
+    }
+
+    // A stale payload can still carry messages from before the cutoff.
+    final cutoff = _channelState.channel?.truncatedAt;
+    final state = remoteState.copyWith(
+      messages: _truncateMessages(remoteState.messages, cutoff),
+      pinnedMessages: _truncateMessages(remoteState.pinnedMessages, cutoff),
+    );
+
+    updateChannelState(_preserveLocalUnreadState(state));
   }
 
   /// Rewrites the current user's [Read] in [remoteState], if present, to
@@ -723,10 +842,14 @@ class ChannelClientState {
   void updateThreadInfo(String parentId, List<Message> messages) {
     final updatedThreads = {...threads};
 
+    // A stale response can still carry replies from before the cutoff.
+    final truncatedAt = _channelState.channel?.truncatedAt;
+    final replies = _truncateMessages(messages, truncatedAt)!;
+
     final threadMessages = updatedThreads[parentId] ?? <Message>[];
     final updatedThreadMessages = MessageMerging.mergeMessages(
       existing: threadMessages,
-      toMerge: messages.where((it) => it.id != parentId),
+      toMerge: replies.where((it) => it.id != parentId),
     );
 
     // Update the thread with the modified message list.

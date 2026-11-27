@@ -33,7 +33,7 @@ void main() {
 
   test('deleting an unsent message emits message.deleted', () async {
     final channel = _channel();
-    final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending);
+    final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending());
     channel.state!.addNewMessage(unsent);
     final deleted = channel.on(EventType.messageDeleted).first;
 
@@ -59,7 +59,7 @@ void main() {
 
   test('deleting an unsent message removes it from the state', () async {
     final channel = _channel();
-    final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending);
+    final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending());
     channel.state!.addNewMessage(unsent);
 
     await channel.deleteMessage(unsent);
@@ -84,7 +84,7 @@ void main() {
 
   test('deleting an unsent message for me emits a hard-deleted message.deleted', () async {
     final channel = _channel();
-    final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending);
+    final unsent = Message(id: 'unsent', text: 'Hello', state: MessageState.sending());
     channel.state!.addNewMessage(unsent);
     final deleted = channel.on(EventType.messageDeleted).first;
 
@@ -99,7 +99,7 @@ void main() {
   });
 
   test('deleting a message while its attachment uploads cancels the upload', () async {
-    final channel = _channel(imageUpload: Completer<SendImageResponse>().future);
+    final channel = _channel(imageUpload: Completer<Result<UploadedFile>>().future);
     channel.sendMessage(_withUploadingImage('uploading')).ignore();
     await pumpEventQueue();
 
@@ -121,13 +121,13 @@ void main() {
   });
 
   test('a message deleted while its attachment uploads stays deleted once the upload finishes', () async {
-    final upload = Completer<SendImageResponse>();
+    final upload = Completer<Result<UploadedFile>>();
     final channel = _channel(imageUpload: upload.future);
     final sending = channel.sendMessage(_withUploadingImage('uploading')).then<void>((_) {}, onError: (_) {});
     await pumpEventQueue();
 
     await channel.deleteMessage(channel.state!.messages.single);
-    upload.complete(SendImageResponse()..file = 'https://example.com/image.png');
+    upload.complete(const Result.success(UploadedFile(fileUrl: 'https://example.com/image.png')));
     await sending;
     await pumpEventQueue();
 
@@ -157,12 +157,8 @@ class _DeliveringClient extends MockStreamChatClient {
 
 // A channel created from a state, on a [_DeliveringClient] whose image
 // uploads finish with [imageUpload].
-Channel _channel({Future<SendImageResponse>? imageUpload}) {
+Channel _channel({Future<Result<UploadedFile>>? imageUpload}) {
   final client = _DeliveringClient();
-  when(
-    () => client.detachedLogger(any()),
-  ).thenAnswer((invocation) => Logger.detached(invocation.positionalArguments.first as String));
-  when(() => client.logger).thenReturn(Logger.detached('client'));
   if (imageUpload != null) {
     when(
       () => client.sendImage(

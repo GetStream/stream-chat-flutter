@@ -1,13 +1,13 @@
 /// @docImport '../../client/client.dart';
 /// @docImport '../../event_type.dart';
-/// @docImport 'event.dart';
+/// @docImport '../../ws/events/event.dart';
 library;
 
 import 'package:clock/clock.dart';
 import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
-import '../error/stream_chat_error.dart';
+import '../error/stream_chat_exception.dart';
 import 'channel_model.dart';
 import 'message.dart';
 import 'user.dart';
@@ -185,7 +185,7 @@ final class ScheduledMessage extends Equatable {
   List<Object?> get props => [
     id,
     cid,
-    channel?.extraData,
+    channel?.custom,
     user,
     message,
     scheduledAt,

@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
+import '../utils.dart';
 import 'scheduled_messages_harness.dart';
 
 void main() {
@@ -12,28 +13,16 @@ void main() {
   final original = fakeScheduledMessage('a');
   final edited = Message(id: 'a', text: 'Good evening');
   final saved = fakeScheduledMessage('a', text: 'Good evening', updatedAt: DateTime.utc(2026, 10, 30));
-  final tooLong = StreamChatNetworkError.raw(
-    code: 4,
-    message: 'Message is too long',
-    statusCode: 400,
-    data: ErrorResponse()
-      ..code = 4
-      ..statusCode = 400
-      ..message = 'Message is too long',
-  );
-  final sendingError = StreamChatNetworkError.raw(
-    code: scheduledMessageSendingCode,
+  final tooLong = apiException(code: StreamErrorCode.inputError, message: 'Message is too long', statusCode: 400);
+  final sendingError = apiException(
+    code: const StreamErrorCode(scheduledMessageSendingCode),
     message: 'Sending',
     statusCode: 409,
   );
-  final conflictError = StreamChatNetworkError.raw(
-    code: scheduledMessageConflictCode,
+  final conflictError = apiException(
+    code: const StreamErrorCode(scheduledMessageConflictCode),
     message: 'Changed at the same time',
     statusCode: 409,
-    data: ErrorResponse()
-      ..code = scheduledMessageConflictCode
-      ..statusCode = 409
-      ..message = 'Changed at the same time',
   );
 
   void stubUpdate(Future<UpdateScheduledMessageResponse> Function() answer, {DateTime? scheduledAt}) {
@@ -107,15 +96,7 @@ void main() {
   });
 
   test('updateScheduledMessage keeps an edit stopped by a server error as failed, to retry', () async {
-    final serverError = StreamChatNetworkError.raw(
-      code: -1,
-      message: 'Internal error',
-      statusCode: 500,
-      data: ErrorResponse()
-        ..code = -1
-        ..statusCode = 500
-        ..message = 'Internal error',
-    );
+    final serverError = apiException(code: StreamErrorCode.internalError, message: 'Internal error', statusCode: 500);
     stubUpdate(() async => throw serverError);
 
     await update(throws: serverError);
@@ -137,15 +118,7 @@ void main() {
   test(
     'updateScheduledMessage keeps an edit refused without a scheduled message reason as failed, not to retry',
     () async {
-      final forbidden = StreamChatNetworkError.raw(
-        code: 17,
-        message: 'Not allowed',
-        statusCode: 403,
-        data: ErrorResponse()
-          ..code = 17
-          ..statusCode = 403
-          ..message = 'Not allowed',
-      );
+      final forbidden = apiException(code: const StreamErrorCode(17), message: 'Not allowed', statusCode: 403);
       stubUpdate(() async => throw forbidden);
 
       await update(throws: forbidden);

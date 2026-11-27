@@ -1,21 +1,15 @@
 // ignore_for_file: invalid_use_of_protected_member
 
 import 'package:dio/dio.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:stream_chat/src/core/http/connection_id_manager.dart';
-import 'package:stream_chat/src/core/http/interceptor/connection_id_interceptor.dart';
+import 'package:stream_core/stream_core.dart' show ConnectionIdInterceptor;
 import 'package:test/test.dart';
 
-import '../../../mocks.dart';
-
 void main() {
-  late ConnectionIdManager connectionIdManager;
-  late ConnectionIdInterceptor connectionIdInterceptor;
+  // Wired the way `StreamHttpClient` wires it: a closure reading the id off the connection.
+  String? connectionId;
+  final connectionIdInterceptor = ConnectionIdInterceptor(() => connectionId);
 
-  setUp(() {
-    connectionIdManager = MockConnectionIdManager();
-    connectionIdInterceptor = ConnectionIdInterceptor(connectionIdManager);
-  });
+  tearDown(() => connectionId = null);
 
   test(
     '`onRequest` should add connectionId in the request',
@@ -26,9 +20,7 @@ void main() {
       final queryParams = options.queryParameters;
       expect(queryParams.containsKey('connection_id'), isFalse);
 
-      const connectionId = 'test-connection-id';
-      when(() => connectionIdManager.hasConnectionId).thenReturn(true);
-      when(() => connectionIdManager.connectionId).thenReturn(connectionId);
+      connectionId = 'test-connection-id';
 
       connectionIdInterceptor.onRequest(options, handler);
 
@@ -37,15 +29,11 @@ void main() {
 
       expect(updatedQueryParams.containsKey('connection_id'), isTrue);
       expect(updatedQueryParams['connection_id'], connectionId);
-
-      verify(() => connectionIdManager.hasConnectionId).called(1);
-      verify(() => connectionIdManager.connectionId).called(1);
-      verifyNoMoreInteractions(connectionIdManager);
     },
   );
 
   test(
-    '`onRequest` should not add connectionId if `hasConnectionId` is false',
+    '`onRequest` should not add connectionId when there is none',
     () async {
       final options = RequestOptions(path: 'test-path');
       final handler = RequestInterceptorHandler();
@@ -53,7 +41,7 @@ void main() {
       final queryParams = options.queryParameters;
       expect(queryParams.containsKey('connection_id'), isFalse);
 
-      when(() => connectionIdManager.hasConnectionId).thenReturn(false);
+      connectionId = null;
 
       connectionIdInterceptor.onRequest(options, handler);
 
@@ -61,9 +49,6 @@ void main() {
       final updatedQueryParams = updatedOptions.queryParameters;
 
       expect(updatedQueryParams.containsKey('connection_id'), isFalse);
-
-      verify(() => connectionIdManager.hasConnectionId).called(1);
-      verifyNoMoreInteractions(connectionIdManager);
     },
   );
 }

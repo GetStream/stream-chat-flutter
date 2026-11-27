@@ -9,6 +9,7 @@ import 'package:test/test.dart';
 import '../../fakes.dart';
 import '../../matchers.dart';
 import '../../mocks.dart';
+import '../../utils.dart';
 
 void main() {
   ChannelState _generateChannelState(
@@ -35,34 +36,21 @@ void main() {
     return state;
   }
 
-  Logger _createLogger(String name) {
-    final logger = Logger.detached(name)..level = Level.ALL;
-    logger.onRecord.listen(print);
-    return logger;
-  }
-
   group('Non-Initialized Channel', () {
     late final client = MockStreamChatClient();
+    late final moderationClient = MockModerationClient();
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
     late Channel channel;
 
     setUpAll(() {
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
-
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
     });
 
     setUp(() {
+      when(() => client.moderation).thenReturn(moderationClient);
       channel = Channel(client, channelType, channelId);
     });
 
@@ -70,49 +58,49 @@ void main() {
       channel.dispose();
     });
 
-    test('should be able to set `extraData`', () {
-      expect(channel.extraData.isEmpty, isTrue);
+    test('should be able to set `custom`', () {
+      expect(channel.custom.isEmpty, isTrue);
 
       expect(
-        () => channel.extraData = {'name': 'test-channel-name'},
+        () => channel.custom = {'name': 'test-channel-name'},
         returnsNormally,
       );
 
-      expect(channel.extraData.isEmpty, isFalse);
-      expect(channel.extraData.containsKey('name'), isTrue);
-      expect(channel.extraData['name'], 'test-channel-name');
+      expect(channel.custom.isEmpty, isFalse);
+      expect(channel.custom.containsKey('name'), isTrue);
+      expect(channel.custom['name'], 'test-channel-name');
     });
 
     test('should be able to get and set `image`', () {
-      expect(channel.extraData.isEmpty, isTrue);
+      expect(channel.custom.isEmpty, isTrue);
 
       const imageUrl = 'https://getstream.io/some-image';
       channel.image = imageUrl;
 
       expect(channel.image, imageUrl);
-      expect(channel.extraData['image'], imageUrl);
+      expect(channel.custom['image'], imageUrl);
 
       const newImage = 'https://getstream.io/new-image';
       final newChannelInstance = Channel(client, channelType, channelId, image: newImage);
 
       expect(newChannelInstance.image, newImage);
-      expect(newChannelInstance.extraData['image'], newImage);
+      expect(newChannelInstance.custom['image'], newImage);
     });
 
     test('should be able to get and set `name`', () {
-      expect(channel.extraData.isEmpty, isTrue);
+      expect(channel.custom.isEmpty, isTrue);
 
       const name = 'Channel name';
       channel.name = name;
 
       expect(channel.name, name);
-      expect(channel.extraData['name'], name);
+      expect(channel.custom['name'], name);
 
       const newName = 'New channel name';
       final newChannelInstance = Channel(client, channelType, channelId, name: newName);
 
       expect(newChannelInstance.name, newName);
-      expect(newChannelInstance.extraData['name'], newName);
+      expect(newChannelInstance.custom['name'], newName);
     });
 
     test('setters remain usable after a failed watch()', () async {
@@ -129,19 +117,19 @@ void main() {
           membersPagination: any(named: 'membersPagination'),
           watchersPagination: any(named: 'watchersPagination'),
         ),
-      ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+      ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
       // A failed watch() also completes `initialized` with the error. Attach
       // the expectation up-front so that error has a listener the moment it
       // occurs and isn't reported as an unhandled async error.
       final initializedFailure = expectLater(
         channel.initialized,
-        throwsA(isA<StreamChatNetworkError>()),
+        throwsA(isA<StreamApiException>()),
       );
 
       await expectLater(
         channel.watch(),
-        throwsA(isA<StreamChatNetworkError>()),
+        throwsA(isA<StreamApiException>()),
       );
       await initializedFailure;
 
@@ -165,12 +153,8 @@ void main() {
       registerFallbackValue(FakeMessage());
       registerFallbackValue(<Message>[]);
       registerFallbackValue(FakeAttachmentFile());
-
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
+      registerFallbackValue(const ChannelFilter.raw({}));
+      registerFallbackValue(const BannedUserFilter.raw({}));
 
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
@@ -188,9 +172,6 @@ void main() {
       final channelState = _generateChannelState(channelId, channelType);
       when(() => client.chatPersistenceClient.getChannelStateByCid(channelCid)).thenAnswer((_) async => channelState);
       when(() => client.chatPersistenceClient.updateMessages(channelCid, any())).thenAnswer((_) => Future.value());
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
     });
 
     // Setting up a initialized channel
@@ -236,6 +217,7 @@ void main() {
 
   group('Initialized Channel', () {
     late final client = MockStreamChatClient();
+    late final moderationClient = MockModerationClient();
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
     const channelCid = '$channelType:$channelId';
@@ -247,12 +229,6 @@ void main() {
       registerFallbackValue(FakeAttachmentFile());
       registerFallbackValue(FakeEvent());
 
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -263,9 +239,6 @@ void main() {
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
 
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
-
       // mock channel delivery reporter
       when(
         () => client.channelDeliveryReporter.submitForDelivery(any()),
@@ -274,6 +247,7 @@ void main() {
 
     // Setting up a initialized channel
     setUp(() {
+      when(() => client.moderation).thenReturn(moderationClient);
       final channelState = _generateChannelState(
         channelId,
         channelType,
@@ -288,8 +262,22 @@ void main() {
       clearInteractions(client);
     });
 
-    test('should throw if trying to set `extraData`', () {
-      expect(() => channel.extraData = {'name': 'test-channel-name'}, throwsA(isA<StateError>()));
+    test('should throw if trying to set `custom`', () {
+      expect(() => channel.custom = {'name': 'test-channel-name'}, throwsA(isA<StateError>()));
+    });
+
+    test('Channel.custom reads the current channel, even when its custom data is empty', () {
+      final channel = Channel.fromState(
+        client,
+        ChannelState(
+          channel: ChannelModel(cid: channelCid, custom: const {'name': 'Old name'}),
+        ),
+      );
+      addTearDown(channel.dispose);
+
+      channel.state!.updateChannelState(ChannelState(channel: ChannelModel(cid: channelCid)));
+
+      expect(channel.custom, isEmpty);
     });
 
     test('should throw if trying to set `image`', () {
@@ -373,6 +361,39 @@ void main() {
     });
 
     group('`.sendMessage`', () {
+      test('queues a failed send for retry when the failure is retriable', () async {
+        // The enqueue gate used to test a type nothing throws any more, so a
+        // failed send never reached the queue at all. The retry is observable
+        // as a second attempt, since adding to the queue processes it.
+        final message = Message(id: 'retriable-id', text: 'hi', user: client.state.currentUser);
+
+        when(
+          () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+        ).thenThrow(apiException(statusCode: 500));
+
+        await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatException>()));
+        await Future.delayed(const Duration(milliseconds: 50));
+
+        verify(
+          () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+        ).called(greaterThan(1));
+      });
+
+      test('does not queue a failed send when the failure is not retriable', () async {
+        final message = Message(id: 'refused-id', text: 'hi', user: client.state.currentUser);
+
+        when(
+          () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
+
+        await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatException>()));
+        await Future.delayed(const Duration(milliseconds: 50));
+
+        verify(
+          () => client.sendMessage(any(that: isSameMessageAs(message)), channelId, channelType),
+        ).called(1);
+      });
+
       test('should work fine', () async {
         final message = Message(
           id: 'test-message-id',
@@ -396,7 +417,7 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.sending),
+                message.copyWith(state: MessageState.sending()),
                 matchMessageState: true,
               ),
             ],
@@ -424,7 +445,7 @@ void main() {
       });
 
       test(
-        'should handle StreamChatNetworkError by adding message to retry queue with skipPush: true, skipEnrichUrl: false',
+        'should mark a refused send as failed with skipPush: true, skipEnrichUrl: false',
         () async {
           final message = Message(
             id: 'test-message-id',
@@ -439,7 +460,7 @@ void main() {
               channelType,
               skipPush: true,
             ),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -447,7 +468,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(
+                    state: MessageState.sending(skipPush: true, skipEnrichUrl: false),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -471,14 +494,14 @@ void main() {
               skipPush: true,
             ),
             throwsA(
-              isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+              isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
             ),
           );
         },
       );
 
       test(
-        'should handle StreamChatNetworkError by adding message to retry queue with skipPush: true, skipEnrichUrl: true',
+        'should mark a refused send as failed with skipPush: true, skipEnrichUrl: true',
         () async {
           final message = Message(
             id: 'test-message-id-2',
@@ -494,7 +517,7 @@ void main() {
               skipPush: true,
               skipEnrichUrl: true,
             ),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -502,7 +525,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(
+                    state: MessageState.sending(skipPush: true, skipEnrichUrl: true),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -527,14 +552,14 @@ void main() {
               skipEnrichUrl: true,
             ),
             throwsA(
-              isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+              isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
             ),
           );
         },
       );
 
       test(
-        'should handle StreamChatNetworkError by adding message to retry queue with skipPush: false, skipEnrichUrl: true',
+        'should mark a refused send as failed with skipPush: false, skipEnrichUrl: true',
         () async {
           final message = Message(
             id: 'test-message-id-3',
@@ -549,7 +574,7 @@ void main() {
               channelType,
               skipEnrichUrl: true,
             ),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -557,7 +582,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(
+                    state: MessageState.sending(skipPush: false, skipEnrichUrl: true),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -581,14 +608,14 @@ void main() {
               skipEnrichUrl: true,
             ),
             throwsA(
-              isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+              isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
             ),
           );
         },
       );
 
       test(
-        'should handle StreamChatNetworkError by adding message to retry queue with skipPush: false, skipEnrichUrl: false',
+        'should mark a refused send as failed with skipPush: false, skipEnrichUrl: false',
         () async {
           final message = Message(
             id: 'test-message-id-4',
@@ -602,7 +629,7 @@ void main() {
               channelId,
               channelType,
             ),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+          ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -610,7 +637,7 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(state: MessageState.sending()),
                   matchMessageState: true,
                 ),
               ],
@@ -633,11 +660,66 @@ void main() {
               message,
             ),
             throwsA(
-              isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+              isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
             ),
           );
         },
       );
+
+      test('should re-send the message through the retry queue when the failure is retriable', () async {
+        final message = Message(
+          id: 'test-message-id',
+          text: 'Hello world!',
+          user: client.state.currentUser,
+        );
+
+        when(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).thenThrow(apiException(code: StreamErrorCode.internalError, statusCode: 500));
+
+        await expectLater(channel.sendMessage(message), throwsA(isA<StreamApiException>()));
+        await pumpEventQueue();
+
+        // Once for the original send, once for the queue's retry attempt.
+        verify(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).called(2);
+      });
+
+      test('should not re-send the message when the failure is not retriable', () async {
+        final message = Message(
+          id: 'test-message-id',
+          text: 'Hello world!',
+          user: client.state.currentUser,
+        );
+
+        when(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
+
+        await expectLater(channel.sendMessage(message), throwsA(isA<StreamApiException>()));
+        await pumpEventQueue();
+
+        verify(
+          () => client.sendMessage(
+            any(that: isSameMessageAs(message)),
+            channelId,
+            channelType,
+          ),
+        ).called(1);
+      });
 
       test('should update message state even when non-retriable error occurs', () async {
         final message = Message(
@@ -653,14 +735,7 @@ void main() {
             channelType,
           ),
         ).thenThrow(
-          StreamChatNetworkError.raw(
-            code: ChatErrorCode.inputError.code,
-            message: 'Input error',
-            data: ErrorResponse()
-              ..code = ChatErrorCode.inputError.code
-              ..message = 'Input error'
-              ..statusCode = 400,
-          ),
+          apiException(code: StreamErrorCode.inputError, statusCode: 400, message: 'Input error'),
         );
 
         expectLater(
@@ -669,7 +744,7 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.sending),
+                message.copyWith(state: MessageState.sending()),
                 matchMessageState: true,
               ),
             ],
@@ -689,7 +764,7 @@ void main() {
 
         await expectLater(
           channel.sendMessage(message),
-          throwsA(isA<StreamChatNetworkError>()),
+          throwsA(isA<StreamApiException>()),
         );
       });
 
@@ -708,8 +783,12 @@ void main() {
           attachments: attachments,
         );
 
-        final sendImageResponse = SendImageResponse()..file = 'test-image-url';
-        final sendFileResponse = SendFileResponse()..file = 'test-file-url';
+        const sendImageResult = Result<UploadedFile>.success(
+          UploadedFile(fileUrl: 'test-image-url'),
+        );
+        const sendFileResult = Result<UploadedFile>.success(
+          UploadedFile(fileUrl: 'test-file-url'),
+        );
 
         when(
           () => client.sendImage(
@@ -720,7 +799,7 @@ void main() {
             cancelToken: any(named: 'cancelToken'),
             extraData: any(named: 'extraData'),
           ),
-        ).thenAnswer((_) async => sendImageResponse);
+        ).thenAnswer((_) async => sendImageResult);
 
         when(
           () => client.sendFile(
@@ -731,7 +810,7 @@ void main() {
             cancelToken: any(named: 'cancelToken'),
             extraData: any(named: 'extraData'),
           ),
-        ).thenAnswer((_) async => sendFileResponse);
+        ).thenAnswer((_) async => sendFileResult);
 
         when(
           () => client.sendMessage(
@@ -758,7 +837,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.sending,
+                    state: MessageState.sending(),
                     attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.preparing()))],
                   ),
                   matchMessageState: true,
@@ -770,7 +849,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.sending,
+                    state: MessageState.sending(),
                     attachments: [...attachments]
                       ..[0] = attachments[0].copyWith(
                         uploadState: const UploadState.success(),
@@ -785,7 +864,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.sending,
+                    state: MessageState.sending(),
                     attachments: [...attachments]
                       ..[0] = attachments[0].copyWith(
                         uploadState: const UploadState.success(),
@@ -803,7 +882,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.sending,
+                    state: MessageState.sending(),
                     attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.success()))],
                   ),
                   matchMessageState: true,
@@ -869,17 +948,181 @@ void main() {
         ).called(1);
       });
 
+      test('Channel.sendMessage sends an uploaded image with its URL as the imageUrl', () async {
+        final attachment = Attachment(
+          id: 'test-attachment-id',
+          type: 'image',
+          file: AttachmentFile(size: 100, path: 'test-file-path'),
+        );
+        final message = Message(id: 'test-message-id', attachments: [attachment]);
+
+        when(
+          () => client.sendImage(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer((_) async => const Result.success(UploadedFile(fileUrl: 'image-url')));
+        when(() => client.sendMessage(any(), channelId, channelType)).thenAnswer(
+          (_) async => SendMessageResponse()..message = message.copyWith(state: MessageState.sent),
+        );
+
+        await channel.sendMessage(message);
+
+        final sent = verify(() => client.sendMessage(captureAny(), channelId, channelType)).captured.single as Message;
+        expect(sent.attachments.single.imageUrl, 'image-url');
+      });
+
+      test('Channel.sendMessage sends an uploaded file with its URL and thumbnail', () async {
+        final attachment = Attachment(
+          id: 'test-attachment-id',
+          type: 'video',
+          file: AttachmentFile(size: 100, path: 'test-file-path'),
+        );
+        final message = Message(id: 'test-message-id', attachments: [attachment]);
+
+        when(
+          () => client.sendFile(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer(
+          (_) async => const Result.success(UploadedFile(fileUrl: 'clip-url', thumbUrl: 'thumb-url')),
+        );
+        when(() => client.sendMessage(any(), channelId, channelType)).thenAnswer(
+          (_) async => SendMessageResponse()..message = message.copyWith(state: MessageState.sent),
+        );
+
+        await channel.sendMessage(message);
+
+        final sent = verify(() => client.sendMessage(captureAny(), channelId, channelType)).captured.single as Message;
+        expect(
+          sent.attachments.single,
+          isA<Attachment>()
+              .having((it) => it.assetUrl, 'assetUrl', 'clip-url')
+              .having((it) => it.thumbUrl, 'thumbUrl', 'thumb-url'),
+        );
+      });
+
+      test('Channel.sendMessage marks an attachment failed when its upload fails', () async {
+        final attachment = Attachment(
+          id: 'test-attachment-id',
+          type: 'image',
+          file: AttachmentFile(size: 100, path: 'test-file-path'),
+        );
+        final message = Message(id: 'test-message-id', attachments: [attachment]);
+
+        when(
+          () => client.sendImage(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer((_) async => const Result.failure(StreamClientException(message: 'boom')));
+
+        await expectLater(channel.sendMessage(message), throwsA(isA<StreamClientException>()));
+
+        final stored = channel.state!.messages.single.attachments.single;
+        expect(stored.uploadState, isA<UploadStateFailed>());
+      });
+
       test('should not send if the message is invalid', () async {
         final message = Message(id: 'test-message-id');
 
         expect(
           () => channel.sendMessage(message),
-          throwsA(isA<StreamChatError>()),
+          throwsA(isA<StreamClientException>()),
         );
 
         verifyNever(
           () => client.sendMessage(any(), channelId, channelType),
         );
+      });
+
+      test('should report a superseded send as a cancelled request', () async {
+        final attachment = Attachment(
+          id: 'test-attachment-id',
+          type: 'image',
+          file: AttachmentFile(size: 100, path: 'test-file-path'),
+        );
+
+        final message = Message(id: 'test-message-id', attachments: [attachment]);
+
+        // Holds the first send inside its attachment upload, so the second one
+        // arrives while it is still in flight.
+        final upload = Completer<Result<UploadedFile>>();
+        when(
+          () => client.sendImage(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer((_) => upload.future);
+        addTearDown(
+          () => upload.complete(const Result<UploadedFile>.success(UploadedFile(fileUrl: 'url'))),
+        );
+
+        final superseded = channel.sendMessage(message);
+        await pumpEventQueue();
+        unawaited(channel.sendMessage(message).catchError((_) => SendMessageResponse()));
+
+        // The caller stopped it, so it is a cancelled request rather than an
+        // SDK failure a crash tracker should hear about.
+        await expectLater(
+          superseded,
+          throwsA(
+            isA<StreamNetworkException>().having((it) => it.isCancelled, 'isCancelled', isTrue),
+          ),
+        );
+      });
+
+      test('superseded by a newer send leaves the newer one sending', () async {
+        final message = Message(
+          id: 'test-message-id',
+          attachments: [
+            Attachment(
+              id: 'test-attachment-id',
+              type: AttachmentType.image,
+              file: AttachmentFile(size: 100, path: 'test-file-path'),
+            ),
+          ],
+        );
+
+        final upload = Completer<Result<UploadedFile>>();
+        when(
+          () => client.sendImage(
+            any(),
+            channelId,
+            channelType,
+            onSendProgress: any(named: 'onSendProgress'),
+            cancelToken: any(named: 'cancelToken'),
+            extraData: any(named: 'extraData'),
+          ),
+        ).thenAnswer((_) => upload.future);
+        addTearDown(
+          () => upload.complete(const Result<UploadedFile>.success(UploadedFile(fileUrl: 'url'))),
+        );
+
+        final first = channel.sendMessage(message).then<void>((_) {}, onError: (_) {});
+        await pumpEventQueue();
+
+        channel.sendMessage(message).ignore();
+        await first;
+
+        expect(channel.state!.messages.single.state, MessageState.sending());
       });
 
       test(
@@ -906,16 +1149,12 @@ void main() {
               extraData: any(named: 'extraData'),
             ),
           ).thenAnswer(
-            (_) async => throw StreamChatNetworkError.raw(
-              code: 0,
-              message: 'Request cancelled',
-              type: StreamChatNetworkErrorType.cancel,
-            ),
+            (_) async => const Result.failure(StreamNetworkException(message: 'Request cancelled', isCancelled: true)),
           );
 
           expect(
             () => channel.sendMessage(message),
-            throwsA(isA<StreamChatError>()),
+            throwsA(isA<StreamClientException>()),
           );
 
           verify(
@@ -960,11 +1199,7 @@ void main() {
               extraData: any(named: 'extraData'),
             ),
           ).thenAnswer(
-            (_) async => throw StreamChatNetworkError.raw(
-              code: 0,
-              message: 'Request cancelled',
-              type: StreamChatNetworkErrorType.cancel,
-            ),
+            (_) async => const Result.failure(StreamNetworkException(message: 'Request cancelled', isCancelled: true)),
           );
 
           when(
@@ -1037,11 +1272,7 @@ void main() {
               extraData: any(named: 'extraData'),
             ),
           ).thenAnswer(
-            (_) async => throw StreamChatNetworkError.raw(
-              code: 0,
-              message: 'Request cancelled',
-              type: StreamChatNetworkErrorType.cancel,
-            ),
+            (_) async => const Result.failure(StreamNetworkException(message: 'Request cancelled', isCancelled: true)),
           );
 
           when(
@@ -1109,11 +1340,7 @@ void main() {
               extraData: any(named: 'extraData'),
             ),
           ).thenAnswer(
-            (_) async => throw StreamChatNetworkError.raw(
-              code: 0,
-              message: 'Request cancelled',
-              type: StreamChatNetworkErrorType.cancel,
-            ),
+            (_) async => const Result.failure(StreamNetworkException(message: 'Request cancelled', isCancelled: true)),
           );
 
           when(
@@ -1155,44 +1382,12 @@ void main() {
           );
         },
       );
-
-      test('superseded by a newer send leaves the newer one sending', () async {
-        final message = Message(
-          id: 'test-message-id',
-          attachments: [
-            Attachment(
-              id: 'test-attachment-id',
-              type: AttachmentType.image,
-              file: AttachmentFile(size: 100, path: 'test-file-path'),
-            ),
-          ],
-        );
-
-        when(
-          () => client.sendImage(
-            any(),
-            channelId,
-            channelType,
-            onSendProgress: any(named: 'onSendProgress'),
-            cancelToken: any(named: 'cancelToken'),
-            extraData: any(named: 'extraData'),
-          ),
-        ).thenAnswer((_) => Completer<SendImageResponse>().future);
-
-        final first = channel.sendMessage(message).then<void>((_) {}, onError: (_) {});
-        await pumpEventQueue();
-
-        channel.sendMessage(message).ignore();
-        await first;
-
-        expect(channel.state!.messages.single.state, MessageState.sending);
-      });
     });
 
     group('`.sendStaticLocation`', () {
       const deviceId = 'test-device-id';
       const locationId = 'test-location-id';
-      const coordinates = LocationCoordinates(
+      const coordinates = LocationCoordinate(
         latitude: 40.7128,
         longitude: -74.0060,
       );
@@ -1241,7 +1436,7 @@ void main() {
       const deviceId = 'test-device-id';
       const locationId = 'test-location-id';
       final endSharingAt = DateTime.timestamp().add(const Duration(hours: 1));
-      const coordinates = LocationCoordinates(
+      const coordinates = LocationCoordinate(
         latitude: 40.7128,
         longitude: -74.0060,
       );
@@ -1334,11 +1529,11 @@ void main() {
       setUp(() {
         when(
           () => client.createDraft(draftMessage, channelId, channelType),
-        ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
+        ).thenAnswer((_) async => throw const StreamNetworkException(message: 'No connection'));
       });
 
       test('keeps the draft in the channel state', () async {
-        await expectLater(() => channel.createDraft(draftMessage), throwsA(isA<StreamChatNetworkError>()));
+        await expectLater(() => channel.createDraft(draftMessage), throwsA(isA<StreamNetworkException>()));
 
         expect(channel.state!.draft?.message, draftMessage);
       });
@@ -1347,9 +1542,9 @@ void main() {
         final threadDraft = DraftMessage(text: 'Thread reply', parentId: 'unloaded-parent-id');
         when(
           () => client.createDraft(threadDraft, channelId, channelType),
-        ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
+        ).thenAnswer((_) async => throw const StreamNetworkException(message: 'No connection'));
 
-        await expectLater(() => channel.createDraft(threadDraft), throwsA(isA<StreamChatNetworkError>()));
+        await expectLater(() => channel.createDraft(threadDraft), throwsA(isA<StreamNetworkException>()));
 
         expect(channel.state!.draft, isNull);
       });
@@ -1359,7 +1554,7 @@ void main() {
       setUp(() {
         when(
           () => client.deleteDraft(channelId, channelType, parentId: any(named: 'parentId')),
-        ).thenAnswer((_) async => throw StreamChatNetworkError(ChatErrorCode.internalSystemError));
+        ).thenAnswer((_) async => throw const StreamNetworkException(message: 'No connection'));
       });
 
       test('removes the draft from the channel state', () async {
@@ -1371,7 +1566,7 @@ void main() {
           ),
         );
 
-        await expectLater(() => channel.deleteDraft(), throwsA(isA<StreamChatNetworkError>()));
+        await expectLater(() => channel.deleteDraft(), throwsA(isA<StreamNetworkException>()));
         await Future<void>.delayed(Duration.zero);
 
         expect(channel.state!.draft, isNull);
@@ -1602,7 +1797,7 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
+                message.copyWith(state: MessageState.updating()),
                 matchMessageState: true,
               ),
             ],
@@ -1642,8 +1837,12 @@ void main() {
           attachments: attachments,
         );
 
-        final sendImageResponse = SendImageResponse()..file = 'test-image-url';
-        final sendFileResponse = SendFileResponse()..file = 'test-file-url';
+        const sendImageResult = Result<UploadedFile>.success(
+          UploadedFile(fileUrl: 'test-image-url'),
+        );
+        const sendFileResult = Result<UploadedFile>.success(
+          UploadedFile(fileUrl: 'test-file-url'),
+        );
 
         when(
           () => client.sendImage(
@@ -1654,7 +1853,7 @@ void main() {
             cancelToken: any(named: 'cancelToken'),
             extraData: any(named: 'extraData'),
           ),
-        ).thenAnswer((_) async => sendImageResponse);
+        ).thenAnswer((_) async => sendImageResult);
 
         when(
           () => client.sendFile(
@@ -1665,7 +1864,7 @@ void main() {
             cancelToken: any(named: 'cancelToken'),
             extraData: any(named: 'extraData'),
           ),
-        ).thenAnswer((_) async => sendFileResponse);
+        ).thenAnswer((_) async => sendFileResult);
 
         when(
           () => client.updateMessage(
@@ -1690,7 +1889,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.updating(),
                     attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.preparing()))],
                   ),
                   matchMessageState: true,
@@ -1702,7 +1901,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.updating(),
                     attachments: [...attachments]
                       ..[0] = attachments[0].copyWith(
                         uploadState: const UploadState.success(),
@@ -1717,7 +1916,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.updating(),
                     attachments: [...attachments]
                       ..[0] = attachments[0].copyWith(
                         uploadState: const UploadState.success(),
@@ -1735,7 +1934,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.updating(),
                     attachments: [...attachments.map((it) => it.copyWith(uploadState: const UploadState.success()))],
                   ),
                   matchMessageState: true,
@@ -1799,7 +1998,7 @@ void main() {
         ).called(1);
       });
 
-      test('should update message state even when error is not StreamChatNetworkError', () async {
+      test('should update message state even when the error is not a StreamChatException', () async {
         final message = Message(
           id: 'test-message-id-error-1',
           state: MessageState.sent,
@@ -1818,7 +2017,9 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
+                message.copyWith(
+                  state: MessageState.updating(skipPush: false, skipEnrichUrl: true),
+                ),
                 matchMessageState: true,
               ),
             ],
@@ -1843,7 +2044,7 @@ void main() {
       });
 
       test(
-        'should add message to retry queue when retriable StreamChatNetworkError occurs with skipPush: false, skipEnrichUrl: true',
+        'should mark the message failed and report the failure as retriable with skipPush: false, skipEnrichUrl: true',
         () async {
           final message = Message(
             id: 'test-message-id-retry-1',
@@ -1857,10 +2058,7 @@ void main() {
               skipEnrichUrl: true,
             ),
           ).thenThrow(
-            StreamChatNetworkError.raw(
-              code: ChatErrorCode.requestTimeout.code,
-              message: 'Request timed out',
-            ),
+            apiException(code: StreamErrorCode.requestTimeout, statusCode: 408, message: 'Request timed out'),
           );
 
           expectLater(
@@ -1869,7 +2067,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
+                  message.copyWith(
+                    state: MessageState.updating(skipPush: false, skipEnrichUrl: true),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -1890,8 +2090,8 @@ void main() {
           await expectLater(
             channel.updateMessage(message, skipEnrichUrl: true),
             throwsA(
-              isA<StreamChatNetworkError>()
-                  .having((it) => it.code, 'code', ChatErrorCode.requestTimeout.code)
+              isA<StreamApiException>()
+                  .having((it) => it.code, 'code', StreamErrorCode.requestTimeout)
                   .having((it) => it.isRetriable, 'isRetriable', isTrue),
             ),
           );
@@ -1899,7 +2099,7 @@ void main() {
       );
 
       test(
-        'should add message to retry queue when retriable StreamChatNetworkError occurs with skipPush: true, skipEnrichUrl: false',
+        'should mark the message failed and report the failure as retriable with skipPush: true, skipEnrichUrl: false',
         () async {
           final message = Message(
             id: 'test-message-id-retry-2',
@@ -1913,10 +2113,7 @@ void main() {
               skipPush: true,
             ),
           ).thenThrow(
-            StreamChatNetworkError.raw(
-              code: ChatErrorCode.internalSystemError.code,
-              message: 'Internal system error',
-            ),
+            apiException(code: StreamErrorCode.internalError, statusCode: 500, message: 'Internal system error'),
           );
 
           expectLater(
@@ -1925,7 +2122,9 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
+                  message.copyWith(
+                    state: MessageState.updating(skipPush: true, skipEnrichUrl: false),
+                  ),
                   matchMessageState: true,
                 ),
               ],
@@ -1946,15 +2145,15 @@ void main() {
           await expectLater(
             channel.updateMessage(message, skipPush: true),
             throwsA(
-              isA<StreamChatNetworkError>()
-                  .having((it) => it.code, 'code', ChatErrorCode.internalSystemError.code)
+              isA<StreamApiException>()
+                  .having((it) => it.code, 'code', StreamErrorCode.internalError)
                   .having((it) => it.isRetriable, 'isRetriable', isTrue),
             ),
           );
         },
       );
 
-      test('should handle non-retriable StreamChatNetworkError with skipPush: true, skipEnrichUrl: true', () async {
+      test('should handle a non-retriable failure with skipPush: true, skipEnrichUrl: true', () async {
         final message = Message(
           id: 'test-message-id-error-2',
           state: MessageState.sent,
@@ -1966,7 +2165,7 @@ void main() {
             skipPush: true,
             skipEnrichUrl: true,
           ),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -1974,7 +2173,9 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
+                message.copyWith(
+                  state: MessageState.updating(skipPush: true, skipEnrichUrl: true),
+                ),
                 matchMessageState: true,
               ),
             ],
@@ -1999,12 +2200,12 @@ void main() {
             skipEnrichUrl: true,
           ),
           throwsA(
-            isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
           ),
         );
       });
 
-      test('should handle non-retriable StreamChatNetworkError with skipPush: false, skipEnrichUrl: false', () async {
+      test('should handle a non-retriable failure with skipPush: false, skipEnrichUrl: false', () async {
         final message = Message(
           id: 'test-message-id-error-3',
           state: MessageState.sent,
@@ -2014,7 +2215,7 @@ void main() {
           () => client.updateMessage(
             any(that: isSameMessageAs(message)),
           ),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -2022,7 +2223,7 @@ void main() {
           emitsInOrder([
             [
               isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
+                message.copyWith(state: MessageState.updating()),
                 matchMessageState: true,
               ),
             ],
@@ -2043,7 +2244,7 @@ void main() {
         await expectLater(
           channel.updateMessage(message),
           throwsA(
-            isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
           ),
         );
       });
@@ -2061,6 +2262,7 @@ void main() {
           ],
         );
 
+        final upload = Completer<Result<UploadedFile>>();
         when(
           () => client.sendImage(
             any(),
@@ -2070,7 +2272,10 @@ void main() {
             cancelToken: any(named: 'cancelToken'),
             extraData: any(named: 'extraData'),
           ),
-        ).thenAnswer((_) => Completer<SendImageResponse>().future);
+        ).thenAnswer((_) => upload.future);
+        addTearDown(
+          () => upload.complete(const Result<UploadedFile>.success(UploadedFile(fileUrl: 'url'))),
+        );
 
         final first = channel.updateMessage(message).then<void>((_) {}, onError: (_) {});
         await pumpEventQueue();
@@ -2078,7 +2283,7 @@ void main() {
         channel.updateMessage(message).ignore();
         await first;
 
-        expect(channel.state!.messages.single.state, MessageState.updating);
+        expect(channel.state!.messages.single.state, MessageState.updating());
       });
     });
 
@@ -2159,7 +2364,7 @@ void main() {
           [
             isSameMessageAs(
               message.copyWith(
-                state: MessageState.updating,
+                state: MessageState.partialUpdating(set: set, unset: unset),
               ),
               matchText: true,
               matchMessageState: true,
@@ -2195,7 +2400,7 @@ void main() {
     });
 
     group('`.partialUpdateMessage` error handling', () {
-      test('should update message state even when error is not StreamChatNetworkError', () async {
+      test('should update message state even when the error is not a StreamChatException', () async {
         final message = Message(
           id: 'test-message-id-error-partial-1',
           state: MessageState.sent,
@@ -2222,7 +2427,7 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updating,
+                  state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: false),
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -2255,7 +2460,7 @@ void main() {
       });
 
       test(
-        'should add message to retry queue when retriable StreamChatNetworkError occurs with skipEnrichUrl: true',
+        'should mark the message failed and report the failure as retriable with skipEnrichUrl: true',
         () async {
           final message = Message(
             id: 'test-message-id-retry-partial-1',
@@ -2277,10 +2482,7 @@ void main() {
               skipEnrichUrl: true,
             ),
           ).thenThrow(
-            StreamChatNetworkError.raw(
-              code: ChatErrorCode.requestTimeout.code,
-              message: 'Request timed out',
-            ),
+            apiException(code: StreamErrorCode.requestTimeout, statusCode: 408, message: 'Request timed out'),
           );
 
           expectLater(
@@ -2290,7 +2492,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: true),
                   ),
                   matchText: true,
                   matchMessageState: true,
@@ -2320,8 +2522,8 @@ void main() {
               skipEnrichUrl: true,
             ),
             throwsA(
-              isA<StreamChatNetworkError>()
-                  .having((it) => it.code, 'code', ChatErrorCode.requestTimeout.code)
+              isA<StreamApiException>()
+                  .having((it) => it.code, 'code', StreamErrorCode.requestTimeout)
                   .having((it) => it.isRetriable, 'isRetriable', isTrue),
             ),
           );
@@ -2329,7 +2531,7 @@ void main() {
       );
 
       test(
-        'should add message to retry queue when retriable StreamChatNetworkError occurs with skipEnrichUrl: false',
+        'should mark the message failed and report the failure as retriable with skipEnrichUrl: false',
         () async {
           final message = Message(
             id: 'test-message-id-retry-partial-2',
@@ -2350,10 +2552,7 @@ void main() {
               unset: unset,
             ),
           ).thenThrow(
-            StreamChatNetworkError.raw(
-              code: ChatErrorCode.internalSystemError.code,
-              message: 'Internal system error',
-            ),
+            apiException(code: StreamErrorCode.internalError, statusCode: 500, message: 'Internal system error'),
           );
 
           expectLater(
@@ -2363,7 +2562,7 @@ void main() {
               [
                 isSameMessageAs(
                   message.copyWith(
-                    state: MessageState.updating,
+                    state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: false),
                   ),
                   matchText: true,
                   matchMessageState: true,
@@ -2392,15 +2591,15 @@ void main() {
               unset: unset,
             ),
             throwsA(
-              isA<StreamChatNetworkError>()
-                  .having((it) => it.code, 'code', ChatErrorCode.internalSystemError.code)
+              isA<StreamApiException>()
+                  .having((it) => it.code, 'code', StreamErrorCode.internalError)
                   .having((it) => it.isRetriable, 'isRetriable', isTrue),
             ),
           );
         },
       );
 
-      test('should handle non-retriable StreamChatNetworkError with skipEnrichUrl: true', () async {
+      test('should handle a non-retriable failure with skipEnrichUrl: true', () async {
         final message = Message(
           id: 'test-message-id-error-partial-2',
           state: MessageState.sent,
@@ -2419,7 +2618,7 @@ void main() {
             unset: unset,
             skipEnrichUrl: true,
           ),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -2428,7 +2627,7 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updating,
+                  state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: true),
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -2458,12 +2657,12 @@ void main() {
             skipEnrichUrl: true,
           ),
           throwsA(
-            isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
           ),
         );
       });
 
-      test('should handle non-retriable StreamChatNetworkError with skipEnrichUrl: false', () async {
+      test('should handle a non-retriable failure with skipEnrichUrl: false', () async {
         final message = Message(
           id: 'test-message-id-error-partial-3',
           state: MessageState.sent,
@@ -2481,7 +2680,7 @@ void main() {
             set: set,
             unset: unset,
           ),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.notAllowed));
+        ).thenThrow(apiException(code: StreamErrorCode.notAllowed, statusCode: 403));
 
         expectLater(
           // skipping first seed message list -> [] messages
@@ -2490,7 +2689,7 @@ void main() {
             [
               isSameMessageAs(
                 message.copyWith(
-                  state: MessageState.updating,
+                  state: MessageState.partialUpdating(set: set, unset: unset, skipEnrichUrl: false),
                 ),
                 matchText: true,
                 matchMessageState: true,
@@ -2519,7 +2718,7 @@ void main() {
             unset: unset,
           ),
           throwsA(
-            isA<StreamChatNetworkError>().having((it) => it.code, 'code', ChatErrorCode.notAllowed.code),
+            isA<StreamApiException>().having((it) => it.code, 'code', StreamErrorCode.notAllowed),
           ),
         );
       });
@@ -2566,6 +2765,82 @@ void main() {
         verify(() => client.deleteMessage(messageId)).called(1);
       });
 
+      test('marks a message that is already gone as deleted', () async {
+        const messageId = 'test-message-id';
+        final message = Message(
+          id: messageId,
+          createdAt: DateTime.now(),
+          state: MessageState.sent,
+        );
+        const errorMessage = 'DeleteMessage failed with error: "message with id test-message-id has been deleted"';
+        when(() => client.deleteMessage(messageId)).thenThrow(
+          apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+        );
+        channel.state?.addNewMessage(message);
+
+        final res = await channel.deleteMessage(message);
+
+        expect(res, isNotNull);
+        expect(channel.state?.messages.single.state, MessageState.softDeleted);
+      });
+
+      test('removes a hard-deleted message that is already gone', () async {
+        const messageId = 'test-message-id';
+        final message = Message(
+          id: messageId,
+          attachments: [
+            Attachment(type: 'image', imageUrl: 'test-image-url'),
+            Attachment(type: 'file', assetUrl: 'test-asset-url'),
+          ],
+          createdAt: DateTime.now(),
+          state: MessageState.sent,
+        );
+        const errorMessage = 'DeleteMessage failed with error: "message with id test-message-id doesn\'t exist"';
+        when(() => client.deleteMessage(messageId, hard: true)).thenThrow(
+          apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+        );
+        when(
+          () => client.deleteImage(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
+        when(
+          () => client.deleteFile(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
+        channel.state?.addNewMessage(message);
+
+        await channel.deleteMessage(message, hard: true);
+
+        expect(channel.state?.messages, isEmpty);
+      });
+
+      test('deletes the attachments of a hard-deleted message that is already gone', () async {
+        const messageId = 'test-message-id';
+        final message = Message(
+          id: messageId,
+          attachments: [
+            Attachment(type: 'image', imageUrl: 'test-image-url'),
+            Attachment(type: 'file', assetUrl: 'test-asset-url'),
+          ],
+          createdAt: DateTime.now(),
+          state: MessageState.sent,
+        );
+        const errorMessage = 'DeleteMessage failed with error: "message with id test-message-id doesn\'t exist"';
+        when(() => client.deleteMessage(messageId, hard: true)).thenThrow(
+          apiException(code: StreamErrorCode.notFound, statusCode: 404, message: errorMessage),
+        );
+        when(
+          () => client.deleteImage(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
+        when(
+          () => client.deleteFile(any(), channelId, channelType),
+        ).thenAnswer((_) async => const Result.success(null));
+        channel.state?.addNewMessage(message);
+
+        await channel.deleteMessage(message, hard: true);
+
+        verify(() => client.deleteImage('test-image-url', channelId, channelType)).called(1);
+        verify(() => client.deleteFile('test-asset-url', channelId, channelType)).called(1);
+      });
+
       test('should delete attachments for hard delete', () async {
         final attachments = List.generate(
           3,
@@ -2593,11 +2868,11 @@ void main() {
 
         when(
           () => client.deleteImage(any(), channelId, channelType),
-        ).thenAnswer((_) async => EmptyResponse());
+        ).thenAnswer((_) async => const Result.success(null));
 
         when(
           () => client.deleteFile(any(), channelId, channelType),
-        ).thenAnswer((_) async => EmptyResponse());
+        ).thenAnswer((_) async => const Result.success(null));
 
         final res = await channel.deleteMessage(message, hard: true);
         expect(res, isNotNull);
@@ -2616,7 +2891,7 @@ void main() {
           final message = Message(
             id: messageId,
             text: 'Hello World!',
-            state: MessageState.sending,
+            state: MessageState.sending(),
           );
 
           expectLater(
@@ -2625,7 +2900,7 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(state: MessageState.sending()),
                   matchMessageState: true,
                 ),
               ],
@@ -2692,7 +2967,7 @@ void main() {
           final message = Message(
             id: messageId,
             text: 'Hello World!',
-            state: MessageState.sending,
+            state: MessageState.sending(),
           );
 
           expectLater(
@@ -2701,7 +2976,7 @@ void main() {
             emitsInOrder([
               [
                 isSameMessageAs(
-                  message.copyWith(state: MessageState.sending),
+                  message.copyWith(state: MessageState.sending()),
                   matchMessageState: true,
                 ),
               ],
@@ -2743,10 +3018,7 @@ void main() {
           channel.state?.messagesStream.skip(1),
           emitsInOrder([
             [
-              isSameMessageAs(
-                message.copyWith(state: MessageState.updating),
-                matchMessageState: true,
-              ),
+              isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
             ],
             [
               isSameMessageAs(
@@ -2799,10 +3071,7 @@ void main() {
             channel.state?.messagesStream.skip(1),
             emitsInOrder([
               [
-                isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
-                  matchMessageState: true,
-                ),
+                isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
               ],
               [
                 isSameMessageAs(
@@ -2857,10 +3126,7 @@ void main() {
             channel.state?.messagesStream.skip(1),
             emitsInOrder([
               [
-                isSameMessageAs(
-                  message.copyWith(state: MessageState.updating),
-                  matchMessageState: true,
-                ),
+                isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
               ],
               [
                 isSameMessageAs(
@@ -2925,10 +3191,7 @@ void main() {
         channel.state?.messagesStream.skip(1),
         emitsInOrder([
           [
-            isSameMessageAs(
-              message.copyWith(state: MessageState.updating),
-              matchMessageState: true,
-            ),
+            isA<Message>().having((it) => it.state.isUpdating, 'isUpdating', isTrue),
           ],
           [
             isSameMessageAs(
@@ -2953,18 +3216,18 @@ void main() {
     });
 
     group('`.search`', () {
-      final filter = Filter.in_('cid', const [channelCid]);
+      final filter = ChannelFilter.in_(ChannelFilterField.cid, const [channelCid]);
 
       test('should work fine with `query`', () async {
         const query = 'test-search-query';
-        const sort = [SortOption.asc('test-sort-field')];
+        final sort = [MessageSearchSort.asc(MessageSearchSortField.custom('test-sort-field'))];
         const pagination = PaginationParams();
 
         final results = List.generate(3, (index) => GetMessageResponse());
 
         when(
           () => client.search(
-            filter,
+            any(that: isSameFilterAs(filter)),
             query: query,
             sort: any(named: 'sort'),
             paginationParams: any(named: 'paginationParams'),
@@ -2984,7 +3247,7 @@ void main() {
 
         verify(
           () => client.search(
-            filter,
+            any(that: isSameFilterAs(filter)),
             query: query,
             sort: any(named: 'sort'),
             paginationParams: any(named: 'paginationParams'),
@@ -2993,15 +3256,15 @@ void main() {
       });
 
       test('should work fine with `messageFilters`', () async {
-        final messageFilters = Filter.query('key', 'text');
-        const sort = [SortOption.desc('test-sort-field')];
+        final messageFilters = MessageSearchFilter.query(MessageSearchFilterField.text, 'text');
+        final sort = [MessageSearchSort.desc(MessageSearchSortField.custom('test-sort-field'))];
         const pagination = PaginationParams();
 
         final results = List.generate(3, (index) => GetMessageResponse());
 
         when(
           () => client.search(
-            filter,
+            any(that: isSameFilterAs(filter)),
             messageFilters: messageFilters,
             sort: any(named: 'sort'),
             paginationParams: any(named: 'paginationParams'),
@@ -3021,7 +3284,7 @@ void main() {
 
         verify(
           () => client.search(
-            filter,
+            any(that: isSameFilterAs(filter)),
             messageFilters: messageFilters,
             sort: any(named: 'sort'),
             paginationParams: any(named: 'paginationParams'),
@@ -3035,13 +3298,15 @@ void main() {
 
       when(
         () => client.deleteFile(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
-      ).thenAnswer((_) async => EmptyResponse());
+      ).thenAnswer((_) async => const Result.success(null));
 
       final res = await channel.deleteFile(url);
 
       expect(res, isNotNull);
 
-      verify(() => client.deleteFile(url, channelId, channelType, cancelToken: any(named: 'cancelToken'))).called(1);
+      verify(
+        () => client.deleteFile(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
+      ).called(1);
     });
 
     test('`.deleteImage`', () async {
@@ -3049,13 +3314,15 @@ void main() {
 
       when(
         () => client.deleteImage(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
-      ).thenAnswer((_) async => EmptyResponse());
+      ).thenAnswer((_) async => const Result.success(null));
 
       final res = await channel.deleteImage(url);
 
       expect(res, isNotNull);
 
-      verify(() => client.deleteImage(url, channelId, channelType, cancelToken: any(named: 'cancelToken'))).called(1);
+      verify(
+        () => client.deleteImage(url, channelId, channelType, cancelToken: any(named: 'cancelToken')),
+      ).called(1);
     });
 
     test('`.stopAIResponse`', () async {
@@ -3166,7 +3433,7 @@ void main() {
 
           when(
             () => client.sendReaction(message.id, reaction),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -3201,7 +3468,7 @@ void main() {
 
           await expectLater(
             channel.sendReaction(message, reaction),
-            throwsA(isA<StreamChatNetworkError>()),
+            throwsA(isA<StreamApiException>()),
           );
 
           verify(() => client.sendReaction(message.id, reaction)).called(1);
@@ -3369,7 +3636,7 @@ void main() {
 
           when(
             () => client.sendReaction(message.id, reaction),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -3406,7 +3673,7 @@ void main() {
 
           await expectLater(
             channel.sendReaction(message, reaction),
-            throwsA(isA<StreamChatNetworkError>()),
+            throwsA(isA<StreamApiException>()),
           );
 
           verify(() => client.sendReaction(message.id, reaction)).called(1);
@@ -3575,7 +3842,7 @@ void main() {
 
           when(
             () => client.deleteReaction(messageId, type),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -3604,7 +3871,7 @@ void main() {
 
           await expectLater(
             channel.deleteReaction(message, reaction),
-            throwsA(isA<StreamChatNetworkError>()),
+            throwsA(isA<StreamApiException>()),
           );
 
           verify(() => client.deleteReaction(messageId, type)).called(1);
@@ -3700,7 +3967,7 @@ void main() {
 
           when(
             () => client.deleteReaction(messageId, type),
-          ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+          ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
           expectLater(
             // skipping first seed message list -> [] messages
@@ -3731,7 +3998,7 @@ void main() {
 
           await expectLater(
             channel.deleteReaction(message, reaction),
-            throwsA(isA<StreamChatNetworkError>()),
+            throwsA(isA<StreamApiException>()),
           );
 
           verify(() => client.deleteReaction(messageId, type)).called(1);
@@ -3751,7 +4018,7 @@ void main() {
 
       final channelModel = ChannelModel(
         cid: channelCid,
-        extraData: channelData,
+        custom: channelData,
       );
 
       when(() => client.updateChannel(channelId, channelType, channelData, message: any(named: 'message'))).thenAnswer(
@@ -3767,18 +4034,18 @@ void main() {
 
       expect(res, isNotNull);
       expect(res.channel.cid, channelModel.cid);
-      expect(res.channel.extraData, channelData);
+      expect(res.channel.custom, channelData);
       expect(res.message?.id, updateMessage.id);
 
       verify(() => client.updateChannel(channelId, channelType, channelData, message: any(named: 'message'))).called(1);
     });
 
-    test('`.updateImage`', () async {
+    test('Channel.updateImage sets the image through a partial update', () async {
       const image = 'https://getstream.io/new-image';
 
-      final channelModel = ChannelModel(
-        cid: channelCid,
-        extraData: {'image': image},
+      final response = UpdateChannelPartialResponse(
+        duration: '0.01ms',
+        channel: ChannelModel(cid: channelCid),
       );
 
       when(
@@ -3787,14 +4054,11 @@ void main() {
           channelType,
           set: {'image': image},
         ),
-      ).thenAnswer(
-        (_) async => PartialUpdateChannelResponse()..channel = channelModel,
-      );
+      ).thenAnswer((_) async => Result.success(response));
 
       final res = await channel.updateImage(image);
 
-      expect(res, isNotNull);
-      expect(res.channel.extraData['image'], image);
+      expect(res.getOrNull(), response);
 
       verify(
         () => client.updateChannelPartial(
@@ -3805,12 +4069,12 @@ void main() {
       ).called(1);
     });
 
-    test('`.updateName`', () async {
+    test('Channel.updateName sets the name through a partial update', () async {
       const name = 'Name';
 
-      final channelModel = ChannelModel(
-        cid: channelCid,
-        extraData: {'name': name},
+      final response = UpdateChannelPartialResponse(
+        duration: '0.01ms',
+        channel: ChannelModel(cid: channelCid),
       );
 
       when(
@@ -3819,14 +4083,11 @@ void main() {
           channelType,
           set: {'name': name},
         ),
-      ).thenAnswer(
-        (_) async => PartialUpdateChannelResponse()..channel = channelModel,
-      );
+      ).thenAnswer((_) async => Result.success(response));
 
       final res = await channel.updateName(name);
 
-      expect(res, isNotNull);
-      expect(res.channel.extraData['name'], name);
+      expect(res.getOrNull(), response);
 
       verify(
         () => client.updateChannelPartial(
@@ -3837,7 +4098,7 @@ void main() {
       ).called(1);
     });
 
-    test('`.updatePartial`', () async {
+    test('Channel.updatePartial sends the set and unset fields for this channel', () async {
       const set = {
         'name': 'Stream Team',
         'profile_image': 'test-profile-image',
@@ -3845,12 +4106,9 @@ void main() {
 
       const unset = ['tag', 'last_name'];
 
-      final channelModel = ChannelModel(
-        cid: channelCid,
-        extraData: {
-          'coolness': 999,
-          ...set,
-        },
+      final response = UpdateChannelPartialResponse(
+        duration: '0.01ms',
+        channel: ChannelModel(cid: channelCid),
       );
 
       when(
@@ -3860,18 +4118,11 @@ void main() {
           set: set,
           unset: unset,
         ),
-      ).thenAnswer(
-        (_) async => PartialUpdateChannelResponse()..channel = channelModel,
-      );
+      ).thenAnswer((_) async => Result.success(response));
 
       final res = await channel.updatePartial(set: set, unset: unset);
 
-      expect(res, isNotNull);
-      expect(res.channel.cid, channelModel.cid);
-      expect(
-        res.channel.extraData,
-        {'coolness': 999, ...set},
-      );
+      expect(res.getOrNull(), response);
 
       verify(
         () => client.updateChannelPartial(
@@ -3883,12 +4134,16 @@ void main() {
       ).called(1);
     });
 
-    test('`.delete`', () async {
-      when(() => client.deleteChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
+    test('Channel.delete deletes this channel and returns the deleted channel', () async {
+      final response = DeleteChannelResponse(
+        duration: '0.01ms',
+        channel: ChannelModel(cid: channelCid),
+      );
+      when(() => client.deleteChannel(channelId, channelType)).thenAnswer((_) async => Result.success(response));
 
       final res = await channel.delete();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.deleteChannel(channelId, channelType)).called(1);
     });
@@ -4187,7 +4442,7 @@ void main() {
           ),
         ).thenAnswer((_) async {
           if (++attempts == 1) {
-            throw StreamChatNetworkError(ChatErrorCode.inputError);
+            throw apiException(code: StreamErrorCode.inputError, statusCode: 400);
           }
           return _generateChannelState(channelId, channelType);
         });
@@ -4196,11 +4451,11 @@ void main() {
         // Attach the expectation before watch() so the error is handled.
         final firstInit = expectLater(
           freshChannel.initialized,
-          throwsA(isA<StreamChatNetworkError>()),
+          throwsA(isA<StreamApiException>()),
         );
         await expectLater(
           freshChannel.watch(),
-          throwsA(isA<StreamChatNetworkError>()),
+          throwsA(isA<StreamApiException>()),
         );
         await firstInit;
         expect(freshChannel.state, isNull);
@@ -4223,11 +4478,11 @@ void main() {
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
           ),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
         await expectLater(
           channel.watch(),
-          throwsA(isA<StreamChatNetworkError>()),
+          throwsA(isA<StreamApiException>()),
         );
 
         verify(
@@ -4420,11 +4675,11 @@ void main() {
             membersPagination: any(named: 'membersPagination'),
             watchersPagination: any(named: 'watchersPagination'),
           ),
-        ).thenThrow(StreamChatNetworkError(ChatErrorCode.inputError));
+        ).thenThrow(apiException(code: StreamErrorCode.inputError, statusCode: 400));
 
         await expectLater(
           channel.query(),
-          throwsA(isA<StreamChatNetworkError>()),
+          throwsA(isA<StreamApiException>()),
         );
 
         verify(
@@ -4619,7 +4874,7 @@ void main() {
     });
 
     test('`.queryMembers`', () async {
-      final filter = Filter.in_('cid', const [channelCid]);
+      final filter = MemberFilter.in_(MemberFilterField.userId, const ['test-user-id-0']);
 
       final members = List.generate(
         3,
@@ -4655,7 +4910,7 @@ void main() {
     });
 
     test('`.queryBannedUsers`', () async {
-      final filter = Filter.equal('channel_cid', channelCid);
+      final filter = BannedUserFilter.equal(BannedUserFilterField.channelCid, channelCid);
 
       final bans = List.generate(
         3,
@@ -4667,7 +4922,7 @@ void main() {
 
       when(
         () => client.queryBannedUsers(
-          filter: filter,
+          filter: any(named: 'filter', that: isSameFilterAs(filter)),
           sort: any(named: 'sort'),
           pagination: any(named: 'pagination'),
         ),
@@ -4680,51 +4935,51 @@ void main() {
 
       verify(
         () => client.queryBannedUsers(
-          filter: filter,
+          filter: any(named: 'filter', that: isSameFilterAs(filter)),
           sort: any(named: 'sort'),
           pagination: any(named: 'pagination'),
         ),
       ).called(1);
     });
 
-    test('`.mute`', () async {
+    test('`.mute` mutes the channel by cid', () async {
       when(
-        () => client.muteChannel(
+        () => moderationClient.muteChannel(
           channelCid,
           expiration: any(named: 'expiration'),
         ),
-      ).thenAnswer((_) async => EmptyResponse());
+      ).thenAnswer((_) async => const Result.success(null));
 
       final res = await channel.mute();
 
-      expect(res, isNotNull);
+      expect(res.isSuccess, isTrue);
 
       verify(
-        () => client.muteChannel(
+        () => moderationClient.muteChannel(
           channelCid,
           expiration: any(named: 'expiration'),
         ),
       ).called(1);
     });
 
-    test('`.mute with expiration`', () async {
+    test('`.mute` unmutes the channel once the expiration elapses', () async {
       const expiration = Duration(seconds: 3);
 
       when(
-        () => client.muteChannel(
+        () => moderationClient.muteChannel(
           channelCid,
           expiration: expiration,
         ),
-      ).thenAnswer((_) async => EmptyResponse());
+      ).thenAnswer((_) async => const Result.success(null));
 
-      when(() => client.unmuteChannel(channelCid)).thenAnswer((_) async => EmptyResponse());
+      when(() => moderationClient.unmuteChannel(channelCid)).thenAnswer((_) async => const Result.success(null));
 
       final res = await channel.mute(expiration: expiration);
 
-      expect(res, isNotNull);
+      expect(res.isSuccess, isTrue);
 
       verify(
-        () => client.muteChannel(
+        () => moderationClient.muteChannel(
           channelCid,
           expiration: expiration,
         ),
@@ -4732,24 +4987,24 @@ void main() {
 
       // wait for expiration
       await Future.delayed(expiration);
-      verify(() => client.unmuteChannel(channelCid)).called(1);
+      verify(() => moderationClient.unmuteChannel(channelCid)).called(1);
     });
 
-    test('`.unmute`', () async {
+    test('`.unmute` unmutes the channel by cid', () async {
       when(
-        () => client.unmuteChannel(channelCid),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => moderationClient.unmuteChannel(channelCid),
+      ).thenAnswer((_) async => const Result.success(null));
 
       final res = await channel.unmute();
 
-      expect(res, isNotNull);
+      expect(res.isSuccess, isTrue);
 
       verify(
-        () => client.unmuteChannel(channelCid),
+        () => moderationClient.unmuteChannel(channelCid),
       ).called(1);
     });
 
-    test('`.enableSlowMode`', () async {
+    test('Channel.enableSlowMode enables slow mode on this channel and returns the updated channel', () async {
       const cooldown = 10;
 
       final channelModel = ChannelModel(
@@ -4758,19 +5013,21 @@ void main() {
       );
 
       when(
-        () => client.enableSlowdown(
+        () => client.enableSlowMode(
           channelId,
           channelType,
           cooldown,
         ),
-      ).thenAnswer((_) async => PartialUpdateChannelResponse()..channel = channelModel);
+      ).thenAnswer(
+        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
+      );
 
       final res = await channel.enableSlowMode(cooldownInterval: 10);
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel));
 
       verify(
-        () => client.enableSlowdown(
+        () => client.enableSlowMode(
           channelId,
           channelType,
           cooldown,
@@ -4778,97 +5035,111 @@ void main() {
       ).called(1);
     });
 
-    test('`.disableSlowMode`', () async {
+    test('Channel.disableSlowMode disables slow mode on this channel and returns the updated channel', () async {
       final channelModel = ChannelModel(
         cid: channelCid,
       );
 
       when(
-        () => client.disableSlowdown(
+        () => client.disableSlowMode(
           channelId,
           channelType,
         ),
-      ).thenAnswer((_) async => PartialUpdateChannelResponse()..channel = channelModel);
+      ).thenAnswer(
+        (_) async => Result.success(UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel)),
+      );
 
       final res = await channel.disableSlowMode();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), UpdateChannelPartialResponse(duration: '0.01ms', channel: channelModel));
 
-      verify(() => client.disableSlowdown(channelId, channelType)).called(1);
+      verify(() => client.disableSlowMode(channelId, channelType)).called(1);
     });
 
-    test('`.banUser`', () async {
+    test('`.banMember` scopes the ban to the channel cid', () async {
       const userId = 'test-user-id';
-      const options = {'key': 'value'};
 
       when(
-        () => client.banUser(
-          userId,
-          {'type': channelType, 'id': channelId, ...options},
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => moderationClient.banUser(userId, channelCid: channelCid, reason: 'spam'),
+      ).thenAnswer((_) async => const Result.success(null));
 
-      final res = await channel.banMember(userId, options);
+      final res = await channel.banMember(userId, reason: 'spam');
 
-      expect(res, isNotNull);
+      expect(res.isSuccess, isTrue);
 
       verify(
-        () => client.banUser(
+        () => moderationClient.banUser(userId, channelCid: channelCid, reason: 'spam'),
+      ).called(1);
+    });
+
+    test('`.banMember` forwards every option to the client', () async {
+      const userId = 'test-user-id';
+      const timeout = Duration(minutes: 30);
+
+      when(
+        () => moderationClient.banUser(
           userId,
-          {'type': channelType, 'id': channelId, ...options},
+          channelCid: channelCid,
+          timeout: timeout,
+          reason: 'spam',
+          shadow: true,
+          deleteMessages: DeleteType.hard,
+        ),
+      ).thenAnswer((_) async => const Result.success(null));
+
+      final res = await channel.banMember(
+        userId,
+        timeout: timeout,
+        reason: 'spam',
+        shadow: true,
+        deleteMessages: DeleteType.hard,
+      );
+
+      expect(res.isSuccess, isTrue);
+
+      verify(
+        () => moderationClient.banUser(
+          userId,
+          channelCid: channelCid,
+          timeout: timeout,
+          reason: 'spam',
+          shadow: true,
+          deleteMessages: DeleteType.hard,
         ),
       ).called(1);
     });
 
-    test('`.unbanUser`', () async {
+    test('`.unbanMember` scopes the unban to the channel cid', () async {
       const userId = 'test-user-id';
 
-      when(() => client.unbanUser(userId, any())).thenAnswer((_) async => EmptyResponse());
+      when(
+        () => moderationClient.unbanUser(userId, channelCid: channelCid),
+      ).thenAnswer((_) async => const Result.success(null));
 
       final res = await channel.unbanMember(userId);
 
-      expect(res, isNotNull);
+      expect(res.isSuccess, isTrue);
 
-      verify(() => client.unbanUser(userId, any())).called(1);
+      verify(() => moderationClient.unbanUser(userId, channelCid: channelCid)).called(1);
     });
 
-    test('`.shadowBan`', () async {
+    test('`.shadowBan` scopes the shadow ban to the channel cid', () async {
       const userId = 'test-user-id';
-      const options = {'key': 'value'};
 
       when(
-        () => client.shadowBan(
-          userId,
-          {'type': channelType, 'id': channelId, ...options},
-        ),
-      ).thenAnswer((_) async => EmptyResponse());
+        () => moderationClient.shadowBan(userId, channelCid: channelCid),
+      ).thenAnswer((_) async => const Result.success(null));
 
-      final res = await channel.shadowBan(userId, options);
+      final res = await channel.shadowBan(userId);
 
-      expect(res, isNotNull);
+      expect(res.isSuccess, isTrue);
 
-      verify(
-        () => client.shadowBan(
-          userId,
-          {'type': channelType, 'id': channelId, ...options},
-        ),
-      ).called(1);
+      verify(() => moderationClient.shadowBan(userId, channelCid: channelCid)).called(1);
     });
 
-    test('`.removeShadowBan`', () async {
-      const userId = 'test-user-id';
-
-      when(() => client.removeShadowBan(userId, any())).thenAnswer((_) async => EmptyResponse());
-
-      final res = await channel.removeShadowBan(userId);
-
-      expect(res, isNotNull);
-
-      verify(() => client.removeShadowBan(userId, any())).called(1);
-    });
-
-    test('`.hide`', () async {
+    test('Channel.hide hides this channel and clears its history when asked', () async {
       const clearHistory = true;
+      const response = HideChannelResponse(duration: '0.01ms');
 
       when(
         () => client.hideChannel(
@@ -4876,11 +5147,11 @@ void main() {
           channelType,
           clearHistory: clearHistory,
         ),
-      ).thenAnswer((_) async => EmptyResponse());
+      ).thenAnswer((_) async => const Result.success(response));
 
       final res = await channel.hide(clearHistory: clearHistory);
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(
         () => client.hideChannel(
@@ -4891,62 +5162,81 @@ void main() {
       ).called(1);
     });
 
-    test('`.show`', () async {
-      when(() => client.showChannel(channelId, channelType)).thenAnswer((_) async => EmptyResponse());
+    test('Channel.show shows this channel again', () async {
+      const response = ShowChannelResponse(duration: '0.01ms');
+      when(() => client.showChannel(channelId, channelType)).thenAnswer((_) async => const Result.success(response));
 
       final res = await channel.show();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.showChannel(channelId, channelType)).called(1);
     });
 
-    // testing archiving
-    test('`.archive`', () async {
+    test('Channel.archive archives this channel and returns the updated membership', () async {
+      final response = UpdateMemberPartialResponse(
+        duration: '0.01ms',
+        channelMember: Member(userId: 'test-user-id'),
+      );
       when(() => client.archiveChannel(channelId: channelId, channelType: channelType)).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(),
+        (_) async => Result.success(response),
       );
 
       final res = await channel.archive();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.archiveChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test('`.unarchive`', () async {
+    test('Channel.unarchive unarchives this channel and returns the updated membership', () async {
+      final response = UpdateMemberPartialResponse(
+        duration: '0.01ms',
+        channelMember: Member(userId: 'test-user-id'),
+      );
       when(() => client.unarchiveChannel(channelId: channelId, channelType: channelType)).thenAnswer(
-        (_) async => FakePartialUpdateMemberResponse(),
+        (_) async => Result.success(response),
       );
 
       final res = await channel.unarchive();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.unarchiveChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    // testing pinning
-    test('`.pin`', () async {
+    test('Channel.pin pins this channel and returns the updated membership', () async {
+      final response = UpdateMemberPartialResponse(
+        duration: '0.01ms',
+        channelMember: Member(userId: 'test-user-id'),
+      );
       when(
         () => client.pinChannel(channelId: channelId, channelType: channelType),
-      ).thenAnswer((_) async => FakePartialUpdateMemberResponse());
+      ).thenAnswer(
+        (_) async => Result.success(response),
+      );
 
       final res = await channel.pin();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.pinChannel(channelId: channelId, channelType: channelType)).called(1);
     });
 
-    test('`.unpin`', () async {
+    test('Channel.unpin unpins this channel and returns the updated membership', () async {
+      final response = UpdateMemberPartialResponse(
+        duration: '0.01ms',
+        channelMember: Member(userId: 'test-user-id'),
+      );
       when(
         () => client.unpinChannel(channelId: channelId, channelType: channelType),
-      ).thenAnswer((_) async => FakePartialUpdateMemberResponse());
+      ).thenAnswer(
+        (_) async => Result.success(response),
+      );
 
       final res = await channel.unpin();
 
-      expect(res, isNotNull);
+      expect(res.getOrNull(), response);
 
       verify(() => client.unpinChannel(channelId: channelId, channelType: channelType)).called(1);
     });
@@ -5128,16 +5418,11 @@ void main() {
 
   group('Channel State Validation and Cooldown', () {
     late final client = MockStreamChatClient();
+    late final moderationClient = MockModerationClient();
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
 
     setUpAll(() {
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -5147,9 +5432,6 @@ void main() {
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
 
       // mock channel delivery reporter
       when(
@@ -5187,6 +5469,7 @@ void main() {
       late Channel channel;
 
       setUp(() {
+        when(() => client.moderation).thenReturn(moderationClient);
         final channelState = _generateChannelState(channelId, channelType);
         channel = Channel.fromState(client, channelState);
       });
@@ -5570,7 +5853,7 @@ void main() {
         () async {
           // Set initial channel state with some properties
           final initialChannel = channel.state?.channelState.channel?.copyWith(
-            extraData: {'name': 'Test Channel'},
+            custom: {'name': 'Test Channel'},
             memberCount: 5,
             frozen: true,
           );
@@ -5805,7 +6088,7 @@ void main() {
         () async {
           // Set initial channel state with some properties
           final initialChannel = channel.state?.channelState.channel?.copyWith(
-            extraData: {'name': 'Test Channel'},
+            custom: {'name': 'Test Channel'},
             messageCount: 7,
             frozen: true,
           );
@@ -5918,12 +6201,6 @@ void main() {
     const channelType = 'test-channel-type';
 
     setUpAll(() {
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -5933,9 +6210,6 @@ void main() {
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
     });
 
     test('should return filterTags from channel state', () {
@@ -5988,12 +6262,6 @@ void main() {
       registerFallbackValue(FakeAttachmentFile());
       registerFallbackValue(FakeEvent());
 
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -6003,9 +6271,6 @@ void main() {
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
     });
 
     test(
@@ -6449,12 +6714,6 @@ void main() {
     late final client = MockStreamChatClient();
 
     setUpAll(() {
-      // detached loggers
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
       final retryPolicy = RetryPolicy(
         shouldRetry: (_, __, ___) => false,
         delayFactor: Duration.zero,
@@ -6464,288 +6723,130 @@ void main() {
       // fake clientState
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
-
-      // client logger
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
     });
 
-    test(
-      ".markRead should throw if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no readEvents capability
-        );
+    Channel channelWith(List<ChannelCapability> ownCapabilities) {
+      final channel = Channel.fromState(
+        client,
+        _generateChannelState(channelId, channelType, ownCapabilities: ownCapabilities),
+      );
+      addTearDown(channel.dispose);
+      return channel;
+    }
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+    test('Channel.markRead returns a failure when the current user cannot send read events', () async {
+      final channel = channelWith([]);
 
-        await expectLater(
-          channel.markRead(messageId: 'message-id-123'),
-          throwsA(isA<StreamChatError>()),
-        );
-      },
-    );
+      final res = await channel.markRead(messageId: 'message-id-123');
 
-    test(
-      '.markRead should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [ChannelCapability.readEvents],
-        );
+      expect(res.exceptionOrNull(), isA<StreamClientException>());
+      verifyNever(() => client.markChannelRead(channelId, channelType, messageId: 'message-id-123'));
+    });
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+    test('Channel.markRead marks this channel read up to the given message', () async {
+      const response = MarkReadResponse(duration: '0.01ms');
+      final channel = channelWith([ChannelCapability.readEvents]);
+      when(
+        () => client.markChannelRead(channelId, channelType, messageId: 'message-id-123'),
+      ).thenAnswer((_) async => const Result.success(response));
 
-        when(
-          () => client.markChannelRead(
-            channelId,
-            channelType,
-            messageId: 'message-id-123',
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
+      final res = await channel.markRead(messageId: 'message-id-123');
 
-        await expectLater(
-          channel.markRead(messageId: 'message-id-123'),
-          completes,
-        );
+      expect(res.getOrNull(), response);
+      verify(() => client.markChannelRead(channelId, channelType, messageId: 'message-id-123')).called(1);
+    });
 
-        verify(
-          () => client.markChannelRead(
-            channelId,
-            channelType,
-            messageId: 'message-id-123',
-          ),
-        ).called(1);
-      },
-    );
+    test('Channel.markUnread returns a failure when the current user cannot send read events', () async {
+      final channel = channelWith([]);
 
-    test(
-      ".markUnread should throw if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no readEvents capability
-        );
+      final res = await channel.markUnread('message-id-123');
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+      expect(res.exceptionOrNull(), isA<StreamClientException>());
+      verifyNever(() => client.markChannelUnread(channelId, channelType, 'message-id-123'));
+    });
 
-        await expectLater(
-          channel.markUnread('message-id-123'),
-          throwsA(isA<StreamChatError>()),
-        );
-      },
-    );
+    test('Channel.markUnread marks this channel unread from the given message', () async {
+      final channel = channelWith([ChannelCapability.readEvents]);
+      when(
+        () => client.markChannelUnread(channelId, channelType, 'message-id-123'),
+      ).thenAnswer((_) async => const Result.success(null));
 
-    test(
-      '.markUnread should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [ChannelCapability.readEvents],
-        );
+      final res = await channel.markUnread('message-id-123');
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+      expect(res, const Result<void>.success(null));
+      verify(() => client.markChannelUnread(channelId, channelType, 'message-id-123')).called(1);
+    });
 
-        when(
-          () => client.markChannelUnread(
-            channelId,
-            channelType,
-            'message-id-123',
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
+    test('Channel.markUnreadByTimestamp returns a failure when the current user cannot send read events', () async {
+      final timestamp = DateTime.utc(2024);
+      final channel = channelWith([]);
 
-        await expectLater(
-          channel.markUnread('message-id-123'),
-          completes,
-        );
+      final res = await channel.markUnreadByTimestamp(timestamp);
 
-        verify(
-          () => client.markChannelUnread(
-            channelId,
-            channelType,
-            'message-id-123',
-          ),
-        ).called(1);
-      },
-    );
+      expect(res.exceptionOrNull(), isA<StreamClientException>());
+      verifyNever(() => client.markChannelUnreadByTimestamp(channelId, channelType, timestamp));
+    });
 
-    test(
-      ".markUnreadByTimestamp should throw if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no readEvents capability
-        );
+    test('Channel.markUnreadByTimestamp marks the messages after the given time unread', () async {
+      final timestamp = DateTime.utc(2024);
+      final channel = channelWith([ChannelCapability.readEvents]);
+      when(
+        () => client.markChannelUnreadByTimestamp(channelId, channelType, timestamp),
+      ).thenAnswer((_) async => const Result.success(null));
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+      final res = await channel.markUnreadByTimestamp(timestamp);
 
-        final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
+      expect(res, const Result<void>.success(null));
+      verify(() => client.markChannelUnreadByTimestamp(channelId, channelType, timestamp)).called(1);
+    });
 
-        await expectLater(
-          channel.markUnreadByTimestamp(timestamp),
-          throwsA(isA<StreamChatError>()),
-        );
-      },
-    );
+    test('Channel.markThreadRead returns a failure when the current user cannot send read events', () async {
+      final channel = channelWith([]);
 
-    test(
-      '.markUnreadByTimestamp should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [ChannelCapability.readEvents],
-        );
+      final res = await channel.markThreadRead('thread-id-123');
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+      expect(res.exceptionOrNull(), isA<StreamClientException>());
+      verifyNever(() => client.markThreadRead(channelId, channelType, 'thread-id-123'));
+    });
 
-        final timestamp = DateTime.parse('2024-01-01T00:00:00Z');
+    test('Channel.markThreadRead marks the given thread read', () async {
+      const response = MarkReadResponse(duration: '0.01ms');
+      final channel = channelWith([ChannelCapability.readEvents]);
+      when(
+        () => client.markThreadRead(channelId, channelType, 'thread-id-123'),
+      ).thenAnswer((_) async => const Result.success(response));
 
-        when(
-          () => client.markChannelUnreadByTimestamp(
-            channelId,
-            channelType,
-            timestamp,
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
+      final res = await channel.markThreadRead('thread-id-123');
 
-        await expectLater(
-          channel.markUnreadByTimestamp(timestamp),
-          completes,
-        );
+      expect(res.getOrNull(), response);
+      verify(() => client.markThreadRead(channelId, channelType, 'thread-id-123')).called(1);
+    });
 
-        verify(
-          () => client.markChannelUnreadByTimestamp(
-            channelId,
-            channelType,
-            timestamp,
-          ),
-        ).called(1);
-      },
-    );
+    test('Channel.markThreadUnread returns a failure when the current user cannot send read events', () async {
+      final channel = channelWith([]);
 
-    test(
-      ".markThreadRead should throw if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no readEvents capability
-        );
+      final res = await channel.markThreadUnread('thread-id-123');
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
+      expect(res.exceptionOrNull(), isA<StreamClientException>());
+      verifyNever(() => client.markThreadUnread(channelId, channelType, 'thread-id-123'));
+    });
 
-        await expectLater(
-          channel.markThreadRead('thread-id-123'),
-          throwsA(isA<StreamChatError>()),
-        );
-      },
-    );
+    test('Channel.markThreadUnread marks the given thread unread', () async {
+      final channel = channelWith([ChannelCapability.readEvents]);
+      when(
+        () => client.markThreadUnread(channelId, channelType, 'thread-id-123'),
+      ).thenAnswer((_) async => const Result.success(null));
 
-    test(
-      '.markThreadRead should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [ChannelCapability.readEvents],
-        );
+      final res = await channel.markThreadUnread('thread-id-123');
 
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
-        when(
-          () => client.markThreadRead(
-            channelId,
-            channelType,
-            'thread-id-123',
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
-
-        await expectLater(
-          channel.markThreadRead('thread-id-123'),
-          completes,
-        );
-
-        verify(
-          () => client.markThreadRead(
-            channelId,
-            channelType,
-            'thread-id-123',
-          ),
-        ).called(1);
-      },
-    );
-
-    test(
-      ".markThreadUnread should throw if we don't have the capability",
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [], // no readEvents capability
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
-        await expectLater(
-          channel.markThreadUnread('thread-id-123'),
-          throwsA(isA<StreamChatError>()),
-        );
-      },
-    );
-
-    test(
-      '.markThreadUnread should succeed if we have the capability',
-      () async {
-        final channelState = _generateChannelState(
-          channelId,
-          channelType,
-          ownCapabilities: [ChannelCapability.readEvents],
-        );
-
-        final channel = Channel.fromState(client, channelState);
-        addTearDown(channel.dispose);
-
-        when(
-          () => client.markThreadUnread(
-            channelId,
-            channelType,
-            'thread-id-123',
-          ),
-        ).thenAnswer((_) async => EmptyResponse());
-
-        await expectLater(
-          channel.markThreadUnread('thread-id-123'),
-          completes,
-        );
-
-        verify(
-          () => client.markThreadUnread(
-            channelId,
-            channelType,
-            'thread-id-123',
-          ),
-        ).called(1);
-      },
-    );
+      expect(res, const Result<void>.success(null));
+      verify(() => client.markThreadUnread(channelId, channelType, 'thread-id-123')).called(1);
+    });
   });
 
   group('Retry functionality with parameter preservation', () {
     late final client = MockStreamChatClient();
+    late final moderationClient = MockModerationClient();
     const channelId = 'test-channel-id';
     const channelType = 'test-channel-type';
     late Channel channel;
@@ -6755,25 +6856,17 @@ void main() {
       registerFallbackValue(<Message>[]);
       registerFallbackValue(FakeAttachmentFile());
 
-      when(() => client.detachedLogger(any())).thenAnswer((invocation) {
-        final name = invocation.positionalArguments.first;
-        return _createLogger(name);
-      });
-
-      when(() => client.logger).thenReturn(_createLogger('mock-client-logger'));
-
       final clientState = FakeClientState();
       when(() => client.state).thenReturn(clientState);
 
       final retryPolicy = RetryPolicy(
-        shouldRetry: (_, __, error) {
-          return error is StreamChatNetworkError && error.isRetriable;
-        },
+        shouldRetry: (_, __, error) => error?.isRetriable ?? false,
       );
       when(() => client.retryPolicy).thenReturn(retryPolicy);
     });
 
     setUp(() {
+      when(() => client.moderation).thenReturn(moderationClient);
       final channelState = _generateChannelState(channelId, channelType);
       channel = Channel.fromState(client, channelState);
     });

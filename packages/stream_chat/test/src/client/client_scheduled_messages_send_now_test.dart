@@ -2,6 +2,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
 import 'package:test/test.dart';
 
+import '../utils.dart';
 import 'scheduled_messages_harness.dart';
 
 void main() {
@@ -9,9 +10,9 @@ void main() {
 
   final original = fakeScheduledMessage('a');
   final accepted = fakeScheduledMessage('a', updatedAt: DateTime.utc(2026, 10, 30));
-  final refused = StreamChatNetworkError.raw(code: 4, message: 'Not allowed', statusCode: 400);
-  final sendingError = StreamChatNetworkError.raw(
-    code: scheduledMessageSendingCode,
+  final refused = apiException(message: 'Not allowed');
+  final sendingError = apiException(
+    code: const StreamErrorCode(scheduledMessageSendingCode),
     message: 'Sending',
     statusCode: 409,
   );

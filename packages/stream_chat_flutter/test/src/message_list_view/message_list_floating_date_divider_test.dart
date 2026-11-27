@@ -106,7 +106,9 @@ Future<void> _pumpMessageList(WidgetTester tester) async {
   when(() => channelClientState.currentUserRead).thenReturn(null);
   when(() => channelClientState.currentUserReadStream).thenAnswer((_) => const Stream.empty());
   when(() => channelClientState.messagesStream).thenAnswer((_) => messagesController.stream);
-  when(() => channel.markRead(messageId: any(named: 'messageId'))).thenAnswer((_) async => EmptyResponse());
+  when(
+    () => channel.markRead(messageId: any(named: 'messageId')),
+  ).thenAnswer((_) async => const Result.success(MarkReadResponse(duration: '0ms')));
 
   final messages = _messagesOnSeparateDays();
   when(() => channelClientState.messages).thenReturn(messages);

@@ -2,10 +2,12 @@ import 'dart:async';
 
 import 'package:mocktail/mocktail.dart';
 import 'package:stream_chat/stream_chat.dart';
+import 'package:stream_core/stream_core.dart' show runSafely;
 import 'package:test/test.dart';
 
 import '../../fakes.dart';
 import '../../mocks.dart';
+import '../../utils.dart';
 
 void main() {
   setUpAll(() {
@@ -40,8 +42,8 @@ void main() {
     final channel = _channel(
       imageUpload: (_) async {
         attempt += 1;
-        if (attempt == 1) throw StreamChatNetworkError(ChatErrorCode.internalSystemError);
-        return SendImageResponse()..file = 'https://example.com/image.png';
+        if (attempt == 1) throw apiException(code: StreamErrorCode.internalError, statusCode: 500);
+        return const UploadedFile(fileUrl: 'https://example.com/image.png');
       },
     );
     await _ignoringFailure(channel.sendMessage(_withImage()));
@@ -54,22 +56,22 @@ void main() {
   });
 
   test('sending a message whose attachment has no file throws', () async {
-    final channel = _channel(imageUpload: (_) async => SendImageResponse());
+    final channel = _channel(imageUpload: (_) async => const UploadedFile());
     final message = Message(
       id: 'message',
       text: 'Hello',
       attachments: [Attachment(id: 'custom', type: 'custom')],
     );
 
-    await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatError>()));
+    await expectLater(channel.sendMessage(message), throwsA(isA<StreamChatException>()));
   });
 
   test('retryAttachmentUpload does not send the message while its other attachments upload', () async {
     final channel = _channel(
       imageUpload: (invocation) {
         final file = invocation.positionalArguments.first as AttachmentFile;
-        if (file.path == 'first.png') return Future.value(SendImageResponse()..file = 'https://example.com/1.png');
-        return Completer<SendImageResponse>().future;
+        if (file.path == 'first.png') return Future.value(const UploadedFile(fileUrl: 'https://example.com/1.png'));
+        return Completer<UploadedFile>().future;
       },
     );
     channel.sendMessage(_withImages(['first', 'second'])).ignore();
@@ -110,7 +112,7 @@ void main() {
     final channel = _channel(imageUpload: _uploadUntilCanceled);
     final sending = expectLater(
       channel.sendMessage(_withImage()),
-      throwsA(isA<StreamChatError>().having((it) => it.message, 'message', 'Message deleted')),
+      throwsA(isA<StreamChatException>().having((it) => it.message, 'message', 'Message deleted')),
     );
     await pumpEventQueue();
 
@@ -123,7 +125,7 @@ void main() {
     final channel = _channel(imageUpload: _uploadUntilCanceled);
     final first = expectLater(
       channel.sendMessage(_withImage()),
-      throwsA(isA<StreamChatError>().having((it) => it.message, 'message', 'Message cancelled')),
+      throwsA(isA<StreamChatException>().having((it) => it.message, 'message', 'Message cancelled')),
     );
     await pumpEventQueue();
 
@@ -150,13 +152,13 @@ void main() {
   });
 
   test('deleting a message whose attachment finished uploading does not send it', () async {
-    final upload = Completer<SendImageResponse>();
+    final upload = Completer<UploadedFile>();
     final channel = _channel(imageUpload: (_) => upload.future);
     final sending = _ignoringFailure(channel.sendMessage(_withImage()));
     await pumpEventQueue();
     final message = channel.state!.messages.single;
 
-    upload.complete(SendImageResponse()..file = 'https://example.com/image.png');
+    upload.complete(const UploadedFile(fileUrl: 'https://example.com/image.png'));
     channel.deleteMessage(message).ignore();
     await sending;
 
@@ -176,7 +178,7 @@ void main() {
     final channel = _channel(
       imageUpload: (_) {
         uploads += 1;
-        return Completer<SendImageResponse>().future;
+        return Completer<UploadedFile>().future;
       },
     );
 
@@ -188,19 +190,19 @@ void main() {
 
   test('sending a message uploads its next attachment once one finishes', () async {
     final uploaded = <String?>[];
-    final first = Completer<SendImageResponse>();
+    final first = Completer<UploadedFile>();
     final channel = _channel(
       imageUpload: (invocation) {
         final file = invocation.positionalArguments.first as AttachmentFile;
         uploaded.add(file.path);
         if (file.path == '1.png') return first.future;
-        return Completer<SendImageResponse>().future;
+        return Completer<UploadedFile>().future;
       },
     );
     channel.sendMessage(_withImages(['1', '2', '3', '4'])).ignore();
     await pumpEventQueue();
 
-    first.complete(SendImageResponse()..file = 'https://example.com/1.png');
+    first.complete(const UploadedFile(fileUrl: 'https://example.com/1.png'));
     await pumpEventQueue();
 
     expect(uploaded.last, '4.png');
@@ -210,7 +212,7 @@ void main() {
     final channel = _channel(
       imageUpload: (invocation) async {
         final file = invocation.positionalArguments.first as AttachmentFile;
-        return SendImageResponse()..file = 'https://example.com/${file.path}';
+        return UploadedFile(fileUrl: 'https://example.com/${file.path}');
       },
     );
     final sending = channel.sendMessage(_withImages(['1', '2', '3', '4']));
@@ -233,16 +235,16 @@ void main() {
   });
 
   test('deleting a message whose attachment finished uploading makes its sending throw', () async {
-    final upload = Completer<SendImageResponse>();
+    final upload = Completer<UploadedFile>();
     final channel = _channel(imageUpload: (_) => upload.future);
     final sending = expectLater(
       channel.sendMessage(_withImage()),
-      throwsA(isA<StreamChatError>().having((it) => it.message, 'message', 'Message deleted')),
+      throwsA(isA<StreamChatException>().having((it) => it.message, 'message', 'Message deleted')),
     );
     await pumpEventQueue();
     final message = channel.state!.messages.single;
 
-    upload.complete(SendImageResponse()..file = 'https://example.com/image.png');
+    upload.complete(const UploadedFile(fileUrl: 'https://example.com/image.png'));
     channel.deleteMessage(message).ignore();
 
     await sending;
@@ -253,7 +255,7 @@ void main() {
     final channel = _channel(
       imageUpload: (_) {
         uploads += 1;
-        return Completer<SendImageResponse>().future;
+        return Completer<UploadedFile>().future;
       },
     );
     channel.sendMessage(_withImage()).ignore();
@@ -299,14 +301,10 @@ Message _withImages(List<String> ids) {
 
 // An upload that answers only once it is canceled, the way a canceled
 // request does.
-Future<SendImageResponse> _uploadUntilCanceled(Invocation invocation) async {
+Future<UploadedFile> _uploadUntilCanceled(Invocation invocation) async {
   final cancelToken = invocation.namedArguments[#cancelToken] as CancelToken;
   await cancelToken.whenCancel;
-  throw StreamChatNetworkError.raw(
-    code: 0,
-    message: 'Request canceled',
-    type: StreamChatNetworkErrorType.cancel,
-  );
+  throw const StreamNetworkException(message: 'Request canceled', isCancelled: true);
 }
 
 // Waits for [future], which fails in the setup of a test.
@@ -315,7 +313,7 @@ Future<void> _ignoringFailure(Future<Object?> future) {
 }
 
 // An image upload on [client], with any arguments.
-Future<SendImageResponse> _sendImage(StreamChatClient client) {
+Future<Result<UploadedFile>> _sendImage(StreamChatClient client) {
   return client.sendImage(
     any(),
     any(),
@@ -328,13 +326,9 @@ Future<SendImageResponse> _sendImage(StreamChatClient client) {
 
 // A channel created from a state, whose image uploads are answered by
 // [imageUpload] and whose messages are sent as they are.
-Channel _channel({required Future<SendImageResponse> Function(Invocation) imageUpload}) {
+Channel _channel({required Future<UploadedFile> Function(Invocation) imageUpload}) {
   final client = MockStreamChatClient();
-  when(
-    () => client.detachedLogger(any()),
-  ).thenAnswer((invocation) => Logger.detached(invocation.positionalArguments.first as String));
-  when(() => client.logger).thenReturn(Logger.detached('client'));
-  when(() => _sendImage(client)).thenAnswer(imageUpload);
+  when(() => _sendImage(client)).thenAnswer((invocation) => runSafely(() => imageUpload(invocation)));
   when(
     () => client.sendMessage(
       any(),

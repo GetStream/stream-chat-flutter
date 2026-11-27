@@ -77,11 +77,11 @@ void main() {
       final pollController = StreamPollController()
         ..addOption(
           'Option 1',
-          extraData: {'key': 'value'},
+          custom: {'key': 'value'},
         );
 
       expect(pollController.value.options.length, 2);
-      expect(pollController.value.options.last.extraData['key'], 'value');
+      expect(pollController.value.options.last.custom['key'], 'value');
     });
 
     test('Update Option', () {

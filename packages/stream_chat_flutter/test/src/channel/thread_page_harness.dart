@@ -93,8 +93,8 @@ Future<MockChannel> pumpThreadPage(
   when(() => channel.imageStream).thenAnswer((_) => Stream.value(null));
   when(() => channel.isMuted).thenReturn(false);
   when(() => channel.isMutedStream).thenAnswer((_) => Stream.value(false));
-  when(() => channel.extraData).thenReturn({'name': 'test'});
-  when(() => channel.extraDataStream).thenAnswer((_) => Stream.value({'name': 'test'}));
+  when(() => channel.custom).thenReturn({'name': 'test'});
+  when(() => channel.customStream).thenAnswer((_) => Stream.value({'name': 'test'}));
   when(
     () => channel.getReplies(
       any(),

@@ -67,9 +67,9 @@ class _HomeScreenState extends State<HomeScreen> {
   /// [StreamChannelListController].
   late final channelListController = StreamChannelListController(
     client: StreamChatCore.of(context).client,
-    filter: Filter.and([
-      Filter.equal('type', 'messaging'),
-      Filter.in_('members', [StreamChatCore.of(context).currentUser!.id]),
+    filter: .and([
+      ChannelFilter.equal(ChannelFilterField.type, 'messaging'),
+      ChannelFilter.in_(ChannelFilterField.members, [StreamChatCore.of(context).currentUser!.id]),
     ]),
   );
 

@@ -11,6 +11,7 @@ on:
       - unlabeled
     branches:
       - master
+      - v11
       - v9
 
 concurrency:
@@ -61,10 +62,14 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   # [semantic_changelog_update] checks that a changelog was updated at all; this
-  # checks that the entries went under `## Upcoming` rather than into a section
-  # for a version that is already published.
+  # checks that the entries went under `## Upcoming` (or v11's `## Upcoming Beta`)
+  # rather than into a section for a version that is already published. Version
+  # headings published from master count as released, so v11 can carry them.
   changelog_placement:
     runs-on:
       group: github-public-amd64
     steps:
       - uses: GetStream/verify-semantic-changelog-update/placement@v1.1.0
+        with:
+          upcoming-heading: 'Upcoming( Beta)?'
+          released-from: master

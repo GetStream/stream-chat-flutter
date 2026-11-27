@@ -27,7 +27,7 @@ void main() {
 
   testWidgets('StreamMessageItem ignores a swipe on a message still being sent', (tester) async {
     final replies = <Message>[];
-    await _pumpMessageItem(tester, _message(state: MessageState.sending), onReplyTap: replies.add);
+    await _pumpMessageItem(tester, _message(state: MessageState.sending()), onReplyTap: replies.add);
 
     await _swipe(tester);
 
@@ -45,7 +45,7 @@ void main() {
 
   testWidgets('StreamMessageItem is not rebuilt from scratch when a message finishes sending', (tester) async {
     final row = find.descendant(of: find.byType(StreamMessageItem), matching: find.byType(Material)).first;
-    await _pumpMessageItem(tester, _message(state: MessageState.sending), onReplyTap: (_) {});
+    await _pumpMessageItem(tester, _message(state: MessageState.sending()), onReplyTap: (_) {});
     final sendingState = tester.state(row);
 
     await _pumpMessageItem(tester, _message(), onReplyTap: (_) {});

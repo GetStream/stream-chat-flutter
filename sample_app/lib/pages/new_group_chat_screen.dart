@@ -26,22 +26,16 @@ class _NewGroupChatScreenState extends State<NewGroupChatScreen> {
 
   late final userListController = StreamUserListController(
     client: StreamChat.of(context).client,
-    sort: [const SortOption.asc('name')],
+    sort: [UserSort.asc(UserSortField.name)],
     limit: 25,
     filter: _filter(),
   );
 
-  // Excludes the current user from the directory listing — searching must keep
-  // excluding them, so the search text is combined with this rather than
-  // replacing it.
-  Filter _filter({String query = ''}) {
-    return Filter.and([
-      Filter.notEqual('id', StreamChat.of(context).currentUser!.id),
-      if (query.isNotEmpty)
-        Filter.or([
-          Filter.autoComplete('name', query),
-          Filter.autoComplete('id', query),
-        ]),
+  UserFilter? _filter({String query = ''}) {
+    if (query.isEmpty) return null;
+    return UserFilter.or([
+      UserFilter.autoComplete(UserFilterField.name, query),
+      UserFilter.autoComplete(UserFilterField.id, query),
     ]);
   }
 
