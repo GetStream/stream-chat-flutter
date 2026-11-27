@@ -31,11 +31,18 @@ jobs:
   measure-android:
     if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     timeout-minutes: 60
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: Git Checkout
-        uses: actions/checkout@v7
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       # Android lint needs Java 21 or newer; the runner image defaults to 17.
       - name: Set up Java
@@ -87,7 +94,7 @@ jobs:
       || (contains(github.head_ref, 'release/') && github.event.pull_request.draft == false)
     timeout-minutes: 60
     # Pinned, so a runner image update doesn't change the iOS numbers.
-    runs-on: macos-26
+    runs-on: { group: scaleway-macos }
     steps:
       - name: Git Checkout
         uses: actions/checkout@v7
