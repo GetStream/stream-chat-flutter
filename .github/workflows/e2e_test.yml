@@ -188,7 +188,7 @@ jobs:
     # Only on workflow_dispatch, when the checkbox is ticked.
     if: github.event_name == 'workflow_dispatch' && inputs.ios && needs.select.outputs.e2e_batches != '[]'
     needs: [select, allure_launch_ios]
-    runs-on: macos-15
+    runs-on: { group: scaleway-macos }
     timeout-minutes: 60
     strategy:
       fail-fast: false
