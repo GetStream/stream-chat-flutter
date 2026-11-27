@@ -37,16 +37,17 @@ jobs:
 
   # Decides whether the check passes: it fails when entity files changed and
   # `schemaVersion` was not bumped. The comment is left to `comment`, so a
-  # comment that cannot be posted never fails the check.
+  # comment that cannot be handed over or posted never fails the check.
   check_entity_modifications:
     needs: gate
     if: needs.gate.outputs.should_run == 'true'
     runs-on: ubuntu-latest
     outputs:
-      has_changes: ${{ steps.check_entities.outputs.has_changes }}
+      has_comment: ${{ steps.upload_comment.outcome == 'success' }}
     steps:
-      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
-      # makes no signed-in GitHub call, so it runs on a free standard runner.
+      # Anonymous checkout: the org IP allow list refuses only signed-in API and git requests, and
+      # this job makes neither, so it runs on a free standard runner. The artifact upload goes to
+      # the Actions artifact service, which the allow list does not refuse.
       - name: 📥 Checkout
         run: |
           git init -q .
@@ -69,13 +70,14 @@ jobs:
         run: cat comment_body.md >> "$GITHUB_STEP_SUMMARY"
 
       - name: 📤 Upload Comment Body
+        id: upload_comment
         if: steps.check_entities.outputs.has_changes == 'true'
+        continue-on-error: true
         uses: actions/upload-artifact@v7
         with:
           name: db-entities-comment
           path: comment_body.md
           if-no-files-found: error
-          retention-days: 1
 
       - name: 🚨 Enforce schema version bump
         if: steps.check_entities.outputs.has_changes == 'true' && steps.check_entities.outputs.version_bumped == 'false'
@@ -83,17 +85,17 @@ jobs:
           echo "::error file=packages/stream_chat_persistence/lib/src/db/drift_chat_database.dart::Database entity files were modified but \`schemaVersion\` was not bumped. See the job summary for the suggested change."
           exit 1
 
-  # Posts the comment `check_entity_modifications` wrote, also when that job
-  # failed on a missing version bump. Commenting is a signed-in GitHub call,
-  # which the org IP allow list refuses from a standard runner, so this job
-  # runs in the org runner group. Fork pull requests get a read-only token:
-  # they skip the comment and read the suggested change in the job summary
-  # instead.
+  # Posts the comment `check_entity_modifications` uploaded, also when that
+  # job failed on a missing version bump. Commenting is a signed-in GitHub
+  # call, which the org IP allow list refuses from a standard runner, so this
+  # job runs in the org runner group. Fork pull requests get a read-only
+  # token: they skip the comment and read the suggested change in the job
+  # summary instead.
   comment:
     needs: check_entity_modifications
     if: >-
       !cancelled()
-      && needs.check_entity_modifications.outputs.has_changes == 'true'
+      && needs.check_entity_modifications.outputs.has_comment == 'true'
       && github.event.pull_request.head.repo.full_name == github.repository
     timeout-minutes: 5
     runs-on:
