@@ -1,4 +1,5 @@
 // coverage:ignore-file
+// Throwaway line: live test of the entity check comment job.
 import 'package:drift/drift.dart';
 import '../converter/converter.dart';
 
