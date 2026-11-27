@@ -2,6 +2,7 @@
 
 ✅ Added
 
+- Added `redactedHeaders` and `redactedQueryParameters` to `LoggingInterceptor`, naming the headers and query parameters it logs as `<redacted>`, and `LoggingInterceptor.defaultRedactedHeaders`.
 - Added scheduled messages: schedule one with `Channel.scheduleMessage`, which uploads its attachments first, and read the current user's unsent ones from `ClientState.scheduledMessages` after `StreamChatClient.loadScheduledMessages`, or per channel and thread with `ClientState.scheduledChannelMessages` and `ClientState.scheduledThreadReplies`.
 - Added `ScheduledMessage.failure`, which says why a scheduled message failed, and `StreamChatClient.resendScheduledMessage` to retry one whose request failed.
 - Added `ScheduledMessageRefusedError`, thrown for a message that can't be scheduled, usually before any request, and `ScheduledMessageRules` to check up front.
@@ -10,6 +11,8 @@
 
 - Overrides of the channel query methods on `Channel` and `StreamChatClient` must add the new `includeScheduledMessages` parameter.
 - Attachment uploads go through the client's attachment file uploader, set with `attachmentFileUploaderProvider`, instead of `Channel.sendImage` and `Channel.sendFile`.
+- `StreamWebSocketError.message` reads `The WebSocket connection failed` when the connection fails to open.
+- `LoggingInterceptor` logs the `Authorization`, `Cookie` and `Proxy-Authorization` headers as `<redacted>`. Pass `redactedHeaders: const {}` to log them as is.
 
 🐞 Fixed
 

@@ -78,4 +78,8 @@ class Token extends Equatable {
 
   @override
   List<Object?> get props => [authType, rawValue, userId];
+
+  /// A description of this token that leaves out [rawValue].
+  @override
+  String toString() => 'Token(userId: $userId, authType: ${authType.name})';
 }

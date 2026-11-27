@@ -41,12 +41,15 @@ class StreamWebSocketError extends StreamChatError {
     return StreamWebSocketError(message, data: data);
   }
 
-  /// Creates a [StreamWebSocketError] from a [WebSocketChannelException].
+  /// Creates an error from a failure of the WebSocket channel.
+  ///
+  /// The message reads `The WebSocket connection failed`, except for an
+  /// [error] created with a message of its own, which keeps it.
   factory StreamWebSocketError.fromWebSocketChannelError(
     WebSocketChannelException error,
   ) {
-    final message = error.message ?? '';
-    return StreamWebSocketError(message);
+    if (error.inner != null) return const StreamWebSocketError('The WebSocket connection failed');
+    return StreamWebSocketError(error.message ?? '');
   }
 
   /// The structured error returned by the server, if any.

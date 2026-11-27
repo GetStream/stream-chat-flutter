@@ -127,6 +127,83 @@ void main() {
     addTearDown(timer.cancel);
   });
 
+  test('`connect` fails with a fixed message when the socket cannot open', () async {
+    when(() => webSocketChannel.stream).thenAnswer(
+      (_) => Stream.error(
+        WebSocketChannelException.from(
+          Exception(
+            "Connection to 'https://example.com:443/connect?json=%7B%7D&version=1#' was not upgraded to websocket",
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(
+      webSocket.connect(OwnUser(id: 'test-user')),
+      throwsA(
+        isA<StreamWebSocketError>().having(
+          (it) => it.message,
+          'message',
+          'The WebSocket connection failed',
+        ),
+      ),
+    );
+  });
+
+  test('logs the URL it connects to without the query string', () async {
+    final logger = Logger.detached('ws')..level = Level.ALL;
+    final messages = <String>[];
+    final subscription = logger.onRecord.listen((it) => messages.add(it.message));
+    addTearDown(subscription.cancel);
+
+    final loggedSocket = WebSocket(
+      apiKey: 'api-key',
+      baseUrl: 'ws://example.com:8800',
+      tokenManager: tokenManager,
+      logger: logger,
+      webSocketChannelProvider: (_, {protocols}) => webSocketChannel,
+    );
+    addTearDown(loggedSocket.disconnect);
+
+    loggedSocket.connect(OwnUser(id: 'test-user')).ignore();
+    await pumpEventQueue();
+
+    expect(messages, contains('[connect] #ws; uri: ws://example.com:8800/connect'));
+  });
+
+  test('logs a failed open with the message `connect` fails with', () async {
+    final logger = Logger.detached('ws')..level = Level.ALL;
+    final records = <LogRecord>[];
+    final subscription = logger.onRecord.listen(records.add);
+    addTearDown(subscription.cancel);
+
+    final loggedSocket = WebSocket(
+      apiKey: 'api-key',
+      baseUrl: 'wss://example.com',
+      tokenManager: tokenManager,
+      logger: logger,
+      webSocketChannelProvider: (_, {protocols}) => webSocketChannel,
+    );
+    addTearDown(loggedSocket.disconnect);
+    when(() => webSocketChannel.stream).thenAnswer(
+      (_) => Stream.error(
+        WebSocketChannelException.from(
+          Exception(
+            "Connection to 'https://example.com:443/connect?json=%7B%7D&version=1#' was not upgraded to websocket",
+          ),
+        ),
+      ),
+    );
+
+    await expectLater(loggedSocket.connect(OwnUser(id: 'test-user')), throwsA(isA<StreamWebSocketError>()));
+
+    final warning = records.firstWhere((it) => it.message.startsWith('[onConnectionError]'));
+    expect(
+      warning.error,
+      isA<StreamWebSocketError>().having((it) => it.message, 'message', 'The WebSocket connection failed'),
+    );
+  });
+
   test('`connect` successfully without user details', () async {
     final user = OwnUser(
       id: 'test-user',

@@ -37,6 +37,13 @@ void main() {
     );
   });
 
+  test('describes itself without its raw value', () {
+    final token = Token.development('test-user-id');
+
+    expect('$token', contains('test-user-id'));
+    expect('$token', isNot(contains(token.rawValue)));
+  });
+
   test('`.development` should create a dev-token with provided user-id', () {
     const userId = 'test-user-id';
     final token = Token.development(userId);

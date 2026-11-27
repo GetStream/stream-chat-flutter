@@ -251,7 +251,7 @@ class WebSocket with TimerHelper {
       final uri = await _buildUri(
         includeUserDetails: includeUserDetails,
       );
-      _logger?.info('[connect] #ws; uri: $uri');
+      _logger?.info('[connect] #ws; uri: ${uri.scheme}://${uri.authority}${uri.path}');
       _initWebSocketChannel(uri);
     } catch (e, stk) {
       _onConnectionError(e, stk);
@@ -329,7 +329,7 @@ class WebSocket with TimerHelper {
           );
           // Disconnected while the token was loading.
           if (_user == null) return;
-          _logger?.info('[reconnect] #ws; uri: $uri');
+          _logger?.info('[reconnect] #ws; uri: ${uri.scheme}://${uri.authority}${uri.path}');
           _initWebSocketChannel(uri);
         } catch (e, stk) {
           if (_user == null) return;
@@ -450,14 +450,14 @@ class WebSocket with TimerHelper {
   }
 
   void _onConnectionError(error, [stacktrace]) {
-    _logger?.warning('[onConnectionError] #ws; error occurred', error, stacktrace);
-
     StreamWebSocketError wsError;
     if (error is WebSocketChannelException) {
       wsError = StreamWebSocketError.fromWebSocketChannelError(error);
     } else {
       wsError = StreamWebSocketError(error.toString());
     }
+
+    _logger?.warning('[onConnectionError] #ws; error occurred', wsError, stacktrace);
 
     final completer = connectionCompleter;
     // complete with error if not yet completed

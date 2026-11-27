@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:stream_chat/src/core/api/responses.dart';
 import 'package:stream_chat/src/core/error/error.dart';
 import 'package:test/test.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 DioException _dioException(DioExceptionType type) => DioException(
   requestOptions: RequestOptions(path: 'test-path'),
@@ -27,6 +28,26 @@ void main() {
   });
 
   group('StreamWebSocketError', () {
+    test('.fromWebSocketChannelError reads as a fixed message for a wrapped failure', () {
+      final error = StreamWebSocketError.fromWebSocketChannelError(
+        WebSocketChannelException.from(
+          Exception(
+            "Connection to 'https://example.com:443/connect?json=%7B%7D&version=1#' was not upgraded to websocket",
+          ),
+        ),
+      );
+
+      expect(error.message, 'The WebSocket connection failed');
+    });
+
+    test('.fromWebSocketChannelError keeps a message of its own', () {
+      final error = StreamWebSocketError.fromWebSocketChannelError(
+        WebSocketChannelException('WebSocket connection failed.'),
+      );
+
+      expect(error.message, 'WebSocket connection failed.');
+    });
+
     test('.fromStreamError', () {
       final data = ErrorResponse()..code = 333;
       final error = StreamWebSocketError.fromStreamError(data.toJson());
