@@ -27,11 +27,19 @@ jobs:
   # Saves the AVD with a quick-boot snapshot for the e2e_test.yml batches. Here, because a cache
   # saved by a pull request is visible to that pull request alone, and one saved on master to all.
   android_avd:
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v7
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
+      - name: Git Checkout
+        run: |
+          git init -q .
+          git fetch -q --depth=1 --no-tags "https://github.com/$REPOSITORY" "$SHA"
+          git checkout -q FETCH_HEAD
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - uses: ./.github/actions/enable-kvm
 
