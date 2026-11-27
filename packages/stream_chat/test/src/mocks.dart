@@ -12,7 +12,6 @@ import 'package:stream_chat/src/core/api/channel_api.dart';
 import 'package:stream_chat/src/core/api/moderation_api.dart';
 import 'package:stream_chat/src/core/api/push_preferences_api.dart';
 import 'package:stream_chat/src/core/api/scheduled_messages_api.dart';
-import 'package:stream_chat/src/core/api/user_api.dart';
 import 'package:stream_chat/src/core/http/stream_http_client.dart';
 import 'package:stream_chat/src/core/models/channel_config.dart';
 import 'package:stream_chat/src/core/models/events/chat_event.dart';
@@ -41,8 +40,6 @@ class MockDio extends Mock implements Dio {
 class MockHttpClient extends Mock implements StreamHttpClient {}
 
 class MockTokenManager extends Mock implements TokenManager {}
-
-class MockUserApi extends Mock implements UserApi {}
 
 class MockChannelApi extends Mock implements ChannelApi {}
 

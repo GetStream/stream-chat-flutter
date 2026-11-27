@@ -5,14 +5,6 @@ import 'package:test/test.dart';
 
 void main() {
   group('src/api/responses', () {
-    test('QueryUsersResponse', () {
-      const jsonExample = r'''
-      {"users":[{"id":"wild-breeze-7","role":"user","created_at":"2020-01-12T12:03:19.102029Z","updated_at":"2020-02-03T08:58:33.971562Z","last_active":"2020-02-03T08:58:33.965072Z","banned":false,"online":true,"name":"Wild breeze","image":"https://getstream.io/random_svg/?id=wild-breeze-7\u0026amp;name=Wild+breeze"}],"duration":"2.44ms"}
-      ''';
-      final response = QueryUsersResponse.fromJson(json.decode(jsonExample));
-      expect(response.users, isA<List<User>>());
-    });
-
     test('EmptyResponse', () {
       const jsonExample = '''{"file": "file-url","duration":"0.35ms"}''';
       final response = EmptyResponse.fromJson(json.decode(jsonExample));

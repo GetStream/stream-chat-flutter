@@ -45,6 +45,7 @@ onto Stream's OpenAPI-generated API client.
     - [Unread Counts](#unread-counts)
     - [User Blocking](#user-blocking)
     - [User Updates](#user-updates)
+    - [Users](#users)
     - [Channels and Members](#channels-and-members)
     - [Channel and Member Custom Data](#channel-and-member-custom-data)
     - [User Custom Data](#user-custom-data)
@@ -108,6 +109,7 @@ from the spec, so don't subclass them or depend on their private constructors.
 | [**User Blocking**](#user-blocking) | `blockUser`, `unblockUser` and `getBlockedUsers` (was `queryBlockedUsers`) return a `Result` instead of throwing; their responses are renamed `BlockUserResponse` and `GetBlockedUsersResponse`, `unblockUser` answers a new `UnblockUserResponse`, and `UserBlock`'s fields are all non-nullable |
 | [**Messages**](#messages) | `Moderation`, `ReactionGroup`, `Action`, `Reaction` and `Location` no longer decode from or encode to JSON; `Action` compares by value; reaction calls return a `Result`, `getReactions` answers a new `GetReactionsResponse`, and the reaction queries take `limit`/`offset` or `limit`/`next`/`prev`; message reads and search return a `Result`, `getMessagesById` is `getManyMessages`, `getReplies` takes a required `limit` and reply ids, `translateMessage` takes a `TranslationLanguage`, search results are `SearchMessageResult`s, `sendAction` returns a `Result`, takes `Map<String, String>` form data and, on the client, no channel id or type; sending, updating, pinning and deleting messages return a `Result`, `partialUpdateMessage` is `updateMessagePartial` and deletes answer a `DeleteMessageResponse` |
 | [**User Updates**](#user-updates) | `updateUser` and `updateUsers` return a `Result<UpdateUsersResponse>` instead of throwing; `partialUpdateUser(s)` becomes `updateUserPartial` / `updateUsersPartial` and `PartialUpdateUserRequest` becomes `UpdateUserPartialRequest`; `updateUser` no longer sends `role`, `teams` or `teamsRole`, and the returned users no longer carry their private fields in `extraData` |
+| [**Users**](#users) | `queryUsers` returns a `Result<QueryUsersResponse>` instead of throwing; `QueryUsersResponse` no longer decodes from JSON and compares by value; `getActiveLiveLocations` is `getUserLiveLocations`, and it, `updateLiveLocation` and `stopLiveLocation` return a `Result`, with the last two no longer taking `createdByDeviceId`; `StreamChat(Core)`'s `currentUser` is an `OwnUser?` |
 | [**Channel and Member Custom Data**](#channel-and-member-custom-data) | `extraData` is `custom` on `ChannelModel`, `Member` and `Channel`; the channel and member flags it carried are fields |
 | [**User Custom Data**](#user-custom-data) | `extraData` is `custom` on `User` and `OwnUser`; `name` is nullable and `nameOrId` falls back to the id; the user fields it carried are fields |
 | [**Message Custom Data**](#message-custom-data) | `extraData` is `custom` on `Message`, `Attachment`, `Reaction` and `DraftMessage`; a message's channel id, HTML, markup and deleted reply count, and an attachment's Giphy renditions, are fields |
@@ -351,6 +353,22 @@ search-and-replace you can apply directly. `Kind` is one of `renamed`, `removed`
 | `UpdateUsersResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two instances with the same fields are now equal |
 | `UpdateUsersResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
 | `StreamChatApi.user.updateUsers` / `partialUpdateUsers` | `StreamChatClient.updateUsers` / `updateUsersPartial` | `removed` | The endpoints moved to the generated client |
+| `StreamChatClient.queryUsers` → `Future<QueryUsersResponse>` | `Future<Result<QueryUsersResponse>>` | `retyped` | Returns a `Result` instead of throwing. The returned users are still stored in `ClientState.users` on success |
+| `QueryUsersResponse.fromJson` | — | `removed` | The response is a plain class; construct it directly |
+| `QueryUsersResponse.duration` (`String?`) | `String` | `retyped` | Always present; drop any `!` or `?? ''` |
+| `QueryUsersResponse` identity `==` | value `==`, plus `copyWith` | `retyped` | Two responses with the same fields are now equal |
+| `StreamChatClient.getActiveLiveLocations` | `StreamChatClient.getUserLiveLocations` | `renamed` | Same call; the name of the API's operation |
+| `StreamChatClient.getActiveLiveLocations` → `Future<GetActiveLiveLocationsResponse>` | `Future<Result<SharedLocationsResponse>>` | `retyped` | Returns a `Result` instead of throwing. The returned locations are still stored in `ClientState.activeLiveLocations` on success |
+| `StreamChatClient.updateLiveLocation` → `Future<Location>` | `Future<Result<SharedLocationResponse>>` | `retyped` | Returns a `Result` instead of throwing; the updated location is `response.location` |
+| `StreamChatClient.stopLiveLocation` → `Future<Location>` | `Future<Result<SharedLocationResponse>>` | `retyped` | Returns a `Result` instead of throwing; the stopped location is `response.location` |
+| `StreamChatClient.updateLiveLocation(createdByDeviceId:)` | — | `removed` | Had no effect |
+| `StreamChatClient.stopLiveLocation(createdByDeviceId:)` | — | `removed` | Had no effect |
+| `GetActiveLiveLocationsResponse` | `SharedLocationsResponse` | `renamed` | Same fields; the name of the API's response |
+| `GetActiveLiveLocationsResponse.fromJson` | — | `removed` | The response is a plain class; construct it directly |
+| `GetActiveLiveLocationsResponse.duration` (`String?`) | `SharedLocationsResponse.duration` (`String`) | `retyped` | Always present; drop any `!` or `?? ''` |
+| `StreamChatApi.user` | `StreamChatClient.queryUsers`, `getUserLiveLocations`, `updateLiveLocation`, `stopLiveLocation` | `removed` | The endpoints moved to the generated client |
+| `StreamChatState.currentUser` / `currentUserStream` (`User?` / `Stream<User?>`) | `OwnUser?` / `Stream<OwnUser?>` | `retyped` | Same value as `client.state.currentUser`; readers compile unchanged |
+| `StreamChatCoreState.currentUser` / `currentUserStream` (`User?` / `Stream<User?>`) | `OwnUser?` / `Stream<OwnUser?>` | `retyped` | Same value as `client.state.currentUser`; readers compile unchanged |
 | `ChannelModel.extraData` / `Member.extraData` | `ChannelModel.custom` / `Member.custom` | `renamed` | The wire's name for it; also the constructor and `copyWith` arguments |
 | `Channel.extraData` / `Channel.extraDataStream` / `Channel(…, extraData:)` / `StreamChatClient.channel(…, extraData:)` | `Channel.custom` / `Channel.customStream` / `data: CreateChannelData(custom: …)` | `renamed` | Follows `ChannelModel.custom`; the setter is renamed too |
 | `channel.extraData['disabled']` / `['hidden']` / `['muted']` / `['blocked']` / `['truncated_at']` / `['truncated_by']` / `['auto_translation_enabled']` / `['auto_translation_language']` | `ChannelModel.disabled` / `hidden` / `muted` / `blocked` / `truncatedAt` / `truncatedBy` / `autoTranslationEnabled` / `autoTranslationLanguage` | `retyped` | Fields now, not custom data; `copyWith(custom:)` no longer sets them |
@@ -573,7 +591,7 @@ final result = await client.someMigratedCall();
 
 // One that has not migrated still throws — the type is what changed.
 try {
-  await client.queryUsers();
+  await client.queryBannedUsers(filter: BannedUserFilter.equal(BannedUserFilterField.channelCid, cid));
 } on StreamChatException catch (error) {
   print(error.message);
 }
@@ -1514,6 +1532,80 @@ no longer encodes to JSON or extends `Equatable`; it still compares by value and
 > **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. The partial
 > updates take the API's names, as the channel and member partial updates already do. The request carries only
 > what the user can change and their custom data as it is.
+
+### Users
+
+**`StreamChatClient.queryUsers` returns a `Result<QueryUsersResponse>` instead of throwing.** A `try`/`catch` around
+it still compiles, but no longer catches a failed call: read the returned `Result` instead. On success it still
+stores the returned users in `ClientState.users`; a failure leaves them as they were.
+
+**The users `queryUsers` returns no longer carry their private fields in `extraData`.** Their devices, mutes,
+channel mutes, privacy settings, unread counts and hidden channels are left out; read them from `currentUser`.
+
+```dart
+// v10
+try {
+  final response = await client.queryUsers(filter: Filter.in_('id', ids));
+  showUsers(response.users);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.queryUsers(filter: UserFilter.in_(UserFilterField.id, ids));
+result.fold(
+  onSuccess: (response) => showUsers(response.users),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**`QueryUsersResponse` no longer decodes from JSON.** It is a plain class with a const constructor and final fields,
+compares by value and gains `copyWith`, and its `duration` is always present.
+
+**`getActiveLiveLocations` is renamed `getUserLiveLocations`, and it, `updateLiveLocation` and `stopLiveLocation`
+return a `Result` instead of throwing.** A `try`/`catch` around them still compiles, but no longer catches a failed
+call: read the returned `Result` instead. The updated or stopped location is `response.location`, and
+`getUserLiveLocations` still stores the locations it returns in `ClientState.activeLiveLocations`. A failure leaves
+them as they were.
+
+```dart
+// v10
+try {
+  final location = await client.updateLiveLocation(
+    messageId: id,
+    createdByDeviceId: deviceId,
+    location: coordinate,
+  );
+  show(location);
+} on StreamChatException catch (e) {
+  report(e);
+}
+
+// v11
+final result = await client.updateLiveLocation(messageId: id, location: coordinate);
+result.fold(
+  onSuccess: (response) => show(response.location),
+  onFailure: (error, _) => report(error),
+);
+```
+
+**`updateLiveLocation` and `stopLiveLocation` no longer take `createdByDeviceId`.** The parameter had no effect, so
+drop it from the call.
+
+**`GetActiveLiveLocationsResponse` is replaced by `SharedLocationsResponse`.** It has the same `activeLiveLocations`,
+no longer decodes from JSON, is built through a const constructor, compares by value and gains `copyWith`, and its
+`duration` is always present.
+
+**`StreamChatApi.user` is removed.** Call `queryUsers`, `getUserLiveLocations`, `updateLiveLocation` and
+`stopLiveLocation` on `StreamChatClient`.
+
+**`StreamChat.of(context).currentUser` and `StreamChatCore.of(context).currentUser` are typed `OwnUser?`**, and their
+`currentUserStream`s `Stream<OwnUser?>`, matching `client.state.currentUser`. Code that reads them compiles as before;
+a mock or subclass of `StreamChatState` or `StreamChatCoreState` that returns a plain `User` must return an `OwnUser`.
+
+> **Why:** the endpoints moved onto the generated client, which returns a `Result` for every call. The users
+> response keeps its v10 name and fields; `getUserLiveLocations` and the live-location responses take the API's
+> names.
 
 ### Channels and Members
 

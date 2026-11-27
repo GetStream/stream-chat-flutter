@@ -242,11 +242,11 @@ class StreamChatState extends State<StreamChat> {
     );
   }
 
-  /// The current user
-  User? get currentUser => widget.client.state.currentUser;
+  /// The connected user, or null when no user is connected.
+  OwnUser? get currentUser => widget.client.state.currentUser;
 
-  /// The current user as a stream
-  Stream<User?> get currentUserStream => widget.client.state.currentUserStream;
+  /// The connected user as it changes, null while no user is connected.
+  Stream<OwnUser?> get currentUserStream => widget.client.state.currentUserStream;
 
   @override
   void didChangeDependencies() {

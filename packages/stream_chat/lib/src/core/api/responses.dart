@@ -1,12 +1,9 @@
 import 'package:json_annotation/json_annotation.dart';
 import '../../client/client.dart';
 import '../models/banned_user.dart';
-import '../models/converters/v1_json_converters.dart';
-import '../models/location.dart';
 import '../models/message.dart';
 import '../models/push_preference.dart';
 import '../models/scheduled_message.dart';
-import '../models/user.dart';
 
 part 'responses.g.dart';
 
@@ -42,17 +39,6 @@ class ErrorResponse extends _BaseResponse {
       'message: $message, '
       'statusCode: $statusCode, '
       'moreInfo: $moreInfo)';
-}
-
-/// Model response for [StreamChatClient.queryUsers] api call
-@JsonSerializable(createToJson: false)
-class QueryUsersResponse extends _BaseResponse {
-  /// List of users returned by the query
-  @JsonKey(defaultValue: [])
-  late List<User> users;
-
-  /// Create a new instance from a json
-  static QueryUsersResponse fromJson(Map<String, dynamic> json) => _$QueryUsersResponseFromJson(json);
 }
 
 /// Model response for [StreamChatClient.queryBannedUsers] api call
@@ -163,16 +149,4 @@ Map<String, PushPreference> _userPreferencesFromJson(Map<String, dynamic>? json)
     for (final MapEntry(:key, :value) in json.entries)
       if (value != null) key: PushPreference.fromJson(value as Map<String, dynamic>),
   };
-}
-
-/// Model response for [StreamChatClient.getActiveLiveLocations] api call
-@JsonSerializable(createToJson: false)
-class GetActiveLiveLocationsResponse extends _BaseResponse {
-  /// List of active live locations returned by the api call
-  @LocationV1JsonConverter()
-  late List<Location> activeLiveLocations;
-
-  /// Create a new instance from a json
-  static GetActiveLiveLocationsResponse fromJson(Map<String, dynamic> json) =>
-      _$GetActiveLiveLocationsResponseFromJson(json);
 }

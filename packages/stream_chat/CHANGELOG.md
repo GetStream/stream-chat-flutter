@@ -135,6 +135,13 @@
 - The users in an `UpdateUsersResponse` no longer carry their devices, mutes, channel mutes, privacy settings, unread counts, hidden channels or token revocation time in their custom data.
 - `updateUser` and `updateUsers` no longer send the user's `role`, `teams` and `teamsRole`.
 - `StreamChatApi.user.updateUsers` and `partialUpdateUsers` are removed; call `updateUsers` and `updateUsersPartial` on `StreamChatClient` instead.
+- `queryUsers` returns a `Result` instead of throwing.
+- `getActiveLiveLocations` is renamed `getUserLiveLocations`, and it, `updateLiveLocation` and `stopLiveLocation` return a `Result` instead of throwing.
+- `updateLiveLocation` and `stopLiveLocation` no longer take `createdByDeviceId`.
+- `GetActiveLiveLocationsResponse` is renamed `SharedLocationsResponse`.
+- `QueryUsersResponse` and `SharedLocationsResponse` no longer decode from JSON.
+- The users `queryUsers` returns no longer carry devices, mutes or unread counts in `custom`.
+- `StreamChatApi.user` is removed.
 - The reminder calls on `StreamChatClient` and `Channel` return a `Result` instead of throwing.
 - `deleteReminder` returns a `DeleteReminderResponse` instead of an `EmptyResponse`.
 - `queryReminders` takes `limit`, `next` and `prev` instead of `PaginationParams`.

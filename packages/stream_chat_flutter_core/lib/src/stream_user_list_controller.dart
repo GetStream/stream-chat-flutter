@@ -154,29 +154,25 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
       this.limit * defaultInitialPagedLimitMultiplier,
       _kDefaultBackendPaginationLimit,
     );
-    try {
-      final userResponse = await client.queryUsers(
-        filter: _activeFilter,
-        sort: _activeSort,
-        presence: presence,
-        pagination: PaginationParams(limit: limit),
-      );
+    final result = await client.queryUsers(
+      filter: _activeFilter,
+      sort: _activeSort,
+      presence: presence,
+      pagination: PaginationParams(limit: limit),
+    );
 
-      if (isStale(generation)) return;
-      final users = userResponse.users;
-      final nextKey = users.length < limit ? null : users.length;
-      value = PagedValue(
-        items: users,
-        nextPageKey: nextKey,
-      );
-    } on StreamChatException catch (error) {
-      if (isStale(generation)) return;
-      value = PagedValue.error(error);
-    } catch (error) {
-      if (isStale(generation)) return;
-      final chatError = StreamClientException(message: 'Failed to load users', cause: error);
-      value = PagedValue.error(chatError);
-    }
+    if (isStale(generation)) return;
+    result.fold(
+      onSuccess: (response) {
+        final users = response.users;
+        final nextKey = users.length < limit ? null : users.length;
+        value = PagedValue(
+          items: users,
+          nextPageKey: nextKey,
+        );
+      },
+      onFailure: (error, _) => value = PagedValue.error(_chatException(error, 'Failed to load users')),
+    );
   }
 
   @override
@@ -184,33 +180,30 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
     final generation = loadGeneration;
     final previousValue = value.asSuccess;
 
-    try {
-      final userResponse = await client.queryUsers(
-        filter: _activeFilter,
-        sort: _activeSort,
-        presence: presence,
-        pagination: PaginationParams(limit: limit, offset: nextPageKey),
-      );
+    final result = await client.queryUsers(
+      filter: _activeFilter,
+      sort: _activeSort,
+      presence: presence,
+      pagination: PaginationParams(limit: limit, offset: nextPageKey),
+    );
 
-      // Drop the page if a newer search or clearResults() superseded it, so a
-      // stale page cannot repopulate the results.
-      if (isStale(generation)) return;
-      final users = userResponse.users;
-      final previousItems = previousValue.items;
-      final newItems = previousItems + users;
-      final nextKey = users.length < limit ? null : newItems.length;
-      value = PagedValue(
-        items: newItems,
-        nextPageKey: nextKey,
-      );
-    } on StreamChatException catch (error) {
-      if (isStale(generation)) return;
-      value = previousValue.copyWith(error: error);
-    } catch (error) {
-      if (isStale(generation)) return;
-      final chatError = StreamClientException(message: 'Failed to load more users', cause: error);
-      value = previousValue.copyWith(error: chatError);
-    }
+    // Drop the page if a newer search or clearResults() superseded it, so a
+    // stale page cannot repopulate the results.
+    if (isStale(generation)) return;
+    result.fold(
+      onSuccess: (response) {
+        final users = response.users;
+        final newItems = previousValue.items + users;
+        final nextKey = users.length < limit ? null : newItems.length;
+        value = PagedValue(
+          items: newItems,
+          nextPageKey: nextKey,
+        );
+      },
+      onFailure: (error, _) {
+        value = previousValue.copyWith(error: _chatException(error, 'Failed to load more users'));
+      },
+    );
   }
 
   @override
@@ -231,4 +224,9 @@ class StreamUserListController extends PagedValueNotifier<int, User> with Search
       value = PagedValue(items: users);
     }
   }
+
+  StreamChatException _chatException(Object error, String message) => switch (error) {
+    final StreamChatException error => error,
+    _ => StreamClientException(message: message, cause: error),
+  };
 }

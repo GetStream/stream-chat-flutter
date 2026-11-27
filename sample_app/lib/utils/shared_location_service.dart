@@ -30,7 +30,7 @@ class SharedLocationService {
           return _startTrackingLocation();
         });
 
-    return _client.getActiveLiveLocations().ignore();
+    return _client.getUserLiveLocations().ignore();
   }
 
   Future<void> _startTrackingLocation() async {
@@ -69,7 +69,6 @@ class SharedLocationService {
       // Update the live location with the new position
       _client.updateLiveLocation(
         messageId: messageId,
-        createdByDeviceId: location.createdByDeviceId,
         location: LocationCoordinate(
           latitude: position.latitude,
           longitude: position.longitude,

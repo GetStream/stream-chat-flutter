@@ -268,7 +268,7 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
       widget.client != null,
       'StreamChatClient is required in order to query all app users',
     );
-    final response = await widget.client!.queryUsers(
+    final result = await widget.client!.queryUsers(
       pagination: PaginationParams(limit: widget.limit),
       filter: query.isEmpty
           ? null
@@ -278,7 +278,7 @@ class _StreamMentionAutocompleteOptionsState extends State<StreamMentionAutocomp
             ]),
       sort: [UserSort.asc(UserSortField.id)],
     );
-    return response.users;
+    return result.map((it) => it.users).getOrDefault(const []);
   }
 }
 
