@@ -13,13 +13,19 @@ jobs:
   # Does a sanity check on packages for the next beta version so we are not surprised by any breaking changes.
   analyze_beta_versions:
     timeout-minutes: 15
-    runs-on:
-      group: github-public-amd64
+    runs-on: ubuntu-latest
     steps:
+      # Anonymous checkout: the org IP allow list refuses only signed-in requests, and this job
+      # makes no other GitHub call, so it runs on a free standard runner.
       - name: "Git Checkout"
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 0
+        run: |
+          git init -q .
+          git remote add origin "https://github.com/$REPOSITORY"
+          git fetch -q origin '+refs/heads/*:refs/remotes/origin/*' '+refs/tags/*:refs/tags/*' "$SHA"
+          git checkout -q --detach "$SHA"
+        env:
+          REPOSITORY: ${{ github.repository }}
+          SHA: ${{ github.sha }}
 
       - name: "Install Flutter"
         uses: ./.github/actions/setup-flutter
