@@ -118,7 +118,7 @@ void main() {
   test(
     'updateScheduledMessage keeps an edit refused without a scheduled message reason as failed, not to retry',
     () async {
-      final forbidden = apiException(code: const StreamErrorCode(17), message: 'Not allowed', statusCode: 403);
+      final forbidden = apiException(code: StreamErrorCode.notAllowed, message: 'Not allowed', statusCode: 403);
       stubUpdate(() async => throw forbidden);
 
       await update(throws: forbidden);
