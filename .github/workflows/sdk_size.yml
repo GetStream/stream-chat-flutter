@@ -52,6 +52,8 @@ jobs:
 
       - uses: ./.github/actions/install-android-ndk
 
+      - uses: ./.github/actions/limit-gradle-memory
+
       - name: Measure app size
         run: dart run metrics/sdk_size/tool/measure.dart --platform android
 

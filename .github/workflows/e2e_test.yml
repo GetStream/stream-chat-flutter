@@ -117,6 +117,21 @@ jobs:
 
       - uses: ./.github/actions/enable-kvm
 
+      # The emulator takes about 3 GB of the runner's 8 GB, and flutter's
+      # frontend_server builds next to Gradle.
+      - uses: ./.github/actions/limit-gradle-memory
+        with:
+          heap: 2g
+
+      # Without swap a peak stalls the host and GitHub loses the runner.
+      - name: Add swap
+        run: |
+          sudo fallocate -l 8G /mnt/e2e.swap
+          sudo chmod 600 /mnt/e2e.swap
+          sudo mkswap /mnt/e2e.swap
+          sudo swapon /mnt/e2e.swap
+          free -m
+
       - name: Install Tools
         uses: ./.github/actions/install-tools
 
